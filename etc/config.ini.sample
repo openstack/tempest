@@ -1,0 +1,32 @@
+[swift]
+auth_host = 10.0.0.100
+auth_port = 443
+auth_prefix = /auth/
+auth_ssl = yes
+account = system
+username = root
+password = password
+
+[rabbitmq]
+host = 10.0.0.100
+user = guest
+password = 
+
+[glance]
+host = 10.0.0.100
+apiver = v1.0
+port = 9292
+
+[nova]
+host = 10.0.0.100
+port = 8774
+apiver = v1.1
+user = admin
+key = 24BD8F71-6AD8-439D-B722-7E2E25FD1911
+
+[keystone]
+host = 10.0.0.100
+port = 5000
+apiver = v1.1
+user = admin
+password = password

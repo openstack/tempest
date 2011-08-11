@@ -1,0 +1,9 @@
+pep8>=0.5.0
+pylint==0.19
+anyjson
+nose
+argparse
+httplib2>=0.7.0
+pika
+dnspython
+ipython
