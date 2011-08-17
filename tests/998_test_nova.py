@@ -62,10 +62,17 @@ class TestNovaAPI(tests.FunctionalTest):
         self.result['status'] = data['server']['status']
 
         # Get IP Address of newly created server
-        if 'addr' in data['server']['addresses']['vmnet'][0]:
-            netaddr = data['server']['addresses']['vmnet'][0]['addr']
-        elif 'addr' in data['server']['address']['public'][0]:
-            netaddr = data['server']['addresses']['public'][0]['addr']
+        addr_name = "private"
+        if 'vmnet' in data['server']['addresses']:
+            ref = data['server']['addresses']['vmnet']
+            if len(ref) > 0:
+                addr_name = 'vmnet'            
+        if 'public' in data['server']['addresses']:
+            ref = data['server']['addresses']['public']
+            if len(ref) > 0:
+                addr_name = 'public' 
+        ref = data['server']['addresses'][addr_name]
+        netaddr = ref[0]['addr']
 
         r = "" . join(os.popen('ping -c5 %s' % (netaddr)).readlines())
         if r.find('64 bytes') > 1:
