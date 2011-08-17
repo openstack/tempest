@@ -40,7 +40,7 @@ class TestCleanUp(tests.FunctionalTest):
         headers = {'X-Auth-User': '%s' % (self.nova['user']),
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
         response, content = http.request(path, 'DELETE', headers=headers)
-        self.assertEqual(204, response.status)
+        self.assertEqual(response.status, 202)
     test_995_delete_server.tags = ['nova']
 
     def test_996_delete_multi_server(self):
