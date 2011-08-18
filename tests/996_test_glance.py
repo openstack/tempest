@@ -47,7 +47,7 @@ class TestGlanceAPI(tests.FunctionalTest):
         """
         Uploads a test kernal to glance api
         """
-        kernel = "sample_vm/vmlinuz-2.6.32-23-server"
+        kernel = self.config['environment']['kernel']
         if 'apiver' in self.glance:
             path = "http://%s:%s/%s/images" % (self.glance['host'],
                           self.glance['port'], self.glance['apiver'])
@@ -77,7 +77,7 @@ class TestGlanceAPI(tests.FunctionalTest):
         """
         Uploads a test initrd to glance api
         """
-        initrd = "sample_vm/initrd.img-2.6.32-23-server"
+        initrd = self.config['environment']['initrd']
         if 'apiver' in self.glance:
             path = "http://%s:%s/%s/images" % (self.glance['host'],
                           self.glance['port'], self.glance['apiver'])
@@ -110,7 +110,7 @@ class TestGlanceAPI(tests.FunctionalTest):
         links it to the initrd and kernel uploaded
         earlier
         """
-        image = "sample_vm/ubuntu-lucid.img"
+        image = self.config['environment']['image']
         upload_data = ""
         for chunk in self._read_in_chunks(image):
             upload_data += chunk
@@ -168,7 +168,7 @@ class TestGlanceAPI(tests.FunctionalTest):
     test_005_set_image_meta_property.tags = ['glance']
 
     def test_006_list_image_metadata(self):
-        image = "sample_vm/ubuntu-lucid.img"
+        image = self.config['environment']['image']
         if 'apiver' in self.glance:
             path = "http://%s:%s/%s/images/%s" % (self.glance['host'],
                            self.glance['port'], self.glance['apiver'],

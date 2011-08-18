@@ -1,3 +1,8 @@
+[environment]
+kernel = include/sample_vm/vmlinuz-2.6.32-23-server
+initrd = include/sample_vm/initrd.img-2.6.32-23-server
+image = include/sample_vm/ubuntu-lucid.img
+
 [swift]
 auth_host = 10.0.0.100
 auth_port = 443
