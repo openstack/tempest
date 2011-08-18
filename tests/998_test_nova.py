@@ -49,7 +49,7 @@ class TestNovaAPI(tests.FunctionalTest):
         headers = {'X-Auth-User': '%s' % (self.nova['user']),
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         data = json.loads(content)
 
         # Get Server status exit when active
@@ -98,7 +98,7 @@ class TestNovaAPI(tests.FunctionalTest):
 
         http = httplib2.Http()
         response, content = http.request(path, 'HEAD', headers=headers)
-        self.assertEqual(204, response.status)
+        self.assertEqual(response.status, 204)
         self.assertNotEqual(response['x-auth-token'], '')
         self.assertNotEqual(response['x-server-management-url'], '')
 
@@ -112,7 +112,7 @@ class TestNovaAPI(tests.FunctionalTest):
         http = httplib2.Http()
         headers = {'X-Auth-Token': self.nova['X-Auth-Token']}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         data = json.loads(content)
         self.assertEqual(len(data['versions']), 2)
     test_101_verify_version_selection_default.tags = ['nova', 'nova-api']
@@ -123,7 +123,7 @@ class TestNovaAPI(tests.FunctionalTest):
         http = httplib2.Http()
         headers = {'X-Auth-Token': self.nova['X-Auth-Token']}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         data = json.loads(content)
         self.assertEqual(len(data['versions']), 2)
     test_102_verify_version_selection_json.tags = ['nova', 'nova-api']
@@ -134,7 +134,7 @@ class TestNovaAPI(tests.FunctionalTest):
         http = httplib2.Http()
         headers = {'X-Auth-Token': self.nova['X-Auth-Token']}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         self.assertTrue('<versions>' in content)
     test_103_verify_version_selection_xml.tags = ['nova', 'nova-api']
 
@@ -225,8 +225,8 @@ class TestNovaAPI(tests.FunctionalTest):
         headers = {'X-Auth-User': '%s' % (self.nova['user']),
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
-        self.assertNotEqual('{"limits": []}', content)
+        self.assertEqual(response.status, 200)
+        self.assertNotEqual(content, '{"limits": []}')
     test_109_verify_blank_limits.tags = ['nova', 'nova-api']
 
     def test_110_list_flavors_v1_1(self):
@@ -237,8 +237,8 @@ class TestNovaAPI(tests.FunctionalTest):
         headers = {'X-Auth-User': '%s' % (self.nova['user']),
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
-        self.assertNotEqual('{"flavors": []}', content)
+        self.assertEqual(response.status, 200)
+        self.assertNotEqual(content, '{"flavors": []}')
     test_110_list_flavors_v1_1.tags = ['nova', 'nova-api']
 
     def test_111_verify_kernel_active_v1_1(self):
@@ -255,7 +255,7 @@ class TestNovaAPI(tests.FunctionalTest):
         headers = {'X-Auth-User': '%s' % (self.nova['user']),
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         data = json.loads(content)
         self.assertEqual(data['image']['status'], 'ACTIVE')
     test_111_verify_kernel_active_v1_1.tags = ['nova']
@@ -274,7 +274,7 @@ class TestNovaAPI(tests.FunctionalTest):
         headers = {'X-Auth-User': '%s' % (self.nova['user']),
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         data = json.loads(content)
         self.assertEqual(data['image']['status'], 'ACTIVE')
     test_112_verify_ramdisk_active_v1_1.tags = ['nova']
@@ -293,7 +293,7 @@ class TestNovaAPI(tests.FunctionalTest):
         headers = {'X-Auth-User': '%s' % (self.nova['user']),
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         data = json.loads(content)
         self.assertEqual(data['image']['status'], 'ACTIVE')
     test_113_verify_image_active_v1_1.tags = ['nova']
@@ -325,7 +325,7 @@ class TestNovaAPI(tests.FunctionalTest):
         response, content = http.request(path, 'POST', headers=headers,
                                          body=data)
         json_return = json.loads(content)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         self.assertEqual(json_return['server']['status'], "BUILD")
         self.nova['single_server_id'] = json_return['server']['id']
         time.sleep(5)
@@ -345,7 +345,7 @@ class TestNovaAPI(tests.FunctionalTest):
                    'X-Auth-Token': '%s' % (self.nova['X-Auth-Token'])}
 
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
     test_201_get_server_details.tags = ['nova']
 
     # MOVING TO 999 because it can kill the API
@@ -382,7 +382,7 @@ class TestNovaAPI(tests.FunctionalTest):
             response, content = http.request(path, 'POST', headers=headers,
                                              body=data)
             json_return = json.loads(content)
-            self.assertEqual(200, response.status)
+            self.assertEqual(response.status, 200)
             self.assertEqual(json_return['server']['status'], "BUILD")
             self.nova['multi_server']["test %s" % (i)] = \
                         json_return['server']['id']
