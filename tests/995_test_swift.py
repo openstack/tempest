@@ -47,20 +47,18 @@ class TestSwift(tests.FunctionalTest):
                                       self.swift['auth_prefix'],
                                       self.swift['ver'])
 
-        # Uncomment for debugging
-        # pprint(path)
-
         http = httplib2.Http(disable_ssl_certificate_validation=True)
         self.swift['auth_user'] = '%s:%s' % (self.swift['account'],
                                              self.swift['username'])
         headers = {'X-Auth-User': '%s' % (self.swift['auth_user']),
                    'X-Auth-Key': '%s' % (self.swift['password'])}
         response, content = http.request(path, 'GET', headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         self.assertIsNotNone(response['x-auth-token'])
         self.assertIsNotNone(response['x-storage-token'])
         self.assertIsNotNone(response['x-storage-url'])
 
+        # TODO: there has got to be a better way to do this (jshepher)
         for k, v in response.items():
             if (k == 'x-auth-token'):
                 self.swift['x-auth-token'] = v
@@ -81,7 +79,7 @@ class TestSwift(tests.FunctionalTest):
         http = httplib2.Http(disable_ssl_certificate_validation=True)
         headers = { 'X-Storage-Token': '%s' % (self.swift['x-storage-token'])}
         response, content = http.request(path, 'PUT', headers=headers)
-        self.assertEqual(201, response.status)
+        self.assertEqual(response.status, 201)
     test_001_create_container.tags = ['swift']
 
     def test_002_list_containers(self):
@@ -89,7 +87,7 @@ class TestSwift(tests.FunctionalTest):
         headers = {'X-Auth-Token': '%s' % (self.swift['x-auth-token'])}
         response, content = http.request(self.swift['storage_url'], 'GET',
                                          headers=headers)
-        self.assertEqual(200, response.status)
+        self.assertEqual(response.status, 200)
         self.assertLessEqual('1', response['x-account-container-count'])
     test_002_list_containers.tags = ['swift']
 
@@ -109,8 +107,7 @@ class TestSwift(tests.FunctionalTest):
         response, content = http.request(path, 'PUT',
                                          headers=headers,
                                          body=upload)
-        self.assertEqual(201, response.status)
-        self.assertIn('201', content)
+        self.assertEqual(response.status, 201)
     test_010_create_small_object.tags = ['swift']
 
     def test_011_create_medium_object(self):
@@ -132,7 +129,7 @@ class TestSwift(tests.FunctionalTest):
         response, content = http.request(path, 'PUT',
                                          headers=headers,
                                          body=upload)
-        self.assertEqual(201, response.status)
+        self.assertEqual(response.status, 201)
     test_011_create_medium_object.tags = ['swift']
 
     def test_013_get_small_object(self):
@@ -145,8 +142,8 @@ class TestSwift(tests.FunctionalTest):
                    'X-Storage-Token': '%s' % (self.swift['x-storage-token'])}
         response, content = http.request(path, 'GET',
                                          headers=headers)
-        self.assertEqual(200, response.status)
-        self.assertEqual(self._md5sum_file(SMALL_OBJ), response['etag'])
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response['etag'], self._md5sum_file(SMALL_OBJ))
     test_013_get_small_object.tags = ['swift']
 
     def test_017_delete_small_object(self):
@@ -158,7 +155,7 @@ class TestSwift(tests.FunctionalTest):
                    'X-Storage-Token': '%s' % (
                                               self.swift['x-storage-token'])}
         response, content = http.request(path, 'DELETE', headers=headers)
-        self.assertEqual(204, response.status)
+        self.assertEqual(response.status, 204)
     test_017_delete_small_object.tags = ['swift']
 
     def test_018_delete_medium_object(self):
@@ -170,7 +167,7 @@ class TestSwift(tests.FunctionalTest):
                    'X-Storage-Token': '%s' % (
                                               self.swift['x-storage-token'])}
         response, content = http.request(path, 'DELETE', headers=headers)
-        self.assertEqual(204, response.status)
+        self.assertEqual(response.status, 204)
     test_018_delete_medium_object.tags = ['swift']
 
     def test_030_check_container_metadata(self):
@@ -180,8 +177,7 @@ class TestSwift(tests.FunctionalTest):
                                              self.swift['username']),
                    'X-Storage-Token': '%s' % (self.swift['x-storage-token'])}
         response, content = http.request(path, 'HEAD', headers=headers)
-        self.assertEqual(204, response.status)
-        # pprint(response)
+        self.assertEqual(response.status, 204)
     test_030_check_container_metadata.tags = ['swift']
 
     def test_050_delete_container(self):
@@ -191,5 +187,5 @@ class TestSwift(tests.FunctionalTest):
                                              self.swift['username']),
                    'X-Storage-Token': '%s' % (self.swift['x-storage-token'])}
         response, content = http.request(path, 'DELETE', headers=headers)
-        self.assertEqual(204, response.status)
+        self.assertEqual(response.status, 204)
     test_050_delete_container.tags = ['swift']
