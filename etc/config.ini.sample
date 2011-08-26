@@ -1,7 +1,7 @@
 [environment]
-kernel = include/sample_vm/vmlinuz-2.6.32-23-server
-initrd = include/sample_vm/initrd.img-2.6.32-23-server
-image = include/sample_vm/ubuntu-lucid.img
+kernel = include/sample_vm/natty-server-uec-amd64-vmlinuz-virtual
+#initrd = include/sample_vm/natty-server-uec-amd64-initrd-virtual
+image = include/sample_vm/natty-server-uec-amd64.img
 
 [swift]
 auth_host = 10.0.0.100
