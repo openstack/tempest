@@ -1,26 +1,9 @@
 ::
 
-                .-'''-.
-               '   _    \
-       .     /   /` '.   \    _..._
-     .'|    .   |     \  '  .'     '.   .--./)
-   .'  |    |   '      |  '.   .-.   . /.''\\
-  <    |    \    \     / / |  '   '  || |  | |
-   |   | ____`.   ` ..' /  |  |   |  | \`-' /
-   |   | \ .'   '-...-'`   |  |   |  | /("'`
-   |   |/  .               |  |   |  | \ '---.
-   |    /\  \              |  |   |  |  /'""'.\
-   |   |  \  \             |  |   |  | ||     ||
-   '    \  \  \            |  |   |  | \'. __//
-  '------'  '---'          '--'   '--'  `'---'
+OpenStack integration test suite
+================================
 
-
-kong
-====
-
-Kong is a set of tests to be run against a live cluster. Kong sees you when
-you're sleeping and knows when you've been bad or good.
-
+This is a set of integration tests to be run against a live cluster.
 
 Quickstart
 ----------
