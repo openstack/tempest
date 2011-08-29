@@ -29,6 +29,7 @@ RABBITMQ_DATA = {}
 CONFIG_DATA = {}
 KEYSTONE_DATA = {}
 
+
 class skip_test(object):
     """Decorator that skips a test."""
     def __init__(self, msg):
@@ -79,7 +80,8 @@ class skip_unless(object):
 
 class FunctionalTest(unittest2.TestCase):
     def setUp(self):
-        global GLANCE_DATA, NOVA_DATA, SWIFT_DATA, RABBITMQ_DATA, KEYSTONE_DATA, CONFIG_DATA
+        global GLANCE_DATA, NOVA_DATA, SWIFT_DATA, RABBITMQ_DATA
+        global KEYSTONE_DATA, CONFIG_DATA
         # Define config dict
         self.config = CONFIG_DATA
         # Define service specific dicts
@@ -101,7 +103,7 @@ class FunctionalTest(unittest2.TestCase):
             self.swift['account'] = self.config['swift']['account']
             self.swift['username'] = self.config['swift']['username']
             self.swift['password'] = self.config['swift']['password']
-            self.swift['ver'] = 'v1.0'  # need to find a better way to get this.
+            self.swift['ver'] = 'v1.0'  # need to find a better way to get this
 
         # Glance Setup
         self.glance['host'] = self.config['glance']['host']

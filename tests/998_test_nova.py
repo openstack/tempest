@@ -61,11 +61,11 @@ class TestNovaAPI(tests.FunctionalTest):
         if 'vmnet' in data['server']['addresses']:
             ref = data['server']['addresses']['vmnet']
             if len(ref) > 0:
-                addr_name = 'vmnet'            
+                addr_name = 'vmnet'
         if 'public' in data['server']['addresses']:
             ref = data['server']['addresses']['public']
             if len(ref) > 0:
-                addr_name = 'public' 
+                addr_name = 'public'
         ref = data['server']['addresses'][addr_name]
         netaddr = ref[0]['addr']
 

@@ -71,7 +71,7 @@ class TestSwift(tests.FunctionalTest):
     def test_001_create_container(self):
         path = "%s/%s/" % (self.swift['storage_url'], "test_container")
         http = httplib2.Http(disable_ssl_certificate_validation=True)
-        headers = { 'X-Storage-Token': '%s' % (self.swift['x-storage-token'])}
+        headers = {'X-Storage-Token': '%s' % (self.swift['x-storage-token'])}
         response, content = http.request(path, 'PUT', headers=headers)
         self.assertEqual(response.status, 201)
     test_001_create_container.tags = ['swift']
