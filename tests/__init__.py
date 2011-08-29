@@ -21,7 +21,6 @@ import nose.plugins.skip
 import os
 from pprint import pprint
 import unittest2
-from xmlrpclib import Server
 
 NOVA_DATA = {}
 GLANCE_DATA = {}
