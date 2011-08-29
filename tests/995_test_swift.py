@@ -17,14 +17,8 @@
 
 """Functional test case for OpenStack Swift """
 
-import hashlib
 import httplib2
-import json
 import os
-import tempfile
-import time
-import unittest
-import urllib
 
 from pprint import pprint
 

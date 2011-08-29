@@ -22,7 +22,6 @@ set information of hosts etc..
 
 import os
 import tests
-import unittest2
 
 
 class TestSkipExamples(tests.FunctionalTest):

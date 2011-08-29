@@ -17,13 +17,7 @@
 
 """Functional test case that utilizes cURL against the API server"""
 
-import json
-import os
-import tempfile
-import unittest
 import httplib2
-import urllib
-import hashlib
 
 from pprint import pprint
 

@@ -19,13 +19,8 @@
 
 import json
 import os
-import tempfile
-import unittest
 import httplib2
-import urllib
-import hashlib
 import time
-import os
 
 from pprint import pprint
 
