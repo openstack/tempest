@@ -21,7 +21,7 @@ import json
 import os
 from pprint import pprint
 
-import tests
+from kong import tests
 
 
 class TestGlanceAPI(tests.FunctionalTest):

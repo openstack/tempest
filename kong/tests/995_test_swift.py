@@ -22,7 +22,7 @@ import os
 
 from pprint import pprint
 
-import tests
+from kong import tests
 
 SMALL_OBJ = "include/swift_objects/swift_small"
 MED_OBJ = "include/swift_objects/swift_medium"

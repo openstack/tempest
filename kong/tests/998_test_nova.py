@@ -24,7 +24,7 @@ import time
 
 from pprint import pprint
 
-import tests
+from kong import tests
 
 
 class TestNovaAPI(tests.FunctionalTest):

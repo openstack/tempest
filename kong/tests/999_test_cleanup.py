@@ -21,7 +21,7 @@ import httplib2
 
 from pprint import pprint
 
-import tests
+from kong import tests
 
 
 class TestCleanUp(tests.FunctionalTest):

@@ -17,7 +17,7 @@
 
 """Functional test case to check RabbitMQ """
 import pika
-import tests
+from kong import tests
 
 from pprint import pprint
 #RABBITMQ_HOST = get_config("rabbitmq/host")

@@ -145,7 +145,8 @@ class FunctionalTest(unittest2.TestCase):
 
     def _parse_defaults_file(self):
         cfg = os.path.abspath(os.path.join(os.path.dirname(__file__),
-                                   "..", "etc", "config.ini"))
+                                   os.path.pardir, os.path.pardir,
+                                   "etc", "config.ini"))
         if os.path.exists(cfg):
             self._build_config(cfg)
         else:

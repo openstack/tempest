@@ -21,7 +21,7 @@ set information of hosts etc..
 """
 
 import os
-import tests
+from kong import tests
 
 
 class TestSkipExamples(tests.FunctionalTest):
