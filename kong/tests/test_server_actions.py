@@ -18,12 +18,12 @@ class ServerActionsTest(tests.FunctionalTest):
         super(ServerActionsTest, self).setUp()
         self.os = openstack.Manager(self.nova)
 
-        self.image_ref = self.os.config.env.image_ref
-        self.image_ref_alt = self.os.config.env.image_ref_alt
-        self.flavor_ref = self.os.config.env.flavor_ref
-        self.flavor_ref_alt = self.os.config.env.flavor_ref_alt
-        self.ssh_timeout = self.os.config.nova.ssh_timeout
-        self.build_timeout = self.os.config.nova.build_timeout
+        self.image_ref = self.glance['image_id']
+#        self.image_ref_alt = self.os.config.env.image_ref_alt
+        self.flavor_ref = self.nova['flavor_ref']
+        self.flavor_ref_alt = self.nova['flavor_ref_alt']
+        self.ssh_timeout = self.nova['ssh_timeout']
+        self.build_timeout = self.nova['build_timeout']
 
         self.server_password = 'testpwd'
         self.server_name = 'stacktester1'
@@ -156,6 +156,7 @@ class ServerActionsTest(tests.FunctionalTest):
         self._assert_ssh_password('test123')
     test_change_server_password.tags = ['nova']
 
+    @tests.skip("rebuild test needs alternate image, but we only have one")
     def test_rebuild(self):
         """Rebuild a server"""
 

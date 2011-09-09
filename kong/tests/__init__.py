@@ -117,6 +117,10 @@ class FunctionalTest(unittest2.TestCase):
             self.nova['ver'] = self.config['nova']['apiver']
             self.nova['user'] = self.config['nova']['user']
             self.nova['key'] = self.config['nova']['key']
+            self.nova['flavor_ref'] = self.config['nova']['flavor_ref']
+            self.nova['flavor_ref_alt'] = self.config['nova']['flavor_ref_alt']
+            self.nova['ssh_timeout'] = self.config['nova']['ssh_timeout']
+            self.nova['build_timeout'] = self.config['nova']['build_timeout']
 
         if 'keystone' in self.config:
             self.keystone['host'] = self.config['keystone']['host']

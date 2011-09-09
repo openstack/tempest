@@ -28,6 +28,10 @@ port = 8774
 apiver = v1.1
 user = admin
 key = 24BD8F71-6AD8-439D-B722-7E2E25FD1911
+ssh_timeout = 300
+build_timeout = 300
+flavor_ref = 1
+flavor_ref_alt = 2
 
 [keystone]
 host = 10.0.0.100

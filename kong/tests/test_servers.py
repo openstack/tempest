@@ -13,10 +13,10 @@ class ServersTest(tests.FunctionalTest):
     def setUp(self):
         super(ServersTest, self).setUp()
         self.os = openstack.Manager(self.nova)
-        self.image_ref = self.os.config.env.image_ref
-        self.flavor_ref = self.os.config.env.flavor_ref
-        self.ssh_timeout = self.os.config.nova.ssh_timeout
-        self.build_timeout = self.os.config.nova.build_timeout
+        self.image_ref = self.glance['image_id']
+        self.flavor_ref = self.nova['flavor_ref']
+        self.ssh_timeout = self.nova['ssh_timeout']
+        self.build_timeout = self.nova['build_timeout']
 
     def _assert_server_entity(self, server):
         actual_keys = set(server.keys())
@@ -43,16 +43,16 @@ class ServersTest(tests.FunctionalTest):
         self.assertTrue(expected_keys <= actual_keys)
 
         server_id = str(server['id'])
-        host = self.os.config.nova.host
-        port = self.os.config.nova.port
+        host = self.nova['host']
+        port = self.nova['port']
         api_url = '%s:%s' % (host, port)
-        base_url = os.path.join(api_url, self.os.config.nova.base_url)
+        base_url = os.path.join(api_url, self.nova['apiver'])
 
         self_link = 'http://' + os.path.join(base_url,
-                                             self.os.config.nova.project_id,
+#                                             self.os.config.nova.project_id,
                                              'servers', server_id)
         bookmark_link = 'http://' + os.path.join(api_url,
-                                            self.os.config.nova.project_id,
+#                                            self.os.config.nova.project_id,
                                             'servers', server_id)
 
         expected_links = [

@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from kong import openstack
 from kong import tests
@@ -44,8 +45,6 @@ class FlavorsTest(tests.FunctionalTest):
         actual_links = flavor['links']
 
         flavor_id = str(flavor['id'])
-        host = self.os.config.nova.host
-        port = self.os.config.nova.port
         mgmt_url = self.os.nova.management_url
         bmk_url = re.sub(r'v1.1\/', r'', mgmt_url)
 
