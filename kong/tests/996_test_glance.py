@@ -77,7 +77,12 @@ class TestGlanceAPI(tests.FunctionalTest):
         """
         Uploads a test initrd to glance api
         """
+        if not 'initrd' in self.config['environment']:
+            self.glance['ramdisk_id'] = None
+            return
+
         initrd = self.config['environment']['initrd']
+
         if 'apiver' in self.glance:
             path = "http://%s:%s/%s/images" % (self.glance['host'],
                           self.glance['port'], self.glance['apiver'])
@@ -126,10 +131,13 @@ class TestGlanceAPI(tests.FunctionalTest):
                    'x-image-meta-container-format': 'ami',
                    'x-image-meta-property-Kernel_id': '%s' % \
                        self.glance['kernel_id'],
-                   'x-image-meta-property-Ramdisk_id': '%s' % \
-                       self.glance['ramdisk_id'],
                    'Content-Length': '%d' % os.path.getsize(image),
                    'Content-Type': 'application/octet-stream'}
+
+        if self.glance['ramdisk_id']:
+            ramdisk_id = '%s' % self.glance['ramdisk_id']
+            headers['x-image-meta-property-Ramdisk_id'] = ramdisk_id
+
         http = httplib2.Http()
         response, content = http.request(path, 'POST',
                                          headers=headers,
@@ -152,9 +160,12 @@ class TestGlanceAPI(tests.FunctionalTest):
         headers = {'X-Image-Meta-Property-Distro': 'Ubuntu',
                    'X-Image-Meta-Property-Arch': 'x86_64',
                    'X-Image-Meta-Property-Kernel_id': '%s' % \
-                       self.glance['kernel_id'],
-                   'X-Image-Meta-Property-Ramdisk_id': '%s' % \
-                       self.glance['ramdisk_id']}
+                       self.glance['kernel_id']}
+
+        if self.glance['ramdisk_id']:
+            ramdisk_id = '%s' % self.glance['ramdisk_id']
+            headers['X-Image-Meta-Property-Ramdisk_id'] = ramdisk_id
+
         http = httplib2.Http()
         response, content = http.request(path, 'PUT', headers=headers)
         self.assertEqual(response.status, 200)
@@ -163,8 +174,9 @@ class TestGlanceAPI(tests.FunctionalTest):
         self.assertEqual(data['image']['properties']['distro'], "Ubuntu")
         self.assertEqual(data['image']['properties']['kernel_id'],
                          str(self.glance['kernel_id']))
-        self.assertEqual(data['image']['properties']['ramdisk_id'],
-                         str(self.glance['ramdisk_id']))
+        if self.glance['ramdisk_id']:
+            self.assertEqual(data['image']['properties']['ramdisk_id'],
+                             str(self.glance['ramdisk_id']))
     test_005_set_image_meta_property.tags = ['glance']
 
     def test_006_list_image_metadata(self):
@@ -188,6 +200,7 @@ class TestGlanceAPI(tests.FunctionalTest):
         self.assertEqual(response['x-image-meta-property-distro'], "Ubuntu")
         self.assertEqual(response['x-image-meta-property-kernel_id'],
                          str(self.glance['kernel_id']))
-        self.assertEqual(response['x-image-meta-property-ramdisk_id'],
-                         str(self.glance['ramdisk_id']))
+        if self.glance['ramdisk_id']:
+            self.assertEqual(response['x-image-meta-property-ramdisk_id'],
+                             str(self.glance['ramdisk_id']))
     test_006_list_image_metadata.tags = ['glance']
