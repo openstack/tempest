@@ -9,7 +9,7 @@ class ImagesTest(tests.FunctionalTest):
 
     def setUp(self):
         super(ImagesTest, self).setUp()
-        self.os = openstack.Manager()
+        self.os = openstack.Manager(self.nova)
 
         host = self.os.config.nova.host
         port = self.os.config.nova.port

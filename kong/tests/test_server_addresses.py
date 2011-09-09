@@ -12,7 +12,7 @@ class ServerAddressesTest(tests.FunctionalTest):
     @classmethod
     def setUpClass(self):
         super(ServerAddressesTest, self).setUp()
-        self.os = openstack.Manager()
+        self.os = openstack.Manager(self.nova)
         self.image_ref = self.os.config.env.image_ref
         self.flavor_ref = self.os.config.env.flavor_ref
 

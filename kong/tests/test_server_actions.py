@@ -16,7 +16,7 @@ class ServerActionsTest(tests.FunctionalTest):
 
     def setUp(self):
         super(ServerActionsTest, self).setUp()
-        self.os = openstack.Manager()
+        self.os = openstack.Manager(self.nova)
 
         self.image_ref = self.os.config.env.image_ref
         self.image_ref_alt = self.os.config.env.image_ref_alt

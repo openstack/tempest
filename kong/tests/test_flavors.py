@@ -8,7 +8,7 @@ from kong import tests
 class FlavorsTest(tests.FunctionalTest):
     def setUp(self):
         super(FlavorsTest, self).setUp()
-        self.os = openstack.Manager()
+        self.os = openstack.Manager(self.nova)
 
     def _index_flavors(self):
         url = '/flavors'
