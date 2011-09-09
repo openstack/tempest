@@ -16,7 +16,10 @@
 #    under the License.
 
 """Functional test case to check RabbitMQ """
-import pika
+try:
+    import pika
+except ImportError:
+    pika = None
 from kong import tests
 
 from pprint import pprint
@@ -26,6 +29,7 @@ from pprint import pprint
 
 
 class TestRabbitMQ(tests.FunctionalTest):
+    @tests.skip_unless(pika, "pika not available")
     def test_000_ghetto(self):
         """
         This sets the host, user, and pass self variables so they
@@ -45,12 +49,14 @@ class TestRabbitMQ(tests.FunctionalTest):
         channel = connection.channel()
         return (channel, connection)
 
+    @tests.skip_unless(pika, "pika not available")
     def test_001_connect(self):
         channel, connection = self._cnx()
         self.assert_(channel)
         connection.close()
     test_001_connect.tags = ['rabbitmq']
 
+    @tests.skip_unless(pika, "pika not available")
     def test_002_send_receive_msg(self):
         unitmsg = 'Hello from unittest'
         channel, connection = self._cnx()
@@ -72,6 +78,7 @@ class TestRabbitMQ(tests.FunctionalTest):
         channel.start_consuming()
     test_002_send_receive_msg.tags = ['rabbitmq']
 
+    @tests.skip_unless(pika, "pika not available")
     def test_003_send_receive_msg_with_persistense(self):
         unitmsg = 'Hello from unittest with Persistense'
         channel, connection = self._cnx()
