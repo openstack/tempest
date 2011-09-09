@@ -319,7 +319,11 @@ class TestNovaAPI(tests.FunctionalTest):
         data = json.dumps(json_str)
         response, content = http.request(path, 'POST', headers=headers,
                                          body=data)
-        json_return = json.loads(content)
+        try:
+            json_return = json.loads(content)
+        except ValueError:
+            print repr(content)
+            raise
         self.assertEqual(response.status, 200)
         self.assertEqual(json_return['server']['status'], "BUILD")
         self.nova['single_server_id'] = json_return['server']['id']
