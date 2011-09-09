@@ -10,9 +10,7 @@ from kong.common import ssh
 
 
 class ServersTest(tests.FunctionalTest):
-
-    @classmethod
-    def setUpClass(self):
+    def setUp(self):
         super(ServersTest, self).setUp()
         self.os = openstack.Manager(self.nova)
         self.image_ref = self.os.config.env.image_ref
