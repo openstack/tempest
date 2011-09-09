@@ -316,6 +316,7 @@ class TestNovaAPI(tests.FunctionalTest):
 #                                                      self.glance['image_id'])
             }
         }
+        pprint(json_str)
         data = json.dumps(json_str)
         response, content = http.request(path, 'POST', headers=headers,
                                          body=data)
