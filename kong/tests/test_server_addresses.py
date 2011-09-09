@@ -2,16 +2,16 @@
 import json
 import os
 
-import unittest2 as unittest
-
-from kong import openstack
 from kong import exceptions
+from kong import openstack
+from kong import tests
 
 
-class ServerAddressesTest(unittest.TestCase):
+class ServerAddressesTest(tests.FunctionalTest):
 
     @classmethod
     def setUpClass(self):
+        super(ServerAddressesTest, self).setUp()
         self.os = openstack.Manager()
         self.image_ref = self.os.config.env.image_ref
         self.flavor_ref = self.os.config.env.flavor_ref

@@ -1,14 +1,14 @@
 import json
 import os
 
-import unittest2 as unittest
-
 from kong import openstack
+from kong import tests
 
 
-class ImagesTest(unittest.TestCase):
+class ImagesTest(tests.FunctionalTest):
 
     def setUp(self):
+        super(ImagesTest, self).setUp()
         self.os = openstack.Manager()
 
         host = self.os.config.nova.host

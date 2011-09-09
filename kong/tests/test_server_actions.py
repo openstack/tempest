@@ -4,16 +4,18 @@ import time
 
 from kong import exceptions
 from kong import openstack
+from kong import tests
 from kong.common import ssh
 
 import unittest2 as unittest
 
 
-class ServerActionsTest(unittest.TestCase):
+class ServerActionsTest(tests.FunctionalTest):
 
     multi_node = openstack.Manager().config.env.multi_node
 
     def setUp(self):
+        super(ServerActionsTest, self).setUp()
         self.os = openstack.Manager()
 
         self.image_ref = self.os.config.env.image_ref

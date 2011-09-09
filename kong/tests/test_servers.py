@@ -3,17 +3,17 @@ import base64
 import json
 import os
 
-import unittest2 as unittest
-
 from kong import openstack
 from kong import exceptions
+from kong import tests
 from kong.common import ssh
 
 
-class ServersTest(unittest.TestCase):
+class ServersTest(tests.FunctionalTest):
 
     @classmethod
     def setUpClass(self):
+        super(ServersTest, self).setUp()
         self.os = openstack.Manager()
         self.image_ref = self.os.config.env.image_ref
         self.flavor_ref = self.os.config.env.flavor_ref

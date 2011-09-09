@@ -1,18 +1,14 @@
 import json
 import os
 
-import unittest2 as unittest
-
 from kong import openstack
+from kong import tests
 
 
-class FlavorsTest(unittest.TestCase):
-
+class FlavorsTest(tests.FunctionalTest):
     def setUp(self):
+        super(FlavorsTest, self).setUp()
         self.os = openstack.Manager()
-
-    def tearDown(self):
-        pass
 
     def _index_flavors(self):
         url = '/flavors'
