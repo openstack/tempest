@@ -46,13 +46,11 @@ class FlavorsTest(tests.FunctionalTest):
         flavor_id = str(flavor['id'])
         host = self.os.config.nova.host
         port = self.os.config.nova.port
-        api_url = '%s:%s' % (host, port)
-        base_url = os.path.join(api_url, self.os.config.nova.base_url,
-                                self.os.config.nova.project_id)
-        api_url = os.path.join(api_url, self.os.config.nova.project_id)
+        mgmt_url = self.os.nova.management_url
+        bmk_url = re.sub(r'v1.1\/', r'', mgmt_url)
 
-        self_link = 'http://' + os.path.join(base_url, 'flavors', flavor_id)
-        bookmark_link = 'http://' + os.path.join(api_url, 'flavors', flavor_id)
+        self_link = os.path.join(mgmt_url, 'flavors', flavor_id)
+        bookmark_link = os.path.join(bmk_url, 'flavors', flavor_id)
 
         expected_links = [
             {
