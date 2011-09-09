@@ -73,6 +73,7 @@ class FlavorsTest(tests.FunctionalTest):
         for flavor in flavors:
             detailed_flavor = self._show_flavor(flavor['id'])
             self._assert_flavor_entity_detailed(detailed_flavor)
+    test_show_flavor.tags = ['nova', 'glance']
 
     def test_index_flavors_basic(self):
         """List all flavors"""
@@ -81,6 +82,7 @@ class FlavorsTest(tests.FunctionalTest):
 
         for flavor in flavors:
             self._assert_flavor_entity_basic(flavor)
+    test_index_flavors_basic.tags = ['nova', 'glance']
 
     def test_index_flavors_detailed(self):
         """List all flavors in detail"""
@@ -94,3 +96,4 @@ class FlavorsTest(tests.FunctionalTest):
 
         for flavor in flavors:
             self._assert_flavor_entity_detailed(flavor)
+    test_index_flavors_detailed.tags = ['nova', 'glance']

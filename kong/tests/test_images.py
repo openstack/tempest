@@ -74,6 +74,7 @@ class ImagesTest(tests.FunctionalTest):
 
         for image in resp_body['images']:
             self._assert_image_entity_basic(image)
+    test_index.tags = ['nova', 'glance']
 
     def test_detail(self):
         """List all images in detail"""
@@ -86,3 +87,4 @@ class ImagesTest(tests.FunctionalTest):
 
         for image in resp_body['images']:
             self._assert_image_entity_detailed(image)
+    test_detail.tags = ['nova', 'glance']

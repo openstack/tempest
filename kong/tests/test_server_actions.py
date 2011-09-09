@@ -109,6 +109,7 @@ class ServerActionsTest(tests.FunctionalTest):
         # SSH and verify uptime is less than before
         post_reboot_time_started = self._get_boot_time()
         self.assertTrue(initial_time_started < post_reboot_time_started)
+    test_reboot_server_soft.tags = ['nova']
 
     def test_reboot_server_hard(self):
         """Reboot a server (HARD)"""
@@ -132,6 +133,7 @@ class ServerActionsTest(tests.FunctionalTest):
         # SSH and verify uptime is less than before
         post_reboot_time_started = self._get_boot_time()
         self.assertTrue(initial_time_started < post_reboot_time_started)
+    test_reboot_server_hard.tags = ['nova']
 
     def test_change_server_password(self):
         """Change root password of a server"""
@@ -152,6 +154,7 @@ class ServerActionsTest(tests.FunctionalTest):
 
         # SSH into server using new password
         self._assert_ssh_password('test123')
+    test_change_server_password.tags = ['nova']
 
     def test_rebuild(self):
         """Rebuild a server"""
@@ -236,6 +239,7 @@ class ServerActionsTest(tests.FunctionalTest):
 
         # make sure file is gone
         self.assertEqual(self._read_file(FILENAME, specified_password), '')
+    test_rebuild.tags = ['nova']
 
     @unittest.skipIf(not multi_node, 'Multiple compute nodes required')
     def test_resize_server_confirm(self):
@@ -270,6 +274,7 @@ class ServerActionsTest(tests.FunctionalTest):
         # Ensure API still reports new flavor
         server = self.os.nova.get_server(self.server_id)
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
+    test_resize_server_confirm.tags = ['nova']
 
     @unittest.skipIf(not multi_node, 'Multiple compute nodes required')
     def test_resize_server_revert(self):
@@ -305,6 +310,7 @@ class ServerActionsTest(tests.FunctionalTest):
         # Ensure flavor ref was reverted to original
         server = self.os.nova.get_server(self.server_id)
         self.assertEqual(self.flavor_ref, server['flavor']['id'])
+    test_resize_server_revert.tags = ['nova']
 
 
 class SnapshotTests(unittest.TestCase):
@@ -366,6 +372,7 @@ class SnapshotTests(unittest.TestCase):
 
         # Cleaning up
         self.os.nova.request('DELETE', '/images/%s' % snapshot_id)
+    test_snapshot_server_active.tags = ['nova', 'glance']
 
     def test_snapshot_server_inactive(self):
         """Ensure inability to snapshot server in BUILD state"""
@@ -381,3 +388,4 @@ class SnapshotTests(unittest.TestCase):
         snapshot_id = response['location'].rsplit('/', 1)[1]
         # Delete image for now, won't need this once correct status code is in
         self.os.nova.request('DELETE', '/images/%s' % snapshot_id)
+    test_snapshot_server_inactive.tags = ['nova', 'glance']

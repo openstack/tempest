@@ -118,6 +118,7 @@ class ServersTest(tests.FunctionalTest):
         self.assertTrue(client.test_connection_auth())
 
         self.os.nova.delete_server(server['id'])
+    test_build_server.tags = ['nova', 'glance']
 
     def test_build_server_with_file(self):
         """Build a server with an injected file"""
@@ -176,6 +177,7 @@ class ServersTest(tests.FunctionalTest):
         self.assertEqual(injected_file, file_contents)
 
         self.os.nova.delete_server(server['id'])
+    test_build_server_with_file.tags = ['nova', 'glance']
 
     def test_build_server_with_password(self):
         """Build a server with a password"""
@@ -229,6 +231,7 @@ class ServersTest(tests.FunctionalTest):
         self.assertTrue(client.test_connection_auth())
 
         self.os.nova.delete_server(server['id'])
+    test_build_server_with_password.tags = ['nova', 'glance']
 
     def test_delete_server_building(self):
         """Delete a server while building"""
@@ -253,6 +256,7 @@ class ServersTest(tests.FunctionalTest):
             self.os.nova.poll_request_status('GET', url, 404)
         except exceptions.TimeoutException:
             self.fail("Server deletion timed out")
+    test_delete_server_building.tags = ['nova', 'glance']
 
     def test_delete_server_active(self):
         """Delete a server after fully built"""
@@ -278,6 +282,7 @@ class ServersTest(tests.FunctionalTest):
             self.os.nova.poll_request_status('GET', url, 404)
         except exceptions.TimeoutException:
             self.fail("Server deletion timed out")
+    test_delete_server_active.tags = ['nova', 'glance']
 
     def test_update_server_name(self):
         """Change the name of a server"""
@@ -321,6 +326,7 @@ class ServersTest(tests.FunctionalTest):
         self.assertEqual('updatedtestserver', data['server']['name'])
 
         self.os.nova.delete_server(server_id)
+    test_update_server_name.tags = ['nova', 'glance']
 
     def test_create_server_invalid_image(self):
         """Create a server with an unknown image"""
@@ -346,6 +352,7 @@ class ServersTest(tests.FunctionalTest):
         }
         # KNOWN-ISSUE - The error message is confusing and should be improved
         #self.assertEqual(fault, expected_fault)
+    test_create_server_invalid_image.tags = ['nova', 'glance']
 
     def test_create_server_invalid_flavor(self):
         """Create a server with an unknown flavor"""
@@ -371,3 +378,4 @@ class ServersTest(tests.FunctionalTest):
         }
         # KNOWN-ISSUE lp804084
         #self.assertEqual(fault, expected_fault)
+    test_create_server_invalid_flavor.tags = ['nova', 'glance']
