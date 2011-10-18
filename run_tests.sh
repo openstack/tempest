@@ -26,15 +26,15 @@ done
 echo $test_opts
 
 function run_tests {
+  base_dir=$(dirname $0)
   for test_dir in $tests
   do
-    cd $test_dir
-    test_cmd="./run_tests.sh ${test_opts}"
+    test_cmd="${base_dir}/${test_dir}/run_tests.sh ${test_opts}"
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     echo $test_cmd
     echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
     $test_cmd
-    cd ..
+
   done
 }
 

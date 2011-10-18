@@ -33,8 +33,9 @@ function process_option {
   esac
 }
 
+base_dir=$(dirname $0)
 venv=.kong-venv
-with_venv=tools/with_venv.sh
+with_venv=../tools/with_venv.sh
 always_venv=0
 never_venv=0
 force=0
@@ -59,35 +60,38 @@ function run_pep8 {
   ${wrapper} pep8 $PEP8_OPTIONS $PEP8_INCLUDE || exit 1
 }
 NOSETESTS="env python run_tests.py $noseargs"
-
-if [ $never_venv -eq 0 ]
-then
-  # Remove the virtual environment if --force used
-  if [ $force -eq 1 ]; then
-    echo "Cleaning virtualenv..."
-    rm -rf ${venv}
-  fi
-  if [ -e ${venv} ]; then
-    wrapper="${with_venv}"
-  else
-    if [ $always_venv -eq 1 ]; then
-      # Automatically install the virtualenv
-      use_ve='y'
-    else
-      echo -e "No virtual environment found...create one? (Y/n) \c"
-      read use_ve
+function setup_venv {
+    if [ $never_venv -eq 0 ]
+    then
+        # Remove the virtual environment if --force used
+        if [ $force -eq 1 ]; then
+            echo "Cleaning virtualenv..."
+            rm -rf ${venv}
+        fi
+        if [ -e ${venv} ]; then
+            wrapper="${with_venv}"
+        else
+            if [ $always_venv -eq 1 ]; then
+                # Automatically install the virtualenv
+                use_ve='y'
+            else
+                echo -e "No virtual environment found...create one? (Y/n) \c"
+                read use_ve
+            fi
+            if [ "x$use_ve" = "xY" -o "x$use_ve" = "x" -o "x$use_ve" = "xy" ]; then
+                # Install the virtualenv and run the test suite in it
+                env python ../tools/install_venv.py
+                wrapper=${with_venv}
+            fi
+        fi
     fi
-    if [ "x$use_ve" = "xY" -o "x$use_ve" = "x" -o "x$use_ve" = "xy" ]; then
-        # Install the virtualenv and run the test suite in it
-        env python ../tools/install_venv.py
-        wrapper=${with_venv}
-    fi
-  fi
-fi
+}
 
 if [ $just_pep8 -eq 1 ]; then
     run_pep8
     exit
 fi
 
+cd $base_dir
+setup_venv
 run_tests || exit
