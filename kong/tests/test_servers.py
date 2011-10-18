@@ -18,6 +18,10 @@ class ServersTest(tests.FunctionalTest):
         self.ssh_timeout = self.nova['ssh_timeout']
         self.build_timeout = self.nova['build_timeout']
 
+    def tearDown(self):
+        if getattr(self, 'server_id', False):
+            self.os.nova.delete_server(self.server_id)
+
     def _assert_server_entity(self, server):
         actual_keys = set(server.keys())
         expected_keys = set((
@@ -49,10 +53,10 @@ class ServersTest(tests.FunctionalTest):
         base_url = os.path.join(api_url, self.nova['apiver'])
 
         self_link = 'http://' + os.path.join(base_url,
-#                                             self.os.config.nova.project_id,
+                                             self.os.nova.project_id,
                                              'servers', server_id)
         bookmark_link = 'http://' + os.path.join(api_url,
-#                                            self.os.config.nova.project_id,
+                                            self.os.nova.project_id,
                                             'servers', server_id)
 
         expected_links = [
@@ -91,6 +95,7 @@ class ServersTest(tests.FunctionalTest):
         _body = json.loads(body)
         self.assertEqual(_body.keys(), ['server'])
         created_server = _body['server']
+        self.server_id = created_server['id'] # for the tearDown
 
         admin_pass = created_server.pop('adminPass')
         self._assert_server_entity(created_server)
@@ -112,10 +117,9 @@ class ServersTest(tests.FunctionalTest):
             self.fail("Failed to retrieve IP address from server entity")
 
         # Assert password works
-        client = ssh.Client(ip, 'root', admin_pass, self.ssh_timeout)
-        self.assertTrue(client.test_connection_auth())
-
-        self.os.nova.delete_server(server['id'])
+        if int(self.nova['ssh_timeout']) > 0:
+            client = ssh.Client(ip, 'root', admin_pass, self.ssh_timeout)
+            self.assertTrue(client.test_connection_auth())
     test_build_server.tags = ['nova', 'glance']
 
     def test_build_server_with_file(self):
@@ -149,6 +153,7 @@ class ServersTest(tests.FunctionalTest):
         _body = json.loads(body)
         self.assertEqual(_body.keys(), ['server'])
         created_server = _body['server']
+        self.server_id = _body['server']['id']
 
         admin_pass = created_server.pop('adminPass', None)
         self._assert_server_entity(created_server)
@@ -170,11 +175,10 @@ class ServersTest(tests.FunctionalTest):
             self.fail("Failed to retrieve IP address from server entity")
 
         # Assert injected file is on instance, also verifying password works
-        client = ssh.Client(ip, 'root', admin_pass, self.ssh_timeout)
-        injected_file = client.exec_command('cat /etc/test.txt')
-        self.assertEqual(injected_file, file_contents)
-
-        self.os.nova.delete_server(server['id'])
+        if int(self.nova['ssh_timeout']) > 0:
+            client = ssh.Client(ip, 'root', admin_pass, self.ssh_timeout)
+            injected_file = client.exec_command('cat /etc/test.txt')
+            self.assertEqual(injected_file, file_contents)
     test_build_server_with_file.tags = ['nova', 'glance']
 
     def test_build_server_with_password(self):
@@ -224,11 +228,10 @@ class ServersTest(tests.FunctionalTest):
         except KeyError:
             self.fail("Failed to retrieve IP address from server entity")
 
-        # Assert password was set to that in request
-        client = ssh.Client(ip, 'root', server_password, self.ssh_timeout)
-        self.assertTrue(client.test_connection_auth())
-
-        self.os.nova.delete_server(server['id'])
+        # Assert password was set to that in request ( if ssh_timeout is > 0
+        if int(self.nova['ssh_timeout']) > 0:
+            client = ssh.Client(ip, 'root', server_password, self.ssh_timeout)
+            self.assertTrue(client.test_connection_auth())
     test_build_server_with_password.tags = ['nova', 'glance']
 
     def test_delete_server_building(self):

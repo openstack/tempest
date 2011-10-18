@@ -13,7 +13,7 @@ class Client(object):
         self.host = host
         self.username = username
         self.password = password
-        self.timeout = timeout
+        self.timeout = int(timeout)
 
     def _get_ssh_connection(self):
         """Returns an ssh connection to the specified host"""

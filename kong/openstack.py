@@ -10,4 +10,5 @@ class Manager(object):
                                   nova['port'],
                                   nova['ver'],
                                   nova['user'],
-                                  nova['key'])
+                                  nova['key'],
+                                  nova['project'])

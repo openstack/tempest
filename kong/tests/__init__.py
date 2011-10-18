@@ -96,37 +96,18 @@ class FunctionalTest(unittest2.TestCase):
 
         # Swift Setup
         if 'swift' in self.config:
-            self.swift['auth_host'] = self.config['swift']['auth_host']
-            self.swift['auth_port'] = self.config['swift']['auth_port']
-            self.swift['auth_prefix'] = self.config['swift']['auth_prefix']
-            self.swift['auth_ssl'] = self.config['swift']['auth_ssl']
-            self.swift['account'] = self.config['swift']['account']
-            self.swift['username'] = self.config['swift']['username']
-            self.swift['password'] = self.config['swift']['password']
+            self.swift = self.config['swift']
             self.swift['ver'] = 'v1.0'  # need to find a better way to get this
 
         # Glance Setup
-        self.glance['host'] = self.config['glance']['host']
-        self.glance['port'] = self.config['glance']['port']
-        if 'apiver' in self.config['glance']:
-            self.glance['apiver'] = self.config['glance']['apiver']
+        self.glance = self.config['glance']
 
         if 'nova' in self.config:
-            self.nova['host'] = self.config['nova']['host']
-            self.nova['port'] = self.config['nova']['port']
+            self.nova = self.config['nova']
             self.nova['ver'] = self.config['nova']['apiver']
-            self.nova['user'] = self.config['nova']['user']
-            self.nova['key'] = self.config['nova']['key']
-            self.nova['flavor_ref'] = self.config['nova']['flavor_ref']
-            self.nova['flavor_ref_alt'] = self.config['nova']['flavor_ref_alt']
-            self.nova['ssh_timeout'] = self.config['nova']['ssh_timeout']
-            self.nova['build_timeout'] = self.config['nova']['build_timeout']
 
         if 'keystone' in self.config:
-            self.keystone['host'] = self.config['keystone']['host']
-            self.keystone['port'] = self.config['keystone']['port']
-            self.keystone['apiver'] = self.config['keystone']['apiver']
-            self.keystone['user'] = self.config['keystone']['user']
+            self.keystone = self.config['keystone']
             self.keystone['pass'] = self.config['keystone']['password']
 
     def _md5sum_file(self, path):

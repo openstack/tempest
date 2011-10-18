@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from kong import openstack
 from kong import tests
@@ -15,23 +16,15 @@ class ImagesTest(tests.FunctionalTest):
         image_id = str(image['id'])
 
         mgmt_url = self.os.nova.management_url
+        mgmt_url = re.sub(r'1//', r'1/', mgmt_url) # TODO: is this a bug in Nova?
         bmk_url = re.sub(r'v1.1\/', r'', mgmt_url)
+        self_link = {'rel': 'self',
+                     'href': os.path.join(mgmt_url, 'images', image_id)}
+        bookmark_link = {'rel': 'bookmark',
+                         'href': os.path.join(bmk_url, 'images', image_id)}
 
-        self_link = os.path.join(mgmt_url, 'images', image_id)
-        bookmark_link = os.path.join(bmk_url, 'images', image_id)
-
-        expected_links = [
-            {
-                'rel': 'self',
-                'href': self_link,
-            },
-            {
-                'rel': 'bookmark',
-                'href': bookmark_link,
-            },
-        ]
-
-        self.assertEqual(image['links'], expected_links)
+        self.assertIn(bookmark_link, image['links'])
+        self.assertIn(self_link, image['links'])
 
     def _assert_image_entity_basic(self, image):
         actual_keys = set(image.keys())
@@ -50,14 +43,16 @@ class ImagesTest(tests.FunctionalTest):
             keys.remove('server')
         actual_keys = set(keys)
         expected_keys = set((
+            'created',
             'id',
+            'links',
+            'metadata',
+            'minDisk',
+            'minRam',
             'name',
             'progress',
-            'created',
-            'updated',
             'status',
-            'metadata',
-            'links',
+            'updated',
         ))
         self.assertEqual(actual_keys, expected_keys)
 
@@ -80,7 +75,6 @@ class ImagesTest(tests.FunctionalTest):
         """List all images in detail"""
 
         response, body = self.os.nova.request('GET', '/images/detail')
-
         self.assertEqual(response['status'], '200')
         resp_body = json.loads(body)
         self.assertEqual(resp_body.keys(), ['images'])
