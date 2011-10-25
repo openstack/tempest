@@ -25,24 +25,20 @@ class ServersTest(tests.FunctionalTest):
     def _assert_server_entity(self, server):
         actual_keys = set(server.keys())
         expected_keys = set((
-            'id',
-            'name',
-            'hostId',
-            'status',
-            'metadata',
-            'addresses',
-            'links',
-            'progress',
-            'image',
-            'flavor',
-            'created',
-            'updated',
             'accessIPv4',
             'accessIPv6',
-
-            #KNOWN-ISSUE lp804093
-            'uuid',
-
+            'addresses',
+            'created',
+            'flavor',
+            'hostId',
+            'id',
+            'image',
+            'links',
+            'metadata',
+            'name',
+            'progress',
+            'status',
+            'updated',
         ))
         self.assertTrue(expected_keys <= actual_keys)
 
