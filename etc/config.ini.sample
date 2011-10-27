@@ -1,7 +1,7 @@
 [environment]
-kernel = include/sample_vm/natty-server-uec-amd64-vmlinuz-virtual
-#initrd = include/sample_vm/natty-server-uec-amd64-initrd-virtual
-image = include/sample_vm/natty-server-uec-amd64.img
+aki_location = include/sample_vm/natty-server-cloudimg-amd64-vmlinuz-virtual
+#ari_location = include/sample_vm/natty-server-cloudimg-amd64-loader
+ami_location = include/sample_vm/natty-server-cloudimg-amd64.img
 
 [swift]
 auth_host = 10.0.0.100
