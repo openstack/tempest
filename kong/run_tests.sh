@@ -68,7 +68,7 @@ function setup_venv {
             echo "Cleaning virtualenv..."
             rm -rf ${venv}
         fi
-        if [ -e ${venv} ]; then
+        if [ -e "../${venv}" ]; then
             wrapper="${with_venv}"
         else
             if [ $always_venv -eq 1 ]; then
