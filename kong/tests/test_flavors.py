@@ -35,8 +35,11 @@ class FlavorsTest(tests.FunctionalTest):
 
     def _assert_flavor_entity_detailed(self, flavor):
         actual_keys = set(flavor.keys())
-        expected_keys = set(('id', 'name', 'ram', 'disk', 'links'))
-        self.assertEqual(actual_keys, expected_keys)
+        expected_keys = set(('id', 'name', 'ram', 'disk', 'vcpus', 'links'))
+        #NOTE(bcwaldon): We cannot expect an explicit list of keys since
+        # any extension can a new attribute to a flavor entity. However, we
+        # can expect a minimum set of keys defined in the spec.
+        self.assertTrue(actual_keys >= expected_keys)
         self.assertEqual(type(flavor['ram']), int)
         self.assertEqual(type(flavor['disk']), int)
         self._assert_flavor_links(flavor)
