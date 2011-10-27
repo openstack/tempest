@@ -19,7 +19,6 @@ import ConfigParser
 from hashlib import md5
 import nose.plugins.skip
 import os
-from pprint import pprint
 import unittest2
 
 NOVA_DATA = {}
@@ -92,7 +91,6 @@ class FunctionalTest(unittest2.TestCase):
         self.keystone = KEYSTONE_DATA
 
         self._parse_defaults_file()
-        pprint(self.config)
 
         # Swift Setup
         if 'swift' in self.config:
