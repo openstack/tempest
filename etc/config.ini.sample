@@ -36,8 +36,9 @@ flavor_ref = 1
 flavor_ref_alt = 2
 
 [keystone]
-host = 10.0.0.100
-port = 5000
+service_host = 10.0.0.100
+service_port = 5000
 apiver = v1.1
 user = admin
 password = password
+tenant_id = 1
