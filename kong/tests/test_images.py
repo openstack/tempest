@@ -17,7 +17,6 @@ class TestImagesThroughCompute(tests.FunctionalTest):
         image_id = str(image['id'])
 
         mgmt_url = self.os.nova.management_url
-        mgmt_url = re.sub(r'1//', r'1/', mgmt_url) # TODO: is this a bug in Nova?
         bmk_url = re.sub(r'v1.1\/', r'', mgmt_url)
         self_link = {'rel': 'self',
                      'href': os.path.join(mgmt_url, 'images', image_id)}
@@ -157,7 +156,7 @@ class TestGlanceAPI(tests.FunctionalTest):
         self.assertEqual(201, response.status)
         data = json.loads(content)
         self.assertEqual(data['image']['name'], "test-image")
-        self.assertEqual(data['image']['checksum'], 
+        self.assertEqual(data['image']['checksum'],
                          self._md5sum_file(ami_location))
         machine_id = data['image']['id']
 
