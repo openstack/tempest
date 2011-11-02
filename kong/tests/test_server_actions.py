@@ -12,18 +12,17 @@ import unittest2 as unittest
 
 class ServerActionsTest(tests.FunctionalTest):
 
-    multi_node = openstack.Manager().config.env.multi_node
-
     def setUp(self):
         super(ServerActionsTest, self).setUp()
         self.os = openstack.Manager(self.nova)
 
+        self.multi_node = self.nova['multi_node'] == 'yes'
         self.image_ref = self.glance['image_id']
-#        self.image_ref_alt = self.os.config.env.image_ref_alt
+        self.image_ref_alt = self.glance['image_id_alt']
         self.flavor_ref = self.nova['flavor_ref']
         self.flavor_ref_alt = self.nova['flavor_ref_alt']
-        self.ssh_timeout = self.nova['ssh_timeout']
-        self.build_timeout = self.nova['build_timeout']
+        self.ssh_timeout = int(self.nova['ssh_timeout'])
+        self.build_timeout = int(self.nova['build_timeout'])
 
         self.server_password = 'testpwd'
         self.server_name = 'stacktester1'
@@ -41,13 +40,11 @@ class ServerActionsTest(tests.FunctionalTest):
         self._wait_for_server_status(self.server_id, 'ACTIVE')
 
         server = self.os.nova.get_server(self.server_id)
-
-        # KNOWN-ISSUE lp?
-        #self.access_ip = server['accessIPv4']
         self.access_ip = server['addresses']['public'][0]['addr']
 
         # Ensure server came up
-        self._assert_ssh_password()
+        if self.ssh_timeout:
+            self._assert_ssh_password()
 
     def tearDown(self):
         self.os.nova.delete_server(self.server_id)
@@ -87,11 +84,13 @@ class ServerActionsTest(tests.FunctionalTest):
         client = self._get_ssh_client(password)
         return client.exec_command(command)
 
-    def test_reboot_server_soft(self):
-        """Reboot a server (SOFT)"""
-
+    def test_reboot_server(self):
+        """Reboot a server SOFT and HARD"""
         # SSH and get the uptime
-        initial_time_started = self._get_boot_time()
+        if self.ssh_timeout:
+            initial_time_started = self._get_boot_time()
+        else:
+            intitial_time_started = 0
 
         # Make reboot request
         post_body = json.dumps({'reboot': {'type': 'SOFT'}})
@@ -100,22 +99,16 @@ class ServerActionsTest(tests.FunctionalTest):
         self.assertEqual(response['status'], '202')
 
         # Assert status transition
-        # KNOWN-ISSUE
-        #self._wait_for_server_status(self.server_id, 'REBOOT')
-        ssh_client = self._get_ssh_client(self.server_password)
-        ssh_client.connect_until_closed()
+        self._wait_for_server_status(self.server_id, 'REBOOT')
         self._wait_for_server_status(self.server_id, 'ACTIVE')
 
         # SSH and verify uptime is less than before
-        post_reboot_time_started = self._get_boot_time()
-        self.assertTrue(initial_time_started < post_reboot_time_started)
-    test_reboot_server_soft.tags = ['nova']
+        if self.ssh_timeout:
+            post_reboot_time_started = self._get_boot_time()
+            self.assertTrue(initial_time_started < post_reboot_time_started)
 
-    def test_reboot_server_hard(self):
-        """Reboot a server (HARD)"""
-
-        # SSH and get the uptime
-        initial_time_started = self._get_boot_time()
+            # SSH and get the uptime for the next reboot
+            initial_time_started = post_reboot_time_started
 
         # Make reboot request
         post_body = json.dumps({'reboot': {'type': 'HARD'}})
@@ -124,23 +117,19 @@ class ServerActionsTest(tests.FunctionalTest):
         self.assertEqual(response['status'], '202')
 
         # Assert status transition
-        # KNOWN-ISSUE
+        # KNOWN-ISSUE 884906
         #self._wait_for_server_status(self.server_id, 'HARD_REBOOT')
-        ssh_client = self._get_ssh_client(self.server_password)
-        ssh_client.connect_until_closed()
+        self._wait_for_server_status(self.server_id, 'REBOOT')
         self._wait_for_server_status(self.server_id, 'ACTIVE')
 
         # SSH and verify uptime is less than before
-        post_reboot_time_started = self._get_boot_time()
-        self.assertTrue(initial_time_started < post_reboot_time_started)
-    test_reboot_server_hard.tags = ['nova']
+        if self.ssh_timeout:
+            post_reboot_time_started = self._get_boot_time()
+            self.assertTrue(initial_time_started < post_reboot_time_started)
+    test_reboot_server.tags = ['nova']
 
-    def test_change_server_password(self):
+    def test_change_password(self):
         """Change root password of a server"""
-
-        # SSH into server using original password
-        self._assert_ssh_password()
-
         # Change server password
         post_body = json.dumps({'changePassword': {'adminPass': 'test123'}})
         url = '/servers/%s/action' % self.server_id
@@ -148,15 +137,14 @@ class ServerActionsTest(tests.FunctionalTest):
 
         # Assert status transition
         self.assertEqual('202', response['status'])
-        # KNOWN-ISSUE
         self._wait_for_server_status(self.server_id, 'PASSWORD')
         self._wait_for_server_status(self.server_id, 'ACTIVE')
 
         # SSH into server using new password
-        self._assert_ssh_password('test123')
-    test_change_server_password.tags = ['nova']
+        if self.ssh_timeout:
+            self._assert_ssh_password('test123')
+    test_change_password.tags = ['nova']
 
-    @tests.skip("rebuild test needs alternate image, but we only have one")
     def test_rebuild(self):
         """Rebuild a server"""
 
@@ -164,8 +152,9 @@ class ServerActionsTest(tests.FunctionalTest):
         CONTENTS = 'WORDS'
 
         # write file to server
-        self._write_file(FILENAME, CONTENTS)
-        self.assertEqual(self._read_file(FILENAME), CONTENTS)
+        if self.ssh_timeout:
+            self._write_file(FILENAME, CONTENTS)
+            self.assertEqual(self._read_file(FILENAME), CONTENTS)
 
         # Make rebuild request
         post_body = json.dumps({'rebuild': {'imageRef': self.image_ref_alt}})
@@ -178,12 +167,11 @@ class ServerActionsTest(tests.FunctionalTest):
         generated_password = rebuilt_server['adminPass']
 
         # Ensure correct status transition
-        # KNOWN-ISSUE
-        #self._wait_for_server_status(self.server_id, 'REBUILD')
-        self._wait_for_server_status(self.server_id, 'BUILD')
+        self._wait_for_server_status(self.server_id, 'REBUILD')
         self._wait_for_server_status(self.server_id, 'ACTIVE')
 
         # Treats an issue where we ssh'd in too soon after rebuild
+        #TODO(bcwaldon): fix the Xen driver so we don't have to sleep here
         time.sleep(30)
 
         # Check that the instance's imageRef matches the new imageRef
@@ -193,15 +181,16 @@ class ServerActionsTest(tests.FunctionalTest):
         self.assertTrue(ref_match or id_match)
 
         # SSH into the server to ensure it came back up
-        self._assert_ssh_password(generated_password)
+        if self.ssh_timeout:
+            self._assert_ssh_password(generated_password)
 
-        # make sure file is gone
-        self.assertEqual(self._read_file(FILENAME, generated_password), '')
+            # make sure file is gone
+            self.assertEqual(self._read_file(FILENAME, generated_password), '')
 
-        # test again with a specified password
-        self._write_file(FILENAME, CONTENTS, generated_password)
-        _contents = self._read_file(FILENAME, generated_password)
-        self.assertEqual(_contents, CONTENTS)
+            # test again with a specified password
+            self._write_file(FILENAME, CONTENTS, generated_password)
+            _contents = self._read_file(FILENAME, generated_password)
+            self.assertEqual(_contents, CONTENTS)
 
         specified_password = 'some_password'
 
@@ -221,9 +210,7 @@ class ServerActionsTest(tests.FunctionalTest):
         self.assertEqual(rebuilt_server['adminPass'], specified_password)
 
         # Ensure correct status transition
-        # KNOWN-ISSUE
-        #self._wait_for_server_status(self.server_id, 'REBUILD')
-        self._wait_for_server_status(self.server_id, 'BUILD')
+        self._wait_for_server_status(self.server_id, 'REBUILD')
         self._wait_for_server_status(self.server_id, 'ACTIVE')
 
         # Treats an issue where we ssh'd in too soon after rebuild
@@ -235,16 +222,14 @@ class ServerActionsTest(tests.FunctionalTest):
         id_match = self.image_ref == server['image']['id']
         self.assertTrue(ref_match or id_match)
 
-        # SSH into the server to ensure it came back up
-        self._assert_ssh_password(specified_password)
-
         # make sure file is gone
-        self.assertEqual(self._read_file(FILENAME, specified_password), '')
+        if self.ssh_timeout:
+            self.assertEqual(self._read_file(FILENAME, specified_password), '')
     test_rebuild.tags = ['nova']
 
-    @unittest.skipIf(not multi_node, 'Multiple compute nodes required')
-    def test_resize_server_confirm(self):
+    def test_resize(self):
         """Resize a server"""
+
         # Make resize request
         post_body = json.dumps({'resize': {'flavorRef': self.flavor_ref_alt}})
         url = '/servers/%s/action' % self.server_id
@@ -252,16 +237,15 @@ class ServerActionsTest(tests.FunctionalTest):
 
         # Wait for status transition
         self.assertEqual('202', response['status'])
-        # KNOWN-ISSUE
-        #self._wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
-        self._wait_for_server_status(self.server_id, 'RESIZE-CONFIRM')
+        self._wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
         # Ensure API reports new flavor
         server = self.os.nova.get_server(self.server_id)
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
 
         #SSH into the server to ensure it came back up
-        self._assert_ssh_password()
+        if self.ssh_timeout:
+            self._assert_ssh_password()
 
         # Make confirmResize request
         post_body = json.dumps({'confirmResize': 'null'})
@@ -275,12 +259,10 @@ class ServerActionsTest(tests.FunctionalTest):
         # Ensure API still reports new flavor
         server = self.os.nova.get_server(self.server_id)
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
-    test_resize_server_confirm.tags = ['nova']
+    test_resize.tags = ['nova']
 
-    @unittest.skipIf(not multi_node, 'Multiple compute nodes required')
-    def test_resize_server_revert(self):
+    def test_resize_revert(self):
         """Resize a server, then revert"""
-
         # Make resize request
         post_body = json.dumps({'resize': {'flavorRef': self.flavor_ref_alt}})
         url = '/servers/%s/action' % self.server_id
@@ -288,12 +270,11 @@ class ServerActionsTest(tests.FunctionalTest):
 
         # Wait for status transition
         self.assertEqual('202', response['status'])
-        # KNOWN-ISSUE
-        #self._wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
-        self._wait_for_server_status(self.server_id, 'RESIZE-CONFIRM')
+        self._wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
         # SSH into the server to ensure it came back up
-        self._assert_ssh_password()
+        if self.ssh_timeout:
+            self._assert_ssh_password()
 
         # Ensure API reports new flavor
         server = self.os.nova.get_server(self.server_id)
@@ -311,18 +292,19 @@ class ServerActionsTest(tests.FunctionalTest):
         # Ensure flavor ref was reverted to original
         server = self.os.nova.get_server(self.server_id)
         self.assertEqual(self.flavor_ref, server['flavor']['id'])
-    test_resize_server_revert.tags = ['nova']
+    test_resize_revert.tags = ['nova']
 
 
-class SnapshotTests(unittest.TestCase):
+class SnapshotTests(tests.FunctionalTest):
 
     def setUp(self):
-        self.os = openstack.Manager()
+        super(SnapshotTests, self).setUp()
+        self.os = openstack.Manager(self.nova)
 
-        self.image_ref = self.os.config.env.image_ref
-        self.flavor_ref = self.os.config.env.flavor_ref
-        self.ssh_timeout = self.os.config.nova.ssh_timeout
-        self.build_timeout = self.os.config.nova.build_timeout
+        self.image_ref = self.glance['image_id']
+        self.flavor_ref = self.nova['flavor_ref']
+        self.ssh_timeout = int(self.nova['ssh_timeout'])
+        self.build_timeout = int(self.nova['build_timeout'])
 
         self.server_name = 'stacktester1'
 
@@ -345,18 +327,17 @@ class SnapshotTests(unittest.TestCase):
         except exceptions.TimeoutException:
             self.fail("Server failed to change status to %s" % status)
 
-    def test_snapshot_server_active(self):
+    def test_snapshot(self):
         """Create image from an existing server"""
 
         # Wait for server to come up before running this test
         self._wait_for_server_status(self.server_id, 'ACTIVE')
 
         # Create snapshot
-        image_data = {'name': 'backup'}
+        image_data = {'name': 'testserver_snapshot'}
         req_body = json.dumps({'createImage': image_data})
         url = '/servers/%s/action' % self.server_id
         response, body = self.os.nova.request('POST', url, body=req_body)
-
         self.assertEqual(response['status'], '202')
         image_ref = response['location']
         snapshot_id = image_ref.rsplit('/', 1)[1]
@@ -368,25 +349,37 @@ class SnapshotTests(unittest.TestCase):
         server_ref = snapshot['server']['links'][0]['href']
         self.assertTrue(server_ref.endswith('/%s' % self.server_id))
 
-        # Ensure image is actually created
+        # Wait for first snapshot to start saving before making second snapshot
+        self.os.nova.wait_for_image_status(snapshot['id'], 'SAVING')
+
+        # Create second snapshot
+        image_data = {'name': 'testserver_snapshot2'}
+        req_body = json.dumps({'createImage': image_data})
+        url = '/servers/%s/action' % self.server_id
+        response, body = self.os.nova.request('POST', url, body=req_body)
+        self.assertEqual(response['status'], '409')
+
+        # Ensure both snapshots succeed
         self.os.nova.wait_for_image_status(snapshot['id'], 'ACTIVE')
 
         # Cleaning up
         self.os.nova.request('DELETE', '/images/%s' % snapshot_id)
-    test_snapshot_server_active.tags = ['nova', 'glance']
+    test_snapshot.tags = ['nova']
 
-    def test_snapshot_server_inactive(self):
+    def test_snapshot_while_building(self):
         """Ensure inability to snapshot server in BUILD state"""
 
+        # Ensure server is in BUILD state
+        url = '/servers/%s' % self.server_id
+        response, body = self.os.nova.request('GET', url)
+        server = json.loads(body)['server']
+        self.assertEqual(server['status'], 'BUILD', 'Server built too quickly')
+
         # Create snapshot
-        req_body = json.dumps({'createImage': {'name': 'backup'}})
+        req_body = json.dumps({'createImage': {'name': 'testserver_snapshot'}})
         url = '/servers/%s/action' % self.server_id
         response, body = self.os.nova.request('POST', url, body=req_body)
 
-        # KNOWN-ISSUE - we shouldn't be able to snapshot a building server
-        #self.assertEqual(response['status'], '400')  # what status code?
-        self.assertEqual(response['status'], '202')
-        snapshot_id = response['location'].rsplit('/', 1)[1]
-        # Delete image for now, won't need this once correct status code is in
-        self.os.nova.request('DELETE', '/images/%s' % snapshot_id)
-    test_snapshot_server_inactive.tags = ['nova', 'glance']
+        # KNOWN-ISSUE 885232
+        self.assertEqual(response['status'], '409')
+    test_snapshot_while_building.tags = ['nova']
