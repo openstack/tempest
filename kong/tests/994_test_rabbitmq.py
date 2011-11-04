@@ -41,11 +41,10 @@ class TestRabbitMQ(tests.FunctionalTest):
     test_000_ghetto.tags = ['rabbitmq']
 
     def _cnx(self):
-        # TODO: Figuring out what's going with creds
-        # creds = pika.credentials.PlainCredentials(
-        #     self.rabbitmq['user'], self.rabbitmq['pass']
+        creds = pika.credentials.PlainCredentials(
+            self.rabbitmq['user'], self.rabbitmq['pass'])
         connection = pika.BlockingConnection(pika.ConnectionParameters(
-                host=self.rabbitmq['host']))
+                host=self.rabbitmq['host'],credentials=creds))
         channel = connection.channel()
         return (channel, connection)
 
