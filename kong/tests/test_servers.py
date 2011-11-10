@@ -24,6 +24,18 @@ class ServersTest(tests.FunctionalTest):
         if getattr(self, 'server_id', False):
             self.os.nova.delete_server(self.server_id)
 
+    def _assert_created_server_entity(self, created_server):
+        actual_keys = set(created_server.keys())
+        expected_keys = set((
+            'id',
+            'adminPass',
+            'links',
+        ))
+        print actual_keys
+        print expected_keys
+        self.assertTrue(expected_keys <= actual_keys)
+        self._assert_server_links(created_server)
+
     def _assert_server_entity(self, server):
         actual_keys = set(server.keys())
         expected_keys = set((
@@ -43,7 +55,9 @@ class ServersTest(tests.FunctionalTest):
             'updated',
         ))
         self.assertTrue(expected_keys <= actual_keys)
+        self._assert_server_links(server)
 
+    def _assert_server_links(self, server):
         server_id = str(server['id'])
         host = self.nova['host']
         port = self.nova['port']
@@ -92,13 +106,8 @@ class ServersTest(tests.FunctionalTest):
         _body = json.loads(body)
         self.assertEqual(_body.keys(), ['server'])
         created_server = _body['server']
-        admin_pass = created_server.pop('adminPass')
-        self._assert_server_entity(created_server)
-        self.assertEqual(expected_server['name'], created_server['name'])
-        self.assertEqual(created_server['accessIPv4'], '')
-        self.assertEqual(created_server['accessIPv6'], '')
-        self.assertEqual(expected_server['metadata'],
-                         created_server['metadata'])
+        admin_pass = created_server['adminPass']
+        self._assert_created_server_entity(created_server)
         self.server_id = created_server['id']
 
         # Get server again and ensure attributes stuck
@@ -107,7 +116,7 @@ class ServersTest(tests.FunctionalTest):
         self.assertEqual(server['name'], expected_server['name'])
         self.assertEqual(server['accessIPv4'], '')
         self.assertEqual(server['accessIPv6'], '')
-        self.assertEqual(server['metadata'], created_server['metadata'])
+        self.assertEqual(server['metadata'], {'testEntry': 'testValue'})
 
         # Parse last-updated time
         update_time = utils.load_isotime(server['created'])
@@ -386,12 +395,13 @@ class ServersTest(tests.FunctionalTest):
         created_server = _body['server']
         self.server_id = _body['server']['id']
 
-        admin_pass = created_server.pop('adminPass', None)
+        admin_pass = created_server['adminPass']
         self.assertEqual(expected_server['adminPass'], admin_pass)
-        self._assert_server_entity(created_server)
-        self.assertEqual(expected_server['name'], created_server['name'])
-        self.assertEqual(expected_server['metadata'],
-                         created_server['metadata'])
+        self._assert_created_server_entity(created_server)
+        self.assertEqual(expected_server['metadata'], {
+            'key1': 'value1',
+            'key2': 'value2',
+        })
 
         self.os.nova.wait_for_server_status(created_server['id'],
                                             'ACTIVE',
