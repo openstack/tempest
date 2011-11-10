@@ -15,7 +15,7 @@ class FlavorsTest(unittest.TestCase):
 
     @attr(type='smoke')
     def test_list_flavors(self):
-        """ List of all flavors should contain the expected flavor """
+        """List of all flavors should contain the expected flavor"""
         resp, body = self.client.list_flavors()
         flavors = body['flavors']
 
@@ -26,7 +26,7 @@ class FlavorsTest(unittest.TestCase):
 
     @attr(type='smoke')
     def test_list_flavors_with_detail(self):
-        """ Detailed list of all flavors should contain the expected flavor """
+        """Detailed list of all flavors should contain the expected flavor"""
         resp, body = self.client.list_flavors_with_detail()
         flavors = body['flavors']
         resp, flavor = self.client.get_flavor_details(self.flavor_id)
@@ -34,6 +34,6 @@ class FlavorsTest(unittest.TestCase):
 
     @attr(type='smoke')
     def test_get_flavor(self):
-        """ The expected flavor details should be returned """
+        """The expected flavor details should be returned"""
         resp, flavor = self.client.get_flavor_details(self.flavor_id)
         self.assertEqual(self.flavor_id, flavor['id'])

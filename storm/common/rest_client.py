@@ -83,7 +83,7 @@ class RestClient(object):
         return self.request('PUT', url, headers, body)
 
     def request(self, method, url, headers=None, body=None):
-        """ A simple HTTP request interface."""
+        """A simple HTTP request interface."""
 
         self.http_obj = httplib2.Http()
         if headers == None:

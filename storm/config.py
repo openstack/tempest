@@ -5,7 +5,7 @@ class NovaConfig(object):
     """Provides configuration information for connecting to Nova."""
 
     def __init__(self, conf):
-        """Initialize a Nova-specific configuration object."""
+        """Initialize a Nova-specific configuration object"""
         self.conf = conf
 
     def get(self, item_name, default_value):

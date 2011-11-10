@@ -77,7 +77,7 @@ class ServersTest(unittest.TestCase):
 
     @attr(type='smoke')
     def test_update_server_name(self):
-        """ The server name should be changed to the the provided value """
+        """The server name should be changed to the the provided value"""
         name = rand_name('server')
         resp, server = self.client.create_server(name, self.image_ref,
                                                  self.flavor_ref)
