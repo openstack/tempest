@@ -143,12 +143,12 @@ class TestGlanceAPI(tests.FunctionalTest):
                    'x-image-meta-name': 'test-image',
                    'x-image-meta-disk-format': 'ami',
                    'x-image-meta-container-format': 'ami',
-                   'x-image-meta-property-kernel_id': kernel_id,
+                   'x-image-meta-property-kernel_id': str(kernel_id),
                    'Content-Length': '%d' % os.path.getsize(ami_location),
                    'Content-Type': 'application/octet-stream'}
 
         if ari_location:
-            headers['x-image-meta-property-ramdisk_id'] = ramdisk_id
+            headers['x-image-meta-property-ramdisk_id'] = str(ramdisk_id)
 
         http = httplib2.Http()
         response, content = http.request(self.base_url, 'POST',
@@ -163,9 +163,9 @@ class TestGlanceAPI(tests.FunctionalTest):
         # now ensure we can modify the image properties
         headers = {'X-Image-Meta-Property-distro': 'Ubuntu',
                    'X-Image-Meta-Property-arch': 'x86_64',
-                   'X-Image-Meta-Property-kernel_id': kernel_id}
+                   'X-Image-Meta-Property-kernel_id': str(kernel_id)}
         if ari_location:
-            headers['X-Image-Meta-Property-ramdisk_id'] = ramdisk_id
+            headers['X-Image-Meta-Property-ramdisk_id'] = str(ramdisk_id)
 
         http = httplib2.Http()
         url = '%s/%s' % (self.base_url, machine_id)
@@ -175,9 +175,9 @@ class TestGlanceAPI(tests.FunctionalTest):
         properties = data['image']['properties']
         self.assertEqual(properties['arch'], "x86_64")
         self.assertEqual(properties['distro'], "Ubuntu")
-        self.assertEqual(properties['kernel_id'], kernel_id)
+        self.assertEqual(properties['kernel_id'], str(kernel_id))
         if ari_location:
-            self.assertEqual(properties['ramdisk_id'], ramdisk_id)
+            self.assertEqual(properties['ramdisk_id'], str(ramdisk_id))
 
         # list the metadata to ensure the new values stuck
         http = httplib2.Http()
@@ -191,10 +191,10 @@ class TestGlanceAPI(tests.FunctionalTest):
         self.assertEqual(response['x-image-meta-property-arch'], "x86_64")
         self.assertEqual(response['x-image-meta-property-distro'], "Ubuntu")
         self.assertEqual(response['x-image-meta-property-kernel_id'],
-                         kernel_id)
+                         str(kernel_id))
         if ari_location:
             self.assertEqual(response['x-image-meta-property-ramdisk_id'],
-                             ramdisk_id)
+                             str(ramdisk_id))
 
         # delete images for which we have non-None ids
         delete_ids = filter(lambda x: x, (kernel_id, ramdisk_id, machine_id))
