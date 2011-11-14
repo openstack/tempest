@@ -14,7 +14,6 @@ class Client(object):
         self.base_url = "http://%s:%s/%s" % (host, port, base_url)
 
     def poll_request(self, method, url, check_response, **kwargs):
-
         timeout = kwargs.pop('timeout', 180)
         interval = kwargs.pop('interval', 2)
         # Start timestamp
@@ -29,15 +28,13 @@ class Client(object):
             time.sleep(interval)
 
     def poll_request_status(self, method, url, status=200, **kwargs):
-
         def check_response(resp, body):
             return resp['status'] == str(status)
 
         self.poll_request(method, url, check_response, **kwargs)
 
-
     def request(self, method, url, **kwargs):
-        # Default to management_url, but can be overridden here 
+        # Default to management_url, but can be overridden here
         # (for auth requests)
         base_url = kwargs.get('base_url', self.management_url)
 

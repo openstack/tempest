@@ -89,7 +89,7 @@ class TestGlanceAPI(tests.FunctionalTest):
     def setUp(self):
         super(TestGlanceAPI, self).setUp()
         self.base_url = "http://%s:%s/%s/images" % (self.glance['host'],
-		                                    self.glance['port'],
+                                                    self.glance['port'],
                                                     self.glance['apiver'])
 
     def test_upload_ami_style_image(self):
