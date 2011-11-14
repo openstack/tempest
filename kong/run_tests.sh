@@ -8,9 +8,10 @@ function usage {
   echo "  -N, --no-virtual-env     Don't use virtualenv.  Run tests in local environment"
   echo "  -f, --force              Force a clean re-build of the virtual environment. Useful when dependencies have been added."
   echo "  -p, --pep8               Just run pep8"
-  echo "  --nova		   Run all tests tagged as \"nova\"."
-  echo "  --swift		   Run all tests tagged as \"swift\"."
-  echo "  --glance		   Run all tests tagged as \"glance\"."
+  echo "  --nova                   Run all tests tagged as \"nova\"."
+  echo "  --swift                  Run all tests tagged as \"swift\"."
+  echo "  --glance                 Run all tests tagged as \"glance\"."
+  echo "  --auth                   Run all tests tagged as \"auth\"."
   echo "  -h, --help               Print this usage message"
   echo ""
   echo "Note: with no options specified, the script will try to run the tests in a virtual environment,"
@@ -29,6 +30,7 @@ function process_option {
     --nova) noseargs="$noseargs -a tags=nova";;
     --glance) noseargs="$noseargs -a tags=glance";;
     --swift) noseargs="$noseargs -a tags=swift";;
+    --auth) noseargs="$noseargs -a tags=auth";;
     *) noseargs="$noseargs $1"
   esac
 }
