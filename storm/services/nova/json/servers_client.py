@@ -257,3 +257,41 @@ class ServersClient(object):
                                       str(server_id), post_body, self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_server_metadata(self, server_id):
+        resp, body = self.client.get("servers/%s/metadata" % str(server_id))
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def set_server_metadata(self, server_id, meta):
+        post_body = json.dumps({'metadata': meta})
+        resp, body = self.client.put('servers/%s/metadata' %
+                                     str(server_id), post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def update_server_metadata(self, server_id, meta):
+        post_body = json.dumps({'metadata': meta})
+        resp, body = self.client.post('servers/%s/metadata' %
+                                     str(server_id), post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def get_server_metadata_item(self, server_id, key):
+        resp, body = self.client.get("servers/%s/metadata/%s" %
+                                    (str(server_id), key))
+        body = json.loads(body)
+        return resp, body['meta']
+
+    def set_server_metadata_item(self, server_id, key, meta):
+        post_body = json.dumps({'meta': meta})
+        resp, body = self.client.put('servers/%s/metdata/%s' %
+                                    (str(server_id), key),
+                                    post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['meta']
+
+    def delete_server_metadata_item(self, server_id, key):
+        resp, body = self.client.delete("servers/%s/metadata/%s" %
+                                    (str(server_id), key))
+        return resp, body
