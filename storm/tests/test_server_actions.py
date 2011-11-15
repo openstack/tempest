@@ -30,7 +30,7 @@ class ServerActionsTest(unittest.TestCase):
 
     @attr(type='smoke')
     def test_change_server_password(self):
-        """ The server's password should be set to the provided password """
+        """The server's password should be set to the provided password"""
         resp, body = self.client.change_password(self.id, 'newpass')
         self.client.wait_for_server_status(self.id, 'ACTIVE')
         #TODO: SSH in to verify the new password works
@@ -45,7 +45,7 @@ class ServerActionsTest(unittest.TestCase):
 
     @attr(type='smoke')
     def test_reboot_server_soft(self):
-        """ The server should be signaled to reboot gracefully """
+        """The server should be signaled to reboot gracefully"""
         #TODO: Add validation the server has been rebooted
 
         resp, body = self.client.reboot(self.id, 'SOFT')
@@ -53,7 +53,7 @@ class ServerActionsTest(unittest.TestCase):
 
     @attr(type='smoke')
     def test_rebuild_server(self):
-        """ The server should be rebuilt using the provided image """
+        """The server should be rebuilt using the provided image"""
 
         self.client.rebuild(self.id, self.image_ref_alt, name='rebuiltserver')
         self.client.wait_for_server_status(self.id, 'ACTIVE')
