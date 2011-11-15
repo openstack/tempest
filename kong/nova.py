@@ -1,6 +1,4 @@
 import json
-import logging
-import subprocess
 
 import kong.common.http
 from kong import exceptions
@@ -24,7 +22,7 @@ class API(kong.common.http.Client):
         self.user = user
         self.api_key = api_key
         self.project_id = project_id
-        # Default to same as base_url, but will be change on auth
+        # Default to same as base_url, but will be changed for auth
         self.management_url = self.base_url
 
     def authenticate(self, user, api_key, project_id):
@@ -104,7 +102,7 @@ class API(kong.common.http.Client):
         project_id = kwargs.get('project_id', self.project_id)
 
         headers['X-Auth-Token'] = self.authenticate(self.user, self.api_key,
-                                                    self.project_id)
+                                                    project_id)
         kwargs['headers'] = headers
         return super(API, self).request(method, url, **kwargs)
 
