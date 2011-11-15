@@ -19,8 +19,6 @@
 
 import httplib2
 import json
-import os
-import time
 import uuid
 
 from kong import keystone
@@ -67,6 +65,10 @@ class TestKeystoneAuth(tests.FunctionalTest):
         self.assertEqual(response.status, 200)
         res_body = json.loads(content)
         self.assertTrue(res_body['access']['token']['id'])
+        self.assertTrue(res_body['access']['token']['tenant']['id'],
+            self.tenant_id)
+        self.assertTrue(res_body['access']['user']['name'],
+            self.user)
     test_can_get_token.tags = ['auth']
 
     def test_bad_user(self):
