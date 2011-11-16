@@ -36,4 +36,4 @@ class FlavorsTest(unittest.TestCase):
     def test_get_flavor(self):
         """The expected flavor details should be returned"""
         resp, flavor = self.client.get_flavor_details(self.flavor_id)
-        self.assertEqual(self.flavor_id, flavor['id'])
+        self.assertEqual(self.flavor_id, str(flavor['id']))
