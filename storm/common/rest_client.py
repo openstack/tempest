@@ -1,3 +1,4 @@
+from storm import exceptions
 import httplib2
 import json
 import storm.config
@@ -93,4 +94,8 @@ class RestClient(object):
         req_url = "%s/%s" % (self.base_url, url)
         resp, body = self.http_obj.request(req_url, method,
                                            headers=headers, body=body)
+        if resp.status == 400:
+            body = json.loads(body)
+            raise exceptions.BadRequest(body['badRequest']['message'])
+
         return resp, body
