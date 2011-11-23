@@ -285,7 +285,7 @@ class ServersClient(object):
 
     def set_server_metadata_item(self, server_id, key, meta):
         post_body = json.dumps({'meta': meta})
-        resp, body = self.client.put('servers/%s/metdata/%s' %
+        resp, body = self.client.put('servers/%s/metadata/%s' %
                                     (str(server_id), key),
                                     post_body, self.headers)
         body = json.loads(body)

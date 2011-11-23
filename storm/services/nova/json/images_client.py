@@ -70,11 +70,15 @@ class ImagesClient(object):
         """Deletes the provided image"""
         return self.client.delete("images/%s" % str(image_id))
 
-    def wait_for_image_exists(self, image_id):
+    def wait_for_image_resp_code(self, image_id, code):
+        """
+        Waits until the HTTP response code for the request matches the
+        expected value
+        """
         resp, body = self.client.get("images/%s" % str(image_id))
         start = int(time.time())
 
-        while resp.status != 200:
+        while resp.status != code:
             time.sleep(self.build_interval)
             resp, body = self.client.get("images/%s" % str(image_id))
 
@@ -97,39 +101,45 @@ class ImagesClient(object):
                 raise exceptions.BuildErrorException
 
     def list_image_metadata(self, image_id):
+        """Lists all metadata items for an image"""
         resp, body = self.client.get("images/%s/metadata" % str(image_id))
         body = json.loads(body)
-        return resp, body
+        return resp, body['metadata']
 
     def set_image_metadata(self, image_id, meta):
+        """Sets the metadata for an image"""
         post_body = json.dumps({'metadata': meta})
         resp, body = self.client.put('images/%s/metadata' %
                                       str(image_id), post_body, self.headers)
         body = json.loads(body)
-        return resp, body
+        return resp, body['metadata']
 
     def update_image_metadata(self, image_id, meta):
+        """Updates the metadata for an image"""
         post_body = json.dumps({'metadata': meta})
         resp, body = self.client.post('images/%s/metadata' %
                                       str(image_id), post_body, self.headers)
         body = json.loads(body)
-        return resp, body
+        return resp, body['metadata']
 
     def get_image_metadata_item(self, image_id, key):
+        """Returns the value for a specific image metadata key"""
         resp, body = self.client.get("images/%s/metadata/%s" %
                                      (str(image_id), key))
         body = json.loads(body)
-        return resp, body
+        return resp, body['meta']
 
     def set_image_metadata_item(self, image_id, key, meta):
+        """Sets the value for a specific image metadata key"""
         post_body = json.dumps({'meta': meta})
-        resp, body = self.client.put('images/%s/metdata/%s' %
-                                     (str(image_id), key),
-                                     post_body, self.headers)
+        resp, body = self.client.put('images/%s/metadata/%s' %
+                                     (str(image_id), key), post_body,
+                                     self.headers)
         body = json.loads(body)
-        return resp, body
+        return resp, body['meta']
 
     def delete_image_metadata_item(self, image_id, key):
+        """Deletes a single image metadata key/value pair"""
         resp, body = self.client.delete("images/%s/metadata/%s" %
                                      (str(image_id), key))
         return resp, body

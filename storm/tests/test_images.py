@@ -35,7 +35,7 @@ class ImagesTest(unittest.TestCase):
         name = rand_name('image')
         resp, body = self.client.create_image(server['id'], name)
         image_id = self._parse_image_id(resp['location'])
-        self.client.wait_for_image_exists(image_id)
+        self.client.wait_for_image_resp_code(image_id, 200)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
         #Verify the image was created correctly
