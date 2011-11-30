@@ -1,4 +1,4 @@
 [gerrit]
 host=review.openstack.org
 port=29418
-project=openstack/openstack-integration-tests.git
+project=openstack/tempest.git
