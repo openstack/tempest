@@ -53,6 +53,21 @@ class ServerMetadataTest(unittest.TestCase):
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         self.assertEqual(resp_metadata, req_metadata)
 
+    def test_server_create_metadata_key_too_long(self):
+        """
+        Attempt to start a server with a meta-data key that is > 255 characters
+        Try a few values
+        """
+        for sz in [256, 257, 511, 1023]:
+            key = "k" * sz
+            meta = {key: 'data1'}
+            name = rand_name('server')
+            resp, server = self.client.create_server(name, self.image_ref,
+                                                     self.flavor_ref,
+                                                     meta=meta)
+            self.assertEqual(413, resp.status)
+        # no teardown - all creates should fail
+
     def test_update_server_metadata(self):
         """
         The server's metadata values should be updated to the
