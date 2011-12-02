@@ -1,7 +1,10 @@
 .kong-venv
 *.pyc
 etc/config.ini
+etc/storm.conf
+etc/tempest.conf
 include/swift_objects/swift_small
 include/swift_objects/swift_medium
 include/swift_objects/swift_large
 *.log
+*.swp

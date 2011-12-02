@@ -1,14 +1,15 @@
-from storm import exceptions
-import httplib2
 import json
+
+import httplib2
+
+from storm import exceptions
 import storm.config
 
 
 class RestClient(object):
 
-    def __init__(self, user, key, auth_url, tenant_name=None):
-        self.config = storm.config.StormConfig()
-
+    def __init__(self, config, user, key, auth_url, tenant_name=None):
+        self.config = config
         if self.config.env.authentication == 'keystone_v2':
             self.token, self.base_url = self.keystone_v2_auth(user,
                                                               key,
@@ -55,21 +56,24 @@ class RestClient(object):
         resp, body = self.http_obj.request(auth_url, 'POST',
                                            headers=headers, body=body)
 
-        try:
-            auth_data = json.loads(body)['access']
-            token = auth_data['token']['id']
-            endpoints = auth_data['serviceCatalog'][0]['endpoints']
-            mgmt_url = endpoints[0]['publicURL']
+        if resp.status == 200:
+            try:
+                auth_data = json.loads(body)['access']
+                token = auth_data['token']['id']
+                endpoints = auth_data['serviceCatalog'][0]['endpoints']
+                mgmt_url = endpoints[0]['publicURL']
 
-            #TODO (dwalleck): This is a horrible stopgap.
-            #Need to join strings more cleanly
-            temp = mgmt_url.rsplit('/')
-            service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
-            management_url = service_url + tenant_name
-            return token, management_url
-        except KeyError:
-            print "Failed to authenticate user"
-            raise
+                #TODO (dwalleck): This is a horrible stopgap.
+                #Need to join strings more cleanly
+                temp = mgmt_url.rsplit('/')
+                service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
+                management_url = service_url + tenant_name
+                return token, management_url
+            except Exception, e:
+                print "Failed to authenticate user: %s" % e
+                raise
+        elif resp.status == 401:
+            raise exceptions.AuthenticationFailure(user=user, password=api_key)
 
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)

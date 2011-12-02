@@ -1,4 +1,8 @@
 import ConfigParser
+import logging
+import os
+
+LOG = logging.getLogger(__name__)
 
 
 class NovaConfig(object):
@@ -119,15 +123,24 @@ class EnvironmentConfig(object):
 class StormConfig(object):
     """Provides OpenStack configuration information."""
 
-    _path = "etc/storm.conf"
+    def __init__(self, conf_dir, conf_file):
+        """
+        Initialize a configuration from a conf directory and conf file.
 
-    def __init__(self, path=None):
-        """Initialize a configuration from a path."""
-        self._conf = self.load_config(self._path)
+        :param conf_dir: Directory to look for config files
+        :param conf_file: Name of config file to use
+        """
+        path = os.path.join(conf_dir, conf_file)
+
+        if not os.path.exists(path):
+            msg = "Config file %(path)s not found" % locals()
+            raise RuntimeError(msg)
+
+        self._conf = self.load_config(path)
         self.nova = NovaConfig(self._conf)
         self.env = EnvironmentConfig(self._conf)
 
-    def load_config(self, path=None):
+    def load_config(self, path):
         """Read configuration from given path and return a config object."""
         config = ConfigParser.SafeConfigParser()
         config.read(path)

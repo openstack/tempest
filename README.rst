@@ -1,25 +1,37 @@
 ::
 
-OpenStack integration test suite
-================================
+Tempest - The OpenStack Integration Test Suite
+==============================================
 
 This is a set of integration tests to be run against a live cluster.
 
 Quickstart
 ----------
 
-You're going to want to make your own config.ini file in the /etc/ directory,
-it needs to point at your running cluster.
+To run Tempest, you first need to create a configuration file that
+will tell Tempest where to find the various OpenStack services and
+other testing behaviour switches.
 
-After that try commands such as::
+The easiest way to create a configuration file is to copy the sample
+one in the ``etc/`` directory ::
 
-  run_tests.sh --nova
-  run_tests.sh --glance
-  run_tests.sh --swift
-  run_tests.sh --auth
+    $> cd $TEMPEST_ROOT_DIR
+    $> cp etc/storm.conf.sample etc/storm.conf
 
+After that, open up the ``etc/storm.conf`` file and edit the
+variables to fit your test environment.
 
-Additional Info
----------------
+.. note::
 
-There are additional README files in the various subdirectories of this project.
+    If you have a running devstack environment, look at the
+    environment variables in your ``devstack/localrc`` file.
+    The ADMIN_PASSWORD variable should match the api_key value
+    in the storm.conf [nova] configuration section. In addition,
+    you will need to get the UUID identifier of the image that
+    devstack uploaded and set the image_ref value in the [environment]
+    section in the storm.conf to that image UUID.
+
+After setting up your configuration file, you can execute the set of
+Tempest tests by using ``nosetests`` ::
+
+    $> nosetests storm

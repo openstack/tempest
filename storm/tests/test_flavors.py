@@ -10,7 +10,7 @@ class FlavorsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.flavors_client
-        cls.config = storm.config.StormConfig()
+        cls.config = cls.os.config
         cls.flavor_id = cls.config.env.flavor_ref
 
     @attr(type='smoke')

@@ -11,7 +11,7 @@ class ServerMetadataTest(unittest.TestCase):
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.servers_client
-        cls.config = storm.config.StormConfig()
+        cls.config = cls.os.config
         cls.image_ref = cls.config.env.image_ref
         cls.flavor_ref = cls.config.env.flavor_ref
 

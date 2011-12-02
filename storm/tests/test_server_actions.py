@@ -4,19 +4,21 @@ import unittest2 as unittest
 import storm.config
 from storm.common.utils.data_utils import rand_name
 
+# Some module-level skip conditions
+resize_available = False
 
 class ServerActionsTest(unittest.TestCase):
-    resize_available = storm.config.StormConfig().env.resize_available
 
     @classmethod
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.servers_client
-        cls.config = storm.config.StormConfig()
+        cls.config = cls.os.config
         cls.image_ref = cls.config.env.image_ref
         cls.image_ref_alt = cls.config.env.image_ref_alt
         cls.flavor_ref = cls.config.env.flavor_ref
         cls.flavor_ref_alt = cls.config.env.flavor_ref_alt
+        resize_available = cls.config.env.resize_available
 
     def setUp(self):
         self.name = rand_name('server')

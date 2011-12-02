@@ -4,18 +4,21 @@ from storm.common.utils.data_utils import rand_name
 import unittest2 as unittest
 import storm.config
 
+# Some module-level skip conditions
+create_image_enabled = False
+
 
 class ImagesTest(unittest.TestCase):
-    create_image_enabled = storm.config.StormConfig().env.create_image_enabled
 
     @classmethod
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.images_client
         cls.servers_client = cls.os.servers_client
-        cls.config = storm.config.StormConfig()
+        cls.config = cls.os.config
         cls.image_ref = cls.config.env.image_ref
         cls.flavor_ref = cls.config.env.flavor_ref
+        create_image_enabled = cls.config.env.create_image_enabled
 
     def _parse_image_id(self, image_ref):
         temp = image_ref.rsplit('/')
