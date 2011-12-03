@@ -15,9 +15,28 @@ class NovaConfig(object):
             return default_value
 
     @property
-    def auth_url(self):
-        """URL used to authenticate. Defaults to 127.0.0.1."""
-        return self.get("auth_url", "127.0.0.1")
+    def host(self):
+        """Host IP for making Nova API requests. Defaults to '127.0.0.1'."""
+        return self.get("host", "127.0.1")
+
+    @property
+    def port(self):
+        """Listen port of the Nova service."""
+        return self.get("port", "8773")
+
+    @property
+    def apiVer(self):
+        """Version of the API"""
+        return self.get("apiVer", "v1.1")
+
+    @property
+    def path(self):
+        """Path of API request"""
+        return self.get("path", "/")
+
+    def params(self):
+        """Parameters to be passed with the API request"""
+        return self.get("params", "")
 
     @property
     def username(self):

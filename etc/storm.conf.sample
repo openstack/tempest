@@ -1,5 +1,8 @@
 [nova]
-auth_url=http://127.0.0.1:5000/v2.0/tokens
+host=127.0.0.1
+port=5000
+apiVer=v2.0
+path=tokens
 user=admin
 api_key=admin-key
 tenant_name=admin-project
