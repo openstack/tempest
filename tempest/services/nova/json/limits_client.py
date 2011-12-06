@@ -4,7 +4,7 @@ from tempest.common import rest_client
 
 class LimitsClient(object):
 
-    def __init__(self, username, key, auth_url, tenant_name=None):
+    def __init__(self, config, username, key, auth_url, tenant_name=None):
         self.client = rest_client.RestClient(config, username, key,
                                              auth_url, tenant_name)
 

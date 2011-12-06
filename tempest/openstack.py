@@ -16,7 +16,7 @@ class Manager(object):
             os.path.dirname(__file__))),
         "etc")
 
-    DEFAULT_CONFIG_FILE = "storm.conf"
+    DEFAULT_CONFIG_FILE = "tempest.conf"
 
     def __init__(self):
         """
@@ -27,7 +27,7 @@ class Manager(object):
             self.DEFAULT_CONFIG_DIR)
         config_file = os.environ.get('TEMPEST_CONFIG',
             self.DEFAULT_CONFIG_FILE)
-        self.config = storm.config.StormConfig(config_dir, config_file)
+        self.config = tempest.config.TempestConfig(config_dir, config_file)
         self.auth_url = data_utils.build_url(self.config.nova.host,
                                         self.config.nova.port,
                                         self.config.nova.apiVer,
