@@ -1,10 +1,11 @@
 import os
 
-from storm.services.nova.json.images_client import ImagesClient
-from storm.services.nova.json.flavors_client import FlavorsClient
-from storm.services.nova.json.servers_client import ServersClient
-from storm.common.utils import data_utils
-import storm.config
+from tempest.services.nova.json.images_client import ImagesClient
+from tempest.services.nova.json.flavors_client import FlavorsClient
+from tempest.services.nova.json.servers_client import ServersClient
+from tempest.services.nova.json.limits_client import LimitsClient
+from tempest.common.utils import data_utils
+import tempest.config
 
 
 class Manager(object):
@@ -48,6 +49,12 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.auth_url,
                                               self.config.nova.tenant_name)
+            self.limits_client = LimitsClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.api_key,
+                                              self.auth_url,
+                                              self.config.nova.tenant_name)
+            
         else:
             #Assuming basic/native authentication
             self.servers_client = ServersClient(self.config,
@@ -59,6 +66,11 @@ class Manager(object):
                                                 self.config.nova.api_key,
                                                 self.auth_url)
             self.images_client = ImagesClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.auth_url,
+                                              self.config.nova.api_key,
+                                              self.auth_url)
+            self.limits_client = LimitsClient(self.config,
                                               self.config.nova.username,
                                               self.config.nova.auth_url,
                                               self.config.nova.api_key,

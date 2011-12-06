@@ -1,9 +1,9 @@
-from storm.common import ssh
+from tempest.common import ssh
 from nose.plugins.attrib import attr
-from storm import openstack
-from storm.common.utils.data_utils import rand_name
+from tempest import openstack
+from tempest.common.utils.data_utils import rand_name
 import base64
-import storm.config
+import tempest.config
 import unittest2 as unittest
 
 
@@ -16,7 +16,6 @@ class ServersTest(unittest.TestCase):
         cls.config = cls.os.config
         cls.image_ref = cls.config.env.image_ref
         cls.flavor_ref = cls.config.env.flavor_ref
-        cls.ssh_timeout = cls.config.nova.ssh_timeout
 
     @attr(type='smoke')
     def test_create_delete_server(self):
@@ -34,6 +33,10 @@ class ServersTest(unittest.TestCase):
                                                  accessIPv4=accessIPv4,
                                                  accessIPv6=accessIPv6,
                                                  personality=personality)
+        #Check the initial response
+        self.assertEqual(202, resp.status)
+        self.assertTrue(server['id'] is not None)
+        self.assertTrue(server['adminPass'] is not None)
 
         #Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
@@ -46,8 +49,9 @@ class ServersTest(unittest.TestCase):
         self.assertEqual(self.image_ref, server['image']['id'])
         self.assertEqual(str(self.flavor_ref), server['flavor']['id'])
 
-        #Teardown
-        self.client.delete_server(self.id)
+        #Delete the server
+        resp, body = self.client.delete_server(server['id'])
+        self.assertEqual(204, resp.status)
 
     @attr(type='smoke')
     def test_create_server_with_admin_password(self):
@@ -64,14 +68,6 @@ class ServersTest(unittest.TestCase):
         #Verify the password is set correctly in the response
         self.assertEqual('testpassword', server['adminPass'])
 
-        #SSH into the server using the set password
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
-        resp, addresses = self.client.list_addresses(server['id'])
-        ip = addresses['public'][0]['addr']
-
-        client = ssh.Client(ip, 'root', 'testpassword', self.ssh_timeout)
-        self.assertTrue(client.test_connection_auth())
-
         #Teardown
         self.client.delete_server(server['id'])
 
@@ -84,7 +80,8 @@ class ServersTest(unittest.TestCase):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         #Update the server with a new name
-        self.client.update_server(server['id'], name='newname')
+        resp, server = self.client.update_server(server['id'], name='newname')
+        self.assertEquals(200, resp.status)
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         #Verify the name of the server has changed
@@ -105,8 +102,10 @@ class ServersTest(unittest.TestCase):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         #Update the IPv4 and IPv6 access addresses
-        self.client.update_server(server['id'], accessIPv4='1.1.1.1',
-                                  accessIPv6='::babe:2.2.2.2')
+        resp, body = self.client.update_server(server['id'],
+                                               accessIPv4='1.1.1.1',
+                                               accessIPv6='::babe:2.2.2.2')
+        self.assertEqual(200, resp.status)
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         #Verify the access addresses have been updated

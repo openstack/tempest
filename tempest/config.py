@@ -120,8 +120,9 @@ class EnvironmentConfig(object):
         return self.get("authentication", 'keystone')
 
 
-class StormConfig(object):
+class TempestConfig(object):
     """Provides OpenStack configuration information."""
+
 
     def __init__(self, conf_dir, conf_file):
         """

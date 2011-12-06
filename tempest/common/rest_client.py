@@ -2,8 +2,8 @@ import json
 
 import httplib2
 
-from storm import exceptions
-import storm.config
+from tempest import exceptions
+import tempest.config
 
 
 class RestClient(object):
@@ -101,5 +101,13 @@ class RestClient(object):
         if resp.status == 400:
             body = json.loads(body)
             raise exceptions.BadRequest(body['badRequest']['message'])
+
+        if resp.status == 413:
+            body = json.loads(body)
+            raise exceptions.OverLimit(body['overLimit']['message'])
+            
+        if resp.status in (500, 501):
+            body = json.loads(body)
+            raise exceptions.ComputeFault(body['computeFault']['message'])
 
         return resp, body

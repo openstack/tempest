@@ -1,4 +1,4 @@
-from storm.common import rest_client
+from tempest.common import rest_client
 import json
 import time
 

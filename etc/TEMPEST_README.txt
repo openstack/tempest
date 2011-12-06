@@ -1,8 +1,8 @@
 To run:
--rename the /etc/storm.conf.sample file to storm.conf
+-rename the /etc/tempest.conf.sample file to tempest.conf
 -Set the fields in the file to values relevant to your system
 -Set the "authentication" value (basic or keystone_v2 currently supported)
--from the root directory of the project, run "nosetests storm/tests" to
+-from the root directory of the project, run "nosetests tempest/tests" to
  run all tests
 
 TODO:

@@ -1,6 +1,7 @@
-from storm.common import rest_client
+from tempest.common import rest_client
+from tempest import exceptions
 import json
-import storm.config
+import tempest.config
 import time
 
 
@@ -10,6 +11,7 @@ class ImagesClient(object):
         self.config = config
         self.client = rest_client.RestClient(config, username, key,
                                              auth_url, tenant_name)
+
         self.build_interval = self.config.nova.build_interval
         self.build_timeout = self.config.nova.build_timeout
         self.headers = {'Content-Type': 'application/json',

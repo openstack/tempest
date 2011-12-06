@@ -1,11 +1,11 @@
 import unittest2 as unittest
-import storm.config
+import tempest.config
 import base64
 from nose.plugins.attrib import attr
-from storm import openstack
-from storm.common.utils.data_utils import rand_name
-from storm.common import ssh
-from storm import exceptions
+from tempest import openstack
+from tempest.common.utils.data_utils import rand_name
+from tempest.common import ssh
+from tempest import exceptions
 
 
 class ServersNegativeTest(unittest.TestCase):

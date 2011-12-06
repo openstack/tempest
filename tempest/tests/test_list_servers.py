@@ -1,8 +1,8 @@
 from nose.plugins.attrib import attr
-from storm import openstack
-from storm.common.utils.data_utils import rand_name
+from tempest import openstack
+from tempest.common.utils.data_utils import rand_name
 import unittest2 as unittest
-import storm.config
+import tempest.config
 
 
 class ServerDetailsTest(unittest.TestCase):
