@@ -16,9 +16,9 @@ The easiest way to create a configuration file is to copy the sample
 one in the ``etc/`` directory ::
 
     $> cd $TEMPEST_ROOT_DIR
-    $> cp etc/storm.conf.sample etc/storm.conf
+    $> cp etc/tempest.conf.sample etc/tempest.conf
 
-After that, open up the ``etc/storm.conf`` file and edit the
+After that, open up the ``etc/tempest.conf`` file and edit the
 variables to fit your test environment.
 
 .. note::
@@ -26,12 +26,12 @@ variables to fit your test environment.
     If you have a running devstack environment, look at the
     environment variables in your ``devstack/localrc`` file.
     The ADMIN_PASSWORD variable should match the api_key value
-    in the storm.conf [nova] configuration section. In addition,
+    in the tempest.conf [nova] configuration section. In addition,
     you will need to get the UUID identifier of the image that
     devstack uploaded and set the image_ref value in the [environment]
-    section in the storm.conf to that image UUID.
+    section in the tempest.conf to that image UUID.
 
 After setting up your configuration file, you can execute the set of
 Tempest tests by using ``nosetests`` ::
 
-    $> nosetests storm
+    $> nosetests tempest
