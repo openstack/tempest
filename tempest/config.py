@@ -123,7 +123,6 @@ class EnvironmentConfig(object):
 class TempestConfig(object):
     """Provides OpenStack configuration information."""
 
-
     def __init__(self, conf_dir, conf_file):
         """
         Initialize a configuration from a conf directory and conf file.

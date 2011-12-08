@@ -54,7 +54,7 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.auth_url,
                                               self.config.nova.tenant_name)
-            
+
         else:
             #Assuming basic/native authentication
             self.servers_client = ServersClient(self.config,

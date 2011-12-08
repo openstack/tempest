@@ -27,7 +27,7 @@ class ImagesMetadataTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.servers_client.delete_server(cls.server['id'])
-        
+
     def setUp(self):
         meta = {'key1': 'value1', 'key2': 'value2'}
         name = rand_name('image')
@@ -77,7 +77,8 @@ class ImagesMetadataTest(unittest.TestCase):
     def test_update_image_metadata(self):
         """The metadata for the image should match the updated values"""
         meta = {'key1': 'alt1', 'key2': 'alt2'}
-        resp, metadata = self.client.update_image_metadata(self.image['id'], meta)
+        resp, metadata = self.client.update_image_metadata(self.image['id'],
+                                                           meta)
 
         resp, metadata = self.client.list_image_metadata(self.image['id'])
         self.assertEqual('alt1', metadata['key1'])
