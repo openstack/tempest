@@ -1,6 +1,7 @@
 import ConfigParser
 import logging
 import os
+from tempest.common.utils import data_utils
 
 LOG = logging.getLogger(__name__)
 
@@ -37,6 +38,15 @@ class NovaConfig(object):
     def path(self):
         """Path of API request"""
         return self.get("path", "/")
+
+    @property
+    def auth_url(self):
+        """The Auth URL (derived)"""
+        auth_url = data_utils.build_url(self.host,
+                                        self.port,
+                                        self.apiVer,
+                                        self.path)
+        return auth_url
 
     def params(self):
         """Parameters to be passed with the API request"""
@@ -111,7 +121,7 @@ class EnvironmentConfig(object):
 
     @property
     def create_image_enabled(self):
-        """ Does the test environment support resizing """
+        """ Does the test environment support snapshots """
         return self.get("create_image_enabled", 'false') != 'false'
 
     @property

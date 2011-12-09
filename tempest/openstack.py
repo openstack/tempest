@@ -28,31 +28,27 @@ class Manager(object):
         config_file = os.environ.get('TEMPEST_CONFIG',
             self.DEFAULT_CONFIG_FILE)
         self.config = tempest.config.TempestConfig(config_dir, config_file)
-        self.auth_url = data_utils.build_url(self.config.nova.host,
-                                        self.config.nova.port,
-                                        self.config.nova.apiVer,
-                                        self.config.nova.path)
 
         if self.config.env.authentication == 'keystone_v2':
             self.servers_client = ServersClient(self.config,
                                                 self.config.nova.username,
                                                 self.config.nova.api_key,
-                                                self.auth_url,
+                                                self.config.nova.auth_url,
                                                 self.config.nova.tenant_name)
             self.flavors_client = FlavorsClient(self.config,
                                                 self.config.nova.username,
                                                 self.config.nova.api_key,
-                                                self.auth_url,
+                                                self.config.nova.auth_url,
                                                 self.config.nova.tenant_name)
             self.images_client = ImagesClient(self.config,
                                               self.config.nova.username,
                                               self.config.nova.api_key,
-                                              self.auth_url,
+                                              self.config.nova.auth_url,
                                               self.config.nova.tenant_name)
             self.limits_client = LimitsClient(self.config,
                                               self.config.nova.username,
                                               self.config.nova.api_key,
-                                              self.auth_url,
+                                              self.config.nova.auth_url,
                                               self.config.nova.tenant_name)
 
         else:
@@ -60,18 +56,16 @@ class Manager(object):
             self.servers_client = ServersClient(self.config,
                                                 self.config.nova.username,
                                                 self.config.nova.api_key,
-                                                self.auth_url)
+                                                self.config.nova.auth_url)
             self.flavors_client = FlavorsClient(self.config,
                                                 self.config.nova.username,
                                                 self.config.nova.api_key,
-                                                self.auth_url)
+                                                self.config.nova.auth_url)
             self.images_client = ImagesClient(self.config,
                                               self.config.nova.username,
-                                              self.config.nova.auth_url,
                                               self.config.nova.api_key,
-                                              self.auth_url)
+                                              self.config.nova.auth_url)
             self.limits_client = LimitsClient(self.config,
                                               self.config.nova.username,
-                                              self.config.nova.auth_url,
                                               self.config.nova.api_key,
-                                              self.auth_url)
+                                              self.config.nova.auth_url)
