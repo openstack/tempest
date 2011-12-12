@@ -1,7 +1,6 @@
 from tempest import exceptions
 from tempest.common import rest_client
 import json
-import tempest.config
 import time
 
 
@@ -17,42 +16,42 @@ class ServersClient(object):
         self.headers = {'Content-Type': 'application/json',
                         'Accept': 'application/json'}
 
-    def create_server(self, name, image_ref, flavor_ref, meta=None,
-                      personality=None, accessIPv4=None, accessIPv6=None,
-                      adminPass=None):
+    def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
         Creates an instance of a server.
-        name: The name of the server.
-        image_ref: The reference to the image used to build the server.
-        flavor_ref: The flavor used to build the server.
+        name (Required): The name of the server.
+        image_ref (Required): Reference to the image used to build the server.
+        flavor_ref (Required): The flavor used to build the server.
+        Following optional keyword arguments are accepted:
         adminPass: Sets the initial root password.
-        meta: A dictionary of values to be used as metadata.
+        metadata: A dictionary of values to be used as metadata.
         personality: A list of dictionaries for files to be injected into
         the server.
+        security_groups: A list of security group dicts.
+        networks: A list of network dicts with UUID and fixed_ip.
+        user_data: User data for instance.
+        availability_zone: Availability zone in which to launch instance.
         accessIPv4: The IPv4 access address for the server.
         accessIPv6: The IPv6 access address for the server.
+        min_count: Count of minimum number of instances to launch.
+        max_count: Count of maximum number of instances to launch.
         """
-
         post_body = {
             'name': name,
             'imageRef': image_ref,
             'flavorRef': flavor_ref,
+            'metadata': kwargs.get('meta'),
+            'personality': kwargs.get('personality'),
+            'adminPass': kwargs.get('adminPass'),
+            'security_groups': kwargs.get('security_groups'),
+            'networks': kwargs.get('networks'),
+            'user_data': kwargs.get('user_data'),
+            'availability_zone': kwargs.get('availability_zone'),
+            'accessIPv4': kwargs.get('accessIPv4'),
+            'accessIPv6': kwargs.get('accessIPv6'),
+            'min_count': kwargs.get('min_count'),
+            'max_count': kwargs.get('max_count'),
         }
-
-        if meta != None:
-            post_body['metadata'] = meta
-
-        if personality != None:
-            post_body['personality'] = personality
-
-        if adminPass != None:
-            post_body['adminPass'] = adminPass
-
-        if accessIPv4 != None:
-            post_body['accessIPv4'] = accessIPv4
-
-        if accessIPv6 != None:
-            post_body['accessIPv6'] = accessIPv6
 
         post_body = json.dumps({'server': post_body})
         resp, body = self.client.post('servers', post_body, self.headers)
