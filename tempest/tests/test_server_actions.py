@@ -1,12 +1,15 @@
-from nose.plugins.attrib import attr
-from tempest import openstack
-from tempest.common.utils.data_utils import rand_name
-import unittest2 as unittest
-import tempest.config
 import base64
+
+from nose.plugins.attrib import attr
+import unittest2 as unittest
+
+from tempest.common.utils.data_utils import rand_name
+import tempest.config
+from tempest import openstack
 
 
 class ServerActionsTest(unittest.TestCase):
+
     resize_available = tempest.config.TempestConfig().env.resize_available
 
     @classmethod
@@ -27,7 +30,7 @@ class ServerActionsTest(unittest.TestCase):
         self.client.wait_for_server_status(self.server['id'], 'ACTIVE')
 
     def tearDown(self):
-        self.client.delete_server(self.id)
+        self.client.delete_server(self.server['id'])
 
     @attr(type='smoke')
     def test_change_server_password(self):
@@ -54,14 +57,14 @@ class ServerActionsTest(unittest.TestCase):
     def test_rebuild_server(self):
         """ The server should be rebuilt using the provided image and data """
         meta = {'rebuild': 'server'}
-        name = rand_name('server')
+        new_name = rand_name('server')
         file_contents = 'Test server rebuild.'
         personality = [{'path': '/etc/rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
 
         resp, rebuilt_server = self.client.rebuild(self.server['id'],
                                                    self.image_ref_alt,
-                                                   name=name, meta=meta,
+                                                   name=new_name, meta=meta,
                                                    personality=personality,
                                                    adminPass='rebuild')
 
@@ -74,7 +77,7 @@ class ServerActionsTest(unittest.TestCase):
         self.client.wait_for_server_status(rebuilt_server['id'], 'ACTIVE')
         resp, server = self.client.get_server(rebuilt_server['id'])
         self.assertEqual(self.image_ref_alt, rebuilt_server['image']['id'])
-        self.assertEqual('rebuiltserver', rebuilt_server['name'])
+        self.assertEqual(new_name, rebuilt_server['name'])
 
     @attr(type='smoke')
     @unittest.skipIf(not resize_available, 'Resize not available.')

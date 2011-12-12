@@ -1,33 +1,17 @@
-import os
-
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.flavors_client import FlavorsClient
 from tempest.services.nova.json.servers_client import ServersClient
 from tempest.services.nova.json.limits_client import LimitsClient
-from tempest.common.utils import data_utils
 import tempest.config
 
 
 class Manager(object):
 
-    DEFAULT_CONFIG_DIR = os.path.join(
-        os.path.abspath(
-          os.path.dirname(
-            os.path.dirname(__file__))),
-        "etc")
-
-    DEFAULT_CONFIG_FILE = "tempest.conf"
-
     def __init__(self):
         """
         Top level manager for all Openstack APIs
         """
-        # Environment variables override defaults...
-        config_dir = os.environ.get('TEMPEST_CONFIG_DIR',
-            self.DEFAULT_CONFIG_DIR)
-        config_file = os.environ.get('TEMPEST_CONFIG',
-            self.DEFAULT_CONFIG_FILE)
-        self.config = tempest.config.TempestConfig(config_dir, config_file)
+        self.config = tempest.config.TempestConfig()
 
         if self.config.env.authentication == 'keystone_v2':
             self.servers_client = ServersClient(self.config,

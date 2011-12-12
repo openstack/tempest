@@ -208,7 +208,7 @@ class ServersClient(object):
                                       str(server_id), post_body,
                                       self.headers)
         body = json.loads(body)
-        return resp, body
+        return resp, body['server']
 
     def resize(self, server_id, flavor_ref):
         """Changes the flavor of a server."""

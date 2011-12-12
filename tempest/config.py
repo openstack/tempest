@@ -133,13 +133,23 @@ class EnvironmentConfig(object):
 class TempestConfig(object):
     """Provides OpenStack configuration information."""
 
-    def __init__(self, conf_dir, conf_file):
-        """
-        Initialize a configuration from a conf directory and conf file.
+    DEFAULT_CONFIG_DIR = os.path.join(
+        os.path.abspath(
+          os.path.dirname(
+            os.path.dirname(__file__))),
+        "etc")
 
-        :param conf_dir: Directory to look for config files
-        :param conf_file: Name of config file to use
-        """
+    DEFAULT_CONFIG_FILE = "tempest.conf"
+
+    def __init__(self):
+        """Initialize a configuration from a conf directory and conf file."""
+
+        # Environment variables override defaults...
+        conf_dir = os.environ.get('TEMPEST_CONFIG_DIR',
+            self.DEFAULT_CONFIG_DIR)
+        conf_file = os.environ.get('TEMPEST_CONFIG',
+            self.DEFAULT_CONFIG_FILE)
+
         path = os.path.join(conf_dir, conf_file)
 
         if not os.path.exists(path):
