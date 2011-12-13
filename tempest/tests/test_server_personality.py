@@ -3,7 +3,6 @@ from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 import base64
-import tempest.config
 import unittest2 as unittest
 
 

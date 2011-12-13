@@ -1,6 +1,5 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
-import tempest.config
 import unittest2 as unittest
 
 

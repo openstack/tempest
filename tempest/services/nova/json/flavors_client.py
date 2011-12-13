@@ -1,6 +1,5 @@
 from tempest.common import rest_client
 import json
-import time
 
 
 class FlavorsClient(object):
