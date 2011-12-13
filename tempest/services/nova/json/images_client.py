@@ -1,7 +1,6 @@
 from tempest.common import rest_client
 from tempest import exceptions
 import json
-import tempest.config
 import time
 
 

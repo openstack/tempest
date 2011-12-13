@@ -1,9 +1,7 @@
-from tempest.common import ssh
 from nose.plugins.attrib import attr
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 import base64
-import tempest.config
 import unittest2 as unittest
 
 
