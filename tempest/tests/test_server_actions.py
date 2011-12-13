@@ -24,34 +24,36 @@ class ServerActionsTest(unittest.TestCase):
 
     def setUp(self):
         self.name = rand_name('server')
-        resp, self.server = self.client.create_server(self.name,
-                                                      self.image_ref,
-                                                      self.flavor_ref)
-        self.client.wait_for_server_status(self.server['id'], 'ACTIVE')
+        resp, server = self.client.create_server(self.name,
+                                                 self.image_ref,
+                                                 self.flavor_ref)
+        self.server_id = server['id']
+
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     def tearDown(self):
-        self.client.delete_server(self.server['id'])
+        self.client.delete_server(self.server_id)
 
     @attr(type='smoke')
     def test_change_server_password(self):
         """The server's password should be set to the provided password"""
-        resp, body = self.client.change_password(self.server['id'], 'newpass')
+        resp, body = self.client.change_password(self.server_id, 'newpass')
         self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(self.server['id'], 'ACTIVE')
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='smoke')
     def test_reboot_server_hard(self):
         """ The server should be power cycled """
-        resp, body = self.client.reboot(self.server['id'], 'HARD')
+        resp, body = self.client.reboot(self.server_id, 'HARD')
         self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(self.server['id'], 'ACTIVE')
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='smoke')
     def test_reboot_server_soft(self):
         """The server should be signaled to reboot gracefully"""
-        resp, body = self.client.reboot(self.server['id'], 'SOFT')
+        resp, body = self.client.reboot(self.server_id, 'SOFT')
         self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(self.server['id'], 'ACTIVE')
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='smoke')
     def test_rebuild_server(self):
@@ -62,14 +64,14 @@ class ServerActionsTest(unittest.TestCase):
         personality = [{'path': '/etc/rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
 
-        resp, rebuilt_server = self.client.rebuild(self.server['id'],
+        resp, rebuilt_server = self.client.rebuild(self.server_id,
                                                    self.image_ref_alt,
                                                    name=new_name, meta=meta,
                                                    personality=personality,
                                                    adminPass='rebuild')
 
         #Verify the properties in the initial response are correct
-        self.assertEqual(self.server['id'], rebuilt_server['id'])
+        self.assertEqual(self.server_id, rebuilt_server['id'])
         self.assertEqual(self.image_ref_alt, rebuilt_server['image']['id'])
         self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
 
@@ -87,14 +89,14 @@ class ServerActionsTest(unittest.TestCase):
         the provided flavor
         """
 
-        resp, server = self.client.resize(self.id, self.flavor_ref_alt)
+        resp, server = self.client.resize(self.server_id, self.flavor_ref_alt)
         self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(self.id, 'VERIFY_RESIZE')
+        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
-        self.client.confirm_resize(self.id)
-        self.client.wait_for_server_status(self.id, 'ACTIVE')
+        self.client.confirm_resize(self.server_id)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        resp, server = self.client.get_server(self.id)
+        resp, server = self.client.get_server(self.server_id)
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
 
     @attr(type='smoke')
@@ -105,12 +107,12 @@ class ServerActionsTest(unittest.TestCase):
         values after a resize is reverted
         """
 
-        resp, server = self.client.resize(self.id, self.flavor_ref_alt)
+        resp, server = self.client.resize(self.server_id, self.flavor_ref_alt)
         self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(id, 'VERIFY_RESIZE')
+        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
-        self.client.revert_resize(self.id)
-        self.client.wait_for_server_status(id, 'ACTIVE')
+        self.client.revert_resize(self.server_id)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        resp, server = self.client.get_server(id)
+        resp, server = self.client.get_server(self.server_id)
         self.assertEqual(self.flavor_ref, server['flavor']['id'])

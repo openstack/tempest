@@ -226,7 +226,7 @@ class ServersClient(object):
     def confirm_resize(self, server_id):
         """Confirms the flavor change for a server"""
         post_body = {
-            'confirmResize': null
+            'confirmResize': None,
         }
 
         post_body = json.dumps(post_body)
@@ -237,7 +237,7 @@ class ServersClient(object):
     def revert_resize(self, server_id):
         """Reverts a server back to its original flavor"""
         post_body = {
-            'revertResize': null
+            'revertResize': None,
         }
 
         post_body = json.dumps(post_body)
