@@ -36,3 +36,13 @@ class FlavorsTest(unittest.TestCase):
         """The expected flavor details should be returned"""
         resp, flavor = self.client.get_flavor_details(self.flavor_id)
         self.assertEqual(self.flavor_id, str(flavor['id']))
+
+    @attr(type='negative')
+    def test_get_non_existant_flavor(self):
+        """flavor details are not returned for non existant flavors"""
+        try:
+            resp, flavor = self.client.get_flavor_details(999)
+        except:
+            pass
+        else:
+            self.fail('Should not get details for a non-existant flavor')
