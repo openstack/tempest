@@ -141,10 +141,13 @@ class ServersClient(object):
             server_status = body['status']
 
             if(server_status == 'ERROR'):
-                raise exceptions.BuildErrorException
+                message = 'Server %s entered ERROR status.' % server_id
+                raise exceptions.BuildErrorException(message)
 
             if (int(time.time()) - start >= self.build_timeout):
-                raise exceptions.TimeoutException
+                message = 'Server %s failed to reach ACTIVE status within the \
+                required time (%s s).' % (server_id, self.build_timeout)
+                raise exceptions.TimeoutException(message)
 
     def list_addresses(self, server_id):
         """Lists all addresses for a server"""
