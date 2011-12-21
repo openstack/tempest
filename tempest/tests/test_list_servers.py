@@ -2,6 +2,7 @@ import unittest2 as unittest
 
 import nose.plugins.skip
 
+from nose.plugins.attrib import attr
 from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
@@ -127,3 +128,13 @@ class ServerDetailsTest(unittest.TestCase):
         self.assertEqual(self.s1_name, server['name'])
         self.assertEqual(self.image_ref, server['image']['id'])
         self.assertEqual(str(self.flavor_ref), server['flavor']['id'])
+
+    @attr(type='negative')
+    def test_get_nonexistant_server_details(self):
+        """Negative test: GET on non existant server should not succeed"""
+        try:
+            resp, server = self.client.get_server(999)
+        except exceptions.NotFound:
+            pass
+        else:
+            self.fail('GET on non existant server should not succeed')
