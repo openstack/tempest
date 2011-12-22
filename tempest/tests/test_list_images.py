@@ -223,3 +223,13 @@ class ListImagesTest(unittest.TestCase):
         params = {'changes-since': self.image1['created']}
         resp, images = self.client.list_images_with_detail(params)
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
+
+    @attr(type='negative')
+    def test_get_nonexistant_image(self):
+        """Negative test: GET on non existant image should fail"""
+        try:
+            resp, image = self.client.get_image(999)
+        except:
+            pass
+        else:
+            self.fail('GET on non existant image should fail')
