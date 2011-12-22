@@ -1,3 +1,4 @@
+from nose.plugins.attrib import attr
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 import unittest2 as unittest
@@ -112,3 +113,65 @@ class ServerMetadataTest(unittest.TestCase):
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
+
+    @attr(type='negative')
+    def test_get_nonexistant_server_metadata_item(self):
+        """Negative test: GET on nonexistant server should not succeed"""
+        try:
+            resp, meta = self.client.get_server_metadata_item(999, 'test2')
+        except:
+            pass
+        else:
+            self.fail('GET on nonexistant server should not succeed')
+
+    @attr(type='negative')
+    def test_list_nonexistant_server_metadata(self):
+        """
+        Negative test:List metadata on a non existant server should not succeed
+        """
+        try:
+            resp, metadata = self.client.list_server_metadata(999)
+        except:
+            pass
+        else:
+            self.fail('List metadata on a non existant server should'
+                      'not succeed')
+
+    @attr(type='negative')
+    def test_set_nonexistant_server_metadata(self):
+        """
+        Negative test: Set metadata on a non existant server should not succeed
+        """
+        meta = {'meta1': 'data1'}
+        try:
+            resp, metadata = self.client.set_server_metadata(999, meta)
+        except:
+            pass
+        else:
+            self.fail('Set metadata on a non existant server should'
+                      'not succeed')
+
+    @attr(type='negative')
+    def test_update_nonexistant_server_metadata(self):
+        """
+        Negative test: An update should not happen for a nonexistant image
+        """
+        meta = {'key1': 'value1', 'key2': 'value2'}
+        try:
+            resp, metadata = self.client.update_server_metadata(999, meta)
+        except:
+            pass
+        else:
+            self.fail('An update should not happen for a nonexistant image')
+
+    @attr(type='negative')
+    def test_delete_nonexistant_server_metadata_item(self):
+        """
+        Negative test: Should not be able to delete metadata item from a
+        nonexistant server
+        """
+        meta = {'delkey': 'delvalue'}
+
+        #Delete the metadata item
+        resp, metadata = self.client.delete_server_metadata_item(999, 'delkey')
+        self.assertEqual(404, resp.status)
