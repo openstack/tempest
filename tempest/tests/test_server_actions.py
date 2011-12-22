@@ -2,7 +2,7 @@ import base64
 
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-
+from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 import tempest.config
 from tempest import openstack
@@ -116,3 +116,34 @@ class ServerActionsTest(unittest.TestCase):
 
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(self.flavor_ref, server['flavor']['id'])
+
+    @attr(type='negative')
+    def test_reboot_nonexistant_server_soft(self):
+        """
+        Negative Test: The server reboot on non existant server should return
+        an error
+        """
+        resp, body = self.client.reboot(999, 'SOFT')
+        self.assertEqual(404, resp.status)
+
+    @attr(type='negative')
+    def test_rebuild_nonexistant_server(self):
+        """
+        Negative test: The server rebuild for a non existing server should not
+        be allowed
+        """
+        meta = {'rebuild': 'server'}
+        new_name = rand_name('server')
+        file_contents = 'Test server rebuild.'
+        personality = [{'path': '/etc/rebuild.txt',
+                        'contents': base64.b64encode(file_contents)}]
+        try:
+            resp, rebuilt_server = self.client.rebuild(999,
+                                       self.image_ref_alt, name=new_name,
+                                       meta=meta, personality=personality,
+                                       adminPass='rebuild')
+        except exceptions.NotFound:
+            pass
+        else:
+            self.fail('The server rebuild for a non existing server should not'
+                      ' be allowed')
