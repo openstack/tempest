@@ -13,7 +13,7 @@ class NovaConfig(object):
         """Initialize a Nova-specific configuration object"""
         self.conf = conf
 
-    def get(self, item_name, default_value):
+    def get(self, item_name, default_value=None):
         try:
             return self.conf.get("nova", item_name)
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
@@ -22,7 +22,7 @@ class NovaConfig(object):
     @property
     def host(self):
         """Host IP for making Nova API requests. Defaults to '127.0.0.1'."""
-        return self.get("host", "127.0.1")
+        return self.get("host", "127.0.0.1")
 
     @property
     def port(self):
@@ -45,12 +45,18 @@ class NovaConfig(object):
         auth_url = data_utils.build_url(self.host,
                                         self.port,
                                         self.apiVer,
-                                        self.path)
+                                        self.path,
+                                        use_ssl=self.use_ssl)
         return auth_url
 
     def params(self):
         """Parameters to be passed with the API request"""
         return self.get("params", "")
+
+    @property
+    def use_ssl(self):
+        """Specifies if we are using https."""
+        return bool(self.get("use_ssl", False))
 
     @property
     def username(self):

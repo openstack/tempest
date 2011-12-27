@@ -6,10 +6,10 @@ def rand_name(name='test'):
     return name + str(random.randint(1, 99999999999))
 
 
-def build_url(host, port, apiVer=None, path=None, params=None, https=False):
+def build_url(host, port, apiVer=None, path=None, params=None, use_ssl=False):
     """Build the request URL from given host, port, path and parameters"""
 
-    if https:
+    if use_ssl:
         url = "https://" + host
     else:
         url = "http://" + host
