@@ -107,6 +107,13 @@ class RestClient(object):
 
         if resp.status in (500, 501):
             body = json.loads(body)
-            raise exceptions.ComputeFault(body['computeFault']['message'])
+            #I'm seeing both computeFault and cloudServersFault come back.
+            #Will file a bug to fix, but leave as is for now.
+
+            if 'cloudServersFault' in body:
+                message = body['cloudServersFault']['message']
+            else:
+                message = body['computeFault']['message']
+            raise exceptions.ComputeFault(message)
 
         return resp, body
