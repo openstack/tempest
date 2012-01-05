@@ -1,56 +1,64 @@
-class TimeoutException(Exception):
-    """Exception on timeout"""
-    def __init__(self, message):
-        self.message = message
+class TempestException(Exception):
+    """
+    Base Tempest Exception
+
+    To correctly use this class, inherit from it and define
+    a 'message' property. That message will get printf'd
+    with the keyword arguments provided to the constructor.
+    """
+    message = "An unknown exception occurred"
+
+    def __init__(self, *args, **kwargs):
+        try:
+            self._error_string = self.message % kwargs
+        except Exception:
+            # at least get the core message out if something happened
+            self._error_string = self.message
+        if len(args) > 0:
+            # If there is a non-kwarg parameter, assume it's the error
+            # message or reason description and tack it on to the end
+            # of the exception message
+            # Convert all arguments into their string representations...
+            args = ["%s" % arg for arg in args]
+            self._error_string = (self._error_string +
+                                  "\nDetails: %s" % '\n'.join(args))
 
     def __str__(self):
-        return repr(self.message)
+        return self._error_string
 
 
-class BuildErrorException(Exception):
-    """Server entered ERROR status unintentionally"""
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return repr(self.message)
+class NotFound(TempestException):
+    message = "Object not found"
 
 
-class BadRequest(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return repr(self.message)
+class TimeoutException(TempestException):
+    message = "Request timed out"
 
 
-class AuthenticationFailure(Exception):
-    msg = ("Authentication with user %(user)s and password "
-           "%(password)s failed.")
-
-    def __init__(self, **kwargs):
-        self.message = self.msg % kwargs
+class BuildErrorException(TempestException):
+    message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
-class EndpointNotFound(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return repr(self.message)
+class BadRequest(TempestException):
+    message = "Bad request"
 
 
-class OverLimit(Exception):
-    def __init__(self, message):
-        self.message = message
-
-    def __str__(self):
-        return repr(self.message)
+class AuthenticationFailure(TempestException):
+    message = ("Authentication with user %(user)s and password "
+               "%(password)s failed")
 
 
-class ComputeFault(Exception):
-    def __init__(self, message):
-        self.message = message
+class EndpointNotFound(TempestException):
+    message = "Endpoint not found"
 
-    def __str__(self):
-        return repr(self.message)
+
+class OverLimit(TempestException):
+    message = "Quota exceeded"
+
+
+class ComputeFault(TempestException):
+    message = "Got compute fault"
+
+
+class Duplicate(TempestException):
+    message = "An object with that identifier already exists"

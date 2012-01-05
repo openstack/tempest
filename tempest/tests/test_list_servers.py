@@ -1,7 +1,9 @@
 import unittest2 as unittest
 
-from tempest import exceptions
+import nose.plugins.skip
+
 from tempest import openstack
+from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests import utils
 
@@ -12,6 +14,7 @@ class ServerDetailsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.servers_client
+        cls.images_client = cls.os.images_client
         cls.config = cls.os.config
         cls.image_ref = cls.config.env.image_ref
         cls.flavor_ref = cls.config.env.flavor_ref
@@ -27,6 +30,24 @@ class ServerDetailsTest(unittest.TestCase):
             cls.multiple_images = True
         else:
             cls.image_ref_alt = cls.image_ref
+
+        # Do some sanity checks here. If one of the images does
+        # not exist, or image_ref and image_ref_alt are the same,
+        # fail early since the tests won't work...
+        if cls.image_ref != cls.image_ref_alt:
+            cls.image_ref_alt_different = True
+
+        try:
+            cls.images_client.get_image(cls.image_ref)
+        except exceptions.NotFound:
+            raise RuntimeError("Image %s (image_ref) was not found!" %
+                               cls.image_ref)
+
+        try:
+            cls.images_client.get_image(cls.image_ref_alt)
+        except exceptions.NotFound:
+            raise RuntimeError("Image %s (image_ref_alt) was not found!" %
+                               cls.image_ref_alt)
 
         cls.s1_name = rand_name('server')
         resp, server = cls.client.create_server(cls.s1_name, cls.image_ref,

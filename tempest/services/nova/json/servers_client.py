@@ -55,6 +55,7 @@ class ServersClient(object):
 
         post_body = json.dumps({'server': post_body})
         resp, body = self.client.post('servers', post_body, self.headers)
+
         body = json.loads(body)
         return resp, body['server']
 
@@ -140,11 +141,10 @@ class ServersClient(object):
             resp, body = self.get_server(server_id)
             server_status = body['status']
 
-            if(server_status == 'ERROR'):
-                message = 'Server %s entered ERROR status.' % server_id
-                raise exceptions.BuildErrorException(message)
+            if server_status == 'ERROR':
+                raise exceptions.BuildErrorException(server_id=server_id)
 
-            if (int(time.time()) - start >= self.build_timeout):
+            if int(time.time()) - start >= self.build_timeout:
                 message = 'Server %s failed to reach ACTIVE status within the \
                 required time (%s s).' % (server_id, self.build_timeout)
                 raise exceptions.TimeoutException(message)

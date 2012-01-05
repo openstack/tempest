@@ -1,6 +1,9 @@
-from nose.plugins.attrib import attr
-from tempest import openstack
 import unittest2 as unittest
+
+from nose.plugins.attrib import attr
+
+from tempest import exceptions
+from tempest import openstack
 
 
 class FlavorsTest(unittest.TestCase):
@@ -40,9 +43,5 @@ class FlavorsTest(unittest.TestCase):
     @attr(type='negative')
     def test_get_non_existant_flavor(self):
         """flavor details are not returned for non existant flavors"""
-        try:
-            resp, flavor = self.client.get_flavor_details(999)
-        except:
-            pass
-        else:
-            self.fail('Should not get details for a non-existant flavor')
+        self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
+                          999)

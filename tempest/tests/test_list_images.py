@@ -1,7 +1,10 @@
+import unittest2 as unittest
+
 from nose.plugins.attrib import attr
+
+from tempest import exceptions
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
-import unittest2 as unittest
 
 
 def _parse_image_id(image_ref):
@@ -32,7 +35,7 @@ class ListImagesTest(unittest.TestCase):
                                                               cls.flavor_ref)
         cls.servers_client.wait_for_server_status(cls.server2['id'], 'ACTIVE')
 
-        #Create images to be used in the filter tests
+        # Create images to be used in the filter tests
         image1_name = rand_name('image')
         resp, body = cls.client.create_image(cls.server1['id'], image1_name)
         cls.image1_id = _parse_image_id(resp['location'])
@@ -54,11 +57,25 @@ class ListImagesTest(unittest.TestCase):
         cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
         resp, cls.image3 = cls.client.get_image(cls.image3_id)
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.delete_image(cls.image1_id)
+        cls.client.delete_image(cls.image2_id)
+        cls.client.delete_image(cls.image3_id)
+        cls.servers_client.delete_server(cls.server1['id'])
+        cls.servers_client.delete_server(cls.server2['id'])
+
     @attr(type='smoke')
     def test_get_image(self):
         """Returns the correct details for a single image"""
         resp, image = self.client.get_image(self.image_ref)
         self.assertEqual(self.image_ref, image['id'])
+
+    @attr(type='negative')
+    def test_get_image_not_existing(self):
+        """Check raises a NotFound"""
+        self.assertRaises(exceptions.NotFound, self.client.get_image,
+                          "nonexistingimageid")
 
     @attr(type='smoke')
     def test_list_images(self):
@@ -91,13 +108,16 @@ class ListImagesTest(unittest.TestCase):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
+    @unittest.skip('Skipping until Nova Bug 912837 is fixed')
     @attr(type='positive')
     def test_list_images_filter_by_server_id(self):
         """The images should contain images filtered by server id"""
         params = {'server': self.server1['id']}
         resp, images = self.client.list_images(params)
 
-        self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
+        self.assertTrue(any([i for i in images if i['id'] == self.image1_id]),
+                        "Failed to find image %s in images. Got images %s" %
+                        (self.image1_id, images))
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
