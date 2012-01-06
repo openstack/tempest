@@ -1,6 +1,9 @@
+import unittest2 as unittest
+
+from tempest import exceptions
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
-import unittest2 as unittest
+from tempest.tests import utils
 
 
 class ServerDetailsTest(unittest.TestCase):
@@ -14,6 +17,16 @@ class ServerDetailsTest(unittest.TestCase):
         cls.flavor_ref = cls.config.env.flavor_ref
         cls.image_ref_alt = cls.config.env.image_ref_alt
         cls.flavor_ref_alt = cls.config.env.flavor_ref_alt
+
+        # Check to see if the alternate image ref actually exists...
+        images_client = cls.os.images_client
+        resp, images = images_client.list_images()
+
+        if any([image for image in images
+                if image['id'] == cls.image_ref_alt]):
+            cls.multiple_images = True
+        else:
+            cls.image_ref_alt = cls.image_ref
 
         cls.s1_name = rand_name('server')
         resp, server = cls.client.create_server(cls.s1_name, cls.image_ref,
@@ -48,6 +61,7 @@ class ServerDetailsTest(unittest.TestCase):
         self.assertTrue(self.s2 in servers)
         self.assertTrue(self.s3 in servers)
 
+    @utils.skip_unless_attr('multiple_images', 'Only one image found')
     def test_list_servers_detailed_filter_by_image(self):
         """Filter the detailed list of servers by image"""
         params = {'image': self.image_ref}
