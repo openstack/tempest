@@ -1,3 +1,5 @@
+import tempest.config
+from tempest.services.image import service as image_service
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.flavors_client import FlavorsClient
 from tempest.services.nova.json.servers_client import ServersClient
@@ -74,3 +76,16 @@ class Manager(object):
                                               self.config.nova.username,
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url)
+
+
+class ServiceManager(object):
+
+    """
+    Top-level object housing clients for OpenStack APIs
+    """
+
+    def __init__(self):
+        self.config = tempest.config.TempestConfig()
+        self.services = {}
+        self.services['image'] = image_service.Service(self.config)
+        self.images = self.services['image']

@@ -135,8 +135,7 @@ def main():
     if options.verbose:
         print "Found base image with UUID %s" % conf_settings['base_image_uuid']
 
-    tempest_conf = """
-[nova]
+    tempest_conf = """[nova]
 host=%(service_host)s
 port=%(service_port)s
 apiVer=%(identity_api_version)s
@@ -147,6 +146,16 @@ tenant_name=%(user)s
 ssh_timeout=300
 build_interval=10
 build_timeout=600
+
+[image]
+host = %(service_host)s
+port = 9292
+username = %(user)s
+password = %(password)s
+tenant = %(user)s
+auth_url = http://127.0.0.1:5000/v2.0/tokens/
+strategy = keystone
+service_token = servicetoken
 
 [environment]
 image_ref=%(base_image_uuid)s

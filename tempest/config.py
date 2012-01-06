@@ -136,6 +136,62 @@ class EnvironmentConfig(object):
         return self.get("authentication", 'keystone')
 
 
+class ImagesConfig(object):
+    """
+    Provides configuration information for connecting to an
+    OpenStack Images service.
+    """
+
+    def __init__(self, conf):
+        self.conf = conf
+
+    def get(self, item_name, default_value=None):
+        try:
+            return self.conf.get("image", item_name)
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            return default_value
+
+    @property
+    def host(self):
+        """Host IP for making Images API requests. Defaults to '127.0.0.1'."""
+        return self.get("host", "127.0.0.1")
+
+    @property
+    def port(self):
+        """Listen port of the Images service."""
+        return int(self.get("port", "9292"))
+
+    @property
+    def api_version(self):
+        """Version of the API"""
+        return self.get("api_version", "1")
+
+    @property
+    def username(self):
+        """Username to use for Images API requests. Defaults to 'admin'."""
+        return self.get("user", "admin")
+
+    @property
+    def password(self):
+        """Password for user"""
+        return self.get("password", "")
+
+    @property
+    def tenant(self):
+        """Tenant to use for Images API requests. Defaults to 'admin'."""
+        return self.get("tenant", "admin")
+
+    @property
+    def service_token(self):
+        """Token to use in querying the API. Default: None"""
+        return self.get("service_token")
+
+    @property
+    def auth_url(self):
+        """Optional URL to auth service. Will be discovered if None"""
+        return self.get("auth_url")
+
+
 class TempestConfig(object):
     """Provides OpenStack configuration information."""
 
@@ -165,6 +221,7 @@ class TempestConfig(object):
         self._conf = self.load_config(path)
         self.nova = NovaConfig(self._conf)
         self.env = EnvironmentConfig(self._conf)
+        self.images = ImagesConfig(self._conf)
 
     def load_config(self, path):
         """Read configuration from given path and return a config object."""
