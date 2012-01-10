@@ -37,7 +37,7 @@ class ImagesTest(unittest.TestCase):
                                                          self.flavor_ref)
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
-        #Create a new image
+        # Create a new image
         name = rand_name('image')
         meta = {'image_type': 'test'}
         resp, body = self.client.create_image(server['id'], name, meta)
@@ -45,16 +45,42 @@ class ImagesTest(unittest.TestCase):
         self.client.wait_for_image_resp_code(image_id, 200)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
-        #Verify the image was created correctly
+        # Verify the image was created correctly
         resp, image = self.client.get_image(image_id)
         self.assertEqual(name, image['name'])
         self.assertEqual('test', image['metadata']['image_type'])
 
-        #Verify minRAM and minDisk values are the same as the original image
+        # Verify minRAM and minDisk values are the same as the original image
         resp, original_image = self.client.get_image(self.image_ref)
         self.assertEqual(original_image['minRam'], image['minRam'])
         self.assertEqual(original_image['minDisk'], image['minDisk'])
 
-        #Teardown
+        # Teardown
         self.client.delete_image(image['id'])
         self.servers_client.delete_server(server['id'])
+
+    @attr(type='negative')
+    def test_create_image_from_deleted_server(self):
+        """An image should not be created as the server instance is removed """
+        server_name = rand_name('server')
+        resp, server = self.servers_client.create_server(server_name,
+                                                         self.image_ref,
+                                                         self.flavor_ref)
+        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+
+        # Delete server before trying to create server
+        self.servers_client.delete_server(server['id'])
+
+        try:
+            # Create a new image after server is deleted
+            name = rand_name('image')
+            meta = {'image_type': 'test'}
+            resp, body = self.client.create_image(server['id'], name, meta)
+
+        except:
+            pass
+
+        else:
+            self.fail("should not create snapshot from deleted instance")
+        # Delete Image in case the test filed and image created
+        self.client.delete_image(image['id'])
