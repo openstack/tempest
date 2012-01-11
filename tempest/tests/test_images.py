@@ -61,7 +61,7 @@ class ImagesTest(unittest.TestCase):
 
     @attr(type='negative')
     def test_create_image_from_deleted_server(self):
-        """An image should not be created as the server instance is removed """
+        """An image should not be created if the server instance is removed """
         server_name = rand_name('server')
         resp, server = self.servers_client.create_server(server_name,
                                                          self.image_ref,
@@ -81,6 +81,6 @@ class ImagesTest(unittest.TestCase):
             pass
 
         else:
-            self.fail("should not create snapshot from deleted instance")
-        # Delete Image in case the test filed and image created
-        self.client.delete_image(image['id'])
+            self.fail("Should not create snapshot from deleted instance!")
+            image_id = _parse_image_id(resp.['location'])
+            self.client.delete_image(image_id)

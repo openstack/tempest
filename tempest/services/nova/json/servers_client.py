@@ -258,7 +258,6 @@ class ServersClient(object):
         post_body = json.dumps(post_body)
         resp, body = self.client.post('servers/%s/action' %
                                       str(server_id), post_body, self.headers)
-        body = json.loads(body)
         return resp, body
 
     def list_server_metadata(self, server_id):
