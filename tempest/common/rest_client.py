@@ -7,12 +7,13 @@ from tempest import exceptions
 
 class RestClient(object):
 
-    def __init__(self, config, user, key, auth_url, tenant_name=None):
+    def __init__(self, config, user, key, auth_url, service, tenant_name=None):
         self.config = config
         if self.config.env.authentication == 'keystone_v2':
             self.token, self.base_url = self.keystone_v2_auth(user,
                                                               key,
                                                               auth_url,
+                                                              service,
                                                               tenant_name)
         else:
             self.token, self.base_url = self.basic_auth(user,
@@ -35,7 +36,7 @@ class RestClient(object):
         except:
             raise
 
-    def keystone_v2_auth(self, user, api_key, auth_url, tenant_name):
+    def keystone_v2_auth(self, user, api_key, auth_url, service, tenant_name):
         """
         Provides authentication via Keystone 2.0
         """
@@ -59,18 +60,25 @@ class RestClient(object):
             try:
                 auth_data = json.loads(body)['access']
                 token = auth_data['token']['id']
-                endpoints = auth_data['serviceCatalog'][0]['endpoints']
-                mgmt_url = endpoints[0]['publicURL']
-
-                #TODO (dwalleck): This is a horrible stopgap.
-                #Need to join strings more cleanly
-                temp = mgmt_url.rsplit('/')
-                service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
-                management_url = service_url + tenant_name
-                return token, management_url
             except Exception, e:
-                print "Failed to authenticate user: %s" % e
+                print "Failed to obtain token for user: %s" % e
                 raise
+
+            mgmt_url = None
+            for ep in auth_data['serviceCatalog']:
+                if ep["name"] == service:
+                    mgmt_url = ep['endpoints'][0]['publicURL']
+                    break
+
+            if mgmt_url == None:
+                raise exceptions.EndpointNotFound(service)
+
+            #TODO (dwalleck): This is a horrible stopgap.
+            #Need to join strings more cleanly
+            temp = mgmt_url.rsplit('/')
+            service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
+            management_url = service_url + tenant_name
+            return token, management_url
         elif resp.status == 401:
             raise exceptions.AuthenticationFailure(user=user, password=api_key)
 
