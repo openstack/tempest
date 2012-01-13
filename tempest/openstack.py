@@ -3,6 +3,8 @@ from tempest.services.nova.json.flavors_client import FlavorsClient
 from tempest.services.nova.json.servers_client import ServersClient
 from tempest.services.nova.json.limits_client import LimitsClient
 from tempest.services.nova.json.extensions_client import ExtensionsClient
+from tempest.services.nova.json.extensions_client import SecurityGroupsClient
+
 import tempest.config
 
 
@@ -40,7 +42,11 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url,
                                               self.config.nova.tenant_name)
-
+            self.security_groups_client = SecurityGroupsClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.api_key,
+                                              self.config.nova.auth_url,
+                                              self.config.nova.tenant_name)
         else:
             #Assuming basic/native authentication
             self.servers_client = ServersClient(self.config,
@@ -60,6 +66,10 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url)
             self.extensions_client = ExtensionsClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.api_key,
+                                              self.config.nova.auth_url)
+            self.security_groups_client = SecurityGroupsClient(self.config,
                                               self.config.nova.username,
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url)
