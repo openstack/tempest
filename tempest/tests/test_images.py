@@ -81,6 +81,8 @@ class ImagesTest(unittest.TestCase):
             pass
 
         else:
-            self.fail("Should not create snapshot from deleted instance!")
-            image_id = _parse_image_id(resp.['location'])
+            image_id = _parse_image_id(resp['location'])
+            self.client.wait_for_image_resp_code(image_id, 200)
+            self.client.wait_for_image_status(image_id, 'ACTIVE')
             self.client.delete_image(image_id)
+            self.fail("Should not create snapshot from deleted instance!")
