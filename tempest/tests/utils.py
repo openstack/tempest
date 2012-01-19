@@ -62,7 +62,7 @@ class skip_unless_attr(object):
                                "or False") % attr
 
     def __call__(self, func):
-        def _skipper(*args, **kwargs):
+        def _skipper(*args, **kw):
             """Wrapped skipper function."""
             testobj = args[0]
             if not getattr(testobj, self.attr, False):

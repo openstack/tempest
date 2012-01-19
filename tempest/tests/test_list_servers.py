@@ -25,18 +25,15 @@ class ServerDetailsTest(unittest.TestCase):
         images_client = cls.os.images_client
         resp, images = images_client.list_images()
 
-        if any([image for image in images
-                if image['id'] == cls.image_ref_alt]):
+        if cls.image_ref != cls.image_ref_alt and \
+            any([image for image in images
+                 if image['id'] == cls.image_ref_alt]):
             cls.multiple_images = True
         else:
             cls.image_ref_alt = cls.image_ref
 
         # Do some sanity checks here. If one of the images does
-        # not exist, or image_ref and image_ref_alt are the same,
-        # fail early since the tests won't work...
-        if cls.image_ref != cls.image_ref_alt:
-            cls.image_ref_alt_different = True
-
+        # not exist, fail early since the tests won't work...
         try:
             cls.images_client.get_image(cls.image_ref)
         except exceptions.NotFound:
