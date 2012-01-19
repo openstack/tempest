@@ -8,7 +8,7 @@ from tempest.services.nova.json.extensions_client import ExtensionsClient
 from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
 
-import tempest.config
+from tempest.services.nova.json.keypairs_client import KeyPairsClient
 
 
 class Manager(object):
@@ -45,6 +45,11 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url,
                                               self.config.nova.tenant_name)
+            self.keypairs_client = KeyPairsClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.api_key,
+                                              self.config.nova.auth_url,
+                                              self.config.nova.tenant_name)
             self.security_groups_client = SecurityGroupsClient(self.config,
                                               self.config.nova.username,
                                               self.config.nova.api_key,
@@ -73,6 +78,10 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url)
             self.security_groups_client = SecurityGroupsClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.api_key,
+                                              self.config.nova.auth_url)
+            self.keypairs_client = KeyPairsClient(self.config,
                                               self.config.nova.username,
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url)
