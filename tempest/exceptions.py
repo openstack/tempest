@@ -52,6 +52,11 @@ class EndpointNotFound(TempestException):
     message = "Endpoint not found"
 
 
+class RateLimitExceeded(TempestException):
+    message = ("Rate limit exceeded.\nMessage: %(message)s\n"
+               "Details: %(details)s")
+
+
 class OverLimit(TempestException):
     message = "Quota exceeded"
 
