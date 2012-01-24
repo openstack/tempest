@@ -20,7 +20,7 @@ class FlavorsClient(object):
 
         resp, body = self.client.get(url)
         body = json.loads(body)
-        return resp, body
+        return resp, body['flavors']
 
     def list_flavors_with_detail(self, params=None):
         url = 'flavors/detail'
@@ -33,7 +33,7 @@ class FlavorsClient(object):
 
         resp, body = self.client.get(url)
         body = json.loads(body)
-        return resp, body
+        return resp, body['flavors']
 
     def get_flavor_details(self, flavor_id):
         resp, body = self.client.get("flavors/%s" % str(flavor_id))
