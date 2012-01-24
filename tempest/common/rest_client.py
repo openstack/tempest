@@ -68,6 +68,11 @@ class RestClient(object):
             for ep in auth_data['serviceCatalog']:
                 if ep["name"] == service:
                     mgmt_url = ep['endpoints'][0]['publicURL']
+                    # See LP#920817. The tenantId is *supposed*
+                    # to be returned for each endpoint accorsing to the
+                    # Keystone spec. But... it isn't, so we have to parse
+                    # the tenant ID out of hte public URL :(
+                    tenant_id = mgmt_url.split('/')[-1]
                     break
 
             if mgmt_url == None:
@@ -77,7 +82,7 @@ class RestClient(object):
             #Need to join strings more cleanly
             temp = mgmt_url.rsplit('/')
             service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
-            management_url = service_url + tenant_name
+            management_url = service_url + tenant_id
             return token, management_url
         elif resp.status == 401:
             raise exceptions.AuthenticationFailure(user=user, password=api_key)
