@@ -1,13 +1,15 @@
 import json
-
 import httplib2
-
+import logging
+import sys
 from tempest import exceptions
 
 
 class RestClient(object):
 
     def __init__(self, config, user, key, auth_url, service, tenant_name=None):
+        self.log = logging.getLogger(__name__)
+        self.log.setLevel(logging.ERROR)
         self.config = config
         if self.config.env.authentication == 'keystone_v2':
             self.token, self.base_url = self.keystone_v2_auth(user,
@@ -99,6 +101,12 @@ class RestClient(object):
     def put(self, url, body, headers):
         return self.request('PUT', url, headers, body)
 
+    def _log(self, req_url, body, resp, resp_body):
+        self.log.error('Request URL: ' + req_url)
+        self.log.error('Request Body: ' + str(body))
+        self.log.error('Response Headers: ' + str(resp))
+        self.log.error('Response Body: ' + str(resp_body))
+
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
 
@@ -108,34 +116,38 @@ class RestClient(object):
         headers['X-Auth-Token'] = self.token
 
         req_url = "%s/%s" % (self.base_url, url)
-        resp, body = self.http_obj.request(req_url, method,
+        resp, resp_body = self.http_obj.request(req_url, method,
                                            headers=headers, body=body)
 
         if resp.status == 404:
-            raise exceptions.NotFound(body)
+            self._log(req_url, body, resp, resp_body)
+            raise exceptions.NotFound(resp_body)
 
         if resp.status == 400:
-            body = json.loads(body)
-            raise exceptions.BadRequest(body['badRequest']['message'])
+            resp_body = json.loads(resp_body)
+            self._log(req_url, body, resp, resp_body)
+            raise exceptions.BadRequest(resp_body['badRequest']['message'])
 
         if resp.status == 413:
-            body = json.loads(body)
-            if 'overLimit' in body:
-                raise exceptions.OverLimit(body['overLimit']['message'])
+            resp_body = json.loads(resp_body)
+            self._log(req_url, body, resp, resp_body)
+            if 'overLimit' in resp_body:
+                raise exceptions.OverLimit(resp_body['overLimit']['message'])
             else:
                 raise exceptions.RateLimitExceeded(
-                    message=body['overLimitFault']['message'],
-                    details=body['overLimitFault']['details'])
+                    message=resp_body['overLimitFault']['message'],
+                    details=resp_body['overLimitFault']['details'])
 
         if resp.status in (500, 501):
-            body = json.loads(body)
+            resp_body = json.loads(resp_body)
+            self._log(req_url, body, resp, resp_body)
             #I'm seeing both computeFault and cloudServersFault come back.
             #Will file a bug to fix, but leave as is for now.
 
-            if 'cloudServersFault' in body:
-                message = body['cloudServersFault']['message']
+            if 'cloudServersFault' in resp_body:
+                message = resp_body['cloudServersFault']['message']
             else:
-                message = body['computeFault']['message']
+                message = resp_body['computeFault']['message']
             raise exceptions.ComputeFault(message)
 
-        return resp, body
+        return resp, resp_body
