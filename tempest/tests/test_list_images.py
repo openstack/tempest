@@ -25,14 +25,13 @@ class ListImagesTest(unittest.TestCase):
 
         name = rand_name('server')
         resp, cls.server1 = cls.servers_client.create_server(name,
-                                                              cls.image_ref,
-                                                              cls.flavor_ref)
-        cls.servers_client.wait_for_server_status(cls.server1['id'], 'ACTIVE')
-
+                                                             cls.image_ref,
+                                                             cls.flavor_ref)
         name = rand_name('server')
         resp, cls.server2 = cls.servers_client.create_server(name,
-                                                              cls.image_ref,
-                                                              cls.flavor_ref)
+                                                             cls.image_ref,
+                                                             cls.flavor_ref)
+        cls.servers_client.wait_for_server_status(cls.server1['id'], 'ACTIVE')
         cls.servers_client.wait_for_server_status(cls.server2['id'], 'ACTIVE')
 
         # Create images to be used in the filter tests
@@ -43,19 +42,22 @@ class ListImagesTest(unittest.TestCase):
         cls.client.wait_for_image_status(cls.image1_id, 'ACTIVE')
         resp, cls.image1 = cls.client.get_image(cls.image1_id)
 
-        image2_name = rand_name('image')
-        resp, body = cls.client.create_image(cls.server1['id'], image2_name)
-        cls.image2_id = _parse_image_id(resp['location'])
-        cls.client.wait_for_image_resp_code(cls.image2_id, 200)
-        cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
-        resp, cls.image2 = cls.client.get_image(cls.image2_id)
-
+        # Servers have a hidden property for when they are being imaged
+        # Performing back-to-back create image calls on a single
+        # server will sometimes cause failures
         image3_name = rand_name('image')
         resp, body = cls.client.create_image(cls.server2['id'], image3_name)
         cls.image3_id = _parse_image_id(resp['location'])
         cls.client.wait_for_image_resp_code(cls.image3_id, 200)
         cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
         resp, cls.image3 = cls.client.get_image(cls.image3_id)
+
+        image2_name = rand_name('image')
+        resp, body = cls.client.create_image(cls.server1['id'], image2_name)
+        cls.image2_id = _parse_image_id(resp['location'])
+        cls.client.wait_for_image_resp_code(cls.image2_id, 200)
+        cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
+        resp, cls.image2 = cls.client.get_image(cls.image2_id)
 
     @classmethod
     def tearDownClass(cls):
@@ -158,13 +160,6 @@ class ListImagesTest(unittest.TestCase):
         params = {'changes-since': self.image3['created']}
         resp, images = self.client.list_images(params)
         found = any([i for i in images if i['id'] == self.image3_id])
-        self.assertTrue(found)
-
-    @attr(type='smoke')
-    def test_list_images_with_detail(self):
-        """Detailed list of all images should contain the expected image"""
-        resp, images = self.client.list_images_with_detail()
-        found = any([i for i in images if i['id'] == self.image_ref])
         self.assertTrue(found)
 
     @attr(type='smoke')
