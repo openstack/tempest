@@ -2,7 +2,6 @@ import unittest2 as unittest
 
 import nose.plugins.skip
 
-from nose.plugins.attrib import attr
 from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
@@ -48,28 +47,89 @@ class ServerDetailsTest(unittest.TestCase):
                                cls.image_ref_alt)
 
         cls.s1_name = rand_name('server')
-        resp, server = cls.client.create_server(cls.s1_name, cls.image_ref,
+        resp, cls.s1 = cls.client.create_server(cls.s1_name, cls.image_ref,
                                                 cls.flavor_ref)
-        cls.client.wait_for_server_status(server['id'], 'ACTIVE')
-        resp, cls.s1 = cls.client.get_server(server['id'])
-
         cls.s2_name = rand_name('server')
-        resp, server = cls.client.create_server(cls.s2_name, cls.image_ref_alt,
+        resp, cls.s2 = cls.client.create_server(cls.s2_name, cls.image_ref_alt,
                                                 cls.flavor_ref)
-        cls.client.wait_for_server_status(server['id'], 'ACTIVE')
-        resp, cls.s2 = cls.client.get_server(server['id'])
-
         cls.s3_name = rand_name('server')
-        resp, server = cls.client.create_server(cls.s3_name, cls.image_ref,
+        resp, cls.s3 = cls.client.create_server(cls.s3_name, cls.image_ref,
                                                 cls.flavor_ref_alt)
-        cls.client.wait_for_server_status(server['id'], 'ACTIVE')
-        resp, cls.s3 = cls.client.get_server(server['id'])
+
+        cls.client.wait_for_server_status(cls.s1['id'], 'ACTIVE')
+        resp, cls.s1 = cls.client.get_server(cls.s1['id'])
+        cls.client.wait_for_server_status(cls.s2['id'], 'ACTIVE')
+        resp, cls.s2 = cls.client.get_server(cls.s2['id'])
+        cls.client.wait_for_server_status(cls.s3['id'], 'ACTIVE')
+        resp, cls.s3 = cls.client.get_server(cls.s3['id'])
+
+        # The list server call returns minimal results, so we need
+        # a less detailed version of each server also
+        cls.s1_min = cls._convert_to_min_details(cls.s1)
+        cls.s2_min = cls._convert_to_min_details(cls.s2)
+        cls.s3_min = cls._convert_to_min_details(cls.s3)
 
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.s1['id'])
         cls.client.delete_server(cls.s2['id'])
         cls.client.delete_server(cls.s3['id'])
+
+    def test_list_servers(self):
+        """Return a list of all servers"""
+        resp, body = self.client.list_servers()
+        servers = body['servers']
+
+        self.assertTrue(self.s1_min in servers)
+        self.assertTrue(self.s2_min in servers)
+        self.assertTrue(self.s3_min in servers)
+
+    @utils.skip_unless_attr('multiple_images', 'Only one image found')
+    def test_list_servers_filter_by_image(self):
+        """Filter the list of servers by image"""
+        params = {'image': self.image_ref}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertTrue(self.s1_min in servers)
+        self.assertTrue(self.s2_min not in servers)
+        self.assertTrue(self.s3_min in servers)
+
+    def test_list_servers_filter_by_flavor(self):
+        """Filter the list of servers by flavor"""
+        params = {'flavor': self.flavor_ref_alt}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertTrue(self.s1_min not in servers)
+        self.assertTrue(self.s2_min not in servers)
+        self.assertTrue(self.s3_min in servers)
+
+    def test_list_servers_filter_by_server_name(self):
+        """Filter the list of servers by server name"""
+        params = {'name': self.s1_name}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertTrue(self.s1_min in servers)
+        self.assertTrue(self.s2_min not in servers)
+        self.assertTrue(self.s3_min not in servers)
+
+    def test_list_servers_filter_by_server_status(self):
+        """Filter the list of servers by server status"""
+        params = {'status': 'active'}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertTrue(self.s1_min in servers)
+        self.assertTrue(self.s2_min in servers)
+        self.assertTrue(self.s3_min in servers)
+
+    def test_list_servers_limit_results(self):
+        """Verify only the expected number of servers are returned"""
+        params = {'limit': 1}
+        resp, servers = self.client.list_servers_with_detail(params)
+        self.assertEqual(1, len(servers['servers']))
 
     def test_list_servers_with_detail(self):
         """ Return a detailed list of all servers """
@@ -121,6 +181,12 @@ class ServerDetailsTest(unittest.TestCase):
         self.assertTrue(self.s2 in servers)
         self.assertTrue(self.s3 in servers)
 
+    def test_list_servers_detailed_limit_results(self):
+        """Verify only the expected number of detailed results are returned"""
+        params = {'limit': 1}
+        resp, servers = self.client.list_servers_with_detail(params)
+        self.assertEqual(1, len(servers['servers']))
+
     def test_get_server_details(self):
         """Return the full details of a single server"""
         resp, server = self.client.get_server(self.s1['id'])
@@ -129,12 +195,10 @@ class ServerDetailsTest(unittest.TestCase):
         self.assertEqual(self.image_ref, server['image']['id'])
         self.assertEqual(str(self.flavor_ref), server['flavor']['id'])
 
-    @attr(type='negative')
-    def test_get_nonexistant_server_details(self):
-        """Negative test: GET on non existant server should not succeed"""
-        try:
-            resp, server = self.client.get_server(999)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('GET on non existant server should not succeed')
+    @classmethod
+    def _convert_to_min_details(self, server):
+        min_detail = {}
+        min_detail['name'] = server['name']
+        min_detail['links'] = server['links']
+        min_detail['id'] = server['id']
+        return min_detail
