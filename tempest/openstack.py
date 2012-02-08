@@ -7,6 +7,7 @@ from tempest.services.nova.json.limits_client import LimitsClient
 from tempest.services.nova.json.extensions_client import ExtensionsClient
 from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
+from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
 
 from tempest.services.nova.json.keypairs_client import KeyPairsClient
 
@@ -55,6 +56,11 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url,
                                               self.config.nova.tenant_name)
+            self.floating_ips_client = FloatingIPsClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.api_key,
+                                              self.config.nova.auth_url,
+                                              self.config.nova.tenant_name)
         else:
             #Assuming basic/native authentication
             self.servers_client = ServersClient(self.config,
@@ -82,6 +88,10 @@ class Manager(object):
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url)
             self.keypairs_client = KeyPairsClient(self.config,
+                                              self.config.nova.username,
+                                              self.config.nova.api_key,
+                                              self.config.nova.auth_url)
+            self.floating_ips_client = FloatingIPsClient(self.config,
                                               self.config.nova.username,
                                               self.config.nova.api_key,
                                               self.config.nova.auth_url)
