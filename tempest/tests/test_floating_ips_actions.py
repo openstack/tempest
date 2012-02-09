@@ -94,7 +94,8 @@ class FloatingIPsTest(unittest.TestCase):
         self.assertEqual(202, resp.status)
         #Disassociation of floating IP that was associated in this method
         resp, body = \
-            self.client.disassociate_floating_ip_from_server(floating_ip_id)
+            self.client.disassociate_floating_ip_from_server(
+                                                           self.floating_ip_id)
 
     @attr(type='positive')
     def test_dissociate_floating_ip(self):
