@@ -54,6 +54,7 @@ class ServerMetadataTest(unittest.TestCase):
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         self.assertEqual(resp_metadata, req_metadata)
 
+    @attr(type='negative')
     def test_server_create_metadata_key_too_long(self):
         """
         Attempt to start a server with a meta-data key that is > 255 characters
@@ -63,10 +64,14 @@ class ServerMetadataTest(unittest.TestCase):
             key = "k" * sz
             meta = {key: 'data1'}
             name = rand_name('server')
-            resp, server = self.client.create_server(name, self.image_ref,
-                                                     self.flavor_ref,
-                                                     meta=meta)
-            self.assertEqual(413, resp.status)
+            try:
+                resp, server = self.client.create_server(name, self.image_ref,
+                                                         self.flavor_ref,
+                                                         meta=meta)
+            except:
+                pass
+            else:
+                self.fail('Metadata should have been too long')
         # no teardown - all creates should fail
 
     def test_update_server_metadata(self):
@@ -170,8 +175,12 @@ class ServerMetadataTest(unittest.TestCase):
         Negative test: Should not be able to delete metadata item from a
         nonexistant server
         """
-        meta = {'delkey': 'delvalue'}
+        meta = {'d': 'delvalue'}
 
         #Delete the metadata item
-        resp, metadata = self.client.delete_server_metadata_item(999, 'delkey')
-        self.assertEqual(404, resp.status)
+        try:
+            resp, metadata = self.client.delete_server_metadata_item(999, 'd')
+        except:
+            pass
+        else:
+            self.fail('A delete should not happen for a nonexistant image')

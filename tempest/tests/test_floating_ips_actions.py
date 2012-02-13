@@ -7,7 +7,7 @@ from tempest.common.utils.data_utils import rand_name
 
 class FloatingIPsTest(unittest.TestCase):
     server_id = None
-    floating_ip_id = None
+    floating_ip = None
 
     @classmethod
     def setUpClass(cls):
@@ -28,6 +28,7 @@ class FloatingIPsTest(unittest.TestCase):
         #Floating IP creation
         resp, body = cls.client.create_floating_ip()
         cls.floating_ip_id = body['id']
+        cls.floating_ip = body['ip']
         #Generating a nonexistant floatingIP id
         cls.floating_ip_ids = []
         resp, body = cls.client.list_floating_ips()
@@ -89,13 +90,13 @@ class FloatingIPsTest(unittest.TestCase):
        l"""
         #Association of floating IP to fixed IP address
         resp, body =\
-        self.client.associate_floating_ip_to_server(self.floating_ip_id,
-                                                    self.fixed_ip_addr)
+        self.client.associate_floating_ip_to_server(self.floating_ip,
+                                                    self.server_id)
         self.assertEqual(202, resp.status)
         #Disassociation of floating IP that was associated in this method
         resp, body = \
-            self.client.disassociate_floating_ip_from_server(
-                                                           self.floating_ip_id)
+            self.client.disassociate_floating_ip_from_server(self.floating_ip,
+                                                             self.server_id)
 
     @attr(type='positive')
     def test_dissociate_floating_ip(self):
@@ -106,11 +107,12 @@ class FloatingIPsTest(unittest.TestCase):
         #Association of floating IP to a specific server
         #so as to check dissociation
         resp, body = \
-            self.client.associate_floating_ip_to_server(self.floating_ip_id,
-                                                        self.fixed_ip_addr)
+            self.client.associate_floating_ip_to_server(self.floating_ip,
+                                                        self.server_id)
         #Disassociation of floating IP
         resp, body = \
-        self.client.disassociate_floating_ip_from_server(self.floating_ip_id)
+        self.client.disassociate_floating_ip_from_server(self.floating_ip,
+                                                         self.server_id)
         self.assertEqual(202, resp.status)
 
     @attr(type='negative')
@@ -123,7 +125,7 @@ class FloatingIPsTest(unittest.TestCase):
         #Deleting the non existant floating IP
         try:
             resp, body = self.client.delete_floating_ip(self.non_exist_id)
-        except exceptions.NotFound:
+        except:
             pass
         else:
             self.fail('Should not be able to delete a nonexistant floating IP')
@@ -137,9 +139,9 @@ class FloatingIPsTest(unittest.TestCase):
         #Associating non existant floating IP
         try:
             resp, body = \
-            self.client.associate_floating_ip_to_server(self.non_exist_id,
-                                                        self.fixed_ip_addr)
-        except exceptions.NotFound:
+            self.client.associate_floating_ip_to_server("0.0.0.0",
+                                                        self.server_id)
+        except:
             pass
         else:
             self.fail('Should not be able to associate'
@@ -153,8 +155,9 @@ class FloatingIPsTest(unittest.TestCase):
         #Dissociating non existant floating IP
         try:
             resp, body = \
-            self.client.disassociate_floating_ip_from_server(self.non_exist_id)
-        except exceptions.NotFound:
+            self.client.disassociate_floating_ip_from_server("0.0.0.0",
+                                                             self.server_id)
+        except:
             pass
         else:
             self.fail('Should not be able to dissociate'

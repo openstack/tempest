@@ -8,6 +8,8 @@ class FloatingIPsClient(object):
         self.config = config
         self.client = rest_client.RestClient(config, username, key,
                                              auth_url, 'nova', tenant_name)
+        self.headers = {'Content-Type': 'application/json',
+                        'Accept': 'application/json'}
 
     def list_floating_ips(self, params=None):
         """Returns a list of all floating IPs filtered by any parameters"""
@@ -43,21 +45,28 @@ class FloatingIPsClient(object):
         resp, body = self.client.delete(url)
         return resp, body
 
-    def associate_floating_ip_to_server(self, floating_ip_id, fixed_ip_addr):
+    def associate_floating_ip_to_server(self, floating_ip, server_id):
         """Associate the provided floating IP to a specific server"""
-        url = "os-floating-ips/%s/associate" % str(floating_ip_id)
+        url = "servers/%s/action" % str(server_id)
         post_body = {
-            'associate_address': {
-                'fixed_ip': fixed_ip_addr,
+            'addFloatingIp': {
+                'address': floating_ip,
             }
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.client.post(url, post_body, None)
+        resp, body = self.client.post(url, post_body, self.headers)
         return resp, body
 
-    def disassociate_floating_ip_from_server(self, floating_ip_id):
+    def disassociate_floating_ip_from_server(self, floating_ip, server_id):
         """Disassociate the provided floating IP from a specific server"""
-        url = "os-floating-ips/%s/disassociate" % str(floating_ip_id)
-        resp, body = self.client.post(url, None, None)
+        url = "servers/%s/action" % str(server_id)
+        post_body = {
+            'removeFloatingIp': {
+                'address': floating_ip,
+            }
+        }
+
+        post_body = json.dumps(post_body)
+        resp, body = self.client.post(url, post_body, self.headers)
         return resp, body

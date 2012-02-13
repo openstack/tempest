@@ -135,6 +135,11 @@ class EnvironmentConfig(object):
         """ What auth method does the environment use (basic|keystone) """
         return self.get("authentication", 'keystone')
 
+    @property
+    def release_name(self):
+        """ Which release is this? """
+        return self.get("release_name", 'essex')
+
 
 class ImagesConfig(object):
     """
