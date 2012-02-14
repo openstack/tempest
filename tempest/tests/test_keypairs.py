@@ -2,9 +2,13 @@ from nose.plugins.attrib import attr
 import unittest2 as unittest
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
+import tempest.config
+from tempest import exceptions
 
 
 class KeyPairsTest(unittest.TestCase):
+
+    release = tempest.config.TempestConfig().env.release_name
 
     @classmethod
     def setUpClass(cls):
@@ -62,26 +66,6 @@ class KeyPairsTest(unittest.TestCase):
         self.assertEqual(202, resp.status)
 
     @attr(type='smoke')
-    def test_keypair_create_get_delete(self):
-        """Keypair should be created, fetched and deleted"""
-        k_name = rand_name('keypair-')
-        resp, keypair = self.client.create_keypair(k_name)
-        self.assertEqual(200, resp.status)
-        #Need to pop these keys so that our compare doesn't fail later,
-        #as the keypair dicts from get API doesn't have them.
-        keypair.pop('private_key')
-        keypair.pop('user_id')
-        #Now fetch the created keypair by its name
-        resp, fetched_key = self.client.get_keypair(k_name)
-        self.assertEqual(200, resp.status)
-
-        self.assertEqual(keypair, fetched_key,
-                    "The fetched keypair is different from the created key")
-        #Delete the keypair
-        resp, _ = self.client.delete_keypair(k_name)
-        self.assertEqual(202, resp.status)
-
-    @attr(type='smoke')
     def test_keypair_create_with_pub_key(self):
         """Keypair should be created with a given public key"""
         k_name = rand_name('keypair-')
@@ -109,23 +93,23 @@ class KeyPairsTest(unittest.TestCase):
         """Keypair should not be created with a non RSA public key"""
         k_name = rand_name('keypair-')
         pub_key = "ssh-rsa JUNK nova@ubuntu"
-        resp, _ = self.client.create_keypair(k_name, pub_key)
-        self.assertEqual(400, resp.status)
-
-    @attr(type='negative')
-    def test_keypair_create_with_empty_pub_key(self):
-        """Keypair should not be created with an empty public key"""
-        k_name = rand_name('keypair-')
-        pub_key = ""
-        resp, _ = self.client.create_keypair(k_name, pub_key)
-        self.assertEqual(400, resp.status)
+        try:
+            resp, _ = self.client.create_keypair(k_name, pub_key)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('Expected BadRequest for invalid public key')
 
     @attr(type='negative')
     def test_keypair_delete_nonexistant_key(self):
         """Non-existant key deletion should throw a proper error"""
         k_name = rand_name("keypair-non-existant-")
-        resp, _ = self.client.delete_keypair(k_name)
-        self.assertEqual(400, resp.status)
+        try:
+            resp, _ = self.client.delete_keypair(k_name)
+        except exceptions.NotFound:
+            pass
+        else:
+            self.fail('nonexistent key')
 
     @attr(type='negative')
     def test_create_keypair_with_duplicate_name(self):
@@ -134,19 +118,34 @@ class KeyPairsTest(unittest.TestCase):
         resp, _ = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
         #Now try the same keyname to ceate another key
-        resp, _ = self.client.create_keypair(k_name)
-        #Expect a HTTP 409 Conflict Error
-        self.assertEqual(409, resp.status)
+        try:
+            resp, _ = self.client.create_keypair(k_name)
+            #Expect a HTTP 409 Conflict Error
+        except exceptions.Duplicate:
+            pass
+        else:
+            self.fail('duplicate name')
+        resp, _ = self.client.delete_keypair(k_name)
+        self.assertEqual(202, resp.status)
 
     @attr(type='negative')
     def test_create_keypair_with_empty_name_string(self):
         """Keypairs with name being an empty string should not be created"""
-        resp, _ = self.client.create_keypair('')
-        self.assertEqual(400, resp.status)
+        try:
+            resp, _ = self.client.create_keypair('')
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('empty string')
 
+    @unittest.skipIf(release == 'diablo', 'bug in diablo')
     @attr(type='negative')
     def test_create_keypair_with_long_keynames(self):
         """Keypairs with name longer than 255 chars should not be created"""
         k_name = 'keypair-'.ljust(260, '0')
-        resp, _ = self.client.create_keypair(k_name)
-        self.assertEqual(400, resp.status)
+        try:
+            resp, _ = self.client.create_keypair(k_name)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('too long')

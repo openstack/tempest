@@ -128,6 +128,11 @@ class RestClient(object):
             self._log(req_url, body, resp, resp_body)
             raise exceptions.BadRequest(resp_body['badRequest']['message'])
 
+        if resp.status == 409:
+            resp_body = json.loads(resp_body)
+            self._log(req_url, body, resp, resp_body)
+            raise exceptions.Duplicate(resp_body)
+
         if resp.status == 413:
             resp_body = json.loads(resp_body)
             self._log(req_url, body, resp, resp_body)
@@ -149,5 +154,10 @@ class RestClient(object):
             else:
                 message = resp_body['computeFault']['message']
             raise exceptions.ComputeFault(message)
+
+        if resp.status >= 400:
+            resp_body = json.loads(resp_body)
+            self._log(req_url, body, resp, resp_body)
+            raise exceptions.TempestException(str(resp.status))
 
         return resp, resp_body

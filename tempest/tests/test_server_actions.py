@@ -123,8 +123,7 @@ class ServerActionsTest(unittest.TestCase):
         Negative Test: The server reboot on non existant server should return
         an error
         """
-        resp, body = self.client.reboot(999, 'SOFT')
-        self.assertEqual(404, resp.status)
+        self.assertRaises(exceptions.NotFound, self.client.reboot, 999, 'SOFT')
 
     @attr(type='negative')
     def test_rebuild_nonexistant_server(self):

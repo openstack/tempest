@@ -159,7 +159,7 @@ service_token = servicetoken
 
 [environment]
 image_ref=%(base_image_uuid)s
-image_ref_alt=4
+image_ref_alt=%(base_image_uuid)s
 flavor_ref=1
 flavor_ref_alt=2
 create_image_enabled=true
