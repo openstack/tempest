@@ -5,8 +5,11 @@ from tempest.common import rest_client
 class LimitsClient(object):
 
     def __init__(self, config, username, key, auth_url, tenant_name=None):
+        self.config = config
+        catalog_name = self.config.nova.catalog_name
         self.client = rest_client.RestClient(config, username, key,
-                                             auth_url, 'nova', tenant_name)
+                                             auth_url, catalog_name,
+                                             tenant_name)
 
     def get_limits(self):
         resp, body = self.client.get("limits")

@@ -8,8 +8,10 @@ class ServersClient(object):
 
     def __init__(self, config, username, key, auth_url, tenant_name=None):
         self.config = config
+        catalog_name = self.config.nova.catalog_name
         self.client = rest_client.RestClient(config, username, key,
-                                             auth_url, 'nova', tenant_name)
+                                             auth_url, catalog_name,
+                                             tenant_name)
 
         self.build_interval = self.config.nova.build_interval
         self.build_timeout = self.config.nova.build_timeout

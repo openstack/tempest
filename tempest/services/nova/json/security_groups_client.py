@@ -6,8 +6,10 @@ class SecurityGroupsClient(object):
 
     def __init__(self, config, username, key, auth_url, tenant_name=None):
         self.config = config
+        catalog_name = self.config.nova.catalog_name
         self.client = rest_client.RestClient(config, username, key,
-                                             auth_url, 'nova', tenant_name)
+                                             auth_url, catalog_name,
+                                             tenant_name)
 
     def list_security_groups(self, params=None):
         """List all security groups for a user"""

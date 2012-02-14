@@ -9,6 +9,7 @@ tenant_name=admin-project
 ssh_timeout=300
 build_interval=10
 build_timeout=600
+catalog_name=nova
 
 [environment]
 image_ref=3

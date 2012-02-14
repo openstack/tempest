@@ -88,6 +88,11 @@ class NovaConfig(object):
         """Timeout in seconds to wait for an entity to build."""
         return float(self.get("build_timeout", 300))
 
+    @property
+    def catalog_name(self):
+        """Catalog name of the Nova service."""
+        return self.get("catalog_name", 'nova')
+
 
 class EnvironmentConfig(object):
     def __init__(self, conf):
