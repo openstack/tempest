@@ -89,9 +89,9 @@ class NovaConfig(object):
         return float(self.get("build_timeout", 300))
 
     @property
-    def catalog_name(self):
+    def catalog_type(self):
         """Catalog name of the Nova service."""
-        return self.get("catalog_name", 'nova')
+        return self.get("catalog_type", 'compute')
 
 
 class EnvironmentConfig(object):

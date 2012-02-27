@@ -68,7 +68,7 @@ class RestClient(object):
 
             mgmt_url = None
             for ep in auth_data['serviceCatalog']:
-                if ep["name"] == service:
+                if ep["type"] == service:
                     mgmt_url = ep['endpoints'][0]['publicURL']
                     # See LP#920817. The tenantId is *supposed*
                     # to be returned for each endpoint accorsing to the

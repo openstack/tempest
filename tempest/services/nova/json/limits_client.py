@@ -6,9 +6,9 @@ class LimitsClient(object):
 
     def __init__(self, config, username, key, auth_url, tenant_name=None):
         self.config = config
-        catalog_name = self.config.nova.catalog_name
+        catalog_type = self.config.nova.catalog_type
         self.client = rest_client.RestClient(config, username, key,
-                                             auth_url, catalog_name,
+                                             auth_url, catalog_type,
                                              tenant_name)
 
     def get_limits(self):
