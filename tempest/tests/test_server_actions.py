@@ -1,4 +1,5 @@
 import base64
+import time
 
 from nose.plugins.attrib import attr
 import unittest2 as unittest
@@ -21,6 +22,8 @@ class ServerActionsTest(unittest.TestCase):
         cls.image_ref_alt = cls.config.env.image_ref_alt
         cls.flavor_ref = cls.config.env.flavor_ref
         cls.flavor_ref_alt = cls.config.env.flavor_ref_alt
+        cls.build_interval = cls.config.nova.build_interval
+        cls.build_timeout = cls.config.nova.build_timeout
 
     def setUp(self):
         self.name = rand_name('server')
@@ -114,8 +117,18 @@ class ServerActionsTest(unittest.TestCase):
         self.client.revert_resize(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+        # Need to poll for the id change until lp#924371 is fixed
         resp, server = self.client.get_server(self.server_id)
-        self.assertEqual(self.flavor_ref, server['flavor']['id'])
+        start = int(time.time())
+
+        while server['flavor']['id'] != self.flavor_ref:
+            time.sleep(self.build_interval)
+            resp, server = self.client.get_server(self.server_id)
+
+            if int(time.time()) - start >= self.build_timeout:
+                message = 'Server %s failed to revert resize within the \
+                required time (%s s).' % (self.server_id, self.build_timeout)
+                raise exceptions.TimeoutException(message)
 
     @attr(type='negative')
     def test_reboot_nonexistant_server_soft(self):
