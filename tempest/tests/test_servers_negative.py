@@ -60,10 +60,9 @@ class ServersNegativeTest(unittest.TestCase):
         else:
             self.fail('Cannot create a server with an invalid flavor')
 
-    @unittest.expectedFailure
+    @unittest.skipIf(release == 'diablo', 'Bug in Diablo, lp#891264')
     def test_invalid_access_ip_v4_address(self):
         """An access IPv4 address must match a valid address pattern"""
-        #Currently failing due to bug
         accessIPv4 = '1.1.1.1.1.1'
         name = rand_name('server')
         try:
@@ -76,10 +75,9 @@ class ServersNegativeTest(unittest.TestCase):
         else:
             self.fail('Access IPv4 address must match the correct format')
 
-    @unittest.expectedFailure
+    @unittest.skipIf(release == 'diablo', 'Bug in Diablo, lp#891264')
     def test_invalid_ip_v6_address(self):
         """An access IPv6 address must match a valid address pattern"""
-        #Currently failing due to bug
         accessIPv6 = 'notvalid'
         name = rand_name('server')
         try:
