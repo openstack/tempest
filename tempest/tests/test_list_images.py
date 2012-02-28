@@ -110,7 +110,6 @@ class ListImagesTest(unittest.TestCase):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
-    @unittest.skip('Skipping until Nova Bug 912837 is fixed')
     @attr(type='positive')
     def test_list_images_filter_by_server_id(self):
         """The images should contain images filtered by server id"""
@@ -126,12 +125,19 @@ class ListImagesTest(unittest.TestCase):
     @attr(type='positive')
     def test_list_images_filter_by_server_ref(self):
         """The list of servers should be filtered by server ref"""
-        params = {'server': self.image3['metadata']['instance_ref']}
-        resp, images = self.client.list_images(params)
+        server_links = self.server2['links']
 
-        self.assertFalse(any([i for i in images if i['id'] == self.image1_id]))
-        self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
-        self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
+        # Try all server link types
+        for link in server_links:
+            params = {'server': link['href']}
+            resp, images = self.client.list_images(params)
+
+            self.assertFalse(any([i for i in images
+                            if i['id'] == self.image1_id]))
+            self.assertFalse(any([i for i in images
+                            if i['id'] == self.image2_id]))
+            self.assertTrue(any([i for i in images
+                            if i['id'] == self.image3_id]))
 
     @attr(type='positive')
     def test_list_images_filter_by_type(self):
@@ -210,12 +216,19 @@ class ListImagesTest(unittest.TestCase):
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_server_ref(self):
         """Detailed list of servers should be filtered by server ref"""
-        params = {'server': self.image3['metadata']['instance_ref']}
-        resp, images = self.client.list_images_with_detail(params)
+        server_links = self.server2['links']
 
-        self.assertFalse(any([i for i in images if i['id'] == self.image1_id]))
-        self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
-        self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
+        # Try all server link types
+        for link in server_links:
+            params = {'server': link['href']}
+            resp, images = self.client.list_images_with_detail(params)
+
+            self.assertFalse(any([i for i in images
+                            if i['id'] == self.image1_id]))
+            self.assertFalse(any([i for i in images
+                            if i['id'] == self.image2_id]))
+            self.assertTrue(any([i for i in images
+                            if i['id'] == self.image3_id]))
 
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_type(self):
