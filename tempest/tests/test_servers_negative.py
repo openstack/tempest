@@ -2,9 +2,12 @@ import unittest2 as unittest
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+import tempest.config
 
 
 class ServersNegativeTest(unittest.TestCase):
+    release = tempest.config.TempestConfig().\
+            env.release_name
 
     @classmethod
     def setUpClass(cls):
