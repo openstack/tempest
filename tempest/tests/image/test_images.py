@@ -58,9 +58,6 @@ class CreateRegisterImagesTest(unittest.TestCase):
 
         metas = [
             {
-                'id': '1'
-            },  # Cannot specify ID in registration
-            {
                 'container_format': 'wrong',
             },  # Invalid container format
             {
