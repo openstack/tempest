@@ -75,13 +75,15 @@ class ServerActionsTest(unittest.TestCase):
 
         #Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
-        self.assertEqual(self.image_ref_alt, rebuilt_server['image']['id'])
+        rebuilt_image_id = rebuilt_server['image']['id']
+        self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
 
         #Verify the server properties after the rebuild completes
         self.client.wait_for_server_status(rebuilt_server['id'], 'ACTIVE')
         resp, server = self.client.get_server(rebuilt_server['id'])
-        self.assertEqual(self.image_ref_alt, rebuilt_server['image']['id'])
+        rebuilt_image_id = rebuilt_server['image']['id']
+        self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, rebuilt_server['name'])
 
     @attr(type='smoke')
