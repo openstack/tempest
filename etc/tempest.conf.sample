@@ -11,6 +11,12 @@ build_interval=10
 build_timeout=600
 catalog_type=compute
 
+[image]
+username=admin
+password=********
+tenant=admin
+auth_url=http://localhost:5000/v2.0
+
 [environment]
 image_ref=3
 image_ref_alt=4

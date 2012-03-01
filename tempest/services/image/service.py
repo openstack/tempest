@@ -49,7 +49,8 @@ class Service(BaseService):
             service_token = config.images.service_token
             self._client = client.Client(config.images.host,
                                          config.images.port,
-                                         auth_tok=service_token)
+                                         auth_tok=service_token,
+                                         creds=creds)
         else:
             raise NotImplementedError
 
