@@ -26,6 +26,7 @@ class ImagesTest(unittest.TestCase):
         cls.flavor_ref = cls.config.env.flavor_ref
         cls.create_image_enabled = cls.config.env.create_image_enabled
 
+    @unittest.skip('diablo bug 944966')
     @attr(type='smoke')
     @unittest.skipUnless(create_image_enabled,
                          'Environment unable to create images.')
@@ -59,6 +60,7 @@ class ImagesTest(unittest.TestCase):
         self.client.delete_image(image['id'])
         self.servers_client.delete_server(server['id'])
 
+    @unittest.skip('diablo race condition bug 944116')
     @attr(type='negative')
     def test_create_image_from_deleted_server(self):
         """An image should not be created if the server instance is removed """

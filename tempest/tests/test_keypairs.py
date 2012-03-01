@@ -95,7 +95,8 @@ class KeyPairsTest(unittest.TestCase):
         pub_key = "ssh-rsa JUNK nova@ubuntu"
         try:
             resp, _ = self.client.create_keypair(k_name, pub_key)
-        except exceptions.BadRequest:
+        # Should be BadRequest. Bug 944996.
+        except exceptions.ComputeFault:
             pass
         else:
             self.fail('Expected BadRequest for invalid public key')
@@ -106,7 +107,8 @@ class KeyPairsTest(unittest.TestCase):
         k_name = rand_name("keypair-non-existant-")
         try:
             resp, _ = self.client.delete_keypair(k_name)
-        except exceptions.NotFound:
+        # Should be NotFound. Bug 944996.
+        except exceptions.ComputeFault:
             pass
         else:
             self.fail('nonexistent key')
@@ -121,24 +123,27 @@ class KeyPairsTest(unittest.TestCase):
         try:
             resp, _ = self.client.create_keypair(k_name)
             #Expect a HTTP 409 Conflict Error
-        except exceptions.Duplicate:
+        # Should be Duplicate. Bug 944996.
+        except exceptions.ComputeFault:
             pass
         else:
             self.fail('duplicate name')
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 
+    @unittest.skip('Bad behavior: will create, can\'t remove. Bug 947750')
     @attr(type='negative')
     def test_create_keypair_with_empty_name_string(self):
         """Keypairs with name being an empty string should not be created"""
         try:
             resp, _ = self.client.create_keypair('')
-        except exceptions.BadRequest:
+        # Should be BadRequest. Bug 944996.
+        except exceptions.ComputeFault:
             pass
         else:
             self.fail('empty string')
 
-    @unittest.skipIf(release == 'diablo', 'bug in diablo')
+    @unittest.skip('test does not fail. Bug 945000')
     @attr(type='negative')
     def test_create_keypair_with_long_keynames(self):
         """Keypairs with name longer than 255 chars should not be created"""

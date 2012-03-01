@@ -201,4 +201,6 @@ class ServerDetailsTest(unittest.TestCase):
         min_detail['name'] = server['name']
         min_detail['links'] = server['links']
         min_detail['id'] = server['id']
+        # This was removed in Essex.
+        min_detail['uuid'] = server['uuid']
         return min_detail

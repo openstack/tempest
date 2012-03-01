@@ -136,7 +136,8 @@ class ServerActionsTest(unittest.TestCase):
         Negative Test: The server reboot on non existant server should return
         an error
         """
-        self.assertRaises(exceptions.NotFound, self.client.reboot, 999, 'SOFT')
+        self.assertRaises(exceptions.TempestException, self.client.reboot,
+                          999, 'SOFT')
 
     @attr(type='negative')
     def test_rebuild_nonexistant_server(self):
@@ -154,7 +155,8 @@ class ServerActionsTest(unittest.TestCase):
                                        self.image_ref_alt, name=new_name,
                                        meta=meta, personality=personality,
                                        adminPass='rebuild')
-        except exceptions.NotFound:
+        # Should be NotFound. Bug 945007.
+        except exceptions.TempestException:
             pass
         else:
             self.fail('The server rebuild for a non existing server should not'

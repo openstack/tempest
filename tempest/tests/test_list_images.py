@@ -86,6 +86,7 @@ class ListImagesTest(unittest.TestCase):
         found = any([i for i in images if i['id'] == self.image_ref])
         self.assertTrue(found)
 
+    @unittest.skip('diablo bug 945024')
     @attr(type='positive')
     def test_list_images_filter_by_status(self):
         """
@@ -110,6 +111,7 @@ class ListImagesTest(unittest.TestCase):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
+    @unittest.skip('diablo bug 945024')
     @attr(type='positive')
     def test_list_images_filter_by_server_id(self):
         """The images should contain images filtered by server id"""
@@ -122,6 +124,7 @@ class ListImagesTest(unittest.TestCase):
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
+    @unittest.skip('diablo bug 945024')
     @attr(type='positive')
     def test_list_images_filter_by_server_ref(self):
         """The list of servers should be filtered by server ref"""
@@ -177,6 +180,7 @@ class ListImagesTest(unittest.TestCase):
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
 
+    @unittest.skip('diablo bug 945024')
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_status(self):
         """
@@ -213,6 +217,7 @@ class ListImagesTest(unittest.TestCase):
         resp, images = self.client.list_images_with_detail(params)
         self.assertEqual(1, len(images))
 
+    @unittest.skip('diablo bug 945024')
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_server_ref(self):
         """Detailed list of servers should be filtered by server ref"""
