@@ -56,7 +56,7 @@ class NovaConfig(object):
     @property
     def use_ssl(self):
         """Specifies if we are using https."""
-        return bool(self.get("use_ssl", False))
+        return self.get("use_ssl", 'false') != 'false'
 
     @property
     def username(self):
