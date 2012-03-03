@@ -14,7 +14,7 @@ class KeyPairsClient(object):
                         'Accept': 'application/json'}
 
     def list_keypairs(self):
-        resp, body = self.client.get("/os-keypairs")
+        resp, body = self.client.get("os-keypairs")
         body = json.loads(body)
         #Each returned keypair is embedded within an unnecessary 'keypair'
         #element which is a deviation from other resources like floating-ips,
@@ -24,7 +24,7 @@ class KeyPairsClient(object):
         return resp, body['keypairs']
 
     def get_keypair(self, key_name):
-        resp, body = self.client.get("/os-keypairs/%s" % str(key_name))
+        resp, body = self.client.get("os-keypairs/%s" % str(key_name))
         body = json.loads(body)
         return resp, body['keypair']
 
@@ -33,10 +33,10 @@ class KeyPairsClient(object):
         if pub_key:
             post_body['keypair']['public_key'] = pub_key
         post_body = json.dumps(post_body)
-        resp, body = self.client.post("/os-keypairs",
+        resp, body = self.client.post("os-keypairs",
                                 headers=self.headers, body=post_body)
         body = json.loads(body)
         return resp, body['keypair']
 
     def delete_keypair(self, key_name):
-        return self.client.delete("/os-keypairs/%s" % str(key_name))
+        return self.client.delete("os-keypairs/%s" % str(key_name))
