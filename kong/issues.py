@@ -2,7 +2,7 @@ import re
 
 
 class KnownIssuesFinder(object):
-    
+
     def __init__(self):
         self.count = 0
         self._pattern = re.compile('# *KNOWN-ISSUE')
@@ -10,7 +10,7 @@ class KnownIssuesFinder(object):
     def find_known_issues(self, package):
         for file in self._find_test_module_files(package):
             self._count_known_issues(file)
-                
+
     def _find_test_module_files(self, package):
         for name in dir(package):
             if name.startswith('test'):
