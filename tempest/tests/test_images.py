@@ -14,7 +14,7 @@ def _parse_image_id(image_ref):
 class ImagesTest(unittest.TestCase):
 
     create_image_enabled = tempest.config.TempestConfig().\
-            env.create_image_enabled
+            compute.create_image_enabled
 
     @classmethod
     def setUpClass(cls):
@@ -22,9 +22,9 @@ class ImagesTest(unittest.TestCase):
         cls.client = cls.os.images_client
         cls.servers_client = cls.os.servers_client
         cls.config = cls.os.config
-        cls.image_ref = cls.config.env.image_ref
-        cls.flavor_ref = cls.config.env.flavor_ref
-        cls.create_image_enabled = cls.config.env.create_image_enabled
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.create_image_enabled = cls.config.compute.create_image_enabled
 
     @attr(type='smoke')
     @unittest.skipUnless(create_image_enabled,

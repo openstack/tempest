@@ -4,10 +4,10 @@ import json
 
 class FlavorsClient(object):
 
-    def __init__(self, config, username, key, auth_url, tenant_name=None):
+    def __init__(self, config, username, password, auth_url, tenant_name=None):
         self.config = config
-        catalog_type = self.config.nova.catalog_type
-        self.client = rest_client.RestClient(config, username, key,
+        catalog_type = self.config.compute.catalog_type
+        self.client = rest_client.RestClient(config, username, password,
                                              auth_url, catalog_type,
                                              tenant_name)
 

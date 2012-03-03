@@ -1,4 +1,5 @@
 import tempest.config
+from tempest import exceptions
 from tempest.services.image import service as image_service
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.flavors_client import FlavorsClient
@@ -8,7 +9,6 @@ from tempest.services.nova.json.extensions_client import ExtensionsClient
 from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
 from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
-
 from tempest.services.nova.json.keypairs_client import KeyPairsClient
 
 
@@ -19,82 +19,29 @@ class Manager(object):
         Top level manager for all Openstack APIs
         """
         self.config = tempest.config.TempestConfig()
+        username = self.config.identity.username
+        password = self.config.identity.password
+        tenant_name = self.config.identity.tenant_name
 
-        if self.config.env.authentication == 'keystone_v2':
-            self.servers_client = ServersClient(self.config,
-                                                self.config.nova.username,
-                                                self.config.nova.api_key,
-                                                self.config.nova.auth_url,
-                                                self.config.nova.tenant_name)
-            self.flavors_client = FlavorsClient(self.config,
-                                                self.config.nova.username,
-                                                self.config.nova.api_key,
-                                                self.config.nova.auth_url,
-                                                self.config.nova.tenant_name)
-            self.images_client = ImagesClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url,
-                                              self.config.nova.tenant_name)
-            self.limits_client = LimitsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url,
-                                              self.config.nova.tenant_name)
-            self.extensions_client = ExtensionsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url,
-                                              self.config.nova.tenant_name)
-            self.keypairs_client = KeyPairsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url,
-                                              self.config.nova.tenant_name)
-            self.security_groups_client = SecurityGroupsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url,
-                                              self.config.nova.tenant_name)
-            self.floating_ips_client = FloatingIPsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url,
-                                              self.config.nova.tenant_name)
+        if None in [username, password, tenant_name]:
+            raise exceptions.InvalidConfiguration(message="Missing complete \
+                                                  user credentials.")
+        auth_url = self.config.identity.auth_url
+
+        if self.config.identity.strategy == 'keystone':
+            client_args = (self.config, username, password, auth_url,
+                           tenant_name)
         else:
-            #Assuming basic/native authentication
-            self.servers_client = ServersClient(self.config,
-                                                self.config.nova.username,
-                                                self.config.nova.api_key,
-                                                self.config.nova.auth_url)
-            self.flavors_client = FlavorsClient(self.config,
-                                                self.config.nova.username,
-                                                self.config.nova.api_key,
-                                                self.config.nova.auth_url)
-            self.images_client = ImagesClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url)
-            self.limits_client = LimitsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url)
-            self.extensions_client = ExtensionsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url)
-            self.security_groups_client = SecurityGroupsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url)
-            self.keypairs_client = KeyPairsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url)
-            self.floating_ips_client = FloatingIPsClient(self.config,
-                                              self.config.nova.username,
-                                              self.config.nova.api_key,
-                                              self.config.nova.auth_url)
+            client_args = (self.config, username, password, auth_url)
+
+        self.servers_client = ServersClient(*client_args)
+        self.flavors_client = FlavorsClient(*client_args)
+        self.images_client = ImagesClient(*client_args)
+        self.limits_client = LimitsClient(*client_args)
+        self.extensions_client = ExtensionsClient(*client_args)
+        self.keypairs_client = KeyPairsClient(*client_args)
+        self.security_groups_client = SecurityGroupsClient(*client_args)
+        self.floating_ips_client = FloatingIPsClient(*client_args)
 
 
 class ServiceManager(object):

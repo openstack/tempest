@@ -15,8 +15,8 @@ class FloatingIPsTest(unittest.TestCase):
         cls.client = cls.os.floating_ips_client
         cls.servers_client = cls.os.servers_client
         cls.config = cls.os.config
-        cls.image_ref = cls.config.env.image_ref
-        cls.flavor_ref = cls.config.env.flavor_ref
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
         #Server creation
         resp, server = cls.servers_client.create_server('floating-server',
                                                         cls.image_ref,

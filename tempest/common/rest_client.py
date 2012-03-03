@@ -12,29 +12,30 @@ MAX_RECURSION_DEPTH = 2
 
 class RestClient(object):
 
-    def __init__(self, config, user, key, auth_url, service, tenant_name=None):
+    def __init__(self, config, user, password, auth_url, service,
+                 tenant_name=None):
         self.log = logging.getLogger(__name__)
         self.log.setLevel(logging.ERROR)
         self.config = config
-        if self.config.env.authentication == 'keystone_v2':
-            self.token, self.base_url = self.keystone_v2_auth(user,
-                                                              key,
-                                                              auth_url,
-                                                              service,
-                                                              tenant_name)
+        if self.config.identity.strategy == 'keystone':
+            self.token, self.base_url = self.keystone_auth(user,
+                                                           password,
+                                                           auth_url,
+                                                           service,
+                                                           tenant_name)
         else:
             self.token, self.base_url = self.basic_auth(user,
-                                                        key,
+                                                        password,
                                                         auth_url)
 
-    def basic_auth(self, user, api_key, auth_url):
+    def basic_auth(self, user, password, auth_url):
         """
         Provides authentication for the target API
         """
 
         params = {}
         params['headers'] = {'User-Agent': 'Test-Client', 'X-Auth-User': user,
-                             'X-Auth-Key': api_key}
+                             'X-Auth-Key': password}
 
         self.http_obj = httplib2.Http()
         resp, body = self.http_obj.request(auth_url, 'GET', **params)
@@ -43,15 +44,15 @@ class RestClient(object):
         except:
             raise
 
-    def keystone_v2_auth(self, user, api_key, auth_url, service, tenant_name):
+    def keystone_auth(self, user, password, auth_url, service, tenant_name):
         """
-        Provides authentication via Keystone 2.0
+        Provides authentication via Keystone
         """
 
         creds = {'auth': {
                 'passwordCredentials': {
                     'username': user,
-                    'password': api_key,
+                    'password': password,
                 },
                 'tenantName': tenant_name
             }

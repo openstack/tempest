@@ -7,14 +7,14 @@ import tempest.config
 
 class FlavorsTest(unittest.TestCase):
 
-    release = tempest.config.TempestConfig().env.release_name
+    release = tempest.config.TempestConfig().compute.release_name
 
     @classmethod
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.flavors_client
         cls.config = cls.os.config
-        cls.flavor_id = cls.config.env.flavor_ref
+        cls.flavor_id = cls.config.compute.flavor_ref
 
     @attr(type='smoke')
     def test_list_flavors(self):
