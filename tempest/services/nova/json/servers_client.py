@@ -146,10 +146,13 @@ class ServersClient(object):
             if server_status == 'ERROR':
                 raise exceptions.BuildErrorException(server_id=server_id)
 
-            if int(time.time()) - start >= self.build_timeout:
+            timed_out = int(time.time()) - start >= self.build_timeout
+
+            if server_status != status and timed_out:
                 message = 'Server %s failed to reach %s status within the \
                 required time (%s s).' % (server_id, status,
                                           self.build_timeout)
+                message += ' Current status: %s.' % server_status
                 raise exceptions.TimeoutException(message)
 
     def list_addresses(self, server_id):
