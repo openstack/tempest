@@ -2,7 +2,12 @@ import json
 import httplib2
 import logging
 import sys
+import time
 from tempest import exceptions
+
+
+# redrive rate limited calls at most twice
+MAX_RECURSION_DEPTH = 2
 
 
 class RestClient(object):
@@ -107,7 +112,7 @@ class RestClient(object):
         self.log.error('Response Headers: ' + str(resp))
         self.log.error('Response Body: ' + str(resp_body))
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, headers=None, body=None, depth=0):
         """A simple HTTP request interface."""
 
         self.http_obj = httplib2.Http()
@@ -138,6 +143,10 @@ class RestClient(object):
             self._log(req_url, body, resp, resp_body)
             if 'overLimit' in resp_body:
                 raise exceptions.OverLimit(resp_body['overLimit']['message'])
+            elif depth < MAX_RECURSION_DEPTH:
+                delay = resp['Retry-After'] if 'Retry-After' in resp else 60
+                time.sleep(int(delay))
+                return self.request(method, url, headers, body, depth + 1)
             else:
                 raise exceptions.RateLimitExceeded(
                     message=resp_body['overLimitFault']['message'],
