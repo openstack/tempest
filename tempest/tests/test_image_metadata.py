@@ -15,7 +15,6 @@ class ImagesMetadataTest(unittest.TestCase):
         cls.config = cls.os.config
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
-        cls.ssh_timeout = cls.config.nova.ssh_timeout
 
         name = rand_name('server')
         resp, server = cls.servers_client.create_server(name, cls.image_ref,
