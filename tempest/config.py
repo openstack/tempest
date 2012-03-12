@@ -52,7 +52,7 @@ class IdentityConfig(object):
     @property
     def use_ssl(self):
         """Specifies if we are using https."""
-        return self.get("use_ssl", 'false') != 'false'
+        return self.get("use_ssl", 'false').lower() != 'false'
 
     @property
     def username(self):
@@ -109,12 +109,12 @@ class ComputeConfig(object):
     @property
     def resize_available(self):
         """Does the test environment support resizing?"""
-        return self.get("resize_available", 'false') != 'false'
+        return self.get("resize_available", 'false').lower() != 'false'
 
     @property
     def create_image_enabled(self):
         """Does the test environment support snapshots?"""
-        return self.get("create_image_enabled", 'false') != 'false'
+        return self.get("create_image_enabled", 'false').lower() != 'false'
 
     @property
     def release_name(self):
