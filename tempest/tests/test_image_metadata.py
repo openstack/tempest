@@ -1,20 +1,16 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
-import unittest2 as unittest
 from tempest import exceptions
+from base_compute_test import BaseComputeTest
 
 
-class ImagesMetadataTest(unittest.TestCase):
+class ImagesMetadataTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.servers_client = cls.os.servers_client
-        cls.client = cls.os.images_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.servers_client = cls.servers_client
+        cls.client = cls.images_client
 
         name = rand_name('server')
         resp, server = cls.servers_client.create_server(name, cls.image_ref,

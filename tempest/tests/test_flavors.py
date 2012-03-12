@@ -3,16 +3,15 @@ from nose.plugins.attrib import attr
 from tempest import exceptions
 from tempest import openstack
 import tempest.config
+from base_compute_test import BaseComputeTest
 
 
-class FlavorsTest(unittest.TestCase):
+class FlavorsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.flavors_client
-        cls.config = cls.os.config
-        cls.flavor_id = cls.config.compute.flavor_ref
+        cls.client = cls.flavors_client
+        cls.flavor_id = cls.flavor_ref
 
     @attr(type='smoke')
     def test_list_flavors(self):

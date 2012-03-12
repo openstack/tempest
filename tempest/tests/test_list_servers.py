@@ -4,22 +4,16 @@ import nose.plugins.skip
 
 from tempest import openstack
 from tempest import exceptions
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests import utils
 
 
-class ServerDetailsTest(unittest.TestCase):
+class ServerDetailsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.servers_client
-        cls.images_client = cls.os.images_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
-        cls.image_ref_alt = cls.config.compute.image_ref_alt
-        cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
+        cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...
         images_client = cls.os.images_client

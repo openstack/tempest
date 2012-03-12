@@ -1,9 +1,8 @@
-import unittest2 as unittest
-
 from nose.plugins.attrib import attr
 
 from tempest import exceptions
 from tempest import openstack
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
 
 
@@ -12,16 +11,11 @@ def _parse_image_id(image_ref):
     return temp[len(temp) - 1]
 
 
-class ListImagesTest(unittest.TestCase):
+class ListImagesTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.images_client
-        cls.servers_client = cls.os.servers_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.client = cls.images_client
 
         name = rand_name('server')
         resp, cls.server1 = cls.servers_client.create_server(name,

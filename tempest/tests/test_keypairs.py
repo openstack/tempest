@@ -1,16 +1,17 @@
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 from tempest import openstack
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 
 
-class KeyPairsTest(unittest.TestCase):
+class KeyPairsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
         cls.os = openstack.Manager()
-        cls.client = cls.os.keypairs_client
+        cls.client = cls.keypairs_client
 
     @attr(type='smoke')
     def test_keypairs_create_list_delete(self):

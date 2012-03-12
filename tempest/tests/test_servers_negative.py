@@ -1,19 +1,15 @@
-import unittest2 as unittest
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
+from base_compute_test import BaseComputeTest
 from tempest import exceptions
 import tempest.config
 
 
-class ServersNegativeTest(unittest.TestCase):
+class ServersNegativeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.servers_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.client = cls.servers_client
 
     def test_server_name_blank(self):
         """Create a server with name parameter empty"""

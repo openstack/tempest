@@ -1,19 +1,15 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
 import base64
-import unittest2 as unittest
 
 
-class ServersTest(unittest.TestCase):
+class ServersTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.servers_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.client = cls.servers_client
 
     @attr(type='smoke')
     def test_create_delete_server(self):

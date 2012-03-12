@@ -1,16 +1,14 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
 import tempest.config
-import unittest2 as unittest
+from base_compute_test import BaseComputeTest
 
 
-class ExtentionsTest(unittest.TestCase):
+class ExtentionsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.extensions_client
-        cls.config = cls.os.config
+        cls.client = cls.extensions_client
 
     @attr(type='smoke')
     def test_list_extensions(self):

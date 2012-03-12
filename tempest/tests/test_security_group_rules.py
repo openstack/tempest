@@ -1,17 +1,16 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
-import unittest2 as unittest
 from tempest import exceptions
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
 import time
 
 
-class SecurityGroupsTest(unittest.TestCase):
+class SecurityGroupsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.security_groups_client
+        cls.client = cls.security_groups_client
 
     @attr(type='positive')
     def test_security_group_rules_create(self):

@@ -153,15 +153,15 @@ class AuthorizationTest(unittest.TestCase):
         A create server request should fail if the tenant id does not match
         the current user
         """
+        saved_base_url = self.other_client.base_url
         try:
-            saved_base_url = self.other_client.client.base_url
             # Change the base URL to impersonate another user
-            self.other_client.client.base_url = self.client.client.base_url
+            self.other_client.base_url = self.client.base_url
             self.other_client.create_server('test', self.image['id'],
                                                     self.flavor_ref)
         finally:
             # Reset the base_url...
-            self.other_client.client.base_url = saved_base_url
+            self.other_client.base_url = saved_base_url
 
     @classmethod
     def _parse_image_id(self, image_ref):

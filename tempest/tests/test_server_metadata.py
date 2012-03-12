@@ -1,18 +1,14 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
-import unittest2 as unittest
 
 
-class ServerMetadataTest(unittest.TestCase):
+class ServerMetadataTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.servers_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.client = cls.servers_client
 
         #Create a server to be used for all read only tests
         name = rand_name('server')

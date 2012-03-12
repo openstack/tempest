@@ -2,6 +2,7 @@ from nose.plugins.attrib import attr
 import unittest2 as unittest
 
 from tempest.common.utils.data_utils import rand_name
+from base_compute_test import BaseComputeTest
 import tempest.config
 from tempest import openstack
 
@@ -11,19 +12,15 @@ def _parse_image_id(image_ref):
     return temp[1]
 
 
-class ImagesTest(unittest.TestCase):
+class ImagesTest(BaseComputeTest):
 
     create_image_enabled = tempest.config.TempestConfig().\
             compute.create_image_enabled
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.images_client
-        cls.servers_client = cls.os.servers_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.client = cls.images_client
+        cls.servers_client = cls.servers_client
         cls.create_image_enabled = cls.config.compute.create_image_enabled
 
     @attr(type='smoke')

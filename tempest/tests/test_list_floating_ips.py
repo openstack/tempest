@@ -1,16 +1,16 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
-import unittest2 as unittest
 from tempest import exceptions
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
+import unittest2 as unittest
 
 
-class FloatingIPDetailsTest(unittest.TestCase):
+class FloatingIPDetailsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.floating_ips_client
+        cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
         cls.random_number = 0

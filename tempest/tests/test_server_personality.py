@@ -1,21 +1,17 @@
 from nose.plugins.attrib import attr
 from tempest import openstack
 from tempest import exceptions
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
 import base64
-import unittest2 as unittest
 
 
-class ServerPersonalityTest(unittest.TestCase):
+class ServerPersonalityTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.servers_client
-        cls.config = cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
-        cls.user_client = cls.os.limits_client
+        cls.client = cls.servers_client
+        cls.user_client = cls.limits_client
 
     def test_personality_files_exceed_limit(self):
         """

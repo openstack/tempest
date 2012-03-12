@@ -1,29 +1,23 @@
 import base64
 import time
-
-from nose.plugins.attrib import attr
 import unittest2 as unittest
+
 from tempest import exceptions
+from base_compute_test import BaseComputeTest
 from tempest.common.utils.data_utils import rand_name
 import tempest.config
 from tempest import openstack
 
+from nose.plugins.attrib import attr
 
-class ServerActionsTest(unittest.TestCase):
+
+class ServerActionsTest(BaseComputeTest):
 
     resize_available = tempest.config.TempestConfig().compute.resize_available
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.servers_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.image_ref_alt = cls.config.compute.image_ref_alt
-        cls.flavor_ref = cls.config.compute.flavor_ref
-        cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
-        cls.build_interval = cls.config.compute.build_interval
-        cls.build_timeout = cls.config.compute.build_timeout
+        cls.client = cls.servers_client
 
     def setUp(self):
         self.name = rand_name('server')
