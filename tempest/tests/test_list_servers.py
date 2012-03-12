@@ -16,10 +16,10 @@ class ServerDetailsTest(unittest.TestCase):
         cls.client = cls.os.servers_client
         cls.images_client = cls.os.images_client
         cls.config = cls.os.config
-        cls.image_ref = cls.config.env.image_ref
-        cls.flavor_ref = cls.config.env.flavor_ref
-        cls.image_ref_alt = cls.config.env.image_ref_alt
-        cls.flavor_ref_alt = cls.config.env.flavor_ref_alt
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.image_ref_alt = cls.config.compute.image_ref_alt
+        cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
 
         # Check to see if the alternate image ref actually exists...
         images_client = cls.os.images_client

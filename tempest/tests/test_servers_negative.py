@@ -7,16 +7,16 @@ import tempest.config
 
 class ServersNegativeTest(unittest.TestCase):
     release = tempest.config.TempestConfig().\
-            env.release_name
+            compute.release_name
 
     @classmethod
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.servers_client
         cls.config = cls.os.config
-        cls.image_ref = cls.config.env.image_ref
-        cls.flavor_ref = cls.config.env.flavor_ref
-        cls.ssh_timeout = cls.config.nova.ssh_timeout
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.ssh_timeout = cls.config.compute.ssh_timeout
 
     def test_server_name_blank(self):
         """Create a server with name parameter empty"""

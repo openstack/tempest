@@ -27,6 +27,10 @@ class TempestException(Exception):
         return self._error_string
 
 
+class InvalidConfiguration(TempestException):
+    message = "Invalid Configuration"
+
+
 class NotFound(TempestException):
     message = "Object not found"
 

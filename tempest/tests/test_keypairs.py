@@ -8,7 +8,7 @@ from tempest import exceptions
 
 class KeyPairsTest(unittest.TestCase):
 
-    release = tempest.config.TempestConfig().env.release_name
+    release = tempest.config.TempestConfig().compute.release_name
 
     @classmethod
     def setUpClass(cls):

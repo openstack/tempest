@@ -20,8 +20,8 @@ class ListImagesTest(unittest.TestCase):
         cls.client = cls.os.images_client
         cls.servers_client = cls.os.servers_client
         cls.config = cls.os.config
-        cls.image_ref = cls.config.env.image_ref
-        cls.flavor_ref = cls.config.env.flavor_ref
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
 
         name = rand_name('server')
         resp, cls.server1 = cls.servers_client.create_server(name,

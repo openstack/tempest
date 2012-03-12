@@ -12,8 +12,8 @@ class ServersTest(unittest.TestCase):
         cls.os = openstack.Manager()
         cls.client = cls.os.servers_client
         cls.config = cls.os.config
-        cls.image_ref = cls.config.env.image_ref
-        cls.flavor_ref = cls.config.env.flavor_ref
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
 
     @attr(type='smoke')
     def test_create_delete_server(self):

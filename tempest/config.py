@@ -6,33 +6,33 @@ from tempest.common.utils import data_utils
 LOG = logging.getLogger(__name__)
 
 
-class NovaConfig(object):
-    """Provides configuration information for connecting to Nova."""
+class IdentityConfig(object):
+    """Provides configuration information for authenticating with Keystone."""
 
     def __init__(self, conf):
-        """Initialize a Nova-specific configuration object"""
+        """Initialize an Identity-specific configuration object"""
         self.conf = conf
 
     def get(self, item_name, default_value=None):
         try:
-            return self.conf.get("nova", item_name)
+            return self.conf.get("identity", item_name)
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             return default_value
 
     @property
     def host(self):
-        """Host IP for making Nova API requests. Defaults to '127.0.0.1'."""
+        """Host IP for making Identity API requests."""
         return self.get("host", "127.0.0.1")
 
     @property
     def port(self):
-        """Listen port of the Nova service."""
+        """Port for the Identity service."""
         return self.get("port", "8773")
 
     @property
-    def apiVer(self):
-        """Version of the API"""
-        return self.get("apiVer", "v1.1")
+    def api_version(self):
+        """Version of the Identity API"""
+        return self.get("api_version", "v1.1")
 
     @property
     def path(self):
@@ -41,17 +41,13 @@ class NovaConfig(object):
 
     @property
     def auth_url(self):
-        """The Auth URL (derived)"""
+        """The Identity URL (derived)"""
         auth_url = data_utils.build_url(self.host,
                                         self.port,
-                                        self.apiVer,
+                                        self.api_version,
                                         self.path,
                                         use_ssl=self.use_ssl)
         return auth_url
-
-    def params(self):
-        """Parameters to be passed with the API request"""
-        return self.get("params", "")
 
     @property
     def use_ssl(self):
@@ -60,18 +56,70 @@ class NovaConfig(object):
 
     @property
     def username(self):
-        """Username to use for Nova API requests. Defaults to 'admin'."""
-        return self.get("user", "admin")
+        """Username to use for Identity API requests."""
+        return self.get("user", None)
 
     @property
     def tenant_name(self):
-        """Tenant name to use for Nova API requests. Defaults to 'admin'."""
-        return self.get("tenant_name", "admin")
+        """Tenant name to use for Identity API requests."""
+        return self.get("tenant_name", None)
 
     @property
-    def api_key(self):
-        """API key to use when authenticating. Defaults to 'admin_key'."""
-        return self.get("api_key", "admin_key")
+    def password(self):
+        """Password to use when authenticating."""
+        return self.get("password", None)
+
+    @property
+    def strategy(self):
+        """Which auth method does the environment use? (basic|keystone)"""
+        return self.get("strategy", 'keystone')
+
+
+class ComputeConfig(object):
+    def __init__(self, conf):
+        """Initialize a Compute-specific configuration object."""
+        self.conf = conf
+
+    def get(self, item_name, default_value):
+        try:
+            return self.conf.get("compute", item_name)
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            return default_value
+
+    @property
+    def image_ref(self):
+        """Valid primary image to use in tests."""
+        return self.get("image_ref", 'e7ddc02e-92fa-4f82-b36f-59b39bf66a67')
+
+    @property
+    def image_ref_alt(self):
+        """Valid secondary image reference to be used in tests."""
+        return self.get("image_ref_alt", '346f4039-a81e-44e0-9223-4a3d13c907')
+
+    @property
+    def flavor_ref(self):
+        """Valid primary flavor to use in tests."""
+        return self.get("flavor_ref", 1)
+
+    @property
+    def flavor_ref_alt(self):
+        """Valid secondary flavor to be used in tests."""
+        return self.get("flavor_ref_alt", 2)
+
+    @property
+    def resize_available(self):
+        """Does the test environment support resizing?"""
+        return self.get("resize_available", 'false') != 'false'
+
+    @property
+    def create_image_enabled(self):
+        """Does the test environment support snapshots?"""
+        return self.get("create_image_enabled", 'false') != 'false'
+
+    @property
+    def release_name(self):
+        """Which release is this?"""
+        return self.get("release_name", 'essex')
 
     @property
     def build_interval(self):
@@ -90,60 +138,8 @@ class NovaConfig(object):
 
     @property
     def catalog_type(self):
-        """Catalog name of the Nova service."""
+        """Catalog type of the Compute service."""
         return self.get("catalog_type", 'compute')
-
-
-class EnvironmentConfig(object):
-    def __init__(self, conf):
-        """Initialize a Environment-specific configuration object."""
-        self.conf = conf
-
-    def get(self, item_name, default_value):
-        try:
-            return self.conf.get("environment", item_name)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
-            return default_value
-
-    @property
-    def image_ref(self):
-        """Valid imageRef to use """
-        return self.get("image_ref", 3)
-
-    @property
-    def image_ref_alt(self):
-        """Valid imageRef to rebuild images with"""
-        return self.get("image_ref_alt", 3)
-
-    @property
-    def flavor_ref(self):
-        """Valid flavorRef to use"""
-        return self.get("flavor_ref", 1)
-
-    @property
-    def flavor_ref_alt(self):
-        """Valid flavorRef to resize images with"""
-        return self.get("flavor_ref_alt", 2)
-
-    @property
-    def resize_available(self):
-        """ Does the test environment support resizing """
-        return self.get("resize_available", 'false') != 'false'
-
-    @property
-    def create_image_enabled(self):
-        """ Does the test environment support snapshots """
-        return self.get("create_image_enabled", 'false') != 'false'
-
-    @property
-    def authentication(self):
-        """ What auth method does the environment use (basic|keystone) """
-        return self.get("authentication", 'keystone')
-
-    @property
-    def release_name(self):
-        """ Which release is this? """
-        return self.get("release_name", 'essex')
 
 
 class ImagesConfig(object):
@@ -229,8 +225,8 @@ class TempestConfig(object):
             raise RuntimeError(msg)
 
         self._conf = self.load_config(path)
-        self.nova = NovaConfig(self._conf)
-        self.env = EnvironmentConfig(self._conf)
+        self.compute = ComputeConfig(self._conf)
+        self.identity = IdentityConfig(self._conf)
         self.images = ImagesConfig(self._conf)
 
     def load_config(self, path):

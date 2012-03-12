@@ -1,27 +1,30 @@
-[nova]
+[identity]
+use_ssl=False
 host=127.0.0.1
 port=5000
-apiVer=v2.0
+api_version=v2.0
 path=tokens
 user=admin
-api_key=admin-key
+password=admin-password
 tenant_name=admin-project
+strategy=keystone
+
+[compute]
+# Reference data for tests. The ref and ref_alt should be
+# distinct images/flavors.
+image_ref=e7ddc02e-92fa-4f82-b36f-59b39bf66a67
+image_ref_alt=346f4039-a81e-44e0-9223-4a3d13c92a07
+flavor_ref=1
+flavor_ref_alt=2
 ssh_timeout=300
 build_interval=10
 build_timeout=600
 catalog_type=compute
+create_image_enabled=true
+resize_available=true
 
 [image]
 username=admin
 password=********
 tenant=admin
 auth_url=http://localhost:5000/v2.0
-
-[environment]
-image_ref=3
-image_ref_alt=4
-flavor_ref=1
-flavor_ref_alt=2
-create_image_enabled=true
-resize_available=true
-authentication=keystone_v2

@@ -13,8 +13,8 @@ class ServerPersonalityTest(unittest.TestCase):
         cls.os = openstack.Manager()
         cls.client = cls.os.servers_client
         cls.config = cls.config = cls.os.config
-        cls.image_ref = cls.config.env.image_ref
-        cls.flavor_ref = cls.config.env.flavor_ref
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
         cls.user_client = cls.os.limits_client
 
     def test_personality_files_exceed_limit(self):
