@@ -7,8 +7,8 @@ from tempest import openstack
 
 
 def _parse_image_id(image_ref):
-    temp = image_ref.rsplit('/')
-    return temp[6]
+    temp = image_ref.rsplit('images/')
+    return temp[1]
 
 
 class ImagesTest(unittest.TestCase):
