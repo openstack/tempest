@@ -3,17 +3,17 @@ Quanta Research Cambridge OpenStack Stress Test System
 
 Nova is a distributed, asynchronous system that is prone to race condition
 bugs. These bugs will not be easily found during
-functional testing but will be encountered by users in large deployments in a 
+functional testing but will be encountered by users in large deployments in a
 way that is hard to debug. The stress test tries to cause these bugs to happen
 in a more controlled environment.
 
-The basic idea of the test is that there are a number of actions, roughly 
+The basic idea of the test is that there are a number of actions, roughly
 corresponding to the Compute API, that are fired pseudo-randomly at a nova 
 cluster as fast as possible. These actions consist of what to do, how to
 verify success, and a state filter to make sure that the operation makes sense.
 For example, if the action is to reboot a server and none are active, nothing
 should be done. A test case is a set of actions to be performed and the
-probability that each action should be selected. There are also parameters 
+probability that each action should be selected. There are also parameters
 controlling rate of fire and stuff like that.
 
 This test framework is designed to stress test a Nova cluster. Hence,
@@ -24,7 +24,7 @@ Environment
 This particular framework assumes your working Nova cluster understands Nova 
 API 2.0. The stress tests can read the logs from the cluster. To enable this
 you have to
-provide the private key and user name for ssh to the cluster in the 
+provide the private key and user name for ssh to the cluster in the
 [stress] section of tempest.conf. You also need to provide the
 value of --logdir in nova.conf:
 
@@ -35,7 +35,7 @@ value of --logdir in nova.conf:
 The stress test needs the top-level tempest directory to be on PYTHONPATH
 if you are not using nosetests to run.
 
-For real stress, you need to remove "ratelimit" from the pipeline in 
+For real stress, you need to remove "ratelimit" from the pipeline in
 api-paste.ini.
 
 
