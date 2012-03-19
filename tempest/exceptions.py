@@ -35,6 +35,10 @@ class NotFound(TempestException):
     message = "Object not found"
 
 
+class Unauthorized(TempestException):
+    message = 'Unauthorized'
+
+
 class TimeoutException(TempestException):
     message = "Request timed out"
 

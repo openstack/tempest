@@ -14,16 +14,20 @@ from tempest.services.nova.json.keypairs_client import KeyPairsClient
 
 class Manager(object):
 
-    def __init__(self):
+    def __init__(self, username=None, api_key=None, tenant_name=None):
         """
         Top level manager for all Openstack APIs
         """
         self.config = tempest.config.TempestConfig()
-        username = self.config.identity.username
-        password = self.config.identity.password
-        tenant_name = self.config.identity.tenant_name
 
         if None in [username, password, tenant_name]:
+            # Pull from the default, the first non-admin user
+            username = self.config.identity.nonadmin_user1
+            password = self.config.identity.nonadmin_user1_password
+            tenant_name = self.config.identity.nonadmin_user1_tenant_name
+
+        if None in [username, password, tenant_name]:
+            # We can't find any usable credentials, fail early
             raise exceptions.InvalidConfiguration(message="Missing complete \
                                                   user credentials.")
         auth_url = self.config.identity.auth_url

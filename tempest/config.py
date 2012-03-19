@@ -55,19 +55,34 @@ class IdentityConfig(object):
         return self.get("use_ssl", 'false').lower() != 'false'
 
     @property
-    def username(self):
-        """Username to use for Identity API requests."""
-        return self.get("user", None)
+    def nonadmin_user1(self):
+        """Username to use for Nova API requests."""
+        return self.get("nonadmin_user1")
 
     @property
-    def tenant_name(self):
-        """Tenant name to use for Identity API requests."""
-        return self.get("tenant_name", None)
+    def nonadmin_user1_tenant_name(self):
+        """Tenant name to use for Nova API requests."""
+        return self.get("nonadmin_user1_tenant_name")
 
     @property
-    def password(self):
-        """Password to use when authenticating."""
-        return self.get("password", None)
+    def nonadmin_user1_password(self):
+        """API key to use when authenticating."""
+        return self.get("nonadmin_user1_password")
+
+    @property
+    def nonadmin_user2(self):
+        """Alternate username to use for Nova API requests."""
+        return self.get("nonadmin_user2")
+
+    @property
+    def nonadmin_user2_tenant_name(self):
+        """Alternate tenant name for Nova API requests."""
+        return self.get("nonadmin_user2_tenant_name")
+
+    @property
+    def nonadmin_user2_password(self):
+        """Alternate API key to use when authenticating."""
+        return self.get("nonadmin_user2_password")
 
     @property
     def strategy(self):
