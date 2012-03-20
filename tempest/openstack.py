@@ -10,6 +10,7 @@ from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
 from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
 from tempest.services.nova.json.keypairs_client import KeyPairsClient
+from tempest.services.nova.json.volumes_client import VolumesClient
 
 
 class Manager(object):
@@ -42,6 +43,7 @@ class Manager(object):
         self.keypairs_client = KeyPairsClient(*client_args)
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.floating_ips_client = FloatingIPsClient(*client_args)
+        self.volumes_client = VolumesClient(*client_args)
 
 
 class ServiceManager(object):
