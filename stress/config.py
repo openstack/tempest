@@ -41,3 +41,8 @@ class StressConfig(object):
     def nova_logdir(self):
         """Directory containing log files on the compute nodes"""
         return self.get("nova_logdir", None)
+
+    @property
+    def controller(self):
+        """Controller host"""
+        return self.get("controller", None)

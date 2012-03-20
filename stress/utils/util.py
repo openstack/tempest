@@ -32,6 +32,7 @@ def scp(keypath, args):
 
 
 def ssh(keypath, user, node, command, check=True):
+    command = 'sudo ' + command
     command = "ssh %s %s@%s %s" % (get_ssh_options(keypath), user,
                                    node, command)
     popenargs = shlex.split(command)

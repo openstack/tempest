@@ -202,4 +202,4 @@ class ListImagesTest(unittest.TestCase):
         Simple test to see all fixture images returned
         """
         images = self.client.get_images()
-        self.assertEqual(10, len(images) - len(cls.original_images))
+        self.assertEqual(10, len(images) - len(self.original_images))

@@ -23,14 +23,15 @@ Environment
 ------------
 This particular framework assumes your working Nova cluster understands Nova 
 API 2.0. The stress tests can read the logs from the cluster. To enable this
-you have to
-provide the private key and user name for ssh to the cluster in the
+you have to provide the hostname to call 'nova-manage' and
+the private key and user name for ssh to the cluster in the
 [stress] section of tempest.conf. You also need to provide the
 value of --logdir in nova.conf:
 
   host_private_key_path=<path to private ssh key>
   host_admin_user=<name of user for ssh command>
   nova_logdir=<value of --logdir in nova.conf>
+  controller=<hostname for calling nova-manage>
 
 The stress test needs the top-level tempest directory to be on PYTHONPATH
 if you are not using nosetests to run.

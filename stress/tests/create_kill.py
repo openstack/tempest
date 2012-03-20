@@ -20,13 +20,8 @@ from stress.driver import *
 from tempest import openstack
 
 choice_spec = [
-    BasherAction(TestCreateVM(), 50,
-                 kargs={'timeout': '600',
-                        'image_ref': 2,
-                        'flavor_ref': 1}
-                 ),
-    BasherAction(TestKillActiveVM(), 50,
-                 kargs={'timeout': '600'})
+    BasherAction(TestCreateVM(), 50),
+    BasherAction(TestKillActiveVM(), 50)
 ]
 
 nova = openstack.Manager()

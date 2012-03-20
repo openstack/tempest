@@ -57,7 +57,8 @@ class TestCreateVM(test_case.StressTestCase):
             return None
 
         _key_name = kwargs.get('key_name', '')
-        _timeout = int(kwargs.get('timeout', 60))
+        _timeout = int(kwargs.get('timeout',
+                                  manager.config.compute.build_timeout))
         _image_ref = kwargs.get('image_ref', manager.config.compute.image_ref)
         _flavor_ref = kwargs.get('flavor_ref',
                                  manager.config.compute.flavor_ref)
@@ -172,7 +173,7 @@ class TestKillActiveVM(test_case.StressTestCase):
             self._logger.info('no ACTIVE instances to delete')
             return
 
-        _timeout = kwargs.get('timeout', 600)
+        _timeout = kwargs.get('timeout', manager.config.compute.build_timeout)
 
         target = random.choice(active_vms)
         killtarget = target[0]
@@ -240,7 +241,7 @@ class TestKillAnyVM(test_case.StressTestCase):
             self._logger.info('no active instances to delete')
             return
 
-        _timeout = kwargs.get('timeout', 60)
+        _timeout = kwargs.get('timeout', manager.config.compute.build_timeout)
 
         target = random.choice(vms)
         killtarget = target[0]
@@ -276,7 +277,7 @@ class TestUpdateVMName(test_case.StressTestCase):
             self._logger.info('no active instances to update')
             return
 
-        _timeout = kwargs.get('timeout', 600)
+        _timeout = kwargs.get('timeout', manager.config.compute.build_timeout)
 
         target = random.choice(active_vms)
         update_target = target[0]
