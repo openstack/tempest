@@ -93,7 +93,8 @@ class RestClient(object):
             management_url = service_url + tenant_id
             return token, management_url
         elif resp.status == 401:
-            raise exceptions.AuthenticationFailure(user=user, password=api_key)
+            raise exceptions.AuthenticationFailure(user=user,
+                                                   password=password)
 
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)
