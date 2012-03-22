@@ -125,6 +125,9 @@ class RestClient(object):
         req_url = "%s/%s" % (self.base_url, url)
         resp, resp_body = self.http_obj.request(req_url, method,
                                            headers=headers, body=body)
+        if resp.status == 401:
+            self._log(req_url, body, resp, resp_body)
+            raise exceptions.Unauthorized()
 
         if resp.status == 404:
             self._log(req_url, body, resp, resp_body)

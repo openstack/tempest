@@ -4,9 +4,12 @@ host=127.0.0.1
 port=5000
 api_version=v2.0
 path=tokens
-user=admin
-password=admin-password
-tenant_name=admin-project
+nonadmin_user1=user1
+nonadmin_user1_password=password
+nonadmin_user1_tenant_name=user1-project
+nonadmin_user2=user2
+nonadmin_user2_password=password
+nonadmin_user2_tenant_name=user2-project
 strategy=keystone
 
 [compute]
