@@ -15,7 +15,7 @@ from tempest.services.nova.json.volumes_client import VolumesClient
 
 class Manager(object):
 
-    def __init__(self, username=None, api_key=None, tenant_name=None):
+    def __init__(self, username=None, password=None, tenant_name=None):
         """
         Top level manager for all Openstack APIs
         """
