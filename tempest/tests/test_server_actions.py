@@ -140,6 +140,7 @@ class ServerActionsTest(unittest.TestCase):
         """
         self.assertRaises(exceptions.NotFound, self.client.reboot, 999, 'SOFT')
 
+    @unittest.skip('Until bug 963248 is fixed.')
     @attr(type='negative')
     def test_rebuild_nonexistant_server(self):
         """
