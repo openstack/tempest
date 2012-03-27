@@ -42,14 +42,14 @@ class Service(BaseService):
             creds = {
                 'username': config.images.username,
                 'password': config.images.password,
-                'tenant': config.images.tenant,
-                'auth_url': config.images.auth_url,
-                'strategy': 'keystone'
+                'tenant': config.images.tenant_name,
+                # rstrip() is necessary here because Glance client
+                # automatically adds the tokens/ part...
+                'auth_url': config.identity.auth_url.rstrip('/tokens'),
+                'strategy': config.identity.strategy
             }
-            service_token = config.images.service_token
             self._client = client.Client(config.images.host,
                                          config.images.port,
-                                         auth_tok=service_token,
                                          creds=creds)
         else:
             raise NotImplementedError

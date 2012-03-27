@@ -6,8 +6,6 @@ import tempest.config
 
 
 class ServersNegativeTest(unittest.TestCase):
-    release = tempest.config.TempestConfig().\
-            compute.release_name
 
     @classmethod
     def setUpClass(cls):
@@ -16,7 +14,6 @@ class ServersNegativeTest(unittest.TestCase):
         cls.config = cls.os.config
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
-        cls.ssh_timeout = cls.config.compute.ssh_timeout
 
     def test_server_name_blank(self):
         """Create a server with name parameter empty"""
@@ -63,7 +60,6 @@ class ServersNegativeTest(unittest.TestCase):
         else:
             self.fail('Cannot create a server with an invalid flavor')
 
-    @unittest.skipIf(release == 'diablo', 'Bug in Diablo, lp#891264')
     def test_invalid_access_ip_v4_address(self):
         """An access IPv4 address must match a valid address pattern"""
         accessIPv4 = '1.1.1.1.1.1'
@@ -78,7 +74,6 @@ class ServersNegativeTest(unittest.TestCase):
         else:
             self.fail('Access IPv4 address must match the correct format')
 
-    @unittest.skipIf(release == 'diablo', 'Bug in Diablo, lp#891264')
     def test_invalid_ip_v6_address(self):
         """An access IPv6 address must match a valid address pattern"""
         accessIPv6 = 'notvalid'

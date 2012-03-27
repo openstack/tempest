@@ -1,3 +1,22 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2012 OpenStack, LLC
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+import logging
+
 import tempest.config
 from tempest import exceptions
 from tempest.services.image import service as image_service
@@ -12,25 +31,28 @@ from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
 from tempest.services.nova.json.keypairs_client import KeyPairsClient
 from tempest.services.nova.json.volumes_client import VolumesClient
 
+LOG = logging.getLogger(__name__)
+
 
 class Manager(object):
 
-    def __init__(self, username=None, password=None, tenant_name=None):
-        """
-        Top level manager for all Openstack APIs
-        """
+    """
+    Top level manager for OpenStack Compute clients
+    """
+
+    def __init__(self):
         self.config = tempest.config.TempestConfig()
 
-        if None in [username, password, tenant_name]:
-            # Pull from the default, the first non-admin user
-            username = self.config.identity.nonadmin_user1
-            password = self.config.identity.nonadmin_user1_password
-            tenant_name = self.config.identity.nonadmin_user1_tenant_name
+        username = self.config.compute.username
+        password = self.config.compute.password
+        tenant_name = self.config.compute.tenant_name
 
-        if None in [username, password, tenant_name]:
-            # We can't find any usable credentials, fail early
-            raise exceptions.InvalidConfiguration(message="Missing complete \
-                                                  user credentials.")
+        if None in (username, password, tenant_name):
+            msg = ("Missing required credentials. "
+                   "username: %(username)s, password: %(password)s, "
+                   "tenant_name: %(tenant_name)s") % locals()
+            raise exceptions.InvalidConfiguration(msg)
+
         auth_url = self.config.identity.auth_url
 
         if self.config.identity.strategy == 'keystone':

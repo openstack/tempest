@@ -4,6 +4,8 @@ from nose.plugins.attrib import attr
 from nose.tools import raises
 
 from tempest import openstack
+from tempest.services.nova.json.images_client import ImagesClient
+from tempest.services.nova.json.servers_client import ServersClient
 from tempest.common.utils.data_utils import rand_name
 from tempest.exceptions import NotFound, ComputeFault, BadRequest, Unauthorized
 from tempest.tests import utils
@@ -23,10 +25,10 @@ class AuthorizationTest(unittest.TestCase):
         cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
 
         # Verify the second user is not the same as the first and is configured
-        cls.user1 = cls.config.identity.nonadmin_user1
-        cls.user2 = cls.config.identity.nonadmin_user2
-        cls.user2_password = cls.config.identity.nonadmin_user2_password
-        cls.user2_tenant_name = cls.config.identity.nonadmin_user2_tenant_name
+        cls.user1 = cls.config.compute.username
+        cls.user2 = cls.config.compute.alt_username
+        cls.user2_password = cls.config.compute.alt_password
+        cls.user2_tenant_name = cls.config.compute.alt_tenant_name
         cls.multi_user = False
 
         if  (cls.user2 != None and cls.user1 != cls.user2
@@ -35,10 +37,18 @@ class AuthorizationTest(unittest.TestCase):
 
             # Setup a client instance for the second user
             cls.multi_user = True
-            cls.os_other = openstack.Manager(cls.user2, cls.user2_password,
-                                             cls.user2_tenant_name)
-            cls.other_client = cls.os_other.servers_client
-            cls.other_images_client = cls.os_other.images_client
+
+            auth_url = self.config.identity.auth_url
+
+            if self.config.identity.strategy == 'keystone':
+                client_args = (self.config, cls.user2, cls.user_2password,
+                               auth_url, cls.user2_tenant_name)
+            else:
+                client_args = (self.config, cls.user2, cls.user2_password,
+                               auth_url)
+
+            cls.other_client = ServersClient(*client_args)
+            cls.other_images_client = ImagesClient(*client_args)
 
             name = rand_name('server')
             resp, server = cls.client.create_server(name, cls.image_ref,

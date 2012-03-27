@@ -109,7 +109,6 @@ class CreateRegisterImagesTest(unittest.TestCase):
         self.assertEqual(1024, results['size'])
 
     @attr(type='image')
-    @unittest.skip('Skipping until Glance Bug 912897 is fixed')
     def test_register_remote_image(self):
         """Register a new remote image"""
         meta = {
@@ -141,7 +140,6 @@ class ListImagesTest(unittest.TestCase):
     def setUpClass(cls):
         if not GLANCE_INSTALLED:
             raise SkipTest('Glance not installed')
-        raise SkipTest('Skipping until Glance Bug 912897 is fixed')
         cls.os = openstack.ServiceManager()
         cls.client = cls.os.images.get_client()
         cls.created_images = []
@@ -149,7 +147,7 @@ class ListImagesTest(unittest.TestCase):
 
         # We add a few images here to test the listing functionality of
         # the images API
-        for x in xrange(1, 10):
+        for x in xrange(0, 10):
             # We make even images remote and odd images standard
             if x % 2 == 0:
                 cls.created_images.append(cls._create_remote_image(x))

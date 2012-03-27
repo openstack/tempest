@@ -8,8 +8,6 @@ from tempest import exceptions
 
 class KeyPairsTest(unittest.TestCase):
 
-    release = tempest.config.TempestConfig().compute.release_name
-
     @classmethod
     def setUpClass(cls):
         cls.os = openstack.Manager()
@@ -138,7 +136,6 @@ class KeyPairsTest(unittest.TestCase):
         else:
             self.fail('empty string')
 
-    @unittest.skipIf(release == 'diablo', 'bug in diablo')
     @attr(type='negative')
     def test_create_keypair_with_long_keynames(self):
         """Keypairs with name longer than 255 chars should not be created"""

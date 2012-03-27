@@ -1,23 +1,48 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2012 OpenStack, LLC
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 import ConfigParser
 import logging
 import os
+
 from tempest.common.utils import data_utils
 
 LOG = logging.getLogger(__name__)
 
 
-class IdentityConfig(object):
-    """Provides configuration information for authenticating with Keystone."""
+class BaseConfig(object):
+
+    SECTION_NAME = None
 
     def __init__(self, conf):
-        """Initialize an Identity-specific configuration object"""
         self.conf = conf
 
     def get(self, item_name, default_value=None):
         try:
-            return self.conf.get("identity", item_name)
+            return self.conf.get(self.SECTION_NAME, item_name)
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             return default_value
+
+
+class IdentityConfig(BaseConfig):
+
+    """Provides configuration information for authenticating with Keystone."""
+
+    SECTION_NAME = "identity"
 
     @property
     def host(self):
@@ -55,61 +80,54 @@ class IdentityConfig(object):
         return self.get("use_ssl", 'false').lower() != 'false'
 
     @property
-    def nonadmin_user1(self):
-        """Username to use for Nova API requests."""
-        return self.get("nonadmin_user1")
-
-    @property
-    def nonadmin_user1_tenant_name(self):
-        """Tenant name to use for Nova API requests."""
-        return self.get("nonadmin_user1_tenant_name")
-
-    @property
-    def nonadmin_user1_password(self):
-        """API key to use when authenticating."""
-        return self.get("nonadmin_user1_password")
-
-    @property
-    def nonadmin_user2(self):
-        """Alternate username to use for Nova API requests."""
-        return self.get("nonadmin_user2")
-
-    @property
-    def nonadmin_user2_tenant_name(self):
-        """Alternate tenant name for Nova API requests."""
-        return self.get("nonadmin_user2_tenant_name")
-
-    @property
-    def nonadmin_user2_password(self):
-        """Alternate API key to use when authenticating."""
-        return self.get("nonadmin_user2_password")
-
-    @property
     def strategy(self):
         """Which auth method does the environment use? (basic|keystone)"""
         return self.get("strategy", 'keystone')
 
 
-class ComputeConfig(object):
-    def __init__(self, conf):
-        """Initialize a Compute-specific configuration object."""
-        self.conf = conf
+class ComputeConfig(BaseConfig):
 
-    def get(self, item_name, default_value):
-        try:
-            return self.conf.get("compute", item_name)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
-            return default_value
+    SECTION_NAME = "compute"
+
+    @property
+    def username(self):
+        """Username to use for Nova API requests."""
+        return self.get("username", "demo")
+
+    @property
+    def tenant_name(self):
+        """Tenant name to use for Nova API requests."""
+        return self.get("tenant_name", "demo")
+
+    @property
+    def password(self):
+        """API key to use when authenticating."""
+        return self.get("password", "pass")
+
+    @property
+    def alt_username(self):
+        """Username of alternate user to use for Nova API requests."""
+        return self.get("alt_username", "demo")
+
+    @property
+    def alt_tenant_name(self):
+        """Alternate user's Tenant name to use for Nova API requests."""
+        return self.get("alt_tenant_name", "demo")
+
+    @property
+    def alt_password(self):
+        """API key to use when authenticating as alternate user."""
+        return self.get("alt_password", "pass")
 
     @property
     def image_ref(self):
         """Valid primary image to use in tests."""
-        return self.get("image_ref", 'e7ddc02e-92fa-4f82-b36f-59b39bf66a67')
+        return self.get("image_ref", "{$IMAGE_ID}")
 
     @property
     def image_ref_alt(self):
         """Valid secondary image reference to be used in tests."""
-        return self.get("image_ref_alt", '346f4039-a81e-44e0-9223-4a3d13c907')
+        return self.get("image_ref_alt", "{$IMAGE_ID_ALT}")
 
     @property
     def flavor_ref(self):
@@ -132,19 +150,9 @@ class ComputeConfig(object):
         return self.get("create_image_enabled", 'false').lower() != 'false'
 
     @property
-    def release_name(self):
-        """Which release is this?"""
-        return self.get("release_name", 'essex')
-
-    @property
     def build_interval(self):
         """Time in seconds between build status checks."""
         return float(self.get("build_interval", 10))
-
-    @property
-    def ssh_timeout(self):
-        """Timeout in seconds to use when connecting via ssh."""
-        return float(self.get("ssh_timeout", 300))
 
     @property
     def build_timeout(self):
@@ -157,20 +165,14 @@ class ComputeConfig(object):
         return self.get("catalog_type", 'compute')
 
 
-class ImagesConfig(object):
+class ImagesConfig(BaseConfig):
+
     """
     Provides configuration information for connecting to an
     OpenStack Images service.
     """
 
-    def __init__(self, conf):
-        self.conf = conf
-
-    def get(self, item_name, default_value=None):
-        try:
-            return self.conf.get("image", item_name)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
-            return default_value
+    SECTION_NAME = "image"
 
     @property
     def host(self):
@@ -189,31 +191,34 @@ class ImagesConfig(object):
 
     @property
     def username(self):
-        """Username to use for Images API requests. Defaults to 'admin'."""
-        return self.get("user", "admin")
+        """Username to use for Images API requests. Defaults to 'demo'."""
+        return self.get("user", "demo")
 
     @property
     def password(self):
         """Password for user"""
-        return self.get("password", "")
+        return self.get("password", "pass")
 
     @property
-    def tenant(self):
-        """Tenant to use for Images API requests. Defaults to 'admin'."""
-        return self.get("tenant", "admin")
-
-    @property
-    def service_token(self):
-        """Token to use in querying the API. Default: None"""
-        return self.get("service_token")
-
-    @property
-    def auth_url(self):
-        """Optional URL to auth service. Will be discovered if None"""
-        return self.get("auth_url")
+    def tenant_name(self):
+        """Tenant to use for Images API requests. Defaults to 'demo'."""
+        return self.get("tenant_name", "demo")
 
 
-class TempestConfig(object):
+# TODO(jaypipes): Move this to a common utils (not data_utils...)
+def singleton(cls):
+    """Simple wrapper for classes that should only have a single instance"""
+    instances = {}
+
+    def getinstance():
+        if cls not in instances:
+            instances[cls] = cls()
+        return instances[cls]
+    return getinstance
+
+
+@singleton
+class TempestConfig:
     """Provides OpenStack configuration information."""
 
     DEFAULT_CONFIG_DIR = os.path.join(
@@ -234,6 +239,8 @@ class TempestConfig(object):
             self.DEFAULT_CONFIG_FILE)
 
         path = os.path.join(conf_dir, conf_file)
+
+        LOG.info("Using tempest config file %s" % path)
 
         if not os.path.exists(path):
             msg = "Config file %(path)s not found" % locals()
