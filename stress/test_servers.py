@@ -214,7 +214,7 @@ class VerifyKillActiveVM(pending_action.PendingAction):
             target = self._target
             self._logger.info('machine %s: DELETED [%.1f secs elapsed]' %
                               (target['id'], time.time() - self._start_time))
-            self._state.delete_machine_state(target['id'])
+            self._state.delete_instance_state(target['id'])
             return True
 
         return False

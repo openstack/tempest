@@ -34,4 +34,4 @@ bash_openstack(nova,
                sleep_time=500,  # in milliseconds
                seed=int(time.time()),
                test_name="hard reboots",
-               max_vms=32)
+               )

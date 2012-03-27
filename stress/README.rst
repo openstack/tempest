@@ -32,6 +32,7 @@ value of --logdir in nova.conf:
   host_admin_user=<name of user for ssh command>
   nova_logdir=<value of --logdir in nova.conf>
   controller=<hostname for calling nova-manage>
+  max_instances=<limit on instances that will be created>
 
 The stress test needs the top-level tempest directory to be on PYTHONPATH
 if you are not using nosetests to run.

@@ -164,6 +164,11 @@ class ComputeConfig(BaseConfig):
         """Catalog type of the Compute service."""
         return self.get("catalog_type", 'compute')
 
+    @property
+    def log_level(self):
+        """Level for logging compute API calls."""
+        return self.get("log_level", 'ERROR')
+
 
 class ImagesConfig(BaseConfig):
 

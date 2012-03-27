@@ -21,11 +21,12 @@ import tempest.config
 
 # get the environment variables for credentials
 identity = tempest.config.TempestConfig().identity
-print identity.username, identity.password,\
-    identity.tenant_name, identity.auth_url
+compute = tempest.config.TempestConfig().compute
+print compute.username, compute.password,\
+    compute.tenant_name, identity.auth_url
 
-nt = client.Client(identity.username, identity.password,
-                   identity.tenant_name, identity.auth_url)
+nt = client.Client(compute.username, compute.password,
+                   compute.tenant_name, identity.auth_url)
 
 flavor_list = nt.flavors.list()
 server_list = nt.servers.list()

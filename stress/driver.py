@@ -114,14 +114,14 @@ def bash_openstack(manager,
                                    (default: 32)
                     `seed`       = random seed (default: None)
     """
+    stress_config = StressConfig(manager.config._conf)
     # get keyword arguments
     duration = kwargs.get('duration', datetime.timedelta(seconds=10))
     seed = kwargs.get('seed', None)
     sleep_time = float(kwargs.get('sleep_time', 3000)) / 1000
-    max_vms = int(kwargs.get('max_vms', 32))
+    max_vms = int(kwargs.get('max_vms', stress_config.max_instances))
     test_name = kwargs.get('test_name', 'unamed test')
 
-    stress_config = StressConfig(manager.config._conf)
     keypath = stress_config.host_private_key_path
     user = stress_config.host_admin_user
     logdir = stress_config.nova_logdir
@@ -194,7 +194,8 @@ def bash_openstack(manager,
                 break
             i += 1
             if i > 60:
-                raise
+                _error_in_logs(keypath, logdir, user, computes)
+                raise Exception("Cleanup timed out")
             time.sleep(1)
         logging.info('killed %s' % kill_id)
         state.delete_instance_state(kill_id)

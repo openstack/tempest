@@ -32,4 +32,4 @@ bash_openstack(nova,
                sleep_time=100,  # in milliseconds
                seed=int(time.time()),
                test_name="create and delete",
-               max_vms=32)
+               )

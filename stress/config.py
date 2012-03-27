@@ -46,3 +46,8 @@ class StressConfig(object):
     def controller(self):
         """Controller host"""
         return self.get("controller", None)
+
+    @property
+    def max_instances(self):
+        """Maximum number of instances to create during test"""
+        return self.get("max_instances", 16)

@@ -35,4 +35,4 @@ bash_openstack(nova,
                sleep_time=1000,  # in milliseconds
                seed=None,
                test_name="simple create and delete",
-               max_vms=10)
+               max_vms=4)

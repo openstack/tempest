@@ -33,7 +33,7 @@ class RestClient(object):
     def __init__(self, config, user, password, auth_url, service,
                  tenant_name=None):
         self.log = logging.getLogger(__name__)
-        self.log.setLevel(logging.ERROR)
+        self.log.setLevel(getattr(logging, config.compute.log_level))
         self.config = config
         if self.config.identity.strategy == 'keystone':
             self.token, self.base_url = self.keystone_auth(user,
