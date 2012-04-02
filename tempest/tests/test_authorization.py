@@ -38,13 +38,13 @@ class AuthorizationTest(unittest.TestCase):
             # Setup a client instance for the second user
             cls.multi_user = True
 
-            auth_url = self.config.identity.auth_url
+            auth_url = cls.config.identity.auth_url
 
-            if self.config.identity.strategy == 'keystone':
-                client_args = (self.config, cls.user2, cls.user_2password,
+            if cls.config.identity.strategy == 'keystone':
+                client_args = (cls.config, cls.user2, cls.user2_password,
                                auth_url, cls.user2_tenant_name)
             else:
-                client_args = (self.config, cls.user2, cls.user2_password,
+                client_args = (cls.config, cls.user2, cls.user2_password,
                                auth_url)
 
             cls.other_client = ServersClient(*client_args)

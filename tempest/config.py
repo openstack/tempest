@@ -107,17 +107,17 @@ class ComputeConfig(BaseConfig):
     @property
     def alt_username(self):
         """Username of alternate user to use for Nova API requests."""
-        return self.get("alt_username", "demo")
+        return self.get("alt_username")
 
     @property
     def alt_tenant_name(self):
         """Alternate user's Tenant name to use for Nova API requests."""
-        return self.get("alt_tenant_name", "demo")
+        return self.get("alt_tenant_name")
 
     @property
     def alt_password(self):
         """API key to use when authenticating as alternate user."""
-        return self.get("alt_password", "pass")
+        return self.get("alt_password")
 
     @property
     def image_ref(self):
