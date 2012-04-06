@@ -40,12 +40,21 @@ class Manager(object):
     Top level manager for OpenStack Compute clients
     """
 
-    def __init__(self):
+    def __init__(self, username=None, password=None, tenant_name=None):
+        """
+        We allow overriding of the credentials used within the various
+        client classes managed by the Manager object. Left as None, the
+        standard username/password/tenant_name is used.
+
+        :param username: Override of the username
+        :param password: Override of the password
+        :param tenant_name: Override of the tenant name
+        """
         self.config = tempest.config.TempestConfig()
 
-        username = self.config.compute.username
-        password = self.config.compute.password
-        tenant_name = self.config.compute.tenant_name
+        username = username or self.config.compute.username
+        password = password or self.config.compute.password
+        tenant_name = tenant_name or self.config.compute.tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials. "
@@ -70,6 +79,35 @@ class Manager(object):
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.floating_ips_client = FloatingIPsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)
+
+
+class AltManager(Manager):
+
+    """
+    Manager object that uses the alt_XXX credentials for its
+    managed client objects
+    """
+
+    def __init__(self):
+        conf = tempest.config.TempestConfig()
+        super(AltManager, self).__init__(conf.compute.alt_username,
+                                         conf.compute.alt_password,
+                                         conf.compute.alt_tenant_name)
+
+
+class AdminManager(Manager):
+
+    """
+    Manager object that uses the alt_XXX credentials for its
+    managed client objects
+    """
+
+    def __init__(self):
+        conf = tempest.config.TempestConfig()
+        super(AdminManager, self).__init__(conf.compute_admin.username,
+                                           conf.compute_admin.password,
+                                           conf.compute_admin.tenant_name)
+        # TODO(jaypipes): Add Admin-Only client class construction below...
 
 
 class ServiceManager(object):

@@ -36,18 +36,9 @@ class AuthorizationTest(unittest.TestCase):
             and cls.user2_tenant_name != None):
 
             try:
-                # Setup a client instance for the second user
-                auth_url = cls.config.identity.auth_url
-
-                if cls.config.identity.strategy == 'keystone':
-                    cls.client_args = (cls.config, cls.user2,
-                                       cls.user2_password,
-                                       auth_url, cls.user2_tenant_name)
-                else:
-                    cls.client_args = (cls.config, cls.user2,
-                                       cls.user2_password, auth_url)
-                cls.other_client = ServersClient(*cls.client_args)
-                cls.other_images_client = ImagesClient(*cls.client_args)
+                cls.other_manager = openstack.AltManager()
+                cls.other_client = cls.other_manager.servers_client
+                cls.other_images_client = cls.other_manager.images_client
             except exceptions.AuthenticationFailure:
                 # multi_user is already set to false, just fall through
                 pass
@@ -162,12 +153,15 @@ class AuthorizationTest(unittest.TestCase):
         A create server request should fail if the tenant id does not match
         the current user
         """
-        other_servers_client = ServersClient(*self.client_args)
-
-        # Change the base URL to impersonate another user
-        other_servers_client.client.base_url = self.client.client.base_url
-        other_servers_client.create_server('test', self.image['id'],
-                                              self.flavor_ref)
+        try:
+            saved_base_url = self.other_client.client.base_url
+            # Change the base URL to impersonate another user
+            self.other_client.client.base_url = self.client.client.base_url
+            self.other_client.create_server('test', self.image['id'],
+                                                    self.flavor_ref)
+        finally:
+            # Reset the base_url...
+            self.other_client.client.base_url = saved_base_url
 
     @classmethod
     def _parse_image_id(self, image_ref):

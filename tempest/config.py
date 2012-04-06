@@ -170,6 +170,26 @@ class ComputeConfig(BaseConfig):
         return self.get("log_level", 'ERROR')
 
 
+class ComputeAdminConfig(BaseConfig):
+
+    SECTION_NAME = "compute-admin"
+
+    @property
+    def username(self):
+        """Administrative Username to use for Nova API requests."""
+        return self.get("username", "admin")
+
+    @property
+    def tenant_name(self):
+        """Administrative Tenant name to use for Nova API requests."""
+        return self.get("tenant_name", "admin")
+
+    @property
+    def password(self):
+        """API key to use when authenticating as admin."""
+        return self.get("password", "pass")
+
+
 class ImagesConfig(BaseConfig):
 
     """
@@ -253,6 +273,7 @@ class TempestConfig:
 
         self._conf = self.load_config(path)
         self.compute = ComputeConfig(self._conf)
+        self.compute_admin = ComputeAdminConfig(self._conf)
         self.identity = IdentityConfig(self._conf)
         self.images = ImagesConfig(self._conf)
 
