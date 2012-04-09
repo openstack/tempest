@@ -165,6 +165,31 @@ class ComputeConfig(BaseConfig):
         return float(self.get("build_timeout", 300))
 
     @property
+    def run_ssh(self):
+        """Does the test environment support snapshots?"""
+        return self.get("run_ssh", 'false').lower() != 'false'
+
+    @property
+    def ssh_user(self):
+        """User name used to authenticate to an instance."""
+        return self.get("ssh_user", "root")
+
+    @property
+    def ssh_timeout(self):
+        """Timeout in seconds to wait for authentcation to succeed."""
+        return float(self.get("ssh_timeout", 300))
+
+    @property
+    def network_for_ssh(self):
+        """Network used for SSH connections."""
+        return self.get("network_for_ssh", "public")
+
+    @property
+    def ip_version_for_ssh(self):
+        """IP version used for SSH connections."""
+        return int(self.get("ip_version_for_ssh", 4))
+
+    @property
     def catalog_type(self):
         """Catalog type of the Compute service."""
         return self.get("catalog_type", 'compute')

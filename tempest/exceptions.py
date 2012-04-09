@@ -75,3 +75,12 @@ class ComputeFault(TempestException):
 
 class Duplicate(TempestException):
     message = "An object with that identifier already exists"
+
+
+class SSHTimeout(TempestException):
+    message = ("Connection to the %(host)s via SSH timed out.\n"
+                "User: %(user)s, Password: %(password)s")
+
+
+class ServerUnreachable(TempestException):
+    message = "The server is not reachable via the configured network"

@@ -20,6 +20,7 @@ class BaseComputeTest(unittest.TestCase):
     config = os.config
     build_interval = config.compute.build_interval
     build_timeout = config.compute.build_timeout
+    ssh_user = config.compute.ssh_user
 
     # Validate reference data exists
     # If not, attempt to auto-configure
