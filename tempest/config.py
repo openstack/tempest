@@ -217,7 +217,7 @@ class ImagesConfig(BaseConfig):
     @property
     def username(self):
         """Username to use for Images API requests. Defaults to 'demo'."""
-        return self.get("user", "demo")
+        return self.get("username", "demo")
 
     @property
     def password(self):
