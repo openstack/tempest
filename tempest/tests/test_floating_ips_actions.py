@@ -24,7 +24,6 @@ class FloatingIPsTest(unittest.TestCase):
         cls.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         cls.server_id = server['id']
         resp, body = cls.servers_client.get_server(server['id'])
-        cls.fixed_ip_addr = body['addresses']['private'][0]['addr']
         #Floating IP creation
         resp, body = cls.client.create_floating_ip()
         cls.floating_ip_id = body['id']
