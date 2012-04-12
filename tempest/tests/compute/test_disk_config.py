@@ -9,6 +9,8 @@ from nose.plugins.attrib import attr
 
 class TestServerDiskConfig(unittest.TestCase):
 
+    resize_available = tempest.config.TempestConfig().compute.resize_available
+
     @classmethod
     def setUpClass(cls):
         cls.os = openstack.Manager()
@@ -125,6 +127,7 @@ class TestServerDiskConfig(unittest.TestCase):
 
     @attr(type='positive')
     @utils.skip_unless_attr('disk_config', 'Disk config extension not enabled')
+    @unittest.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_from_manual_to_auto(self):
         """A server should be resized from manual to auto disk config"""
         name = rand_name('server')
@@ -151,6 +154,7 @@ class TestServerDiskConfig(unittest.TestCase):
 
     @attr(type='positive')
     @utils.skip_unless_attr('disk_config', 'Disk config extension not enabled')
+    @unittest.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_from_auto_to_manual(self):
         """A server should be resized from auto to manual disk config"""
         name = rand_name('server')
