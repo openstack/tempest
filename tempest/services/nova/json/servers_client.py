@@ -53,10 +53,12 @@ class ServersClient(object):
             'accessIPv4': kwargs.get('accessIPv4'),
             'accessIPv6': kwargs.get('accessIPv6'),
             'min_count': kwargs.get('min_count'),
-            'max_count': kwargs.get('max_count'),
-            'OS-DCF:diskConfig': kwargs.get('disk_config')
+            'max_count': kwargs.get('max_count')
         }
 
+        disk_config = kwargs.get('disk_config')
+        if disk_config != None:
+            post_body['OS-DCF:diskConfig'] = disk_config
         post_body = json.dumps({'server': post_body})
         resp, body = self.client.post('servers', post_body, self.headers)
 
