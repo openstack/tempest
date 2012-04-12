@@ -37,6 +37,7 @@ class ServersClient(object):
         accessIPv6: The IPv6 access address for the server.
         min_count: Count of minimum number of instances to launch.
         max_count: Count of maximum number of instances to launch.
+        disk_config: Determines if user or admin controls disk configuration.
         """
         post_body = {
             'name': name,
@@ -53,6 +54,7 @@ class ServersClient(object):
             'accessIPv6': kwargs.get('accessIPv6'),
             'min_count': kwargs.get('min_count'),
             'max_count': kwargs.get('max_count'),
+            'OS-DCF:diskConfig': kwargs.get('disk_config')
         }
 
         post_body = json.dumps({'server': post_body})
@@ -193,7 +195,7 @@ class ServersClient(object):
                                 post_body, self.headers)
 
     def rebuild(self, server_id, image_ref, name=None, meta=None,
-                personality=None, adminPass=None):
+                personality=None, adminPass=None, disk_config=None):
         """Rebuilds a server with a new image"""
         post_body = {
                 'imageRef': image_ref,
@@ -211,6 +213,9 @@ class ServersClient(object):
         if personality != None:
             post_body['personality'] = personality
 
+        if disk_config != None:
+            post_body['OS-DCF:diskConfig'] = disk_config
+
         post_body = json.dumps({'rebuild': post_body})
         resp, body = self.client.post('servers/%s/action' %
                                       str(server_id), post_body,
@@ -218,13 +223,16 @@ class ServersClient(object):
         body = json.loads(body)
         return resp, body['server']
 
-    def resize(self, server_id, flavor_ref):
+    def resize(self, server_id, flavor_ref, disk_config=None):
         """Changes the flavor of a server."""
         post_body = {
             'resize': {
                 'flavorRef': flavor_ref,
             }
         }
+
+        if disk_config != None:
+            post_body['resize']['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps(post_body)
         resp, body = self.client.post('servers/%s/action' %

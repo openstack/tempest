@@ -16,3 +16,8 @@ class ExtensionsClient(object):
         resp, body = self.client.get(url)
         body = json.loads(body)
         return resp, body
+
+    def is_enabled(self, extension):
+        _, extensions = self.list_extensions()
+        exts = extensions['extensions']
+        return any([e for e in exts if e['name'] == extension])
