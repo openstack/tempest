@@ -1,18 +1,16 @@
 import json
-from tempest.common import rest_client
+from tempest.common.rest_client import RestClient
 
 
-class LimitsClient(object):
+class LimitsClient(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        self.config = config
-        catalog_type = self.config.compute.catalog_type
-        self.client = rest_client.RestClient(config, username, password,
-                                             auth_url, catalog_type,
-                                             tenant_name)
+        super(LimitsClient, self).__init__(config, username, password,
+                                           auth_url, tenant_name)
+        self.service = self.config.compute.catalog_type
 
     def get_limits(self):
-        resp, body = self.client.get("limits")
+        resp, body = self.get("limits")
         body = json.loads(body)
         return resp, body['limits']
 
