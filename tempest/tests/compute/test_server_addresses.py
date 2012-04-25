@@ -59,9 +59,12 @@ class ServerAddressesTest(unittest.TestCase):
 
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
-        self.assertTrue('public' in addresses and len(addresses['public']) > 0
-                        or 'private' in addresses
-                        and len(addresses['private']) > 0)
+        self.assertGreaterEqual(len(addresses), 1)
+        for network_name, network_addresses in addresses.iteritems():
+            self.assertGreaterEqual(len(network_addresses), 1)
+            for address in network_addresses:
+                self.assertTrue(address['addr'])
+                self.assertTrue(address['version'])
 
     @attr(type='smoke', category='server-addresses')
     def test_list_server_addresses_by_network(self):
