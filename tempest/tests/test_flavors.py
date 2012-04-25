@@ -1,8 +1,5 @@
-import unittest2 as unittest
 from nose.plugins.attrib import attr
 from tempest import exceptions
-from tempest import openstack
-import tempest.config
 from base_compute_test import BaseComputeTest
 
 
@@ -11,13 +8,12 @@ class FlavorsTest(BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         cls.client = cls.flavors_client
-        cls.flavor_id = cls.flavor_ref
 
     @attr(type='smoke')
     def test_list_flavors(self):
         """List of all flavors should contain the expected flavor"""
         resp, flavors = self.client.list_flavors()
-        resp, flavor = self.client.get_flavor_details(self.flavor_id)
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         flavor_min_detail = {'id': flavor['id'], 'links': flavor['links'],
                              'name': flavor['name']}
         self.assertTrue(flavor_min_detail in flavors)
@@ -26,14 +22,14 @@ class FlavorsTest(BaseComputeTest):
     def test_list_flavors_with_detail(self):
         """Detailed list of all flavors should contain the expected flavor"""
         resp, flavors = self.client.list_flavors_with_detail()
-        resp, flavor = self.client.get_flavor_details(self.flavor_id)
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         self.assertTrue(flavor in flavors)
 
     @attr(type='smoke')
     def test_get_flavor(self):
         """The expected flavor details should be returned"""
-        resp, flavor = self.client.get_flavor_details(self.flavor_id)
-        self.assertEqual(self.flavor_id, str(flavor['id']))
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        self.assertEqual(self.flavor_ref, str(flavor['id']))
 
     @attr(type='negative')
     def test_get_non_existant_flavor(self):
@@ -120,3 +116,10 @@ class FlavorsTest(BaseComputeTest):
         params = {'minRam': flavors[1]['ram']}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
+
+    @attr(type='negative')
+    def test_get_flavor_details_for_invalid_flavor_id(self):
+        """Ensure 404 returned for non-existant flavor ID"""
+
+        self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
+                        9999)

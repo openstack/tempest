@@ -39,3 +39,27 @@ class FlavorsClient(RestClient):
         resp, body = self.get("flavors/%s" % str(flavor_id))
         body = json.loads(body)
         return resp, body['flavor']
+
+    def create_flavor(self, name, ram, vcpus, disk, ephemeral, flavor_id,
+                    swap, rxtx):
+        """Creates a new flavor or instance type"""
+        post_body = {
+                'name': name,
+                'ram': ram,
+                'vcpus': vcpus,
+                'disk': disk,
+                'OS-FLV-EXT-DATA:ephemeral': ephemeral,
+                'id': flavor_id,
+                'swap': swap,
+                'rxtx_factor': rxtx
+            }
+
+        post_body = json.dumps({'flavor': post_body})
+        resp, body = self.post('flavors', post_body, self.headers)
+
+        body = json.loads(body)
+        return resp, body['flavor']
+
+    def delete_flavor(self, flavor_id):
+        """Deletes the given flavor"""
+        return self.delete("flavors/%s" % str(flavor_id))
