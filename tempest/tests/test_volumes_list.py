@@ -25,7 +25,8 @@ class VolumesTest(unittest.TestCase):
             cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
 
-    def teardown(cls):
+    @classmethod
+    def tearDownClass(cls):
         #Delete the created Volumes
         for i in range(3):
             resp, _ = cls.client.delete_volume(cls.volume_id_list[i])
