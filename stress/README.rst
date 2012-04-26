@@ -17,7 +17,7 @@ probability that each action should be selected. There are also parameters
 controlling rate of fire and stuff like that.
 
 This test framework is designed to stress test a Nova cluster. Hence,
-you must have a working Nova cluster.
+you must have a working Nova cluster with rate limiting turned off.
 
 Environment
 ------------
@@ -34,11 +34,15 @@ value of --logdir in nova.conf:
   controller=<hostname for calling nova-manage>
   max_instances=<limit on instances that will be created>
 
+Also, make sure to set
+
+log_level=CRITICAL
+
+so that the API client does not log failed calls which are expected while
+running stress tests.
+
 The stress test needs the top-level tempest directory to be on PYTHONPATH
 if you are not using nosetests to run.
-
-For real stress, you need to remove "ratelimit" from the pipeline in
-api-paste.ini.
 
 
 Running the sample test
