@@ -2,7 +2,6 @@ from nose.plugins.attrib import attr
 import unittest2 as unittest
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
-import tempest.config
 from tempest import exceptions
 
 
@@ -12,7 +11,6 @@ class KeyPairsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.os = openstack.Manager()
         cls.client = cls.os.keypairs_client
-        cls.config = cls.os.config
 
     @attr(type='smoke')
     def test_keypairs_create_list_delete(self):
@@ -110,6 +108,30 @@ class KeyPairsTest(unittest.TestCase):
             self.fail('nonexistent key')
 
     @attr(type='negative')
+    def test_create_keypair_with_empty_public_key(self):
+        """Keypair should not be created with an empty public key"""
+        k_name = rand_name("keypair-")
+        pub_key = ' '
+        try:
+            resp, _ = self.client.create_keypair(k_name, pub_key)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('Expected BadRequest for empty public key')
+
+    @attr(type='negative')
+    def test_create_keypair_when_public_key_bits_exceeds_maximum(self):
+        """Keypair should not be created when public key bits are too long"""
+        k_name = rand_name("keypair-")
+        pub_key = 'ssh-rsa ' + 'A' * 2048 + ' openstack@ubuntu'
+        try:
+            resp, _ = self.client.create_keypair(k_name, pub_key)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('Expected BadRequest for too long public key')
+
+    @attr(type='negative')
     def test_create_keypair_with_duplicate_name(self):
         """Keypairs with duplicate names should not be created"""
         k_name = rand_name('keypair-')
@@ -146,3 +168,14 @@ class KeyPairsTest(unittest.TestCase):
             pass
         else:
             self.fail('too long')
+
+    @attr(type='negative')
+    def test_create_keypair_invalid_name(self):
+        """Keypairs with name being an invalid name should not be created"""
+        k_name = 'key_/.\@:'
+        try:
+            resp, _ = self.client.create_keypair(k_name)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('invalid name')
