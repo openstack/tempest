@@ -1,22 +1,17 @@
 from tempest import exceptions
-from tempest.common import rest_client
+from tempest.common.rest_client import RestClient
 import json
 import time
 
 
-class ServersClient(object):
+class ServersClient(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        self.config = config
-        catalog_type = self.config.compute.catalog_type
-        self.client = rest_client.RestClient(config, username, password,
-                                             auth_url, catalog_type,
-                                             tenant_name)
-
+        super(ServersClient, self).__init__(config, username, password,
+                                           auth_url, tenant_name)
+        self.service = self.config.compute.catalog_type
         self.build_interval = self.config.compute.build_interval
         self.build_timeout = self.config.compute.build_timeout
-        self.headers = {'Content-Type': 'application/json',
-                        'Accept': 'application/json'}
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
@@ -60,7 +55,7 @@ class ServersClient(object):
             if value != None:
                 post_body[post_param] = value
         post_body = json.dumps({'server': post_body})
-        resp, body = self.client.post('servers', post_body, self.headers)
+        resp, body = self.post('servers', post_body, self.headers)
 
         body = json.loads(body)
         return resp, body['server']
@@ -91,20 +86,20 @@ class ServersClient(object):
             post_body['accessIPv6'] = accessIPv6
 
         post_body = json.dumps({'server': post_body})
-        resp, body = self.client.put("servers/%s" % str(server_id),
+        resp, body = self.put("servers/%s" % str(server_id),
                                      post_body, self.headers)
         body = json.loads(body)
         return resp, body['server']
 
     def get_server(self, server_id):
         """Returns the details of an existing server"""
-        resp, body = self.client.get("servers/%s" % str(server_id))
+        resp, body = self.get("servers/%s" % str(server_id))
         body = json.loads(body)
         return resp, body['server']
 
     def delete_server(self, server_id):
         """Deletes the given server"""
-        return self.client.delete("servers/%s" % str(server_id))
+        return self.delete("servers/%s" % str(server_id))
 
     def list_servers(self, params=None):
         """Lists all servers for a user"""
@@ -117,7 +112,7 @@ class ServersClient(object):
 
             url = "servers?" + "".join(param_list)
 
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body
 
@@ -132,7 +127,7 @@ class ServersClient(object):
 
             url = "servers/detail?" + "".join(param_list)
 
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body
 
@@ -161,13 +156,13 @@ class ServersClient(object):
 
     def list_addresses(self, server_id):
         """Lists all addresses for a server"""
-        resp, body = self.client.get("servers/%s/ips" % str(server_id))
+        resp, body = self.get("servers/%s/ips" % str(server_id))
         body = json.loads(body)
         return resp, body['addresses']
 
     def list_addresses_by_network(self, server_id, network_id):
         """Lists all addresses of a specific network type for a server"""
-        resp, body = self.client.get("servers/%s/ips/%s" %
+        resp, body = self.get("servers/%s/ips/%s" %
                                     (str(server_id), network_id))
         body = json.loads(body)
         return resp, body
@@ -181,7 +176,7 @@ class ServersClient(object):
         }
 
         post_body = json.dumps(post_body)
-        return self.client.post('servers/%s/action' % str(server_id),
+        return self.post('servers/%s/action' % str(server_id),
                                 post_body, self.headers)
 
     def reboot(self, server_id, reboot_type):
@@ -193,7 +188,7 @@ class ServersClient(object):
         }
 
         post_body = json.dumps(post_body)
-        return self.client.post('servers/%s/action' % str(server_id),
+        return self.post('servers/%s/action' % str(server_id),
                                 post_body, self.headers)
 
     def rebuild(self, server_id, image_ref, name=None, meta=None,
@@ -219,7 +214,7 @@ class ServersClient(object):
             post_body['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps({'rebuild': post_body})
-        resp, body = self.client.post('servers/%s/action' %
+        resp, body = self.post('servers/%s/action' %
                                       str(server_id), post_body,
                                       self.headers)
         body = json.loads(body)
@@ -237,7 +232,7 @@ class ServersClient(object):
             post_body['resize']['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps(post_body)
-        resp, body = self.client.post('servers/%s/action' %
+        resp, body = self.post('servers/%s/action' %
                                       str(server_id), post_body, self.headers)
         return resp, body
 
@@ -248,7 +243,7 @@ class ServersClient(object):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.client.post('servers/%s/action' %
+        resp, body = self.post('servers/%s/action' %
                                       str(server_id), post_body, self.headers)
         return resp, body
 
@@ -259,7 +254,7 @@ class ServersClient(object):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.client.post('servers/%s/action' %
+        resp, body = self.post('servers/%s/action' %
                                       str(server_id), post_body, self.headers)
         return resp, body
 
@@ -272,44 +267,44 @@ class ServersClient(object):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.client.post('servers/%s/action' %
+        resp, body = self.post('servers/%s/action' %
                                       str(server_id), post_body, self.headers)
         return resp, body
 
     def list_server_metadata(self, server_id):
-        resp, body = self.client.get("servers/%s/metadata" % str(server_id))
+        resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = json.loads(body)
         return resp, body['metadata']
 
     def set_server_metadata(self, server_id, meta):
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.client.put('servers/%s/metadata' %
+        resp, body = self.put('servers/%s/metadata' %
                                      str(server_id), post_body, self.headers)
         body = json.loads(body)
         return resp, body['metadata']
 
     def update_server_metadata(self, server_id, meta):
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.client.post('servers/%s/metadata' %
+        resp, body = self.post('servers/%s/metadata' %
                                      str(server_id), post_body, self.headers)
         body = json.loads(body)
         return resp, body['metadata']
 
     def get_server_metadata_item(self, server_id, key):
-        resp, body = self.client.get("servers/%s/metadata/%s" %
+        resp, body = self.get("servers/%s/metadata/%s" %
                                     (str(server_id), key))
         body = json.loads(body)
         return resp, body['meta']
 
     def set_server_metadata_item(self, server_id, key, meta):
         post_body = json.dumps({'meta': meta})
-        resp, body = self.client.put('servers/%s/metadata/%s' %
+        resp, body = self.put('servers/%s/metadata/%s' %
                                     (str(server_id), key),
                                     post_body, self.headers)
         body = json.loads(body)
         return resp, body['meta']
 
     def delete_server_metadata_item(self, server_id, key):
-        resp, body = self.client.delete("servers/%s/metadata/%s" %
+        resp, body = self.delete("servers/%s/metadata/%s" %
                                     (str(server_id), key))
         return resp, body

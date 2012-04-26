@@ -30,21 +30,49 @@ MAX_RECURSION_DEPTH = 2
 
 class RestClient(object):
 
-    def __init__(self, config, user, password, auth_url, service,
-                 tenant_name=None):
+    def __init__(self, config, user, password, auth_url, tenant_name=None):
         self.log = logging.getLogger(__name__)
         self.log.setLevel(getattr(logging, config.compute.log_level))
         self.config = config
-        if self.config.identity.strategy == 'keystone':
-            self.token, self.base_url = self.keystone_auth(user,
-                                                           password,
-                                                           auth_url,
-                                                           service,
-                                                           tenant_name)
+        self.user = user
+        self.password = password
+        self.auth_url = auth_url
+        self.tenant_name = tenant_name
+
+        self.service = None
+        self.token = None
+        self.base_url = None
+        self.config = config
+        self.region = 0
+        self.endpoint_url = 'publicURL'
+        self.strategy = self.config.identity.strategy
+        self.headers = {'Content-Type': 'application/json',
+                        'Accept': 'application/json'}
+
+    def _set_auth(self):
+        """
+        Sets the token and base_url used in requests based on the strategy type
+        """
+
+        if self.strategy == 'keystone':
+            self.token, self.base_url = self.keystone_auth(self.user,
+                                                           self.password,
+                                                           self.auth_url,
+                                                           self.service,
+                                                           self.tenant_name)
         else:
-            self.token, self.base_url = self.basic_auth(user,
-                                                        password,
-                                                        auth_url)
+            self.token, self.base_url = self.basic_auth(self.user,
+                                                        self.password,
+                                                        self.auth_url)
+
+    def clear_auth(self):
+        """
+        Can be called to clear the token and base_url so that the next request
+        will fetch a new token and base_url
+        """
+
+        self.token = None
+        self.base_url = None
 
     def basic_auth(self, user, password, auth_url):
         """
@@ -93,7 +121,7 @@ class RestClient(object):
             mgmt_url = None
             for ep in auth_data['serviceCatalog']:
                 if ep["type"] == service:
-                    mgmt_url = ep['endpoints'][0]['publicURL']
+                    mgmt_url = ep['endpoints'][self.region][self.endpoint_url]
                     # See LP#920817. The tenantId is *supposed*
                     # to be returned for each endpoint accorsing to the
                     # Keystone spec. But... it isn't, so we have to parse
@@ -134,6 +162,9 @@ class RestClient(object):
 
     def request(self, method, url, headers=None, body=None, depth=0):
         """A simple HTTP request interface."""
+
+        if (self.token is None) or (self.base_url is None):
+            self._set_auth()
 
         self.http_obj = httplib2.Http()
         if headers == None:

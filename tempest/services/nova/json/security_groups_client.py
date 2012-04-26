@@ -1,17 +1,13 @@
-from tempest.common import rest_client
+from tempest.common.rest_client import RestClient
 import json
 
 
-class SecurityGroupsClient(object):
+class SecurityGroupsClient(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        self.config = config
-        catalog_type = self.config.compute.catalog_type
-        self.client = rest_client.RestClient(config, username, password,
-                                             auth_url, catalog_type,
-                                             tenant_name)
-        self.headers = {'Content-Type': 'application/json',
-                        'Accept': 'application/json'}
+        super(SecurityGroupsClient, self).__init__(config, username, password,
+                                           auth_url, tenant_name)
+        self.service = self.config.compute.catalog_type
 
     def list_security_groups(self, params=None):
         """List all security groups for a user"""
@@ -24,14 +20,14 @@ class SecurityGroupsClient(object):
 
             url += '?' + ' '.join(param_list)
 
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['security_groups']
 
     def get_security_group(self, security_group_id):
         """Get the details of a Security Group"""
         url = "os-security-groups/%s" % str(security_group_id)
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['security_group']
 
@@ -46,14 +42,14 @@ class SecurityGroupsClient(object):
             'description': description,
         }
         post_body = json.dumps({'security_group': post_body})
-        resp, body = self.client.post('os-security-groups',
+        resp, body = self.post('os-security-groups',
                                         post_body, self.headers)
         body = json.loads(body)
         return resp, body['security_group']
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group"""
-        return self.client.delete('os-security-groups/%s'
+        return self.delete('os-security-groups/%s'
                                    % str(security_group_id))
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
@@ -78,11 +74,11 @@ class SecurityGroupsClient(object):
         }
         post_body = json.dumps({'security_group_rule': post_body})
         url = 'os-security-group-rules'
-        resp, body = self.client.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body, self.headers)
         body = json.loads(body)
         return resp, body['security_group_rule']
 
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule"""
-        return self.client.delete('os-security-group-rules/%s'
+        return self.delete('os-security-group-rules/%s'
                                       % str(group_rule_id))

@@ -1,15 +1,13 @@
-from tempest.common import rest_client
+from tempest.common.rest_client import RestClient
 import json
 
 
-class FlavorsClient(object):
+class FlavorsClient(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        self.config = config
-        catalog_type = self.config.compute.catalog_type
-        self.client = rest_client.RestClient(config, username, password,
-                                             auth_url, catalog_type,
-                                             tenant_name)
+        super(FlavorsClient, self).__init__(config, username, password,
+                                            auth_url, tenant_name)
+        self.service = self.config.compute.catalog_type
 
     def list_flavors(self, params=None):
         url = 'flavors'
@@ -20,7 +18,7 @@ class FlavorsClient(object):
 
             url = "flavors?" + "".join(param_list)
 
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['flavors']
 
@@ -33,11 +31,11 @@ class FlavorsClient(object):
 
             url = "flavors/detail?" + "".join(param_list)
 
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['flavors']
 
     def get_flavor_details(self, flavor_id):
-        resp, body = self.client.get("flavors/%s" % str(flavor_id))
+        resp, body = self.get("flavors/%s" % str(flavor_id))
         body = json.loads(body)
         return resp, body['flavor']

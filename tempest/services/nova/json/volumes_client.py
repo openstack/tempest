@@ -1,20 +1,17 @@
 from tempest import exceptions
-from tempest.common import rest_client
+from tempest.common.rest_client import RestClient
 import json
 import time
 
 
-class VolumesClient(object):
+class VolumesClient(RestClient):
 
-    def __init__(self, config, username, key, auth_url, tenant_name=None):
-        self.config = config
-        catalog_type = self.config.compute.catalog_type
-        self.client = rest_client.RestClient(config, username, key, auth_url,
-                                             catalog_type, tenant_name)
+    def __init__(self, config, username, password, auth_url, tenant_name=None):
+        super(VolumesClient, self).__init__(config, username, password,
+                                           auth_url, tenant_name)
+        self.service = self.config.compute.catalog_type
         self.build_interval = self.config.compute.build_interval
         self.build_timeout = self.config.compute.build_timeout
-        self.headers = {'Content-Type': 'application/json',
-                        'Accept': 'application/json'}
 
     def list_volumes(self, params=None):
         """List all the volumes created"""
@@ -26,7 +23,7 @@ class VolumesClient(object):
 
             url += '?' + ' '.join(param_list)
 
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['volumes']
 
@@ -40,14 +37,14 @@ class VolumesClient(object):
 
             url = '?' + ' '.join(param_list)
 
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['volumes']
 
     def get_volume(self, volume_id):
         """Returns the details of a single volume"""
         url = "os-volumes/%s" % str(volume_id)
-        resp, body = self.client.get(url)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['volume']
 
@@ -66,13 +63,13 @@ class VolumesClient(object):
             }
 
         post_body = json.dumps({'volume': post_body})
-        resp, body = self.client.post('os-volumes', post_body, self.headers)
+        resp, body = self.post('os-volumes', post_body, self.headers)
         body = json.loads(body)
         return resp, body['volume']
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume"""
-        return self.client.delete("os-volumes/%s" % str(volume_id))
+        return self.delete("os-volumes/%s" % str(volume_id))
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status"""
