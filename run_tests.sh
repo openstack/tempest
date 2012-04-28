@@ -5,6 +5,7 @@ function usage {
   echo "Run Tempest test suite"
   echo ""
   echo "  -s, --smoke              Only run smoke tests"
+  echo "  -w, --whitebox           Only run whitebox tests"
   echo "  -p, --pep8               Just run pep8"
   echo "  -h, --help               Print this usage message"
   echo "  -d. --debug              Debug this script -- set -o xtrace"
@@ -17,6 +18,7 @@ function process_option {
     -d|--debug) set -o xtrace;;
     -p|--pep8) let just_pep8=1;;
     -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
+    -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
     *) noseargs="$noseargs $1"
   esac
 }

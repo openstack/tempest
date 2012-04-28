@@ -235,6 +235,36 @@ class ComputeConfig(BaseConfig):
         """Level for logging compute API calls."""
         return self.get("log_level", 'ERROR')
 
+    @property
+    def whitebox_enabled(self):
+        """Does the test environment support whitebox tests for Compute?"""
+        return self.get("whitebox_enabled", 'false').lower() != 'false'
+
+    @property
+    def db_uri(self):
+        """Connection string to the database of Compute service"""
+        return self.get("db_uri", None)
+
+    @property
+    def source_dir(self):
+        """Path of nova source directory"""
+        return self.get("source_dir", "/opt/stack/nova")
+
+    @property
+    def config_path(self):
+        """Path of nova configuration file"""
+        return self.get("config_path", "/etc/nova/nova.conf")
+
+    @property
+    def bin_dir(self):
+        """Directory containing nova binaries such as nova-manage"""
+        return self.get("bin_dir", "/usr/local/bin/")
+
+    @property
+    def path_to_private_key(self):
+        """Path to a private key file for SSH access to remote hosts"""
+        return self.get("path_to_private_key")
+
 
 class ComputeAdminConfig(BaseConfig):
 
@@ -314,7 +344,6 @@ class NetworkConfig(BaseConfig):
         return self.get("api_version", "v1.1")
 
 
-# TODO(jaypipes): Move this to a common utils (not data_utils...)
 def singleton(cls):
     """Simple wrapper for classes that should only have a single instance"""
     instances = {}

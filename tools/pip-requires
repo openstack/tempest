@@ -1,9 +1,5 @@
 anyjson
 nose
-argparse
 httplib2>=0.7.0
 pika
-dnspython
-ipython
 unittest2
-paramiko

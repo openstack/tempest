@@ -78,6 +78,28 @@ change_password_available = %COMPUTE_CHANGE_PASSWORD_AVAILABLE%
 # Level to log Compute API request/response details.
 log_level = %COMPUTE_LOG_LEVEL%
 
+# Whitebox options for compute. Whitebox options enable the
+# whitebox test cases, which look at internal Nova database state,
+# SSH into VMs to check instance state, etc.
+
+# Should we run whitebox tests for Compute?
+whitebox_enabled = %COMPUTE_WHITEBOX_ENABLED%
+
+# Path of nova source directory
+source_dir = %COMPUTE_SOURCE_DIR%
+
+# Path of nova configuration file
+config_path = %COMPUTE_CONFIG_PATH%
+
+# Directory containing nova binaries such as nova-manage
+bin_dir = %COMPUTE_BIN_DIR%
+
+# Path to a private key file for SSH access to remote hosts
+path_to_private_key = %COMPUTE_PATH_TO_PRIVATE_KEY%
+
+# Connection string to the database of Compute service
+db_uri = %COMPUTE_DB_URI%
+
 [image]
 # This section contains configuration options used when executing tests
 # against the OpenStack Images API

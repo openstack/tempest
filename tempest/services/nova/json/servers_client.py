@@ -153,7 +153,7 @@ class ServersClient(RestClient):
                 message += ' Current status: %s.' % server_status
                 raise exceptions.TimeoutException(message)
 
-    def wait_for_server_termination(self, server_id):
+    def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination"""
         start_time = int(time.time())
         while True:
@@ -163,7 +163,7 @@ class ServersClient(RestClient):
                 return
 
             server_status = body['status']
-            if server_status == 'ERROR':
+            if server_status == 'ERROR' and not ignore_error:
                 raise exceptions.BuildErrorException
 
             if int(time.time()) - start_time >= self.build_timeout:
