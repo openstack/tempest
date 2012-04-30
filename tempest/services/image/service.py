@@ -50,7 +50,8 @@ class Service(BaseService):
             }
             self._client = client.Client(config.images.host,
                                          config.images.port,
-                                         creds=creds)
+                                         creds=creds,
+                                         configure_via_auth=False)
         else:
             raise NotImplementedError
 

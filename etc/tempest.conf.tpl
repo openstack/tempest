@@ -73,6 +73,20 @@ log_level = %COMPUTE_LOG_LEVEL%
 # This section contains configuration options used when executing tests
 # against the OpenStack Images API
 
+# The type of endpoint for an Image API service. Unless you have a
+# custom Keystone service catalog implementation, you probably want to leave
+# this value as "image"
+catalog_type = %IMAGE_CATALOG_TYPE%
+
+# The version of the OpenStack Images API to use
+api_version = %IMAGE_API_VERSION%
+
+# This is the main host address of the Image API
+host = %IMAGE_HOST%
+
+# Port that the Image API is running on
+port = %IMAGE_PORT%
+
 # This should be the username of a user WITHOUT administrative privileges
 username = %USERNAME%
 # The above non-administrative user's password
