@@ -30,6 +30,7 @@ import SecurityGroupsClient
 from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
 from tempest.services.nova.json.keypairs_client import KeyPairsClient
 from tempest.services.nova.json.volumes_client import VolumesClient
+from tempest.services.identity.json.admin_client import AdminClient
 
 LOG = logging.getLogger(__name__)
 
@@ -79,6 +80,7 @@ class Manager(object):
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.floating_ips_client = FloatingIPsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)
+        self.admin_client = AdminClient(*client_args)
 
 
 class AltManager(Manager):

@@ -45,6 +45,11 @@ class IdentityConfig(BaseConfig):
     SECTION_NAME = "identity"
 
     @property
+    def catalog_type(self):
+        """Catalog type of the Identity service."""
+        return self.get("catalog_type", 'identity')
+
+    @property
     def host(self):
         """Host IP for making Identity API requests."""
         return self.get("host", "127.0.0.1")
