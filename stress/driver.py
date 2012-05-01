@@ -23,9 +23,11 @@ import time
 
 # local imports
 from test_case import *
-from state import State
 import utils.util
 from config import StressConfig
+from state import ClusterState, KeyPairState, FloatingIpState, VolumeState
+from tempest.common.utils.data_utils import rand_name
+
 
 # setup logging to file
 logging.basicConfig(
@@ -96,6 +98,53 @@ def _error_in_logs(keypath, logdir, user, nodes):
     return False
 
 
+def create_initial_vms(manager, state, count):
+    image = manager.config.compute.image_ref
+    flavor = manager.config.compute.flavor_ref
+    servers = []
+    logging.info('Creating %d vms' % count)
+    for _ in xrange(count):
+        name = rand_name('initial_vm-')
+        _, server = manager.servers_client.create_server(name, image, flavor)
+        servers.append(server)
+    for server in servers:
+        manager.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        logging.info('Server Name: %s Id: %s' % (name, server['id']))
+        state.set_instance_state(server['id'], (server, 'ACTIVE'))
+
+
+def create_initial_floating_ips(manager, state, count):
+    logging.info('Creating %d floating ips' % count)
+    for _ in xrange(count):
+        _, ip = manager.floating_ips_client.create_floating_ip()
+        logging.info('Ip: %s' % ip['ip'])
+        state.add_floating_ip(FloatingIpState(ip))
+
+
+def create_initial_keypairs(manager, state, count):
+    logging.info('Creating %d keypairs' % count)
+    for _ in xrange(count):
+        name = rand_name('keypair-')
+        _, keypair = manager.keypairs_client.create_keypair(name)
+        logging.info('Keypair: %s' % name)
+        state.add_keypair(KeyPairState(keypair))
+
+
+def create_initial_volumes(manager, state, count):
+    volumes = []
+    logging.info('Creating %d volumes' % count)
+    for _ in xrange(count):
+        name = rand_name('volume-')
+        _, volume = manager.volumes_client.create_volume(size=1,
+                                                         display_name=name)
+        volumes.append(volume)
+    for volume in volumes:
+        manager.volumes_client.wait_for_volume_status(volume['id'],
+                                                      'available')
+        logging.info('Volume Name: %s Id: %s' % (name, volume['id']))
+        state.add_volume(VolumeState(volume))
+
+
 def bash_openstack(manager,
                    choice_spec,
                    **kwargs):
@@ -130,8 +179,16 @@ def bash_openstack(manager,
                               "rm -f %s/*.log" % logdir)
     random.seed(seed)
     cases = _create_cases(choice_spec)
+    state = ClusterState(max_vms=max_vms)
+    create_initial_keypairs(manager, state,
+                             int(kwargs.get('initial_keypairs', 0)))
+    create_initial_vms(manager, state,
+                       int(kwargs.get('initial_vms', 0)))
+    create_initial_floating_ips(manager, state,
+                                int(kwargs.get('initial_floating_ips', 0)))
+    create_initial_volumes(manager, state,
+                                int(kwargs.get('initial_volumes', 0)))
     test_end_time = time.time() + duration.seconds
-    state = State(max_vms=max_vms)
 
     retry_list = []
     last_retry = time.time()
@@ -163,6 +220,7 @@ def bash_openstack(manager,
             logging.debug('retry verifications for %d tasks', len(retry_list))
             new_retry_list = []
             for v in retry_list:
+                v.check_timeout()
                 if not v.retry():
                     new_retry_list.append(v)
             retry_list = new_retry_list
@@ -180,7 +238,8 @@ def bash_openstack(manager,
     # Cleanup
     logging.info('Cleaning up: terminating virtual machines...')
     vms = state.get_instances()
-    active_vms = [v for _k, v in vms.iteritems() if v and v[1] == 'ACTIVE']
+    active_vms = [v for _k, v in vms.iteritems()
+                  if v and v[1] != 'TERMINATING']
     for target in active_vms:
         manager.servers_client.delete_server(target[0]['id'])
         # check to see that the server was actually killed
@@ -199,6 +258,13 @@ def bash_openstack(manager,
             time.sleep(1)
         logging.info('killed %s' % kill_id)
         state.delete_instance_state(kill_id)
+    for floating_ip_state in state.get_floating_ips():
+        manager.floating_ips_client.delete_floating_ip(
+                                            floating_ip_state.resource_id)
+    for keypair_state in state.get_keypairs():
+        manager.keypairs_client.delete_keypair(keypair_state.name)
+    for volume_state in state.get_volumes():
+        manager.volumes_client.delete_volume(volume_state.resource_id)
 
     if test_succeeded:
         logging.info('*** Test succeeded ***')

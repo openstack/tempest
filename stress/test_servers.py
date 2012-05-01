@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines various sub-classes of the `StressTestCase` and
-`PendingAction` class. The sub-classes of StressTestCase implement various
+`PendingServerAction` class. Sub-classes of StressTestCase implement various
 API calls on the Nova cluster having to do with creating and deleting VMs.
-Each sub-class will have a corresponding PendingAction. These pending
+Each sub-class will have a corresponding PendingServerAction. These pending
 actions veriy that the API call was successful or not."""
 
 
@@ -26,7 +26,6 @@ import time
 # local imports
 import test_case
 import pending_action
-from tempest.exceptions import TimeoutException
 
 
 class TestCreateVM(test_case.StressTestCase):
@@ -101,7 +100,7 @@ class TestCreateVM(test_case.StressTestCase):
                               expected_server)
 
 
-class VerifyCreateVM(pending_action.PendingAction):
+class VerifyCreateVM(pending_action.PendingServerAction):
     """Verify that VM was built and is running"""
     def __init__(self, manager,
                  state,
@@ -127,12 +126,6 @@ class VerifyCreateVM(pending_action.PendingAction):
                                self._target['id'])
             return True
 
-        time_diff = time.time() - self._start_time
-        if time_diff > self._timeout:
-            self._logger.error('%d exceeded launch server timeout of %d' %
-                               (time_diff, self._timeout))
-            raise TimeoutException
-
         admin_pass = self._target['adminPass']
         # Could check more things here.
         if (self._expected['adminPass'] != admin_pass):
@@ -146,7 +139,7 @@ class VerifyCreateVM(pending_action.PendingAction):
             return False
 
         self._logger.info('machine %s: BUILD -> ACTIVE [%.1f secs elapsed]' %
-                          (self._target['id'], time.time() - self._start_time))
+                          (self._target['id'], self.elapsed()))
         self._state.set_instance_state(self._target['id'],
                                       (self._target, 'ACTIVE'))
         return True
@@ -186,7 +179,7 @@ class TestKillActiveVM(test_case.StressTestCase):
                                   killtarget, timeout=_timeout)
 
 
-class VerifyKillActiveVM(pending_action.PendingAction):
+class VerifyKillActiveVM(pending_action.PendingServerAction):
     """Verify that server was destroyed"""
 
     def retry(self):
@@ -201,19 +194,13 @@ class VerifyKillActiveVM(pending_action.PendingAction):
         if (not tid in self._state.get_instances().keys()):
             return False
 
-        time_diff = time.time() - self._start_time
-        if time_diff > self._timeout:
-            self._logger.error('server %s: %d exceeds terminate timeout %d' %
-                               (tid, time_diff, self._timeout))
-            raise TimeoutException
-
         try:
             self._manager.servers_client.get_server(tid)
         except Exception:
             # if we get a 404 response, is the machine really gone?
             target = self._target
             self._logger.info('machine %s: DELETED [%.1f secs elapsed]' %
-                              (target['id'], time.time() - self._start_time))
+                              (target['id'], self.elapsed()))
             self._state.delete_instance_state(target['id'])
             return True
 
@@ -305,7 +292,7 @@ class TestUpdateVMName(test_case.StressTestCase):
                                   timeout=_timeout)
 
 
-class VerifyUpdateVMName(pending_action.PendingAction):
+class VerifyUpdateVMName(pending_action.PendingServerAction):
     """Check that VM has new name"""
     def retry(self):
         """
@@ -317,9 +304,6 @@ class VerifyUpdateVMName(pending_action.PendingAction):
             self._state.get_instances()[self._target['id']][1] ==
             'TERMINATING'):
             return False
-
-        if time.time() - self._start_time > self._timeout:
-            raise TimeoutException
 
         response, body = \
             self._manager.serverse_client.get_server(self._target['id'])
