@@ -11,7 +11,6 @@ class FloatingIPsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
         cls.client = cls.floating_ips_client
         cls.servers_client = cls.servers_client
 

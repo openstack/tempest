@@ -10,7 +10,6 @@ class KeyPairsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
         cls.client = cls.keypairs_client
 
     @attr(type='smoke')
