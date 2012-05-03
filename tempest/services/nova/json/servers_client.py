@@ -21,6 +21,7 @@ class ServersClient(RestClient):
         flavor_ref (Required): The flavor used to build the server.
         Following optional keyword arguments are accepted:
         adminPass: Sets the initial root password.
+        key_name: Key name of keypair that was created earlier.
         meta: A dictionary of values to be used as metadata.
         personality: A list of dictionaries for files to be injected into
         the server.
@@ -40,7 +41,7 @@ class ServersClient(RestClient):
             'flavorRef': flavor_ref
         }
 
-        for option in ['personality', 'adminPass',
+        for option in ['personality', 'adminPass', 'key_name',
                         'security_groups', 'networks', 'user_data',
                         'availability_zone', 'accessIPv4', 'accessIPv6',
                         'min_count', 'max_count', ('metadata', 'meta'),
