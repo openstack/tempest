@@ -48,16 +48,18 @@ class FloatingIPsTest(BaseComputeTest):
         Positive test:Allocation of a new floating IP to a project
         should be succesfull
         """
-        resp, body = self.client.create_floating_ip()
-        self.assertEqual(200, resp.status)
-        floating_ip_id_allocated = body['id']
-        resp, floating_ip_details = \
+        try:
+            resp, body = self.client.create_floating_ip()
+            self.assertEqual(200, resp.status)
+            floating_ip_id_allocated = body['id']
+            resp, floating_ip_details = \
                 self.client.get_floating_ip_details(floating_ip_id_allocated)
-        #Checking if the details of allocated IP is in list of floating IP
-        resp, body = self.client.list_floating_ips()
-        self.assertTrue(floating_ip_details in body)
-        #Deleting the floating IP which is created in this method
-        self.client.delete_floating_ip(floating_ip_id_allocated)
+            #Checking if the details of allocated IP is in list of floating IP
+            resp, body = self.client.list_floating_ips()
+            self.assertTrue(floating_ip_details in body)
+        finally:
+            #Deleting the floating IP which is created in this method
+            self.client.delete_floating_ip(floating_ip_id_allocated)
 
     @attr(type='positive')
     def test_delete_floating_ip(self):
