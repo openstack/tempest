@@ -1,14 +1,8 @@
 from nose.plugins.attrib import attr
 
 from tempest import exceptions
-from tempest import openstack
 from base_compute_test import BaseComputeTest
-from tempest.common.utils.data_utils import rand_name
-
-
-def _parse_image_id(image_ref):
-    temp = image_ref.rsplit('/')
-    return temp[len(temp) - 1]
+from tempest.common.utils.data_utils import rand_name, parse_image_id
 
 
 class ListImagesTest(BaseComputeTest):
@@ -31,7 +25,7 @@ class ListImagesTest(BaseComputeTest):
         # Create images to be used in the filter tests
         image1_name = rand_name('image')
         resp, body = cls.client.create_image(cls.server1['id'], image1_name)
-        cls.image1_id = _parse_image_id(resp['location'])
+        cls.image1_id = parse_image_id(resp['location'])
         cls.client.wait_for_image_resp_code(cls.image1_id, 200)
         cls.client.wait_for_image_status(cls.image1_id, 'ACTIVE')
         resp, cls.image1 = cls.client.get_image(cls.image1_id)
@@ -41,14 +35,14 @@ class ListImagesTest(BaseComputeTest):
         # server will sometimes cause failures
         image3_name = rand_name('image')
         resp, body = cls.client.create_image(cls.server2['id'], image3_name)
-        cls.image3_id = _parse_image_id(resp['location'])
+        cls.image3_id = parse_image_id(resp['location'])
         cls.client.wait_for_image_resp_code(cls.image3_id, 200)
         cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
         resp, cls.image3 = cls.client.get_image(cls.image3_id)
 
         image2_name = rand_name('image')
         resp, body = cls.client.create_image(cls.server1['id'], image2_name)
-        cls.image2_id = _parse_image_id(resp['location'])
+        cls.image2_id = parse_image_id(resp['location'])
         cls.client.wait_for_image_resp_code(cls.image2_id, 200)
         cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
         resp, cls.image2 = cls.client.get_image(cls.image2_id)

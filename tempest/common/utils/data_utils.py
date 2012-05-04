@@ -37,3 +37,10 @@ def build_url(host, port, api_version=None, path=None,
         url += urllib.urlencode(params)
 
     return url
+
+
+def parse_image_id(image_ref):
+    """Return the image id from a given image ref"""
+    temp = image_ref.rsplit('/')
+    #Return the last item, which is the image id
+    return temp[len(temp) - 1]

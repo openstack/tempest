@@ -5,11 +5,7 @@ from tempest.common.utils.data_utils import rand_name
 from base_compute_test import BaseComputeTest
 import tempest.config
 from tempest import openstack
-
-
-def _parse_image_id(image_ref):
-    temp = image_ref.rsplit('images/')
-    return temp[1]
+from tempest.common.utils import data_utils
 
 
 class ImagesTest(BaseComputeTest):
@@ -38,7 +34,7 @@ class ImagesTest(BaseComputeTest):
         name = rand_name('image')
         meta = {'image_type': 'test'}
         resp, body = self.client.create_image(server['id'], name, meta)
-        image_id = _parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         self.client.wait_for_image_resp_code(image_id, 200)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
@@ -78,7 +74,7 @@ class ImagesTest(BaseComputeTest):
             pass
 
         else:
-            image_id = _parse_image_id(resp['location'])
+            image_id = data_utils.parse_image_id(resp['location'])
             self.client.wait_for_image_resp_code(image_id, 200)
             self.client.wait_for_image_status(image_id, 'ACTIVE')
             self.client.delete_image(image_id)

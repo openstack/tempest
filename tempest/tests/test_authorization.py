@@ -4,9 +4,7 @@ from nose.plugins.attrib import attr
 from nose.tools import raises
 
 from tempest import openstack
-from tempest.services.nova.json.images_client import ImagesClient
-from tempest.services.nova.json.servers_client import ServersClient
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils.data_utils import rand_name, parse_image_id
 from tempest import exceptions
 from tempest.tests import utils
 
@@ -53,7 +51,7 @@ class AuthorizationTest(unittest.TestCase):
 
                 name = rand_name('image')
                 resp, body = cls.client.create_image(server['id'], name)
-                image_id = cls._parse_image_id(resp['location'])
+                image_id = parse_image_id(resp['location'])
                 cls.images_client.wait_for_image_resp_code(image_id, 200)
                 cls.images_client.wait_for_image_status(image_id, 'ACTIVE')
                 resp, cls.image = cls.images_client.get_image(image_id)
@@ -162,9 +160,3 @@ class AuthorizationTest(unittest.TestCase):
         finally:
             # Reset the base_url...
             self.other_client.base_url = saved_base_url
-
-    @classmethod
-    def _parse_image_id(self, image_ref):
-        temp = image_ref.rsplit('/')
-        #Return the last item, which is the image id
-        return temp[len(temp) - 1]
