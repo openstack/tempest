@@ -1,7 +1,6 @@
 from tempest import exceptions
 from tempest import openstack
-from tempest.config import TempestConfig
-
+from tempest.common.utils.data_utils import rand_name
 import unittest2 as unittest
 
 
@@ -21,6 +20,7 @@ class BaseComputeTest(unittest.TestCase):
     build_interval = config.compute.build_interval
     build_timeout = config.compute.build_timeout
     ssh_user = config.compute.ssh_user
+    servers = []
 
     # Validate reference data exists
     # If not, attempt to auto-configure
@@ -82,3 +82,16 @@ class BaseComputeTest(unittest.TestCase):
                     if flavors[i]['ram'] > flavors[0]['ram']:
                         flavor_ref_alt = flavors[i]['id']
                         break
+
+    def create_server(self, image_id=None):
+        """Wrapper utility that returns a test server"""
+        server_name = rand_name('test-vm-')
+        flavor = self.flavor_ref
+        if not image_id:
+            image_id = self.image_ref
+
+        resp, server = self.servers_client.create_server(
+                                                server_name, image_id, flavor)
+        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        self.servers.append(server)
+        return server

@@ -1,8 +1,10 @@
-from tempest import openstack
+import sys
+import unittest2 as unittest
+from nose.plugins.attrib import attr
 from tempest.common.utils.data_utils import rand_name
 from base_compute_test import BaseComputeTest
 from tempest import exceptions
-import tempest.config
+from tempest import openstack
 
 
 class ServersNegativeTest(BaseComputeTest):
@@ -10,17 +12,30 @@ class ServersNegativeTest(BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         cls.client = cls.servers_client
+        cls.img_client = cls.images_client
+        cls.alt_os = openstack.AltManager()
+        cls.alt_client = cls.alt_os.servers_client
 
+    @classmethod
+    def tearDownClass(cls):
+        for server in cls.servers:
+            try:
+                cls.client.delete_server(server['id'])
+            except exceptions.NotFound:
+                continue
+
+    @attr(type='negative')
     def test_server_name_blank(self):
         """Create a server with name parameter empty"""
         try:
-            resp, server = self.client.create_server('', self.image_ref,
-                                                     self.flavor_ref)
+                resp, server = self.client.create_server('', self.image_ref,
+                                                         self.flavor_ref)
         except exceptions.BadRequest:
             pass
         else:
             self.fail('Server name cannot be blank')
 
+    @attr(type='negative')
     def test_personality_file_contents_not_encoded(self):
         """Use an unencoded file when creating a server with personality"""
         file_contents = 'This is a test file.'
@@ -37,6 +52,7 @@ class ServersNegativeTest(BaseComputeTest):
         else:
             self.fail('Unencoded file contents should not be accepted')
 
+    @attr(type='negative')
     def test_create_with_invalid_image(self):
         """Create a server with an unknown image"""
         try:
@@ -47,6 +63,7 @@ class ServersNegativeTest(BaseComputeTest):
         else:
             self.fail('Cannot create a server with an invalid image')
 
+    @attr(type='negative')
     def test_create_with_invalid_flavor(self):
         """Create a server with an unknown flavor"""
         try:
@@ -56,6 +73,7 @@ class ServersNegativeTest(BaseComputeTest):
         else:
             self.fail('Cannot create a server with an invalid flavor')
 
+    @attr(type='negative')
     def test_invalid_access_ip_v4_address(self):
         """An access IPv4 address must match a valid address pattern"""
         accessIPv4 = '1.1.1.1.1.1'
@@ -70,6 +88,7 @@ class ServersNegativeTest(BaseComputeTest):
         else:
             self.fail('Access IPv4 address must match the correct format')
 
+    @attr(type='negative')
     def test_invalid_ip_v6_address(self):
         """An access IPv6 address must match a valid address pattern"""
         accessIPv6 = 'notvalid'
@@ -84,6 +103,7 @@ class ServersNegativeTest(BaseComputeTest):
         else:
             self.fail('Access IPv6 address must match the correct format')
 
+    @attr(type='negative')
     def test_reboot_deleted_server(self):
         """Reboot a deleted server"""
         self.name = rand_name('server')
@@ -99,6 +119,7 @@ class ServersNegativeTest(BaseComputeTest):
         else:
             self.fail('Should not be able to reboot a deleted server')
 
+    @attr(type='negative')
     def test_rebuild_deleted_server(self):
         """Rebuild a deleted server"""
         self.name = rand_name('server')
@@ -114,3 +135,121 @@ class ServersNegativeTest(BaseComputeTest):
             pass
         else:
             self.fail('Should not be able to rebuild a deleted server')
+
+    @attr(type='negative')
+    def test_create_numeric_server_name(self):
+        """Create a server with a numeric name"""
+
+        server_name = 12345
+        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+                          server_name, self.image_ref, self.flavor_ref)
+
+    @attr(type='negative')
+    def test_create_server_name_length_exceeds_256(self):
+        """Create a server with name length exceeding 256 characters"""
+
+        server_name = 'a' * 256
+        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+                          server_name, self.image_ref, self.flavor_ref)
+
+    @attr(type='negative')
+    def test_create_with_invalid_network_uuid(self):
+        """Pass invalid network uuid while creating a server"""
+
+        server_name = rand_name('server')
+        networks = [{'fixed_ip': '10.0.1.1', 'uuid':'a-b-c-d-e-f-g-h-i-j'}]
+
+        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+                         server_name, self.image_ref, self.flavor_ref,
+                         networks=networks)
+
+    @attr(type='negative')
+    def test_create_with_non_existant_keypair(self):
+        """Pass a non existant keypair while creating a server"""
+
+        key_name = rand_name('key')
+        server_name = rand_name('server')
+        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+                        server_name, self.image_ref, self.flavor_ref,
+                        key_name=key_name)
+
+    @unittest.skip("Until Bug 1004007 is fixed")
+    @attr(type='negative')
+    def test_create_server_metadata_exceeds_length_limit(self):
+        """Pass really long metadata while creating a server"""
+
+        server_name = rand_name('server')
+        metadata = {'a': 'b' * 260}
+        self.assertRaises(exceptions.OverLimit, self.client.create_server,
+                        server_name, self.image_ref, self.flavor_ref,
+                        meta=metadata)
+
+    @attr(type='negative')
+    def test_update_name_of_non_existent_server(self):
+        """Update name of a non-existent server"""
+
+        server_name = rand_name('server')
+        new_name = rand_name('server') + '_updated'
+
+        self.assertRaises(exceptions.NotFound, self.client.update_server,
+                        server_name, name=new_name)
+
+    @attr(type='negative')
+    def test_update_server_set_empty_name(self):
+        """Update name of the server to an empty string"""
+
+        server_name = rand_name('server')
+        new_name = ''
+
+        self.assertRaises(exceptions.BadRequest, self.client.update_server,
+                        server_name, name=new_name)
+
+    @attr(type='negative')
+    def test_update_server_of_another_tenant(self):
+        """Update name of a server that belongs to another tenant"""
+
+        server = self.create_server()
+        new_name = server['id'] + '_new'
+        self.assertRaises(exceptions.NotFound,
+                        self.alt_client.update_server, server['id'],
+                        name=new_name)
+
+    @attr(type='negative')
+    def test_update_server_name_length_exceeds_256(self):
+        """Update name of server exceed the name length limit"""
+
+        server = self.create_server()
+        new_name = 'a' * 256
+        self.assertRaises(exceptions.BadRequest,
+                        self.client.update_server, server['id'], name=new_name)
+
+    @attr(type='negative')
+    def test_delete_non_existent_server(self):
+        """Delete a non existent server"""
+
+        self.assertRaises(exceptions.NotFound, self.client.delete_server,
+                        '999erra43')
+
+    @attr(type='negative')
+    def test_delete_a_server_of_another_tenant(self):
+        """Delete a server that belongs to another tenant"""
+
+        server = self.create_server()
+        resp, body = self.client.delete_server(server['id'])
+        self.assertEqual(resp['status'], '204')
+        self.assertRaises(exceptions.NotFound, self.alt_client.delete_server,
+                         server['id'])
+
+    @attr(type='negative')
+    def test_delete_server_pass_negative_id(self):
+        """Pass an invalid string parameter to delete server"""
+
+        self.assertRaises(exceptions.NotFound, self.client.delete_server,
+                        -1)
+
+    @attr(type='negative')
+    def test_delete_server_pass_id_exceeding_length_limit(self):
+        """Pass a server ID that exceeds length limit to delete server"""
+
+        self.assertRaises(exceptions.NotFound, self.client.delete_server,
+                          sys.maxint + 1)
