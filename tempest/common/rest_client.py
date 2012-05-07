@@ -132,12 +132,15 @@ class RestClient(object):
             if mgmt_url == None:
                 raise exceptions.EndpointNotFound(service)
 
-            #TODO (dwalleck): This is a horrible stopgap.
-            #Need to join strings more cleanly
-            temp = mgmt_url.rsplit('/')
-            service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
-            management_url = service_url + tenant_id
-            return token, management_url
+            if mgmt_url.endswith(tenant_id):
+                return token, mgmt_url
+            else:
+                #TODO (dwalleck): This is a horrible stopgap.
+                #Need to join strings more cleanly
+                temp = mgmt_url.rsplit('/')
+                service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
+                management_url = service_url + tenant_id
+                return token, management_url
         elif resp.status == 401:
             raise exceptions.AuthenticationFailure(user=user,
                                                    password=password)
