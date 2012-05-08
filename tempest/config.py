@@ -260,6 +260,24 @@ class ImagesConfig(BaseConfig):
         return self.get("tenant_name", "demo")
 
 
+class NetworkConfig(BaseConfig):
+    """Provides configuration information for connecting to an OpenStack
+    Network Service.
+    """
+
+    SECTION_NAME = "network"
+
+    @property
+    def catalog_type(self):
+        """Catalog type of the Quantum service."""
+        return self.get("catalog_type", 'network')
+
+    @property
+    def api_version(self):
+        """Version of Quantum API"""
+        return self.get("api_version", "v1.1")
+
+
 # TODO(jaypipes): Move this to a common utils (not data_utils...)
 def singleton(cls):
     """Simple wrapper for classes that should only have a single instance"""
@@ -306,6 +324,7 @@ class TempestConfig:
         self.compute_admin = ComputeAdminConfig(self._conf)
         self.identity = IdentityConfig(self._conf)
         self.images = ImagesConfig(self._conf)
+        self.network = NetworkConfig(self._conf)
 
     def load_config(self, path):
         """Read configuration from given path and return a config object."""

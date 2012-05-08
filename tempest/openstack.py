@@ -20,6 +20,7 @@ import logging
 import tempest.config
 from tempest import exceptions
 from tempest.services.image import service as image_service
+from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.flavors_client import FlavorsClient
 from tempest.services.nova.json.servers_client import ServersClient
@@ -83,6 +84,7 @@ class Manager(object):
         self.volumes_client = VolumesClient(*client_args)
         self.admin_client = AdminClient(*client_args)
         self.token_client = TokenClient(self.config)
+        self.network_client = NetworkClient(*client_args)
 
 
 class AltManager(Manager):

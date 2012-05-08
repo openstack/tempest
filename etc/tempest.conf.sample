@@ -126,3 +126,9 @@ username = {$ADMIN_USERNAME}
 password = {$ADMIN_PASSWORD}
 # The above administrative user's tenant name
 tenant_name = {$ADMIN_TENANT_NAME}
+
+[network]
+# This section contains configuration options used when executing tests
+# against the OpenStack Network API.
+api_version = v1.1
+catalog_type = network
