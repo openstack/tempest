@@ -56,6 +56,7 @@ class RolesTest(unittest.TestCase):
         found = [role for role in body if role['name'] == role_name]
         self.assertFalse(any(found))
 
+    @unittest.skip('Until bug 997725 is fixed.')
     def test_role_create_blank_name(self):
         """Should not be able to create a role with a blank name"""
         try:
