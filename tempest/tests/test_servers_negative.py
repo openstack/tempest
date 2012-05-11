@@ -83,3 +83,34 @@ class ServersNegativeTest(BaseComputeTest):
             pass
         else:
             self.fail('Access IPv6 address must match the correct format')
+
+    def test_reboot_deleted_server(self):
+        """Reboot a deleted server"""
+        self.name = rand_name('server')
+        resp, create_server = self.client.create_server(self.name,
+                                                 self.image_ref,
+                                                 self.flavor_ref)
+        self.server_id = create_server['id']
+        self.client.delete_server(self.server_id)
+        try:
+            resp1, reboot_server = self.client.reboot(self.server_id, 'SOFT')
+        except exceptions.NotFound:
+            pass
+        else:
+            self.fail('Should not be able to reboot a deleted server')
+
+    def test_rebuild_deleted_server(self):
+        """Rebuild a deleted server"""
+        self.name = rand_name('server')
+        resp, create_server = self.client.create_server(self.name,
+                                                 self.image_ref,
+                                                 self.flavor_ref)
+        self.server_id = create_server['id']
+        self.client.delete_server(self.server_id)
+        try:
+            resp1, rebuild_server = self.client.rebuild(self.server_id,
+                                                self.image_ref_alt)
+        except exceptions.NotFound:
+            pass
+        else:
+            self.fail('Should not be able to rebuild a deleted server')
