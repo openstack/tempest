@@ -17,6 +17,7 @@ that nova API calls such as create/delete are completed"""
 
 import logging
 import time
+from tempest.exceptions import TimeoutException
 
 
 class PendingAction(object):
@@ -25,24 +26,54 @@ class PendingAction(object):
     is successful.
     """
 
-    def __init__(self, nova_manager, state, target_server, timeout=600):
+    def __init__(self, nova_manager, timeout=None):
         """
         `nova_manager` : Manager object.
+        `timeout`   : time before we declare a TimeoutException
+        """
+        if timeout == None:
+            timeout = nova_manager.config.compute.build_timeout
+        self._manager = nova_manager
+        self._logger = logging.getLogger(self.__class__.__name__)
+        self._start_time = time.time()
+        self._timeout = timeout
+
+    def retry(self):
+        """
+        Invoked by user of this class to verify completion of
+        previous TestCase actions
+        """
+        return False
+
+    def check_timeout(self):
+        """Check for timeouts of TestCase actions"""
+        time_diff = time.time() - self._start_time
+        if time_diff > self._timeout:
+            self._logger.error('%s exceeded timeout of %d' %
+                               (self.__class__.__name__, self._timeout))
+            raise TimeoutException
+
+    def elapsed(self):
+        return time.time() - self._start_time
+
+
+class PendingServerAction(PendingAction):
+    """
+    Initialize and describe actions to verify that a Nova API call that
+    changes server state is successful.
+    """
+
+    def __init__(self, nova_manager, state, target_server, timeout=None):
+        """
         `state`           : externally maintained data structure about
                             state of VMs or other persistent objects in
                             the nova cluster
         `target_server`   : server that actions were performed on
-        `target_server`   : time before we declare a TimeoutException
-        `pargs`           : positional arguments
-        `kargs`           : keyword arguments
         """
-        self._manager = nova_manager
+        super(PendingServerAction, self).__init__(nova_manager,
+                                                  timeout=timeout)
         self._state = state
         self._target = target_server
-
-        self._logger = logging.getLogger(self.__class__.__name__)
-        self._start_time = time.time()
-        self._timeout = timeout
 
     def _check_for_status(self, state_string):
         """Check to see if the machine has transitioned states"""
@@ -58,8 +89,3 @@ class PendingAction(object):
             return temp_obj[1]
         self._logger.debug('%s, time: %d' % (state_string, time.time() - t))
         return state_string
-
-    def retry(self):
-        """Invoked by user of this class to verify completion of"""
-        """previous TestCase actions"""
-        return False

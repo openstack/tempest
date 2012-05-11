@@ -12,9 +12,9 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 """Defines various sub-classes of the `StressTestCase` and
-`PendingAction` class. The sub-classes of StressTestCase implement various
+`PendingServerAction` class. Sub-classes of StressTestCase implement various
 API calls on the Nova cluster having to do with Server Actions. Each
-sub-class will have a corresponding PendingAction. These pending
+sub-class will have a corresponding PendingServerAction. These pending
 actions veriy that the API call was successful or not."""
 
 
@@ -25,7 +25,7 @@ import time
 # local imports
 import test_case
 import pending_action
-from tempest.exceptions import TimeoutException, Duplicate
+from tempest.exceptions import Duplicate
 from utils.util import *
 
 
@@ -83,7 +83,7 @@ class TestRebootVM(test_case.StressTestCase):
                               reboot_state=reboot_state)
 
 
-class VerifyRebootVM(pending_action.PendingAction):
+class VerifyRebootVM(pending_action.PendingServerAction):
     """Class to verify that the reboot completed."""
     States = enum('REBOOT_CHECK', 'ACTIVE_CHECK')
 
@@ -110,8 +110,6 @@ class VerifyRebootVM(pending_action.PendingAction):
                                self._target['id'])
             return True
 
-        if time.time() - self._start_time > self._timeout:
-            raise TimeoutException
         reboot_state = self._reboot_state
         if self._retry_state == self.States.REBOOT_CHECK:
             server_state = self._check_for_status(reboot_state)
@@ -131,8 +129,7 @@ class VerifyRebootVM(pending_action.PendingAction):
                 return False
         target = self._target
         self._logger.info('machine %s %s -> ACTIVE [%.1f secs elapsed]' %
-                              (target['id'], reboot_state,
-                                time.time() - self._start_time))
+                              (target['id'], reboot_state, self.elapsed()))
         self._state.set_instance_state(target['id'],
                                       (target, 'ACTIVE'))
 
@@ -200,7 +197,7 @@ class VerifyRebootVM(pending_action.PendingAction):
 #                              state_name=state_name,
 #                              timeout=_timeout)
 #
-#class VerifyResizeVM(pending_action.PendingAction):
+#class VerifyResizeVM(pending_action.PendingServerAction):
 #    """Verify that resizing of a VM was successful"""
 #    States = enum('VERIFY_RESIZE_CHECK', 'ACTIVE_CHECK')
 #
@@ -228,9 +225,6 @@ class VerifyRebootVM(pending_action.PendingAction):
 #                               self._target['id'])
 #            return True
 #
-#        if time.time() - self._start_time > self._timeout:
-#            raise TimeoutException
-#
 #        if self._retry_state == self.States.VERIFY_RESIZE_CHECK:
 #            if self._check_for_status('VERIFY_RESIZE') == 'VERIFY_RESIZE':
 #                # now issue command to CONFIRM RESIZE
@@ -245,7 +239,7 @@ class VerifyRebootVM(pending_action.PendingAction):
 #
 #                self._logger.info(
 #                    'CONFIRMING RESIZE of machine %s [%.1f secs elapsed]' %
-#                    (self._target['id'], time.time() - self._start_time)
+#                    (self._target['id'], self.elapsed())
 #                    )
 #                state.set_instance_state(self._target['id'],
 #                                        (self._target, 'CONFIRM_RESIZE'))
@@ -274,7 +268,7 @@ class VerifyRebootVM(pending_action.PendingAction):
 #
 #                self._logger.info(
 #                    'machine %s: VERIFY_RESIZE -> ACTIVE [%.1f sec elapsed]' %
-#                    (self._target['id'], time.time() - self._start_time)
+#                    (self._target['id'], self.elapsed())
 #                    )
 #                self._state.set_instance_state(self._target['id'],
 #                                              (self._target, 'ACTIVE'))

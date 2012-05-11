@@ -31,6 +31,7 @@ server_list = nt.servers.list()
 images_list = nt.images.list()
 keypairs_list = nt.keypairs.list()
 floating_ips_list = nt.floating_ips.list()
+volumes_list = nt.volumes.list()
 
 print "total servers: %3d, total flavors: %3d, total images: %3d," % \
     (len(server_list),
@@ -51,4 +52,8 @@ for s in keypairs_list:
 
 print "deleting all floating_ips"
 for s in floating_ips_list:
+    s.delete()
+
+print "deleting all volumes"
+for s in volumes_list:
     s.delete()
