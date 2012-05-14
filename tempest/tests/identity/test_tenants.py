@@ -1,4 +1,4 @@
-import nose
+import unittest2 as unittest
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 from base_admin_test import BaseAdminTest
@@ -9,9 +9,6 @@ class TenantsTest(BaseAdminTest):
     @classmethod
     def setUpClass(cls):
         super(TenantsTest, cls).setUpClass()
-
-        if not cls.client.has_admin_extensions():
-            raise nose.SkipTest("Admin extensions disabled")
 
         for _ in xrange(5):
             resp, tenant = cls.client.create_tenant(rand_name('tenant-'))
@@ -30,6 +27,18 @@ class TenantsTest(BaseAdminTest):
         self.assertEqual(len(found), len(self.data.tenants))
         self.assertTrue(resp['status'].startswith('2'))
 
+    def test_list_tenants_by_unauthorized_user(self):
+        """Non-admin user should not be able to list tenants"""
+        self.assertRaises(exceptions.Unauthorized,
+                self.non_admin_client.list_tenants)
+
+    def test_list_tenant_request_without_token(self):
+        """Request to list tenants without a valid token should fail"""
+        token = self.client.get_auth()
+        self.client.delete_token(token)
+        self.assertRaises(exceptions.Unauthorized, self.client.list_tenants)
+        self.client.clear_auth()
+
     def test_tenant_delete(self):
         """Create several tenants and delete them"""
         tenants = []
@@ -47,6 +56,28 @@ class TenantsTest(BaseAdminTest):
         found_2 = [tenant for tenant in body if tenant['id'] in tenants]
         self.assertTrue(any(found_1), 'Tenants not created')
         self.assertFalse(any(found_2), 'Tenants failed to delete')
+
+    def test_tenant_delete_by_unauthorized_user(self):
+        """Non-admin user should not be able to delete a tenant"""
+        tenant_name = rand_name('tenant-')
+        resp, tenant = self.client.create_tenant(tenant_name)
+        self.assertRaises(exceptions.Unauthorized,
+                self.non_admin_client.delete_tenant, tenant['id'])
+
+    def test_tenant_delete_request_without_token(self):
+        """Request to delete a tenant without a valid token should fail"""
+        tenant_name = rand_name('tenant-')
+        resp, tenant = self.client.create_tenant(tenant_name)
+        token = self.client.get_auth()
+        self.client.delete_token(token)
+        self.assertRaises(exceptions.Unauthorized, self.client.delete_tenant,
+                         tenant['id'])
+        self.client.clear_auth()
+
+    def test_delete_non_existent_tenant(self):
+        """Attempt to delete a non existent tenant should fail"""
+        self.assertRaises(exceptions.NotFound, self.client.delete_tenant,
+                         'junk_tenant_123456abc')
 
     def test_tenant_create_with_description(self):
         """Create tenant with a description"""
@@ -108,6 +139,34 @@ class TenantsTest(BaseAdminTest):
             pass
         if tenant1_id:
             self.client.delete_tenant(tenant1_id)
+
+    def test_create_tenant_by_unauthorized_user(self):
+        """Non-admin user should not be authorized to create a tenant"""
+        tenant_name = rand_name('tenant-')
+        self.assertRaises(exceptions.Unauthorized,
+                         self.non_admin_client.create_tenant, tenant_name)
+
+    def test_create_tenant_request_without_token(self):
+        """Create tenant request without a token should not be authorized"""
+        tenant_name = rand_name('tenant-')
+        token = self.client.get_auth()
+        self.client.delete_token(token)
+        self.assertRaises(exceptions.Unauthorized, self.client.create_tenant,
+                         tenant_name)
+        self.client.clear_auth()
+
+    @unittest.skip("Until Bug 987121 is fixed")
+    def test_create_tenant_with_empty_name(self):
+        """Tenant name should not be empty"""
+        self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
+                          name='')
+
+    @unittest.skip("Until Bug 966249 is fixed")
+    def test_create_tenants_name_length_over_64(self):
+        """Tenant name length should not be greater than 64 characters"""
+        tenant_name = 'a' * 64
+        self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
+                         tenant_name)
 
     def test_tenant_update_name(self):
         """Update name attribute of a tenant"""
