@@ -1,4 +1,6 @@
 from tempest.common.rest_client import RestClient
+from tempest import exceptions
+import httplib2
 import json
 
 
@@ -95,3 +97,86 @@ class AdminClient(RestClient):
                                       self.headers)
         body = json.loads(body)
         return resp, body['tenant']
+
+    def create_user(self, name, password, tenant_id, email):
+        """Create a user"""
+        post_body = {
+            'name': name,
+            'password': password,
+            'tenantId': tenant_id,
+            'email': email
+        }
+        post_body = json.dumps({'user': post_body})
+        resp, body = self.post('users', post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['user']
+
+    def delete_user(self, user_id):
+        """Delete a user"""
+        resp, body = self.delete("users/%s" % user_id)
+        return resp, body
+
+    def get_users(self):
+        """Get the list of users"""
+        resp, body = self.get("users")
+        body = json.loads(body)
+        return resp, body['users']
+
+    def enable_disable_user(self, user_id, enabled):
+        """Enables or disables a user"""
+        put_body = {
+                'enabled': enabled
+        }
+        put_body = json.dumps({'user': put_body})
+        resp, body = self.put('users/%s/enabled' % user_id,
+                put_body, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_token(self, token_id):
+        """Delete a token"""
+        resp, body = self.delete("tokens/%s" % token_id)
+        return resp, body
+
+
+class TokenClient(RestClient):
+
+    def __init__(self, config):
+        self.auth_url = config.identity.auth_url
+
+    def auth(self, user, password, tenant):
+        creds = {'auth': {
+                'passwordCredentials': {
+                    'username': user,
+                    'password': password,
+                },
+                'tenantName': tenant
+            }
+        }
+        headers = {'Content-Type': 'application/json'}
+        body = json.dumps(creds)
+        resp, body = self.post(self.auth_url, headers=headers, body=body)
+        return resp, body
+
+    def request(self, method, url, headers=None, body=None):
+        """A simple HTTP request interface."""
+        self.http_obj = httplib2.Http()
+        if headers == None:
+            headers = {}
+
+        resp, resp_body = self.http_obj.request(url, method,
+                                                headers=headers, body=body)
+
+        if resp.status in (401, 403):
+            resp_body = json.loads(resp_body)
+            raise exceptions.Unauthorized(resp_body['error']['message'])
+
+        return resp, resp_body
+
+    def get_token(self, user, password, tenant):
+        resp, body = self.auth(user, password, tenant)
+        if resp['status'] != '202':
+            body = json.loads(body)
+            access = body['access']
+            token = access['token']
+            return token['id']

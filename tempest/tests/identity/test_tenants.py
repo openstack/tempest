@@ -1,39 +1,33 @@
-import unittest2 as unittest
 import nose
-from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests import utils
+from base_admin_test import BaseAdminTest
 
 
-class TenantsTest(unittest.TestCase):
+class TenantsTest(BaseAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.AdminManager()
-        cls.client = cls.os.admin_client
-        cls.config = cls.os.config
+        super(TenantsTest, cls).setUpClass()
 
         if not cls.client.has_admin_extensions():
             raise nose.SkipTest("Admin extensions disabled")
 
-        cls.tenants = []
         for _ in xrange(5):
-            resp, body = cls.client.create_tenant(rand_name('tenant-'))
-            cls.tenants.append(body['id'])
+            resp, tenant = cls.client.create_tenant(rand_name('tenant-'))
+            cls.data.tenants.append(tenant)
 
     @classmethod
     def tearDownClass(cls):
-        for tenant in cls.tenants:
-            cls.client.delete_tenant(tenant)
+        super(TenantsTest, cls).tearDownClass()
 
     def test_list_tenants(self):
         """Return a list of all tenants"""
         resp, body = self.client.list_tenants()
-        found = [tenant for tenant in body if tenant['id'] in self.tenants]
+        found = [tenant for tenant in body if tenant in self.data.tenants]
         self.assertTrue(any(found), 'List did not return newly created '
                         'tenants')
-        self.assertEqual(len(found), len(self.tenants))
+        self.assertEqual(len(found), len(self.data.tenants))
         self.assertTrue(resp['status'].startswith('2'))
 
     def test_tenant_delete(self):

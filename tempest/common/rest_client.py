@@ -18,7 +18,6 @@
 import json
 import httplib2
 import logging
-import sys
 import time
 
 from tempest import exceptions
@@ -73,6 +72,15 @@ class RestClient(object):
 
         self.token = None
         self.base_url = None
+
+    def get_auth(self):
+        """Returns the token of the current request or sets the token if
+        none"""
+
+        if not self.token:
+            self._set_auth()
+
+        return self.token
 
     def basic_auth(self, user, password, auth_url):
         """
@@ -177,7 +185,7 @@ class RestClient(object):
         req_url = "%s/%s" % (self.base_url, url)
         resp, resp_body = self.http_obj.request(req_url, method,
                                            headers=headers, body=body)
-        if resp.status == 401:
+        if resp.status == 401 or resp.status == 403:
             self._log(req_url, body, resp, resp_body)
             raise exceptions.Unauthorized()
 
