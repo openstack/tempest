@@ -47,6 +47,10 @@ class BuildErrorException(TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
+class VolumeBuildErrorException(TempestException):
+    message = "Volume %(volume_id)s failed to build and is in ERROR status"
+
+
 class BadRequest(TempestException):
     message = "Bad request"
 

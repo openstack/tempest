@@ -83,7 +83,7 @@ class VolumesClient(RestClient):
             resp, body = self.get_volume(volume_id)
             volume_status = body['status']
             if volume_status == 'error':
-                raise exceptions.BuildErrorException(volume_id=volume_id)
+                raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
 
             if int(time.time()) - start >= self.build_timeout:
                 message = 'Volume %s failed to reach %s status within '\
