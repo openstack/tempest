@@ -155,6 +155,24 @@ class ServersClient(RestClient):
                 message += ' Current status: %s.' % server_status
                 raise exceptions.TimeoutException(message)
 
+    def wait_for_server_termination(self, server_id):
+        """Waits for server to reach termination"""
+        start_time = int(time.time())
+        while True:
+            try:
+                resp, body = self.get_server(server_id)
+            except exceptions.NotFound:
+                return
+
+            server_status = body['status']
+            if server_status == 'ERROR':
+                raise exceptions.BuildErrorException
+
+            if int(time.time()) - start_time >= self.build_timeout:
+                raise exceptions.TimeoutException
+
+            time.sleep(self.build_interval)
+
     def list_addresses(self, server_id):
         """Lists all addresses for a server"""
         resp, body = self.get("servers/%s/ips" % str(server_id))
