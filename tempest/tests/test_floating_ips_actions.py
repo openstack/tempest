@@ -3,6 +3,8 @@ from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 from base_compute_test import BaseComputeTest
+import unittest2 as unittest
+from unittest.case import SkipTest
 
 
 class FloatingIPsTest(BaseComputeTest):
@@ -128,6 +130,7 @@ class FloatingIPsTest(BaseComputeTest):
         else:
             self.fail('Should not be able to delete a nonexistant floating IP')
 
+    @unittest.skip("Skipped until the Bug #957706 is resolved")
     @attr(type='negative')
     def test_associate_nonexistant_floating_ip(self):
         """
@@ -139,12 +142,13 @@ class FloatingIPsTest(BaseComputeTest):
             resp, body = \
             self.client.associate_floating_ip_to_server("0.0.0.0",
                                                         self.server_id)
-        except:
+        except exceptions.NotFound:
             pass
         else:
             self.fail('Should not be able to associate'
                       ' a nonexistant floating IP')
 
+    @unittest.skip("Skipped until the Bug #984762 is resolved")
     @attr(type='negative')
     def test_dissociate_nonexistant_floating_ip(self):
         """
@@ -155,8 +159,69 @@ class FloatingIPsTest(BaseComputeTest):
             resp, body = \
             self.client.disassociate_floating_ip_from_server("0.0.0.0",
                                                              self.server_id)
-        except:
+        except exceptions.NotFound:
             pass
         else:
             self.fail('Should not be able to dissociate'
                       ' a nonexistant floating IP')
+
+    @unittest.skip("Skipped until the Bug #1000571 is resolved")
+    @attr(type='negative')
+    def test_associate_already_associated_floating_ip(self):
+        """
+        Negative test:Association of an already associated floating IP
+        to specific server should raise BadRequest exception
+        """
+        #Create server so as to use for Multiple association
+        resp, body = self.servers_client.create_server('floating-server2',
+                                                        self.image_ref,
+                                                        self.flavor_ref)
+        self.servers_client.wait_for_server_status(body['id'], 'ACTIVE')
+        self.new_server_id = body['id']
+
+        #Associating floating IP for the first time
+        try:
+            resp, _ = \
+            self.client.associate_floating_ip_to_server(self.floating_ip,
+                                                        self.server_id)
+        #Associating floating IP for the second time
+            resp = {}
+            resp['status'] = None
+            resp, body = \
+            self.client.associate_floating_ip_to_server(self.floating_ip,
+                                                        self.new_server_id)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('Association of an already associated floating IP'
+                      ' to specific server should raise BadRequest')
+        finally:
+            if (resp['status'] != None):
+                #Dissociation of the floating IP associated in this method
+                resp, _ = \
+                self.client.disassociate_floating_ip_from_server(\
+                    self.floating_ip,
+                    self.new_server_id)
+            #Dissociation of the floating IP associated in this method
+            resp, _ = \
+            self.client.disassociate_floating_ip_from_server(self.floating_ip,
+                                                        self.server_id)
+            #Deletion of server created in this method
+            resp, body = self.servers_client.delete_server(self.new_server_id)
+
+    @unittest.skip("Skipped until the Bug #957706 is resolved")
+    @attr(type='negative')
+    def test_associate_ip_to_server_without_passing_floating_ip(self):
+        """
+        Negative test:Association of empty floating IP to specific server
+        should raise NotFound exception
+        """
+        try:
+            resp, body =\
+            self.client.associate_floating_ip_to_server('',
+                                                        self.server_id)
+        except exceptions.NotFound:
+            pass
+        else:
+            self.fail('Association of floating IP to specific server'
+                      ' with out passing floating IP  should raise BadRequest')
