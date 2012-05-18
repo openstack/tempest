@@ -47,6 +47,10 @@ class BuildErrorException(TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
+class AddImageException(TempestException):
+    message = "Image %(image_id) failed to become ACTIVE in the allotted time"
+
+
 class VolumeBuildErrorException(TempestException):
     message = "Volume %(volume_id)s failed to build and is in ERROR status"
 

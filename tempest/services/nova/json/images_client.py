@@ -81,7 +81,7 @@ class ImagesClient(RestClient):
             resp, body = self.get("images/%s" % str(image_id))
 
             if int(time.time()) - start >= self.build_timeout:
-                raise exceptions.BuildErrorException
+                raise exceptions.TimeoutException
 
     def wait_for_image_status(self, image_id, status):
         """Waits for an image to reach a given status."""
@@ -93,10 +93,10 @@ class ImagesClient(RestClient):
             resp, image = self.get_image(image_id)
 
             if image['status'] == 'ERROR':
-                raise exceptions.TimeoutException
+                raise exceptions.AddImageException(image_id=image_id)
 
             if int(time.time()) - start >= self.build_timeout:
-                raise exceptions.BuildErrorException
+                raise exceptions.TimeoutException
 
     def list_image_metadata(self, image_id):
         """Lists all metadata items for an image"""
