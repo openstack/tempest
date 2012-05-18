@@ -6,6 +6,7 @@ from base_compute_test import BaseComputeTest
 import tempest.config
 from tempest import openstack
 from tempest.common.utils import data_utils
+from tempest import exceptions
 
 
 class ImagesTest(BaseComputeTest):
@@ -79,3 +80,38 @@ class ImagesTest(BaseComputeTest):
             self.client.wait_for_image_status(image_id, 'ACTIVE')
             self.client.delete_image(image_id)
             self.fail("Should not create snapshot from deleted instance!")
+
+    @attr(type='negative')
+    def test_create_image_from_invalid_server(self):
+        """An image should not be created with invalid server id"""
+        try:
+            # Create a new image with invalid server id
+            name = rand_name('image')
+            meta = {'image_type': 'test'}
+            resp = {}
+            resp['status'] = None
+            resp, body = self.client.create_image('!@#$%^&*()', name, meta)
+
+        except exceptions.NotFound:
+            pass
+
+        finally:
+            if (resp['status'] != None):
+                image_id = data_utils.parse_image_id(resp['location'])
+                resp, _ = self.client.delete_image(image_id)
+                self.fail("An image should not be created"
+                            " with invalid server id")
+
+    @attr(type='negative')
+    def test_delete_image_with_invalid_image_id(self):
+        """An image should not be deleted with invalid image id"""
+        try:
+            # Delete an image with invalid image id
+            resp, _ = self.client.delete_image('!@$%^&*()')
+
+        except exceptions.NotFound:
+            pass
+
+        else:
+            self.fail("DELETE image request should rasie NotFound exception"
+                        "when requested with invalid image")
