@@ -16,6 +16,7 @@ class AuthorizationTest(unittest.TestCase):
         cls.os = openstack.Manager()
         cls.client = cls.os.servers_client
         cls.images_client = cls.os.images_client
+        cls.keypairs_client = cls.os.keypairs_client
         cls.config = cls.os.config
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
@@ -37,6 +38,7 @@ class AuthorizationTest(unittest.TestCase):
                 cls.other_manager = openstack.AltManager()
                 cls.other_client = cls.other_manager.servers_client
                 cls.other_images_client = cls.other_manager.images_client
+                cls.other_keypairs_client = cls.other_manager.keypairs_client
             except exceptions.AuthenticationFailure:
                 # multi_user is already set to false, just fall through
                 pass
@@ -56,11 +58,16 @@ class AuthorizationTest(unittest.TestCase):
                 cls.images_client.wait_for_image_status(image_id, 'ACTIVE')
                 resp, cls.image = cls.images_client.get_image(image_id)
 
+                cls.keypairname = rand_name('keypair')
+                resp, keypair = \
+                    cls.keypairs_client.create_keypair(cls.keypairname)
+
     @classmethod
     def tearDownClass(cls):
         if cls.multi_user:
             cls.client.delete_server(cls.server['id'])
             cls.images_client.delete_image(cls.image['id'])
+            cls.keypairs_client.delete_keypair(cls.keypairname)
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
@@ -160,3 +167,43 @@ class AuthorizationTest(unittest.TestCase):
         finally:
             # Reset the base_url...
             self.other_client.base_url = saved_base_url
+
+    @raises(exceptions.BadRequest)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_create_keypair_in_another_user_tenant(self):
+        """
+        A create keypair request should fail if the tenant id does not match
+        the current user
+        """
+        #POST keypair with other user tenant
+        k_name = rand_name('keypair-')
+        self.other_keypairs_client._set_auth()
+        self.saved_base_url = self.other_keypairs_client.base_url
+        try:
+            # Change the base URL to impersonate another user
+            self.other_keypairs_client.base_url = self.keypairs_client.base_url
+            resp = {}
+            resp['status'] = None
+            resp, _ = self.other_keypairs_client.create_keypair(k_name)
+        finally:
+            # Reset the base_url...
+            self.other_keypairs_client.base_url = self.saved_base_url
+            if (resp['status'] != None):
+                resp, _ = self.other_keypairs_client.delete_keypair(k_name)
+                self.fail("Create keypair request should not happen if the"
+                        " tenant id does not match the current user")
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_get_keypair_of_other_account_fails(self):
+        """A GET request for another user's keypair should fail"""
+        self.other_keypairs_client.get_keypair(self.keypairname)
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_delete_keypair_of_other_account_fails(self):
+        """A DELETE request for another user's keypair should fail"""
+        self.other_keypairs_client.delete_keypair(self.keypairname)

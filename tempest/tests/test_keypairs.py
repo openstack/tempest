@@ -62,6 +62,29 @@ class KeyPairsTest(BaseComputeTest):
         self.assertEqual(202, resp.status)
 
     @attr(type='smoke')
+    @unittest.skip("Skipped until the Bug #980688 is resolved")
+    def test_get_keypair_detail(self):
+        """Keypair should be created, Got details by name and deleted"""
+        k_name = rand_name('keypair-')
+        resp, keypair = self.client.create_keypair(k_name)
+        try:
+            resp, keypair_detail = self.client.get_keypair(k_name)
+            self.assertEqual(200, resp.status)
+            self.assertTrue('name' in keypair_detail)
+            self.assertTrue('public_key' in keypair_detail)
+            self.assertEqual(keypair_detail['name'], k_name,
+                    "The created keypair name is not equal to requested name")
+            public_key = keypair_detail['public_key']
+            self.assertTrue(public_key is not None,
+                        "Field public_key is empty or not found.")
+        except:
+            self.fail("GET keypair details requested by keypair name"
+                        " has failed")
+        finally:
+            resp, _ = self.client.delete_keypair(k_name)
+            self.assertEqual(202, resp.status)
+
+    @attr(type='smoke')
     def test_keypair_create_with_pub_key(self):
         """Keypair should be created with a given public key"""
         k_name = rand_name('keypair-')
