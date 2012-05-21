@@ -57,6 +57,23 @@ build_interval = 10
 # to build or reach an expected status
 build_timeout = 600
 
+# Run additional tests that use SSH for instance validation?
+# This requires the instances be routable from the host
+#  executing the tests
+run_ssh = false
+
+# Name of a user used to authenticated to an instance
+ssh_user = {$SSH_USER}
+
+# Network id used for SSH (public, private, etc)
+network_for_ssh = {$SSH_NETWORK}
+
+# IP version of the address used for SSH
+ip_version_for_ssh = {$SSH_IP_VERSION}
+
+# Number of seconds to wait to authenticate to an instance
+ssh_timeout = 300
+
 # The type of endpoint for a Compute API service. Unless you have a
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "compute"

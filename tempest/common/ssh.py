@@ -1,6 +1,7 @@
 import time
 import socket
 import warnings
+from tempest import exceptions
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
@@ -9,7 +10,7 @@ with warnings.catch_warnings():
 
 class Client(object):
 
-    def __init__(self, host, username, password, timeout=300):
+    def __init__(self, host, username, password, timeout=60):
         self.host = host
         self.username = username
         self.password = password
@@ -26,8 +27,7 @@ class Client(object):
         while not self._is_timed_out(self.timeout, _start_time):
             try:
                 ssh.connect(self.host, username=self.username,
-                    password=self.password, look_for_keys=False,
-                    timeout=20)
+                    password=self.password, timeout=20)
                 _timeout = False
                 break
             except socket.error:
@@ -36,7 +36,9 @@ class Client(object):
                 time.sleep(15)
                 continue
         if _timeout:
-            raise socket.error("SSH connect timed out")
+            raise exceptions.SSHTimeout(host=self.host,
+                                        user=self.username,
+                                        password=self.password)
         return ssh
 
     def _is_timed_out(self, timeout, start_time):
