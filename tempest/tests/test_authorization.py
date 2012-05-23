@@ -207,3 +207,17 @@ class AuthorizationTest(unittest.TestCase):
     def test_delete_keypair_of_other_account_fails(self):
         """A DELETE request for another user's keypair should fail"""
         self.other_keypairs_client.delete_keypair(self.keypairname)
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_get_image_for_other_account_fails(self):
+        """A GET request for an image on another user's account should fail"""
+        self.other_images_client.get_image(self.image['id'])
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_delete_image_for_other_account_fails(self):
+        """A DELETE request for another user's image should fail"""
+        self.other_images_client.delete_image(self.image['id'])
