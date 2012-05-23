@@ -130,25 +130,20 @@ class RestClient(object):
             for ep in auth_data['serviceCatalog']:
                 if ep["type"] == service:
                     mgmt_url = ep['endpoints'][self.region][self.endpoint_url]
-                    # See LP#920817. The tenantId is *supposed*
-                    # to be returned for each endpoint accorsing to the
-                    # Keystone spec. But... it isn't, so we have to parse
-                    # the tenant ID out of hte public URL :(
-                    tenant_id = mgmt_url.split('/')[-1]
+                    tenant_id = auth_data['token']['tenant']['id']
                     break
 
             if mgmt_url == None:
                 raise exceptions.EndpointNotFound(service)
 
-            if mgmt_url.endswith(tenant_id):
-                return token, mgmt_url
-            else:
-                #TODO (dwalleck): This is a horrible stopgap.
-                #Need to join strings more cleanly
-                temp = mgmt_url.rsplit('/')
-                service_url = temp[0] + '//' + temp[2] + '/' + temp[3] + '/'
-                management_url = service_url + tenant_id
-                return token, management_url
+            if service == 'network':
+                # Keystone does not return the correct endpoint for
+                # quantum. Handle this separately.
+                mgmt_url = mgmt_url + self.config.network.api_version + \
+                             "/tenants/" + tenant_id
+
+            return token, mgmt_url
+
         elif resp.status == 401:
             raise exceptions.AuthenticationFailure(user=user,
                                                    password=password)
