@@ -17,6 +17,7 @@ class AuthorizationTest(unittest.TestCase):
         cls.client = cls.os.servers_client
         cls.images_client = cls.os.images_client
         cls.keypairs_client = cls.os.keypairs_client
+        cls.security_client = cls.os.security_groups_client
         cls.config = cls.os.config
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
@@ -39,12 +40,15 @@ class AuthorizationTest(unittest.TestCase):
                 cls.other_client = cls.other_manager.servers_client
                 cls.other_images_client = cls.other_manager.images_client
                 cls.other_keypairs_client = cls.other_manager.keypairs_client
+                cls.other_security_client = \
+                cls.other_manager.security_groups_client
             except exceptions.AuthenticationFailure:
                 # multi_user is already set to false, just fall through
                 pass
             else:
                 cls.multi_user = True
 
+                cls.other_security_client._set_auth()
                 name = rand_name('server')
                 resp, server = cls.client.create_server(name, cls.image_ref,
                                                         cls.flavor_ref)
@@ -62,12 +66,28 @@ class AuthorizationTest(unittest.TestCase):
                 resp, keypair = \
                     cls.keypairs_client.create_keypair(cls.keypairname)
 
+                name = rand_name('security')
+                description = rand_name('description')
+                resp, cls.security_group = \
+                cls.security_client.create_security_group(name, description)
+
+                parent_group_id = cls.security_group['id']
+                ip_protocol = 'tcp'
+                from_port = 22
+                to_port = 22
+                resp, cls.rule =\
+                cls.security_client.create_security_group_rule(\
+                                                parent_group_id,
+                                                ip_protocol, from_port,
+                                                to_port)
+
     @classmethod
     def tearDownClass(cls):
         if cls.multi_user:
             cls.client.delete_server(cls.server['id'])
             cls.images_client.delete_image(cls.image['id'])
             cls.keypairs_client.delete_keypair(cls.keypairname)
+            cls.security_client.delete_security_group(cls.security_group['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
@@ -221,3 +241,95 @@ class AuthorizationTest(unittest.TestCase):
     def test_delete_image_for_other_account_fails(self):
         """A DELETE request for another user's image should fail"""
         self.other_images_client.delete_image(self.image['id'])
+
+    @raises(exceptions.BadRequest)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_create_security_group_in_another_user_tenant(self):
+        """
+        A create security group request should fail if the tenant id does not
+        match the current user
+        """
+        #POST security group with other user tenant
+        s_name = rand_name('security-')
+        s_description = rand_name('security')
+        self.saved_base_url = self.other_security_client.base_url
+        try:
+            # Change the base URL to impersonate another user
+            self.other_security_client.base_url = self.security_client.base_url
+            resp = {}
+            resp['status'] = None
+            resp, body = self.other_security_client.create_security_group(\
+                                        s_name,
+                                        s_description)
+        finally:
+            # Reset the base_url...
+            self.other_security_client.base_url = self.saved_base_url
+            if (resp['status'] != None):
+                resp, _ = \
+                self.other_security_client.delete_security_group(body['id'])
+                self.fail("Create Security Group request should not happen if"
+                          "the tenant id does not match the current user")
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_get_security_group_of_other_account_fails(self):
+        """A GET request for another user's security group should fail"""
+        self.other_security_client.get_security_group(\
+            self.security_group['id'])
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_delete_security_group_of_other_account_fails(self):
+        """A DELETE request for another user's security group should fail"""
+        self.other_security_client.delete_security_group(\
+            self.security_group['id'])
+
+    @raises(exceptions.BadRequest)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_create_security_group_rule_in_another_user_tenant(self):
+        """
+        A create security group rule request should fail if the tenant id
+        does not match the current user
+        """
+        #POST security group rule with other user tenant
+        parent_group_id = self.security_group['id']
+        ip_protocol = 'icmp'
+        from_port = -1
+        to_port = -1
+        self.saved_base_url = self.other_security_client.base_url
+        try:
+            # Change the base URL to impersonate another user
+            self.other_security_client.base_url = self.security_client.base_url
+            resp = {}
+            resp['status'] = None
+            resp, body = \
+            self.other_security_client.create_security_group_rule(\
+                                                parent_group_id,
+                                                ip_protocol, from_port,
+                                                to_port)
+        finally:
+            # Reset the base_url...
+            self.other_security_client.base_url = self.saved_base_url
+            if (resp['status'] != None):
+                resp, _ = \
+                self.other_security_client.delete_security_group_rule(\
+                                        body['id'])
+                self.fail("Create security group rule request should not "
+                          "happen if the tenant id does not match the"
+                          " current user")
+
+    @unittest.skip("Skipped until the Bug #1001118 is resolved")
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_delete_security_group_rule_of_other_account_fails(self):
+        """
+        A DELETE request for another user's security group rule
+        should fail
+        """
+        self.other_security_client.delete_security_group_rule(\
+            self.rule['id'])

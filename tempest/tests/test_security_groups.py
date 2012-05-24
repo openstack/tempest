@@ -223,3 +223,17 @@ class SecurityGroupsTest(BaseComputeTest):
         else:
             self.fail('Should not be able to delete a nonexistant '
                       'Security Group')
+
+    @attr(type='negative')
+    def test_delete_security_group_without_passing_id(self):
+        """
+        Negative test:Deletion of a Security Group with out passing ID
+        should Fail
+        """
+        try:
+            resp, body = self.client.delete_security_group('')
+        except exceptions.NotFound:
+            pass
+        else:
+            self.fail('Should not be able to delete a Security Group'
+                        'with out passing ID')
