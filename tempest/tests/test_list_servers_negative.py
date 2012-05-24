@@ -39,7 +39,7 @@ class ServerDetailsNegativeTest(BaseComputeTest):
         try:
             resp, body = cls.client.list_servers()
             for server in body['servers']:
-                resp, body = cls.client.delete_server(server['id'])
+                resp, body = cls.client.delete_server(server)
         except exceptions.NotFound:
             pass
 
@@ -69,22 +69,10 @@ class ServerDetailsNegativeTest(BaseComputeTest):
         servers_needed = server_count - num_of_active_servers
 
         for i in range(0, servers_needed):
-            instance = self.create_instance()
-            active_servers.append(instance)
+            srv = self.create_server()
+            active_servers.append(srv)
 
         return active_servers
-
-    def create_instance(self, image_id=None):
-        name = rand_name('test-vm-')
-        flavor = self.flavor_ref
-
-        if not image_id:
-            image_id = self.image_ref
-
-        body, server = self.client.create_server(name, image_id, flavor)
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
-        self.servers.append(server['id'])
-        return server
 
     def test_list_servers_when_no_servers_running(self):
         """Return an empty list when there are no active servers"""
@@ -134,7 +122,7 @@ class ServerDetailsNegativeTest(BaseComputeTest):
             self.images_client.wait_for_image_status(snapshot_id, 'ACTIVE')
 
             # Create a server from the snapshot
-            snap_server = self.create_instance(image_id=snapshot_id)
+            snap_server = self.create_server(image_id=snapshot_id)
             self.servers.append(snap_server['id'])
 
             # List base servers by image
@@ -238,7 +226,7 @@ class ServerDetailsNegativeTest(BaseComputeTest):
 
     def test_list_servers_by_active_status(self):
         """Return a listing of servers by active status"""
-        self.create_instance()
+        self.create_server()
         resp, body = self.client.list_servers({'status': 'ACTIVE'})
         self.assertEqual('200', resp['status'])
         self.assertTrue(len(body['servers']) > 0)
