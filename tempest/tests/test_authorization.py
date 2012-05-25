@@ -18,6 +18,7 @@ class AuthorizationTest(unittest.TestCase):
         cls.images_client = cls.os.images_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_client = cls.os.security_groups_client
+        cls.console_outputs_client = cls.os.console_outputs_client
         cls.config = cls.os.config
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
@@ -42,6 +43,8 @@ class AuthorizationTest(unittest.TestCase):
                 cls.other_keypairs_client = cls.other_manager.keypairs_client
                 cls.other_security_client = \
                 cls.other_manager.security_groups_client
+                cls.other_console_outputs_client = \
+                cls.other_manager.console_outputs_client
             except exceptions.AuthenticationFailure:
                 # multi_user is already set to false, just fall through
                 pass
@@ -420,3 +423,13 @@ class AuthorizationTest(unittest.TestCase):
             resp, body = \
             self.images_client.delete_image_metadata_item(self.image['id'],
                                                             'meta1')
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_get_console_output_of_other_account_server_fails(self):
+        """
+        A Get Console Output for another user's server should fail
+        """
+        self.other_console_outputs_client.get_console_output(self.server['id'],
+                                                                    10)

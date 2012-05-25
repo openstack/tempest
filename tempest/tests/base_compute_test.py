@@ -15,6 +15,7 @@ class BaseComputeTest(unittest.TestCase):
     keypairs_client = os.keypairs_client
     floating_ips_client = os.floating_ips_client
     security_groups_client = os.security_groups_client
+    console_outputs_client = os.console_outputs_client
     limits_client = os.limits_client
     config = os.config
     build_interval = config.compute.build_interval
