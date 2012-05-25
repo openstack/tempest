@@ -1,9 +1,11 @@
 from nose.plugins.attrib import attr
+import unittest2 as unittest
+from unittest2.case import SkipTest
+
 from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 from base_compute_test import BaseComputeTest
-from unittest2.case import SkipTest
 
 
 class FloatingIPsTest(BaseComputeTest):
