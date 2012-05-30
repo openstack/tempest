@@ -112,6 +112,7 @@ class ServersNegativeTest(BaseComputeTest):
                                                  self.flavor_ref)
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
+        self.client.wait_for_server_termination(self.server_id)
         try:
             resp1, reboot_server = self.client.reboot(self.server_id, 'SOFT')
         except exceptions.NotFound:
@@ -128,6 +129,7 @@ class ServersNegativeTest(BaseComputeTest):
                                                  self.flavor_ref)
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
+        self.client.wait_for_server_termination(self.server_id)
         try:
             resp1, rebuild_server = self.client.rebuild(self.server_id,
                                                 self.image_ref_alt)
