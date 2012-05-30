@@ -239,9 +239,95 @@ class UsersTest(BaseIdentityAdminTest):
         self.assertRaises(exceptions.Unauthorized,
                          self.non_admin_client.get_users)
 
+    @attr(type='negative')
     def test_get_users_request_without_token(self):
         """Request to get list of users without a valid token should fail"""
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.get_users)
         self.client.clear_auth()
+
+    @attr(type='positive')
+    def test_list_users_for_tenant(self):
+        """Return a list of all users for a tenant"""
+        self.data.setup_test_tenant()
+        user_ids = list()
+        fetched_user_ids = list()
+        resp, user1 = self.client.create_user('tenant_user1', 'password1',
+                                            self.data.tenant['id'],
+                                            'user1@123')
+        user_ids.append(user1['id'])
+        self.data.users.append(user1)
+        resp, user2 = self.client.create_user('tenant_user2', 'password2',
+                                            self.data.tenant['id'],
+                                            'user2@123')
+        user_ids.append(user2['id'])
+        self.data.users.append(user2)
+        #List of users for the respective tenant ID
+        resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
+        self.assertTrue(resp['status'].startswith('2'))
+        for i in body:
+            fetched_user_ids.append(i['id'])
+        #verifying the user Id in the list
+        missing_users =\
+            [user for user in user_ids if user not in fetched_user_ids]
+        self.assertEqual(0, len(missing_users),
+                             "Failed to find user %s in fetched list"
+                             % ', '.join(m_user for m_user in missing_users))
+
+    @attr(type='positive')
+    def test_list_users_with_roles_for_tenant(self):
+        """Return list of users on tenant when roles are assigned to users"""
+        self.data.setup_test_user()
+        self.data.setup_test_role()
+        user = self.get_user_by_name(self.data.test_user)
+        tenant = self.get_tenant_by_name(self.data.test_tenant)
+        role = self.get_role_by_name(self.data.test_role)
+        #Assigning roles to two users
+        user_ids = list()
+        fetched_user_ids = list()
+        user_ids.append(user['id'])
+        self.client.assign_user_role(tenant['id'], user['id'], role['id'])
+        resp, second_user = self.client.create_user('second_user', 'password1',
+                                            self.data.tenant['id'],
+                                            'user1@123')
+        user_ids.append(second_user['id'])
+        self.data.users.append(second_user)
+        self.client.assign_user_role(tenant['id'], second_user['id'],
+                                     role['id'])
+        #List of users with roles for the respective tenant ID
+        resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
+        self.assertTrue(resp['status'].startswith('2'))
+        for i in body:
+            fetched_user_ids.append(i['id'])
+        #verifying the user Id in the list
+        missing_users =\
+            [user for user in user_ids if user not in fetched_user_ids]
+        self.assertEqual(0, len(missing_users),
+                             "Failed to find user %s in fetched list"
+                             % ', '.join(m_user for m_user in missing_users))
+
+    @attr(type='negative')
+    def test_list_users_with_invalid_tenant(self):
+        """
+        Should not be able to return a list of all
+        users for a nonexistant tenant
+        """
+        #Assign invalid tenant ids
+        invalid_id = list()
+        invalid_id.append(rand_name('999'))
+        invalid_id.append('alpha')
+        invalid_id.append(rand_name("dddd@#%%^$"))
+        invalid_id.append('!@#()$%^&*?<>{}[]')
+        #List the users with invalid tenant id
+        fail = list()
+        for invalid in invalid_id:
+            try:
+                resp, body = self.client.list_users_for_tenant(invalid)
+            except exceptions.NotFound:
+                pass
+            else:
+                fail.append(invalid)
+        if len(fail) != 0:
+            self.fail('Should raise Not Found when list users with invalid'
+                          'tenant ids %s' % fail)

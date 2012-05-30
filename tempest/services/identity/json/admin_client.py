@@ -159,6 +159,36 @@ class AdminClient(RestClient):
         resp, body = self.delete("tokens/%s" % token_id)
         return resp, body
 
+    def list_users_for_tenant(self, tenant_id):
+        """List users for a Tenant"""
+        resp, body = self.get('/tenants/%s/users' % tenant_id)
+        body = json.loads(body)
+        return resp, body['users']
+
+    def create_service(self, name, type, **kwargs):
+        """Create a service"""
+        post_body = {
+                      'name': name,
+                      'type': type,
+                      'description': kwargs.get('description')}
+        post_body = json.dumps({'OS-KSADM:service': post_body})
+        resp, body = self.post('/OS-KSADM/services', post_body,
+                                    self.headers)
+        body = json.loads(body)
+        return resp, body['OS-KSADM:service']
+
+    def get_service(self, service_id):
+        """Get Service"""
+        url = '/OS-KSADM/services/%s' % service_id
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['OS-KSADM:service']
+
+    def delete_service(self, service_id):
+        """Delete Service"""
+        url = '/OS-KSADM/services/%s' % service_id
+        return self.delete(url)
+
 
 class TokenClient(RestClient):
 
