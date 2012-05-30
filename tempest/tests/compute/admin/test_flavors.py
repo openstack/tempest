@@ -106,6 +106,16 @@ class FlavorsAdminTest(BaseComputeTest):
         resp, _ = self.admin_client.delete_flavor(self.new_flavor_id)
         self.assertEqual(resp.status, 202)
 
-        # Get deleted flavor details
-        self.assertRaises(exceptions.NotFound,
-                self.admin_client.get_flavor_details, self.new_flavor_id)
+        # Deleted flavors can be seen via detailed GET
+        resp, flavor = self.admin_client.get_flavor_details(self.new_flavor_id)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(flavor['name'], self.flavor_name)
+
+        # Deleted flavors should not show up in a list however
+        resp, flavors = self.admin_client.list_flavors_with_detail()
+        self.assertEqual(resp.status, 200)
+        flag = True
+        for flavor in flavors:
+            if flavor['name'] == self.flavor_name:
+                flag = False
+        self.assertTrue(flag)
