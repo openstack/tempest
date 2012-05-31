@@ -4,6 +4,7 @@ from base_compute_test import BaseComputeTest
 
 
 class FlavorsTest(BaseComputeTest):
+    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):

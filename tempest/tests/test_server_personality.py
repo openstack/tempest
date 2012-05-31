@@ -7,6 +7,7 @@ import base64
 
 
 class ServerPersonalityTest(BaseComputeTest):
+    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):

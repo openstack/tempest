@@ -10,6 +10,7 @@ from tempest.tests import utils
 
 
 class ServerDetailsTest(BaseComputeTest):
+    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):

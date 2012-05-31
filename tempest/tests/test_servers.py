@@ -4,6 +4,7 @@ from tempest.common.utils.data_utils import rand_name
 
 
 class ServersTest(BaseComputeTest):
+    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):
