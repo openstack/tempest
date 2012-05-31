@@ -48,13 +48,13 @@ class BaseAdminTest(unittest.TestCase):
             return user[0]
 
     def get_tenant_by_name(self, name):
-        _, tenants = self.client.get_tenants()
+        _, tenants = self.client.list_tenants()
         tenant = [t for t in tenants if t['name'] == name]
         if len(tenant) > 0:
             return tenant[0]
 
     def get_role_by_name(self, name):
-        _, roles = self.client.get_roles()
+        _, roles = self.client.list_roles()
         role = [r for r in roles if r['name'] == name]
         if len(role) > 0:
             return role[0]
@@ -92,9 +92,9 @@ class DataGenerator(object):
 
         def setup_test_role(self):
             """Set up a test role"""
-            self.role_name = rand_name('role')
-            resp, role = self.client.create_role(self.role_name)
-            self.roles.append(role)
+            self.test_role = rand_name('role')
+            resp, self.role = self.client.create_role(self.test_role)
+            self.roles.append(self.role)
 
         def teardown_all(self):
             for user in self.users:

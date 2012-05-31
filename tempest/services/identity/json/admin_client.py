@@ -57,6 +57,29 @@ class AdminClient(RestClient):
         resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
         return resp, body
 
+    def list_user_roles(self, user_id):
+        """Returns a list of roles assigned to a user for a tenant"""
+        resp, body = self.get('users/%s/roleRefs' % user_id)
+        body = json.loads(body)
+        return resp, body['roles']
+
+    def assign_user_role(self, user_id, role_id, tenant_id):
+        """Assigns a role to a user for a tenant"""
+        post_body = {
+                'roleId': role_id,
+                'tenantId': tenant_id
+        }
+        post_body = json.dumps({'role': post_body})
+        resp, body = self.post('users/%s/roleRefs' % user_id, post_body,
+                                self.headers)
+        body = json.loads(body)
+        return resp, body['role']
+
+    def remove_user_role(self, user_id, role_id):
+        """Removes a role assignment for a user on a tenant"""
+        resp, body = self.delete('users/%s/roleRefs/%s' % (user_id, role_id))
+        return resp, body
+
     def delete_tenant(self, tenant_id):
         """Delete a tenant"""
         resp, body = self.delete('tenants/%s' % str(tenant_id))
