@@ -333,3 +333,90 @@ class AuthorizationTest(unittest.TestCase):
         """
         self.other_security_client.delete_security_group_rule(\
             self.rule['id'])
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_set_metadata_of_other_account_server_fails(self):
+        """ A set metadata for another user's server should fail """
+        req_metadata = {'meta1': 'data1', 'meta2': 'data2'}
+        self.other_client.set_server_metadata(self.server['id'],
+                                              req_metadata)
+
+    @raises(exceptions.NotFound)
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_set_metadata_of_other_account_image_fails(self):
+        """ A set metadata for another user's image should fail """
+        req_metadata = {'meta1': 'value1', 'meta2': 'value2'}
+        self.other_images_client.set_image_metadata(self.image['id'],
+                                                    req_metadata)
+
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_get_metadata_of_other_account_server_fails(self):
+        """ A get metadata for another user's server should fail """
+        req_metadata = {'meta1': 'data1'}
+        self.client.set_server_metadata(self.server['id'],
+                                              req_metadata)
+        try:
+            resp, meta = \
+            self.other_client.get_server_metadata_item(self.server['id'],
+                                                        'meta1')
+        except exceptions.NotFound:
+            pass
+        finally:
+            resp, body = \
+            self.client.delete_server_metadata_item(self.server['id'], 'meta1')
+
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_get_metadata_of_other_account_image_fails(self):
+        """ A get metadata for another user's image should fail """
+        req_metadata = {'meta1': 'value1'}
+        self.images_client.set_image_metadata(self.image['id'],
+                                             req_metadata)
+        try:
+            resp, meta = \
+            self.other_images_client.get_image_metadata_item(self.image['id'],
+                                                              'meta1')
+        except exceptions.NotFound:
+            pass
+        finally:
+            resp, body = self.images_client.delete_image_metadata_item(\
+                                self.image['id'], 'meta1')
+
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_delete_metadata_of_other_account_server_fails(self):
+        """ A delete metadata for another user's server should fail """
+        req_metadata = {'meta1': 'data1'}
+        self.client.set_server_metadata(self.server['id'],
+                                              req_metadata)
+        try:
+            resp, body = \
+            self.other_client.delete_server_metadata_item(\
+                    self.server['id'], 'meta1')
+        except exceptions.NotFound:
+            pass
+        finally:
+            resp, body = \
+            self.client.delete_server_metadata_item(self.server['id'], 'meta1')
+
+    @attr(type='negative')
+    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    def test_delete_metadata_of_other_account_image_fails(self):
+        """ A delete metadata for another user's image should fail """
+        req_metadata = {'meta1': 'data1'}
+        self.images_client.set_image_metadata(self.image['id'],
+                                              req_metadata)
+        try:
+            resp, body = \
+            self.other_images_client.delete_image_metadata_item(\
+                    self.image['id'], 'meta1')
+        except exceptions.NotFound:
+            pass
+        finally:
+            resp, body = \
+            self.images_client.delete_image_metadata_item(self.image['id'],
+                                                            'meta1')
