@@ -6,6 +6,7 @@ from tempest.common.utils.data_utils import rand_name, parse_image_id
 
 
 class ListImagesTest(BaseComputeTest):
+    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):

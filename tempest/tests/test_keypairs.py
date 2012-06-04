@@ -7,6 +7,7 @@ from tempest import exceptions
 
 
 class KeyPairsTest(BaseComputeTest):
+    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):
