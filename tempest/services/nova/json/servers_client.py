@@ -10,8 +10,6 @@ class ServersClient(RestClient):
         super(ServersClient, self).__init__(config, username, password,
                                            auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
-        self.build_interval = self.config.compute.build_interval
-        self.build_timeout = self.config.compute.build_timeout
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """

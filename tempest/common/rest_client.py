@@ -47,6 +47,8 @@ class RestClient(object):
         self.strategy = self.config.identity.strategy
         self.headers = {'Content-Type': 'application/json',
                         'Accept': 'application/json'}
+        self.build_interval = config.compute.build_interval
+        self.build_timeout = config.compute.build_timeout
 
     def _set_auth(self):
         """
@@ -230,3 +232,19 @@ class RestClient(object):
             raise exceptions.TempestException(str(resp.status))
 
         return resp, resp_body
+
+    def wait_for_resource_deletion(self, id):
+        """Waits for a resource to be deleted"""
+        start_time = int(time.time())
+        while True:
+            if self.is_resource_deleted(id):
+                return
+            if int(time.time()) - start_time >= self.build_timeout:
+                raise exceptions.TimeoutException
+            time.sleep(self.build_interval)
+
+    def is_resource_deleted(self, id):
+        """
+        Subclasses override with specific deletion detection.
+        """
+        return False

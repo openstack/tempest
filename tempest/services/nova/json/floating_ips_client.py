@@ -68,3 +68,10 @@ class FloatingIPsClient(RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post(url, post_body, self.headers)
         return resp, body
+
+    def is_resource_deleted(self, id):
+        try:
+            self.get_floating_ip_details(id)
+        except exceptions.NotFound:
+            return True
+        return False

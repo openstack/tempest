@@ -78,17 +78,15 @@ class FloatingIPsTest(BaseComputeTest):
         #Deleting the floating IP from the project
         resp, body = self.client.delete_floating_ip(floating_ip_body['id'])
         self.assertEqual(202, resp.status)
-        #Listing the floating IPs and checking the existence
-        #of deleted floating IP
-        resp, body = self.client.list_floating_ips()
-        self.assertTrue(floating_ip_details not in body)
+        # Check it was really deleted.
+        self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
     @attr(type='positive')
-    def test_associate_floating_ip(self):
+    def test_associate_disassociate_floating_ip(self):
         """
-        Positive test:Associate the provided floating IP to a specific server
-        should be successfull
-       l"""
+        Positive test:Associate and disassociate the provided floating IP to a
+        specific server should be successfull
+        """
         #Association of floating IP to fixed IP address
         resp, body =\
         self.client.associate_floating_ip_to_server(self.floating_ip,
@@ -98,22 +96,6 @@ class FloatingIPsTest(BaseComputeTest):
         resp, body = \
             self.client.disassociate_floating_ip_from_server(self.floating_ip,
                                                              self.server_id)
-
-    @attr(type='positive')
-    def test_dissociate_floating_ip(self):
-        """
-        Positive test:Dissociate the provided floating IP
-        from a specific server should be successfull
-        """
-        #Association of floating IP to a specific server
-        #so as to check dissociation
-        resp, body = \
-            self.client.associate_floating_ip_to_server(self.floating_ip,
-                                                        self.server_id)
-        #Disassociation of floating IP
-        resp, body = \
-        self.client.disassociate_floating_ip_from_server(self.floating_ip,
-                                                         self.server_id)
         self.assertEqual(202, resp.status)
 
     @attr(type='negative')

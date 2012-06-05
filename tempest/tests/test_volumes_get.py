@@ -1,6 +1,5 @@
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-from unittest.case import SkipTest
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 
@@ -52,9 +51,7 @@ class VolumesGetTest(unittest.TestCase):
             resp, _ = self.client.delete_volume(volume['id'])
             self.assertEqual(202, resp.status)
             #Checking if the deleted Volume still exists
-            resp, fetched_list = self.client.list_volumes()
-            self.assertTrue(fetched_volume not in fetched_list,
-                            'The Volume is not Deleted')
+            self.client.wait_for_resource_deletion(volume['id'])
 
     @attr(type='positive')
     def test_volume_get_metadata_none(self):
