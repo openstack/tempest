@@ -90,3 +90,10 @@ class VolumesClient(RestClient):
                 'the required time (%s s).' % (volume_name, status,
                                               self.build_timeout)
                 raise exceptions.TimeoutException(message)
+
+    def is_resource_deleted(self, id):
+        try:
+            self.get_volume(id)
+        except exceptions.NotFound:
+            return True
+        return False
