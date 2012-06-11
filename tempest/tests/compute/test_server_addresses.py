@@ -1,19 +1,32 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2012 OpenStack, LLC
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 from nose.plugins.attrib import attr
-import unittest2 as unittest
-from tempest import openstack
-from tempest.common.utils.data_utils import rand_name
+
 from tempest import exceptions
+from tempest.common.utils.data_utils import rand_name
+from tempest.tests.compute.base import BaseComputeTest
 
 
-class ServerAddressesTest(unittest.TestCase):
+class ServerAddressesTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.servers_client
-        cls.config = cls.os.config
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.client = cls.servers_client
 
         cls.name = rand_name('server')
         resp, cls.server = cls.client.create_server(cls.name,

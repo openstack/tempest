@@ -19,11 +19,11 @@ import unittest2 as unittest
 
 import nose
 
-from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
+from tempest.tests.compute.base import BaseComputeTest
 
 
-class VolumesTest(unittest.TestCase):
+class VolumesTest(BaseComputeTest):
 
     """
     This test creates a number of 1G volumes. To run successfully,
@@ -37,8 +37,7 @@ class VolumesTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
-        cls.client = cls.os.volumes_client
+        cls.client = cls.volumes_client
         # Create 3 Volumes
         cls.volume_list = list()
         cls.volume_id_list = list()
