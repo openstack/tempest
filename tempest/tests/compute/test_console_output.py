@@ -16,6 +16,7 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
+import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
@@ -56,6 +57,7 @@ class ConsoleOutputTest(BaseComputeTest):
             pass
 
     @attr(type='positive')
+    @unittest.skip('Until tempest bug 1014683 is fixed.')
     def test_get_console_output_server_id_in_reboot_status(self):
         try:
             resp, output = self.servers_client.reboot(self.server_id, 'SOFT')
