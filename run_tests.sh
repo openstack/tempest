@@ -1,41 +1,61 @@
 #!/bin/bash
 
 function usage {
-  echo "Usage: [OPTIONS] [SUITES]"
-  echo "Run all of the test suites"
+  echo "Usage: $0 [OPTION]..."
+  echo "Run Tempest test suite"
   echo ""
+  echo "  -s, --smoke              Only run smoke tests"
+  echo "  -p, --pep8               Just run pep8"
   echo "  -h, --help               Print this usage message"
-  echo ""
-  echo "  The suites should be listed by the name of their directory."
-  echo "  All other options are passed directly to the suites."
+  echo "  -d. --debug              Debug this script -- set -o xtrace"
   exit
 }
 
 function process_option {
   case "$1" in
     -h|--help) usage;;
-    -*|--*) test_opts="$test_opts $1";;
-    *) tests="$tests $1"
+    -d|--debug) set -o xtrace;;
+    -p|--pep8) let just_pep8=1;;
+    -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
+    *) noseargs="$noseargs $1"
   esac
 }
+
+noseargs="tempest"
+just_pep8=0
+
+export NOSE_WITH_OPENSTACK=1
+export NOSE_OPENSTACK_COLOR=1
+export NOSE_OPENSTACK_RED=15.00
+export NOSE_OPENSTACK_YELLOW=3.00
+export NOSE_OPENSTACK_SHOW_ELAPSED=1
+export NOSE_OPENSTACK_STDOUT=1
 
 for arg in "$@"; do
   process_option $arg
 done
 
-echo $test_opts
-
 function run_tests {
-  base_dir=$(dirname $0)
-  for test_dir in $tests
-  do
-    test_cmd="${base_dir}/${test_dir}/run_tests.sh ${test_opts}"
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    echo $test_cmd
-    echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-    $test_cmd
-
-  done
+  $NOSETESTS
 }
 
+function run_pep8 {
+  echo "Running pep8 ..."
+  PEP8_EXCLUDE="kong,etc,include,tools"
+  PEP8_OPTIONS="--exclude=$PEP8_EXCLUDE --repeat"
+  PEP8_INCLUDE="."
+  pep8 $PEP8_OPTIONS $PEP8_INCLUDE
+}
+
+NOSETESTS="nosetests $noseargs"
+
+if [ $just_pep8 -eq 1 ]; then
+    run_pep8
+    exit
+fi
+
 run_tests || exit
+
+if [ -z "$noseargs" ]; then
+  run_pep8
+fi

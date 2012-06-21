@@ -24,10 +24,11 @@ from tempest.common.utils.data_utils import rand_name
 from tempest.tests.compute.base import BaseComputeTest
 
 
-class VolumesTest(BaseComputeTest):
+class VolumesNegativeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(VolumesNegativeTest, cls).setUpClass()
         cls.client = cls.volumes_client
 
     @attr(type='negative')

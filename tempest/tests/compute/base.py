@@ -15,98 +15,120 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
 import time
+
 import unittest2 as unittest
 
+from tempest import config
 from tempest import exceptions
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
+from tempest.services.identity.json.admin_client import AdminClient
+
+LOG = logging.getLogger(__name__)
 
 
 class BaseComputeTest(unittest.TestCase):
 
-    os = openstack.Manager()
-    servers_client = os.servers_client
-    flavors_client = os.flavors_client
-    images_client = os.images_client
-    extensions_client = os.extensions_client
-    floating_ips_client = os.floating_ips_client
-    keypairs_client = os.keypairs_client
-    floating_ips_client = os.floating_ips_client
-    security_groups_client = os.security_groups_client
-    console_outputs_client = os.console_outputs_client
-    limits_client = os.limits_client
-    volumes_client = os.volumes_client
-    config = os.config
-    build_interval = config.compute.build_interval
-    build_timeout = config.compute.build_timeout
-    ssh_user = config.compute.ssh_user
-    servers = []
+    """Base test case class for all Compute API tests"""
 
-    # Validate reference data exists
-    # If not, attempt to auto-configure
-    try:
-        image_ref = config.compute.image_ref
-        image_ref_alt = config.compute.image_ref_alt
-        images_client.get_image(image_ref)
-        images_client.get_image(image_ref_alt)
-    except:
-        # Make a reasonable attempt to get usable images
-        params = {'status': 'ACTIVE'}
-        _, images = images_client.list_images_with_detail(params)
-        if len(images) is 0:
-            message = "No usable image exists. Upload an image to Glance."
-            raise exceptions.InvalidConfiguration(message=message)
-        if len(images) is 1:
-            image_ref = images[0]['id']
-            image_ref_alt = images[0]['id']
+    @classmethod
+    def setUpClass(cls):
+        cls.config = config.TempestConfig()
+        cls.isolated_creds = []
+
+        if cls.config.compute.allow_tenant_isolation:
+            creds = cls._get_isolated_creds()
+            username, tenant_name, password = creds
+            os = openstack.Manager(username=username,
+                                   password=password,
+                                   tenant_name=tenant_name)
         else:
-            # Try to determine if this is a devstack environment.
-            # If so, some of the images are not usable
+            os = openstack.Manager()
 
-            # For now, the useable image in devstack has this property
-            usable = [i for i in images if 'ramdisk_id' in i['metadata']]
-            if len(usable) > 0:
-                # We've found at least one image we can use
-                image_ref = usable[0]['id']
-                image_ref_alt = usable[0]['id']
-            else:
-                # We've done our due dillegence, take the first two images
-                image_ref = images[0]['id']
-                image_ref_alt = images[1]['id']
+        cls.os = os
+        cls.servers_client = os.servers_client
+        cls.flavors_client = os.flavors_client
+        cls.images_client = os.images_client
+        cls.extensions_client = os.extensions_client
+        cls.floating_ips_client = os.floating_ips_client
+        cls.keypairs_client = os.keypairs_client
+        cls.floating_ips_client = os.floating_ips_client
+        cls.security_groups_client = os.security_groups_client
+        cls.console_outputs_client = os.console_outputs_client
+        cls.limits_client = os.limits_client
+        cls.volumes_client = os.volumes_client
+        cls.build_interval = cls.config.compute.build_interval
+        cls.build_timeout = cls.config.compute.build_timeout
+        cls.ssh_user = cls.config.compute.ssh_user
+        cls.image_ref = cls.config.compute.image_ref
+        cls.image_ref_alt = cls.config.compute.image_ref_alt
+        cls.flavor_ref = cls.config.compute.flavor_ref
+        cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
+        cls.servers = []
 
-    try:
-        flavor_ref = config.compute.flavor_ref
-        flavor_ref_alt = config.compute.flavor_ref_alt
-        flavors_client.get_flavor_details(flavor_ref)
-        flavors_client.get_flavor_details(flavor_ref_alt)
-    except:
-        # Reload both with new values
-        # Sort so the smallest flavors are used. This is for efficiency.
-        _, flavors = flavors_client.list_flavors_with_detail()
-        flavors = sorted(flavors, key=lambda k: k['ram'])
+    @classmethod
+    def _get_identity_admin_client(cls):
+        """
+        Returns an instance of the Identity Admin API client
+        """
+        client_args = (cls.config,
+                       cls.config.identity_admin.username,
+                       cls.config.identity_admin.password,
+                       cls.config.identity.auth_url)
+        tenant_name = cls.config.identity_admin.tenant_name
+        admin_client = AdminClient(*client_args, tenant_name=tenant_name)
+        return admin_client
 
-        if len(flavors) is 0:
-            message = "No flavors exists. Add flavors via the admin API."
-            raise exceptions.InvalidConfiguration(message=message)
-        if len(flavors) is 1:
-            flavor_ref = flavors[0]['id']
-            flavor_ref_alt = flavors[0]['id']
-        else:
-            flavor_ref = flavors[0]['id']
-            # Make sure the second flavor does not have the same RAM
-            for i in range(1, len(flavors)):
-                if flavors[i] == flavors[-1]:
-                    # We've tried. Take the last flavor
-                    flavor_ref_alt = flavors[i]['id']
-                else:
-                    if flavors[i]['ram'] > flavors[0]['ram']:
-                        flavor_ref_alt = flavors[i]['id']
-                        break
+    @classmethod
+    def _get_isolated_creds(cls):
+        """
+        Creates a new set of user/tenant/password credentials for a
+        **regular** user of the Compute API so that a test case can
+        operate in an isolated tenant container.
+        """
+        admin_client = cls._get_identity_admin_client()
+        rand_name_root = cls.__name__
+        if cls.isolated_creds:
+            # Main user already created. Create the alt one...
+            rand_name_root += '-alt'
+        username = rand_name_root + "-user"
+        email = rand_name_root + "@example.com"
+        tenant_name = rand_name_root + "-tenant"
+        tenant_desc = tenant_name + "-desc"
+        password = "pass"
+
+        resp, tenant = admin_client.create_tenant(name=tenant_name,
+                                                  description=tenant_desc)
+        resp, user = admin_client.create_user(username,
+                                              password,
+                                              tenant['id'],
+                                              email)
+        # Store the complete creds (including UUID ids...) for later
+        # but return just the username, tenant_name, password tuple
+        # that the various clients will use.
+        cls.isolated_creds.append((user, tenant))
+
+        return username, tenant_name, password
+
+    @classmethod
+    def clear_isolated_creds(cls):
+        if not cls.isolated_creds:
+            pass
+        admin_client = cls._get_identity_admin_client()
+
+        for user, tenant in cls.isolated_creds:
+            admin_client.delete_user(user['id'])
+            admin_client.delete_tenant(tenant['id'])
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.clear_isolated_creds()
 
     def create_server(self, image_id=None):
         """Wrapper utility that returns a test server"""
-        server_name = rand_name('test-vm-')
+        server_name = rand_name(self.__class__.__name__ + "-instance")
         flavor = self.flavor_ref
         if not image_id:
             image_id = self.image_ref
@@ -131,3 +153,22 @@ class BaseComputeTest(unittest.TestCase):
                 condition()
                 return
             time.sleep(self.build_interval)
+
+
+class BaseComputeAdminTest(unittest.TestCase):
+
+    """Base test case class for all Compute Admin API tests"""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.config = config.TempestConfig()
+        cls.admin_username = cls.config.compute_admin.username
+        cls.admin_password = cls.config.compute_admin.password
+        cls.admin_tenant = cls.config.compute_admin.tenant_name
+
+        if not cls.admin_username and cls.admin_password and cls.admin_tenant:
+            msg = ("Missing Compute Admin API credentials "
+                   "in configuration.")
+            raise nose.SkipTest(msg)
+
+        cls.os = openstack.AdminManager()

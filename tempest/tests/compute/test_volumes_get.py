@@ -26,7 +26,8 @@ class VolumesGetTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.client = cls.os.volumes_client
+        super(VolumesGetTest, cls).setUpClass()
+        cls.client = cls.volumes_client
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):

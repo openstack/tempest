@@ -23,6 +23,12 @@ strategy = %IDENTITY_STRATEGY%
 # This section contains configuration options used when executing tests
 # against the OpenStack Compute API.
 
+# Allows test cases to create/destroy tenants and users. This option
+# enables isolated test cases and better parallel execution,
+# but also requires that OpenStack Identity API admin credentials
+# are known.
+allow_tenant_isolation = %COMPUTE_ALLOW_TENANT_ISOLATION%
+
 # This should be the username of a user WITHOUT administrative privileges
 username = %USERNAME%
 # The above non-administrative user's password
@@ -100,8 +106,20 @@ tenant_name = %TENANT_NAME%
 # the admin-only parts of the Compute API
 
 # This should be the username of a user WITH administrative privileges
-username = %ADMIN_USERNAME%
+username = %COMPUTE_ADMIN_USERNAME%
 # The above administrative user's password
-password = %ADMIN_PASSWORD%
+password = %COMPUTE_ADMIN_PASSWORD%
 # The above administrative user's tenant name
-tenant_name = %ADMIN_TENANT_NAME%
+tenant_name = %COMPUTE_ADMIN_TENANT_NAME%
+
+[identity-admin]
+# This section contains configuration options for an administrative
+# user of the Compute API. These options are used in tests that stress
+# the admin-only parts of the Compute API
+
+# This should be the username of a user WITH administrative privileges
+username = %IDENTITY_ADMIN_USERNAME%
+# The above administrative user's password
+password = %IDENTITY_ADMIN_PASSWORD%
+# The above administrative user's tenant name
+tenant_name = %IDENTITY_ADMIN_TENANT_NAME%

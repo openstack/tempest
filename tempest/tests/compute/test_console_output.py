@@ -27,6 +27,7 @@ class ConsoleOutputTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ConsoleOutputTest, cls).setUpClass()
         cls.client = cls.console_outputs_client
         cls.servers_client = cls.servers_client
         cls.name = rand_name('server')
@@ -40,6 +41,7 @@ class ConsoleOutputTest(BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.servers_client.delete_server(cls.server_id)
+        super(ConsoleOutputTest, cls).tearDownClass()
 
     @attr(type='positive')
     def test_get_console_output(self):

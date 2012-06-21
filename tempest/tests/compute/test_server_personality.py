@@ -25,10 +25,10 @@ from tempest.tests.compute.base import BaseComputeTest
 
 
 class ServerPersonalityTest(BaseComputeTest):
-    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):
+        super(ServerPersonalityTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 

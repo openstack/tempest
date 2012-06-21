@@ -24,6 +24,7 @@ class ExtensionsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ExtensionsTest, cls).setUpClass()
         cls.client = cls.extensions_client
 
     @attr(type='smoke')

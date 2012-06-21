@@ -23,10 +23,10 @@ from tempest.tests.compute.base import BaseComputeTest
 
 
 class ListImagesTest(BaseComputeTest):
-    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):
+        super(ListImagesTest, cls).setUpClass()
         cls.client = cls.images_client
 
         name = rand_name('server')
@@ -72,6 +72,7 @@ class ListImagesTest(BaseComputeTest):
         cls.client.delete_image(cls.image3_id)
         cls.servers_client.delete_server(cls.server1['id'])
         cls.servers_client.delete_server(cls.server2['id'])
+        super(ListImagesTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_get_image(self):

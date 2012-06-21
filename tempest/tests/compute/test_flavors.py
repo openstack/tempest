@@ -22,10 +22,10 @@ from tempest.tests.compute.base import BaseComputeTest
 
 
 class FlavorsTest(BaseComputeTest):
-    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):
+        super(FlavorsTest, cls).setUpClass()
         cls.client = cls.flavors_client
 
     @attr(type='smoke')

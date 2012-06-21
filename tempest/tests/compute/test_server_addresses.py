@@ -26,6 +26,7 @@ class ServerAddressesTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ServerAddressesTest, cls).setUpClass()
         cls.client = cls.servers_client
 
         cls.name = rand_name('server')
@@ -37,6 +38,7 @@ class ServerAddressesTest(BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.server['id'])
+        super(ServerAddressesTest, cls).tearDownClass()
 
     @attr(type='negative', category='server-addresses')
     def test_list_server_addresses_invalid_server_id(self):

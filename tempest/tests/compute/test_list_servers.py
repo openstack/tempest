@@ -25,14 +25,14 @@ from tempest.tests import utils
 
 
 class ServerDetailsTest(BaseComputeTest):
-    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):
+        super(ServerDetailsTest, cls).setUpClass()
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...
-        images_client = cls.os.images_client
+        images_client = cls.images_client
         resp, images = images_client.list_images()
 
         if cls.image_ref != cls.image_ref_alt and \
@@ -84,6 +84,7 @@ class ServerDetailsTest(BaseComputeTest):
         cls.client.delete_server(cls.s1['id'])
         cls.client.delete_server(cls.s2['id'])
         cls.client.delete_server(cls.s3['id'])
+        super(ServerDetailsTest, cls).tearDownClass()
 
     def test_list_servers(self):
         """Return a list of all servers"""

@@ -17,7 +17,7 @@
 
 import logging
 
-import tempest.config
+from tempest import config
 from tempest import exceptions
 from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
@@ -33,8 +33,6 @@ from tempest.services.nova.json.keypairs_client import KeyPairsClient
 from tempest.services.nova.json.volumes_client import VolumesClient
 from tempest.services.nova.json.console_output_client \
 import ConsoleOutputsClient
-from tempest.services.identity.json.admin_client import AdminClient
-from tempest.services.identity.json.admin_client import TokenClient
 
 LOG = logging.getLogger(__name__)
 
@@ -55,8 +53,10 @@ class Manager(object):
         :param password: Override of the password
         :param tenant_name: Override of the tenant name
         """
-        self.config = tempest.config.TempestConfig()
+        self.config = config.TempestConfig()
 
+        # If no creds are provided, we fall back on the defaults
+        # in the config file for the Compute API.
         username = username or self.config.compute.username
         password = password or self.config.compute.password
         tenant_name = tenant_name or self.config.compute.tenant_name
@@ -85,8 +85,6 @@ class Manager(object):
         self.floating_ips_client = FloatingIPsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
-        self.admin_client = AdminClient(*client_args)
-        self.token_client = TokenClient(self.config)
         self.network_client = NetworkClient(*client_args)
 
 
@@ -98,7 +96,7 @@ class AltManager(Manager):
     """
 
     def __init__(self):
-        conf = tempest.config.TempestConfig()
+        conf = config.TempestConfig()
         super(AltManager, self).__init__(conf.compute.alt_username,
                                          conf.compute.alt_password,
                                          conf.compute.alt_tenant_name)
@@ -112,11 +110,10 @@ class AdminManager(Manager):
     """
 
     def __init__(self):
-        conf = tempest.config.TempestConfig()
+        conf = config.TempestConfig()
         super(AdminManager, self).__init__(conf.compute_admin.username,
                                            conf.compute_admin.password,
                                            conf.compute_admin.tenant_name)
-        # TODO(jaypipes): Add Admin-Only client class construction below...
 
 
 class ServiceManager(object):
@@ -126,7 +123,7 @@ class ServiceManager(object):
     """
 
     def __init__(self):
-        self.config = tempest.config.TempestConfig()
+        self.config = config.TempestConfig()
         self.services = {}
         self.services['image'] = image_service.Service(self.config)
         self.images = self.services['image']

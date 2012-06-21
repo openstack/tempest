@@ -1,33 +1,67 @@
-import unittest2 as unittest
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2012 OpenStack, LLC
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 import nose
+import unittest2 as unittest
+
 import tempest.config
-from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
+from tempest.services.identity.json.admin_client import AdminClient
+from tempest.services.identity.json.admin_client import TokenClient
 
 
-class BaseAdminTest(unittest.TestCase):
-    """Base class for Identity Admin Tests"""
+class BaseIdentityAdminTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
         cls.config = tempest.config.TempestConfig()
-        cls.admin_username = cls.config.compute_admin.username
-        cls.admin_password = cls.config.compute_admin.password
-        cls.admin_tenant = cls.config.compute_admin.tenant_name
+        cls.username = cls.config.identity_admin.username
+        cls.password = cls.config.identity_admin.password
+        cls.tenant_name = cls.config.identity_admin.tenant_name
 
-        if not(cls.admin_username and cls.admin_password and cls.admin_tenant):
+        if not (cls.username
+                and cls.password
+                and cls.tenant_name):
             raise nose.SkipTest("Missing Admin credentials in configuration")
 
-        cls.admin_os = openstack.AdminManager()
-        cls.client = cls.admin_os.admin_client
-        cls.token_client = cls.admin_os.token_client
+        client_args = (cls.config,
+                       cls.username,
+                       cls.password,
+                       cls.config.identity.auth_url)
+        cls.client = AdminClient(*client_args, tenant_name=cls.tenant_name)
+        cls.token_client = TokenClient(cls.config)
 
         if not cls.client.has_admin_extensions():
             raise nose.SkipTest("Admin extensions disabled")
 
-        cls.os = openstack.Manager()
-        cls.non_admin_client = cls.os.admin_client
         cls.data = DataGenerator(cls.client)
+
+        # Create an admin client with regular Compute API credentials. This
+        # client is used in tests to validate Unauthorized is returned
+        # for non-admin users accessing Identity Admin API commands
+        cls.na_username = cls.config.compute.username
+        cls.na_password = cls.config.compute.password
+        cls.na_tenant_name = cls.config.compute.tenant_name
+        na_client_args = (cls.config,
+                       cls.na_username,
+                       cls.na_password,
+                       cls.config.identity.auth_url)
+        cls.non_admin_client = AdminClient(*na_client_args,
+                                           tenant_name=cls.na_tenant_name)
 
     @classmethod
     def tearDownClass(cls):

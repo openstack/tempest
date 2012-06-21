@@ -90,9 +90,39 @@ class IdentityConfig(BaseConfig):
         return self.get("strategy", 'keystone')
 
 
+class IdentityAdminConfig(BaseConfig):
+
+    SECTION_NAME = "identity-admin"
+
+    @property
+    def username(self):
+        """Username to use for Identity Admin API requests"""
+        return self.get("username", "admin")
+
+    @property
+    def tenant_name(self):
+        """Tenant name to use for Identity Admin API requests"""
+        return self.get("tenant_name", "admin")
+
+    @property
+    def password(self):
+        """API key to use for Identity Admin API requests"""
+        return self.get("password", "pass")
+
+
 class ComputeConfig(BaseConfig):
 
     SECTION_NAME = "compute"
+
+    @property
+    def allow_tenant_isolation(self):
+        """
+        Allows test cases to create/destroy tenants and users. This option
+        enables isolated test cases and better parallel execution,
+        but also requires that OpenStack Identity API admin credentials
+        are known.
+        """
+        return self.get("allow_tenant_isolation", 'false').lower() != 'false'
 
     @property
     def username(self):
@@ -323,6 +353,7 @@ class TempestConfig:
         self.compute = ComputeConfig(self._conf)
         self.compute_admin = ComputeAdminConfig(self._conf)
         self.identity = IdentityConfig(self._conf)
+        self.identity_admin = IdentityAdminConfig(self._conf)
         self.images = ImagesConfig(self._conf)
         self.network = NetworkConfig(self._conf)
 

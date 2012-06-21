@@ -24,43 +24,28 @@ from tempest import exceptions
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests import compute
 
 
 class ServerDetailsNegativeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ServerDetailsNegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.servers = []
 
-        # Verify the alternate user is configured and not the same as the first
-        cls.user1 = cls.config.compute.username
-        cls.user2 = cls.config.compute.alt_username
-        cls.user2_password = cls.config.compute.alt_password
-        cls.user2_tenant_name = cls.config.compute.alt_tenant_name
-        cls.multi_user = False
-
-        if (not None in (cls.user2, cls.user2_password, cls.user2_tenant_name)
-            and cls.user1 != cls.user2):
-
-            try:
-                cls.alt_manager = openstack.AltManager()
-                cls.alt_client = cls.alt_manager.servers_client
-            except exceptions.AuthenticationFailure:
-                # multi_user is already set to false, just fall through
-                pass
+        if compute.MULTI_USER:
+            if cls.config.compute.allow_tenant_isolation:
+                creds = cls._get_isolated_creds()
+                username, tenant_name, password = creds
+                cls.alt_manager = openstack.Manager(username=username,
+                                                    password=password,
+                                                    tenant_name=tenant_name)
             else:
-                cls.multi_user = True
-
-    @classmethod
-    def tearDownClass(cls):
-        """Terminate all running instances in nova"""
-        try:
-            resp, body = cls.client.list_servers()
-            for server in body['servers']:
-                resp, body = cls.client.delete_server(server)
-        except exceptions.NotFound:
-            pass
+                # Use the alt_XXX credentials in the config file
+                cls.alt_manager = openstack.AltManager()
+            cls.alt_client = cls.alt_manager.servers_client
 
     def tearDown(self):
         """Terminate instances created by tests"""

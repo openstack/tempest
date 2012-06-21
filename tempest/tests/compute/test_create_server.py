@@ -32,6 +32,7 @@ class ServersTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ServersTest, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '::babe:220.12.22.2'
@@ -54,6 +55,7 @@ class ServersTest(BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.server_initial['id'])
+        super(ServersTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_create_server_response(self):

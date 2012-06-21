@@ -18,43 +18,35 @@
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils.data_utils import rand_name, parse_image_id
 import tempest.config
 from tempest import exceptions
 from tempest import openstack
-from tempest.common.utils import data_utils
 from tempest.tests.compute.base import BaseComputeTest
-from tempest.tests import utils
+from tempest.tests import compute
 
 
 class ImagesTest(BaseComputeTest):
 
-    create_image_enabled = tempest.config.TempestConfig().\
-            compute.create_image_enabled
-
     @classmethod
     def setUpClass(cls):
+        super(ImagesTest, cls).setUpClass()
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
 
-        cls.user1 = cls.config.compute.username
-        cls.user2 = cls.config.compute.alt_username
-        cls.user2_password = cls.config.compute.alt_password
-        cls.user2_tenant_name = cls.config.compute.alt_tenant_name
-        cls.multi_user = False
         cls.image_ids = []
 
-        if (cls.user2 and cls.user1 != cls.user2 and cls.user2_password \
-            and cls.user2_tenant_name):
-
-            try:
-                cls.alt_manager = openstack.AltManager()
-                cls.alt_client = cls.alt_manager.images_client
-            except exceptions.AuthenticationFailure:
-                # multi_user is already set to false, just fall through
-                pass
+        if compute.MULTI_USER:
+            if cls.config.compute.allow_tenant_isolation:
+                creds = cls._get_isolated_creds()
+                username, tenant_name, password = creds
+                cls.alt_manager = openstack.Manager(username=username,
+                                                    password=password,
+                                                    tenant_name=tenant_name)
             else:
-                cls.multi_user = True
+                # Use the alt_XXX credentials in the config file
+                cls.alt_manager = openstack.AltManager()
+            cls.alt_client = cls.alt_manager.images_client
 
     def tearDown(self):
         """Terminate test instances created after a test is executed"""
@@ -69,7 +61,7 @@ class ImagesTest(BaseComputeTest):
             self.image_ids.remove(image_id)
 
     @attr(type='smoke')
-    @unittest.skipUnless(create_image_enabled,
+    @unittest.skipUnless(compute.CREATE_IMAGE_ENABLED,
                          'Environment unable to create images.')
     def test_create_delete_image(self):
         """An image for the provided server should be created"""
@@ -83,7 +75,7 @@ class ImagesTest(BaseComputeTest):
         name = rand_name('image')
         meta = {'image_type': 'test'}
         resp, body = self.client.create_image(server['id'], name, meta)
-        image_id = data_utils.parse_image_id(resp['location'])
+        image_id = parse_image_id(resp['location'])
         self.client.wait_for_image_resp_code(image_id, 200)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
@@ -123,7 +115,7 @@ class ImagesTest(BaseComputeTest):
             pass
 
         else:
-            image_id = data_utils.parse_image_id(resp['location'])
+            image_id = parse_image_id(resp['location'])
             self.client.wait_for_image_resp_code(image_id, 200)
             self.client.wait_for_image_status(image_id, 'ACTIVE')
             self.client.delete_image(image_id)
@@ -145,13 +137,13 @@ class ImagesTest(BaseComputeTest):
 
         finally:
             if (resp['status'] != None):
-                image_id = data_utils.parse_image_id(resp['location'])
+                image_id = parse_image_id(resp['location'])
                 resp, _ = self.client.delete_image(image_id)
                 self.fail("An image should not be created"
                             " with invalid server id")
 
     @attr(type='negative')
-    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    @unittest.skipUnless(compute.MULTI_USER, 'Second user not configured')
     def test_create_image_for_server_in_another_tenant(self):
         """Creating image of another tenant's server should be return error"""
         server = self.create_server()
@@ -201,7 +193,7 @@ class ImagesTest(BaseComputeTest):
             # Create first snapshot
             snapshot_name = rand_name('test-snap-')
             resp, body = self.client.create_image(server['id'], snapshot_name)
-            image_id = data_utils.parse_image_id(resp['location'])
+            image_id = parse_image_id(resp['location'])
             self.image_ids.append(image_id)
 
             # Create second snapshot
@@ -369,7 +361,7 @@ class ImagesTest(BaseComputeTest):
                       "exceeds 35 character ID length limit")
 
     @attr(type='negative')
-    @utils.skip_unless_attr('multi_user', 'Second user not configured')
+    @unittest.skipUnless(compute.MULTI_USER, 'Second user not configured')
     def test_delete_image_of_another_tenant(self):
         """Return an error while trying to delete another tenant's image"""
 
@@ -377,7 +369,7 @@ class ImagesTest(BaseComputeTest):
 
         snapshot_name = rand_name('test-snap-')
         resp, body = self.client.create_image(server['id'], snapshot_name)
-        image_id = data_utils.parse_image_id(resp['location'])
+        image_id = parse_image_id(resp['location'])
         self.image_ids.append(image_id)
         self.client.wait_for_image_resp_code(image_id, 200)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
@@ -394,7 +386,7 @@ class ImagesTest(BaseComputeTest):
 
         snapshot_name = rand_name('test-snap-')
         resp, body = self.client.create_image(server['id'], snapshot_name)
-        image_id = data_utils.parse_image_id(resp['location'])
+        image_id = parse_image_id(resp['location'])
         self.image_ids.append(image_id)
 
         # Do not wait, attempt to delete the image, ensure it's successful

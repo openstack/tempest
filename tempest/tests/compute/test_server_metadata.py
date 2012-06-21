@@ -25,6 +25,7 @@ class ServerMetadataTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ServerMetadataTest, cls).setUpClass()
         cls.client = cls.servers_client
 
         #Create a server to be used for all read only tests
@@ -39,6 +40,7 @@ class ServerMetadataTest(BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.server_id)
+        super(ServerMetadataTest, cls).tearDownClass()
 
     def setUp(self):
         meta = {'key1': 'value1', 'key2': 'value2'}

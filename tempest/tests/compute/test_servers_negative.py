@@ -30,18 +30,11 @@ class ServersNegativeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ServersNegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client
         cls.alt_os = openstack.AltManager()
         cls.alt_client = cls.alt_os.servers_client
-
-    @classmethod
-    def tearDownClass(cls):
-        for server in cls.servers:
-            try:
-                cls.client.delete_server(server['id'])
-            except exceptions.NotFound:
-                continue
 
     @attr(type='negative')
     def test_server_name_blank(self):

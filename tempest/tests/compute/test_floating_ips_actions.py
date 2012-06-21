@@ -30,6 +30,7 @@ class FloatingIPsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(FloatingIPsTest, cls).setUpClass()
         cls.client = cls.floating_ips_client
         cls.servers_client = cls.servers_client
 
@@ -60,6 +61,7 @@ class FloatingIPsTest(BaseComputeTest):
         resp, body = cls.servers_client.delete_server(cls.server_id)
         #Deleting the floating IP which is created in this method
         resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
+        super(FloatingIPsTest, cls).tearDownClass()
 
     @attr(type='positive')
     def test_allocate_floating_ip(self):

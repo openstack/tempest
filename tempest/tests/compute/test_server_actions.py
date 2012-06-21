@@ -33,6 +33,7 @@ class ServerActionsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ServerActionsTest, cls).setUpClass()
         cls.client = cls.servers_client
 
     def setUp(self):

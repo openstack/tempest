@@ -24,10 +24,10 @@ from tempest.tests.compute.base import BaseComputeTest
 
 
 class KeyPairsTest(BaseComputeTest):
-    _multiprocess_shared_ = True
 
     @classmethod
     def setUpClass(cls):
+        super(KeyPairsTest, cls).setUpClass()
         cls.client = cls.keypairs_client
 
     @attr(type='smoke')

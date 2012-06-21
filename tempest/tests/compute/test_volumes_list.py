@@ -37,6 +37,7 @@ class VolumesTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(VolumesTest, cls).setUpClass()
         cls.client = cls.volumes_client
         # Create 3 Volumes
         cls.volume_list = list()
@@ -74,6 +75,7 @@ class VolumesTest(BaseComputeTest):
         # Delete the created Volumes
         for volume in cls.volume_list:
             resp, _ = cls.client.delete_volume(volume['id'])
+        super(VolumesTest, cls).tearDownClass()
 
     def test_volume_list(self):
         """Should return the list of Volumes"""

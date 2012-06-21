@@ -27,20 +27,26 @@ strategy = keystone
 # This section contains configuration options used when executing tests
 # against the OpenStack Compute API.
 
+# Allows test cases to create/destroy tenants and users. This option
+# enables isolated test cases and better parallel execution,
+# but also requires that OpenStack Identity API admin credentials
+# are known.
+allow_tenant_isolation = true
+
 # This should be the username of a user WITHOUT administrative privileges
-username = {$USERNAME}
+username = demo
 # The above non-administrative user's password
-password = {$PASSWORD}
+password = pass
 # The above non-administrative user's tenant name
-tenant_name = {$TENANT_NAME}
+tenant_name = demo
 
 # This should be the username of an alternate user WITHOUT
 # administrative privileges
-alt_username = {$ALT_USERNAME}
+alt_username = alt_demo
 # The above non-administrative user's password
-alt_password = {$ALT_PASSWORD}
+alt_password = pass
 # The above non-administrative user's tenant name
-alt_tenant_name = {$ALT_TENANT_NAME}
+alt_tenant_name = alt_demo
 
 # Reference data for tests. The ref and ref_alt should be
 # distinct images/flavors.
@@ -109,11 +115,11 @@ host = 127.0.0.1
 port = 9292
 
 # This should be the username of a user WITHOUT administrative privileges
-username = {$USERNAME}
+username = demo
 # The above non-administrative user's password
-password = {$PASSWORD}
+password = pass
 # The above non-administrative user's tenant name
-tenant_name = {$TENANT_NAME}
+tenant_name = demo
 
 [compute-admin]
 # This section contains configuration options for an administrative
@@ -121,14 +127,26 @@ tenant_name = {$TENANT_NAME}
 # the admin-only parts of the Compute API
 
 # This should be the username of a user WITH administrative privileges
-username = {$ADMIN_USERNAME}
+username = admin
 # The above administrative user's password
-password = {$ADMIN_PASSWORD}
+password = pass
 # The above administrative user's tenant name
-tenant_name = {$ADMIN_TENANT_NAME}
+tenant_name = admin
 
 [network]
 # This section contains configuration options used when executing tests
 # against the OpenStack Network API.
 api_version = v1.1
 catalog_type = network
+
+[identity-admin]
+# This section contains configuration options for an administrative
+# user of the Compute API. These options are used in tests that stress
+# the admin-only parts of the Compute API
+
+# This should be the username of a user WITH administrative privileges
+username = admin
+# The above administrative user's password
+password = pass
+# The above administrative user's tenant name
+tenant_name = admin

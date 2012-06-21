@@ -27,6 +27,7 @@ class FloatingIPDetailsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(FloatingIPDetailsTest, cls).setUpClass()
         cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
@@ -40,6 +41,7 @@ class FloatingIPDetailsTest(BaseComputeTest):
     def tearDownClass(cls):
         for i in range(3):
             cls.client.delete_floating_ip(cls.floating_ip_id[i])
+        super(FloatingIPDetailsTest, cls).tearDownClass()
 
     @attr(type='positive')
     def test_list_floating_ips(self):

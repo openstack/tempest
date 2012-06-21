@@ -26,6 +26,7 @@ class ImagesMetadataTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(ImagesMetadataTest, cls).setUpClass()
         cls.servers_client = cls.servers_client
         cls.client = cls.images_client
 
@@ -49,6 +50,7 @@ class ImagesMetadataTest(BaseComputeTest):
     def tearDownClass(cls):
         cls.client.delete_image(cls.image_id)
         cls.servers_client.delete_server(cls.server_id)
+        super(ImagesMetadataTest, cls).tearDownClass()
 
     def setUp(self):
         meta = {'key1': 'value1', 'key2': 'value2'}

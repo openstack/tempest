@@ -26,6 +26,7 @@ class SecurityGroupsTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        super(SecurityGroupsTest, cls).setUpClass()
         cls.client = cls.security_groups_client
 
     @attr(type='positive')
