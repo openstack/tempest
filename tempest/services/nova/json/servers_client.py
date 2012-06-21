@@ -353,3 +353,25 @@ class ServersClient(RestClient):
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
         return resp, body
+
+    def add_security_group(self, server_id, security_group_name):
+        """Adds a security group to the server"""
+        post_body = {
+            'addSecurityGroup': {
+                'name': security_group_name
+            }
+        }
+        post_body = json.dumps(post_body)
+        return self.post('servers/%s/action' % server_id,
+                                post_body, self.headers)
+
+    def remove_security_group(self, server_id, security_group_name):
+        """Removes a security group from the server"""
+        post_body = {
+            'removeSecurityGroup': {
+                'name': security_group_name
+            }
+        }
+        post_body = json.dumps(post_body)
+        return self.post('servers/%s/action' % server_id,
+                                post_body, self.headers)

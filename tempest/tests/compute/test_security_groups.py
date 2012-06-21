@@ -254,3 +254,60 @@ class SecurityGroupsTest(BaseComputeTest):
         else:
             self.fail('Should not be able to delete a Security Group'
                         'with out passing ID')
+
+    def test_server_security_groups(self):
+        """
+        Checks that security groups may be added and linked to a server
+        and not deleted if the server is active.
+        """
+        # Create a couple security groups that we will use
+        # for the server resource this test creates
+        sg_name = rand_name('sg')
+        sg_desc = rand_name('sg-desc')
+        resp, sg = self.client.create_security_group(sg_name, sg_desc)
+        sg_id = sg['id']
+
+        sg2_name = rand_name('sg')
+        sg2_desc = rand_name('sg-desc')
+        resp, sg2 = self.client.create_security_group(sg2_name, sg2_desc)
+        sg2_id = sg2['id']
+
+        # Create server and add the security group created
+        # above to the server we just created
+        server_name = rand_name('server')
+        resp, server = self.servers_client.create_server(server_name,
+                                            self.image_ref,
+                                            self.flavor_ref)
+        server_id = server['id']
+        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        resp, body = self.servers_client.add_security_group(server_id,
+                                                            sg_name)
+
+        # Check that we are not able to delete the security
+        # group since it is in use by an active server
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.delete_security_group,
+                          sg_id)
+
+        # Reboot and add the other security group
+        resp, body = self.servers_client.reboot(server_id, 'HARD')
+        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        resp, body = self.servers_client.add_security_group(server_id,
+                                                            sg2_name)
+
+        # Check that we are not able to delete the other security
+        # group since it is in use by an active server
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.delete_security_group,
+                          sg2_id)
+
+        # Shutdown the server and then verify we can destroy the
+        # security groups, since no active server instance is using them
+        self.servers_client.delete_server(server_id)
+        self.servers_client.wait_for_server_termination(server_id)
+
+        self.client.delete_security_group(sg_id)
+        self.assertEqual(202, resp.status)
+
+        self.client.delete_security_group(sg2_id)
+        self.assertEqual(202, resp.status)
