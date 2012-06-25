@@ -62,6 +62,7 @@ class ServerActionsTest(BaseComputeTest):
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='smoke')
+    @unittest.skip('Until bug 1014647 is dealt with.')
     def test_reboot_server_soft(self):
         """The server should be signaled to reboot gracefully"""
         resp, body = self.client.reboot(self.server_id, 'SOFT')
