@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
 import unittest2 as unittest
 
 from tempest import exceptions
@@ -115,3 +116,18 @@ class BaseComputeTest(unittest.TestCase):
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         self.servers.append(server)
         return server
+
+    def wait_for(self, condition):
+        """Repeatedly calls condition() until a timeout"""
+        start_time = int(time.time())
+        while True:
+            try:
+                condition()
+            except:
+                pass
+            else:
+                return
+            if int(time.time()) - start_time >= self.build_timeout:
+                condition()
+                return
+            time.sleep(self.build_interval)

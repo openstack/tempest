@@ -43,11 +43,13 @@ class ConsoleOutputTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_get_console_output(self):
+        def get_output():
             resp, output = self.client.get_console_output(self.server_id, 10)
             self.assertEqual(200, resp.status)
             self.assertNotEqual(output, None)
             lines = len(output.split('\n'))
             self.assertEqual(lines, 10)
+        self.wait_for(get_output)
 
     @attr(type='negative')
     def test_get_console_output_invalid_server_id(self):
