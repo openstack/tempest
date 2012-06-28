@@ -133,6 +133,17 @@ class AuthorizationTest(BaseComputeTest):
         server_id = self.server['id']
         self.alt_client.list_addresses_by_network(server_id, 'public')
 
+    def test_list_servers_with_alternate_tenant(self):
+        """
+        A list on servers from one tenant should not
+        show on alternate tenant
+        """
+        #Listing servers from alternate tenant
+        alt_server_ids = []
+        resp, body = self.alt_client.list_servers()
+        alt_server_ids = [s['id'] for s in body['servers']]
+        self.assertNotIn(self.server['id'], alt_server_ids)
+
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_change_password_for_alt_account_fails(self):
