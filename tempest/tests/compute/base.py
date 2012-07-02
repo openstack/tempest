@@ -54,7 +54,6 @@ class BaseComputeTest(unittest.TestCase):
         cls.extensions_client = os.extensions_client
         cls.floating_ips_client = os.floating_ips_client
         cls.keypairs_client = os.keypairs_client
-        cls.floating_ips_client = os.floating_ips_client
         cls.security_groups_client = os.security_groups_client
         cls.console_outputs_client = os.console_outputs_client
         cls.limits_client = os.limits_client
