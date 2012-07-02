@@ -46,3 +46,9 @@ class RemoteClient():
         command = 'cat /proc/cpuinfo | grep processor | wc -l'
         output = self.ssh_client.exec_command(command)
         return int(output)
+
+    def get_partitions(self):
+        # Return the contents of /proc/partitions
+        command = 'cat /proc/partitions'
+        output = self.ssh_client.exec_command(command)
+        return output

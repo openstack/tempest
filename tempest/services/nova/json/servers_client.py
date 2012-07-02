@@ -325,3 +325,31 @@ class ServersClient(RestClient):
         resp, body = self.delete("servers/%s/metadata/%s" %
                                     (str(server_id), key))
         return resp, body
+
+    def stop(self, server_id):
+        post_body = json.dumps({'os-stop': None})
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def start(self, server_id):
+        post_body = json.dumps({'os-start': None})
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
+        """Attaches a volume to a server instance"""
+        post_body = json.dumps(
+            {'volumeAttachment': {
+                    'volumeId': volume_id,
+                    'device': device,
+                    }
+             })
+        resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
+                               post_body, self.headers)
+        return resp, body
+
+    def detach_volume(self, server_id, volume_id):
+        """Detaches a volume from a server instance"""
+        resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
+                                 (server_id, volume_id))
+        return resp, body
