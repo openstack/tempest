@@ -27,7 +27,7 @@ class ExtensionsTest(BaseComputeTest):
         super(ExtensionsTest, cls).setUpClass()
         cls.client = cls.extensions_client
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_list_extensions(self):
         """List of all extensions"""
         resp, extensions = self.client.list_extensions()

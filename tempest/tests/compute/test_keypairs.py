@@ -30,7 +30,7 @@ class KeyPairsTest(BaseComputeTest):
         super(KeyPairsTest, cls).setUpClass()
         cls.client = cls.keypairs_client
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_keypairs_create_list_delete(self):
         """Keypairs created should be available in the response list"""
         #Create 3 keypairs
@@ -64,7 +64,7 @@ class KeyPairsTest(BaseComputeTest):
             resp, _ = self.client.delete_keypair(keypair['name'])
             self.assertEqual(202, resp.status)
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_keypair_create_delete(self):
         """Keypair should be created, verified and deleted"""
         k_name = rand_name('keypair-')
@@ -79,7 +79,7 @@ class KeyPairsTest(BaseComputeTest):
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 
-    @attr(type='smoke')
+    @attr(type='positive')
     @unittest.skip("Skipped until the Bug #980688 is resolved")
     def test_get_keypair_detail(self):
         """Keypair should be created, Got details by name and deleted"""
@@ -102,7 +102,7 @@ class KeyPairsTest(BaseComputeTest):
             resp, _ = self.client.delete_keypair(k_name)
             self.assertEqual(202, resp.status)
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_keypair_create_with_pub_key(self):
         """Keypair should be created with a given public key"""
         k_name = rand_name('keypair-')

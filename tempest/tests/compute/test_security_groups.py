@@ -60,7 +60,7 @@ class SecurityGroupsTest(BaseComputeTest):
                 self.client.delete_security_group(securitygroup['id'])
                 self.assertEqual(202, resp.status)
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_security_group_create_delete(self):
         """Security Group should be created, verified and deleted"""
         try:
@@ -82,7 +82,7 @@ class SecurityGroupsTest(BaseComputeTest):
             resp, _ = self.client.delete_security_group(securitygroup['id'])
             self.assertEqual(202, resp.status)
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_security_group_create_get_delete(self):
         """Security Group should be created, fetched and deleted"""
         try:

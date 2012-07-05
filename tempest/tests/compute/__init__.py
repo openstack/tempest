@@ -31,6 +31,7 @@ DISK_CONFIG_ENABLED = False
 FLAVOR_EXTRA_DATA_ENABLED = False
 MULTI_USER = False
 
+
 # All compute tests -- single setup function
 def setup_package():
     LOG.debug("Entering tempest.tests.compute.setup_package")

@@ -16,6 +16,7 @@
 #    under the License.
 
 import nose.plugins.skip
+from nose.plugins.attrib import attr
 import unittest2 as unittest
 
 from tempest import exceptions
@@ -24,11 +25,11 @@ from tempest.tests.compute.base import BaseComputeTest
 from tempest.tests import utils
 
 
-class ServerDetailsTest(BaseComputeTest):
+class ListServerFiltersTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServerDetailsTest, cls).setUpClass()
+        super(ListServerFiltersTest, cls).setUpClass()
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...
@@ -84,18 +85,10 @@ class ServerDetailsTest(BaseComputeTest):
         cls.client.delete_server(cls.s1['id'])
         cls.client.delete_server(cls.s2['id'])
         cls.client.delete_server(cls.s3['id'])
-        super(ServerDetailsTest, cls).tearDownClass()
-
-    def test_list_servers(self):
-        """Return a list of all servers"""
-        resp, body = self.client.list_servers()
-        servers = body['servers']
-
-        self.assertTrue(self.s1_min in servers)
-        self.assertTrue(self.s2_min in servers)
-        self.assertTrue(self.s3_min in servers)
+        super(ListServerFiltersTest, cls).tearDownClass()
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
+    @attr(type='positive')
     def test_list_servers_filter_by_image(self):
         """Filter the list of servers by image"""
         params = {'image': self.image_ref}
@@ -106,6 +99,7 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2_min not in servers)
         self.assertTrue(self.s3_min in servers)
 
+    @attr(type='positive')
     def test_list_servers_filter_by_flavor(self):
         """Filter the list of servers by flavor"""
         params = {'flavor': self.flavor_ref_alt}
@@ -116,6 +110,7 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2_min not in servers)
         self.assertTrue(self.s3_min in servers)
 
+    @attr(type='positive')
     def test_list_servers_filter_by_server_name(self):
         """Filter the list of servers by server name"""
         params = {'name': self.s1_name}
@@ -126,6 +121,7 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2_min not in servers)
         self.assertTrue(self.s3_min not in servers)
 
+    @attr(type='positive')
     def test_list_servers_filter_by_server_status(self):
         """Filter the list of servers by server status"""
         params = {'status': 'active'}
@@ -136,22 +132,15 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2_min in servers)
         self.assertTrue(self.s3_min in servers)
 
+    @attr(type='positive')
     def test_list_servers_limit_results(self):
         """Verify only the expected number of servers are returned"""
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))
 
-    def test_list_servers_with_detail(self):
-        """ Return a detailed list of all servers """
-        resp, body = self.client.list_servers_with_detail()
-        servers = body['servers']
-
-        self.assertTrue(self.s1 in servers)
-        self.assertTrue(self.s2 in servers)
-        self.assertTrue(self.s3 in servers)
-
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
+    @attr(type='positive')
     def test_list_servers_detailed_filter_by_image(self):
         """Filter the detailed list of servers by image"""
         params = {'image': self.image_ref}
@@ -162,6 +151,7 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2 not in servers)
         self.assertTrue(self.s3 in servers)
 
+    @attr(type='positive')
     def test_list_servers_detailed_filter_by_flavor(self):
         """Filter the detailed list of servers by flavor"""
         params = {'flavor': self.flavor_ref_alt}
@@ -172,6 +162,7 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2 not in servers)
         self.assertTrue(self.s3 in servers)
 
+    @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_name(self):
         """Filter the detailed list of servers by server name"""
         params = {'name': self.s1_name}
@@ -182,6 +173,7 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2 not in servers)
         self.assertTrue(self.s3 not in servers)
 
+    @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_status(self):
         """Filter the detailed list of servers by server status"""
         params = {'status': 'active'}
@@ -192,19 +184,12 @@ class ServerDetailsTest(BaseComputeTest):
         self.assertTrue(self.s2 in servers)
         self.assertTrue(self.s3 in servers)
 
+    @attr(type='positive')
     def test_list_servers_detailed_limit_results(self):
         """Verify only the expected number of detailed results are returned"""
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))
-
-    def test_get_server_details(self):
-        """Return the full details of a single server"""
-        resp, server = self.client.get_server(self.s1['id'])
-
-        self.assertEqual(self.s1_name, server['name'])
-        self.assertEqual(self.image_ref, server['image']['id'])
-        self.assertEqual(str(self.flavor_ref), server['flavor']['id'])
 
     @classmethod
     def _convert_to_min_details(self, server):

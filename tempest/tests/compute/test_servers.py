@@ -28,7 +28,7 @@ class ServersTest(BaseComputeTest):
         super(ServersTest, cls).setUpClass()
         cls.client = cls.servers_client
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_create_server_with_admin_password(self):
         """
         If an admin password is provided on server creation, the server's root
@@ -74,7 +74,7 @@ class ServersTest(BaseComputeTest):
                 if server_id:
                     self.client.delete_server(server_id)
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_create_specify_keypair(self):
         """Specify a keypair while creating a server"""
 
@@ -95,7 +95,7 @@ class ServersTest(BaseComputeTest):
             if server:
                 self.client.delete_server(server['id'])
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_update_server_name(self):
         """The server name should be changed to the the provided value"""
         try:
@@ -118,7 +118,7 @@ class ServersTest(BaseComputeTest):
         finally:
             self.client.delete_server(server['id'])
 
-    @attr(type='smoke')
+    @attr(type='positive')
     def test_update_access_server_address(self):
         """
         The server's access addresses should reflect the provided values

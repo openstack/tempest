@@ -116,7 +116,7 @@ class ServerActionsTest(BaseComputeTest):
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
 
-    @attr(type='smoke')
+    @attr(type='positive')
     @unittest.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_revert(self):
         """

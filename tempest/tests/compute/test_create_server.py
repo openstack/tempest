@@ -65,7 +65,7 @@ class ServersTest(BaseComputeTest):
         self.assertTrue(self.server_initial['adminPass'] is not None)
 
     @attr(type='smoke')
-    def test_created_server_fields(self):
+    def test_verify_server_details(self):
         """Verify the specified server attributes are set correctly"""
 
         self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
@@ -74,6 +74,22 @@ class ServersTest(BaseComputeTest):
         self.assertEqual(self.image_ref, self.server['image']['id'])
         self.assertEqual(str(self.flavor_ref), self.server['flavor']['id'])
         self.assertEqual(self.meta, self.server['metadata'])
+
+    @attr(type='smoke')
+    def test_list_servers(self):
+        """The created server should be in the list of all servers"""
+        resp, body = self.client.list_servers()
+        servers = body['servers']
+        found = any([i for i in servers if i['id'] == self.server['id']])
+        self.assertTrue(found)
+
+    @attr(type='smoke')
+    def test_list_servers_with_detail(self):
+        """The created server should be in the detailed list of all servers"""
+        resp, body = self.client.list_servers_with_detail()
+        servers = body['servers']
+        found = any([i for i in servers if i['id'] == self.server['id']])
+        self.assertTrue(found)
 
     @attr(type='positive')
     @unittest.skipIf(not run_ssh, 'Instance validation tests are disabled.')
