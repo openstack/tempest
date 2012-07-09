@@ -163,6 +163,7 @@ class UsersTest(BaseIdentityAdminTest):
         self.assertEqual('200', resp['status'])
 
     @attr(type='negative')
+    @unittest.skip('Until Bug 1022411 is fixed')
     def test_authentication_for_disabled_user(self):
         """Disabled user's token should not get authenticated"""
         self.data.setup_test_user()

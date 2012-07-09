@@ -81,6 +81,10 @@ class ComputeFault(TempestException):
     message = "Got compute fault"
 
 
+class IdentityError(TempestException):
+    message = "Got identity error"
+
+
 class Duplicate(TempestException):
     message = "An object with that identifier already exists"
 
