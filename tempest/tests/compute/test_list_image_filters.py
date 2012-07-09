@@ -72,7 +72,7 @@ class ListImageFiltersTest(BaseComputeTest):
         cls.client.delete_image(cls.image3_id)
         cls.servers_client.delete_server(cls.server1['id'])
         cls.servers_client.delete_server(cls.server2['id'])
-        super(ListImagesTest, cls).tearDownClass()
+        super(ListImageFiltersTest, cls).tearDownClass()
 
     @attr(type='negative')
     def test_get_image_not_existing(self):
