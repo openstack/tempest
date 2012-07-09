@@ -73,7 +73,7 @@ def setup_package():
         if user2 and user1 != user2:
             user2_password = CONFIG.compute.alt_password
             user2_tenant_name = CONFIG.compute.alt_tenant_name
-            if not user2_password or user2_tenant_name:
+            if not user2_password or not user2_tenant_name:
                 msg = ("Alternate user specified but not alternate "
                        "tenant or password")
                 raise nose.SkipTest(msg)
