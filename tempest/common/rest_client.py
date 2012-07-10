@@ -193,7 +193,7 @@ class RestClient(object):
         if resp.status == 400:
             resp_body = json.loads(resp_body)
             self._log(req_url, body, resp, resp_body)
-            raise exceptions.BadRequest(resp_body['badRequest']['message'])
+            raise exceptions.BadRequest(resp_body)
 
         if resp.status == 409:
             resp_body = json.loads(resp_body)

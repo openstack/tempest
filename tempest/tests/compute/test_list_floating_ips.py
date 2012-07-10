@@ -79,7 +79,6 @@ class FloatingIPDetailsTest(BaseComputeTest):
             self.client.delete_floating_ip(floating_ip_id)
 
     @attr(type='negative')
-    @unittest.skip('Skipping until Nova Bug 940500 is fixed')
     def test_get_nonexistant_floating_ip_details(self):
         """
         Negative test:Should not be able to GET the details

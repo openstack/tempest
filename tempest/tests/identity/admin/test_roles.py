@@ -79,16 +79,9 @@ class RolesTest(BaseIdentityAdminTest):
         found = [role for role in body if role['name'] == role_name]
         self.assertFalse(any(found))
 
-    @unittest.skip('Until bug 997725 is fixed.')
     def test_role_create_blank_name(self):
         """Should not be able to create a role with a blank name"""
-        try:
-            resp, body = self.client.create_role('')
-        except exceptions.Duplicate:
-            self.fail('A role with a blank name already exists.')
-        self.assertTrue('status' in resp)
-        self.assertFalse(resp['status'].startswith('2'), 'Create role with '
-                         'empty name should fail')
+        self.assertRaises(exceptions.BadRequest, self.client.create_role, '')
 
     def test_role_create_duplicate(self):
         """Role names should be unique"""
@@ -138,34 +131,28 @@ class UserRolesTest(RolesTest):
                           tenant['id'])
         self.client.clear_auth()
 
-    @unittest.skip("Until Bug 999608 is fixed")
     def test_assign_user_role_for_non_existent_user(self):
         """Attempt to assign a role to a non existent user should fail"""
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
                          'junk-user-id-999', role['id'], tenant['id'])
 
-    @unittest.skip("Until Bug 999608 is fixed")
     def test_assign_user_role_for_non_existent_role(self):
         """Attempt to assign a non existent role to user should fail"""
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
                          user['id'], 'junk-role-id-12345', tenant['id'])
 
-    @unittest.skip("Until Bug 999608 is fixed")
     def test_assign_user_role_for_non_existent_tenant(self):
         """Attempt to assign a role on a non existent tenant should fail"""
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
                          user['id'], role['id'], 'junk-tenant-1234')
 
-    @unittest.skip("Until Bug 999594 is fixed")
     def test_assign_duplicate_user_role(self):
         """Duplicate user role should not get assigned"""
         (user, tenant, role) = self._get_role_params()
-        self.client.create_user_role(user['id'], role['id'], tenant['id'])
-        resp, body = self.client.assign_user_role(user['id'], role['id'],
-                                                  tenant['id'])
+        self.client.assign_user_role(user['id'], role['id'], tenant['id'])
         self.assertRaises(exceptions.Duplicate, self.client.assign_user_role,
                           user['id'], role['id'], tenant['id'])
 
@@ -198,7 +185,7 @@ class UserRolesTest(RolesTest):
                          self.client.remove_user_role, user['id'], role['id'])
         self.client.clear_auth()
 
-    @unittest.skip("Until Bug 999567 is fixed")
+    @unittest.skip("Until Bug 1022990 is fixed")
     def test_remove_user_role_non_existant_user(self):
         """Attempt to remove a role from a non existent user should fail"""
         (user, tenant, role) = self._get_role_params()
@@ -207,7 +194,7 @@ class UserRolesTest(RolesTest):
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
                          'junk-user-id-123', role['id'])
 
-    @unittest.skip("Until Bug 999567 is fixed")
+    @unittest.skip("Until Bug 1022990 is fixed")
     def test_remove_user_role_non_existant_role(self):
         """Attempt to delete a non existent role from a user should fail"""
         (user, tenant, role) = self._get_role_params()
@@ -239,7 +226,6 @@ class UserRolesTest(RolesTest):
                           self.client.list_user_roles, user['id'])
         self.client.clear_auth()
 
-    @unittest.skip("Until Bug 999209 is fixed")
     def test_list_user_roles_for_non_existent_user(self):
         """Attempt to list roles of a non existent user should fail"""
         self.assertRaises(exceptions.NotFound, self.client.list_user_roles,

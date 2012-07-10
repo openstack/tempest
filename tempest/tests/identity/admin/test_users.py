@@ -52,7 +52,6 @@ class UsersTest(BaseIdentityAdminTest):
                           self.alt_email)
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 987121 is fixed")
     def test_create_user_with_empty_name(self):
         """User with an empty name should not be created"""
         self.data.setup_test_tenant()
@@ -61,12 +60,12 @@ class UsersTest(BaseIdentityAdminTest):
                           self.alt_email)
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 966249 is fixed")
+    @unittest.skip("Until Bug 966251 is fixed")
     def test_create_user_with_name_length_over_64(self):
         """Length of user name filed should be restricted to 64 characters"""
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
-                         'a' * 64, self.alt_password,
+                         'a' * 65, self.alt_password,
                          self.data.tenant['id'], self.alt_email)
 
     @attr(type='negative')
@@ -92,7 +91,7 @@ class UsersTest(BaseIdentityAdminTest):
         """User having password exceeding max length should not be created"""
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
-                          self.alt_user, 'a' * 64, self.data.tenant['id'],
+                          self.alt_user, 'a' * 65, self.data.tenant['id'],
                           self.alt_email)
 
     @attr(type='negative')
@@ -163,7 +162,6 @@ class UsersTest(BaseIdentityAdminTest):
         self.assertEqual('200', resp['status'])
 
     @attr(type='negative')
-    @unittest.skip('Until Bug 1022411 is fixed')
     def test_authentication_for_disabled_user(self):
         """Disabled user's token should not get authenticated"""
         self.data.setup_test_user()

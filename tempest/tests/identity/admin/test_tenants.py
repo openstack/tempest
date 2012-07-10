@@ -169,16 +169,14 @@ class TenantsTest(BaseIdentityAdminTest):
                          tenant_name)
         self.client.clear_auth()
 
-    @unittest.skip("Until Bug 987121 is fixed")
     def test_create_tenant_with_empty_name(self):
         """Tenant name should not be empty"""
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
                           name='')
 
-    @unittest.skip("Until Bug 966249 is fixed")
     def test_create_tenants_name_length_over_64(self):
         """Tenant name length should not be greater than 64 characters"""
-        tenant_name = 'a' * 64
+        tenant_name = 'a' * 65
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
                          tenant_name)
 
