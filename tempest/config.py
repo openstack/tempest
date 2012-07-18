@@ -33,7 +33,7 @@ class BaseConfig(object):
 
     def get(self, item_name, default_value=None):
         try:
-            return self.conf.get(self.SECTION_NAME, item_name)
+            return self.conf.get(self.SECTION_NAME, item_name, raw=True)
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             return default_value
 
