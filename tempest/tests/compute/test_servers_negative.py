@@ -247,12 +247,13 @@ class ServersNegativeTest(BaseComputeTest):
     @attr(type='negative')
     def test_delete_a_server_of_another_tenant(self):
         """Delete a server that belongs to another tenant"""
-
-        server = self.create_server()
-        resp, body = self.client.delete_server(server['id'])
-        self.assertEqual(resp['status'], '204')
-        self.assertRaises(exceptions.NotFound, self.alt_client.delete_server,
-                         server['id'])
+        try:
+            server = self.create_server()
+            self.assertRaises(exceptions.NotFound,
+                              self.alt_client.delete_server,
+                              server['id'])
+        finally:
+            self.client.delete_server(server['id'])
 
     @attr(type='negative')
     def test_delete_server_pass_negative_id(self):
