@@ -83,17 +83,21 @@ def find_skips_in_file(path):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.INFO)
+    logging.basicConfig(format='%(levelname)s: %(message)s',
+                        level=logging.INFO)
     results = find_skips()
     unique_bugs = sorted(set([bug for (method, bug) in results]))
     unskips = []
     info("Total bug skips found: %d", len(results))
     info("Total unique bugs causing skips: %d", len(unique_bugs))
-    lp = launchpad.Launchpad.login_anonymously('grabbing bugs', 'production', LPCACHEDIR)
+    lp = launchpad.Launchpad.login_anonymously('grabbing bugs',
+                                               'production',
+                                               LPCACHEDIR)
     for bug_no in unique_bugs:
         bug = lp.bugs[bug_no]
         for task in bug.bug_tasks:
-            info("Bug #%7s (%12s - %12s)", bug_no, task.importance, task.status)
+            info("Bug #%7s (%12s - %12s)", bug_no,
+                 task.importance, task.status)
             if task.status in ('Fix Released', 'Fix Committed'):
                 unskips.append(bug_no)
 

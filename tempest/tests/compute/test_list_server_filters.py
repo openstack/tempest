@@ -87,6 +87,10 @@ class ListServerFiltersTest(BaseComputeTest):
         cls.client.delete_server(cls.s3['id'])
         super(ListServerFiltersTest, cls).tearDownClass()
 
+    def _server_id_in_results(self, server_id, results):
+        ids = [row['id'] for row in results]
+        return server_id in ids
+
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='positive')
     def test_list_servers_filter_by_image(self):
@@ -95,9 +99,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1_min in servers)
-        self.assertTrue(self.s2_min not in servers)
-        self.assertTrue(self.s3_min in servers)
+        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_filter_by_flavor(self):
@@ -106,9 +110,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1_min not in servers)
-        self.assertTrue(self.s2_min not in servers)
-        self.assertTrue(self.s3_min in servers)
+        self.assertFalse(self._server_id_in_results(self.s1['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_filter_by_server_name(self):
@@ -117,9 +121,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1_min in servers)
-        self.assertTrue(self.s2_min not in servers)
-        self.assertTrue(self.s3_min not in servers)
+        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_filter_by_server_status(self):
@@ -128,9 +132,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1_min in servers)
-        self.assertTrue(self.s2_min in servers)
-        self.assertTrue(self.s3_min in servers)
+        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s2['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_limit_results(self):
@@ -147,9 +151,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1 in servers)
-        self.assertTrue(self.s2 not in servers)
-        self.assertTrue(self.s3 in servers)
+        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_flavor(self):
@@ -158,9 +162,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1 not in servers)
-        self.assertTrue(self.s2 not in servers)
-        self.assertTrue(self.s3 in servers)
+        self.assertFalse(self._server_id_in_results(self.s1['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_name(self):
@@ -169,9 +173,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1 in servers)
-        self.assertTrue(self.s2 not in servers)
-        self.assertTrue(self.s3 not in servers)
+        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
+        self.assertFalse(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_status(self):
@@ -180,9 +184,9 @@ class ListServerFiltersTest(BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertTrue(self.s1 in servers)
-        self.assertTrue(self.s2 in servers)
-        self.assertTrue(self.s3 in servers)
+        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s2['id'], servers))
+        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_limit_results(self):
