@@ -72,7 +72,6 @@ class VolumesNegativeTest(BaseComputeTest):
         else:
             self.fail('Should not be able to DELETE a nonexistant volume')
 
-    @unittest.skip('Until bug 1006857 is fixed.')
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_volume_with_invalid_size(self):
@@ -86,7 +85,6 @@ class VolumesNegativeTest(BaseComputeTest):
                                                  display_name=v_name,
                                                  metadata=metadata)
 
-    @unittest.skip('Until bug 1006857 is fixed.')
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_volume_with_out_passing_size(self):
@@ -100,7 +98,6 @@ class VolumesNegativeTest(BaseComputeTest):
                                                  display_name=v_name,
                                                  metadata=metadata)
 
-    @unittest.skip('Until bug 1006875 is fixed.')
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_volume_with_size_zero(self):
