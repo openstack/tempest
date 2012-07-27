@@ -149,7 +149,6 @@ class FloatingIPsTest(BaseComputeTest):
             self.fail('Should not be able to associate'
                       ' a nonexistant floating IP')
 
-    @unittest.skip("Skipped until the Bug #984762 is resolved")
     @attr(type='negative')
     def test_dissociate_nonexistant_floating_ip(self):
         """
@@ -166,7 +165,7 @@ class FloatingIPsTest(BaseComputeTest):
             self.fail('Should not be able to dissociate'
                       ' a nonexistant floating IP')
 
-    @unittest.skip("Skipped until the Bug #1000571 is resolved")
+    @unittest.skip("Skipped until the Bug #1029911 is resolved")
     @attr(type='negative')
     def test_associate_already_associated_floating_ip(self):
         """
