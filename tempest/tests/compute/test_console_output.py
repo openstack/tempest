@@ -45,6 +45,10 @@ class ConsoleOutputTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_get_console_output(self):
+        """
+        Positive test:Should be able to GET the console output
+        for a given server_id and number of lines
+        """
         def get_output():
             resp, output = self.client.get_console_output(self.server_id, 10)
             self.assertEqual(200, resp.status)
@@ -55,6 +59,10 @@ class ConsoleOutputTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_get_console_output_invalid_server_id(self):
+        """
+        Negative test: Should not be able to get the console output
+        for an invalid server_id
+        """
         try:
             resp, output = self.client.get_console_output('!@#$%^&*()', 10)
         except exceptions.NotFound:
@@ -63,6 +71,10 @@ class ConsoleOutputTest(BaseComputeTest):
     @attr(type='positive')
     @unittest.skip('Until tempest bug 1014683 is fixed.')
     def test_get_console_output_server_id_in_reboot_status(self):
+        """
+        Positive test:Should be able to GET the console output
+        for a given server_id in reboot status
+        """
         try:
             resp, output = self.servers_client.reboot(self.server_id, 'SOFT')
             self.servers_client.wait_for_server_status(self.server_id,
