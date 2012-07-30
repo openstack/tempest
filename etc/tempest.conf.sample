@@ -93,6 +93,9 @@ create_image_enabled = true
 # Cluster: the 'nova' user must have scp access between cluster nodes
 resize_available = true
 
+# Does the compute API support changing the admin password?
+change_password_available=true
+
 # Level to log Compute API request/response details.
 log_level = ERROR
 

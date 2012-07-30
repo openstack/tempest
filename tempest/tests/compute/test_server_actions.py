@@ -25,6 +25,7 @@ import tempest.config
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests import compute
 
 
 class ServerActionsTest(BaseComputeTest):
@@ -49,6 +50,8 @@ class ServerActionsTest(BaseComputeTest):
         self.client.delete_server(self.server_id)
 
     @attr(type='smoke')
+    @unittest.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
+                         'Change password not available.')
     def test_change_server_password(self):
         """The server's password should be set to the provided password"""
         resp, body = self.client.change_password(self.server_id, 'newpass')
