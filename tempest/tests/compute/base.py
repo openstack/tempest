@@ -17,6 +17,7 @@
 
 import logging
 import time
+import nose
 
 import unittest2 as unittest
 
@@ -60,6 +61,7 @@ class BaseComputeTest(unittest.TestCase):
         cls.security_groups_client = os.security_groups_client
         cls.console_outputs_client = os.console_outputs_client
         cls.limits_client = os.limits_client
+        cls.volumes_extensions_client = os.volumes_extensions_client
         cls.volumes_client = os.volumes_client
         cls.build_interval = cls.config.compute.build_interval
         cls.build_timeout = cls.config.compute.build_timeout

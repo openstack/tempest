@@ -58,12 +58,12 @@ flavor_ref = %FLAVOR_REF%
 flavor_ref_alt = %FLAVOR_REF_ALT%
 
 # Number of seconds to wait while looping to check the status of an
-# instance or volume that is building.
-build_interval = %BUILD_INTERVAL%
+# instance that is building.
+build_interval = %COMPUTE_BUILD_INTERVAL%
 
-# Number of seconds to time out on waiting for an instance or volume
+# Number of seconds to time out on waiting for an instance
 # to build or reach an expected status
-build_timeout = %BUILD_TIMEOUT%
+build_timeout = %COMPUTE_BUILD_TIMEOUT%
 
 # The type of endpoint for a Compute API service. Unless you have a
 # custom Keystone service catalog implementation, you probably want to leave
@@ -154,3 +154,18 @@ username = %IDENTITY_ADMIN_USERNAME%
 password = %IDENTITY_ADMIN_PASSWORD%
 # The above administrative user's tenant name
 tenant_name = %IDENTITY_ADMIN_TENANT_NAME%
+
+[volume]
+# This section contains the configuration options used when executing tests
+# against the OpenStack Block Storage API service
+
+# The type of endpoint for a Cinder or Block Storage API service.
+# Unless you have a custom Keystone service catalog implementation, you
+# probably want to leave this value as "volume"
+catalog_type = %VOLUME_CATALOG_TYPE%
+# Number of seconds to wait while looping to check the status of a
+# volume that is being made available
+build_interval = %VOLUME_BUILD_INTERVAL%
+# Number of seconds to time out on waiting for a volume
+# to be available or reach an expected status
+build_timeout = %VOLUME_BUILD_TIMEOUT%
