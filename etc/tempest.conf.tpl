@@ -72,6 +72,9 @@ create_image_enabled = %COMPUTE_CREATE_IMAGE_ENABLED%
 # Cluster: the 'nova' user must have scp access between cluster nodes
 resize_available = %COMPUTE_RESIZE_AVAILABLE%
 
+# Does the compute API support changing the admin password?
+change_password_available = %COMPUTE_CHANGE_PASSWORD_AVAILABLE%
+
 # Level to log Compute API request/response details.
 log_level = %COMPUTE_LOG_LEVEL%
 

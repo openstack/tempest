@@ -180,6 +180,12 @@ class ComputeConfig(BaseConfig):
         return self.get("resize_available", 'false').lower() != 'false'
 
     @property
+    def change_password_available(self):
+        """Does the test environment support changing the admin password?"""
+        return self.get("change_password_available", 'false').lower() != \
+            'false'
+
+    @property
     def create_image_enabled(self):
         """Does the test environment support snapshots?"""
         return self.get("create_image_enabled", 'false').lower() != 'false'

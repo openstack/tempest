@@ -27,6 +27,7 @@ LOG = logging.getLogger(__name__)
 CONFIG = config.TempestConfig()
 CREATE_IMAGE_ENABLED = CONFIG.compute.create_image_enabled
 RESIZE_AVAILABLE = CONFIG.compute.resize_available
+CHANGE_PASSWORD_AVAILABLE = CONFIG.compute.change_password_available
 DISK_CONFIG_ENABLED = False
 FLAVOR_EXTRA_DATA_ENABLED = False
 MULTI_USER = False
