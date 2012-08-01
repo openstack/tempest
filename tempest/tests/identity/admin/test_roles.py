@@ -110,16 +110,17 @@ class UserRolesTest(RolesTest):
     def test_assign_user_role(self):
         """Assign a role to a user on a tenant"""
         (user, tenant, role) = self._get_role_params()
-        self.client.assign_user_role(user['id'], role['id'], tenant['id'])
-        resp, roles = self.client.list_user_roles(user['id'])
-        self.assertEquals(tenant['id'], roles[0]['tenantId'])
+        self.client.assign_user_role(tenant['id'], user['id'], role['id'])
+        resp, roles = self.client.list_user_roles(tenant['id'], user['id'])
+        self.assertEquals(1, len(roles))
+        self.assertEquals(roles[0]['id'], role['id'])
 
     def test_assign_user_role_by_unauthorized_user(self):
         """Non admin user should not be authorized to assign a role to user"""
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.assign_user_role,
-                          user['id'], role['id'], tenant['id'])
+                          tenant['id'], user['id'], role['id'])
 
     def test_assign_user_role_request_without_token(self):
         """Request to assign a role to a user without a valid token"""
@@ -127,95 +128,109 @@ class UserRolesTest(RolesTest):
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized,
-                          self.client.assign_user_role, user['id'], role['id'],
-                          tenant['id'])
+                          self.client.assign_user_role, tenant['id'],
+                          user['id'], role['id'])
         self.client.clear_auth()
 
     def test_assign_user_role_for_non_existent_user(self):
         """Attempt to assign a role to a non existent user should fail"""
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
-                         'junk-user-id-999', role['id'], tenant['id'])
+                         tenant['id'], 'junk-user-id-999', role['id'])
 
     def test_assign_user_role_for_non_existent_role(self):
         """Attempt to assign a non existent role to user should fail"""
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
-                         user['id'], 'junk-role-id-12345', tenant['id'])
+                         tenant['id'], user['id'], 'junk-role-id-12345')
 
     def test_assign_user_role_for_non_existent_tenant(self):
         """Attempt to assign a role on a non existent tenant should fail"""
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
-                         user['id'], role['id'], 'junk-tenant-1234')
+                         'junk-tenant-1234', user['id'], role['id'])
 
     def test_assign_duplicate_user_role(self):
         """Duplicate user role should not get assigned"""
         (user, tenant, role) = self._get_role_params()
-        self.client.assign_user_role(user['id'], role['id'], tenant['id'])
+        self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         self.assertRaises(exceptions.Duplicate, self.client.assign_user_role,
-                          user['id'], role['id'], tenant['id'])
+                          tenant['id'], user['id'], role['id'])
 
-    @unittest.skip("Until Bug 999219 is fixed")
     def test_remove_user_role(self):
         """Remove a role assigned to a user on a tenant"""
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(user['id'], role['id'],
-                                                       tenant['id'])
-        resp, body = self.client.remove_user_role(user['id'], user_role['id'])
+        resp, user_role = self.client.assign_user_role(tenant['id'],
+                                                       user['id'], role['id'])
+        resp, body = self.client.remove_user_role(tenant['id'], user['id'],
+                                                  user_role['id'])
         self.assertEquals(resp['status'], '204')
 
     def test_remove_user_role_by_unauthorized_user(self):
         """Non admin user should not be authorized to remove a user's role"""
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(user['id'], role['id'],
-                                                      tenant['id'])
+        resp, user_role = self.client.assign_user_role(tenant['id'],
+                                                       user['id'],
+                                                       role['id'])
         self.assertRaises(exceptions.Unauthorized,
                          self.non_admin_client.remove_user_role,
-                         user['id'], role['id'])
+                         tenant['id'], user['id'], role['id'])
 
     def test_remove_user_role_request_without_token(self):
         """Request to remove a user's role without a valid token"""
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(user['id'], role['id'],
-                                                       tenant['id'])
+        resp, user_role = self.client.assign_user_role(tenant['id'],
+                                                       user['id'],
+                                                       role['id'])
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized,
-                         self.client.remove_user_role, user['id'], role['id'])
+                         self.client.remove_user_role, tenant['id'],
+                         user['id'], role['id'])
         self.client.clear_auth()
 
-    @unittest.skip("Until Bug 1022990 is fixed")
     def test_remove_user_role_non_existant_user(self):
         """Attempt to remove a role from a non existent user should fail"""
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(user['id'], role['id'],
-                                                      tenant['id'])
+        resp, user_role = self.client.assign_user_role(tenant['id'],
+                                                       user['id'],
+                                                       role['id'])
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
-                         'junk-user-id-123', role['id'])
+                         tenant['id'], 'junk-user-id-123', role['id'])
 
-    @unittest.skip("Until Bug 1022990 is fixed")
     def test_remove_user_role_non_existant_role(self):
         """Attempt to delete a non existent role from a user should fail"""
         (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(user['id'], role['id'],
-                                                      tenant['id'])
+        resp, user_role = self.client.assign_user_role(tenant['id'],
+                                                       user['id'],
+                                                       role['id'])
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
-                          user['id'], 'junk-user-role-123')
+                          tenant['id'], user['id'], 'junk-user-role-123')
+
+    def test_remove_user_role_non_existant_tenant(self):
+        """Attempt to remove a role from a non existent tenant should fail"""
+        (user, tenant, role) = self._get_role_params()
+        resp, user_role = self.client.assign_user_role(tenant['id'],
+                                                       user['id'],
+                                                       role['id'])
+        self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
+                          'junk-tenant-id-123', user['id'], role['id'])
 
     def test_list_user_roles(self):
         """List roles assigned to a user on tenant"""
         (user, tenant, role) = self._get_role_params()
-        self.client.assign_user_role(user['id'], role['id'], tenant['id'])
-        resp, roles = self.client.list_user_roles(user['id'])
-        self.assertEquals(tenant['id'], roles[0]['tenantId'])
+        self.client.assign_user_role(tenant['id'], user['id'], role['id'])
+        resp, roles = self.client.list_user_roles(tenant['id'], user['id'])
+        self.assertEquals(1, len(roles))
+        self.assertEquals(role['id'], roles[0]['id'])
 
     def test_list_user_roles_by_unauthorized_user(self):
         """Non admin user should not be authorized to list a user's roles"""
         (user, tenant, role) = self._get_role_params()
-        self.client.assign_user_role(user['id'], role['id'], tenant['id'])
+        self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         self.assertRaises(exceptions.Unauthorized,
-                          self.non_admin_client.list_user_roles, user['id'])
+                          self.non_admin_client.list_user_roles, tenant['id'],
+                          user['id'])
 
     def test_list_user_roles_request_without_token(self):
         """Request to list user's roles without a valid token should fail"""
@@ -223,10 +238,12 @@ class UserRolesTest(RolesTest):
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized,
-                          self.client.list_user_roles, user['id'])
+                          self.client.list_user_roles, tenant['id'],
+                          user['id'])
         self.client.clear_auth()
 
     def test_list_user_roles_for_non_existent_user(self):
         """Attempt to list roles of a non existent user should fail"""
+        (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.list_user_roles,
-        'junk-role-aabbcc11')
+        tenant['id'], 'junk-role-aabbcc11')
