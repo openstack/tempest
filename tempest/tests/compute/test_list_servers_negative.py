@@ -27,11 +27,11 @@ from tempest.tests.compute.base import BaseComputeTest
 from tempest.tests import compute
 
 
-class ServerDetailsNegativeTest(BaseComputeTest):
+class ListServersNegativeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServerDetailsNegativeTest, cls).setUpClass()
+        super(ListServersNegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.servers = []
 
