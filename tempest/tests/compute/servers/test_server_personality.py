@@ -34,8 +34,9 @@ class ServerPersonalityTestBase(object):
         name = rand_name('server')
         file_contents = 'This is a test file.'
         personality = []
-        _, max_file_limit = self.user_client.get_personality_file_limit()
-        for i in range(0, max_file_limit + 1):
+        max_file_limit = \
+            self.user_client.get_specific_absolute_limit("maxPersonality")
+        for i in range(0, int(max_file_limit) + 1):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
                                 'contents': base64.b64encode(file_contents)})
@@ -57,18 +58,16 @@ class ServerPersonalityTestBase(object):
             name = rand_name('server')
             file_contents = 'This is a test file.'
 
-            cli_resp = self.user_client.get_personality_file_limit()
-            resp, max_file_limit = cli_resp
-            self.assertEqual(200, resp.status)
+            max_file_limit = \
+                self.user_client.get_specific_absolute_limit("maxPersonality")
 
             personality = []
-            for i in range(0, max_file_limit):
+            for i in range(0, int(max_file_limit)):
                 path = 'etc/test' + str(i) + '.txt'
                 personality.append({
                     'path': path,
                     'contents': base64.b64encode(file_contents),
                 })
-
             resp, server = self.client.create_server(name, self.image_ref,
                                                      self.flavor_ref,
                                                      personality=personality)
