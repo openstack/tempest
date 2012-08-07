@@ -20,12 +20,15 @@ from tempest import whitebox
 from tempest.tests.identity.base import BaseIdentityAdminTest
 from nose.plugins.attrib import attr
 
+import nose
+
 
 @attr(type='whitebox')
 class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
 
     @classmethod
     def setUpClass(cls):
+        raise nose.SkipTest("Until Bug 1034129 is fixed")
         super(ServersWhiteboxTest, cls).setUpClass()
         BaseIdentityAdminTest.setUpClass()
         cls.client = cls.servers_client
