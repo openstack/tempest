@@ -115,7 +115,8 @@ class ComputeDefaultClientManager(DefaultClientManager):
         # Create our default Nova client to use in testing
         self.client = novaclient.client.Client(self.NOVACLIENT_VERSION,
                         *client_args,
-                        service_type=self.config.compute.catalog_type)
+                        service_type=self.config.compute.catalog_type,
+                        no_cache=True)
 
 
 class GlanceDefaultClientManager(DefaultClientManager):
