@@ -24,6 +24,7 @@ import unittest2 as unittest
 import tempest.config
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest.tests.compute.base import BaseComputeTest
 from tempest.tests import compute
 
@@ -31,6 +32,7 @@ from tempest.tests import compute
 class ServerActionsTest(BaseComputeTest):
 
     resize_available = tempest.config.TempestConfig().compute.resize_available
+    run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
     @classmethod
     def setUpClass(cls):
@@ -43,7 +45,7 @@ class ServerActionsTest(BaseComputeTest):
                                                  self.image_ref,
                                                  self.flavor_ref)
         self.server_id = server['id']
-
+        self.password = server['adminPass']
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     def tearDown(self):
@@ -54,24 +56,59 @@ class ServerActionsTest(BaseComputeTest):
                          'Change password not available.')
     def test_change_server_password(self):
         """The server's password should be set to the provided password"""
-        resp, body = self.client.change_password(self.server_id, 'newpass')
+        new_password = 'Newpass1234'
+        resp, body = self.client.change_password(self.server_id, new_password)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+        if self.run_ssh:
+            # Verify that the user can authenticate with the new password
+            resp, server = self.client.get_server(self.server_id)
+            linux_client = RemoteClient(server, self.ssh_user, new_password)
+            self.assertTrue(linux_client.can_authenticate())
 
     @attr(type='smoke')
     def test_reboot_server_hard(self):
         """ The server should be power cycled """
+        if self.run_ssh:
+            # Get the time the server was last rebooted,
+            # waiting for one minute as who doesn't have seconds precision
+            resp, server = self.client.get_server(self.server_id)
+            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            boot_time = linux_client.get_boot_time()
+            time.sleep(60)
+
         resp, body = self.client.reboot(self.server_id, 'HARD')
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+        if self.run_ssh:
+            # Log in and verify the boot time has changed
+            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            new_boot_time = linux_client.get_boot_time()
+            self.assertGreater(new_boot_time, boot_time)
 
     @attr(type='smoke')
     @unittest.skip('Until bug 1014647 is dealt with.')
     def test_reboot_server_soft(self):
         """The server should be signaled to reboot gracefully"""
+        if self.run_ssh:
+            # Get the time the server was last rebooted,
+            # waiting for one minute as who doesn't have seconds precision
+            resp, server = self.client.get_server(self.server_id)
+            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            boot_time = linux_client.get_boot_time()
+            time.sleep(60)
+
         resp, body = self.client.reboot(self.server_id, 'SOFT')
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+        if self.run_ssh:
+            # Log in and verify the boot time has changed
+            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            new_boot_time = linux_client.get_boot_time()
+            self.assertGreater(new_boot_time, boot_time)
 
     @attr(type='smoke')
     def test_rebuild_server(self):
@@ -81,12 +118,12 @@ class ServerActionsTest(BaseComputeTest):
         file_contents = 'Test server rebuild.'
         personality = [{'path': '/etc/rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
-
+        password = 'rebuildPassw0rd'
         resp, rebuilt_server = self.client.rebuild(self.server_id,
                                                    self.image_ref_alt,
                                                    name=new_name, meta=meta,
                                                    personality=personality,
-                                                   adminPass='rebuild')
+                                                   adminPass=password)
 
         #Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -100,6 +137,11 @@ class ServerActionsTest(BaseComputeTest):
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, rebuilt_server['name'])
+
+        if self.run_ssh:
+            # Verify that the user can authenticate with the provided password
+            linux_client = RemoteClient(server, self.ssh_user, password)
+            self.assertTrue(linux_client.can_authenticate())
 
     @attr(type='smoke')
     @unittest.skipIf(not resize_available, 'Resize not available.')
