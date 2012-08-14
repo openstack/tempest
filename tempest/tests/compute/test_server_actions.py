@@ -25,19 +25,14 @@ import tempest.config
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 from tempest.tests import compute
 
 
-class ServerActionsTest(BaseComputeTest):
+class ServerActionsTestBase(object):
 
     resize_available = tempest.config.TempestConfig().compute.resize_available
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
-
-    @classmethod
-    def setUpClass(cls):
-        super(ServerActionsTest, cls).setUpClass()
-        cls.client = cls.servers_client
 
     def setUp(self):
         self.name = rand_name('server')
@@ -219,3 +214,31 @@ class ServerActionsTest(BaseComputeTest):
         else:
             self.fail('The server rebuild for a non existing server should not'
                       ' be allowed')
+
+
+class ServerActionsTestXML(base.BaseComputeTestXML,
+                           ServerActionsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(ServerActionsTestXML, cls).setUpClass()
+        cls.client = cls.servers_client
+
+    def setUp(self):
+        ServerActionsTestBase.setUp(self)
+
+    def tearDown(self):
+        ServerActionsTestBase.tearDown(self)
+
+
+class ServerActionsTestJSON(base.BaseComputeTestJSON,
+                            ServerActionsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(ServerActionsTestJSON, cls).setUpClass()
+        cls.client = cls.servers_client
+
+    def setUp(self):
+        ServerActionsTestBase.setUp(self)
+
+    def tearDown(self):
+        ServerActionsTestBase.tearDown(self)
