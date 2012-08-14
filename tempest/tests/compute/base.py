@@ -29,7 +29,7 @@ from tempest.services.identity.json.admin_client import AdminClient
 LOG = logging.getLogger(__name__)
 
 
-class BaseComputeTest(unittest.TestCase):
+class _BaseComputeTest(unittest.TestCase):
 
     """Base test case class for all Compute API tests"""
 
@@ -43,9 +43,10 @@ class BaseComputeTest(unittest.TestCase):
             username, tenant_name, password = creds
             os = openstack.Manager(username=username,
                                    password=password,
-                                   tenant_name=tenant_name)
+                                   tenant_name=tenant_name,
+                                   interface=cls._interface)
         else:
-            os = openstack.Manager()
+            os = openstack.Manager(interface=cls._interface)
 
         cls.os = os
         cls.servers_client = os.servers_client
@@ -172,6 +173,23 @@ class BaseComputeTest(unittest.TestCase):
                 condition()
                 return
             time.sleep(self.build_interval)
+
+
+class BaseComputeTestJSON(_BaseComputeTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(BaseComputeTestJSON, cls).setUpClass()
+
+# NOTE(danms): For transition, keep the old name active as JSON
+BaseComputeTest = BaseComputeTestJSON
+
+
+class BaseComputeTestXML(_BaseComputeTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(BaseComputeTestXML, cls).setUpClass()
 
 
 class BaseComputeAdminTest(unittest.TestCase):

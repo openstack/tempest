@@ -23,7 +23,7 @@ from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.flavors_client import FlavorsClient
-from tempest.services.nova.json.servers_client import ServersClient
+from tempest.services.nova.json.servers_client import ServersClientJSON
 from tempest.services.nova.json.limits_client import LimitsClient
 from tempest.services.nova.json.extensions_client import ExtensionsClient
 from tempest.services.nova.json.security_groups_client \
@@ -33,8 +33,14 @@ from tempest.services.nova.json.keypairs_client import KeyPairsClient
 from tempest.services.nova.json.volumes_client import VolumesClient
 from tempest.services.nova.json.console_output_client \
 import ConsoleOutputsClient
+from tempest.services.nova.xml.servers_client import ServersClientXML
 
 LOG = logging.getLogger(__name__)
+
+SERVERS_CLIENTS = {
+    "json": ServersClientJSON,
+    "xml": ServersClientXML,
+}
 
 
 class Manager(object):
@@ -43,7 +49,8 @@ class Manager(object):
     Top level manager for OpenStack Compute clients
     """
 
-    def __init__(self, username=None, password=None, tenant_name=None):
+    def __init__(self, username=None, password=None, tenant_name=None,
+                 interface='json'):
         """
         We allow overriding of the credentials used within the various
         client classes managed by the Manager object. Left as None, the
@@ -75,7 +82,11 @@ class Manager(object):
         else:
             client_args = (self.config, username, password, auth_url)
 
-        self.servers_client = ServersClient(*client_args)
+        try:
+            self.servers_client = SERVERS_CLIENTS[interface](*client_args)
+        except KeyError:
+            msg = "Unsupported interface type `%s'" % interface
+            raise exceptions.InvalidConfiguration(msg)
         self.flavors_client = FlavorsClient(*client_args)
         self.images_client = ImagesClient(*client_args)
         self.limits_client = LimitsClient(*client_args)

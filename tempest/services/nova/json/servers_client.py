@@ -4,11 +4,11 @@ import json
 import time
 
 
-class ServersClient(RestClient):
+class ServersClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ServersClient, self).__init__(config, username, password,
-                                           auth_url, tenant_name)
+        super(ServersClientJSON, self).__init__(config, username, password,
+                                                auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
