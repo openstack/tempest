@@ -18,16 +18,18 @@
 import json
 import httplib2
 import logging
+from lxml import etree
 import time
 
 from tempest import exceptions
-
+from tempest.services.nova.xml.common import xml_to_json
 
 # redrive rate limited calls at most twice
 MAX_RECURSION_DEPTH = 2
 
 
 class RestClient(object):
+    TYPE = "json"
 
     def __init__(self, config, user, password, auth_url, tenant_name=None):
         self.log = logging.getLogger(__name__)
@@ -45,8 +47,8 @@ class RestClient(object):
         self.region = 0
         self.endpoint_url = 'publicURL'
         self.strategy = self.config.identity.strategy
-        self.headers = {'Content-Type': 'application/json',
-                        'Accept': 'application/json'}
+        self.headers = {'Content-Type': 'application/%s' % self.TYPE,
+                        'Accept': 'application/%s' % self.TYPE}
         self.build_interval = config.compute.build_interval
         self.build_timeout = config.compute.build_timeout
 
@@ -153,11 +155,11 @@ class RestClient(object):
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)
 
-    def get(self, url):
-        return self.request('GET', url)
+    def get(self, url, headers=None):
+        return self.request('GET', url, headers)
 
-    def delete(self, url):
-        return self.request('DELETE', url)
+    def delete(self, url, headers=None):
+        return self.request('DELETE', url, headers)
 
     def put(self, url, body, headers):
         return self.request('PUT', url, headers, body)
@@ -167,6 +169,9 @@ class RestClient(object):
         self.log.error('Request Body: ' + str(body))
         self.log.error('Response Headers: ' + str(resp))
         self.log.error('Response Body: ' + str(resp_body))
+
+    def _parse_resp(self, body):
+        return json.loads(body)
 
     def request(self, method, url, headers=None, body=None, depth=0):
         """A simple HTTP request interface."""
@@ -191,20 +196,22 @@ class RestClient(object):
             raise exceptions.NotFound(resp_body)
 
         if resp.status == 400:
-            resp_body = json.loads(resp_body)
+            resp_body = self._parse_resp(resp_body)
             self._log(req_url, body, resp, resp_body)
             raise exceptions.BadRequest(resp_body)
 
         if resp.status == 409:
-            resp_body = json.loads(resp_body)
+            resp_body = self._parse_resp(resp_body)
             self._log(req_url, body, resp, resp_body)
             raise exceptions.Duplicate(resp_body)
 
         if resp.status == 413:
-            resp_body = json.loads(resp_body)
+            resp_body = self._parse_resp(resp_body)
             self._log(req_url, body, resp, resp_body)
             if 'overLimit' in resp_body:
                 raise exceptions.OverLimit(resp_body['overLimit']['message'])
+            elif 'limit' in resp_body['message']:
+                raise exceptions.OverLimit(resp_body['message'])
             elif depth < MAX_RECURSION_DEPTH:
                 delay = resp['Retry-After'] if 'Retry-After' in resp else 60
                 time.sleep(int(delay))
@@ -215,7 +222,7 @@ class RestClient(object):
                     details=resp_body['overLimitFault']['details'])
 
         if resp.status in (500, 501):
-            resp_body = json.loads(resp_body)
+            resp_body = self._parse_resp(resp_body)
             self._log(req_url, body, resp, resp_body)
             #I'm seeing both computeFault and cloudServersFault come back.
             #Will file a bug to fix, but leave as is for now.
@@ -230,7 +237,7 @@ class RestClient(object):
             raise exceptions.ComputeFault(message)
 
         if resp.status >= 400:
-            resp_body = json.loads(resp_body)
+            resp_body = self._parse_resp(resp_body)
             self._log(req_url, body, resp, resp_body)
             raise exceptions.TempestException(str(resp.status))
 
@@ -251,3 +258,10 @@ class RestClient(object):
         Subclasses override with specific deletion detection.
         """
         return False
+
+
+class RestClientXML(RestClient):
+    TYPE = "xml"
+
+    def _parse_resp(self, body):
+        return xml_to_json(etree.fromstring(body))
