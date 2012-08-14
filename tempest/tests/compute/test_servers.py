@@ -18,15 +18,10 @@
 from nose.plugins.attrib import attr
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ServersTest(BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ServersTest, cls).setUpClass()
-        cls.client = cls.servers_client
+class ServersTestBase(object):
 
     @attr(type='positive')
     def test_create_server_with_admin_password(self):
@@ -153,3 +148,17 @@ class ServersTest(BaseComputeTest):
         self.client.wait_for_server_status(server['id'], 'BUILD')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
+
+
+class ServersTestJSON(base.BaseComputeTestJSON, ServersTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(ServersTestJSON, cls).setUpClass()
+        cls.client = cls.servers_client
+
+
+class ServersTestXML(base.BaseComputeTestXML, ServersTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(ServersTestXML, cls).setUpClass()
+        cls.client = cls.servers_client
