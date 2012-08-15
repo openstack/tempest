@@ -21,17 +21,16 @@ import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 from tempest.tests import utils
 import nose
 
 
-class ListServerFiltersTest(BaseComputeTest):
+class ListServerFiltersTest(object):
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
         raise nose.SkipTest("Until Bug 1039753 is fixed")
-        super(ListServerFiltersTest, cls).setUpClass()
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...
@@ -82,12 +81,11 @@ class ListServerFiltersTest(BaseComputeTest):
         cls.s2_min = cls._convert_to_min_details(cls.s2)
         cls.s3_min = cls._convert_to_min_details(cls.s3)
 
-    @classmethod
+    @staticmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.s1['id'])
         cls.client.delete_server(cls.s2['id'])
         cls.client.delete_server(cls.s3['id'])
-        super(ListServerFiltersTest, cls).tearDownClass()
 
     def _server_id_in_results(self, server_id, results):
         ids = [row['id'] for row in results]
@@ -204,3 +202,29 @@ class ListServerFiltersTest(BaseComputeTest):
         min_detail['links'] = server['links']
         min_detail['id'] = server['id']
         return min_detail
+
+
+class ListServerFiltersTestJSON(base.BaseComputeTestJSON,
+                                ListServerFiltersTest):
+    @classmethod
+    def setUpClass(cls):
+        super(ListServerFiltersTestJSON, cls).setUpClass()
+        ListServerFiltersTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(ListServerFiltersTestJSON, cls).tearDownClass()
+        ListServerFiltersTest.tearDownClass(cls)
+
+
+class ListServerFiltersTestXML(base.BaseComputeTestXML,
+                               ListServerFiltersTest):
+    @classmethod
+    def setUpClass(cls):
+        super(ListServerFiltersTestXML, cls).setUpClass()
+        ListServerFiltersTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(ListServerFiltersTestXML, cls).tearDownClass()
+        ListServerFiltersTest.tearDownClass(cls)
