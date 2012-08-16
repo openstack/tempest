@@ -22,16 +22,15 @@ import tempest.config
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import openstack
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class TestAttachVolume(BaseComputeTest):
+class AttachVolumeTest(object):
 
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(TestAttachVolume, cls).setUpClass()
         cls.device = 'vdb'
 
     def _detach(self, server_id, volume_id):
@@ -108,3 +107,19 @@ class TestAttachVolume(BaseComputeTest):
             if attached:
                 self._detach(server['id'], volume['id'])
             self._delete(server['id'], volume['id'])
+
+
+class TestAttachVolumeJSON(base.BaseComputeTestJSON,
+                           AttachVolumeTest):
+    @classmethod
+    def setUpClass(cls):
+        super(TestAttachVolumeJSON, cls).setUpClass()
+        AttachVolumeTest.setUpClass(cls)
+
+
+class TestAttachVolumeXML(base.BaseComputeTestXML,
+                          AttachVolumeTest):
+    @classmethod
+    def setUpClass(cls):
+        super(TestAttachVolumeXML, cls).setUpClass()
+        AttachVolumeTest.setUpClass(cls)
