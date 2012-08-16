@@ -19,14 +19,13 @@ from nose.plugins.attrib import attr
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class SecurityGroupsTest(BaseComputeTest):
+class SecurityGroupsTest(object):
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(SecurityGroupsTest, cls).setUpClass()
         cls.client = cls.security_groups_client
 
     @attr(type='positive')
@@ -311,3 +310,19 @@ class SecurityGroupsTest(BaseComputeTest):
 
         self.client.delete_security_group(sg2_id)
         self.assertEqual(202, resp.status)
+
+
+class SecurityGroupsTestJSON(base.BaseComputeTestJSON,
+                             SecurityGroupsTest):
+    @classmethod
+    def setUpClass(cls):
+        super(SecurityGroupsTestJSON, cls).setUpClass()
+        SecurityGroupsTest.setUpClass(cls)
+
+
+class SecurityGroupsTestXML(base.BaseComputeTestXML,
+                            SecurityGroupsTest):
+    @classmethod
+    def setUpClass(cls):
+        super(SecurityGroupsTestXML, cls).setUpClass()
+        SecurityGroupsTest.setUpClass(cls)
