@@ -168,7 +168,13 @@ class ServersClientXML(RestClientXML):
                 meta.append(Text(v))
                 metadata.append(meta)
 
-        server.append(Element("personality"))
+        if 'personality' in kwargs:
+            personality = Element('personality')
+            server.append(personality)
+            for k in kwargs['personality']:
+                temp = Element('file', path=k['path'])
+                temp.append(Text(k['contents']))
+                personality.append(temp)
 
         resp, body = self.post('servers', str(Document(server)), self.headers)
         server = self._parse_server(etree.fromstring(body))
