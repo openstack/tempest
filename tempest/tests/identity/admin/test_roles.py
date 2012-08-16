@@ -237,10 +237,12 @@ class UserRolesTest(RolesTest):
         (user, tenant, role) = self._get_role_params()
         token = self.client.get_auth()
         self.client.delete_token(token)
-        self.assertRaises(exceptions.Unauthorized,
-                          self.client.list_user_roles, tenant['id'],
-                          user['id'])
-        self.client.clear_auth()
+        try:
+            self.assertRaises(exceptions.Unauthorized,
+                              self.client.list_user_roles, tenant['id'],
+                              user['id'])
+        finally:
+            self.client.clear_auth()
 
     def test_list_user_roles_for_non_existent_user(self):
         """Attempt to list roles of a non existent user should fail"""
