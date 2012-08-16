@@ -23,16 +23,15 @@ import unittest2 as unittest
 import tempest.config
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ServersTest(BaseComputeTest):
+class ServersTest(object):
 
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(ServersTest, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '::babe:220.12.22.2'
@@ -52,10 +51,9 @@ class ServersTest(BaseComputeTest):
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
 
-    @classmethod
+    @staticmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.server_initial['id'])
-        super(ServersTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_create_server_response(self):
@@ -115,3 +113,29 @@ class ServersTest(BaseComputeTest):
         """Verify the instance host name is the same as the server name"""
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
+
+
+class ServersTestJSON(base.BaseComputeTestJSON,
+                      ServersTest):
+    @classmethod
+    def setUpClass(cls):
+        super(ServersTestJSON, cls).setUpClass()
+        ServersTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        ServersTest.tearDownClass(cls)
+        super(ServersTestJSON, cls).tearDownClass()
+
+
+class ServersTestXML(base.BaseComputeTestXML,
+                     ServersTest):
+    @classmethod
+    def setUpClass(cls):
+        super(ServersTestXML, cls).setUpClass()
+        ServersTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        ServersTest.tearDownClass(cls)
+        super(ServersTestXML, cls).tearDownClass()
