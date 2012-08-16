@@ -2,10 +2,10 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class LimitsClient(RestClient):
+class LimitsClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(LimitsClient, self).__init__(config, username, password,
+        super(LimitsClientJSON, self).__init__(config, username, password,
                                            auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
