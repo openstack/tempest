@@ -18,21 +18,16 @@
 from nose.plugins.attrib import attr
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class VolumesGetTest(BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(VolumesGetTest, cls).setUpClass()
-        cls.client = cls.volumes_extensions_client
+class VolumesGetTestBase(object):
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):
         """CREATE, GET, DELETE Volume"""
         try:
-            v_name = rand_name('Volume-')
+            v_name = rand_name('Volume-%s-') % self._interface
             metadata = {'Type': 'work'}
             #Create volume
             resp, volume = self.client.create_volume(size=1,
@@ -93,3 +88,21 @@ class VolumesGetTest(BaseComputeTest):
             #Delete the Volume created in this method
             resp, _ = self.client.delete_volume(volume['id'])
             self.assertEqual(202, resp.status)
+            #Checking if the deleted Volume still exists
+            self.client.wait_for_resource_deletion(volume['id'])
+
+
+class VolumesGetTestXML(base.BaseComputeTestXML, VolumesGetTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(VolumesGetTestXML, cls).setUpClass()
+        cls.client = cls.volumes_extensions_client
+
+
+class VolumesGetTestJSON(base.BaseComputeTestJSON, VolumesGetTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(VolumesGetTestJSON, cls).setUpClass()
+        cls.client = cls.volumes_extensions_client
