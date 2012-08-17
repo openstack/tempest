@@ -34,7 +34,7 @@ __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
 LOG = logging.getLogger(__name__)
 
 
-class BaseComputeTest(unittest.TestCase):
+class BaseCompTest(unittest.TestCase):
 
     """Base test case class for all Compute API tests"""
 
@@ -206,7 +206,7 @@ class BaseComputeTest(unittest.TestCase):
             time.sleep(self.build_interval)
 
 
-class BaseComputeTestJSON(BaseComputeTest):
+class BaseComputeTestJSON(BaseCompTest):
     @classmethod
     def setUpClass(cls):
         cls._interface = "json"
@@ -216,7 +216,7 @@ class BaseComputeTestJSON(BaseComputeTest):
 BaseComputeTest = BaseComputeTestJSON
 
 
-class BaseComputeTestXML(BaseComputeTest):
+class BaseComputeTestXML(BaseCompTest):
     @classmethod
     def setUpClass(cls):
         cls._interface = "xml"

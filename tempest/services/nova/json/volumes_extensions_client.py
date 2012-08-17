@@ -4,10 +4,10 @@ import json
 import time
 
 
-class VolumesExtensionsClient(RestClient):
+class VolumesExtensionsClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumesExtensionsClient, self).__init__(config, username,
+        super(VolumesExtensionsClientJSON, self).__init__(config, username,
                                                       password, auth_url,
                                                       tenant_name)
         self.service = self.config.compute.catalog_type

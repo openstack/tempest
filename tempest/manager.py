@@ -48,7 +48,7 @@ ExtensionsClient = extensions_client.ExtensionsClientJSON
 SecurityGroupsClient = security_groups_client.SecurityGroupsClient
 FloatingIPsClient = floating_ips_client.FloatingIPsClient
 KeyPairsClient = keypairs_client.KeyPairsClientJSON
-VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClient
+VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClientJSON
 VolumesClient = volumes_client.VolumesClient
 ConsoleOutputsClient = console_output_client.ConsoleOutputsClient
 
