@@ -29,14 +29,20 @@ from tempest.services.nova.json.extensions_client import ExtensionsClient
 from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
 from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
-from tempest.services.nova.json.keypairs_client import KeyPairsClient
+from tempest.services.nova.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.nova.json.volumes_client import VolumesClient
 from tempest.services.nova.json.console_output_client \
 import ConsoleOutputsClient
+from tempest.services.nova.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.nova.xml.limits_client import LimitsClientXML
 from tempest.services.nova.xml.servers_client import ServersClientXML
 
 LOG = logging.getLogger(__name__)
+
+KEYPAIRS_CLIENTS = {
+    "json": KeyPairsClientJSON,
+    "xml": KeyPairsClientXML,
+}
 
 SERVERS_CLIENTS = {
     "json": ServersClientJSON,
@@ -91,13 +97,13 @@ class Manager(object):
         try:
             self.servers_client = SERVERS_CLIENTS[interface](*client_args)
             self.limits_client = LIMITS_CLIENTS[interface](*client_args)
+            self.keypairs_client = KEYPAIRS_CLIENTS[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
         self.flavors_client = FlavorsClient(*client_args)
         self.images_client = ImagesClient(*client_args)
         self.extensions_client = ExtensionsClient(*client_args)
-        self.keypairs_client = KeyPairsClient(*client_args)
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.floating_ips_client = FloatingIPsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)

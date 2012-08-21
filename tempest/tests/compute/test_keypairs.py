@@ -20,15 +20,11 @@ import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute.base import BaseComputeTestJSON
+from tempest.tests.compute.base import BaseComputeTestXML
 
 
-class KeyPairsTest(BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(KeyPairsTest, cls).setUpClass()
-        cls.client = cls.keypairs_client
+class KeyPairsTestBase(object):
 
     @attr(type='positive')
     def test_keypairs_create_list_delete(self):
@@ -220,3 +216,17 @@ class KeyPairsTest(BaseComputeTest):
             pass
         else:
             self.fail('invalid name')
+
+
+class KeyPairsTestXML(BaseComputeTestXML, KeyPairsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(KeyPairsTestXML, cls).setUpClass()
+        cls.client = cls.keypairs_client
+
+
+class KeyPairsTestJSON(BaseComputeTestJSON, KeyPairsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(KeyPairsTestJSON, cls).setUpClass()
+        cls.client = cls.keypairs_client
