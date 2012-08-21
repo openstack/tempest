@@ -23,12 +23,14 @@ from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests.compute.base import BaseComputeTest
 from tempest.tests import utils
+import nose
 
 
 class ListServerFiltersTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        raise nose.SkipTest("Until Bug 1039753 is fixed")
         super(ListServerFiltersTest, cls).setUpClass()
         cls.client = cls.servers_client
 
