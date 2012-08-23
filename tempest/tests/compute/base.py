@@ -122,7 +122,27 @@ class BaseComputeTest(unittest.TestCase):
             admin_client.delete_tenant(tenant['id'])
 
     @classmethod
+    def clear_remaining_servers(cls):
+        # NOTE(danms): Only nuke all left-over servers if we're in our
+        # own isolated tenant
+        if not cls.isolated_creds:
+            return
+        resp, servers = cls.servers_client.list_servers()
+        for server in servers['servers']:
+            try:
+                cls.servers_client.delete_server(server['id'])
+            except Exception:
+                pass
+
+        for server in servers['servers']:
+            try:
+                cls.servers_client.wait_for_server_termination(server['id'])
+            except Exception:
+                pass
+
+    @classmethod
     def tearDownClass(cls):
+        cls.clear_remaining_servers()
         cls.clear_isolated_creds()
 
     def create_server(self, image_id=None):
