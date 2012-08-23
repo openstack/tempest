@@ -18,15 +18,10 @@
 from nose.plugins.attrib import attr
 
 from tempest import exceptions
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class FlavorsTest(BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(FlavorsTest, cls).setUpClass()
-        cls.client = cls.flavors_client
+class FlavorsTestBase(object):
 
     @attr(type='smoke')
     def test_list_flavors(self):
@@ -141,3 +136,21 @@ class FlavorsTest(BaseComputeTest):
         """Ensure 404 returned for non-existant flavor ID"""
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
                         9999)
+
+
+class FlavorsTestXML(base.BaseComputeTestXML,
+                     FlavorsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FlavorsTestXML, cls).setUpClass()
+        cls.client = cls.flavors_client
+
+
+class FlavorsTestJSON(base.BaseComputeTestJSON,
+                      FlavorsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FlavorsTestJSON, cls).setUpClass()
+        cls.client = cls.flavors_client

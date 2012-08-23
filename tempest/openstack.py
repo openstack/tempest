@@ -21,8 +21,8 @@ from tempest import config
 from tempest import exceptions
 from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
+from tempest.services.nova.json.flavors_client import FlavorsClientJSON
 from tempest.services.nova.json.images_client import ImagesClient
-from tempest.services.nova.json.flavors_client import FlavorsClient
 from tempest.services.nova.json.limits_client import LimitsClientJSON
 from tempest.services.nova.json.servers_client import ServersClientJSON
 from tempest.services.nova.json.extensions_client import ExtensionsClient
@@ -33,6 +33,7 @@ from tempest.services.nova.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.nova.json.volumes_client import VolumesClient
 from tempest.services.nova.json.console_output_client \
 import ConsoleOutputsClient
+from tempest.services.nova.xml.flavors_client import FlavorsClientXML
 from tempest.services.nova.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.nova.xml.limits_client import LimitsClientXML
 from tempest.services.nova.xml.servers_client import ServersClientXML
@@ -52,6 +53,11 @@ SERVERS_CLIENTS = {
 LIMITS_CLIENTS = {
     "json": LimitsClientJSON,
     "xml": LimitsClientXML,
+}
+
+FLAVORS_CLIENTS = {
+    "json": FlavorsClientJSON,
+    "xml": FlavorsClientXML
 }
 
 
@@ -98,10 +104,10 @@ class Manager(object):
             self.servers_client = SERVERS_CLIENTS[interface](*client_args)
             self.limits_client = LIMITS_CLIENTS[interface](*client_args)
             self.keypairs_client = KEYPAIRS_CLIENTS[interface](*client_args)
+            self.flavors_client = FLAVORS_CLIENTS[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
-        self.flavors_client = FlavorsClient(*client_args)
         self.images_client = ImagesClient(*client_args)
         self.extensions_client = ExtensionsClient(*client_args)
         self.security_groups_client = SecurityGroupsClient(*client_args)
@@ -132,11 +138,12 @@ class AdminManager(Manager):
     managed client objects
     """
 
-    def __init__(self):
+    def __init__(self, interface='json'):
         conf = config.TempestConfig()
         super(AdminManager, self).__init__(conf.compute_admin.username,
                                            conf.compute_admin.password,
-                                           conf.compute_admin.tenant_name)
+                                           conf.compute_admin.tenant_name,
+                                           interface=interface)
 
 
 class ServiceManager(object):
