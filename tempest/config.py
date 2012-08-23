@@ -125,6 +125,17 @@ class ComputeConfig(BaseConfig):
         return self.get("allow_tenant_isolation", 'false').lower() != 'false'
 
     @property
+    def allow_tenant_reuse(self):
+        """
+        If allow_tenant_isolation is True and a tenant that would be created
+        for a given test already exists (such as from a previously-failed run),
+        re-use that tenant instead of failing because of the conflict. Note
+        that this would result in the tenant being deleted at the end of a
+        subsequent successful run.
+        """
+        return self.get("allow_tenant_reuse", 'true').lower() != 'false'
+
+    @property
     def username(self):
         """Username to use for Nova API requests."""
         return self.get("username", "demo")

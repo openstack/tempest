@@ -29,6 +29,12 @@ strategy = %IDENTITY_STRATEGY%
 # are known.
 allow_tenant_isolation = %COMPUTE_ALLOW_TENANT_ISOLATION%
 
+# Allows test cases to create/destroy tenants and users. This option
+# enables isolated test cases and better parallel execution,
+# but also requires that OpenStack Identity API admin credentials
+# are known.
+allow_tenant_reuse = %COMPUTE_ALLOW_TENANT_REUSE%
+
 # This should be the username of a user WITHOUT administrative privileges
 username = %USERNAME%
 # The above non-administrative user's password
