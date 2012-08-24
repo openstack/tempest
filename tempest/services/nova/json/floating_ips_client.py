@@ -3,9 +3,9 @@ from tempest import exceptions
 import json
 
 
-class FloatingIPsClient(RestClient):
+class FloatingIPsClientJSON(RestClient):
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(FloatingIPsClient, self).__init__(config, username, password,
+        super(FloatingIPsClientJSON, self).__init__(config, username, password,
                                                 auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
@@ -15,8 +15,8 @@ class FloatingIPsClient(RestClient):
         if params != None:
             param_list = []
             for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-            url += '?' + ' '.join(param_list)
+                param_list.append("%s=%s" % (param, value))
+            url += '?' + ' &'.join(param_list)
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['floating_ips']

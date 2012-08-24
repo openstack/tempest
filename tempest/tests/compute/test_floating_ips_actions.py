@@ -21,16 +21,15 @@ import unittest2 as unittest
 from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class FloatingIPsTest(BaseComputeTest):
+class FloatingIPsTestBase(object):
     server_id = None
     floating_ip = None
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(FloatingIPsTest, cls).setUpClass()
         cls.client = cls.floating_ips_client
         cls.servers_client = cls.servers_client
 
@@ -55,13 +54,12 @@ class FloatingIPsTest(BaseComputeTest):
             if cls.non_exist_id not in cls.floating_ip_ids:
                 break
 
-    @classmethod
+    @staticmethod
     def tearDownClass(cls):
         #Deleting the server which is created in this method
         resp, body = cls.servers_client.delete_server(cls.server_id)
         #Deleting the floating IP which is created in this method
         resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
-        super(FloatingIPsTest, cls).tearDownClass()
 
     @attr(type='positive')
     def test_allocate_floating_ip(self):
@@ -225,3 +223,29 @@ class FloatingIPsTest(BaseComputeTest):
         else:
             self.fail('Association of floating IP to specific server'
                       ' with out passing floating IP  should raise BadRequest')
+
+
+class FloatingIPsTestJSON(base.BaseComputeTestJSON,
+                            FloatingIPsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(FloatingIPsTestJSON, cls).setUpClass()
+        FloatingIPsTestBase.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        FloatingIPsTestBase.tearDownClass(cls)
+        super(FloatingIPsTestJSON, cls).tearDownClass()
+
+
+class FloatingIPsTestXML(base.BaseComputeTestXML,
+                            FloatingIPsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(FloatingIPsTestXML, cls).setUpClass()
+        FloatingIPsTestBase.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        FloatingIPsTestBase.tearDownClass(cls)
+        super(FloatingIPsTestXML, cls).tearDownClass()

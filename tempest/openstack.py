@@ -23,12 +23,13 @@ from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.nova.json.extensions_client import ExtensionsClientJSON
 from tempest.services.nova.json.flavors_client import FlavorsClientJSON
+from tempest.services.nova.json.floating_ips_client import \
+FloatingIPsClientJSON
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.limits_client import LimitsClientJSON
 from tempest.services.nova.json.servers_client import ServersClientJSON
 from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
-from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
 from tempest.services.nova.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.nova.json.volumes_extensions_client \
 import VolumesExtensionsClientJSON
@@ -36,6 +37,8 @@ from tempest.services.nova.json.console_output_client \
 import ConsoleOutputsClient
 from tempest.services.nova.xml.extensions_client import ExtensionsClientXML
 from tempest.services.nova.xml.flavors_client import FlavorsClientXML
+from tempest.services.nova.xml.floating_ips_client import \
+FloatingIPsClientXML
 from tempest.services.nova.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.nova.xml.limits_client import LimitsClientXML
 from tempest.services.nova.xml.servers_client import ServersClientXML
@@ -73,6 +76,11 @@ EXTENSIONS_CLIENTS = {
 VOLUMES_EXTENSIONS_CLIENTS = {
     "json": VolumesExtensionsClientJSON,
     "xml": VolumesExtensionsClientXML,
+}
+
+FLOAT_CLIENTS = {
+    "json": FloatingIPsClientJSON,
+    "xml": FloatingIPsClientXML,
 }
 
 
@@ -125,12 +133,12 @@ class Manager(object):
                     EXTENSIONS_CLIENTS[interface](*client_args)
             self.volumes_extensions_client = \
                     VOLUMES_EXTENSIONS_CLIENTS[interface](*client_args)
+            self.floating_ips_client = FLOAT_CLIENTS[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
         self.images_client = ImagesClient(*client_args)
         self.security_groups_client = SecurityGroupsClient(*client_args)
-        self.floating_ips_client = FloatingIPsClient(*client_args)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.network_client = NetworkClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)

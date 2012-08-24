@@ -20,14 +20,13 @@ import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class FloatingIPDetailsTest(BaseComputeTest):
+class FloatingIPDetailsTestBase(object):
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(FloatingIPDetailsTest, cls).setUpClass()
         cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
@@ -37,11 +36,10 @@ class FloatingIPDetailsTest(BaseComputeTest):
             cls.floating_ip.append(body)
             cls.floating_ip_id.append(body['id'])
 
-    @classmethod
+    @staticmethod
     def tearDownClass(cls):
         for i in range(3):
             cls.client.delete_floating_ip(cls.floating_ip_id[i])
-        super(FloatingIPDetailsTest, cls).tearDownClass()
 
     @attr(type='positive')
     def test_list_floating_ips(self):
@@ -101,3 +99,29 @@ class FloatingIPDetailsTest(BaseComputeTest):
         else:
             self.fail('Should not be able to GET the details from a'
                       'nonexistant floating IP')
+
+
+class FloatingIPDetailsTestJSON(base.BaseComputeTestJSON,
+                            FloatingIPDetailsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(FloatingIPDetailsTestJSON, cls).setUpClass()
+        FloatingIPDetailsTestBase.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        FloatingIPDetailsTestBase.tearDownClass(cls)
+        super(FloatingIPDetailsTestJSON, cls).tearDownClass()
+
+
+class FloatingIPDetailsTestXML(base.BaseComputeTestXML,
+                            FloatingIPDetailsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(FloatingIPDetailsTestXML, cls).setUpClass()
+        FloatingIPDetailsTestBase.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        FloatingIPDetailsTestBase.tearDownClass(cls)
+        super(FloatingIPDetailsTestXML, cls).tearDownClass()
