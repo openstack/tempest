@@ -19,15 +19,13 @@ import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.identity.base import BaseIdentityAdminTest
+from tempest.tests.identity import base
 
 
-class TenantsTest(BaseIdentityAdminTest):
+class TenantsTestBase(object):
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(TenantsTest, cls).setUpClass()
-
         for _ in xrange(5):
             resp, tenant = cls.client.create_tenant(rand_name('tenant-'))
             cls.data.tenants.append(tenant)
@@ -133,10 +131,12 @@ class TenantsTest(BaseIdentityAdminTest):
         st1 = resp['status']
         en1 = body['enabled']
         self.assertTrue(st1.startswith('2'))
-        self.assertFalse(en1, 'Enable should be False in response')
+        self.assertEqual('false', str(en1).lower(),
+                         'Enable should be False in response')
         resp, body = self.client.get_tenant(tenant_id)
         en2 = body['enabled']
-        self.assertFalse(en2, 'Enable should be False in lookup')
+        self.assertEqual('false', str(en2).lower(),
+                         'Enable should be False in lookup')
         self.client.delete_tenant(tenant_id)
 
     def test_tenant_create_duplicate(self):
@@ -246,7 +246,25 @@ class TenantsTest(BaseIdentityAdminTest):
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)
-        self.assertEqual(t_en, resp1_en)
+        self.assertEqual('false', str(resp1_en).lower())
         self.assertEqual(resp2_en, resp3_en)
 
         self.client.delete_tenant(t_id)
+
+
+class TenantsTestJSON(base.BaseIdentityAdminTestJSON,
+                      TenantsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TenantsTestJSON, cls).setUpClass()
+        TenantsTestBase.setUpClass(cls)
+
+
+class TenantsTestXML(base.BaseIdentityAdminTestXML,
+                      TenantsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TenantsTestXML, cls).setUpClass()
+        TenantsTestBase.setUpClass(cls)

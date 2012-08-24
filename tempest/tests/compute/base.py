@@ -26,7 +26,6 @@ from tempest import config
 from tempest import openstack
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.services.identity.json.admin_client import AdminClient
 
 __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
            'BaseComputeAdminTestJSON', 'BaseComputeAdminTestXML']
@@ -79,12 +78,8 @@ class BaseCompTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        client_args = (cls.config,
-                       cls.config.identity_admin.username,
-                       cls.config.identity_admin.password,
-                       cls.config.identity.auth_url)
-        tenant_name = cls.config.identity_admin.tenant_name
-        admin_client = AdminClient(*client_args, tenant_name=tenant_name)
+        os = openstack.IdentityManager(interface=cls._interface)
+        admin_client = os.admin_client
         return admin_client
 
     @classmethod

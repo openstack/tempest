@@ -24,7 +24,6 @@ import unittest2 as unittest
 from tempest import config
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
-from tempest.services.identity.json.admin_client import AdminClient
 from tempest import exceptions
 
 LOG = logging.getLogger(__name__)
@@ -70,13 +69,8 @@ class BaseVolumeTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        client_args = (cls.config,
-                       cls.config.identity_admin.username,
-                       cls.config.identity_admin.password,
-                       cls.config.identity.auth_url)
-        tenant_name = cls.config.identity_admin.tenant_name
-        admin_client = AdminClient(*client_args, tenant_name=tenant_name)
-        return admin_client
+        os = openstack.IdentityManager()
+        return os.admin_client
 
     @classmethod
     def _get_isolated_creds(cls):

@@ -20,10 +20,10 @@ import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.identity.base import BaseIdentityAdminTest
+from tempest.tests.identity import base
 
 
-class ServicesTest(BaseIdentityAdminTest):
+class ServicesTestBase(object):
 
     def test_create_get_delete_service(self):
         """GET Service"""
@@ -64,3 +64,17 @@ class ServicesTest(BaseIdentityAdminTest):
             #Checking whether service is deleted successfully
             self.assertRaises(exceptions.NotFound, self.client.get_service,
                               service_data['id'])
+
+
+class ServicesTestJSON(base.BaseIdentityAdminTestJSON,
+                      ServicesTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(ServicesTestJSON, cls).setUpClass()
+
+
+class ServicesTestXML(base.BaseIdentityAdminTestXML,
+                      ServicesTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(ServicesTestXML, cls).setUpClass()

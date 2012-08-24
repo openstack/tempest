@@ -19,6 +19,10 @@ import logging
 
 from tempest import config
 from tempest import exceptions
+from tempest.services.identity.json.admin_client import AdminClientJSON
+from tempest.services.identity.json.admin_client import TokenClientJSON
+from tempest.services.identity.xml.admin_client import AdminClientXML
+from tempest.services.identity.xml.admin_client import TokenClientXML
 from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.nova.json.extensions_client import ExtensionsClientJSON
@@ -47,6 +51,7 @@ from tempest.services.nova.xml.volumes_extensions_client \
 import VolumesExtensionsClientXML
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
+
 
 LOG = logging.getLogger(__name__)
 
@@ -93,6 +98,17 @@ FLOAT_CLIENTS = {
 VOLUMES_CLIENTS = {
     "json": VolumesClientJSON,
     "xml": VolumesClientXML,
+}
+
+
+ADMIN_CLIENT = {
+    "json": AdminClientJSON,
+    "xml": AdminClientXML,
+}
+
+TOKEN_CLIENT = {
+    "json": TokenClientJSON,
+    "xml": TokenClientXML,
 }
 
 
@@ -148,6 +164,8 @@ class Manager(object):
                     VOLUMES_EXTENSIONS_CLIENTS[interface](*client_args)
             self.floating_ips_client = FLOAT_CLIENTS[interface](*client_args)
             self.volumes_client = VOLUMES_CLIENTS[interface](*client_args)
+            self.admin_client = ADMIN_CLIENT[interface](*client_args)
+            self.token_client = TOKEN_CLIENT[interface](self.config)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
@@ -196,3 +214,33 @@ class ServiceManager(object):
         self.services = {}
         self.services['image'] = image_service.Service(self.config)
         self.images = self.services['image']
+
+
+class IdentityManager(Manager):
+
+    """
+    Manager object that uses the alt_XXX credentials for its
+    managed client objects
+    """
+
+    def __init__(self, interface='json'):
+        conf = config.TempestConfig()
+        super(IdentityManager, self).__init__(conf.identity_admin.username,
+                                         conf.identity_admin.password,
+                                         conf.identity_admin.tenant_name,
+                                         interface)
+
+
+class IdentityNaManager(Manager):
+
+    """
+    Manager object that uses the alt_XXX credentials for its
+    managed client objects
+    """
+
+    def __init__(self, interface='json'):
+        conf = config.TempestConfig()
+        super(IdentityNaManager, self).__init__(conf.compute.username,
+                                         conf.compute.password,
+                                         conf.compute.tenant_name,
+                                         interface)

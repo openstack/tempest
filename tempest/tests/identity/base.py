@@ -18,50 +18,25 @@
 import nose
 import unittest2 as unittest
 
-import tempest.config
 from tempest.common.utils.data_utils import rand_name
-from tempest.services.identity.json.admin_client import AdminClient
-from tempest.services.identity.json.admin_client import TokenClient
+from tempest import openstack
 
 
-class BaseIdentityAdminTest(unittest.TestCase):
+class BaseIdAdminTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.config = tempest.config.TempestConfig()
-        cls.username = cls.config.identity_admin.username
-        cls.password = cls.config.identity_admin.password
-        cls.tenant_name = cls.config.identity_admin.tenant_name
-
-        if not (cls.username
-                and cls.password
-                and cls.tenant_name):
-            raise nose.SkipTest("Missing Admin credentials in configuration")
-
-        client_args = (cls.config,
-                       cls.username,
-                       cls.password,
-                       cls.config.identity.auth_url)
-        cls.client = AdminClient(*client_args, tenant_name=cls.tenant_name)
-        cls.token_client = TokenClient(cls.config)
+        os = openstack.IdentityManager(interface=cls._interface)
+        cls.client = os.admin_client
+        cls.token_client = os.token_client
 
         if not cls.client.has_admin_extensions():
             raise nose.SkipTest("Admin extensions disabled")
 
         cls.data = DataGenerator(cls.client)
 
-        # Create an admin client with regular Compute API credentials. This
-        # client is used in tests to validate Unauthorized is returned
-        # for non-admin users accessing Identity Admin API commands
-        cls.na_username = cls.config.compute.username
-        cls.na_password = cls.config.compute.password
-        cls.na_tenant_name = cls.config.compute.tenant_name
-        na_client_args = (cls.config,
-                       cls.na_username,
-                       cls.na_password,
-                       cls.config.identity.auth_url)
-        cls.non_admin_client = AdminClient(*na_client_args,
-                                           tenant_name=cls.na_tenant_name)
+        os = openstack.IdentityNaManager(interface=cls._interface)
+        cls.non_admin_client = os.admin_client
 
     @classmethod
     def tearDownClass(cls):
@@ -92,6 +67,22 @@ class BaseIdentityAdminTest(unittest.TestCase):
         role = [r for r in roles if r['name'] == name]
         if len(role) > 0:
             return role[0]
+
+
+class BaseIdentityAdminTestJSON(BaseIdAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(BaseIdentityAdminTestJSON, cls).setUpClass()
+
+BaseIdentityAdminTest = BaseIdentityAdminTestJSON
+
+
+class BaseIdentityAdminTestXML(BaseIdAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(BaseIdentityAdminTestXML, cls).setUpClass()
 
 
 class DataGenerator(object):

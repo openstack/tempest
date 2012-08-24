@@ -4,10 +4,10 @@ import httplib2
 import json
 
 
-class AdminClient(RestClient):
+class AdminClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AdminClient, self).__init__(config, username, password,
+        super(AdminClientJSON, self).__init__(config, username, password,
                                                     auth_url, tenant_name)
         self.service = self.config.identity.catalog_type
         self.endpoint_url = 'adminURL'
@@ -204,7 +204,7 @@ class AdminClient(RestClient):
         return self.delete(url)
 
 
-class TokenClient(RestClient):
+class TokenClientJSON(RestClient):
 
     def __init__(self, config):
         self.auth_url = config.identity.auth_url

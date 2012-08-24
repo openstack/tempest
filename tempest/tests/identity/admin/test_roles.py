@@ -19,14 +19,13 @@ import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.identity.base import BaseIdentityAdminTest
+from tempest.tests.identity import base
 
 
-class RolesTest(BaseIdentityAdminTest):
+class RolesTestBase(object):
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(RolesTest, cls).setUpClass()
 
         for _ in xrange(5):
             resp, role = cls.client.create_role(rand_name('role-'))
@@ -101,11 +100,25 @@ class RolesTest(BaseIdentityAdminTest):
         self.client.delete_role(role1_id)
 
 
-class UserRolesTest(RolesTest):
+class RolesTestJSON(base.BaseIdentityAdminTestJSON,
+                    RolesTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(UserRolesTest, cls).setUpClass()
+        super(RolesTestJSON, cls).setUpClass()
+        RolesTestBase.setUpClass(cls)
+
+
+class RolesTestXML(base.BaseIdentityAdminTestXML,
+                   RolesTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(RolesTestXML, cls).setUpClass()
+        RolesTestBase.setUpClass(cls)
+
+
+class UserRolesTestBase(RolesTestBase):
 
     def test_assign_user_role(self):
         """Assign a role to a user on a tenant"""
@@ -249,3 +262,19 @@ class UserRolesTest(RolesTest):
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.list_user_roles,
         tenant['id'], 'junk-role-aabbcc11')
+
+
+class UserRolesTestJSON(RolesTestJSON,
+                        UserRolesTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(UserRolesTestJSON, cls).setUpClass()
+
+
+class UserRolesTestXML(RolesTestXML,
+                        UserRolesTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(UserRolesTestXML, cls).setUpClass()

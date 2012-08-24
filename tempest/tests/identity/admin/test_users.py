@@ -20,10 +20,10 @@ import unittest2 as unittest
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.identity.base import BaseIdentityAdminTest
+from tempest.tests.identity import base
 
 
-class UsersTest(BaseIdentityAdminTest):
+class UsersTestBase(object):
 
     alt_user = rand_name('test_user_')
     alt_password = rand_name('pass_')
@@ -331,3 +331,17 @@ class UsersTest(BaseIdentityAdminTest):
         if len(fail) != 0:
             self.fail('Should raise Not Found when list users with invalid'
                           'tenant ids %s' % fail)
+
+
+class UsersTestJSON(base.BaseIdentityAdminTestJSON,
+                    UsersTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(UsersTestJSON, cls).setUpClass()
+
+
+class UsersTestXML(base.BaseIdentityAdminTestXML,
+                    UsersTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(UsersTestXML, cls).setUpClass()
