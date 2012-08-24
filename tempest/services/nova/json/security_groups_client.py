@@ -2,11 +2,12 @@ from tempest.common.rest_client import RestClient
 import json
 
 
-class SecurityGroupsClient(RestClient):
+class SecurityGroupsClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(SecurityGroupsClient, self).__init__(config, username, password,
-                                                   auth_url, tenant_name)
+        super(SecurityGroupsClientJSON, self).__init__(config, username,
+                                                       password, auth_url,
+                                                       tenant_name)
         self.service = self.config.compute.catalog_type
 
     def list_security_groups(self, params=None):
@@ -16,9 +17,9 @@ class SecurityGroupsClient(RestClient):
         if params is not None:
             param_list = []
             for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
+                param_list.append("%s=%s" % (param, value))
 
-            url += '?' + ' '.join(param_list)
+            url += '?' + ' &'.join(param_list)
 
         resp, body = self.get(url)
         body = json.loads(body)

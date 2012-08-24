@@ -19,14 +19,13 @@ from nose.plugins.attrib import attr
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class SecurityGroupRulesTest(BaseComputeTest):
+class SecurityGroupRulesTest(object):
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
-        super(SecurityGroupRulesTest, cls).setUpClass()
         cls.client = cls.security_groups_client
 
     @attr(type='positive')
@@ -252,3 +251,19 @@ class SecurityGroupRulesTest(BaseComputeTest):
         else:
             self.fail('Security Group Rule should not be deleted '
                       'with nonexistant rule id')
+
+
+class SecurityGroupRulesTestJSON(base.BaseComputeTestJSON,
+                                 SecurityGroupRulesTest):
+    @classmethod
+    def setUpClass(cls):
+        super(SecurityGroupRulesTestJSON, cls).setUpClass()
+        SecurityGroupRulesTest.setUpClass(cls)
+
+
+class SecurityGroupRulesTestXML(base.BaseComputeTestXML,
+                                SecurityGroupRulesTest):
+    @classmethod
+    def setUpClass(cls):
+        super(SecurityGroupRulesTestXML, cls).setUpClass()
+        SecurityGroupRulesTest.setUpClass(cls)

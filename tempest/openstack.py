@@ -33,7 +33,7 @@ from tempest.services.nova.json.images_client import ImagesClientJSON
 from tempest.services.nova.json.limits_client import LimitsClientJSON
 from tempest.services.nova.json.servers_client import ServersClientJSON
 from tempest.services.nova.json.security_groups_client \
-import SecurityGroupsClient
+import SecurityGroupsClientJSON
 from tempest.services.nova.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.nova.json.volumes_extensions_client \
 import VolumesExtensionsClientJSON
@@ -46,6 +46,8 @@ FloatingIPsClientXML
 from tempest.services.nova.xml.images_client import ImagesClientXML
 from tempest.services.nova.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.nova.xml.limits_client import LimitsClientXML
+from tempest.services.nova.xml.security_groups_client \
+import SecurityGroupsClientXML
 from tempest.services.nova.xml.servers_client import ServersClientXML
 from tempest.services.nova.xml.volumes_extensions_client \
 import VolumesExtensionsClientXML
@@ -100,7 +102,6 @@ VOLUMES_CLIENTS = {
     "xml": VolumesClientXML,
 }
 
-
 ADMIN_CLIENT = {
     "json": AdminClientJSON,
     "xml": AdminClientXML,
@@ -109,6 +110,11 @@ ADMIN_CLIENT = {
 TOKEN_CLIENT = {
     "json": TokenClientJSON,
     "xml": TokenClientXML,
+}
+
+SECURITY_GROUPS_CLIENT = {
+    "json": SecurityGroupsClientJSON,
+    "xml": SecurityGroupsClientXML,
 }
 
 
@@ -166,10 +172,11 @@ class Manager(object):
             self.volumes_client = VOLUMES_CLIENTS[interface](*client_args)
             self.admin_client = ADMIN_CLIENT[interface](*client_args)
             self.token_client = TOKEN_CLIENT[interface](self.config)
+            self.security_groups_client = \
+                SECURITY_GROUPS_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
-        self.security_groups_client = SecurityGroupsClient(*client_args)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.network_client = NetworkClient(*client_args)
 

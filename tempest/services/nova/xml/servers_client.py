@@ -307,8 +307,8 @@ class ServersClientXML(RestClientXML):
                          str(Document(revert)), self.headers)
 
     def create_image(self, server_id, image_name):
-        metadata = element('metadata')
-        image = element('createImage',
+        metadata = Element('metadata')
+        image = Element('createImage',
                         metadata,
                         xmlns=XMLNS_11,
                         name=image_name)
