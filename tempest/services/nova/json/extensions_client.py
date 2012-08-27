@@ -2,10 +2,10 @@ from tempest.common.rest_client import RestClient
 import json
 
 
-class ExtensionsClient(RestClient):
+class ExtensionsClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ExtensionsClient, self).__init__(config, username, password,
+        super(ExtensionsClientJSON, self).__init__(config, username, password,
                                                auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 

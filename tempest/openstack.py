@@ -21,11 +21,11 @@ from tempest import config
 from tempest import exceptions
 from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
+from tempest.services.nova.json.extensions_client import ExtensionsClientJSON
 from tempest.services.nova.json.flavors_client import FlavorsClientJSON
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.limits_client import LimitsClientJSON
 from tempest.services.nova.json.servers_client import ServersClientJSON
-from tempest.services.nova.json.extensions_client import ExtensionsClient
 from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
 from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
@@ -33,6 +33,7 @@ from tempest.services.nova.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.nova.json.volumes_client import VolumesClient
 from tempest.services.nova.json.console_output_client \
 import ConsoleOutputsClient
+from tempest.services.nova.xml.extensions_client import ExtensionsClientXML
 from tempest.services.nova.xml.flavors_client import FlavorsClientXML
 from tempest.services.nova.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.nova.xml.limits_client import LimitsClientXML
@@ -58,6 +59,11 @@ LIMITS_CLIENTS = {
 FLAVORS_CLIENTS = {
     "json": FlavorsClientJSON,
     "xml": FlavorsClientXML
+}
+
+EXTENSIONS_CLIENTS = {
+    "json": ExtensionsClientJSON,
+    "xml": ExtensionsClientXML
 }
 
 
@@ -105,11 +111,12 @@ class Manager(object):
             self.limits_client = LIMITS_CLIENTS[interface](*client_args)
             self.keypairs_client = KEYPAIRS_CLIENTS[interface](*client_args)
             self.flavors_client = FLAVORS_CLIENTS[interface](*client_args)
+            self.extensions_client = \
+                    EXTENSIONS_CLIENTS[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
         self.images_client = ImagesClient(*client_args)
-        self.extensions_client = ExtensionsClient(*client_args)
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.floating_ips_client = FloatingIPsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)

@@ -17,15 +17,10 @@
 
 from nose.plugins.attrib import attr
 
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ExtensionsTest(BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ExtensionsTest, cls).setUpClass()
-        cls.client = cls.extensions_client
+class ExtensionsTestBase(object):
 
     @attr(type='positive')
     def test_list_extensions(self):
@@ -33,3 +28,19 @@ class ExtensionsTest(BaseComputeTest):
         resp, extensions = self.client.list_extensions()
         self.assertTrue("extensions" in extensions)
         self.assertEqual(200, resp.status)
+
+
+class ExtensionsTestJSON(base.BaseComputeTest, ExtensionsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(ExtensionsTestJSON, cls).setUpClass()
+        cls.client = cls.extensions_client
+
+
+class ExtensionsTestXML(base.BaseComputeTestXML, ExtensionsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(ExtensionsTestXML, cls).setUpClass()
+        cls.client = cls.extensions_client
