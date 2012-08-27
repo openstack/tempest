@@ -40,7 +40,7 @@ from tempest.services.nova.json import volumes_extensions_client
 from tempest.services.nova.json import console_output_client
 
 NetworkClient = network_client.NetworkClient
-ImagesClient = images_client.ImagesClient
+ImagesClient = images_client.ImagesClientJSON
 FlavorsClient = flavors_client.FlavorsClientJSON
 ServersClient = servers_client.ServersClientJSON
 LimitsClient = limits_client.LimitsClientJSON

@@ -4,11 +4,11 @@ import json
 import time
 
 
-class ImagesClient(RestClient):
+class ImagesClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ImagesClient, self).__init__(config, username, password,
-                                            auth_url, tenant_name)
+        super(ImagesClientJSON, self).__init__(config, username, password,
+                                               auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
         self.build_interval = self.config.compute.build_interval
         self.build_timeout = self.config.compute.build_timeout
