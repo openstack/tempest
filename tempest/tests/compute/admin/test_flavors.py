@@ -19,24 +19,22 @@ import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-from tempest import exceptions
-from tempest.tests.compute.base import BaseComputeAdminTest
+from tempest.tests.compute import base
 from tempest.tests import compute
 
 
-class FlavorsAdminTest(BaseComputeAdminTest):
+class FlavorsAdminTestBase(object):
 
     """
     Tests Flavors API Create and Delete that require admin privileges
     """
 
-    @classmethod
+    @staticmethod
     def setUpClass(cls):
         if not compute.FLAVOR_EXTRA_DATA_ENABLED:
             msg = "FlavorExtraData extension not enabled."
             raise nose.SkipTest(msg)
 
-        super(FlavorsAdminTest, cls).setUpClass()
         cls.client = cls.os.flavors_client
         cls.flavor_name = 'test_flavor'
         cls.ram = 512
@@ -133,3 +131,21 @@ class FlavorsAdminTest(BaseComputeAdminTest):
             if flavor['name'] == self.flavor_name:
                 flag = False
         self.assertTrue(flag)
+
+
+class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,
+                          FlavorsAdminTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FlavorsAdminTestXML, cls).setUpClass()
+        FlavorsAdminTestBase.setUpClass(cls)
+
+
+class FlavorsAdminTestJSON(base.BaseComputeAdminTestJSON,
+                            FlavorsAdminTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FlavorsAdminTestJSON, cls).setUpClass()
+        FlavorsAdminTestBase.setUpClass(cls)

@@ -21,15 +21,17 @@ import time
 import unittest2 as unittest
 
 from tempest import config
-from tempest import exceptions
 from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 from tempest.services.identity.json.admin_client import AdminClient
 
+__all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
+           'BaseComputeAdminTestJSON', 'BaseComputeAdminTestXML']
+
 LOG = logging.getLogger(__name__)
 
 
-class _BaseComputeTest(unittest.TestCase):
+class BaseComputeTest(unittest.TestCase):
 
     """Base test case class for all Compute API tests"""
 
@@ -200,7 +202,7 @@ class _BaseComputeTest(unittest.TestCase):
             time.sleep(self.build_interval)
 
 
-class BaseComputeTestJSON(_BaseComputeTest):
+class BaseComputeTestJSON(BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         cls._interface = "json"
@@ -210,7 +212,7 @@ class BaseComputeTestJSON(_BaseComputeTest):
 BaseComputeTest = BaseComputeTestJSON
 
 
-class BaseComputeTestXML(_BaseComputeTest):
+class BaseComputeTestXML(BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         cls._interface = "xml"
@@ -233,4 +235,18 @@ class BaseComputeAdminTest(unittest.TestCase):
                    "in configuration.")
             raise nose.SkipTest(msg)
 
-        cls.os = openstack.AdminManager()
+        cls.os = openstack.AdminManager(interface=cls._interface)
+
+
+class BaseComputeAdminTestJSON(BaseComputeAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(BaseComputeAdminTestJSON, cls).setUpClass()
+
+
+class BaseComputeAdminTestXML(BaseComputeAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(BaseComputeAdminTestXML, cls).setUpClass()
