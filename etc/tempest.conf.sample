@@ -33,6 +33,12 @@ strategy = keystone
 # are known.
 allow_tenant_isolation = true
 
+# Allows test cases to create/destroy tenants and users. This option
+# enables isolated test cases and better parallel execution,
+# but also requires that OpenStack Identity API admin credentials
+# are known.
+allow_tenant_reuse = true
+
 # This should be the username of a user WITHOUT administrative privileges
 username = demo
 # The above non-administrative user's password

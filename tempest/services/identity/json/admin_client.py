@@ -101,6 +101,13 @@ class AdminClient(RestClient):
         body = json.loads(body)
         return resp, body['tenants']
 
+    def get_tenant_by_name(self, tenant_name):
+        resp, tenants = self.list_tenants()
+        for tenant in tenants:
+            if tenant['name'] == tenant_name:
+                return tenant
+        raise exceptions.NotFound('No such tenant')
+
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant"""
         resp, body = self.get_tenant(tenant_id)
@@ -164,6 +171,13 @@ class AdminClient(RestClient):
         resp, body = self.get('/tenants/%s/users' % tenant_id)
         body = json.loads(body)
         return resp, body['users']
+
+    def get_user_by_username(self, tenant_id, username):
+        resp, users = self.list_users_for_tenant(tenant_id)
+        for user in users:
+            if user['name'] == username:
+                return user
+        raise exceptions.NotFound('No such user')
 
     def create_service(self, name, type, **kwargs):
         """Create a service"""
