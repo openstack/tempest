@@ -38,10 +38,11 @@ class SmokeTest(object):
     pass
 
 
-class ComputeSmokeTest(test.ComputeDefaultClientTest, SmokeTest):
+class DefaultClientSmokeTest(test.DefaultClientTest, SmokeTest):
 
     """
-    Base smoke test case class for OpenStack Compute API (Nova)
+    Base smoke test case class that provides the default clients to
+    access the various OpenStack APIs.
     """
 
     @classmethod

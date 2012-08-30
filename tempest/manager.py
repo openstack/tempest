@@ -18,8 +18,10 @@
 import logging
 
 # Default client libs
-import novaclient.client
 import glance.client
+import keystoneclient.v2_0.client
+import novaclient.client
+import quantumclient.v2_0.client
 
 import tempest.config
 from tempest import exceptions
@@ -62,16 +64,7 @@ class Manager(object):
 
     def __init__(self):
         self.config = tempest.config.TempestConfig()
-        self.client = None
-
-
-class DefaultClientManager(Manager):
-
-    """
-    Manager class that indicates the client provided by the manager
-    is the default Python client that an OpenStack API provides.
-    """
-    pass
+        self.client_attr_names = []
 
 
 class FuzzClientManager(Manager):
@@ -86,23 +79,42 @@ class FuzzClientManager(Manager):
     pass
 
 
-class ComputeDefaultClientManager(DefaultClientManager):
+class DefaultClientManager(Manager):
 
     """
-    Manager that provides the default python-novaclient client object
-    to access the OpenStack Compute API.
+    Manager that provides the default clients to access the various
+    OpenStack APIs.
     """
 
     NOVACLIENT_VERSION = '2'
 
     def __init__(self):
-        super(ComputeDefaultClientManager, self).__init__()
-        username = self.config.compute.username
-        password = self.config.compute.password
-        tenant_name = self.config.compute.tenant_name
+        super(DefaultClientManager, self).__init__()
+        self.compute_client = self._get_compute_client()
+        self.image_client = self._get_image_client()
+        self.identity_client = self._get_identity_client()
+        self.network_client = self._get_network_client()
+        self.client_attr_names = [
+            'compute_client',
+            'image_client',
+            'identity_client',
+            'network_client',
+            ]
+
+    def _get_compute_client(self, username=None, password=None,
+                            tenant_name=None):
+        # Novaclient will not execute operations for anyone but the
+        # identified user, so a new client needs to be created for
+        # each user that operations need to be performed for.
+        if not username:
+            username = self.config.compute.username
+        if not password:
+            password = self.config.compute.password
+        if not tenant_name:
+            tenant_name = self.config.compute.tenant_name
 
         if None in (username, password, tenant_name):
-            msg = ("Missing required credentials. "
+            msg = ("Missing required credentials for compute client. "
                    "username: %(username)s, password: %(password)s, "
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
@@ -113,19 +125,12 @@ class ComputeDefaultClientManager(DefaultClientManager):
         client_args = (username, password, tenant_name, auth_url)
 
         # Create our default Nova client to use in testing
-        self.client = novaclient.client.Client(self.NOVACLIENT_VERSION,
+        return novaclient.client.Client(self.NOVACLIENT_VERSION,
                         *client_args,
                         service_type=self.config.compute.catalog_type,
                         no_cache=True)
 
-
-class GlanceDefaultClientManager(DefaultClientManager):
-    """
-    Manager that provides the default glance client object to access
-    the OpenStack Images API
-    """
-    def __init__(self):
-        super(GlanceDefaultClientManager, self).__init__()
+    def _get_image_client(self):
         host = self.config.images.host
         port = self.config.images.port
         strategy = self.config.identity.strategy
@@ -135,7 +140,7 @@ class GlanceDefaultClientManager(DefaultClientManager):
         tenant_name = self.config.images.tenant_name
 
         if None in (host, port, username, password, tenant_name):
-            msg = ("Missing required credentials. "
+            msg = ("Missing required credentials for image client. "
                     "host:%(host)s, port: %(port)s username: %(username)s, "
                     "password: %(password)s, "
                     "tenant_name: %(tenant_name)s") % locals()
@@ -149,7 +154,46 @@ class GlanceDefaultClientManager(DefaultClientManager):
                  'auth_url': auth_url}
 
         # Create our default Glance client to use in testing
-        self.client = glance.client.Client(host, port, creds=creds)
+        return glance.client.Client(host, port, creds=creds)
+
+    def _get_identity_client(self):
+        # This identity client is not intended to check the security
+        # of the identity service, so use admin credentials.
+        username = self.config.identity_admin.username
+        password = self.config.identity_admin.password
+        tenant_name = self.config.identity_admin.tenant_name
+
+        if None in (username, password, tenant_name):
+            msg = ("Missing required credentials for identity client. "
+                   "username: %(username)s, password: %(password)s, "
+                   "tenant_name: %(tenant_name)s") % locals()
+            raise exceptions.InvalidConfiguration(msg)
+
+        auth_url = self.config.identity.auth_url.rstrip('tokens')
+
+        return keystoneclient.v2_0.client.Client(username=username,
+                                                 password=password,
+                                                 tenant_name=tenant_name,
+                                                 endpoint=auth_url)
+
+    def _get_network_client(self):
+        # TODO(mnewby) add network-specific auth configuration
+        username = self.config.compute.username
+        password = self.config.compute.password
+        tenant_name = self.config.compute.tenant_name
+
+        if None in (username, password, tenant_name):
+            msg = ("Missing required credentials for network client. "
+                   "username: %(username)s, password: %(password)s, "
+                   "tenant_name: %(tenant_name)s") % locals()
+            raise exceptions.InvalidConfiguration(msg)
+
+        auth_url = self.config.identity.auth_url.rstrip('tokens')
+
+        return quantumclient.v2_0.client.Client(username=username,
+                                                password=password,
+                                                tenant_name=tenant_name,
+                                                auth_url=auth_url)
 
 
 class ComputeFuzzClientManager(FuzzClientManager):

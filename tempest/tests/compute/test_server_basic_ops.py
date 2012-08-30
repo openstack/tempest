@@ -23,7 +23,7 @@ from tempest import smoke
 LOG = logging.getLogger(__name__)
 
 
-class TestServerBasicOps(smoke.ComputeSmokeTest):
+class TestServerBasicOps(smoke.DefaultClientSmokeTest):
 
     """
     This smoke test case follows this basic set of operations:
@@ -39,7 +39,7 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
 
     def test_001_create_keypair(self):
         kp_name = rand_name('keypair-smoke')
-        self.keypair = self.client.keypairs.create(kp_name)
+        self.keypair = self.compute_client.keypairs.create(kp_name)
         try:
             self.assertEqual(self.keypair.id, kp_name)
             self.set_resource('keypair', self.keypair)
@@ -49,7 +49,8 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
     def test_002_create_security_group(self):
         sg_name = rand_name('secgroup-smoke')
         sg_desc = sg_name + " description"
-        self.secgroup = self.client.security_groups.create(sg_name, sg_desc)
+        self.secgroup = self.compute_client.security_groups.create(sg_name,
+                                                                   sg_desc)
         try:
             self.assertEqual(self.secgroup.name, sg_name)
             self.assertEqual(self.secgroup.description, sg_desc)
@@ -76,8 +77,8 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
         ]
         for ruleset in rulesets:
             try:
-                self.client.security_group_rules.create(
-                                                   self.secgroup.id, **ruleset)
+                self.compute_client.security_group_rules.create(
+                        self.secgroup.id, **ruleset)
             except:
                 self.fail("Failed to create rule in security group.")
 
@@ -88,7 +89,7 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
         create_kwargs = {
             'key_name': self.get_resource('keypair').id
         }
-        self.instance = self.client.servers.create(
+        self.instance = self.compute_client.servers.create(
                 i_name, base_image_id, flavor_id, **create_kwargs)
         try:
             self.assertEqual(self.instance.name, i_name)
@@ -100,7 +101,7 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
 
     def test_004_wait_on_active(self):
         instance_id = self.get_resource('instance').id
-        self.status_timeout(self.client.servers, instance_id, 'ACTIVE')
+        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
     def test_005_pause_server(self):
         instance = self.get_resource('instance')
@@ -108,7 +109,7 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
         LOG.debug("Pausing instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.pause()
-        self.status_timeout(self.client.servers, instance_id, 'PAUSED')
+        self.status_timeout(self.compute_client.servers, instance_id, 'PAUSED')
 
     def test_006_unpause_server(self):
         instance = self.get_resource('instance')
@@ -116,7 +117,7 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
         LOG.debug("Unpausing instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.unpause()
-        self.status_timeout(self.client.servers, instance_id, 'ACTIVE')
+        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
     def test_007_suspend_server(self):
         instance = self.get_resource('instance')
@@ -124,7 +125,8 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
         LOG.debug("Suspending instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.suspend()
-        self.status_timeout(self.client.servers, instance_id, 'SUSPENDED')
+        self.status_timeout(self.compute_client.servers,
+                            instance_id, 'SUSPENDED')
 
     def test_008_resume_server(self):
         instance = self.get_resource('instance')
@@ -132,7 +134,7 @@ class TestServerBasicOps(smoke.ComputeSmokeTest):
         LOG.debug("Resuming instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.resume()
-        self.status_timeout(self.client.servers, instance_id, 'ACTIVE')
+        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
     def test_099_terminate_instance(self):
         instance = self.get_resource('instance')
