@@ -21,16 +21,10 @@ from nose.plugins.attrib import attr
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ServerPersonalityTest(BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ServerPersonalityTest, cls).setUpClass()
-        cls.client = cls.servers_client
-        cls.user_client = cls.limits_client
+class ServerPersonalityTestBase(object):
 
     def test_personality_files_exceed_limit(self):
         """
@@ -79,6 +73,29 @@ class ServerPersonalityTest(BaseComputeTest):
                                                personality=personality)
             self.assertEqual('202', resp['status'])
 
+        except Exception:
+            raise Error(resp['message'])
+
         #Teardown
         finally:
             self.client.delete_server(server['id'])
+
+
+class ServerPersonalityTestXML(base.BaseComputeTestXML,
+                                ServerPersonalityTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(ServerPersonalityTestXML, cls).setUpClass()
+        cls.client = cls.servers_client
+        cls.user_client = cls.limits_client
+
+
+class ServerPersonalityTestJSON(base.BaseComputeTestJSON,
+                               ServerPersonalityTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(ServerPersonalityTestJSON, cls).setUpClass()
+        cls.client = cls.servers_client
+        cls.user_client = cls.limits_client
