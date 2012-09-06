@@ -62,6 +62,29 @@ class TestCase(unittest.TestCase):
         del self.resource_keys[key]
 
 
+def call_until_true(func, duration, sleep_for):
+    """
+    Call the given function until it returns True (and return True) or
+    until the specified duration (in seconds) elapses (and return
+    False).
+
+    :param func: A zero argument callable that returns True on success.
+    :param duration: The number of seconds for which to attempt a successful
+                     call of the function.
+    :param sleep_for: The number of seconds to sleep after an unsuccessful
+                      invocation of the function.
+    """
+    now = time.time()
+    timeout = now + duration
+    while now < timeout:
+        if func():
+            return True
+        LOG.debug("Sleeping for %d seconds", sleep_for)
+        time.sleep(sleep_for)
+        now = time.time()
+    return False
+
+
 class DefaultClientTest(TestCase):
 
     """
@@ -78,10 +101,7 @@ class DefaultClientTest(TestCase):
         expected status to show. At any time, if the returned
         status of the thing is ERROR, fail out.
         """
-        now = time.time()
-        timeout = now + self.config.compute.build_timeout
-        sleep_for = self.config.compute.build_interval
-        while now < timeout:
+        def check_status():
             # python-novaclient has resources available to its client
             # that all implement a get() method taking an identifier
             # for the singular resource to retrieve.
@@ -92,13 +112,15 @@ class DefaultClientTest(TestCase):
                           "In ERROR state."
                           % thing)
             elif new_status == expected_status:
-                return  # All good.
+                return True  # All good.
             LOG.debug("Waiting for %s to get to %s status. "
                       "Currently in %s status",
                       thing, expected_status, new_status)
-            LOG.debug("Sleeping for %d seconds", sleep_for)
-        self.fail("Timed out waiting for thing %s to become %s"
-                  % (thing_id, expected_status))
+        if not call_until_true(check_status,
+                               self.config.compute.build_timeout,
+                               self.config.compute.build_interval):
+            self.fail("Timed out waiting for thing %s to become %s"
+                      % (thing_id, expected_status))
 
 
 class ComputeFuzzClientTest(TestCase):
@@ -132,10 +154,7 @@ class ComputeFuzzClientTest(TestCase):
                 resp, server = client.create_server('random_server')
                 self.status_timeout(client.get_server, server['id'], 'ACTIVE')
         """
-        now = time.time()
-        timeout = now + self.config.compute.build_timeout
-        sleep_for = self.config.compute.build_interval
-        while now < timeout:
+        def check_status():
             # Tempest REST client has resources available to its client
             # that all implement a various get_$resource() methods taking
             # an identifier for the singular resource to retrieve.
@@ -146,10 +165,12 @@ class ComputeFuzzClientTest(TestCase):
                           "In ERROR state."
                           % thing)
             elif new_status == expected_status:
-                return  # All good.
+                return True  # All good.
             LOG.debug("Waiting for %s to get to %s status. "
                       "Currently in %s status",
                       thing, expected_status, new_status)
-            LOG.debug("Sleeping for %d seconds", sleep_for)
-        self.fail("Timed out waiting for thing %s to become %s"
-                  % (thing_id, expected_status))
+        if not call_until_true(check_status,
+                               self.config.compute.build_timeout,
+                               self.config.compute.build_interval):
+            self.fail("Timed out waiting for thing %s to become %s"
+                      % (thing_id, expected_status))
