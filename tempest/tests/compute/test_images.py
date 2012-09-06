@@ -17,6 +17,7 @@
 
 from nose.plugins.attrib import attr
 import unittest2 as unittest
+import nose
 
 from tempest.common.utils.data_utils import rand_name, parse_image_id
 import tempest.config
@@ -381,6 +382,7 @@ class ImagesTestJSON(base.BaseComputeTestJSON,
 
     @classmethod
     def setUpClass(cls):
+        raise nose.SkipTest("Until Bug 1046870 is fixed")
         super(ImagesTestJSON, cls).setUpClass()
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
@@ -407,6 +409,7 @@ class ImagesTestXML(base.BaseComputeTestXML,
 
     @classmethod
     def setUpClass(cls):
+        raise nose.SkipTest("Until Bug 1046870 is fixed")
         super(ImagesTestXML, cls).setUpClass()
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client

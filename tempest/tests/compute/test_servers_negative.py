@@ -19,6 +19,7 @@ import sys
 
 from nose.plugins.attrib import attr
 import unittest2 as unittest
+import nose
 
 from tempest import exceptions
 from tempest import openstack
@@ -30,6 +31,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        raise nose.SkipTest("Until Bug 1046870 is fixed")
         super(ServersNegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client
