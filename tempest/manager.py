@@ -145,12 +145,16 @@ class DefaultClientManager(Manager):
                                                     endpoint_type='publicURL')
         return glanceclient.Client('1', endpoint=endpoint, token=token)
 
-    def _get_identity_client(self):
+    def _get_identity_client(self, username=None, password=None,
+                             tenant_name=None):
         # This identity client is not intended to check the security
-        # of the identity service, so use admin credentials.
-        username = self.config.identity_admin.username
-        password = self.config.identity_admin.password
-        tenant_name = self.config.identity_admin.tenant_name
+        # of the identity service, so use admin credentials by default.
+        if not username:
+            username = self.config.identity_admin.username
+        if not password:
+            password = self.config.identity_admin.password
+        if not tenant_name:
+            tenant_name = self.config.identity_admin.tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials for identity client. "

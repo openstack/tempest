@@ -378,6 +378,48 @@ class NetworkConfig(BaseConfig):
         """Version of Quantum API"""
         return self.get("api_version", "v1.1")
 
+    @property
+    def username(self):
+        """Username to use for Quantum API requests."""
+        return self.get("username", "demo")
+
+    @property
+    def tenant_name(self):
+        """Tenant name to use for Quantum API requests."""
+        return self.get("tenant_name", "demo")
+
+    @property
+    def password(self):
+        """API key to use when authenticating as admin."""
+        return self.get("password", "pass")
+
+    @property
+    def tenant_network_cidr(self):
+        """The cidr block to allocate tenant networks from"""
+        return self.get("tenant_network_cidr", "10.100.0.0/16")
+
+    @property
+    def tenant_network_mask_bits(self):
+        """The mask bits for tenant networks"""
+        return int(self.get("tenant_network_mask_bits", "29"))
+
+    @property
+    def tenant_networks_reachable(self):
+        """Whether tenant network connectivity should be evaluated directly"""
+        return (
+            self.get("tenant_networks_reachable", 'false').lower() != 'false'
+        )
+
+    @property
+    def public_network_id(self):
+        """Id of the public network that provides external connectivity"""
+        return self.get("public_network_id", "")
+
+    @property
+    def public_router_id(self):
+        """Id of the public router that provides external connectivity"""
+        return self.get("public_router_id", "")
+
 
 class NetworkAdminConfig(BaseConfig):
 
@@ -385,7 +427,7 @@ class NetworkAdminConfig(BaseConfig):
 
     @property
     def username(self):
-        """Administrative Username to use for Quantum  API requests."""
+        """Administrative Username to use for Quantum API requests."""
         return self.get("username", "admin")
 
     @property

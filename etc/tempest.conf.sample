@@ -185,6 +185,33 @@ api_version = v1.1
 # Catalog type of the Quantum Service
 catalog_type = network
 
+# This should be the username of a user WITHOUT administrative privileges
+username = demo
+# The above non-administrative user's password
+password = pass
+# The above non-administrative user's tenant name
+tenant_name = demo
+
+# A large private cidr block from which to allocate smaller blocks for
+# tenant networks.
+tenant_network_cidr = 10.100.0.0/16
+
+# The mask bits used to partition the tenant block.
+tenant_network_mask_bits = 29
+
+# If tenant networks are reachable, connectivity checks will be
+# performed directly against addresses on those networks.
+tenant_networks_reachable = false
+
+# Id of the public network that provides external connectivity.
+public_network_id = {$PUBLIC_NETWORK_UUID}
+
+# Id of a shared public router that provides external connectivity.
+# A shared public router would commonly be used where IP namespaces
+# were disabled.  If namespaces are enabled, it would be preferable
+# for each tenant to have their own router.
+public_router_id =
+
 [network-admin]
 # This section contains configuration options for an administrative
 # user of the Network API.

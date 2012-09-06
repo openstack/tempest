@@ -5,3 +5,4 @@ unittest2
 lxml
 boto>=2.2.1
 paramiko
+netaddr
