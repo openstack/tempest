@@ -18,6 +18,7 @@
 import time
 import socket
 import warnings
+import select
 
 from tempest import exceptions
 
@@ -37,7 +38,8 @@ class Client(object):
         self.look_for_keys = look_for_keys
         self.key_filename = key_filename
         self.timeout = int(timeout)
-        self.channel_timeout = int(channel_timeout)
+        self.channel_timeout = float(channel_timeout)
+        self.buf_size = 1024
 
     def _get_ssh_connection(self):
         """Returns an ssh connection to the specified host"""
@@ -85,24 +87,48 @@ class Client(object):
             return
 
     def exec_command(self, cmd):
-        """Execute the specified command on the server.
+        """
+        Execute the specified command on the server.
 
-        :returns: data read from standard output of the command
+        Note that this method is reading whole command outputs to memory, thus
+        shouldn't be used for large outputs.
 
+        :returns: data read from standard output of the command.
+        :raises: SSHExecCommandFailed if command returns nonzero
+                 status. The exception contains command status stderr content.
         """
         ssh = self._get_ssh_connection()
-        stdin, stdout, stderr = ssh.exec_command(cmd)
-        stdin.flush()
-        stdin.channel.shutdown_write()
-        stdout.channel.settimeout(self.channel_timeout)
-        status = stdout.channel.recv_exit_status()
-        try:
-            output = stdout.read()
-        except socket.timeout:
-            if status == 0:
-                return None, status
-        ssh.close()
-        return status, output
+        transport = ssh.get_transport()
+        channel = transport.open_session()
+        channel.exec_command(cmd)
+        channel.shutdown_write()
+        out_data = []
+        err_data = []
+
+        select_params = [channel], [], [], self.channel_timeout
+        while True:
+            ready = select.select(*select_params)
+            if not any(ready):
+                raise exceptions.TimeoutException(
+                        "Command: '{0}' executed on host '{1}'.".format(
+                            cmd, self.host))
+            if not ready[0]:        # If there is nothing to read.
+                continue
+            out_chunk = err_chunk = None
+            if channel.recv_ready():
+                out_chunk = channel.recv(self.buf_size)
+                out_data += out_chunk,
+            if channel.recv_stderr_ready():
+                err_chunk = channel.recv_stderr(self.buf_size)
+                err_data += err_chunk,
+            if channel.closed and not err_chunk and not out_chunk:
+                break
+        exit_status = channel.recv_exit_status()
+        if 0 != exit_status:
+            raise exceptions.SSHExecCommandFailed(
+                    command=cmd, exit_status=exit_status,
+                    strerror=''.join(err_data))
+        return ''.join(out_data)
 
     def test_connection_auth(self):
         """ Returns true if ssh can connect to server"""
