@@ -38,7 +38,12 @@ class TestCase(unittest.TestCase):
     def setUpClass(cls):
         cls.manager = cls.manager_class()
         cls.config = cls.manager.config
-        cls.client = cls.manager.client
+        for attr_name in cls.manager.client_attr_names:
+            # Ensure that pre-existing class attributes won't be
+            # accidentally overriden.
+            assert not hasattr(cls, attr_name)
+            client = getattr(cls.manager, attr_name)
+            setattr(cls, attr_name, client)
         cls.resource_keys = {}
         cls.resources = []
 
@@ -57,14 +62,14 @@ class TestCase(unittest.TestCase):
         del self.resource_keys[key]
 
 
-class ComputeDefaultClientTest(TestCase):
+class DefaultClientTest(TestCase):
 
     """
-    Base test case class for OpenStack Compute API (Nova)
-    that uses the novaclient libs for calling the API.
+    Base test case class that provides the default clients to access
+    the various OpenStack APIs.
     """
 
-    manager_class = manager.ComputeDefaultClientManager
+    manager_class = manager.DefaultClientManager
 
     def status_timeout(self, things, thing_id, expected_status):
         """

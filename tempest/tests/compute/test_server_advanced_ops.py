@@ -25,7 +25,7 @@ from tempest import test
 LOG = logging.getLogger(__name__)
 
 
-class TestServerAdvancedOps(test.ComputeDefaultClientTest):
+class TestServerAdvancedOps(test.DefaultClientTest):
 
     """
     This test case stresses some advanced server instance operations:
@@ -57,7 +57,7 @@ class TestServerAdvancedOps(test.ComputeDefaultClientTest):
         i_name = rand_name('instance')
         flavor_id = self.config.compute.flavor_ref
         base_image_id = self.config.compute.image_ref
-        self.instance = self.client.servers.create(
+        self.instance = self.compute_client.servers.create(
                 i_name, base_image_id, flavor_id)
         try:
             self.assertEqual(self.instance.name, i_name)
@@ -67,16 +67,16 @@ class TestServerAdvancedOps(test.ComputeDefaultClientTest):
 
         self.assertEqual(self.instance.status, 'BUILD')
         instance_id = self.get_resource('instance').id
-        self.status_timeout(self.client.servers, instance_id, 'ACTIVE')
+        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
         instance = self.get_resource('instance')
         instance_id = instance.id
         resize_flavor = self.config.compute.flavor_ref_alt
-
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
                   instance.id, instance.flavor, resize_flavor)
         instance.resize(resize_flavor)
-        self.status_timeout(self.client.servers, instance_id, 'VERIFY_RESIZE')
+        self.status_timeout(self.compute_client.servers, instance_id,
+                            'VERIFY_RESIZE')
 
         LOG.debug("Confirming resize of instance %s", instance_id)
         instance.confirm_resize()
-        self.status_timeout(self.client.servers, instance_id, 'ACTIVE')
+        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
