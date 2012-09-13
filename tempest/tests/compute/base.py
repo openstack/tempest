@@ -19,6 +19,7 @@ import logging
 import time
 
 import unittest2 as unittest
+import nose
 
 from tempest import config
 from tempest import openstack
