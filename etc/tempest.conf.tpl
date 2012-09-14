@@ -106,6 +106,13 @@ path_to_private_key = %COMPUTE_PATH_TO_PRIVATE_KEY%
 # Connection string to the database of Compute service
 db_uri = %COMPUTE_DB_URI%
 
+# Run live migration tests (requires 2 hosts)
+live_migration_available = %LIVE_MIGRATION_AVAILABLE%
+
+# Use block live migration (Otherwise, non-block migration will be
+# performed, which requires XenServer pools in case of using XS)
+use_block_migration_for_live_migration = %USE_BLOCK_MIGRATION_FOR_LIVE_MIGRATION%
+
 [image]
 # This section contains configuration options used when executing tests
 # against the OpenStack Images API
