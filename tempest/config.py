@@ -208,7 +208,7 @@ class ComputeConfig(BaseConfig):
 
     @property
     def build_timeout(self):
-        """Timeout in seconds to wait for an entity to build."""
+        """Timeout in seconds to wait for an instance to build."""
         return float(self.get("build_timeout", 300))
 
     @property
@@ -355,6 +355,30 @@ class NetworkConfig(BaseConfig):
         return self.get("api_version", "v1.1")
 
 
+class VolumeConfig(BaseConfig):
+    """Provides configuration information for connecting to an OpenStack Block
+    Storage Service.
+    """
+
+    SECTION_NAME = "volume"
+
+    @property
+    def build_interval(self):
+        """Time in seconds between volume availability checks."""
+        return float(self.get("build_interval", 10))
+
+    @property
+    def build_timeout(self):
+        """Timeout in seconds to wait for a volume to become available."""
+        return float(self.get("build_timeout", 300))
+
+    @property
+    def catalog_type(self):
+        """Catalog type of the Volume Service"""
+        return self.get("catalog_type", 'volume')
+
+
+# TODO(jaypipes): Move this to a common utils (not data_utils...)
 def singleton(cls):
     """Simple wrapper for classes that should only have a single instance"""
     instances = {}
@@ -402,6 +426,7 @@ class TempestConfig:
         self.identity_admin = IdentityAdminConfig(self._conf)
         self.images = ImagesConfig(self._conf)
         self.network = NetworkConfig(self._conf)
+        self.volume = VolumeConfig(self._conf)
 
     def load_config(self, path):
         """Read configuration from given path and return a config object."""

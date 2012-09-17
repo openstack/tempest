@@ -62,10 +62,10 @@ flavor_ref = 1
 flavor_ref_alt = 2
 
 # Number of seconds to wait while looping to check the status of an
-# instance or volume that is building.
+# instance that is building.
 build_interval = 10
 
-# Number of seconds to time out on waiting for an instance or volume
+# Number of seconds to time out on waiting for an instance
 # to build or reach an expected status
 build_timeout = 600
 
@@ -125,7 +125,7 @@ bin_dir = /usr/local/bin
 path_to_private_key = /home/user/.ssh/id_rsa
 
 # Connection string to the database of Compute service
-db_uri = mysql:///user:pass@localhost/nova
+db_uri = mysql://user:pass@localhost/nova
 
 [image]
 # This section contains configuration options used when executing tests
@@ -167,7 +167,10 @@ tenant_name = admin
 [network]
 # This section contains configuration options used when executing tests
 # against the OpenStack Network API.
+
+# Version of the Quantum API
 api_version = v1.1
+# Catalog type of the Quantum Service
 catalog_type = network
 
 [identity-admin]
@@ -181,3 +184,18 @@ username = admin
 password = pass
 # The above administrative user's tenant name
 tenant_name = admin
+
+[volume]
+# This section contains the configuration options used when executng tests
+# against the OpenStack Block Storage API service
+
+# The type of endpoint for a Cinder or Block Storage API service.
+# Unless you have a custom Keystone service catalog implementation, you
+# probably want to leave this value as "volume"
+catalog_type = volume
+# Number of seconds to wait while looping to check the status of a
+# volume that is being made available
+build_interval = 10
+# Number of seconds to time out on waiting for a volume
+# to be available or reach an expected status
+build_timeout = 300

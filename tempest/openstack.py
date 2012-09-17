@@ -22,6 +22,7 @@ from tempest import exceptions
 from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.nova.json.flavors_client import FlavorsClientJSON
+from tempest.services.volume.json.volumes_client import VolumesClient
 from tempest.services.nova.json.images_client import ImagesClient
 from tempest.services.nova.json.limits_client import LimitsClientJSON
 from tempest.services.nova.json.servers_client import ServersClientJSON
@@ -30,7 +31,8 @@ from tempest.services.nova.json.security_groups_client \
 import SecurityGroupsClient
 from tempest.services.nova.json.floating_ips_client import FloatingIPsClient
 from tempest.services.nova.json.keypairs_client import KeyPairsClientJSON
-from tempest.services.nova.json.volumes_client import VolumesClient
+from tempest.services.nova.json.volumes_extensions_client \
+import VolumesExtensionsClient
 from tempest.services.nova.json.console_output_client \
 import ConsoleOutputsClient
 from tempest.services.nova.xml.flavors_client import FlavorsClientXML
@@ -82,23 +84,24 @@ class Manager(object):
 
         # If no creds are provided, we fall back on the defaults
         # in the config file for the Compute API.
-        username = username or self.config.compute.username
-        password = password or self.config.compute.password
-        tenant_name = tenant_name or self.config.compute.tenant_name
+        self.username = username or self.config.compute.username
+        self.password = password or self.config.compute.password
+        self.tenant_name = tenant_name or self.config.compute.tenant_name
 
-        if None in (username, password, tenant_name):
+        if None in (self.username, self.password, self.tenant_name):
             msg = ("Missing required credentials. "
                    "username: %(username)s, password: %(password)s, "
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
 
-        auth_url = self.config.identity.auth_url
+        self.auth_url = self.config.identity.auth_url
 
         if self.config.identity.strategy == 'keystone':
-            client_args = (self.config, username, password, auth_url,
-                           tenant_name)
+            client_args = (self.config, self.username, self.password,
+                           self.auth_url, self.tenant_name)
         else:
-            client_args = (self.config, username, password, auth_url)
+            client_args = (self.config, self.username, self.password,
+                           self.auth_url)
 
         try:
             self.servers_client = SERVERS_CLIENTS[interface](*client_args)
@@ -112,9 +115,10 @@ class Manager(object):
         self.extensions_client = ExtensionsClient(*client_args)
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.floating_ips_client = FloatingIPsClient(*client_args)
-        self.volumes_client = VolumesClient(*client_args)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.network_client = NetworkClient(*client_args)
+        self.volumes_extensions_client = VolumesExtensionsClient(*client_args)
+        self.volumes_client = VolumesClient(*client_args)
 
 
 class AltManager(Manager):

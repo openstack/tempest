@@ -27,6 +27,7 @@ import tempest.config
 from tempest import exceptions
 # Tempest REST Fuzz testing client libs
 from tempest.services.network.json import network_client
+from tempest.services.volume.json import volumes_client
 from tempest.services.nova.json import images_client
 from tempest.services.nova.json import flavors_client
 from tempest.services.nova.json import servers_client
@@ -35,7 +36,7 @@ from tempest.services.nova.json import extensions_client
 from tempest.services.nova.json import security_groups_client
 from tempest.services.nova.json import floating_ips_client
 from tempest.services.nova.json import keypairs_client
-from tempest.services.nova.json import volumes_client
+from tempest.services.nova.json import volumes_extensions_client
 from tempest.services.nova.json import console_output_client
 
 NetworkClient = network_client.NetworkClient
@@ -47,6 +48,7 @@ ExtensionsClient = extensions_client.ExtensionsClient
 SecurityGroupsClient = security_groups_client.SecurityGroupsClient
 FloatingIPsClient = floating_ips_client.FloatingIPsClient
 KeyPairsClient = keypairs_client.KeyPairsClientJSON
+VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClient
 VolumesClient = volumes_client.VolumesClient
 ConsoleOutputsClient = console_output_client.ConsoleOutputsClient
 
@@ -243,6 +245,7 @@ class ComputeFuzzClientManager(FuzzClientManager):
         self.keypairs_client = KeyPairsClient(*client_args)
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.floating_ips_client = FloatingIPsClient(*client_args)
+        self.volumes_extensions_client = VolumesExtensionsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.network_client = NetworkClient(*client_args)
