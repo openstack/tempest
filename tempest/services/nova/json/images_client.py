@@ -22,7 +22,7 @@ class ImagesClientJSON(RestClient):
             }
         }
 
-        if meta != None:
+        if meta is not None:
             post_body['createImage']['metadata'] = meta
 
         post_body = json.dumps(post_body)
@@ -33,7 +33,7 @@ class ImagesClientJSON(RestClient):
     def list_images(self, params=None):
         """Returns a list of all images filtered by any parameters"""
         url = 'images'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))
@@ -47,7 +47,7 @@ class ImagesClientJSON(RestClient):
     def list_images_with_detail(self, params=None):
         """Returns a detailed list of images filtered by any parameters"""
         url = 'images/detail'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))

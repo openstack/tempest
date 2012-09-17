@@ -51,7 +51,7 @@ class ServersClientJSON(RestClient):
                 post_param = option
                 key = option
             value = kwargs.get(key)
-            if value != None:
+            if value is not None:
                 post_body[post_param] = value
         post_body = json.dumps({'server': post_body})
         resp, body = self.post('servers', post_body, self.headers)
@@ -72,16 +72,16 @@ class ServersClientJSON(RestClient):
 
         post_body = {}
 
-        if meta != None:
+        if meta is not None:
             post_body['metadata'] = meta
 
-        if name != None:
+        if name is not None:
             post_body['name'] = name
 
-        if accessIPv4 != None:
+        if accessIPv4 is not None:
             post_body['accessIPv4'] = accessIPv4
 
-        if accessIPv6 != None:
+        if accessIPv6 is not None:
             post_body['accessIPv6'] = accessIPv6
 
         post_body = json.dumps({'server': post_body})
@@ -104,7 +104,7 @@ class ServersClientJSON(RestClient):
         """Lists all servers for a user"""
 
         url = 'servers'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))
@@ -119,7 +119,7 @@ class ServersClientJSON(RestClient):
         """Lists all servers in detail for a user"""
 
         url = 'servers/detail'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))
@@ -215,19 +215,19 @@ class ServersClientJSON(RestClient):
                 'imageRef': image_ref,
         }
 
-        if name != None:
+        if name is not None:
             post_body['name'] = name
 
-        if adminPass != None:
+        if adminPass is not None:
             post_body['adminPass'] = adminPass
 
-        if meta != None:
+        if meta is not None:
             post_body['metadata'] = meta
 
-        if personality != None:
+        if personality is not None:
             post_body['personality'] = personality
 
-        if disk_config != None:
+        if disk_config is not None:
             post_body['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps({'rebuild': post_body})
@@ -245,7 +245,7 @@ class ServersClientJSON(RestClient):
             }
         }
 
-        if disk_config != None:
+        if disk_config is not None:
             post_body['resize']['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps(post_body)

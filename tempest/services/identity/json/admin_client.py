@@ -226,7 +226,7 @@ class TokenClientJSON(RestClient):
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
         self.http_obj = httplib2.Http()
-        if headers == None:
+        if headers is None:
             headers = {}
 
         resp, resp_body = self.http_obj.request(url, method,

@@ -11,7 +11,7 @@ class FlavorsClientJSON(RestClient):
 
     def list_flavors(self, params=None):
         url = 'flavors'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))
@@ -24,7 +24,7 @@ class FlavorsClientJSON(RestClient):
 
     def list_flavors_with_detail(self, params=None):
         url = 'flavors/detail'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))

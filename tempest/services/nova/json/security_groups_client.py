@@ -13,7 +13,7 @@ class SecurityGroupsClient(RestClient):
         """List all security groups for a user"""
 
         url = 'os-security-groups'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))

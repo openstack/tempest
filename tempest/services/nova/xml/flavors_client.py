@@ -46,7 +46,7 @@ class FlavorsClientXML(RestClientXML):
         return [self._format_flavor(xml_to_json(x)) for x in node]
 
     def _list_flavors(self, url, params):
-        if params != None:
+        if params is not None:
             url += "?%s" % urllib.urlencode(params)
 
         resp, body = self.get(url, self.headers)

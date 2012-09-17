@@ -218,7 +218,7 @@ class AuthorizationTest(BaseComputeTest):
         finally:
             # Reset the base_url...
             self.alt_keypairs_client.base_url = self.saved_base_url
-            if (resp['status'] != None):
+            if (resp['status'] is not None):
                 resp, _ = self.alt_keypairs_client.delete_keypair(k_name)
                 self.fail("Create keypair request should not happen if the"
                         " tenant id does not match the current user")
@@ -269,7 +269,7 @@ class AuthorizationTest(BaseComputeTest):
         finally:
             # Reset the base_url...
             self.alt_security_client.base_url = self.saved_base_url
-            if resp['status'] != None:
+            if resp['status'] is not None:
                 resp, _ = \
                 self.alt_security_client.delete_security_group(body['id'])
                 self.fail("Create Security Group request should not happen if"
@@ -314,7 +314,7 @@ class AuthorizationTest(BaseComputeTest):
         finally:
             # Reset the base_url...
             self.alt_security_client.base_url = self.saved_base_url
-            if resp['status'] != None:
+            if resp['status'] is not None:
                 resp, _ = \
                 self.alt_security_client.delete_security_group_rule(
                                         body['id'])

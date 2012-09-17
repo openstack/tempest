@@ -71,7 +71,7 @@ def _get_compute_nodes(keypath, user, controller):
     nova-manage on the controller.
     """
     nodes = []
-    if keypath == None or user == None:
+    if keypath is None or user is None:
         return nodes
     lines = utils.util.ssh(keypath, user, controller,
                      "nova-manage service list | grep ^nova-compute").\
@@ -206,7 +206,7 @@ def bash_openstack(manager,
                 case = random.choice(cases)
                 logging.debug('Chose %s' % case)
                 retry = case.invoke(manager, state)
-                if retry != None:
+                if retry is not None:
                     retry_list.append(retry)
             else:
                 logging.info('Cooling down...')

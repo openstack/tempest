@@ -17,7 +17,7 @@ class VolumesExtensionsClientJSON(RestClient):
     def list_volumes(self, params=None):
         """List all the volumes created"""
         url = 'os-volumes'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))
@@ -31,7 +31,7 @@ class VolumesExtensionsClientJSON(RestClient):
     def list_volumes_with_detail(self, params=None):
         """List all the details of volumes"""
         url = 'os-volumes/detail'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s&" % (param, value))

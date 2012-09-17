@@ -117,7 +117,7 @@ class ImagesTestBase(object):
             pass
 
         finally:
-            if (resp['status'] != None):
+            if (resp['status'] is not None):
                 image_id = parse_image_id(resp['location'])
                 resp, _ = self.client.delete_image(image_id)
                 self.fail("An image should not be created"

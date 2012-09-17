@@ -43,7 +43,7 @@ class FloatingIPsClientXML(RestClientXML):
     def list_floating_ips(self, params=None):
         """Returns a list of all floating IPs filtered by any parameters"""
         url = 'os-floating-ips'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s" % (param, value))

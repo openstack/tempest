@@ -195,7 +195,7 @@ class FloatingIPsTestBase(object):
         else:
             self.fail('The floating IP should be associated to the second'
                     'server')
-        if (resp['status'] != None):
+        if (resp['status'] is not None):
             #Dissociation of the floating IP associated in this method
             resp, _ = \
             self.client.disassociate_floating_ip_from_server(

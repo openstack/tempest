@@ -32,7 +32,7 @@ class TestChangeFloatingIp(test_case.StressTestCase):
         self.server_ids = None
 
     def run(self, manager, state, *pargs, **kwargs):
-        if self.server_ids == None:
+        if self.server_ids is None:
             vms = state.get_instances()
             self.server_ids = [k for k, v in vms.iteritems()]
         floating_ip = random.choice(state.get_floating_ips())
@@ -40,7 +40,7 @@ class TestChangeFloatingIp(test_case.StressTestCase):
             return None
         floating_ip.change_pending = True
         timeout = int(kwargs.get('timeout', 60))
-        if floating_ip.server_id == None:
+        if floating_ip.server_id is None:
             server = random.choice(self.server_ids)
             address = floating_ip.address
             self._logger.info('Adding %s to server %s' % (address, server))

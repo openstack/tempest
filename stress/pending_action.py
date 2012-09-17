@@ -31,7 +31,7 @@ class PendingAction(object):
         `nova_manager` : Manager object.
         `timeout`   : time before we declare a TimeoutException
         """
-        if timeout == None:
+        if timeout is None:
             timeout = nova_manager.config.compute.build_timeout
         self._manager = nova_manager
         self._logger = logging.getLogger(self.__class__.__name__)

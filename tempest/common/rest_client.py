@@ -143,7 +143,7 @@ class RestClient(object):
                     tenant_id = auth_data['token']['tenant']['id']
                     break
 
-            if mgmt_url == None:
+            if mgmt_url is None:
                 raise exceptions.EndpointNotFound(service)
 
             if service == 'network':
@@ -186,7 +186,7 @@ class RestClient(object):
             self._set_auth()
 
         self.http_obj = httplib2.Http()
-        if headers == None:
+        if headers is None:
             headers = {}
         headers['X-Auth-Token'] = self.token
 

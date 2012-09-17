@@ -82,7 +82,7 @@ class ServersClientXML(RestClientXML):
 
     def list_servers(self, params=None):
         url = 'servers/detail'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s" % (param, value))
@@ -94,7 +94,7 @@ class ServersClientXML(RestClientXML):
 
     def list_servers_with_detail(self, params=None):
         url = 'servers/detail'
-        if params != None:
+        if params is not None:
             param_list = []
             for param, value in params.iteritems():
                 param_list.append("%s=%s" % (param, value))
