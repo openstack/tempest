@@ -86,7 +86,7 @@ class AuthorizationTest(BaseComputeTest):
         from_port = 22
         to_port = 22
         resp, cls.rule =\
-        cls.security_client.create_security_group_rule(\
+        cls.security_client.create_security_group_rule(
                                         parent_group_id,
                                         ip_protocol, from_port,
                                         to_port)
@@ -263,7 +263,7 @@ class AuthorizationTest(BaseComputeTest):
             self.alt_security_client.base_url = self.security_client.base_url
             resp = {}
             resp['status'] = None
-            resp, body = self.alt_security_client.create_security_group(\
+            resp, body = self.alt_security_client.create_security_group(
                                         s_name,
                                         s_description)
         finally:
@@ -279,14 +279,13 @@ class AuthorizationTest(BaseComputeTest):
     @attr(type='negative')
     def test_get_security_group_of_alt_account_fails(self):
         """A GET request for another user's security group should fail"""
-        self.alt_security_client.get_security_group(\
-            self.security_group['id'])
+        self.alt_security_client.get_security_group(self.security_group['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_security_group_of_alt_account_fails(self):
         """A DELETE request for another user's security group should fail"""
-        self.alt_security_client.delete_security_group(\
+        self.alt_security_client.delete_security_group(
             self.security_group['id'])
 
     @raises(exceptions.BadRequest)
@@ -308,7 +307,7 @@ class AuthorizationTest(BaseComputeTest):
             resp = {}
             resp['status'] = None
             resp, body = \
-            self.alt_security_client.create_security_group_rule(\
+            self.alt_security_client.create_security_group_rule(
                                                 parent_group_id,
                                                 ip_protocol, from_port,
                                                 to_port)
@@ -317,7 +316,7 @@ class AuthorizationTest(BaseComputeTest):
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] != None:
                 resp, _ = \
-                self.alt_security_client.delete_security_group_rule(\
+                self.alt_security_client.delete_security_group_rule(
                                         body['id'])
                 self.fail("Create security group rule request should not "
                           "happen if the tenant id does not match the"
@@ -331,8 +330,7 @@ class AuthorizationTest(BaseComputeTest):
         A DELETE request for another user's security group rule
         should fail
         """
-        self.alt_security_client.delete_security_group_rule(\
-            self.rule['id'])
+        self.alt_security_client.delete_security_group_rule(self.rule['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
@@ -379,7 +377,7 @@ class AuthorizationTest(BaseComputeTest):
         except exceptions.NotFound:
             pass
         finally:
-            resp, body = self.images_client.delete_image_metadata_item(\
+            resp, body = self.images_client.delete_image_metadata_item(
                                 self.image['id'], 'meta1')
 
     @attr(type='negative')
@@ -390,8 +388,8 @@ class AuthorizationTest(BaseComputeTest):
                                               req_metadata)
         try:
             resp, body = \
-            self.alt_client.delete_server_metadata_item(\
-                    self.server['id'], 'meta1')
+            self.alt_client.delete_server_metadata_item(self.server['id'],
+                                                        'meta1')
         except exceptions.NotFound:
             pass
         finally:
@@ -406,8 +404,8 @@ class AuthorizationTest(BaseComputeTest):
                                               req_metadata)
         try:
             resp, body = \
-            self.alt_images_client.delete_image_metadata_item(\
-                    self.image['id'], 'meta1')
+            self.alt_images_client.delete_image_metadata_item(self.image['id'],
+                                                              'meta1')
         except exceptions.NotFound:
             pass
         finally:
