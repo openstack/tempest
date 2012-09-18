@@ -9,3 +9,4 @@ include/swift_objects/swift_large
 *.log
 *.swp
 *.egg-info
+.tox
