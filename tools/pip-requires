@@ -3,3 +3,4 @@ nose
 httplib2>=0.7.0
 pika
 unittest2
+lxml
