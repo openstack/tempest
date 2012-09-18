@@ -174,7 +174,6 @@ class AuthorizationTest(BaseComputeTest):
         """A create image request for another user's server should fail"""
         self.alt_images_client.create_image(self.server['id'], 'testImage')
 
-    @unittest.skip("Skipped until the Bug #1039608 is resolved")
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_server_with_unauthorized_image(self):
