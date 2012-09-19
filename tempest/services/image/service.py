@@ -36,22 +36,25 @@ class Service(BaseService):
         # Determine the Images API version
         self.api_version = int(config.images.api_version)
 
+        # We load the client class specific to the API version...
         if self.api_version == 1:
-            # We load the client class specific to the API version...
-            from glance import client
-            creds = {
-                'username': config.images.username,
-                'password': config.images.password,
-                'tenant': config.images.tenant_name,
-                # rstrip() is necessary here because Glance client
-                # automatically adds the tokens/ part...
-                'auth_url': config.identity.auth_url.rstrip('/tokens'),
-                'strategy': config.identity.strategy
-            }
-            self._client = client.Client(config.images.host,
-                                         config.images.port,
-                                         creds=creds,
-                                         configure_via_auth=False)
+            import glanceclient
+            import keystoneclient.v2_0.client
+
+            auth_url = self.config.identity.auth_url.rstrip('tokens')
+            keystone = keystoneclient.v2_0.client.Client(
+                    username=config.images.username,
+                    password=config.images.password,
+                    tenant_name=config.images.tenant_name,
+                    auth_url=auth_url)
+            token = keystone.auth_token
+            endpoint = keystone.service_catalog.url_for(
+                    service_type='image',
+                    endpoint_type='publicURL')
+
+            self._client = glanceclient.Client('1',
+                                               endpoint=endpoint,
+                                               token=token)
         else:
             raise NotImplementedError
 

@@ -25,8 +25,7 @@ from nose.plugins.skip import SkipTest
 
 GLANCE_INSTALLED = False
 try:
-    from glance import client
-    from glance.common import exception
+    import glanceclient
     GLANCE_INSTALLED = True
 except ImportError:
     pass
@@ -51,7 +50,7 @@ class CreateRegisterImagesTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         for image_id in cls.created_images:
-            cls.client.delete_image(image_id)
+            cls.client.images.delete(image_id)
 
     @attr(type='image')
     def test_register_with_invalid_data(self):
@@ -70,11 +69,10 @@ class CreateRegisterImagesTest(unittest.TestCase):
         ]
         for meta in metas:
             try:
-                results = self.client.add_image(meta)
-            except exception.Invalid:
+                self.client.images.create(**meta)
+            except glanceclient.exc.HTTPBadRequest:
                 continue
-            self.fail("Did not raise Invalid for meta %s. Got results: %s" %
-                      (meta, results))
+            self.fail("Did not raise Invalid for meta %s." % meta)
 
     @attr(type='image')
     def test_register_then_upload(self):
@@ -86,27 +84,27 @@ class CreateRegisterImagesTest(unittest.TestCase):
             'container_format': 'bare',
             'properties': {'prop1': 'val1'}
         }
-        results = self.client.add_image(meta)
-        self.assertTrue('id' in results)
-        image_id = results['id']
+        results = self.client.images.create(**meta)
+        self.assertTrue(hasattr(results, 'id'))
+        image_id = results.id
         self.created_images.append(image_id)
-        self.assertTrue('name' in results)
-        self.assertEqual(meta['name'], results['name'])
-        self.assertTrue('is_public' in results)
-        self.assertEqual(meta['is_public'], results['is_public'])
-        self.assertTrue('status' in results)
-        self.assertEqual('queued', results['status'])
-        self.assertTrue('properties' in results)
+        self.assertTrue(hasattr(results, 'name'))
+        self.assertEqual(meta['name'], results.name)
+        self.assertTrue(hasattr(results, 'is_public'))
+        self.assertEqual(meta['is_public'], results.is_public)
+        self.assertTrue(hasattr(results, 'status'))
+        self.assertEqual('queued', results.status)
+        self.assertTrue(hasattr(results, 'properties'))
         for key, val in meta['properties'].items():
-            self.assertEqual(val, results['properties'][key])
+            self.assertEqual(val, results.properties[key])
 
         # Now try uploading an image file
         image_file = StringIO.StringIO('*' * 1024)
-        results = self.client.update_image(image_id, image_data=image_file)
-        self.assertTrue('status' in results)
-        self.assertEqual('active', results['status'])
-        self.assertTrue('size' in results)
-        self.assertEqual(1024, results['size'])
+        results = self.client.images.update(image_id, data=image_file)
+        self.assertTrue(hasattr(results, 'status'))
+        self.assertEqual('active', results.status)
+        self.assertTrue(hasattr(results, 'size'))
+        self.assertEqual(1024, results.size)
 
     @attr(type='image')
     def test_register_remote_image(self):
@@ -118,16 +116,16 @@ class CreateRegisterImagesTest(unittest.TestCase):
             'container_format': 'bare',
             'location': 'http://example.com/someimage.iso'
         }
-        results = self.client.add_image(meta)
-        self.assertTrue('id' in results)
-        image_id = results['id']
+        results = self.client.images.create(**meta)
+        self.assertTrue(hasattr(results, 'id'))
+        image_id = results.id
         self.created_images.append(image_id)
-        self.assertTrue('name' in results)
-        self.assertEqual(meta['name'], results['name'])
-        self.assertTrue('is_public' in results)
-        self.assertEqual(meta['is_public'], results['is_public'])
-        self.assertTrue('status' in results)
-        self.assertEqual('active', results['status'])
+        self.assertTrue(hasattr(results, 'name'))
+        self.assertEqual(meta['name'], results.name)
+        self.assertTrue(hasattr(results, 'is_public'))
+        self.assertEqual(meta['is_public'], results.is_public)
+        self.assertTrue(hasattr(results, 'status'))
+        self.assertEqual('active', results.status)
 
 
 class ListImagesTest(unittest.TestCase):
@@ -143,7 +141,7 @@ class ListImagesTest(unittest.TestCase):
         cls.os = openstack.ServiceManager()
         cls.client = cls.os.images.get_client()
         cls.created_images = []
-        cls.original_images = cls.client.get_images()
+        cls.original_images = list(cls.client.images.list())
 
         # We add a few images here to test the listing functionality of
         # the images API
@@ -157,7 +155,7 @@ class ListImagesTest(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         for image_id in cls.created_images:
-            cls.client.delete_image(image_id)
+            cls.client.images.delete(image_id)
 
     @classmethod
     def _create_remote_image(cls, x):
@@ -172,8 +170,8 @@ class ListImagesTest(unittest.TestCase):
             'container_format': 'bare',
             'location': 'http://example.com/someimage_%s.iso' % x
         }
-        results = cls.client.add_image(meta)
-        image_id = results['id']
+        results = cls.client.images.create(**meta)
+        image_id = results.id
         return image_id
 
     @classmethod
@@ -183,15 +181,16 @@ class ListImagesTest(unittest.TestCase):
         image. Note that the size of the new image is a random number between
         1024 and 4096
         """
+        image_file = StringIO.StringIO('*' * random.randint(1024, 4096))
         meta = {
             'name': 'New Standard Image %s' % x,
             'is_public': True,
             'disk_format': 'raw',
-            'container_format': 'bare'
+            'container_format': 'bare',
+            'data': image_file,
         }
-        image_file = StringIO.StringIO('*' * random.randint(1024, 4096))
-        results = cls.client.add_image(meta, image_file)
-        image_id = results['id']
+        results = cls.client.images.create(**meta)
+        image_id = results.id
         return image_id
 
     @attr(type='image')
@@ -199,5 +198,5 @@ class ListImagesTest(unittest.TestCase):
         """
         Simple test to see all fixture images returned
         """
-        images = self.client.get_images()
+        images = list(self.client.images.list())
         self.assertEqual(10, len(images) - len(self.original_images))

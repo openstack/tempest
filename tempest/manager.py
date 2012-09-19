@@ -18,7 +18,7 @@
 import logging
 
 # Default client libs
-import glance.client
+import glanceclient
 import keystoneclient.v2_0.client
 import novaclient.client
 import quantumclient.v2_0.client
@@ -133,30 +133,11 @@ class DefaultClientManager(Manager):
                         no_cache=True)
 
     def _get_image_client(self):
-        host = self.config.images.host
-        port = self.config.images.port
-        strategy = self.config.identity.strategy
-        auth_url = self.config.identity.auth_url
-        username = self.config.images.username
-        password = self.config.images.password
-        tenant_name = self.config.images.tenant_name
-
-        if None in (host, port, username, password, tenant_name):
-            msg = ("Missing required credentials for image client. "
-                    "host:%(host)s, port: %(port)s username: %(username)s, "
-                    "password: %(password)s, "
-                    "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
-        auth_url = self.config.identity.auth_url.rstrip('tokens')
-
-        creds = {'strategy': strategy,
-                 'username': username,
-                 'password': password,
-                 'tenant': tenant_name,
-                 'auth_url': auth_url}
-
-        # Create our default Glance client to use in testing
-        return glance.client.Client(host, port, creds=creds)
+        keystone = self._get_identity_client()
+        token = keystone.auth_token
+        endpoint = keystone.service_catalog.url_for(service_type='image',
+                                                    endpoint_type='publicURL')
+        return glanceclient.Client('1', endpoint=endpoint, token=token)
 
     def _get_identity_client(self):
         # This identity client is not intended to check the security
