@@ -49,7 +49,7 @@ SecurityGroupsClient = security_groups_client.SecurityGroupsClient
 FloatingIPsClient = floating_ips_client.FloatingIPsClientJSON
 KeyPairsClient = keypairs_client.KeyPairsClientJSON
 VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClientJSON
-VolumesClient = volumes_client.VolumesClient
+VolumesClient = volumes_client.VolumesClientJSON
 ConsoleOutputsClient = console_output_client.ConsoleOutputsClient
 
 LOG = logging.getLogger(__name__)

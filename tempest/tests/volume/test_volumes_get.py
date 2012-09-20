@@ -18,15 +18,10 @@
 from nose.plugins.attrib import attr
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.volume.base import BaseVolumeTest
+from tempest.tests.volume import base
 
 
-class VolumesGetTest(BaseVolumeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(VolumesGetTest, cls).setUpClass()
-        cls.client = cls.volumes_client
+class VolumesGetTestBase(object):
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):
@@ -97,3 +92,19 @@ class VolumesGetTest(BaseVolumeTest):
                 resp, _ = self.client.delete_volume(volume['id'])
                 self.assertEqual(202, resp.status)
                 self.client.wait_for_resource_deletion(volume['id'])
+
+
+class VolumesGetTestXML(base.BaseVolumeTestXML, VolumesGetTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(VolumesGetTestXML, cls).setUpClass()
+        cls.client = cls.volumes_client
+
+
+class VolumesGetTestJSON(base.BaseVolumeTestJSON, VolumesGetTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(VolumesGetTestJSON, cls).setUpClass()
+        cls.client = cls.volumes_client

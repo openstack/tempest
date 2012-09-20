@@ -45,7 +45,8 @@ from tempest.services.nova.xml.limits_client import LimitsClientXML
 from tempest.services.nova.xml.servers_client import ServersClientXML
 from tempest.services.nova.xml.volumes_extensions_client \
 import VolumesExtensionsClientXML
-from tempest.services.volume.json.volumes_client import VolumesClient
+from tempest.services.volume.json.volumes_client import VolumesClientJSON
+from tempest.services.volume.xml.volumes_client import VolumesClientXML
 
 LOG = logging.getLogger(__name__)
 
@@ -87,6 +88,11 @@ VOLUMES_EXTENSIONS_CLIENTS = {
 FLOAT_CLIENTS = {
     "json": FloatingIPsClientJSON,
     "xml": FloatingIPsClientXML,
+}
+
+VOLUMES_CLIENTS = {
+    "json": VolumesClientJSON,
+    "xml": VolumesClientXML,
 }
 
 
@@ -141,13 +147,13 @@ class Manager(object):
             self.volumes_extensions_client = \
                     VOLUMES_EXTENSIONS_CLIENTS[interface](*client_args)
             self.floating_ips_client = FLOAT_CLIENTS[interface](*client_args)
+            self.volumes_client = VOLUMES_CLIENTS[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
         self.security_groups_client = SecurityGroupsClient(*client_args)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.network_client = NetworkClient(*client_args)
-        self.volumes_client = VolumesClient(*client_args)
 
 
 class AltManager(Manager):

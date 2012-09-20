@@ -22,13 +22,13 @@ from tempest.common.rest_client import RestClient
 from tempest import exceptions
 
 
-class VolumesClient(RestClient):
+class VolumesClientJSON(RestClient):
     """
     Client class to send CRUD Volume API requests to a Cinder endpoint
     """
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumesClient, self).__init__(config, username, password,
+        super(VolumesClientJSON, self).__init__(config, username, password,
                                            auth_url, tenant_name)
 
         self.service = self.config.volume.catalog_type
