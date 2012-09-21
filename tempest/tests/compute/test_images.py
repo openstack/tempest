@@ -203,29 +203,27 @@ class ImagesTestBase(object):
                       " characters")
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 1005397 is fixed")
     def test_create_image_specify_uuid_35_characters_or_less(self):
         """Return an error if Image ID passed is 35 characters or less"""
         try:
             snapshot_name = rand_name('test-snap-')
             test_uuid = ('a' * 35)
-            self.assertRaises(exceptions.BadRequest, self.client.create_image,
+            self.assertRaises(exceptions.NotFound, self.client.create_image,
                               test_uuid, snapshot_name)
         except:
-            self.fail("Should return 400 Bad Request if server uuid is 35"
+            self.fail("Should return 404 Not Found if server uuid is 35"
                       " characters or less")
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 1005397 is fixed")
     def test_create_image_specify_uuid_37_characters_or_more(self):
         """Return an error if Image ID passed is 37 characters or more"""
         try:
             snapshot_name = rand_name('test-snap-')
             test_uuid = ('a' * 37)
-            self.assertRaises(exceptions.BadRequest, self.client.create_image,
+            self.assertRaises(exceptions.NotFound, self.client.create_image,
                               test_uuid, snapshot_name)
         except:
-            self.fail("Should return 400 Bad Request if server uuid is 37"
+            self.fail("Should return 404 Not Found if server uuid is 37"
                       " characters or more")
 
     @attr(type='negative')
