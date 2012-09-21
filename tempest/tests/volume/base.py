@@ -50,6 +50,9 @@ class BaseVolumeTest(unittest.TestCase):
 
         cls.os = os
         cls.volumes_client = os.volumes_client
+        cls.servers_client = os.servers_client
+        cls.image_ref = cls.config.compute.image_ref
+        cls.flavor_ref = cls.config.compute.flavor_ref
         cls.build_interval = cls.config.volume.build_interval
         cls.build_timeout = cls.config.volume.build_timeout
         cls.volumes = {}
@@ -63,6 +66,7 @@ class BaseVolumeTest(unittest.TestCase):
                                              cls.volumes_client.service,
                                              cls.os.tenant_name)
         except exceptions.EndpointNotFound:
+            cls.clear_isolated_creds()
             raise nose.SkipTest(skip_msg)
 
     @classmethod
