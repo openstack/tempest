@@ -44,7 +44,7 @@ class FloatingIPsTestBase(object):
         resp, body = cls.client.create_floating_ip()
         cls.floating_ip_id = body['id']
         cls.floating_ip = body['ip']
-        #Generating a nonexistant floatingIP id
+        #Generating a nonexistent floatingIP id
         cls.floating_ip_ids = []
         resp, body = cls.client.list_floating_ips()
         for i in range(len(body)):
@@ -65,7 +65,7 @@ class FloatingIPsTestBase(object):
     def test_allocate_floating_ip(self):
         """
         Positive test:Allocation of a new floating IP to a project
-        should be succesfull
+        should be successful
         """
         try:
             resp, body = self.client.create_floating_ip()
@@ -84,7 +84,7 @@ class FloatingIPsTestBase(object):
     def test_delete_floating_ip(self):
         """
         Positive test:Deletion of valid floating IP from project
-        should be succesfull
+        should be successful
         """
         #Creating the floating IP that is to be deleted in this method
         resp, floating_ip_body = self.client.create_floating_ip()
@@ -101,7 +101,7 @@ class FloatingIPsTestBase(object):
     def test_associate_disassociate_floating_ip(self):
         """
         Positive test:Associate and disassociate the provided floating IP to a
-        specific server should be successfull
+        specific server should be successful
         """
         #Association of floating IP to fixed IP address
         resp, body =\
@@ -118,25 +118,25 @@ class FloatingIPsTestBase(object):
     def test_delete_nonexistant_floating_ip(self):
         """
 
-        Negative test:Deletion of a nonexistant floating IP
+        Negative test:Deletion of a nonexistent floating IP
         from project should fail
         """
-        #Deleting the non existant floating IP
+        #Deleting the non existent floating IP
         try:
             resp, body = self.client.delete_floating_ip(self.non_exist_id)
         except:
             pass
         else:
-            self.fail('Should not be able to delete a nonexistant floating IP')
+            self.fail('Should not be able to delete a nonexistent floating IP')
 
     @unittest.skip("Skipped until the Bug #957706 is resolved")
     @attr(type='negative')
     def test_associate_nonexistant_floating_ip(self):
         """
-        Negative test:Association of a non existant floating IP
+        Negative test:Association of a non existent floating IP
         to specific server should fail
         """
-        #Associating non existant floating IP
+        #Associating non existent floating IP
         try:
             resp, body = \
             self.client.associate_floating_ip_to_server("0.0.0.0",
@@ -145,14 +145,14 @@ class FloatingIPsTestBase(object):
             pass
         else:
             self.fail('Should not be able to associate'
-                      ' a nonexistant floating IP')
+                      ' a nonexistent floating IP')
 
     @attr(type='negative')
     def test_dissociate_nonexistant_floating_ip(self):
         """
-        Negative test:Dissociation of a non existant floating IP should fail
+        Negative test:Dissociation of a non existent floating IP should fail
         """
-        #Dissociating non existant floating IP
+        #Dissociating non existent floating IP
         try:
             resp, body = \
             self.client.disassociate_floating_ip_from_server("0.0.0.0",
@@ -161,14 +161,13 @@ class FloatingIPsTestBase(object):
             pass
         else:
             self.fail('Should not be able to dissociate'
-                      ' a nonexistant floating IP')
+                      ' a nonexistent floating IP')
 
-    @unittest.skip("Skipped until the Bug #1029911 is resolved")
-    @attr(type='negative')
+    @attr(type='positive')
     def test_associate_already_associated_floating_ip(self):
         """
-        Negative test:Association of an already associated floating IP
-        to specific server should raise BadRequest exception
+        positive test:Association of an already associated floating IP
+        to specific server should change the association of the Floating IP
         """
         #Create server so as to use for Multiple association
         resp, body = self.servers_client.create_server('floating-server2',
@@ -178,34 +177,32 @@ class FloatingIPsTestBase(object):
         self.new_server_id = body['id']
 
         #Associating floating IP for the first time
-        try:
-            resp, _ = \
-            self.client.associate_floating_ip_to_server(self.floating_ip,
-                                                        self.server_id)
+        resp, _ = \
+        self.client.associate_floating_ip_to_server(self.floating_ip,
+                                                    self.server_id)
         #Associating floating IP for the second time
-            resp = {}
-            resp['status'] = None
-            resp, body = \
-            self.client.associate_floating_ip_to_server(self.floating_ip,
-                                                        self.new_server_id)
-        except exceptions.BadRequest:
+        resp, body = \
+        self.client.associate_floating_ip_to_server(self.floating_ip,
+                                                    self.new_server_id)
+
+        #Make sure no longer associated with old server
+        try:
+            self.client.disassociate_floating_ip_from_server(\
+                self.floating_ip,
+                self.server_id)
+        except exceptions.NotFound:
             pass
         else:
-            self.fail('Association of an already associated floating IP'
-                      ' to specific server should raise BadRequest')
-        finally:
-            if (resp['status'] != None):
-                #Dissociation of the floating IP associated in this method
-                resp, _ = \
-                self.client.disassociate_floating_ip_from_server(\
-                    self.floating_ip,
-                    self.new_server_id)
+            self.fail('The floating IP should be associated to the second'
+                    'server')
+        if (resp['status'] != None):
             #Dissociation of the floating IP associated in this method
             resp, _ = \
-            self.client.disassociate_floating_ip_from_server(self.floating_ip,
-                                                        self.server_id)
-            #Deletion of server created in this method
-            resp, body = self.servers_client.delete_server(self.new_server_id)
+            self.client.disassociate_floating_ip_from_server(\
+                self.floating_ip,
+                self.new_server_id)
+       #Deletion of server created in this method
+        resp, body = self.servers_client.delete_server(self.new_server_id)
 
     @unittest.skip("Skipped until the Bug #957706 is resolved")
     @attr(type='negative')
