@@ -118,8 +118,8 @@ class UsersTestBase(object):
         # Delete the token from database
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.create_user,
-                            self.alt_user, self.alt_password,
-                            self.data.tenant['id'], self.alt_email)
+                          self.alt_user, self.alt_password,
+                          self.data.tenant['id'], self.alt_email)
 
         # Unset the token to allow further tests to generate a new token
         self.client.clear_auth()
@@ -230,7 +230,7 @@ class UsersTestBase(object):
         self.data.setup_test_user()
         resp, users = self.client.get_users()
         self.assertIn(self.data.test_user, [u['name'] for u in users],
-                        "Could not find %s" % self.data.test_user)
+                      "Could not find %s" % self.data.test_user)
 
     @attr(type='negative')
     def test_get_users_by_unauthorized_user(self):
@@ -272,8 +272,8 @@ class UsersTestBase(object):
         missing_users =\
             [user for user in user_ids if user not in fetched_user_ids]
         self.assertEqual(0, len(missing_users),
-                             "Failed to find user %s in fetched list"
-                             % ', '.join(m_user for m_user in missing_users))
+                         "Failed to find user %s in fetched list" %
+                         ', '.join(m_user for m_user in missing_users))
 
     @attr(type='positive')
     def test_list_users_with_roles_for_tenant(self):
@@ -304,8 +304,8 @@ class UsersTestBase(object):
         missing_users =\
             [user for user in user_ids if user not in fetched_user_ids]
         self.assertEqual(0, len(missing_users),
-                             "Failed to find user %s in fetched list"
-                             % ', '.join(m_user for m_user in missing_users))
+                         "Failed to find user %s in fetched list" %
+                         ', '.join(m_user for m_user in missing_users))
 
     @attr(type='negative')
     def test_list_users_with_invalid_tenant(self):
@@ -330,7 +330,7 @@ class UsersTestBase(object):
                 fail.append(invalid)
         if len(fail) != 0:
             self.fail('Should raise Not Found when list users with invalid'
-                          'tenant ids %s' % fail)
+                      'tenant ids %s' % fail)
 
 
 class UsersTestJSON(base.BaseIdentityAdminTestJSON,
@@ -340,8 +340,7 @@ class UsersTestJSON(base.BaseIdentityAdminTestJSON,
         super(UsersTestJSON, cls).setUpClass()
 
 
-class UsersTestXML(base.BaseIdentityAdminTestXML,
-                    UsersTestBase):
+class UsersTestXML(base.BaseIdentityAdminTestXML, UsersTestBase):
     @classmethod
     def setUpClass(cls):
         super(UsersTestXML, cls).setUpClass()

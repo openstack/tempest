@@ -140,7 +140,7 @@ class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,
 
 
 class FlavorsAdminTestJSON(base.BaseComputeAdminTestJSON,
-                            FlavorsAdminTestBase):
+                           FlavorsAdminTestBase):
 
     @classmethod
     def setUpClass(cls):

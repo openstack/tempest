@@ -96,9 +96,7 @@ class VolumesClientXML(RestClientXML):
         :param display_name: Optional Volume Name.
         :param metadata: An optional dictionary of values for metadata.
         """
-        volume = Element("volume",
-                          xmlns=XMLNS_11,
-                          size=size)
+        volume = Element("volume", xmlns=XMLNS_11, size=size)
         if display_name:
             volume.add_attr('display_name', display_name)
 

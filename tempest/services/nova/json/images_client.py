@@ -26,8 +26,8 @@ class ImagesClientJSON(RestClient):
             post_body['createImage']['metadata'] = meta
 
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/action' %
-                                      str(server_id), post_body, self.headers)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body, self.headers)
         return resp, body
 
     def list_images(self, params=None):
@@ -107,37 +107,35 @@ class ImagesClientJSON(RestClient):
     def set_image_metadata(self, image_id, meta):
         """Sets the metadata for an image"""
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.put('images/%s/metadata' %
-                                      str(image_id), post_body, self.headers)
+        resp, body = self.put('images/%s/metadata' % str(image_id),
+                              post_body, self.headers)
         body = json.loads(body)
         return resp, body['metadata']
 
     def update_image_metadata(self, image_id, meta):
         """Updates the metadata for an image"""
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.post('images/%s/metadata' %
-                                      str(image_id), post_body, self.headers)
+        resp, body = self.post('images/%s/metadata' % str(image_id),
+                               post_body, self.headers)
         body = json.loads(body)
         return resp, body['metadata']
 
     def get_image_metadata_item(self, image_id, key):
         """Returns the value for a specific image metadata key"""
-        resp, body = self.get("images/%s/metadata/%s" %
-                                     (str(image_id), key))
+        resp, body = self.get("images/%s/metadata/%s" % (str(image_id), key))
         body = json.loads(body)
         return resp, body['meta']
 
     def set_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key"""
         post_body = json.dumps({'meta': meta})
-        resp, body = self.put('images/%s/metadata/%s' %
-                                     (str(image_id), key), post_body,
-                                     self.headers)
+        resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
+                              post_body, self.headers)
         body = json.loads(body)
         return resp, body['meta']
 
     def delete_image_metadata_item(self, image_id, key):
         """Deletes a single image metadata key/value pair"""
         resp, body = self.delete("images/%s/metadata/%s" %
-                                     (str(image_id), key))
+                                 (str(image_id), key))
         return resp, body

@@ -134,8 +134,7 @@ class ImagesMetadataTest(BaseComputeTest):
     def test_get_nonexistant_image_metadata_item(self):
         """Negative test: Get on nonexistant image should not happen"""
         try:
-            resp, metadata = self.client.get_image_metadata_item(999,
-                                                                    'key2')
+            resp, metadata = self.client.get_image_metadata_item(999, 'key2')
         except exceptions.NotFound:
             pass
         else:
@@ -158,8 +157,7 @@ class ImagesMetadataTest(BaseComputeTest):
         nonexistant image"""
         meta = {'key1': 'alt'}
         try:
-            resp, body = self.client.set_image_metadata_item(999,
-                                                             'key1', meta)
+            resp, body = self.client.set_image_metadata_item(999, 'key1', meta)
             resp, metadata = self.client.list_image_metadata(999)
         except exceptions.NotFound:
             pass
@@ -171,8 +169,7 @@ class ImagesMetadataTest(BaseComputeTest):
         """Negative test: Shouldnt be able to delete metadata
                           item from nonexistant image"""
         try:
-            resp, body = self.client.delete_image_metadata_item(999,
-                                                                 'key1')
+            resp, body = self.client.delete_image_metadata_item(999, 'key1')
             resp, metadata = self.client.list_image_metadata(999)
         except exceptions.NotFound:
             pass

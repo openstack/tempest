@@ -123,7 +123,7 @@ class VerifyCreateVM(pending_action.PendingServerAction):
             self._state.get_instances()[self._target['id']][1] ==
             'TERMINATING'):
             self._logger.info('machine %s is deleted or TERMINATING' %
-                               self._target['id'])
+                              self._target['id'])
             return True
 
         admin_pass = self._target['adminPass']
@@ -273,7 +273,7 @@ class TestUpdateVMName(test_case.StressTestCase):
         new_name = update_target['name'] + '_updated'
         (response, body) = \
             manager.servers_client.update_server(update_target['id'],
-                                                    name=new_name)
+                                                 name=new_name)
         if (response.status != 200):
             self._logger.error("response: %s " % response)
             self._logger.error("body: %s " % body)

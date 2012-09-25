@@ -42,18 +42,16 @@ class SecurityGroupsClient(RestClient):
             'description': description,
         }
         post_body = json.dumps({'security_group': post_body})
-        resp, body = self.post('os-security-groups',
-                                        post_body, self.headers)
+        resp, body = self.post('os-security-groups', post_body, self.headers)
         body = json.loads(body)
         return resp, body['security_group']
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group"""
-        return self.delete('os-security-groups/%s'
-                                   % str(security_group_id))
+        return self.delete('os-security-groups/%s' % str(security_group_id))
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
-                                      to_port, **kwargs):
+                                   to_port, **kwargs):
         """
         Creating a new security group rules.
         parent_group_id :ID of Security group
@@ -80,5 +78,4 @@ class SecurityGroupsClient(RestClient):
 
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule"""
-        return self.delete('os-security-group-rules/%s'
-                                      % str(group_rule_id))
+        return self.delete('os-security-group-rules/%s' % str(group_rule_id))

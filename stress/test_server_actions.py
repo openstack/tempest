@@ -129,7 +129,7 @@ class VerifyRebootVM(pending_action.PendingServerAction):
                 return False
         target = self._target
         self._logger.info('machine %s %s -> ACTIVE [%.1f secs elapsed]' %
-                              (target['id'], reboot_state, self.elapsed()))
+                          (target['id'], reboot_state, self.elapsed()))
         self._state.set_instance_state(target['id'],
                                       (target, 'ACTIVE'))
 

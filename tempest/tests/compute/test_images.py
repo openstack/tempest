@@ -120,8 +120,8 @@ class ImagesTestBase(object):
             if (resp['status'] is not None):
                 image_id = parse_image_id(resp['location'])
                 resp, _ = self.client.delete_image(image_id)
-                self.fail("An image should not be created"
-                            " with invalid server id")
+                self.fail("An image should not be created "
+                          "with invalid server id")
 
     @attr(type='negative')
     @unittest.skipUnless(compute.MULTI_USER, 'Second user not configured')
@@ -282,8 +282,8 @@ class ImagesTestBase(object):
             pass
 
         else:
-            self.fail("DELETE image request should rasie NotFound exception"
-                        "when requested with invalid image")
+            self.fail("DELETE image request should rasie NotFound exception "
+                      "when requested with invalid image")
 
     @attr(type='negative')
     def test_delete_non_existent_image(self):

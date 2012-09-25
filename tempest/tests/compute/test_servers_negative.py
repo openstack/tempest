@@ -58,9 +58,9 @@ class ServersNegativeTest(BaseComputeTest):
 
         try:
             resp, server = self.client.create_server('test',
-                                                      self.image_ref,
-                                                      self.flavor_ref,
-                                                      personality=personality)
+                                                     self.image_ref,
+                                                     self.flavor_ref,
+                                                     personality=personality)
         except exceptions.BadRequest:
             pass
         else:

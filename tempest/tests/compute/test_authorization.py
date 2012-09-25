@@ -179,7 +179,7 @@ class AuthorizationTest(BaseComputeTest):
     def test_create_server_with_unauthorized_image(self):
         """Server creation with another user's image should fail"""
         self.alt_client.create_server('test', self.image['id'],
-                                         self.flavor_ref)
+                                      self.flavor_ref)
 
     @raises(exceptions.BadRequest)
     @attr(type='negative')
@@ -193,7 +193,7 @@ class AuthorizationTest(BaseComputeTest):
             # Change the base URL to impersonate another user
             self.alt_client.base_url = self.client.base_url
             self.alt_client.create_server('test', self.image['id'],
-                                                    self.flavor_ref)
+                                          self.flavor_ref)
         finally:
             # Reset the base_url...
             self.alt_client.base_url = saved_base_url
@@ -337,8 +337,7 @@ class AuthorizationTest(BaseComputeTest):
     def test_set_metadata_of_alt_account_server_fails(self):
         """ A set metadata for another user's server should fail """
         req_metadata = {'meta1': 'data1', 'meta2': 'data2'}
-        self.alt_client.set_server_metadata(self.server['id'],
-                                              req_metadata)
+        self.alt_client.set_server_metadata(self.server['id'], req_metadata)
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
@@ -346,18 +345,17 @@ class AuthorizationTest(BaseComputeTest):
         """ A set metadata for another user's image should fail """
         req_metadata = {'meta1': 'value1', 'meta2': 'value2'}
         self.alt_images_client.set_image_metadata(self.image['id'],
-                                                    req_metadata)
+                                                  req_metadata)
 
     @attr(type='negative')
     def test_get_metadata_of_alt_account_server_fails(self):
         """ A get metadata for another user's server should fail """
         req_metadata = {'meta1': 'data1'}
-        self.client.set_server_metadata(self.server['id'],
-                                              req_metadata)
+        self.client.set_server_metadata(self.server['id'], req_metadata)
         try:
             resp, meta = \
             self.alt_client.get_server_metadata_item(self.server['id'],
-                                                        'meta1')
+                                                     'meta1')
         except exceptions.NotFound:
             pass
         finally:
@@ -373,7 +371,7 @@ class AuthorizationTest(BaseComputeTest):
         try:
             resp, meta = \
             self.alt_images_client.get_image_metadata_item(self.image['id'],
-                                                              'meta1')
+                                                           'meta1')
         except exceptions.NotFound:
             pass
         finally:
@@ -384,8 +382,7 @@ class AuthorizationTest(BaseComputeTest):
     def test_delete_metadata_of_alt_account_server_fails(self):
         """ A delete metadata for another user's server should fail """
         req_metadata = {'meta1': 'data1'}
-        self.client.set_server_metadata(self.server['id'],
-                                              req_metadata)
+        self.client.set_server_metadata(self.server['id'], req_metadata)
         try:
             resp, body = \
             self.alt_client.delete_server_metadata_item(self.server['id'],
@@ -411,7 +408,7 @@ class AuthorizationTest(BaseComputeTest):
         finally:
             resp, body = \
             self.images_client.delete_image_metadata_item(self.image['id'],
-                                                            'meta1')
+                                                          'meta1')
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
@@ -420,4 +417,4 @@ class AuthorizationTest(BaseComputeTest):
         A Get Console Output for another user's server should fail
         """
         self.alt_console_outputs_client.get_console_output(self.server['id'],
-                                                                    10)
+                                                           10)

@@ -89,8 +89,8 @@ class FloatingIPsTestBase(object):
         #Creating the floating IP that is to be deleted in this method
         resp, floating_ip_body = self.client.create_floating_ip()
         #Storing the details of floating IP before deleting it
-        resp, floating_ip_details = \
-                self.client.get_floating_ip_details(floating_ip_body['id'])
+        cli_resp = self.client.get_floating_ip_details(floating_ip_body['id'])
+        resp, floating_ip_details = cli_resp
         #Deleting the floating IP from the project
         resp, body = self.client.delete_floating_ip(floating_ip_body['id'])
         self.assertEqual(202, resp.status)
@@ -171,8 +171,8 @@ class FloatingIPsTestBase(object):
         """
         #Create server so as to use for Multiple association
         resp, body = self.servers_client.create_server('floating-server2',
-                                                        self.image_ref,
-                                                        self.flavor_ref)
+                                                       self.image_ref,
+                                                       self.flavor_ref)
         self.servers_client.wait_for_server_status(body['id'], 'ACTIVE')
         self.new_server_id = body['id']
 
@@ -222,8 +222,7 @@ class FloatingIPsTestBase(object):
                       ' with out passing floating IP  should raise BadRequest')
 
 
-class FloatingIPsTestJSON(base.BaseComputeTestJSON,
-                            FloatingIPsTestBase):
+class FloatingIPsTestJSON(base.BaseComputeTestJSON, FloatingIPsTestBase):
     @classmethod
     def setUpClass(cls):
         super(FloatingIPsTestJSON, cls).setUpClass()
@@ -235,8 +234,7 @@ class FloatingIPsTestJSON(base.BaseComputeTestJSON,
         super(FloatingIPsTestJSON, cls).tearDownClass()
 
 
-class FloatingIPsTestXML(base.BaseComputeTestXML,
-                            FloatingIPsTestBase):
+class FloatingIPsTestXML(base.BaseComputeTestXML, FloatingIPsTestBase):
     @classmethod
     def setUpClass(cls):
         super(FloatingIPsTestXML, cls).setUpClass()

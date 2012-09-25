@@ -261,8 +261,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTestJSON,
         TenantsTestBase.setUpClass(cls)
 
 
-class TenantsTestXML(base.BaseIdentityAdminTestXML,
-                      TenantsTestBase):
+class TenantsTestXML(base.BaseIdentityAdminTestXML, TenantsTestBase):
 
     @classmethod
     def setUpClass(cls):

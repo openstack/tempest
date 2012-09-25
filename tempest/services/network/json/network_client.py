@@ -22,9 +22,7 @@ class NetworkClient(RestClient):
         }
         headers = {'Content-Type': 'application/json'}
         body = json.dumps(post_body)
-        resp, body = self.post('networks',
-                                      headers=headers,
-                                      body=body)
+        resp, body = self.post('networks', headers=headers, body=body)
         body = json.loads(body)
         return resp, body
 
@@ -59,13 +57,13 @@ class NetworkClient(RestClient):
         headers = {'Content-Type': 'application/json'}
         body = json.dumps(post_body)
         resp, body = self.post('networks/%s/ports.json' % network_id,
-                                        headers=headers, body=body)
+                               headers=headers, body=body)
         body = json.loads(body)
         return resp, body
 
     def delete_port(self, network_id, port_id):
         resp, body = self.delete('networks/%s/ports/%s.json' %
-                                            (network_id, port_id))
+                                 (network_id, port_id))
         return resp, body
 
     def list_ports(self, network_id):

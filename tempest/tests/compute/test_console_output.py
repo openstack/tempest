@@ -78,11 +78,11 @@ class ConsoleOutputTest(BaseComputeTest):
         try:
             resp, output = self.servers_client.reboot(self.server_id, 'SOFT')
             self.servers_client.wait_for_server_status(self.server_id,
-                                                        'REBOOT')
+                                                       'REBOOT')
             resp, server = self.servers_client.get_server(self.server_id)
             if (server['status'] == 'REBOOT'):
                 resp, output = self.client.get_console_output(self.server_id,
-                                                                10)
+                                                              10)
                 self.assertEqual(200, resp.status)
                 self.assertNotEqual(output, None)
                 lines = len(output.split('\n'))
@@ -91,4 +91,4 @@ class ConsoleOutputTest(BaseComputeTest):
                 self.fail("Could not capture instance in Reboot status")
         finally:
             self.servers_client.wait_for_server_status(self.server_id,
-                                                        'ACTIVE')
+                                                       'ACTIVE')

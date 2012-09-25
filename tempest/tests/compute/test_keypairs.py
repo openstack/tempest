@@ -94,8 +94,8 @@ class KeyPairsTestBase(object):
             self.assertTrue(public_key is not None,
                             "Field public_key is empty or not found.")
         except:
-            self.fail("GET keypair details requested by keypair name"
-                        " has failed")
+            self.fail("GET keypair details requested by keypair name "
+                      "has failed")
         finally:
             resp, _ = self.client.delete_keypair(k_name)
             self.assertEqual(202, resp.status)

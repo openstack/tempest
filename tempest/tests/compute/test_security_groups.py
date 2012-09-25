@@ -49,9 +49,9 @@ class SecurityGroupsTest(object):
             missing_sgs =\
             [sg for sg in security_group_list if sg not in fetched_list]
             self.assertFalse(missing_sgs,
-                             "Failed to find Security Group %s in fetched list"
-                             % ', '.join(m_group['name']
-                                            for m_group in missing_sgs))
+                             "Failed to find Security Group %s in fetched "
+                             "list" % ', '.join(m_group['name']
+                                                for m_group in missing_sgs))
         finally:
             #Delete all the Security Groups created in this method
             for securitygroup in security_group_list:
@@ -252,7 +252,7 @@ class SecurityGroupsTest(object):
             pass
         else:
             self.fail('Should not be able to delete a Security Group'
-                        'with out passing ID')
+                      'with out passing ID')
 
     def test_server_security_groups(self):
         """

@@ -70,8 +70,8 @@ class VolumesActionsTest(BaseVolumeTest):
         """Verify that a volume's attachment information is retrieved"""
         mountpoint = '/dev/vdc'
         resp, body = self.client.attach_volume(self.volume['id'],
-                                                   self.server['id'],
-                                                   mountpoint)
+                                               self.server['id'],
+                                               mountpoint)
         self.client.wait_for_volume_status(self.volume['id'], 'in-use')
         self.assertEqual(202, resp.status)
         try:

@@ -8,7 +8,7 @@ class AdminClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
         super(AdminClientJSON, self).__init__(config, username, password,
-                                                    auth_url, tenant_name)
+                                              auth_url, tenant_name)
         self.service = self.config.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
@@ -29,8 +29,7 @@ class AdminClientJSON(RestClient):
             'name': name,
         }
         post_body = json.dumps({'role': post_body})
-        resp, body = self.post('OS-KSADM/roles', post_body,
-                                      self.headers)
+        resp, body = self.post('OS-KSADM/roles', post_body, self.headers)
         body = json.loads(body)
         return resp, body['role']
 
@@ -47,8 +46,7 @@ class AdminClientJSON(RestClient):
             'enabled': kwargs.get('enabled', 'true'),
         }
         post_body = json.dumps({'tenant': post_body})
-        resp, body = self.post('tenants', post_body,
-                                      self.headers)
+        resp, body = self.post('tenants', post_body, self.headers)
         body = json.loads(body)
         return resp, body['tenant']
 
@@ -67,9 +65,9 @@ class AdminClientJSON(RestClient):
     def assign_user_role(self, tenant_id, user_id, role_id):
         """Add roles to a user on a tenant"""
         post_body = json.dumps({})
-        resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s'
-                                % (tenant_id, user_id, role_id), post_body,
-                                   self.headers)
+        resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
+                              (tenant_id, user_id, role_id), post_body,
+                              self.headers)
         body = json.loads(body)
         return resp, body['role']
 
@@ -122,7 +120,7 @@ class AdminClientJSON(RestClient):
         }
         post_body = json.dumps({'tenant': post_body})
         resp, body = self.post('tenants/%s' % tenant_id, post_body,
-                                      self.headers)
+                               self.headers)
         body = json.loads(body)
         return resp, body['tenant']
 
@@ -186,8 +184,7 @@ class AdminClientJSON(RestClient):
                       'type': type,
                       'description': kwargs.get('description')}
         post_body = json.dumps({'OS-KSADM:service': post_body})
-        resp, body = self.post('/OS-KSADM/services', post_body,
-                                    self.headers)
+        resp, body = self.post('/OS-KSADM/services', post_body, self.headers)
         body = json.loads(body)
         return resp, body['OS-KSADM:service']
 

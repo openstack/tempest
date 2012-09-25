@@ -138,7 +138,7 @@ class VolumesNegativeTestBase(object):
 
 
 class VolumesNegativeTestXML(base.BaseComputeTestXML,
-                                VolumesNegativeTestBase):
+                             VolumesNegativeTestBase):
     @classmethod
     def setUpClass(cls):
         cls._interface = "xml"
@@ -147,7 +147,7 @@ class VolumesNegativeTestXML(base.BaseComputeTestXML,
 
 
 class VolumesNegativeTestJSON(base.BaseComputeTestJSON,
-                                VolumesNegativeTestBase):
+                              VolumesNegativeTestBase):
     @classmethod
     def setUpClass(cls):
         cls._interface = "json"

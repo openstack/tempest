@@ -41,9 +41,9 @@ class VolumesListTestBase(object):
         # Now check if all the volumes created in setup are in fetched list
         missing_vols = [v for v in self.volume_list if v not in fetched_list]
         self.assertFalse(missing_vols,
-                         "Failed to find volume %s in fetched list"
-                         % ', '.join(m_vol['display_name']
-                                        for m_vol in missing_vols))
+                         "Failed to find volume %s in fetched list" %
+                         ', '.join(m_vol['display_name']
+                                   for m_vol in missing_vols))
 
     @attr(type='smoke')
     def test_volume_list_with_details(self):
@@ -54,9 +54,9 @@ class VolumesListTestBase(object):
         # Verify that all the volumes are returned
         missing_vols = [v for v in self.volume_list if v not in fetched_list]
         self.assertFalse(missing_vols,
-                         "Failed to find volume %s in fetched list"
-                         % ', '.join(m_vol['display_name']
-                                        for m_vol in missing_vols))
+                         "Failed to find volume %s in fetched list" %
+                         ', '.join(m_vol['display_name']
+                                   for m_vol in missing_vols))
 
 
 class VolumeListTestXML(base.BaseVolumeTestXML, VolumesListTestBase):
@@ -76,8 +76,7 @@ class VolumeListTestXML(base.BaseVolumeTestXML, VolumesListTestBase):
                 resp, volume = cls.client.create_volume(size=1,
                                                         display_name=v_name,
                                                         metadata=metadata)
-                cls.client.wait_for_volume_status(volume['id'],
-                                                   'available')
+                cls.client.wait_for_volume_status(volume['id'], 'available')
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])
@@ -123,8 +122,7 @@ class VolumeListTestJSON(base.BaseVolumeTestJSON, VolumesListTestBase):
                 resp, volume = cls.client.create_volume(size=1,
                                                         display_name=v_name,
                                                         metadata=metadata)
-                cls.client.wait_for_volume_status(volume['id'],
-                                                   'available')
+                cls.client.wait_for_volume_status(volume['id'], 'available')
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])

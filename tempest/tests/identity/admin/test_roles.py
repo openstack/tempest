@@ -273,7 +273,7 @@ class UserRolesTestJSON(RolesTestJSON,
 
 
 class UserRolesTestXML(RolesTestXML,
-                        UserRolesTestBase):
+                       UserRolesTestBase):
 
     @classmethod
     def setUpClass(cls):

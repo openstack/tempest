@@ -34,7 +34,7 @@ class AdminClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
         super(AdminClientXML, self).__init__(config, username, password,
-                                                    auth_url, tenant_name)
+                                             auth_url, tenant_name)
         self.service = self.config.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
@@ -61,11 +61,9 @@ class AdminClientXML(RestClientXML):
 
     def create_role(self, name):
         """Create a role"""
-        create_role = Element("role",
-                                xmlns=XMLNS,
-                                name=name)
+        create_role = Element("role", xmlns=XMLNS, name=name)
         resp, body = self.post('OS-KSADM/roles', str(Document(create_role)),
-                                      self.headers)
+                               self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -83,7 +81,7 @@ class AdminClientXML(RestClientXML):
                                 description=kwargs.get('description', ''),
                                 enabled=str(en).lower())
         resp, body = self.post('tenants', str(Document(create_tenant)),
-                                      self.headers)
+                               self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -102,9 +100,8 @@ class AdminClientXML(RestClientXML):
 
     def assign_user_role(self, tenant_id, user_id, role_id):
         """Add roles to a user on a tenant"""
-        resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s'
-                                % (tenant_id, user_id, role_id),
-                                '', self.headers)
+        resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
+                              (tenant_id, user_id, role_id), '', self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -158,11 +155,11 @@ class AdminClientXML(RestClientXML):
     def create_user(self, name, password, tenant_id, email):
         """Create a user"""
         create_user = Element("user",
-                                xmlns=XMLNS,
-                                name=name,
-                                password=password,
-                                tenantId=tenant_id,
-                                email=email)
+                              xmlns=XMLNS,
+                              name=name,
+                              password=password,
+                              tenantId=tenant_id,
+                              email=email)
         resp, body = self.post('users', str(Document(create_user)),
                                self.headers)
         body = self._parse_body(etree.fromstring(body))
@@ -181,8 +178,7 @@ class AdminClientXML(RestClientXML):
 
     def enable_disable_user(self, user_id, enabled):
         """Enables or disables a user"""
-        enable_user = Element("user",
-                                enabled=str(enabled).lower())
+        enable_user = Element("user", enabled=str(enabled).lower())
         resp, body = self.put('users/%s/enabled' % user_id,
                               str(Document(enable_user)), self.headers)
         body = self._parse_array(etree.fromstring(body))
@@ -209,7 +205,7 @@ class AdminClientXML(RestClientXML):
                                  description=kwargs.get('description'))
         resp, body = self.post('OS-KSADM/services',
                                str(Document(create_service)),
-                                    self.headers)
+                               self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -235,8 +231,7 @@ class TokenClientXML(RestClientXML):
         passwordCreds = Element("passwordCredentials",
                                 username=user,
                                 password=password)
-        auth = Element("auth",
-                                tenantName=tenant)
+        auth = Element("auth", tenantName=tenant)
         auth.append(passwordCreds)
         headers = {'Content-Type': 'application/xml'}
         resp, body = self.post(self.auth_url, headers=headers,

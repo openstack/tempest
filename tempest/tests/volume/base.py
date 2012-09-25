@@ -57,7 +57,7 @@ class BaseVolumeTest(unittest.TestCase):
         cls.volumes = {}
 
         skip_msg = ("%s skipped as Cinder endpoint is not available" %
-                                                            cls.__name__)
+                    cls.__name__)
         try:
             cls.volumes_client.keystone_auth(cls.os.username,
                                              cls.os.password,

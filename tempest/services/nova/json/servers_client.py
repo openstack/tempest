@@ -40,10 +40,10 @@ class ServersClientJSON(RestClient):
         }
 
         for option in ['personality', 'adminPass', 'key_name',
-                        'security_groups', 'networks', 'user_data',
-                        'availability_zone', 'accessIPv4', 'accessIPv6',
-                        'min_count', 'max_count', ('metadata', 'meta'),
-                        ('OS-DCF:diskConfig', 'disk_config')]:
+                       'security_groups', 'networks', 'user_data',
+                       'availability_zone', 'accessIPv4', 'accessIPv6',
+                       'min_count', 'max_count', ('metadata', 'meta'),
+                       ('OS-DCF:diskConfig', 'disk_config')]:
             if isinstance(option, tuple):
                 post_param = option[0]
                 key = option[1]
@@ -86,7 +86,7 @@ class ServersClientJSON(RestClient):
 
         post_body = json.dumps({'server': post_body})
         resp, body = self.put("servers/%s" % str(server_id),
-                                     post_body, self.headers)
+                              post_body, self.headers)
         body = json.loads(body)
         return resp, body['server']
 
@@ -180,7 +180,7 @@ class ServersClientJSON(RestClient):
     def list_addresses_by_network(self, server_id, network_id):
         """Lists all addresses of a specific network type for a server"""
         resp, body = self.get("servers/%s/ips/%s" %
-                                    (str(server_id), network_id))
+                              (str(server_id), network_id))
         body = json.loads(body)
         return resp, body
 
@@ -194,7 +194,7 @@ class ServersClientJSON(RestClient):
 
         post_body = json.dumps(post_body)
         return self.post('servers/%s/action' % str(server_id),
-                                post_body, self.headers)
+                         post_body, self.headers)
 
     def reboot(self, server_id, reboot_type):
         """Reboots a server"""
@@ -206,7 +206,7 @@ class ServersClientJSON(RestClient):
 
         post_body = json.dumps(post_body)
         return self.post('servers/%s/action' % str(server_id),
-                                post_body, self.headers)
+                         post_body, self.headers)
 
     def rebuild(self, server_id, image_ref, name=None, meta=None,
                 personality=None, adminPass=None, disk_config=None):
@@ -231,9 +231,8 @@ class ServersClientJSON(RestClient):
             post_body['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps({'rebuild': post_body})
-        resp, body = self.post('servers/%s/action' %
-                                      str(server_id), post_body,
-                                      self.headers)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body, self.headers)
         body = json.loads(body)
         return resp, body['server']
 
@@ -249,8 +248,8 @@ class ServersClientJSON(RestClient):
             post_body['resize']['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/action' %
-                                      str(server_id), post_body, self.headers)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body, self.headers)
         return resp, body
 
     def confirm_resize(self, server_id):
@@ -260,8 +259,8 @@ class ServersClientJSON(RestClient):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/action' %
-                                      str(server_id), post_body, self.headers)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body, self.headers)
         return resp, body
 
     def revert_resize(self, server_id):
@@ -271,8 +270,8 @@ class ServersClientJSON(RestClient):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/action' %
-                                      str(server_id), post_body, self.headers)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body, self.headers)
         return resp, body
 
     def create_image(self, server_id, image_name):
@@ -284,8 +283,8 @@ class ServersClientJSON(RestClient):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/action' %
-                                      str(server_id), post_body, self.headers)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body, self.headers)
         return resp, body
 
     def list_server_metadata(self, server_id):
@@ -295,35 +294,33 @@ class ServersClientJSON(RestClient):
 
     def set_server_metadata(self, server_id, meta):
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.put('servers/%s/metadata' %
-                                     str(server_id), post_body, self.headers)
+        resp, body = self.put('servers/%s/metadata' % str(server_id),
+                              post_body, self.headers)
         body = json.loads(body)
         return resp, body['metadata']
 
     def update_server_metadata(self, server_id, meta):
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.post('servers/%s/metadata' %
-                                     str(server_id), post_body, self.headers)
+        resp, body = self.post('servers/%s/metadata' % str(server_id),
+                               post_body, self.headers)
         body = json.loads(body)
         return resp, body['metadata']
 
     def get_server_metadata_item(self, server_id, key):
-        resp, body = self.get("servers/%s/metadata/%s" %
-                                    (str(server_id), key))
+        resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key))
         body = json.loads(body)
         return resp, body['meta']
 
     def set_server_metadata_item(self, server_id, key, meta):
         post_body = json.dumps({'meta': meta})
-        resp, body = self.put('servers/%s/metadata/%s' %
-                                    (str(server_id), key),
-                                    post_body, self.headers)
+        resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
+                              post_body, self.headers)
         body = json.loads(body)
         return resp, body['meta']
 
     def delete_server_metadata_item(self, server_id, key):
         resp, body = self.delete("servers/%s/metadata/%s" %
-                                    (str(server_id), key))
+                                 (str(server_id), key))
         return resp, body
 
     def stop(self, server_id):
@@ -363,7 +360,7 @@ class ServersClientJSON(RestClient):
         }
         post_body = json.dumps(post_body)
         return self.post('servers/%s/action' % server_id,
-                                post_body, self.headers)
+                         post_body, self.headers)
 
     def remove_security_group(self, server_id, security_group_name):
         """Removes a security group from the server"""
@@ -374,4 +371,4 @@ class ServersClientJSON(RestClient):
         }
         post_body = json.dumps(post_body)
         return self.post('servers/%s/action' % server_id,
-                                post_body, self.headers)
+                         post_body, self.headers)

@@ -180,13 +180,13 @@ def bash_openstack(manager,
     cases = _create_cases(choice_spec)
     state = ClusterState(max_vms=max_vms)
     create_initial_keypairs(manager, state,
-                             int(kwargs.get('initial_keypairs', 0)))
+                            int(kwargs.get('initial_keypairs', 0)))
     create_initial_vms(manager, state,
                        int(kwargs.get('initial_vms', 0)))
     create_initial_floating_ips(manager, state,
                                 int(kwargs.get('initial_floating_ips', 0)))
     create_initial_volumes(manager, state,
-                                int(kwargs.get('initial_volumes', 0)))
+                           int(kwargs.get('initial_volumes', 0)))
     test_end_time = time.time() + duration.seconds
 
     retry_list = []

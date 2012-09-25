@@ -158,10 +158,10 @@ class Manager(object):
             self.images_client = IMAGES_CLIENTS[interface](*client_args)
             self.keypairs_client = KEYPAIRS_CLIENTS[interface](*client_args)
             self.flavors_client = FLAVORS_CLIENTS[interface](*client_args)
-            self.extensions_client = \
-                    EXTENSIONS_CLIENTS[interface](*client_args)
-            self.volumes_extensions_client = \
-                    VOLUMES_EXTENSIONS_CLIENTS[interface](*client_args)
+            ext_cli = EXTENSIONS_CLIENTS[interface](*client_args)
+            self.extensions_client = ext_cli
+            vol_ext_cli = VOLUMES_EXTENSIONS_CLIENTS[interface](*client_args)
+            self.volumes_extensions_client = vol_ext_cli
             self.floating_ips_client = FLOAT_CLIENTS[interface](*client_args)
             self.volumes_client = VOLUMES_CLIENTS[interface](*client_args)
             self.admin_client = ADMIN_CLIENT[interface](*client_args)

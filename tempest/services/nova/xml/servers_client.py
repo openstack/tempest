@@ -241,8 +241,9 @@ class ServersClientXML(RestClientXML):
 
     def list_addresses_by_network(self, server_id, network_id):
         """Lists all addresses of a specific network type for a server"""
-        resp, body = self.get("servers/%s/ips/%s" %
-                                    (str(server_id), network_id), self.headers)
+        resp, body = self.get("servers/%s/ips/%s" % (str(server_id),
+                                                     network_id),
+                              self.headers)
         network = self._parse_network(etree.fromstring(body))
 
         return resp, network

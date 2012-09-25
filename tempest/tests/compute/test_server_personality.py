@@ -57,8 +57,8 @@ class ServerPersonalityTestBase(object):
             name = rand_name('server')
             file_contents = 'This is a test file.'
 
-            resp, max_file_limit = self.user_client.\
-                    get_personality_file_limit()
+            cli_resp = self.user_client.get_personality_file_limit()
+            resp, max_file_limit = cli_resp
             self.assertEqual(200, resp.status)
 
             personality = []
@@ -83,7 +83,7 @@ class ServerPersonalityTestBase(object):
 
 
 class ServerPersonalityTestXML(base.BaseComputeTestXML,
-                                ServerPersonalityTestBase):
+                               ServerPersonalityTestBase):
     @classmethod
     def setUpClass(cls):
         cls._interface = "xml"
