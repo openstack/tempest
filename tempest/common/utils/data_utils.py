@@ -5,7 +5,7 @@ from tempest import exceptions
 
 
 def rand_name(name='test'):
-    return name + str(random.randint(1, 99999999999))
+    return name + str(random.randint(1, 999999))
 
 
 def build_url(host, port, api_version=None, path=None,
