@@ -41,7 +41,7 @@ class FlavorsClientJSON(RestClient):
         return resp, body['flavor']
 
     def create_flavor(self, name, ram, vcpus, disk, ephemeral, flavor_id,
-                    swap, rxtx):
+                      swap, rxtx):
         """Creates a new flavor or instance type"""
         post_body = {
                 'name': name,

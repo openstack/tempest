@@ -67,10 +67,10 @@ class FloatingIPDetailsTestBase(object):
             self.assertEqual(200, resp.status)
             #Comparing the details of floating IP
             self.assertEqual(floating_ip_instance_id,
-                            body['instance_id'])
+                             body['instance_id'])
             self.assertEqual(floating_ip_ip, body['ip'])
             self.assertEqual(floating_ip_fixed_ip,
-                            body['fixed_ip'])
+                             body['fixed_ip'])
             self.assertEqual(floating_ip_id, body['id'])
         #Deleting the floating IP created in this method
         finally:
@@ -102,7 +102,7 @@ class FloatingIPDetailsTestBase(object):
 
 
 class FloatingIPDetailsTestJSON(base.BaseComputeTestJSON,
-                            FloatingIPDetailsTestBase):
+                                FloatingIPDetailsTestBase):
     @classmethod
     def setUpClass(cls):
         super(FloatingIPDetailsTestJSON, cls).setUpClass()
@@ -115,7 +115,7 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTestJSON,
 
 
 class FloatingIPDetailsTestXML(base.BaseComputeTestXML,
-                            FloatingIPDetailsTestBase):
+                               FloatingIPDetailsTestBase):
     @classmethod
     def setUpClass(cls):
         super(FloatingIPDetailsTestXML, cls).setUpClass()

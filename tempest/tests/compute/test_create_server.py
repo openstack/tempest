@@ -40,13 +40,14 @@ class ServersTest(object):
         personality = [{'path': '/etc/test.txt',
                        'contents': base64.b64encode(file_contents)}]
         cls.client = cls.servers_client
-        cls.resp, cls.server_initial = cls.client.create_server(cls.name,
-                                                 cls.image_ref,
-                                                 cls.flavor_ref,
-                                                 meta=cls.meta,
-                                                 accessIPv4=cls.accessIPv4,
-                                                 accessIPv6=cls.accessIPv6,
-                                                 personality=personality)
+        cli_resp = cls.client.create_server(cls.name,
+                                            cls.image_ref,
+                                            cls.flavor_ref,
+                                            meta=cls.meta,
+                                            accessIPv4=cls.accessIPv4,
+                                            accessIPv6=cls.accessIPv6,
+                                            personality=personality)
+        cls.resp, cls.server_initial = cli_resp
         cls.password = cls.server_initial['adminPass']
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])

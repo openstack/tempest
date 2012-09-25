@@ -73,9 +73,8 @@ def _get_compute_nodes(keypath, user, controller):
     nodes = []
     if keypath is None or user is None:
         return nodes
-    lines = utils.util.ssh(keypath, user, controller,
-                     "nova-manage service list | grep ^nova-compute").\
-                     split('\n')
+    cmd = "nova-manage service list | grep ^nova-compute"
+    lines = utils.util.ssh(keypath, user, controller, cmd).split('\n')
     # For example: nova-compute xg11eth0 nova enabled :-) 2011-10-31 18:57:46
     # This is fragile but there is, at present, no other way to get this info.
     for line in lines:

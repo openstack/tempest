@@ -42,7 +42,7 @@ class TenantsTestBase(object):
     def test_list_tenants_by_unauthorized_user(self):
         """Non-admin user should not be able to list tenants"""
         self.assertRaises(exceptions.Unauthorized,
-                self.non_admin_client.list_tenants)
+                          self.non_admin_client.list_tenants)
 
     def test_list_tenant_request_without_token(self):
         """Request to list tenants without a valid token should fail"""
@@ -74,7 +74,7 @@ class TenantsTestBase(object):
         tenant_name = rand_name('tenant-')
         resp, tenant = self.client.create_tenant(tenant_name)
         self.assertRaises(exceptions.Unauthorized,
-                self.non_admin_client.delete_tenant, tenant['id'])
+                          self.non_admin_client.delete_tenant, tenant['id'])
 
     def test_tenant_delete_request_without_token(self):
         """Request to delete a tenant without a valid token should fail"""
@@ -83,13 +83,13 @@ class TenantsTestBase(object):
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.delete_tenant,
-                         tenant['id'])
+                          tenant['id'])
         self.client.clear_auth()
 
     def test_delete_non_existent_tenant(self):
         """Attempt to delete a non existent tenant should fail"""
         self.assertRaises(exceptions.NotFound, self.client.delete_tenant,
-                         'junk_tenant_123456abc')
+                          'junk_tenant_123456abc')
 
     def test_tenant_create_with_description(self):
         """Create tenant with a description"""
@@ -102,11 +102,11 @@ class TenantsTestBase(object):
         desc1 = body['description']
         self.assertTrue(st1.startswith('2'))
         self.assertEqual(desc1, tenant_desc, 'Description should have '
-                        'been sent in response for create')
+                         'been sent in response for create')
         resp, body = self.client.get_tenant(tenant_id)
         desc2 = body['description']
         self.assertEqual(desc2, tenant_desc, 'Description does not appear'
-                        'to be set')
+                         'to be set')
         self.client.delete_tenant(tenant_id)
 
     def test_tenant_create_enabled(self):
@@ -158,7 +158,7 @@ class TenantsTestBase(object):
         """Non-admin user should not be authorized to create a tenant"""
         tenant_name = rand_name('tenant-')
         self.assertRaises(exceptions.Unauthorized,
-                         self.non_admin_client.create_tenant, tenant_name)
+                          self.non_admin_client.create_tenant, tenant_name)
 
     def test_create_tenant_request_without_token(self):
         """Create tenant request without a token should not be authorized"""
@@ -166,7 +166,7 @@ class TenantsTestBase(object):
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.create_tenant,
-                         tenant_name)
+                          tenant_name)
         self.client.clear_auth()
 
     def test_create_tenant_with_empty_name(self):
@@ -178,7 +178,7 @@ class TenantsTestBase(object):
         """Tenant name length should not be greater than 64 characters"""
         tenant_name = 'a' * 65
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
-                         tenant_name)
+                          tenant_name)
 
     def test_tenant_update_name(self):
         """Update name attribute of a tenant"""

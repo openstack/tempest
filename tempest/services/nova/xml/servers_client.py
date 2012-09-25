@@ -197,9 +197,9 @@ class ServersClientXML(RestClientXML):
             timed_out = int(time.time()) - start >= self.build_timeout
 
             if server_status != status and timed_out:
-                message = 'Server %s failed to reach %s status within the '\
-                'required time (%s s).' % (server_id, status,
-                                          self.build_timeout)
+                message = ('Server %s failed to reach %s status within the '
+                           'required time (%s s).' %
+                           (server_id, status, self.build_timeout))
                 message += ' Current status: %s.' % server_status
                 raise exceptions.TimeoutException(message)
 

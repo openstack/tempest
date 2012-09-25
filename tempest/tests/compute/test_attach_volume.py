@@ -46,9 +46,9 @@ class AttachVolumeTest(object):
 
         # Start a server and wait for it to become ready
         resp, server = self.servers_client.create_server(name,
-                                                   self.image_ref,
-                                                   self.flavor_ref,
-                                                   adminPass='password')
+                                                         self.image_ref,
+                                                         self.flavor_ref,
+                                                         adminPass='password')
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Record addresses so that we can ssh later
@@ -62,7 +62,7 @@ class AttachVolumeTest(object):
 
         # Attach the volume to the server
         self.servers_client.attach_volume(server['id'], volume['id'],
-                                    device='/dev/%s' % self.device)
+                                          device='/dev/%s' % self.device)
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
 
         return server, volume

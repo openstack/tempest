@@ -74,7 +74,7 @@ class FlavorsTestBase(object):
         params = {'marker': flavor_id}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
-                        'The list of flavors did not start after the marker.')
+                         'The list of flavors did not start after the marker.')
 
     @attr(type='positive')
     def test_list_flavors_detailed_using_marker(self):
@@ -85,7 +85,7 @@ class FlavorsTestBase(object):
         params = {'marker': flavor_id}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
-                        'The list of flavors did not start after the marker.')
+                         'The list of flavors did not start after the marker.')
 
     @attr(type='positive')
     def test_list_flavors_detailed_filter_by_min_disk(self):
@@ -135,7 +135,7 @@ class FlavorsTestBase(object):
     def test_get_flavor_details_for_invalid_flavor_id(self):
         """Ensure 404 returned for non-existant flavor ID"""
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
-                        9999)
+                          9999)
 
 
 class FlavorsTestXML(base.BaseComputeTestXML,

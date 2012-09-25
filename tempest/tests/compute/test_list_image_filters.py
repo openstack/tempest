@@ -127,11 +127,11 @@ class ListImageFiltersTest(BaseComputeTest):
             resp, images = self.client.list_images(params)
 
             self.assertFalse(any([i for i in images
-                            if i['id'] == self.image1_id]))
+                                  if i['id'] == self.image1_id]))
             self.assertFalse(any([i for i in images
-                            if i['id'] == self.image2_id]))
+                                  if i['id'] == self.image2_id]))
             self.assertTrue(any([i for i in images
-                            if i['id'] == self.image3_id]))
+                                 if i['id'] == self.image3_id]))
 
     @attr(type='positive')
     def test_list_images_filter_by_type(self):
@@ -209,11 +209,11 @@ class ListImageFiltersTest(BaseComputeTest):
             resp, images = self.client.list_images_with_detail(params)
 
             self.assertFalse(any([i for i in images
-                            if i['id'] == self.image1_id]))
+                                  if i['id'] == self.image1_id]))
             self.assertFalse(any([i for i in images
-                            if i['id'] == self.image2_id]))
+                                  if i['id'] == self.image2_id]))
             self.assertTrue(any([i for i in images
-                            if i['id'] == self.image3_id]))
+                                 if i['id'] == self.image3_id]))
 
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_type(self):

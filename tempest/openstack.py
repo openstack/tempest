@@ -226,9 +226,9 @@ class IdentityManager(Manager):
     def __init__(self, interface='json'):
         conf = config.TempestConfig()
         super(IdentityManager, self).__init__(conf.identity_admin.username,
-                                         conf.identity_admin.password,
-                                         conf.identity_admin.tenant_name,
-                                         interface)
+                                              conf.identity_admin.password,
+                                              conf.identity_admin.tenant_name,
+                                              interface)
 
 
 class IdentityNaManager(Manager):
@@ -241,6 +241,6 @@ class IdentityNaManager(Manager):
     def __init__(self, interface='json'):
         conf = config.TempestConfig()
         super(IdentityNaManager, self).__init__(conf.compute.username,
-                                         conf.compute.password,
-                                         conf.compute.tenant_name,
-                                         interface)
+                                                conf.compute.password,
+                                                conf.compute.tenant_name,
+                                                interface)

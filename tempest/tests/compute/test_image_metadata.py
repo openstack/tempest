@@ -159,7 +159,7 @@ class ImagesMetadataTest(BaseComputeTest):
         meta = {'key1': 'alt'}
         try:
             resp, body = self.client.set_image_metadata_item(999,
-                                                            'key1', meta)
+                                                             'key1', meta)
             resp, metadata = self.client.list_image_metadata(999)
         except exceptions.NotFound:
             pass

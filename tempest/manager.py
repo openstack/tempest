@@ -127,10 +127,11 @@ class DefaultClientManager(Manager):
         client_args = (username, password, tenant_name, auth_url)
 
         # Create our default Nova client to use in testing
+        service_type = self.config.compute.catalog_type,
         return novaclient.client.Client(self.NOVACLIENT_VERSION,
-                        *client_args,
-                        service_type=self.config.compute.catalog_type,
-                        no_cache=True)
+                                        *client_args,
+                                        service_type=service_type,
+                                        no_cache=True)
 
     def _get_image_client(self):
         keystone = self._get_identity_client()

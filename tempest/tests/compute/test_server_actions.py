@@ -205,9 +205,11 @@ class ServerActionsTestBase(object):
                         'contents': base64.b64encode(file_contents)}]
         try:
             resp, rebuilt_server = self.client.rebuild(999,
-                                       self.image_ref_alt, name=new_name,
-                                       meta=meta, personality=personality,
-                                       adminPass='rebuild')
+                                                       self.image_ref_alt,
+                                                       name=new_name,
+                                                       meta=meta,
+                                                       personality=personality,
+                                                       adminPass='rebuild')
         except exceptions.NotFound:
             pass
         else:

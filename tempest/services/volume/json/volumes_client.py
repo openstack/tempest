@@ -29,7 +29,7 @@ class VolumesClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
         super(VolumesClientJSON, self).__init__(config, username, password,
-                                           auth_url, tenant_name)
+                                                auth_url, tenant_name)
 
         self.service = self.config.volume.catalog_type
         self.build_interval = self.config.volume.build_interval
@@ -126,9 +126,9 @@ class VolumesClientJSON(RestClient):
                 raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
 
             if int(time.time()) - start >= self.build_timeout:
-                message = 'Volume %s failed to reach %s status within '\
-                'the required time (%s s).' % (volume_name, status,
-                                              self.build_timeout)
+                message = ('Volume %s failed to reach %s status within '
+                           'the required time (%s s).' %
+                           (volume_name, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
 
     def is_resource_deleted(self, id):

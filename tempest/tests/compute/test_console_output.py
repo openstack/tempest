@@ -32,8 +32,8 @@ class ConsoleOutputTest(BaseComputeTest):
         cls.servers_client = cls.servers_client
         cls.name = rand_name('server')
         resp, server = cls.servers_client.create_server(cls.name,
-                                                 cls.image_ref,
-                                                 cls.flavor_ref)
+                                                        cls.image_ref,
+                                                        cls.flavor_ref)
         cls.server_id = server['id']
 
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')

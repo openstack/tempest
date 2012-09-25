@@ -82,13 +82,13 @@ class VerifyChangeFloatingIp(pending_action.PendingAction):
             conn.close()
             if self.add:
                 self._logger.info('%s added [%.1f secs elapsed]' %
-                          (self.floating_ip.address, self.elapsed()))
+                                  (self.floating_ip.address, self.elapsed()))
                 self.floating_ip.change_pending = False
                 return True
         except:
             if not self.add:
                 self._logger.info('%s removed [%.1f secs elapsed]' %
-                          (self.floating_ip.address, self.elapsed()))
+                                  (self.floating_ip.address, self.elapsed()))
                 self.floating_ip.change_pending = False
                 self.floating_ip.server_id = None
                 return True

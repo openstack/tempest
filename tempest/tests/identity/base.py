@@ -101,9 +101,9 @@ class DataGenerator(object):
             self.test_password = rand_name('pass_')
             self.test_email = self.test_user + '@testmail.tm'
             resp, self.user = self.client.create_user(self.test_user,
-                                                    self.test_password,
-                                                    self.tenant['id'],
-                                                    self.test_email)
+                                                      self.test_password,
+                                                      self.tenant['id'],
+                                                      self.test_email)
             self.users.append(self.user)
 
         def setup_test_tenant(self):

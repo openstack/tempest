@@ -38,8 +38,10 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
         cls.connection, cls.meta = cls.get_db_handle_and_meta()
 
         resp, tenants = cls.admin_client.list_tenants()
-        cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
-                        cls.config.compute.tenant_name][0]
+        cls.tenant_id = [
+            tnt['id']
+            for tnt in tenants if tnt['name'] == cls.config.compute.tenant_name
+        ][0]
 
         cls.shared_server = cls.create_server()
 
@@ -62,8 +64,9 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
         if not result:
             cores_hard_limit = 2
             stmt = quotas.insert().values(deleted=0,
-                                project_id=self.tenant_id, resource='cores',
-                                hard_limit=cores_hard_limit)
+                                          project_id=self.tenant_id,
+                                          resource='cores',
+                                          hard_limit=cores_hard_limit)
 
             self.connection.execute(stmt, autocommit=True)
         else:
@@ -93,8 +96,9 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
         if not result:
             ram_hard_limit = 1024
             stmt = quotas.insert().values(deleted=0,
-                                project_id=self.tenant_id, resource='ram',
-                                hard_limit=ram_hard_limit)
+                                          project_id=self.tenant_id,
+                                          resource='ram',
+                                          hard_limit=ram_hard_limit)
 
             self.connection.execute(stmt, autocommit=True)
         else:
@@ -158,10 +162,11 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
             self.update_state(self.shared_server['id'], vm_state, task_state)
 
             self.assertRaises(exceptions.Unauthorized,
-                           self.client.delete_server, self.shared_server['id'])
+                              self.client.delete_server,
+                              self.shared_server['id'])
         except:
             self.fail("Should not allow delete server when vm_state=%s and "
-                    "task_state=%s" % (vm_state, task_state))
+                      "task_state=%s" % (vm_state, task_state))
         finally:
             self.update_state(self.shared_server['id'], 'active', None)
 

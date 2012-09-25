@@ -75,8 +75,8 @@ class AdminClientJSON(RestClient):
 
     def remove_user_role(self, tenant_id, user_id, role_id):
         """Removes a role assignment for a user on a tenant"""
-        return self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s'
-               % (tenant_id, user_id, role_id))
+        return self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
+                           (tenant_id, user_id, role_id))
 
     def delete_tenant(self, tenant_id):
         """Delete a tenant"""
@@ -157,7 +157,7 @@ class AdminClientJSON(RestClient):
         }
         put_body = json.dumps({'user': put_body})
         resp, body = self.put('users/%s/enabled' % user_id,
-                put_body, self.headers)
+                              put_body, self.headers)
         body = json.loads(body)
         return resp, body
 

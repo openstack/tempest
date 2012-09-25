@@ -31,8 +31,8 @@ class ServerAddressesTest(BaseComputeTest):
 
         cls.name = rand_name('server')
         resp, cls.server = cls.client.create_server(cls.name,
-                                                 cls.image_ref,
-                                                 cls.flavor_ref)
+                                                    cls.image_ref,
+                                                    cls.flavor_ref)
         cls.client.wait_for_server_status(cls.server['id'], 'ACTIVE')
 
     @classmethod

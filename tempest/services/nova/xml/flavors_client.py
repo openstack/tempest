@@ -68,7 +68,7 @@ class FlavorsClientXML(RestClientXML):
         return resp, flavor
 
     def create_flavor(self, name, ram, vcpus, disk, ephemeral, flavor_id,
-                    swap, rxtx):
+                      swap, rxtx):
         """Creates a new flavor or instance type"""
         flavor = Element("flavor",
                          xmlns=XMLNS_11,

@@ -193,15 +193,15 @@ class FloatingIPsTestBase(object):
         except exceptions.NotFound:
             pass
         else:
-            self.fail('The floating IP should be associated to the second'
-                    'server')
+            self.fail('The floating IP should be associated to the second '
+                      'server')
         if (resp['status'] is not None):
             #Dissociation of the floating IP associated in this method
             resp, _ = \
             self.client.disassociate_floating_ip_from_server(
                 self.floating_ip,
                 self.new_server_id)
-       #Deletion of server created in this method
+        #Deletion of server created in this method
         resp, body = self.servers_client.delete_server(self.new_server_id)
 
     @unittest.skip("Skipped until the Bug #957706 is resolved")

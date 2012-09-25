@@ -407,9 +407,8 @@ class TempestConfig:
 
         # Environment variables override defaults...
         conf_dir = os.environ.get('TEMPEST_CONFIG_DIR',
-            self.DEFAULT_CONFIG_DIR)
-        conf_file = os.environ.get('TEMPEST_CONFIG',
-            self.DEFAULT_CONFIG_FILE)
+                                  self.DEFAULT_CONFIG_DIR)
+        conf_file = os.environ.get('TEMPEST_CONFIG', self.DEFAULT_CONFIG_FILE)
 
         path = os.path.join(conf_dir, conf_file)
 

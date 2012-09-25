@@ -69,9 +69,10 @@ class KeyPairsTestBase(object):
         private_key = keypair['private_key']
         key_name = keypair['name']
         self.assertEqual(key_name, k_name,
-                "The created keypair name is not equal to the requested name")
+                         "The created keypair name is not equal "
+                         "to the requested name")
         self.assertTrue(private_key is not None,
-                    "Field private_key is empty or not found.")
+                        "Field private_key is empty or not found.")
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 
@@ -87,10 +88,11 @@ class KeyPairsTestBase(object):
             self.assertTrue('name' in keypair_detail)
             self.assertTrue('public_key' in keypair_detail)
             self.assertEqual(keypair_detail['name'], k_name,
-                    "The created keypair name is not equal to requested name")
+                             "The created keypair name is not equal "
+                             "to requested name")
             public_key = keypair_detail['public_key']
             self.assertTrue(public_key is not None,
-                        "Field public_key is empty or not found.")
+                            "Field public_key is empty or not found.")
         except:
             self.fail("GET keypair details requested by keypair name"
                         " has failed")
@@ -114,10 +116,11 @@ class KeyPairsTestBase(object):
         resp, keypair = self.client.create_keypair(k_name, pub_key)
         self.assertEqual(200, resp.status)
         self.assertFalse('private_key' in keypair,
-                    "Field private_key is not empty!")
+                         "Field private_key is not empty!")
         key_name = keypair['name']
         self.assertEqual(key_name, k_name,
-                "The created keypair name is not equal to the requested name!")
+                         "The created keypair name is not equal "
+                         "to the requested name!")
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 

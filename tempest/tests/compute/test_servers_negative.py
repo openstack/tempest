@@ -122,8 +122,8 @@ class ServersNegativeTest(BaseComputeTest):
         """Reboot a deleted server"""
         self.name = rand_name('server')
         resp, create_server = self.client.create_server(self.name,
-                                                 self.image_ref,
-                                                 self.flavor_ref)
+                                                        self.image_ref,
+                                                        self.flavor_ref)
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
@@ -139,14 +139,14 @@ class ServersNegativeTest(BaseComputeTest):
         """Rebuild a deleted server"""
         self.name = rand_name('server')
         resp, create_server = self.client.create_server(self.name,
-                                                 self.image_ref,
-                                                 self.flavor_ref)
+                                                        self.image_ref,
+                                                        self.flavor_ref)
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
         try:
             resp1, rebuild_server = self.client.rebuild(self.server_id,
-                                                self.image_ref_alt)
+                                                        self.image_ref_alt)
         except exceptions.NotFound:
             pass
         else:
@@ -176,8 +176,8 @@ class ServersNegativeTest(BaseComputeTest):
         networks = [{'fixed_ip': '10.0.1.1', 'uuid':'a-b-c-d-e-f-g-h-i-j'}]
 
         self.assertRaises(exceptions.BadRequest, self.client.create_server,
-                         server_name, self.image_ref, self.flavor_ref,
-                         networks=networks)
+                          server_name, self.image_ref, self.flavor_ref,
+                          networks=networks)
 
     @attr(type='negative')
     def test_create_with_non_existant_keypair(self):
@@ -186,8 +186,8 @@ class ServersNegativeTest(BaseComputeTest):
         key_name = rand_name('key')
         server_name = rand_name('server')
         self.assertRaises(exceptions.BadRequest, self.client.create_server,
-                        server_name, self.image_ref, self.flavor_ref,
-                        key_name=key_name)
+                          server_name, self.image_ref, self.flavor_ref,
+                          key_name=key_name)
 
     @unittest.skip("Until Bug 1004007 is fixed")
     @attr(type='negative')
@@ -197,8 +197,8 @@ class ServersNegativeTest(BaseComputeTest):
         server_name = rand_name('server')
         metadata = {'a': 'b' * 260}
         self.assertRaises(exceptions.OverLimit, self.client.create_server,
-                        server_name, self.image_ref, self.flavor_ref,
-                        meta=metadata)
+                          server_name, self.image_ref, self.flavor_ref,
+                          meta=metadata)
 
     @attr(type='negative')
     def test_update_name_of_non_existent_server(self):
@@ -208,7 +208,7 @@ class ServersNegativeTest(BaseComputeTest):
         new_name = rand_name('server') + '_updated'
 
         self.assertRaises(exceptions.NotFound, self.client.update_server,
-                        server_name, name=new_name)
+                          server_name, name=new_name)
 
     @attr(type='negative')
     def test_update_server_set_empty_name(self):
@@ -218,7 +218,7 @@ class ServersNegativeTest(BaseComputeTest):
         new_name = ''
 
         self.assertRaises(exceptions.BadRequest, self.client.update_server,
-                        server_name, name=new_name)
+                          server_name, name=new_name)
 
     @attr(type='negative')
     def test_update_server_of_another_tenant(self):
@@ -227,8 +227,8 @@ class ServersNegativeTest(BaseComputeTest):
         server = self.create_server()
         new_name = server['id'] + '_new'
         self.assertRaises(exceptions.NotFound,
-                        self.alt_client.update_server, server['id'],
-                        name=new_name)
+                          self.alt_client.update_server, server['id'],
+                          name=new_name)
 
     @attr(type='negative')
     def test_update_server_name_length_exceeds_256(self):
@@ -237,14 +237,16 @@ class ServersNegativeTest(BaseComputeTest):
         server = self.create_server()
         new_name = 'a' * 256
         self.assertRaises(exceptions.BadRequest,
-                        self.client.update_server, server['id'], name=new_name)
+                          self.client.update_server,
+                          server['id'],
+                          name=new_name)
 
     @attr(type='negative')
     def test_delete_non_existent_server(self):
         """Delete a non existent server"""
 
         self.assertRaises(exceptions.NotFound, self.client.delete_server,
-                        '999erra43')
+                          '999erra43')
 
     @attr(type='negative')
     def test_delete_a_server_of_another_tenant(self):
@@ -261,8 +263,7 @@ class ServersNegativeTest(BaseComputeTest):
     def test_delete_server_pass_negative_id(self):
         """Pass an invalid string parameter to delete server"""
 
-        self.assertRaises(exceptions.NotFound, self.client.delete_server,
-                        -1)
+        self.assertRaises(exceptions.NotFound, self.client.delete_server, -1)
 
     @attr(type='negative')
     def test_delete_server_pass_id_exceeding_length_limit(self):

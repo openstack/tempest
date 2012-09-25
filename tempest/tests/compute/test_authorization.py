@@ -220,8 +220,8 @@ class AuthorizationTest(BaseComputeTest):
             self.alt_keypairs_client.base_url = self.saved_base_url
             if (resp['status'] is not None):
                 resp, _ = self.alt_keypairs_client.delete_keypair(k_name)
-                self.fail("Create keypair request should not happen if the"
-                        " tenant id does not match the current user")
+                self.fail("Create keypair request should not happen "
+                          "if the tenant id does not match the current user")
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
@@ -369,7 +369,7 @@ class AuthorizationTest(BaseComputeTest):
         """ A get metadata for another user's image should fail """
         req_metadata = {'meta1': 'value1'}
         self.images_client.set_image_metadata(self.image['id'],
-                                             req_metadata)
+                                              req_metadata)
         try:
             resp, meta = \
             self.alt_images_client.get_image_metadata_item(self.image['id'],

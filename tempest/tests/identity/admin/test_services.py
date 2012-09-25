@@ -66,8 +66,7 @@ class ServicesTestBase(object):
                               service_data['id'])
 
 
-class ServicesTestJSON(base.BaseIdentityAdminTestJSON,
-                      ServicesTestBase):
+class ServicesTestJSON(base.BaseIdentityAdminTestJSON, ServicesTestBase):
     @classmethod
     def setUpClass(cls):
         super(ServicesTestJSON, cls).setUpClass()

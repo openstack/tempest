@@ -37,9 +37,10 @@ class VolumesGetTestBase(object):
             self.assertTrue('id' in volume)
             self.assertTrue('displayName' in volume)
             self.assertEqual(volume['displayName'], v_name,
-            "The created volume name is not equal to the requested name")
+                             "The created volume name is not equal "
+                             "to the requested name")
             self.assertTrue(volume['id'] is not None,
-            "Field volume id is empty or not found.")
+                            "Field volume id is empty or not found.")
             #Wait for Volume status to become ACTIVE
             self.client.wait_for_volume_status(volume['id'], 'available')
             #GET Volume

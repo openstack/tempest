@@ -138,8 +138,8 @@ class ImagesTestBase(object):
         """Return error when creating an image of a server that is building"""
         server_name = rand_name('test-vm-')
         resp, server = self.servers_client.create_server(server_name,
-                                                       self.image_ref,
-                                                       self.flavor_ref)
+                                                         self.image_ref,
+                                                         self.flavor_ref)
         self.servers.append(server)
         snapshot_name = rand_name('test-snap-')
         self.assertRaises(exceptions.Duplicate, self.client.create_image,
@@ -164,7 +164,7 @@ class ImagesTestBase(object):
 
         snapshot_name = rand_name('test-snap-')
         self.assertRaises(exceptions.Duplicate, self.client.create_image,
-                         server['id'], snapshot_name)
+                          server['id'], snapshot_name)
 
     @attr(type='negative')
     def test_create_second_image_when_first_image_is_being_saved(self):
@@ -197,7 +197,7 @@ class ImagesTestBase(object):
         try:
             snapshot_name = rand_name('a' * 260)
             self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          server['id'], snapshot_name)
+                              server['id'], snapshot_name)
         except:
             self.fail("Should return 400 Bad Request if image name is over 256"
                       " characters")
@@ -235,8 +235,8 @@ class ImagesTestBase(object):
         try:
             snapshot_name = rand_name('\xef\xbb\xbf')
             self.assertRaises(exceptions.BadRequest,
-                             self.client.create_image, server['id'],
-                             snapshot_name)
+                              self.client.create_image, server['id'],
+                              snapshot_name)
         except:
             self.fail("Should return 400 Bad Request if multi byte characters"
                       " are used for image name")
@@ -310,7 +310,7 @@ class ImagesTestBase(object):
         image_id = '11a22b9-120q-5555-cc11-00ab112223gj'
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                             image_id)
+                              image_id)
         except:
             self.fail("Did not return HTTP 404 NotFound for non hex image")
 
@@ -322,8 +322,7 @@ class ImagesTestBase(object):
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
                               -1)
         except:
-            self.fail("Did not return HTTP 404 NotFound for negative image "
-            "id")
+            self.fail("Did not return HTTP 404 NotFound for negative image id")
 
     @attr(type='negative')
     def test_delete_image_id_is_over_35_character_limit(self):
@@ -352,7 +351,7 @@ class ImagesTestBase(object):
 
         # Delete image
         self.assertRaises(exceptions.NotFound,
-                         self.alt_client.delete_image, image_id)
+                          self.alt_client.delete_image, image_id)
 
     @attr(type='negative')
     def test_delete_image_that_is_not_yet_active(self):

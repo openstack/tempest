@@ -154,8 +154,8 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         #Todo(rohitk): Need to define host connection parameters in config
         else:
             client = self.get_ssh_connection(self.config.whitebox.api_host,
-                                            self.config.whitebox.api_user,
-                                            self.config.whitebox.api_passwd)
+                                             self.config.whitebox.api_user,
+                                             self.config.whitebox.api_passwd)
             result = client.exec_command(cmd)
 
         return result

@@ -34,15 +34,14 @@ class ServerPersonalityTestBase(object):
         name = rand_name('server')
         file_contents = 'This is a test file.'
         personality = []
-        resp, max_file_limit = self.user_client.get_personality_file_limit()
+        _, max_file_limit = self.user_client.get_personality_file_limit()
         for i in range(0, max_file_limit + 1):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
                                 'contents': base64.b64encode(file_contents)})
         try:
-            resp, resp_body = self.client.create_server(name, self.image_ref,
-                                                   self.flavor_ref,
-                                                   personality=personality)
+            self.client.create_server(name, self.image_ref, self.flavor_ref,
+                                      personality=personality)
         except exceptions.OverLimit:
             pass
         else:
@@ -65,12 +64,14 @@ class ServerPersonalityTestBase(object):
             personality = []
             for i in range(0, max_file_limit):
                 path = 'etc/test' + str(i) + '.txt'
-                personality.append({'path': path,
-                                'contents': base64.b64encode(file_contents)})
+                personality.append({
+                    'path': path,
+                    'contents': base64.b64encode(file_contents),
+                })
 
             resp, server = self.client.create_server(name, self.image_ref,
-                                               self.flavor_ref,
-                                               personality=personality)
+                                                     self.flavor_ref,
+                                                     personality=personality)
             self.assertEqual('202', resp['status'])
 
         except Exception:
@@ -92,7 +93,7 @@ class ServerPersonalityTestXML(base.BaseComputeTestXML,
 
 
 class ServerPersonalityTestJSON(base.BaseComputeTestJSON,
-                               ServerPersonalityTestBase):
+                                ServerPersonalityTestBase):
     @classmethod
     def setUpClass(cls):
         cls._interface = "json"

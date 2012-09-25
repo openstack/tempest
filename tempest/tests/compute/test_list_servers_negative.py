@@ -61,8 +61,9 @@ class ListServersNegativeTest(BaseComputeTest):
         """Returns active test instances to calling test methods"""
         resp, body = self.client.list_servers_with_detail()
         servers = body['servers']
-        active_servers = [server for server in servers if server['status'] ==
-                        'ACTIVE']
+        active_servers = [
+            server for server in servers if server['status'] == 'ACTIVE'
+        ]
         num_of_active_servers = len(active_servers)
 
         # Check if we already have enough active servers
@@ -117,7 +118,7 @@ class ListServersNegativeTest(BaseComputeTest):
             # Create a snapshot of the server
             snapshot_name = "%s_snapshot" % base_server['id']
             resp, body = self.client.create_image(base_server['id'],
-                                                 snapshot_name)
+                                                  snapshot_name)
             snapshot_url = resp['location']
             match = re.search('/images/(?P<image_id>.+)', snapshot_url)
             self.assertIsNotNone(match)
@@ -141,8 +142,8 @@ class ListServersNegativeTest(BaseComputeTest):
             resp, body = self.client.list_servers({'image': snapshot_id})
             servers = body['servers']
             self.assertEqual('200', resp['status'])
-            self.assertIn(snap_server['id'], [server['id'] for server in
-                         servers])
+            self.assertIn(snap_server['id'],
+                          [server['id'] for server in servers])
             self.assertEqual(1, len(body['servers']))
 
         finally:
@@ -152,19 +153,19 @@ class ListServersNegativeTest(BaseComputeTest):
     def test_list_servers_by_non_existing_image(self):
         """Listing servers for a non existing image raises error"""
         self.assertRaises(exceptions.NotFound, self.client.list_servers,
-                         {'image': '1234abcd-zzz0-aaa9-ppp3-0987654abcde'})
+                          {'image': '1234abcd-zzz0-aaa9-ppp3-0987654abcde'})
 
     @unittest.skip("Until Bug 1002911 is fixed")
     def test_list_servers_by_image_pass_overlimit_image(self):
         """Return an error while listing server with too large image id"""
         self.assertRaises(exceptions.OverLimit, self.client.list_servers,
-                         {'image': sys.maxint + 1})
+                          {'image': sys.maxint + 1})
 
     @unittest.skip("Until Bug 1002911 is fixed")
     def test_list_servers_by_image_pass_negative_id(self):
         """Return an error while listing server with negative image id"""
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                         {'image': -1})
+                          {'image': -1})
 
     def test_list_servers_by_existing_flavor(self):
         """List servers by flavor"""
@@ -178,25 +179,25 @@ class ListServersNegativeTest(BaseComputeTest):
     def test_list_servers_by_non_existing_flavor(self):
         """Return an error while listing server by non existing flavor"""
         self.assertRaises(exceptions.NotFound, self.client.list_servers,
-                        {'flavor': 1234})
+                          {'flavor': 1234})
 
     @unittest.skip("Until Bug 1002918 is fixed")
     def test_list_servers_by_flavor_pass_overlimit_flavor(self):
         """Return an error while listing server with too large flavor value"""
         self.assertRaises(exceptions.OverLimit, self.client.list_servers,
-                        {'flavor': sys.maxint + 1})
+                          {'flavor': sys.maxint + 1})
 
     @unittest.skip("Until Bug 1002918 is fixed")
     def test_list_servers_by_flavor_pass_negative_value(self):
         """Return an error while listing server with negative flavor value"""
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                         {'flavor': -1})
+                          {'flavor': -1})
 
     def test_list_servers_by_server_name(self):
         """Returns a list of servers containing an existing server name"""
         server_name = rand_name('test-vm-')
         resp, server = self.client.create_server(server_name, self.image_ref,
-                                                self.flavor_ref)
+                                                 self.flavor_ref)
         self.servers.append(server['id'])
 
         resp, body = self.client.list_servers({'name': server_name})
@@ -214,19 +215,19 @@ class ListServersNegativeTest(BaseComputeTest):
     def test_list_servers_by_server_name_empty(self):
         """Return an error when an empty server name is passed"""
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                        {'name': ''})
+                          {'name': ''})
 
     @unittest.skip("Until Bug 1002892 is fixed")
     def test_list_servers_by_server_name_too_large(self):
         """Return an error for a very large value for server name listing"""
         self.assertRaises(exceptions.OverLimit, self.client.list_servers,
-                        {'name': 'a' * 65})
+                          {'name': 'a' * 65})
 
     @unittest.skip("Until Bug 1002892 is fixed")
     def test_list_servers_by_name_pass_numeric_name(self):
         """Return an error for a numeric server name listing"""
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                        {'name': 99})
+                          {'name': 99})
 
     def test_list_servers_by_active_status(self):
         """Return a listing of servers by active status"""
@@ -239,7 +240,7 @@ class ListServersNegativeTest(BaseComputeTest):
         """Return a listing of servers in build state"""
         server_name = rand_name('test-vm-')
         resp, server = self.client.create_server(server_name, self.image_ref,
-                                                self.flavor_ref)
+                                                 self.flavor_ref)
         self.servers.append(server['id'])
         resp, body = self.client.list_servers({'status': 'BUILD'})
         self.assertEqual('200', resp['status'])
@@ -256,7 +257,7 @@ class ListServersNegativeTest(BaseComputeTest):
     def test_list_servers_pass_numeric_status(self):
         """Return an error when a numeric value for status is specified"""
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                         {'status': 1})
+                          {'status': 1})
 
     def test_list_servers_by_limits(self):
         """List servers by specifying limits"""
@@ -275,18 +276,18 @@ class ListServersNegativeTest(BaseComputeTest):
     def test_list_servers_by_limits_pass_string(self):
         """Return an error if a string value is passed for limit"""
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                         {'limit': 'testing'})
+                          {'limit': 'testing'})
 
     def test_list_servers_by_limits_pass_negative_value(self):
         """Return an error if a negative value for limit is passed"""
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                         {'limit': -1})
+                          {'limit': -1})
 
     @unittest.skip("Until Bug 1002924 is fixed")
     def test_list_servers_by_limits_pass_overlimit_value(self):
         """Return an error if too large value for limit is passed"""
         self.assertRaises(exceptions.OverLimit, self.client.list_servers,
-                         {'limit': sys.maxint + 1})
+                          {'limit': sys.maxint + 1})
 
     def test_list_servers_by_changes_since(self):
         """Servers are listed by specifying changes-since date"""
@@ -318,7 +319,7 @@ class ListServersNegativeTest(BaseComputeTest):
 
         # List the servers by alternate user in the base user's tenant
         self.assertRaises(exceptions.NotFound, self.alt_client.list_servers,
-                         {'name': server_name})
+                          {'name': server_name})
 
     def test_list_servers_detail_when_no_servers_running(self):
         """Return an empty list for servers detail when no active servers"""
@@ -363,7 +364,7 @@ class ListServersNegativeTest(BaseComputeTest):
     def test_get_server_details_non_existent_id(self):
         """Return an error during get server details using non-existent id"""
         self.assertRaises(exceptions.NotFound, self.client.get_server,
-                         'junk-123ab-45cd')
+                          'junk-123ab-45cd')
 
     def test_get_server_details_another_tenant_server(self):
         """Return an error when querying details of server in another tenant"""
@@ -378,7 +379,7 @@ class ListServersNegativeTest(BaseComputeTest):
         """Return an error when a string value is passed for uuid"""
         try:
             self.assertRaises(exceptions.NotFound, self.client.get_server,
-                             'junk-server-uuid')
+                              'junk-server-uuid')
         except Exception as e:
             self.fail("Incorrect Exception raised: %s" % e)
 
@@ -387,7 +388,7 @@ class ListServersNegativeTest(BaseComputeTest):
         """Return an error when a negative value is passed for uuid"""
         try:
             self.assertRaises(exceptions.BadRequest, self.client.get_server,
-                             -1)
+                              -1)
         except Exception as e:
             self.fail("Incorrect Exception raised: %s" % e)
 

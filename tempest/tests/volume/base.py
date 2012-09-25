@@ -124,9 +124,10 @@ class BaseVolumeTest(unittest.TestCase):
     def create_volume(self, size=1, metadata={}):
         """Wrapper utility that returns a test volume"""
         display_name = rand_name(self.__class__.__name__ + "-volume")
-        resp, volume = self.volumes_client.create_volume(size=size,
-                                                    display_name=display_name,
-                                                    metdata=metadata)
+        cli_resp = self.volumes_client.create_volume(size=size,
+                                                     display_name=display_name,
+                                                     metdata=metadata)
+        resp, volume = cli_resp
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         self.volumes.append(volume)
         return volume

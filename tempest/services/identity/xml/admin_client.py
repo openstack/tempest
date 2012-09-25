@@ -110,8 +110,8 @@ class AdminClientXML(RestClientXML):
 
     def remove_user_role(self, tenant_id, user_id, role_id):
         """Removes a role assignment for a user on a tenant"""
-        return self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s'
-               % (tenant_id, user_id, role_id), self.headers)
+        return self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
+                           (tenant_id, user_id, role_id), self.headers)
 
     def delete_tenant(self, tenant_id):
         """Delete a tenant"""
@@ -184,7 +184,7 @@ class AdminClientXML(RestClientXML):
         enable_user = Element("user",
                                 enabled=str(enabled).lower())
         resp, body = self.put('users/%s/enabled' % user_id,
-                str(Document(enable_user)), self.headers)
+                              str(Document(enable_user)), self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
@@ -203,10 +203,10 @@ class AdminClientXML(RestClientXML):
         """Create a service"""
         OS_KSADM = "http://docs.openstack.org/identity/api/ext/OS-KSADM/v1.0"
         create_service = Element("service",
-                                xmlns=OS_KSADM,
-                                name=name,
-                                type=type,
-                                description=kwargs.get('description'))
+                                 xmlns=OS_KSADM,
+                                 name=name,
+                                 type=type,
+                                 description=kwargs.get('description'))
         resp, body = self.post('OS-KSADM/services',
                                str(Document(create_service)),
                                     self.headers)
@@ -233,8 +233,8 @@ class TokenClientXML(RestClientXML):
 
     def auth(self, user, password, tenant):
         passwordCreds = Element("passwordCredentials",
-                         username=user,
-                         password=password)
+                                username=user,
+                                password=password)
         auth = Element("auth",
                                 tenantName=tenant)
         auth.append(passwordCreds)
