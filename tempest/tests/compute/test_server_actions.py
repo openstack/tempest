@@ -185,16 +185,15 @@ class ServerActionsTestBase(object):
                 raise exceptions.TimeoutException(message)
 
     @attr(type='negative')
-    def test_reboot_nonexistant_server_soft(self):
+    def test_reboot_nonexistent_server_soft(self):
         """
-        Negative Test: The server reboot on non existant server should return
+        Negative Test: The server reboot on non existent server should return
         an error
         """
         self.assertRaises(exceptions.NotFound, self.client.reboot, 999, 'SOFT')
 
-    @unittest.skip('Until bug 963248 is fixed.')
     @attr(type='negative')
-    def test_rebuild_nonexistant_server(self):
+    def test_rebuild_nonexistent_server(self):
         """
         Negative test: The server rebuild for a non existing server should not
         be allowed
