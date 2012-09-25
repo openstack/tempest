@@ -20,15 +20,10 @@ from nose.tools import raises
 
 from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class VolumesNegativeTest(BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        super(VolumesNegativeTest, cls).setUpClass()
-        cls.client = cls.volumes_extensions_client
+class VolumesNegativeTestBase(object):
 
     @attr(type='negative')
     def test_volume_get_nonexistant_volume_id(self):
@@ -140,3 +135,21 @@ class VolumesNegativeTest(BaseComputeTest):
         Negative: Should not be able to delete volume when empty ID is passed
         """
         resp, volume = self.client.delete_volume('')
+
+
+class VolumesNegativeTestXML(base.BaseComputeTestXML,
+                                VolumesNegativeTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(VolumesNegativeTestXML, cls).setUpClass()
+        cls.client = cls.volumes_extensions_client
+
+
+class VolumesNegativeTestJSON(base.BaseComputeTestJSON,
+                                VolumesNegativeTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(VolumesNegativeTestJSON, cls).setUpClass()
+        cls.client = cls.volumes_extensions_client
