@@ -187,7 +187,7 @@ class FloatingIPsTestBase(object):
 
         #Make sure no longer associated with old server
         try:
-            self.client.disassociate_floating_ip_from_server(\
+            self.client.disassociate_floating_ip_from_server(
                 self.floating_ip,
                 self.server_id)
         except exceptions.NotFound:
@@ -198,7 +198,7 @@ class FloatingIPsTestBase(object):
         if (resp['status'] != None):
             #Dissociation of the floating IP associated in this method
             resp, _ = \
-            self.client.disassociate_floating_ip_from_server(\
+            self.client.disassociate_floating_ip_from_server(
                 self.floating_ip,
                 self.new_server_id)
        #Deletion of server created in this method
