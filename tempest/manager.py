@@ -157,7 +157,7 @@ class DefaultClientManager(Manager):
         return keystoneclient.v2_0.client.Client(username=username,
                                                  password=password,
                                                  tenant_name=tenant_name,
-                                                 endpoint=auth_url)
+                                                 auth_url=auth_url)
 
     def _get_network_client(self):
         # TODO(mnewby) add network-specific auth configuration
