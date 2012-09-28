@@ -92,6 +92,25 @@ class VolumesClientJSON(RestClient):
         """Deletes the Specified Volume"""
         return self.delete("volumes/%s" % str(volume_id))
 
+    def attach_volume(self, volume_id, instance_uuid, mountpoint):
+        """Attaches a volume to a given instance on a given mountpoint"""
+        post_body = {
+                    'instance_uuid': instance_uuid,
+                    'mountpoint': mountpoint
+                    }
+        post_body = json.dumps({'os-attach': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body, self.headers)
+        return resp, body
+
+    def detach_volume(self, volume_id):
+        """Detaches a volume from an instance"""
+        post_body = {}
+        post_body = json.dumps({'os-detach': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body, self.headers)
+        return resp, body
+
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status"""
         resp, body = self.get_volume(volume_id)
