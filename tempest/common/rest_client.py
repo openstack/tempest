@@ -107,12 +107,13 @@ class RestClient(object):
         Provides authentication via Keystone
         """
 
-        creds = {'auth': {
+        creds = {
+            'auth': {
                 'passwordCredentials': {
                     'username': user,
                     'password': password,
                 },
-                'tenantName': tenant_name
+                'tenantName': tenant_name,
             }
         }
 

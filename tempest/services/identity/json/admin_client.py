@@ -207,12 +207,13 @@ class TokenClientJSON(RestClient):
         self.auth_url = config.identity.auth_url
 
     def auth(self, user, password, tenant):
-        creds = {'auth': {
+        creds = {
+            'auth': {
                 'passwordCredentials': {
                     'username': user,
                     'password': password,
                 },
-                'tenantName': tenant
+                'tenantName': tenant,
             }
         }
         headers = {'Content-Type': 'application/json'}

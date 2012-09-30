@@ -101,7 +101,7 @@ class DefaultClientManager(Manager):
             'image_client',
             'identity_client',
             'network_client',
-            ]
+        ]
 
     def _get_compute_client(self, username=None, password=None,
                             tenant_name=None):

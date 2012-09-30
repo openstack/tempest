@@ -335,12 +335,12 @@ class ServersClientJSON(RestClient):
 
     def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
         """Attaches a volume to a server instance"""
-        post_body = json.dumps(
-            {'volumeAttachment': {
-                    'volumeId': volume_id,
-                    'device': device,
-                    }
-             })
+        post_body = json.dumps({
+            'volumeAttachment': {
+                'volumeId': volume_id,
+                'device': device,
+            }
+        })
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
                                post_body, self.headers)
         return resp, body

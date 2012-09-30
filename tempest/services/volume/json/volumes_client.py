@@ -81,7 +81,7 @@ class VolumesClientJSON(RestClient):
             'size': size,
             'display_name': kwargs.get('display_name'),
             'metadata': kwargs.get('metadata'),
-            }
+        }
 
         post_body = json.dumps({'volume': post_body})
         resp, body = self.post('volumes', post_body, self.headers)
@@ -95,9 +95,9 @@ class VolumesClientJSON(RestClient):
     def attach_volume(self, volume_id, instance_uuid, mountpoint):
         """Attaches a volume to a given instance on a given mountpoint"""
         post_body = {
-                    'instance_uuid': instance_uuid,
-                    'mountpoint': mountpoint
-                    }
+            'instance_uuid': instance_uuid,
+            'mountpoint': mountpoint,
+        }
         post_body = json.dumps({'os-attach': post_body})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body, self.headers)

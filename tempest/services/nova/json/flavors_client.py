@@ -44,15 +44,15 @@ class FlavorsClientJSON(RestClient):
                       swap, rxtx):
         """Creates a new flavor or instance type"""
         post_body = {
-                'name': name,
-                'ram': ram,
-                'vcpus': vcpus,
-                'disk': disk,
-                'OS-FLV-EXT-DATA:ephemeral': ephemeral,
-                'id': flavor_id,
-                'swap': swap,
-                'rxtx_factor': rxtx
-            }
+            'name': name,
+            'ram': ram,
+            'vcpus': vcpus,
+            'disk': disk,
+            'OS-FLV-EXT-DATA:ephemeral': ephemeral,
+            'id': flavor_id,
+            'swap': swap,
+            'rxtx_factor': rxtx,
+        }
 
         post_body = json.dumps({'flavor': post_body})
         resp, body = self.post('flavors', post_body, self.headers)

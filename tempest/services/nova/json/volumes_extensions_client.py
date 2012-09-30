@@ -61,7 +61,7 @@ class VolumesExtensionsClientJSON(RestClient):
             'size': size,
             'display_name': kwargs.get('display_name'),
             'metadata': kwargs.get('metadata'),
-            }
+        }
 
         post_body = json.dumps({'volume': post_body})
         resp, body = self.post('os-volumes', post_body, self.headers)

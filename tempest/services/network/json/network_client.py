@@ -17,8 +17,8 @@ class NetworkClient(RestClient):
     def create_network(self, name, key="network"):
         post_body = {
             key: {
-              'name': name
-             }
+                'name': name,
+            }
         }
         headers = {'Content-Type': 'application/json'}
         body = json.dumps(post_body)

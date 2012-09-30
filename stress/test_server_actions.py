@@ -117,8 +117,7 @@ class VerifyRebootVM(pending_action.PendingServerAction):
                 self._logger.info('machine %s ACTIVE -> %s' %
                                   (self._target['id'], reboot_state))
                 self._state.set_instance_state(self._target['id'],
-                                              (self._target, reboot_state)
-                                              )
+                                               (self._target, reboot_state))
                 self._retry_state = self.States.ACTIVE_CHECK
             elif server_state == 'ACTIVE':
                 # machine must have gone ACTIVE -> REBOOT ->ACTIVE

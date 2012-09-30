@@ -36,7 +36,7 @@ logging.basicConfig(
     filename="stress.debug.log",
     filemode="w",
     level=logging.DEBUG,
-    )
+)
 
 # define a Handler which writes INFO messages or higher to the sys.stdout
 _console = logging.StreamHandler()

@@ -67,20 +67,19 @@ class TestCreateVM(test_case.StressTestCase):
             'metadata': {
                 'key1': 'value1',
                 'key2': 'value2',
-                },
+            },
             'imageRef': _image_ref,
             'flavorRef': _flavor_ref,
             'adminPass': 'testpwd',
-            'key_name': _key_name
-            }
+            'key_name': _key_name,
+        }
         TestCreateVM._vm_id = TestCreateVM._vm_id + 1
-        response, body = manager.servers_client.create_server(
-                                         expected_server['name'],
-                                         _image_ref,
-                                         _flavor_ref,
-                                         meta=expected_server['metadata'],
-                                         adminPass=expected_server['adminPass']
-                                         )
+        create_server = manager.servers_client.create_server
+        response, body = create_server(expected_server['name'],
+                                       _image_ref,
+                                       _flavor_ref,
+                                       meta=expected_server['metadata'],
+                                       adminPass=expected_server['adminPass'])
 
         if (response.status != 202):
             self._logger.error("response: %s" % response)
