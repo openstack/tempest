@@ -138,8 +138,8 @@ class RestClient(object):
                     tenant_id = auth_data['token']['tenant']['id']
                     break
 
-                elif ep["type"] == service and ep['name'] == 'cinder' \
-                    and service == 'volume':
+                elif (ep["type"] == service and ep['name'] == 'cinder' and
+                      service == 'volume'):
                     mgmt_url = ep['endpoints'][self.region][self.endpoint_url]
                     tenant_id = auth_data['token']['tenant']['id']
                     break

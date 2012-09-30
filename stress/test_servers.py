@@ -118,9 +118,9 @@ class VerifyCreateVM(pending_action.PendingServerAction):
         """
         # don't run create verification
         # if target machine has been deleted or is going to be deleted
+        target_id = self._target['id']
         if (self._target['id'] not in self._state.get_instances().keys() or
-            self._state.get_instances()[self._target['id']][1] ==
-            'TERMINATING'):
+            self._state.get_instances()[target_id][1] == 'TERMINATING'):
             self._logger.info('machine %s is deleted or TERMINATING' %
                               self._target['id'])
             return True
@@ -299,9 +299,9 @@ class VerifyUpdateVMName(pending_action.PendingServerAction):
         """
         # don't run update verification
         # if target machine has been deleted or is going to be deleted
+        target_id = self._target['id']
         if (not self._target['id'] in self._state.get_instances().keys() or
-            self._state.get_instances()[self._target['id']][1] ==
-            'TERMINATING'):
+            self._state.get_instances()[target_id][1] == 'TERMINATING'):
             return False
 
         response, body = \

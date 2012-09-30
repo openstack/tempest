@@ -103,9 +103,9 @@ class VerifyRebootVM(pending_action.PendingServerAction):
         """
         # don't run reboot verification if target machine has been
         # deleted or is going to be deleted
+        target_id = self._target['id']
         if (self._target['id'] not in self._state.get_instances().keys() or
-            self._state.get_instances()[self._target['id']][1] ==
-            'TERMINATING'):
+            self._state.get_instances()[target_id][1] == 'TERMINATING'):
             self._logger.debug('machine %s is deleted or TERMINATING' %
                                self._target['id'])
             return True
