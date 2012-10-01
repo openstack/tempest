@@ -30,7 +30,6 @@ class ListServerFiltersTest(object):
 
     @staticmethod
     def setUpClass(cls):
-        raise nose.SkipTest("Until Bug 1039753 is fixed")
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...
@@ -208,6 +207,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTestJSON,
                                 ListServerFiltersTest):
     @classmethod
     def setUpClass(cls):
+        raise nose.SkipTest("Until Bug 1039753 is fixed")
         super(ListServerFiltersTestJSON, cls).setUpClass()
         ListServerFiltersTest.setUpClass(cls)
 
@@ -221,6 +221,7 @@ class ListServerFiltersTestXML(base.BaseComputeTestXML,
                                ListServerFiltersTest):
     @classmethod
     def setUpClass(cls):
+        raise nose.SkipTest("Until Bug 1039753 is fixed")
         super(ListServerFiltersTestXML, cls).setUpClass()
         ListServerFiltersTest.setUpClass(cls)
 
