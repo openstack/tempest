@@ -111,7 +111,7 @@ class BaseCompTest(unittest.TestCase):
                 msg = ('Unable to create isolated tenant %s because ' +
                        'it already exists. If this is related to a ' +
                        'previous test failure, try using ' +
-                       'allow_tentant_reuse in tempest.conf') % tenant_name
+                       'allow_tenant_reuse in tempest.conf') % tenant_name
                 raise exceptions.Duplicate(msg)
 
         try:
@@ -125,10 +125,10 @@ class BaseCompTest(unittest.TestCase):
                                                          username)
                 LOG.info('Re-using existing user %s' % user)
             else:
-                msg = ('Unable to create isolated tenant %s because ' +
+                msg = ('Unable to create isolated user %s because ' +
                        'it already exists. If this is related to a ' +
                        'previous test failure, try using ' +
-                       'allow_tentant_reuse in tempest.conf') % tenant_name
+                       'allow_tenant_reuse in tempest.conf') % tenant_name
                 raise exceptions.Duplicate(msg)
 
         # Store the complete creds (including UUID ids...) for later
@@ -149,19 +149,14 @@ class BaseCompTest(unittest.TestCase):
             admin_client.delete_tenant(tenant['id'])
 
     @classmethod
-    def clear_remaining_servers(cls):
-        # NOTE(danms): Only nuke all left-over servers if we're in our
-        # own isolated tenant
-        if not cls.isolated_creds:
-            return
-        resp, servers = cls.servers_client.list_servers()
-        for server in servers['servers']:
+    def clear_servers(cls):
+        for server in cls.servers:
             try:
                 cls.servers_client.delete_server(server['id'])
             except Exception:
                 pass
 
-        for server in servers['servers']:
+        for server in cls.servers:
             try:
                 cls.servers_client.wait_for_server_termination(server['id'])
             except Exception:
@@ -169,20 +164,21 @@ class BaseCompTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.clear_remaining_servers()
+        cls.clear_servers()
         cls.clear_isolated_creds()
 
-    def create_server(self, image_id=None):
+    @classmethod
+    def create_server(cls, image_id=None):
         """Wrapper utility that returns a test server"""
-        server_name = rand_name(self.__class__.__name__ + "-instance")
-        flavor = self.flavor_ref
+        server_name = rand_name(cls.__name__ + "-instance")
+        flavor = cls.flavor_ref
         if not image_id:
-            image_id = self.image_ref
+            image_id = cls.image_ref
 
-        resp, server = self.servers_client.create_server(
+        resp, server = cls.servers_client.create_server(
                                                 server_name, image_id, flavor)
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
-        self.servers.append(server)
+        cls.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        cls.servers.append(server)
         return server
 
     def wait_for(self, condition):
