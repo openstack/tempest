@@ -17,6 +17,7 @@
 
 from nose.plugins.attrib import attr
 from nose.tools import raises
+from nose import SkipTest
 import unittest2 as unittest
 
 from tempest import openstack
@@ -32,7 +33,7 @@ class AuthorizationTest(BaseComputeTest):
     def setUpClass(cls):
         if not compute.MULTI_USER:
             msg = "Need >1 user"
-            raise nose.SkipTest(msg)
+            raise SkipTest(msg)
 
         super(AuthorizationTest, cls).setUpClass()
 
