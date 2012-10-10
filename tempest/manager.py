@@ -21,7 +21,10 @@ import logging
 import glanceclient
 import keystoneclient.v2_0.client
 import novaclient.client
-import quantumclient.v2_0.client
+try:
+    import quantumclient.v2_0.client
+except ImportError:
+    pass
 
 import tempest.config
 from tempest import exceptions
