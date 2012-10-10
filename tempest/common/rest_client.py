@@ -241,6 +241,11 @@ class RestClient(object):
             elif 'error' in resp_body:  # Keystone errors
                 message = resp_body['error']['message']
                 raise exceptions.IdentityError(message)
+            elif 'message' in resp_body:
+                message = resp_body['message']
+            else:
+                message = resp_body
+
             raise exceptions.ComputeFault(message)
 
         if resp.status >= 400:
