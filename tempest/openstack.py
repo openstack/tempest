@@ -53,6 +53,9 @@ from tempest.services.nova.xml.volumes_extensions_client \
 import VolumesExtensionsClientXML
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
+from tempest.services.object_storage.account_client import AccountClient
+from tempest.services.object_storage.container_client import ContainerClient
+from tempest.services.object_storage.object_client import ObjectClient
 
 
 LOG = logging.getLogger(__name__)
@@ -179,6 +182,9 @@ class Manager(object):
             raise exceptions.InvalidConfiguration(msg)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.network_client = NetworkClient(*client_args)
+        self.account_client = AccountClient(*client_args)
+        self.container_client = ContainerClient(*client_args)
+        self.object_client = ObjectClient(*client_args)
 
 
 class AltManager(Manager):

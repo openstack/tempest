@@ -1,3 +1,20 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2012 OpenStack, LLC
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 import random
 import re
 import urllib
@@ -44,3 +61,27 @@ def parse_image_id(image_ref):
     temp = image_ref.rsplit('/')
     #Return the last item, which is the image id
     return temp[len(temp) - 1]
+
+
+def arbitrary_string(size=4, base_text=None):
+    """Return exactly size bytes worth of base_text as a string"""
+
+    if (base_text is None) or (base_text == ''):
+        base_text = 'test'
+
+    if size <= 0:
+        return ''
+
+    extra = size % len(base_text)
+    body = ''
+
+    if extra == 0:
+        body = base_text * size
+
+    if extra == size:
+        body = base_text[:size]
+
+    if extra > 0 and extra < size:
+        body = (size / len(base_text)) * base_text + base_text[:extra]
+
+    return body

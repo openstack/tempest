@@ -199,3 +199,18 @@ build_interval = 10
 # Number of seconds to time out on waiting for a volume
 # to be available or reach an expected status
 build_timeout = 300
+
+[object-storage]
+# This section contains configuration options used when executing tests
+# against the OpenStack Object Storage API.
+# This should be the username of a user WITHOUT administrative privileges
+username = admin
+# The above non-administrative user's password
+password = password
+# The above non-administrative user's tenant name
+tenant_name = admin
+
+# The type of endpoint for an Object Storage API service. Unless you have a
+# custom Keystone service catalog implementation, you probably want to leave
+# this value as "object-store"
+catalog_type = object-store

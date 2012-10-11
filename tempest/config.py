@@ -378,6 +378,31 @@ class VolumeConfig(BaseConfig):
         return self.get("catalog_type", 'volume')
 
 
+class ObjectStorageConfig(BaseConfig):
+
+    SECTION_NAME = "object-storage"
+
+    @property
+    def username(self):
+        """Username to use for Object-Storage API requests."""
+        return self.get("username", "admin")
+
+    @property
+    def tenant_name(self):
+        """Tenant name to use for Object-Storage API requests."""
+        return self.get("tenant_name", "admin")
+
+    @property
+    def password(self):
+        """API key to use when authenticating."""
+        return self.get("password", "password")
+
+    @property
+    def catalog_type(self):
+        """Catalog type of the Object-Storage service."""
+        return self.get("catalog_type", 'object-store')
+
+
 # TODO(jaypipes): Move this to a common utils (not data_utils...)
 def singleton(cls):
     """Simple wrapper for classes that should only have a single instance"""
@@ -426,6 +451,7 @@ class TempestConfig:
         self.images = ImagesConfig(self._conf)
         self.network = NetworkConfig(self._conf)
         self.volume = VolumeConfig(self._conf)
+        self.object_storage = ObjectStorageConfig(self._conf)
 
     def load_config(self, path):
         """Read configuration from given path and return a config object."""

@@ -171,6 +171,9 @@ class RestClient(object):
     def put(self, url, body, headers):
         return self.request('PUT', url, headers, body)
 
+    def head(self, url, headers=None):
+        return self.request('HEAD', url, headers=None)
+
     def _log(self, req_url, body, resp, resp_body):
         self.log.error('Request URL: ' + req_url)
         self.log.error('Request Body: ' + str(body))
