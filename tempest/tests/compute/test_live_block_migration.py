@@ -26,8 +26,8 @@ from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import config
 from tempest import exceptions
 
-from tempest.services.nova.json.hosts_client import HostsClientJSON
-from tempest.services.nova.json.servers_client import ServersClientJSON
+from tempest.services.compute.json.hosts_client import HostsClientJSON
+from tempest.services.compute.json.servers_client import ServersClientJSON
 
 
 @attr(category='live-migration')

@@ -22,7 +22,7 @@ from lxml import etree
 import time
 
 from tempest import exceptions
-from tempest.services.nova.xml.common import xml_to_json
+from tempest.services.compute.xml.common import xml_to_json
 
 # redrive rate limited calls at most twice
 MAX_RECURSION_DEPTH = 2

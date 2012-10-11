@@ -31,16 +31,16 @@ from tempest import exceptions
 # Tempest REST Fuzz testing client libs
 from tempest.services.network.json import network_client
 from tempest.services.volume.json import volumes_client
-from tempest.services.nova.json import images_client
-from tempest.services.nova.json import flavors_client
-from tempest.services.nova.json import servers_client
-from tempest.services.nova.json import limits_client
-from tempest.services.nova.json import extensions_client
-from tempest.services.nova.json import security_groups_client
-from tempest.services.nova.json import floating_ips_client
-from tempest.services.nova.json import keypairs_client
-from tempest.services.nova.json import volumes_extensions_client
-from tempest.services.nova.json import console_output_client
+from tempest.services.compute.json import images_client
+from tempest.services.compute.json import flavors_client
+from tempest.services.compute.json import servers_client
+from tempest.services.compute.json import limits_client
+from tempest.services.compute.json import extensions_client
+from tempest.services.compute.json import security_groups_client
+from tempest.services.compute.json import floating_ips_client
+from tempest.services.compute.json import keypairs_client
+from tempest.services.compute.json import volumes_extensions_client
+from tempest.services.compute.json import console_output_client
 
 NetworkClient = network_client.NetworkClient
 ImagesClient = images_client.ImagesClientJSON

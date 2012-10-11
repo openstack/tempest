@@ -25,31 +25,32 @@ from tempest.services.identity.xml.admin_client import AdminClientXML
 from tempest.services.identity.xml.admin_client import TokenClientXML
 from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
-from tempest.services.nova.json.extensions_client import ExtensionsClientJSON
-from tempest.services.nova.json.flavors_client import FlavorsClientJSON
-from tempest.services.nova.json.floating_ips_client import \
+from tempest.services.compute.json.extensions_client import \
+ExtensionsClientJSON
+from tempest.services.compute.json.flavors_client import FlavorsClientJSON
+from tempest.services.compute.json.floating_ips_client import \
 FloatingIPsClientJSON
-from tempest.services.nova.json.images_client import ImagesClientJSON
-from tempest.services.nova.json.limits_client import LimitsClientJSON
-from tempest.services.nova.json.servers_client import ServersClientJSON
-from tempest.services.nova.json.security_groups_client \
+from tempest.services.compute.json.images_client import ImagesClientJSON
+from tempest.services.compute.json.limits_client import LimitsClientJSON
+from tempest.services.compute.json.servers_client import ServersClientJSON
+from tempest.services.compute.json.security_groups_client \
 import SecurityGroupsClientJSON
-from tempest.services.nova.json.keypairs_client import KeyPairsClientJSON
-from tempest.services.nova.json.volumes_extensions_client \
+from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
+from tempest.services.compute.json.volumes_extensions_client \
 import VolumesExtensionsClientJSON
-from tempest.services.nova.json.console_output_client \
+from tempest.services.compute.json.console_output_client \
 import ConsoleOutputsClient
-from tempest.services.nova.xml.extensions_client import ExtensionsClientXML
-from tempest.services.nova.xml.flavors_client import FlavorsClientXML
-from tempest.services.nova.xml.floating_ips_client import \
+from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
+from tempest.services.compute.xml.flavors_client import FlavorsClientXML
+from tempest.services.compute.xml.floating_ips_client import \
 FloatingIPsClientXML
-from tempest.services.nova.xml.images_client import ImagesClientXML
-from tempest.services.nova.xml.keypairs_client import KeyPairsClientXML
-from tempest.services.nova.xml.limits_client import LimitsClientXML
-from tempest.services.nova.xml.security_groups_client \
+from tempest.services.compute.xml.images_client import ImagesClientXML
+from tempest.services.compute.xml.keypairs_client import KeyPairsClientXML
+from tempest.services.compute.xml.limits_client import LimitsClientXML
+from tempest.services.compute.xml.security_groups_client \
 import SecurityGroupsClientXML
-from tempest.services.nova.xml.servers_client import ServersClientXML
-from tempest.services.nova.xml.volumes_extensions_client \
+from tempest.services.compute.xml.servers_client import ServersClientXML
+from tempest.services.compute.xml.volumes_extensions_client \
 import VolumesExtensionsClientXML
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
