@@ -16,7 +16,6 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-
 from tempest import exceptions
 from tempest.tests.compute import base
 
@@ -94,7 +93,7 @@ class FlavorsTestBase(object):
         flavors = sorted(flavors, key=lambda k: k['disk'])
         flavor_id = flavors[0]['id']
 
-        params = {'minDisk': flavors[1]['disk']}
+        params = {'minDisk': flavors[0]['disk'] + 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
@@ -116,7 +115,7 @@ class FlavorsTestBase(object):
         flavors = sorted(flavors, key=lambda k: k['disk'])
         flavor_id = flavors[0]['id']
 
-        params = {'minDisk': flavors[1]['disk']}
+        params = {'minDisk': flavors[0]['disk'] + 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
