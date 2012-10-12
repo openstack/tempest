@@ -191,6 +191,17 @@ class ComputeConfig(BaseConfig):
         return self.get("resize_available", 'false').lower() != 'false'
 
     @property
+    def live_migration_available(self):
+        return self.get(
+            "live_migration_available", 'false').lower() == 'true'
+
+    @property
+    def use_block_migration_for_live_migration(self):
+        return self.get(
+            "use_block_migration_for_live_migration", 'false'
+        ).lower() == 'true'
+
+    @property
     def change_password_available(self):
         """Does the test environment support changing the admin password?"""
         return self.get("change_password_available", 'false').lower() != \

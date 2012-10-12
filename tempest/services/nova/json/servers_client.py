@@ -372,3 +372,18 @@ class ServersClientJSON(RestClient):
         post_body = json.dumps(post_body)
         return self.post('servers/%s/action' % server_id,
                          post_body, self.headers)
+
+    def live_migrate_server(self, server_id, dest_host, use_block_migration):
+        """ This should be called with administrator privileges """
+
+        migrate_params = {
+            "disk_over_commit": False,
+            "block_migration": use_block_migration,
+            "host": dest_host
+        }
+
+        req_body = json.dumps({'os-migrateLive': migrate_params})
+
+        resp, body = self.post("servers/%s/action" % str(server_id),
+                               req_body, self.headers)
+        return resp, body

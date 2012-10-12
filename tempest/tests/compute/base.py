@@ -83,6 +83,16 @@ class BaseCompTest(unittest.TestCase):
         return admin_client
 
     @classmethod
+    def _get_client_args(cls):
+
+        return (
+            cls.config,
+            cls.config.identity_admin.username,
+            cls.config.identity_admin.password,
+            cls.config.identity.auth_url
+        )
+
+    @classmethod
     def _get_isolated_creds(cls):
         """
         Creates a new set of user/tenant/password credentials for a
