@@ -10,6 +10,7 @@ function usage {
   echo "  -f, --force              Force a clean re-build of the virtual environment. Useful when dependencies have been added."
   echo "  -s, --smoke              Only run smoke tests"
   echo "  -w, --whitebox           Only run whitebox tests"
+  echo "  -c, --nova-coverage      Enable Nova coverage collection"
   echo "  -p, --pep8               Just run pep8"
   echo "  -h, --help               Print this usage message"
   echo "  -d, --debug              Debug this script -- set -o xtrace"
@@ -25,6 +26,7 @@ function process_option {
     -s|--no-site-packages) no_site_packages=1;;
     -f|--force) force=1;;
     -d|--debug) set -o xtrace;;
+    -c|--nova-coverage) let nova_coverage=1;;
     -p|--pep8) let just_pep8=1;;
     -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
     -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
@@ -42,7 +44,7 @@ never_venv=0
 no_site_packages=0
 force=0
 wrapper=""
-
+nova_coverage=0
 
 export NOSE_WITH_OPENSTACK=1
 export NOSE_OPENSTACK_COLOR=1
@@ -82,6 +84,16 @@ function run_pep8 {
   ${wrapper} python tools/hacking.py ${ignore} ${srcfiles}
 }
 
+function run_coverage_start {
+  echo "Starting nova-coverage"
+  ${wrapper} python tools/tempest_coverage.py -c start
+}
+
+function run_coverage_report {
+  echo "Generating nova-coverage report"
+  ${wrapper} python tools/tempest_coverage.py -c report
+}
+
 NOSETESTS="nosetests $noseargs"
 
 if [ $never_venv -eq 0 ]
@@ -115,7 +127,15 @@ if [ $just_pep8 -eq 1 ]; then
     exit
 fi
 
-run_tests || exit
+if [ $nova_coverage -eq 1 ]; then
+    run_coverage_start
+fi
+
+run_tests
+
+if [ $nova_coverage -eq 1 ]; then
+    run_coverage_report
+fi
 
 if [ -z "$noseargs" ]; then
   run_pep8
