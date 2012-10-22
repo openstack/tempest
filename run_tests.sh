@@ -43,7 +43,7 @@ function run_tests {
 
 function run_pep8 {
   echo "Running pep8 ..."
-  PEP8_EXCLUDE="kong,etc,include,tools"
+  PEP8_EXCLUDE="etc,include,tools"
   PEP8_OPTIONS="--exclude=$PEP8_EXCLUDE --repeat"
   PEP8_INCLUDE="."
   pep8 $PEP8_OPTIONS $PEP8_INCLUDE
