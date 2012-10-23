@@ -33,7 +33,7 @@ class AccountClient(RestClient):
         Returns all account metadata headers
         """
 
-        headers = {"X-Storage-Token", self.token}
+        headers = {"X-Storage-Token": self.token}
         resp, body = self.head('', headers=headers)
         return resp, body
 
