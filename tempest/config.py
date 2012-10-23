@@ -37,6 +37,12 @@ class BaseConfig(object):
         except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
             return default_value
 
+    def getboolean(self, item_name, default_value=None):
+        try:
+            return self.conf.getboolean(self.SECTION_NAME, item_name)
+        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
+            return default_value
+
 
 class IdentityConfig(BaseConfig):
 
@@ -414,6 +420,80 @@ class ObjectStorageConfig(BaseConfig):
         return self.get("catalog_type", 'object-store')
 
 
+class BotoConfig(BaseConfig):
+    """Provides configuration information for connecting to EC2/S3."""
+    SECTION_NAME = "boto"
+
+    @property
+    def ec2_url(self):
+        """EC2 URL"""
+        return self.get("ec2_url", "http://localhost:8773/services/Cloud")
+
+    @property
+    def s3_url(self):
+        """S3 URL"""
+        return self.get("s3_url", "http://localhost:8080")
+
+    @property
+    def aws_secret(self):
+        """AWS Secret Key"""
+        return self.get("aws_secret")
+
+    @property
+    def aws_access(self):
+        """AWS Access Key"""
+        return self.get("aws_access")
+
+    @property
+    def aws_region(self):
+        """AWS Region"""
+        return self.get("aws_region", "RegionOne")
+
+    @property
+    def s3_materials_path(self):
+        return self.get("s3_materials_path",
+                        "/opt/stack/devstack/files/images/"
+                        "s3-materials/cirros-0.3.0")
+
+    @property
+    def ari_manifest(self):
+        """ARI Ramdisk Image manifest"""
+        return self.get("ari_manifest",
+                        "cirros-0.3.0-x86_64-initrd.manifest.xml")
+
+    @property
+    def ami_manifest(self):
+        """AMI Machine Image manifest"""
+        return self.get("ami_manifest",
+                        "cirros-0.3.0-x86_64-blank.img.manifest.xml")
+
+    @property
+    def aki_manifest(self):
+        """AKI Kernel Image manifest"""
+        return self.get("aki_manifest",
+                        "cirros-0.3.0-x86_64-vmlinuz.manifest.xml")
+
+    @property
+    def instance_type(self):
+        """Instance type"""
+        return self.get("Instance type", "m1.tiny")
+
+    @property
+    def http_socket_timeout(self):
+        """boto Http socket timeout"""
+        return self.get("http_socket_timeout", "3")
+
+    @property
+    def build_timeout(self):
+        """status change timeout"""
+        return float(self.get("build_timeout", "60"))
+
+    @property
+    def build_interval(self):
+        """status change test interval"""
+        return float(self.get("build_interval", 1))
+
+
 # TODO(jaypipes): Move this to a common utils (not data_utils...)
 def singleton(cls):
     """Simple wrapper for classes that should only have a single instance"""
@@ -463,6 +543,7 @@ class TempestConfig:
         self.network = NetworkConfig(self._conf)
         self.volume = VolumeConfig(self._conf)
         self.object_storage = ObjectStorageConfig(self._conf)
+        self.boto = BotoConfig(self._conf)
 
     def load_config(self, path):
         """Read configuration from given path and return a config object."""

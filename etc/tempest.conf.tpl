@@ -191,3 +191,48 @@ tenant_name = %TENANT_NAME%
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "object-store"
 catalog_type = %OBJECT_CATALOG_TYPE%
+
+[boto]
+# This section contains configuration options used when executing tests
+# with boto.
+
+# EC2 URL
+ec2_url = %BOTO_EC2_URL%
+# S3 URL
+s3_url = %BOTO_S3_URL%
+
+# Use keystone ec2-* command to get those values for your test user and tenant
+aws_access = %BOTO_AWS_ACCESS%
+aws_secret = %BOTO_AWS_SECRET%
+
+#Region
+aws_region = %BOTO_AWS_REGION%
+
+#Image materials for S3 upload
+# ALL content of the specified directory will be uploaded to S3
+s3_materials_path = %BOTO_S3_MATERIALS_PATH%
+
+# The manifest.xml files, must be in the s3_materials_path directory
+# Subdirectories not allowed!
+# The filenames will be used as a Keys in the S3 Buckets
+
+#ARI Ramdisk manifest. Must be in the above s3_materials_path directory
+ari_manifest = %BOTO_ARI_MANIFEST%
+
+#AMI Machine Image manifest. Must be in the above s3_materials_path directory
+ami_manifest = %BOTO_AMI_MANIFEST%
+
+#AKI Kernel Image manifest, Must be in the above s3_materials_path directory
+aki_manifest = %BOTO_AKI_MANIFEST%
+
+#Instance type
+instance_type = %BOTO_FLAVOR_NAME%
+
+#TCP/IP connection timeout
+http_socket_timeout = %BOTO_SOCKET_TIMEOUT%
+
+# Status change wait timout
+build_timeout = %BOTO_BUILD_TIMEOUT%
+
+# Status change wait interval
+build_interval = %BOTO_BUILD_INTERVAL%

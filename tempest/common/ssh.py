@@ -20,21 +20,26 @@ import socket
 import warnings
 import select
 
+from cStringIO import StringIO
 from tempest import exceptions
 
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import paramiko
+    from paramiko import RSAKey
 
 
 class Client(object):
 
-    def __init__(self, host, username, password=None, timeout=300,
+    def __init__(self, host, username, password=None, timeout=300, pkey=None,
                  channel_timeout=10, look_for_keys=False, key_filename=None):
         self.host = host
         self.username = username
         self.password = password
+        if isinstance(pkey, basestring):
+            pkey = RSAKey.from_private_key(StringIO(str(pkey)))
+        self.pkey = pkey
         self.look_for_keys = look_for_keys
         self.key_filename = key_filename
         self.timeout = int(timeout)
@@ -55,7 +60,7 @@ class Client(object):
                             password=self.password,
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
-                            timeout=self.timeout)
+                            timeout=self.timeout, pkey=self.pkey)
                 _timeout = False
                 break
             except socket.error:

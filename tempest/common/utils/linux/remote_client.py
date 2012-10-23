@@ -4,25 +4,29 @@ from tempest.common import utils
 from tempest.exceptions import SSHTimeout, ServerUnreachable
 
 import time
+import re
 
 
 class RemoteClient():
 
-    def __init__(self, server, username, password):
+    #Note(afazekas): It should always get an address instead of server
+    def __init__(self, server, username, password=None, pkey=None):
         ssh_timeout = TempestConfig().compute.ssh_timeout
         network = TempestConfig().compute.network_for_ssh
         ip_version = TempestConfig().compute.ip_version_for_ssh
-        addresses = server['addresses'][network]
+        if isinstance(server, basestring):
+            ip_address = server
+        else:
+            addresses = server['addresses'][network]
+            for address in addresses:
+                if address['version'] == ip_version:
+                    ip_address = address['addr']
+                    break
+            else:
+                raise ServerUnreachable()
 
-        for address in addresses:
-            if address['version'] == ip_version:
-                ip_address = address['addr']
-                break
-
-        if ip_address is None:
-            raise ServerUnreachable()
-
-        self.ssh_client = Client(ip_address, username, password, ssh_timeout)
+        self.ssh_client = Client(ip_address, username, password, ssh_timeout,
+                                 pkey=pkey)
         if not self.ssh_client.test_connection_auth():
             raise SSHTimeout()
 
@@ -62,3 +66,9 @@ class RemoteClient():
         boot_time_string = self.ssh_client.exec_command(cmd)
         boot_time_string = boot_time_string.replace('\n', '')
         return time.strptime(boot_time_string, utils.LAST_REBOOT_TIME_FORMAT)
+
+    def write_to_console(self, message):
+        message = re.sub("([$\\`])", "\\\\\\\\\\1", message)
+        # usually to /dev/ttyS0
+        cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
+        return self.ssh_client.exec_command(cmd)
