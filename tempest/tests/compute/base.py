@@ -17,14 +17,13 @@
 
 import logging
 import time
-import nose
 
 import unittest2 as unittest
 import nose
 
 from tempest import config
-from tempest import openstack
 from tempest import exceptions
+from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 
 __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
@@ -61,6 +60,7 @@ class BaseCompTest(unittest.TestCase):
         cls.keypairs_client = os.keypairs_client
         cls.security_groups_client = os.security_groups_client
         cls.console_outputs_client = os.console_outputs_client
+        cls.quotas_client = os.quotas_client
         cls.limits_client = os.limits_client
         cls.volumes_extensions_client = os.volumes_extensions_client
         cls.volumes_client = os.volumes_client
@@ -178,10 +178,12 @@ class BaseCompTest(unittest.TestCase):
         cls.clear_isolated_creds()
 
     @classmethod
-    def create_server(cls, image_id=None):
+    def create_server(cls, image_id=None, flavor=None):
         """Wrapper utility that returns a test server"""
         server_name = rand_name(cls.__name__ + "-instance")
-        flavor = cls.flavor_ref
+
+        if not flavor:
+            flavor = cls.flavor_ref
         if not image_id:
             image_id = cls.image_ref
 
