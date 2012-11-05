@@ -15,13 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import re
-import unittest2 as unittest
-import tempest.config
-
 from nose.plugins.attrib import attr
-from tempest import exceptions
-from tempest import openstack
 from tempest.common.utils.data_utils import rand_name, arbitrary_string
 from tempest.tests.object_storage import base
 
@@ -108,3 +102,47 @@ class ContainerTest(base.BaseObjectTest):
 
         object_names = [obj['name'] for obj in object_list]
         self.assertIn(object_name, object_names)
+
+    @attr(type='smoke')
+    def test_container_metadata(self):
+        """Update/Retrieve/Delete Container Metadata"""
+
+        # Create a container
+        container_name = rand_name(name='TestContainer')
+        resp, _ = self.container_client.create_container(container_name)
+        self.containers.append(container_name)
+
+        # Update container metadata
+        metadata = {'name': 'Pictures',
+                    'description': 'Travel'
+                    }
+        resp, _ = \
+            self.container_client.update_container_metadata(container_name,
+                                                            metadata=metadata)
+        self.assertEqual(resp['status'], '204')
+
+        # List container metadata
+        resp, _ = self.container_client.list_container_metadata(
+                                                            container_name)
+        self.assertEqual(resp['status'], '204')
+        self.assertIn('x-container-meta-name', resp)
+        self.assertIn('x-container-meta-description', resp)
+        self.assertEqual(resp['x-container-meta-name'], 'Pictures')
+        self.assertEqual(resp['x-container-meta-description'], 'Travel')
+
+        # Delete container metadata
+        resp, _ = \
+            self.container_client.delete_container_metadata(
+                                                    container_name,
+                                                    metadata=metadata.keys())
+        self.assertEqual(resp['status'], '204')
+
+        resp, _ = self.container_client.list_container_metadata(container_name)
+        self.assertEqual(resp['status'], '204')
+        self.assertNotIn('x-container-meta-name', resp)
+        self.assertNotIn('x-container-meta-description', resp)
+
+        # Delete Container
+        resp, _ = self.container_client.delete_container(container_name)
+        self.assertEqual(resp['status'], '204')
+        self.containers.remove(container_name)

@@ -47,6 +47,18 @@ class AccountClient(RestClient):
         resp, body = self.post('', headers=headers, body=None)
         return resp, body
 
+    def delete_account_metadata(self, metadata,
+                                metadata_prefix='X-Remove-Account-Meta-'):
+        """
+        Deletes an account metadata entry.
+        """
+
+        headers = {"X-Storage-Token": self.token}
+        for item in metadata:
+            headers[metadata_prefix + item] = 'x'
+        resp, body = self.post('', headers=headers, body=None)
+        return resp, body
+
     def list_account_containers(self, params=None):
         """
         GET on the (base) storage URL

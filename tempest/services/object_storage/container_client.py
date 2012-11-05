@@ -63,8 +63,29 @@ class ContainerClient(RestClient):
                 headers[metadata_prefix + key] = metadata[key]
 
         resp, body = self.post(url, body=None, headers=headers)
+        return resp, body
 
-        return resp. body
+    def delete_container_metadata(self, container_name, metadata,
+                                  metadata_prefix='X-Remove-Container-Meta-'):
+        """Deletes arbitrary metadata on container"""
+        url = container_name
+        headers = {}
+
+        if metadata is not None:
+            for item in metadata:
+                headers[metadata_prefix + item] = 'x'
+
+        resp, body = self.post(url, body=None, headers=headers)
+        return resp, body
+
+    def list_container_metadata(self, container_name):
+        """
+        Retrieves container metadata headers
+        """
+        url = container_name
+        headers = {"X-Storage-Token": self.token}
+        resp, body = self.head(url, headers=headers)
+        return resp, body
 
     def list_all_container_objects(self, container, params=None):
         """
