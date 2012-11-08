@@ -140,11 +140,6 @@ class ListServersNegativeTest(BaseComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    def test_list_servers_pass_numeric_status(self):
-        """Return an error when a numeric value for status is specified"""
-        self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                          {'status': 1})
-
     def test_list_servers_by_limits(self):
         """List servers by specifying limits"""
         resp, body = self.client.list_servers({'limit': 1})
