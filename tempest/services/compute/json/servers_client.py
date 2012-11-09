@@ -404,3 +404,95 @@ class ServersClientJSON(RestClient):
         resp, body = self.post("servers/%s/action" % str(server_id),
                                req_body, self.headers)
         return resp, body
+
+    def list_servers_for_all_tenants(self):
+
+        url = self.base_url + '/servers?all_tenants=1'
+        resp = self.requests.get(url)
+        resp, body = self.post('servers', post_body, self.headers)
+
+        body = json.loads(body)
+        return resp, body['servers']
+
+    def migrate_server(self, server_id):
+        """Migrates a server to a new host"""
+        post_body = {'migrate': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+        return resp, body
+
+    def confirm_migration(self, server_id):
+        """Confirms the migration of a server"""
+        post_body = {'confirmResize': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+        return resp, body
+
+    def lock_server(self, server_id):
+        """Locks the given server"""
+        post_body = {'lock': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def unlock_server(self, server_id):
+        """UNlocks the given server"""
+        post_body = {'unlock': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def start_server(self, server_id):
+        """Starts the given server"""
+        post_body = {'os-start': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def stop_server(self, server_id):
+        """Stops the given server"""
+        post_body = {'os-stop': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def suspend_server(self, server_id):
+        """Suspends the provded server"""
+        post_body = {'suspend': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def resume_server(self, server_id):
+        """Un-suspends the provded server"""
+        post_body = {'resume': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def pause_server(self, server_id):
+        """Pauses the provded server"""
+        post_body = {'pause': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def unpause_server(self, server_id):
+        """Un-pauses the provded server"""
+        post_body = {'unpause': 'null'}
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+
+    def reset_state(self, server_id, new_state='error'):
+        """Resets the state of a server to active/error"""
+        post_body = {
+            'os-resetState': {
+                'state': new_state
+            }
+        }
+        resp, body = self.post('servers/%s/action' % server_id,
+                               post_body, self.headers)
+        return resp, body
