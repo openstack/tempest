@@ -35,12 +35,17 @@ and reference data to be used in testing.
 
     In addition, the ``<devstack-repo>/tools/configure_tempest.sh`` script can
     also be used to generate a tempest.conf based on your devstack's rc files.
+    TEMPEST_DIR variable points to location /opt/stack/temptest. Update this
+    variable if the location is different..
 
 Tempest is not tied to any single test runner, but Nose been the most commonly
 used tool. After setting up your configuration file, you can execute
 the set of Tempest tests by using ``nosetests`` ::
-
     $> nosetests tempest
+
+To run one single test  ::
+    $> nosetests -sv tempest.tests.compute.servers.test_server_actions.py:
+       ServerActionsTestJSON.test_rebuild_nonexistent_server
 
 Configuration
 -------------
