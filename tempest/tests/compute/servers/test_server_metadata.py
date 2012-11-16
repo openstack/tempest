@@ -18,6 +18,7 @@
 from nose.plugins.attrib import attr
 
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.tests.compute.base import BaseComputeTest
 
 
@@ -69,7 +70,6 @@ class ServerMetadataTest(BaseComputeTest):
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         self.assertEqual(resp_metadata, req_metadata)
 
-    @attr(type='negative')
     def test_server_create_metadata_key_too_long(self):
         """
         Attempt to start a server with a meta-data key that is > 255 characters
@@ -79,14 +79,10 @@ class ServerMetadataTest(BaseComputeTest):
             key = "k" * sz
             meta = {key: 'data1'}
             name = rand_name('server')
-            try:
-                resp, server = self.client.create_server(name, self.image_ref,
-                                                         self.flavor_ref,
-                                                         meta=meta)
-            except:
-                pass
-            else:
-                self.fail('Metadata should have been too long')
+            self.assertRaises(exceptions.OverLimit,
+                              self.client.create_server, name, self.image_ref,
+                              self.flavor_ref, meta=meta)
+
         # no teardown - all creates should fail
 
     def test_update_server_metadata(self):
