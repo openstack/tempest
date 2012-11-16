@@ -81,7 +81,7 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
         random_name = ''.join(
             random.choice(string.ascii_uppercase) for x in range(20))
 
-        self.assertFalse(random_name in self._get_compute_hostnames())
+        self.assertNotIn(random_name, self._get_compute_hostnames())
 
         return random_name
 
@@ -105,22 +105,15 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
                      'Block Live migration not available')
     def test_001_live_block_migration(self):
         """Live block migrate an instance to another host"""
-
         if len(self._get_compute_hostnames()) < 2:
             raise nose.SkipTest(
                 "Less than 2 compute nodes, skipping migration test.")
-
         server_id = self._get_an_active_server()
-
         actual_host = self._get_host_for_server(server_id)
-
         target_host = self._get_host_other_than(actual_host)
-
         self._migrate_server_to(server_id, target_host)
-
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
-
-        self.assertTrue(target_host == self._get_host_for_server(server_id))
+        self.assertEquals(target_host, self._get_host_for_server(server_id))
 
     @attr(type='positive', bug='lp1051881')
     @unittest.skip('Until bug 1051881 is dealt with.')
@@ -130,12 +123,10 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
         """Migrating to an invalid host should not change the status"""
 
         server_id = self._get_an_active_server()
-
         target_host = self._get_non_existing_host_name()
 
         with self.assertRaises(exceptions.BadRequest) as cm:
             self._migrate_server_to(server_id, target_host)
-
         self.assertEquals('ACTIVE', self._get_server_status(server_id))
 
     @classmethod
