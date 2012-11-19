@@ -50,7 +50,7 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
             cls.image_ids.remove(image_id)
 
     @classmethod
-    def update_state(self, server_id, vm_state, task_state, deleted=0):
+    def update_state(self, server_id, vm_state, task_state, deleted=False):
         """Update states of an instance in database for validation"""
         if not task_state:
             task_state = "NULL"
@@ -63,7 +63,7 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
 
         self.connection.execute(stmt, autocommit=True)
 
-    def _test_create_image_409_base(self, vm_state, task_state, deleted=0):
+    def _test_create_image_409_base(self, vm_state, task_state, deleted=False):
         """Base method for create image tests based on vm and task states"""
         try:
             self.update_state(self.shared_server['id'], vm_state,
