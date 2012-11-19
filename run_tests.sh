@@ -23,7 +23,7 @@ function process_option {
   esac
 }
 
-noseargs="tempest"
+noseargs=""
 just_pep8=0
 
 export NOSE_WITH_OPENSTACK=1
@@ -36,6 +36,15 @@ export NOSE_OPENSTACK_STDOUT=1
 for arg in "$@"; do
   process_option $arg
 done
+
+
+# only add tempest default if we don't specify a test
+if [[ "x$noseargs" =~ "tempest" ]]; then
+  noseargs="$noseargs"
+else
+  noseargs="$noseargs tempest"
+fi
+
 
 function run_tests {
   $NOSETESTS
