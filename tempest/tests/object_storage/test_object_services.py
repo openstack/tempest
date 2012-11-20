@@ -15,13 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import re
-import unittest2 as unittest
-import tempest.config
-
 from nose.plugins.attrib import attr
-from tempest import exceptions
-from tempest import openstack
 from tempest.common.utils.data_utils import rand_name, arbitrary_string
 from tempest.tests.object_storage import base
 
@@ -110,3 +104,104 @@ class ObjectTest(base.BaseObjectTest):
         actual_meta_key = 'x-object-meta-' + meta_key
         self.assertTrue(actual_meta_key in resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
+
+    @attr(type='smoke')
+    def test_get_object(self):
+        """Retrieve object's data(in response body)"""
+
+        #Create Object
+        object_name = rand_name(name='TestObject')
+        data = arbitrary_string()
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   object_name, data)
+
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   object_name)
+        self.assertEqual(resp['status'], '200')
+        # Check data
+        self.assertEqual(body, data)
+
+    @attr(type='smoke')
+    def test_copy_object(self):
+        """Copy storage object"""
+
+        # Create source Object
+        src_object_name = rand_name(name='SrcObject')
+        src_data = arbitrary_string(size=len(src_object_name) * 2,
+                                    base_text=src_object_name)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   src_object_name, src_data)
+
+        # Create destinametion Object
+        dst_object_name = rand_name(name='DstObject')
+        dst_data = arbitrary_string(size=len(dst_object_name) * 3,
+                                    base_text=dst_object_name)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   dst_object_name, dst_data)
+
+        # Copy source object to destination
+        resp, _ = self.object_client.copy_object(self.container_name,
+                                                 src_object_name,
+                                                 dst_object_name)
+        self.assertEqual(resp['status'], '201')
+
+        # Check data
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   dst_object_name)
+        self.assertEqual(body, src_data)
+
+    @attr(type='smoke')
+    def test_copy_object_to_itself(self):
+        """Change the content type of an existing object"""
+
+        # Create Object
+        object_name = rand_name(name='TestObject')
+        data = arbitrary_string()
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   object_name, data)
+        # Get the old content type
+        resp_tmp, _ = self.object_client.list_object_metadata(
+                                                        self.container_name,
+                                                        object_name)
+        # Change the content type of the object
+        metadata = {'content-type': 'text/plain; charset=UTF-8'}
+        self.assertNotEqual(resp_tmp['content-type'], metadata['content-type'])
+        resp, _ = self.object_client.copy_object(self.container_name,
+                                                 object_name,
+                                                 object_name,
+                                                 metadata)
+        self.assertEqual(resp['status'], '201')
+
+        # Check the content type
+        resp, _ = self.object_client.list_object_metadata(self.container_name,
+                                                          object_name)
+        self.assertEqual(resp['content-type'], metadata['content-type'])
+
+    @attr(type='smoke')
+    def test_copy_object_2d_way(self):
+        """Copy storage object"""
+
+        # Create source Object
+        src_object_name = rand_name(name='SrcObject')
+        src_data = arbitrary_string(size=len(src_object_name) * 2,
+                                    base_text=src_object_name)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   src_object_name, src_data)
+
+        # Create destinametion Object
+        dst_object_name = rand_name(name='DstObject')
+        dst_data = arbitrary_string(size=len(dst_object_name) * 3,
+                                    base_text=dst_object_name)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   dst_object_name, dst_data)
+
+        # Copy source object to destination
+        resp, _ = self.object_client.copy_object_2d_way(self.container_name,
+                                                        src_object_name,
+                                                        dst_object_name)
+        self.assertEqual(resp['status'], '201')
+
+        # Check data
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   dst_object_name)
+        self.assertEqual(body, src_data)

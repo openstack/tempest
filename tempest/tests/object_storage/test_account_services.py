@@ -15,13 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest2 as unittest
-import tempest.config
-import re
-
 from nose.plugins.attrib import attr
-from tempest import exceptions
-from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests.object_storage import base
 
@@ -74,3 +68,15 @@ class AccountTest(base.BaseObjectTest):
         resp, metadata = self.account_client.list_account_metadata()
         self.assertIn('x-account-meta-test-account-meta', resp)
         self.assertEqual(resp['x-account-meta-test-account-meta'], 'Meta!')
+
+    @attr(type='smoke')
+    def test_delete_account_metadata(self):
+        """Delete metadata from account"""
+
+        metadata = ['test-account-meta']
+        resp, _ = \
+            self.account_client.delete_account_metadata(metadata=metadata)
+        self.assertEqual(resp['status'], '204')
+
+        resp, metadata = self.account_client.list_account_metadata()
+        self.assertNotIn('x-account-meta-test-account-meta', resp)

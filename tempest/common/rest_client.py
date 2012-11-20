@@ -172,7 +172,10 @@ class RestClient(object):
         return self.request('PUT', url, headers, body)
 
     def head(self, url, headers=None):
-        return self.request('HEAD', url, headers=None)
+        return self.request('HEAD', url, headers)
+
+    def copy(self, url, headers=None):
+        return self.request('COPY', url, headers)
 
     def _log(self, req_url, body, resp, resp_body):
         self.log.error('Request URL: ' + req_url)
