@@ -132,7 +132,7 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(self.container_name,
                                                    src_object_name, src_data)
 
-        # Create destinametion Object
+        # Create destination Object
         dst_object_name = rand_name(name='DstObject')
         dst_data = arbitrary_string(size=len(dst_object_name) * 3,
                                     base_text=dst_object_name)
@@ -188,7 +188,7 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(self.container_name,
                                                    src_object_name, src_data)
 
-        # Create destinametion Object
+        # Create destination Object
         dst_object_name = rand_name(name='DstObject')
         dst_data = arbitrary_string(size=len(dst_object_name) * 3,
                                     base_text=dst_object_name)
