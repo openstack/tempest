@@ -57,6 +57,8 @@ from tempest.services.volume.xml.volumes_client import VolumesClientXML
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
+from tempest.services.boto.clients import APIClientEC2
+from tempest.services.boto.clients import ObjectClientS3
 
 
 LOG = logging.getLogger(__name__)
@@ -186,6 +188,8 @@ class Manager(object):
         self.account_client = AccountClient(*client_args)
         self.container_client = ContainerClient(*client_args)
         self.object_client = ObjectClient(*client_args)
+        self.ec2api_client = APIClientEC2(*client_args)
+        self.s3_client = ObjectClientS3(*client_args)
 
 
 class AltManager(Manager):

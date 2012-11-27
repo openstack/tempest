@@ -5,5 +5,6 @@ include/swift_objects/swift_medium
 include/swift_objects/swift_large
 *.log
 *.swp
+*.swo
 *.egg-info
 .tox

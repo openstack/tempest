@@ -221,3 +221,48 @@ tenant_name = admin
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "object-store"
 catalog_type = object-store
+
+[boto]
+# This section contains configuration options used when executing tests
+# with boto.
+
+# EC2 URL
+ec2_url = http://localhost:8773/services/Cloud
+# S3 URL
+s3_url = http://localhost:3333
+
+# Use keystone ec2-* command to get those values for your test user and tenant
+aws_access =
+aws_secret =
+
+#Region
+aws_region = RegionOne
+
+#Image materials for S3 upload
+# ALL content of the specified directory will be uploaded to S3
+s3_materials_path = /opt/stack/devstack/files/images/s3-materials/cirros-0.3.0
+
+# The manifest.xml files, must be in the s3_materials_path directory
+# Subdirectories not allowed!
+# The filenames will be used as a Keys in the S3 Buckets
+
+#ARI Ramdisk manifest. Must be in the above s3_materials_path
+ari_manifest = cirros-0.3.0-x86_64-initrd.manifest.xml
+
+#AMI Machine Image manifest. Must be in the above s3_materials_path
+ami_manifest = cirros-0.3.0-x86_64-blank.img.manifest.xml
+
+#AKI Kernel Image manifest, Must be in the above s3_materials_path
+aki_manifest = cirros-0.3.0-x86_64-vmlinuz.manifest.xml
+
+#Instance type
+instance_type = m1.tiny
+
+#TCP/IP connection timeout
+http_socket_timeout = 5
+
+# Status change wait timout
+build_timeout = 120
+
+# Status change wait interval
+build_interval = 1
