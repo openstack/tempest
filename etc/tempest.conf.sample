@@ -193,7 +193,7 @@ password = pass
 tenant_name = admin
 
 [volume]
-# This section contains the configuration options used when executng tests
+# This section contains the configuration options used when executing tests
 # against the OpenStack Block Storage API service
 
 # The type of endpoint for a Cinder or Block Storage API service.
