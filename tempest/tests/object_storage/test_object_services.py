@@ -122,7 +122,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(body, data)
 
     @attr(type='smoke')
-    def test_copy_object(self):
+    def test_copy_object_in_same_container(self):
         """Copy storage object"""
 
         # Create source Object
@@ -140,9 +140,8 @@ class ObjectTest(base.BaseObjectTest):
                                                    dst_object_name, dst_data)
 
         # Copy source object to destination
-        resp, _ = self.object_client.copy_object(self.container_name,
-                                                 src_object_name,
-                                                 dst_object_name)
+        resp, _ = self.object_client.copy_object_in_same_container(
+            self.container_name, src_object_name, dst_object_name)
         self.assertEqual(resp['status'], '201')
 
         # Check data
@@ -161,15 +160,13 @@ class ObjectTest(base.BaseObjectTest):
                                                    object_name, data)
         # Get the old content type
         resp_tmp, _ = self.object_client.list_object_metadata(
-                                                        self.container_name,
-                                                        object_name)
+            self.container_name,
+            object_name)
         # Change the content type of the object
         metadata = {'content-type': 'text/plain; charset=UTF-8'}
         self.assertNotEqual(resp_tmp['content-type'], metadata['content-type'])
-        resp, _ = self.object_client.copy_object(self.container_name,
-                                                 object_name,
-                                                 object_name,
-                                                 metadata)
+        resp, _ = self.object_client.copy_object_in_same_container(
+            self.container_name, object_name, object_name, metadata)
         self.assertEqual(resp['status'], '201')
 
         # Check the content type
@@ -205,3 +202,62 @@ class ObjectTest(base.BaseObjectTest):
         resp, body = self.object_client.get_object(self.container_name,
                                                    dst_object_name)
         self.assertEqual(body, src_data)
+
+    @attr(type='smoke')
+    def test_copy_object_across_containers(self):
+        """Copy storage object across containers"""
+
+        #Create a container so as to use as source container
+        src_container_name = rand_name(name='TestSourceContainer')
+        self.container_client.create_container(src_container_name)
+
+        #Create a container so as to use as destination container
+        dst_container_name = rand_name(name='TestDestinationContainer')
+        self.container_client.create_container(dst_container_name)
+
+        # Create Object in source container
+        object_name = rand_name(name='Object')
+        data = arbitrary_string(size=len(object_name) * 2,
+                                base_text=object_name)
+        resp, _ = self.object_client.create_object(src_container_name,
+                                                   object_name, data)
+        #Set Object Metadata
+        meta_key = rand_name(name='test-')
+        meta_value = rand_name(name='MetaValue-')
+        orig_metadata = {meta_key: meta_value}
+
+        resp, _ = \
+            self.object_client.update_object_metadata(src_container_name,
+                                                      object_name,
+                                                      orig_metadata)
+        self.assertEqual(resp['status'], '202')
+
+        try:
+            # Copy object from source container to destination container
+            resp, _ = self.object_client.copy_object_across_containers(
+                src_container_name, object_name, dst_container_name,
+                object_name)
+            self.assertEqual(resp['status'], '201')
+
+            # Check if object is present in destination container
+            resp, body = self.object_client.get_object(dst_container_name,
+                                                       object_name)
+            self.assertEqual(body, data)
+            actual_meta_key = 'x-object-meta-' + meta_key
+            self.assertTrue(actual_meta_key in resp)
+            self.assertEqual(resp[actual_meta_key], meta_value)
+
+        except Exception as e:
+            self.fail("Got exception :%s ; while copying"
+                      " object across containers" % e)
+        finally:
+            #Delete objects from respective containers
+            resp, _ = self.object_client.delete_object(dst_container_name,
+                                                       object_name)
+            resp, _ = self.object_client.delete_object(src_container_name,
+                                                       object_name)
+            #Delete containers created in this method
+            resp, _ = self.container_client.delete_container(
+                src_container_name)
+            resp, _ = self.container_client.delete_container(
+                dst_container_name)
