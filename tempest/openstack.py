@@ -59,7 +59,7 @@ from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
 from tempest.services.boto.clients import APIClientEC2
 from tempest.services.boto.clients import ObjectClientS3
-
+from tempest.services.compute.json.quotas_client import QuotasClient
 
 LOG = logging.getLogger(__name__)
 
@@ -184,6 +184,7 @@ class Manager(object):
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
         self.console_outputs_client = ConsoleOutputsClient(*client_args)
+        self.quotas_client = QuotasClient(*client_args)
         self.network_client = NetworkClient(*client_args)
         self.account_client = AccountClient(*client_args)
         self.container_client = ContainerClient(*client_args)
