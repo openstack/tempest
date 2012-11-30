@@ -73,7 +73,6 @@ def setup_package():
         EC2_CAN_CONNECT_ERROR = "AWS credentials not set," +\
                                 " faild to get them even by keystoneclient"
     except Exception as exc:
-        logging.exception(exc)
         EC2_CAN_CONNECT_ERROR = str(exc)
     else:
         EC2_CAN_CONNECT_ERROR = None
@@ -88,7 +87,6 @@ def setup_package():
             if exc.status == 403:
                 _cred_sub_check(s3client.connection_data)
     except Exception as exc:
-        logging.exception(exc)
         S3_CAN_CONNECT_ERROR = str(exc)
     except keystoneclient.exceptions.Unauthorized:
         S3_CAN_CONNECT_ERROR = "AWS credentials not set," +\
