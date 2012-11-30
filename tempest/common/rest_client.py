@@ -162,8 +162,8 @@ class RestClient(object):
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)
 
-    def get(self, url, headers=None):
-        return self.request('GET', url, headers)
+    def get(self, url, headers=None, wait=None):
+        return self.request('GET', url, headers, wait=wait)
 
     def delete(self, url, headers=None):
         return self.request('DELETE', url, headers)
@@ -186,7 +186,8 @@ class RestClient(object):
     def _parse_resp(self, body):
         return json.loads(body)
 
-    def request(self, method, url, headers=None, body=None, depth=0):
+    def request(self, method, url,
+                headers=None, body=None, depth=0, wait=None):
         """A simple HTTP request interface."""
 
         if (self.token is None) or (self.base_url is None):
@@ -205,7 +206,8 @@ class RestClient(object):
             raise exceptions.Unauthorized()
 
         if resp.status == 404:
-            self._log(req_url, body, resp, resp_body)
+            if not wait:
+                self._log(req_url, body, resp, resp_body)
             raise exceptions.NotFound(resp_body)
 
         if resp.status == 400:

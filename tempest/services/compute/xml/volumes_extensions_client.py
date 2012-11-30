@@ -79,10 +79,10 @@ class VolumesExtensionsClientXML(RestClientXML):
             volumes += [self._parse_volume(vol) for vol in list(body)]
         return resp, volumes
 
-    def get_volume(self, volume_id):
+    def get_volume(self, volume_id, wait=None):
         """Returns the details of a single volume"""
         url = "os-volumes/%s" % str(volume_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url, self.headers, wait=wait)
         body = etree.fromstring(body)
         return resp, self._parse_volume(body)
 
@@ -139,7 +139,7 @@ class VolumesExtensionsClientXML(RestClientXML):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_volume(id)
+            self.get_volume(id, wait=True)
         except exceptions.NotFound:
             return True
         return False
