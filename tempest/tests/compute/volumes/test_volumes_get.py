@@ -26,6 +26,7 @@ class VolumesGetTestBase(object):
     @attr(type='smoke')
     def test_volume_create_get_delete(self):
         """CREATE, GET, DELETE Volume"""
+        volume = None
         try:
             v_name = rand_name('Volume-%s-') % self._interface
             metadata = {'Type': 'work'}
@@ -61,11 +62,12 @@ class VolumesGetTestBase(object):
                              'from the created Volume')
 
         finally:
-            #Delete the Volume created in this method
-            resp, _ = self.client.delete_volume(volume['id'])
-            self.assertEqual(202, resp.status)
-            #Checking if the deleted Volume still exists
-            self.client.wait_for_resource_deletion(volume['id'])
+            if volume:
+                #Delete the Volume created in this method
+                resp, _ = self.client.delete_volume(volume['id'])
+                self.assertEqual(202, resp.status)
+                #Checking if the deleted Volume still exists
+                self.client.wait_for_resource_deletion(volume['id'])
 
     @attr(type='positive')
     def test_volume_get_metadata_none(self):
