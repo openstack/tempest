@@ -58,9 +58,7 @@ def build_url(host, port, api_version=None, path=None,
 
 def parse_image_id(image_ref):
     """Return the image id from a given image ref"""
-    temp = image_ref.rsplit('/')
-    #Return the last item, which is the image id
-    return temp[len(temp) - 1]
+    return  image_ref.rsplit('/')[-1]
 
 
 def arbitrary_string(size=4, base_text=None):
