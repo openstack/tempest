@@ -59,10 +59,10 @@ class VolumesExtensionsClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['volumes']
 
-    def get_volume(self, volume_id):
+    def get_volume(self, volume_id, wait=None):
         """Returns the details of a single volume"""
         url = "os-volumes/%s" % str(volume_id)
-        resp, body = self.get(url)
+        resp, body = self.get(url, wait=wait)
         body = json.loads(body)
         return resp, body['volume']
 
@@ -111,7 +111,7 @@ class VolumesExtensionsClientJSON(RestClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_volume(id)
+            self.get_volume(id, wait=True)
         except exceptions.NotFound:
             return True
         return False
