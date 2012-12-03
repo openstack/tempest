@@ -31,6 +31,7 @@ class ServersTestBase(object):
         """
 
         try:
+            server = None
             name = rand_name('server')
             resp, server = self.client.create_server(name, self.image_ref,
                                                      self.flavor_ref,
@@ -41,12 +42,15 @@ class ServersTestBase(object):
 
         #Teardown
         finally:
-            self.client.delete_server(server['id'])
+            if server:
+                self.client.delete_server(server['id'])
 
     def test_create_with_existing_server_name(self):
         """Creating a server with a name that already exists is allowed"""
 
         try:
+            id1 = None
+            id2 = None
             server_name = rand_name('server')
             resp, server = self.client.create_server(server_name,
                                                      self.image_ref,
@@ -74,6 +78,7 @@ class ServersTestBase(object):
         """Specify a keypair while creating a server"""
 
         try:
+            server = None
             key_name = rand_name('key')
             resp, keypair = self.keypairs_client.create_keypair(key_name)
             resp, body = self.keypairs_client.list_keypairs()
@@ -94,6 +99,7 @@ class ServersTestBase(object):
     def test_update_server_name(self):
         """The server name should be changed to the the provided value"""
         try:
+            server = None
             name = rand_name('server')
             resp, server = self.client.create_server(name, self.image_ref,
                                                      self.flavor_ref)
@@ -111,7 +117,8 @@ class ServersTestBase(object):
 
         #Teardown
         finally:
-            self.client.delete_server(server['id'])
+            if server:
+                self.client.delete_server(server['id'])
 
     @attr(type='positive')
     def test_update_access_server_address(self):
@@ -119,6 +126,7 @@ class ServersTestBase(object):
         The server's access addresses should reflect the provided values
         """
         try:
+            server = None
             name = rand_name('server')
             resp, server = self.client.create_server(name, self.image_ref,
                                                      self.flavor_ref)
@@ -138,7 +146,8 @@ class ServersTestBase(object):
 
         #Teardown
         finally:
-            self.client.delete_server(server['id'])
+            if server:
+                self.client.delete_server(server['id'])
 
     def test_delete_server_while_in_building_state(self):
         """Delete a server while it's VM state is Building"""
