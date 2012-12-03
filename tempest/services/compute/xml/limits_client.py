@@ -29,7 +29,7 @@ class LimitsClientXML(RestClientXML):
                                               auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
-    def get_limits(self):
+    def get_absolute_limits(self):
         resp, body = self.get("limits", self.headers)
         body = objectify.fromstring(body)
         lim = NS + 'absolute'
@@ -37,23 +37,19 @@ class LimitsClientXML(RestClientXML):
 
         for el in body[lim].iterchildren():
             attributes = el.attrib
-            if attributes['name'] == 'maxServerMeta':
-                ret['maxServerMeta'] = int(attributes['value'])
-            elif attributes['name'] == 'maxPersonality':
-                ret['maxPersonality'] = int(attributes['value'])
-            elif attributes['name'] == 'maxPersonalitySize':
-                ret['maxPersonalitySize'] = int(attributes['value'])
-
+            ret[attributes['name']] = attributes['value']
         return resp, ret
 
-    def get_max_server_meta(self):
-        resp, limits_dict = self.get_limits()
-        return resp, limits_dict['maxServerMeta']
+    def get_specific_absolute_limit(self, absolute_limit):
+        resp, body = self.get("limits", self.headers)
+        body = objectify.fromstring(body)
+        lim = NS + 'absolute'
+        ret = {}
 
-    def get_personality_file_limit(self):
-        resp, limits_dict = self.get_limits()
-        return resp, limits_dict['maxPersonality']
-
-    def get_personality_size_limit(self):
-        resp, limits_dict = self.get_limits()
-        return resp, limits_dict['maxPersonalitySize']
+        for el in body[lim].iterchildren():
+            attributes = el.attrib
+            ret[attributes['name']] = attributes['value']
+        if absolute_limit not in ret:
+            return None
+        else:
+            return ret[absolute_limit]
