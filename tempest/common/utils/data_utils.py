@@ -18,6 +18,8 @@
 import random
 import re
 import urllib
+import itertools
+
 from tempest import exceptions
 
 
@@ -64,24 +66,10 @@ def parse_image_id(image_ref):
 
 
 def arbitrary_string(size=4, base_text=None):
-    """Return exactly size bytes worth of base_text as a string"""
-
-    if (base_text is None) or (base_text == ''):
+    """
+    Return size characters from base_text, repeating the base_text infinitely
+    if needed.
+    """
+    if not base_text:
         base_text = 'test'
-
-    if size <= 0:
-        return ''
-
-    extra = size % len(base_text)
-    body = ''
-
-    if extra == 0:
-        body = base_text * size
-
-    if extra == size:
-        body = base_text[:size]
-
-    if extra > 0 and extra < size:
-        body = (size / len(base_text)) * base_text + base_text[:extra]
-
-    return body
+    return ''.join(itertools.islice(itertools.cycle(base_text), size))
