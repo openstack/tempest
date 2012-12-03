@@ -51,6 +51,14 @@ class RestClient(object):
                         'Accept': 'application/%s' % self.TYPE}
         self.build_interval = config.compute.build_interval
         self.build_timeout = config.compute.build_timeout
+        self.general_header_lc = set(('cache-control', 'connection',
+                                      'date', 'pragma', 'trailer',
+                                      'transfer-encoding', 'via',
+                                      'warning'))
+        self.response_header_lc = set(('accept-ranges', 'age', 'etag',
+                                       'location', 'proxy-authenticate',
+                                       'retry-after', 'server',
+                                       'vary', 'www-authenticate'))
 
     def _set_auth(self):
         """
@@ -201,6 +209,38 @@ class RestClient(object):
         req_url = "%s/%s" % (self.base_url, url)
         resp, resp_body = self.http_obj.request(req_url, method,
                                                 headers=headers, body=body)
+
+        #TODO(afazekas): Make sure we can validate all responses, and the
+        #http library does not do any action automatically
+        if (resp.status in set((204, 205, 304)) or resp.status < 200 or
+            method.upper() == 'HEAD') and body:
+            raise exception.ResponseWithNonEmptyBody(status=resp.status)
+
+        #NOTE(afazekas):
+        # If the HTTP Status Code is 205
+        #   'The response MUST NOT include an entity.'
+        # A HTTP entity has an entity-body and an 'entity-header'.
+        # In the HTTP response specification (Section 6) the 'entity-header'
+        # 'generic-header' and 'response-header' are in OR relation.
+        # All headers not in the above two group are considered as entity
+        # header in every interpretation.
+
+        if (resp.status == 205 and
+            0 != len(set(resp.keys()) - set(('status',)) -
+            self.response_header_lc - self.general_header_lc)):
+            raise exception.ResponseWithEntity()
+
+        #NOTE(afazekas)
+        # Now the swift sometimes (delete not empty container)
+        # returns with non json error response, we can create new rest class
+        # for swift.
+        # Usually RFC2616 says error responses SHOULD contain an explanation.
+        # The warning is normal for SHOULD/SHOULD NOT case
+
+        # Likely it will cause error
+        if not body and resp.status >= 400:
+            self.log.warning("status >= 400 response with empty body")
+
         if resp.status == 401 or resp.status == 403:
             self._log(req_url, body, resp, resp_body)
             raise exceptions.Unauthorized()
