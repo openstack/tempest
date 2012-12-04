@@ -25,6 +25,7 @@ from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 from tempest.services.compute.xml.common import XMLNS_11
 import time
+import urllib
 
 LOG = logging.getLogger(__name__)
 
@@ -82,24 +83,18 @@ class ServersClientXML(RestClientXML):
 
     def list_servers(self, params=None):
         url = 'servers/detail'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s" % (param, value))
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
-            url += "?" + "&".join(param_list)
         resp, body = self.get(url, self.headers)
         servers = self._parse_array(etree.fromstring(body))
         return resp, {"servers": servers}
 
     def list_servers_with_detail(self, params=None):
         url = 'servers/detail'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s" % (param, value))
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
-            url += "?" + "&".join(param_list)
         resp, body = self.get(url, self.headers)
         servers = self._parse_array(etree.fromstring(body))
         return resp, {"servers": servers}

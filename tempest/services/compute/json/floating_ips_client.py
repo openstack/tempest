@@ -18,6 +18,7 @@
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
 import json
+import urllib
 
 
 class FloatingIPsClientJSON(RestClient):
@@ -29,11 +30,9 @@ class FloatingIPsClientJSON(RestClient):
     def list_floating_ips(self, params=None):
         """Returns a list of all floating IPs filtered by any parameters"""
         url = 'os-floating-ips'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s" % (param, value))
-            url += '?' + ' &'.join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['floating_ips']

@@ -17,6 +17,7 @@
 
 from tempest.common.rest_client import RestClient
 import json
+import urllib
 
 
 class SecurityGroupsClientJSON(RestClient):
@@ -31,12 +32,8 @@ class SecurityGroupsClientJSON(RestClient):
         """List all security groups for a user"""
 
         url = 'os-security-groups'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s" % (param, value))
-
-            url += '?' + ' &'.join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)

@@ -16,6 +16,7 @@
 #    under the License.
 
 import json
+import urllib
 
 from tempest.common.rest_client import RestClient
 
@@ -36,7 +37,7 @@ class ContainerClient(RestClient):
            Creates a container, with optional metadata passed in as a
            dictonary
         """
-        url = container_name
+        url = str(container_name)
         headers = {}
 
         if metadata is not None:
@@ -48,14 +49,14 @@ class ContainerClient(RestClient):
 
     def delete_container(self, container_name):
         """Deletes the container (if it's empty)"""
-        url = container_name
+        url = str(container_name)
         resp, body = self.delete(url)
         return resp, body
 
     def update_container_metadata(self, container_name, metadata,
                                   metadata_prefix='X-Container-Meta-'):
         """Updates arbitrary metadata on container"""
-        url = container_name
+        url = str(container_name)
         headers = {}
 
         if metadata is not None:
@@ -68,7 +69,7 @@ class ContainerClient(RestClient):
     def delete_container_metadata(self, container_name, metadata,
                                   metadata_prefix='X-Remove-Container-Meta-'):
         """Deletes arbitrary metadata on container"""
-        url = container_name
+        url = str(container_name)
         headers = {}
 
         if metadata is not None:
@@ -82,7 +83,7 @@ class ContainerClient(RestClient):
         """
         Retrieves container metadata headers
         """
-        url = container_name
+        url = str(container_name)
         headers = {"X-Storage-Token": self.token}
         resp, body = self.head(url, headers=headers)
         return resp, body
@@ -162,11 +163,9 @@ class ContainerClient(RestClient):
         """
 
         url = str(container)
-        param_list = ['format=%s&' % self.format]
-        if params is not None:
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-        url += '?' + ''.join(param_list)
+        url += '?format=%s' % self.format
+        if params:
+            url += '&%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)

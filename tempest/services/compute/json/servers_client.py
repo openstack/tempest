@@ -19,6 +19,7 @@ from tempest import exceptions
 from tempest.common.rest_client import RestClient
 import json
 import time
+import urllib
 
 
 class ServersClientJSON(RestClient):
@@ -121,12 +122,8 @@ class ServersClientJSON(RestClient):
         """Lists all servers for a user"""
 
         url = 'servers'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url = "servers?" + "".join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
@@ -136,12 +133,8 @@ class ServersClientJSON(RestClient):
         """Lists all servers in detail for a user"""
 
         url = 'servers/detail'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url = "servers/detail?" + "".join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)

@@ -19,6 +19,7 @@ from tempest import exceptions
 from tempest.common.rest_client import RestClient
 import json
 import time
+import urllib
 
 
 class VolumesExtensionsClientJSON(RestClient):
@@ -34,12 +35,8 @@ class VolumesExtensionsClientJSON(RestClient):
     def list_volumes(self, params=None):
         """List all the volumes created"""
         url = 'os-volumes'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url += '?' + ' '.join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
@@ -48,12 +45,8 @@ class VolumesExtensionsClientJSON(RestClient):
     def list_volumes_with_detail(self, params=None):
         """List all the details of volumes"""
         url = 'os-volumes/detail'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url = '?' + ' '.join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)

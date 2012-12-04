@@ -17,6 +17,7 @@
 
 from tempest.common.rest_client import RestClient
 import json
+import urllib
 
 
 class FlavorsClientJSON(RestClient):
@@ -28,12 +29,8 @@ class FlavorsClientJSON(RestClient):
 
     def list_flavors(self, params=None):
         url = 'flavors'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url = "flavors?" + "".join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
@@ -41,12 +38,8 @@ class FlavorsClientJSON(RestClient):
 
     def list_flavors_with_detail(self, params=None):
         url = 'flavors/detail'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url = "flavors/detail?" + "".join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
