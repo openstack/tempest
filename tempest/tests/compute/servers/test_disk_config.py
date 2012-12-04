@@ -36,44 +36,6 @@ class TestServerDiskConfig(BaseComputeTest):
         cls.client = cls.os.servers_client
 
     @attr(type='positive')
-    def test_create_server_with_manual_disk_config(self):
-        """A server should be created with manual disk config"""
-        name = rand_name('server')
-        resp, server = self.client.create_server(name,
-                                                 self.image_ref,
-                                                 self.flavor_ref,
-                                                 disk_config='MANUAL')
-
-        #Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
-
-        #Verify the specified attributes are set correctly
-        resp, server = self.client.get_server(server['id'])
-        self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
-
-        #Delete the server
-        resp, body = self.client.delete_server(server['id'])
-
-    @attr(type='positive')
-    def test_create_server_with_auto_disk_config(self):
-        """A server should be created with auto disk config"""
-        name = rand_name('server')
-        resp, server = self.client.create_server(name,
-                                                 self.image_ref,
-                                                 self.flavor_ref,
-                                                 disk_config='AUTO')
-
-        #Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
-
-        #Verify the specified attributes are set correctly
-        resp, server = self.client.get_server(server['id'])
-        self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
-
-        #Delete the server
-        resp, body = self.client.delete_server(server['id'])
-
-    @attr(type='positive')
     def test_rebuild_server_with_manual_disk_config(self):
         """A server should be rebuilt using the manual disk config option"""
         name = rand_name('server')
