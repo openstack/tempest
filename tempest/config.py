@@ -18,6 +18,7 @@
 import ConfigParser
 import logging
 import os
+import sys
 
 from tempest.common.utils import data_utils
 
@@ -513,11 +514,17 @@ class TempestConfig:
 
         path = os.path.join(conf_dir, conf_file)
 
+        if (not os.path.isfile(path) and
+                not 'TEMPEST_CONFIG_DIR' in os.environ and
+                not 'TEMPEST_CONFIG' in os.environ):
+            path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
+
         LOG.info("Using tempest config file %s" % path)
 
         if not os.path.exists(path):
             msg = "Config file %(path)s not found" % locals()
-            raise RuntimeError(msg)
+            print >> sys.stderr, RuntimeError(msg)
+            sys.exit(os.EX_NOINPUT)
 
         self._conf = self.load_config(path)
         self.compute = ComputeConfig(self._conf)
