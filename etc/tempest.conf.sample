@@ -210,12 +210,8 @@ build_timeout = 300
 [object-storage]
 # This section contains configuration options used when executing tests
 # against the OpenStack Object Storage API.
-# This should be the username of a user WITHOUT administrative privileges
-username = admin
-# The above non-administrative user's password
-password = password
-# The above non-administrative user's tenant name
-tenant_name = admin
+
+# You can configure the credentials in the compute section
 
 # The type of endpoint for an Object Storage API service. Unless you have a
 # custom Keystone service catalog implementation, you probably want to leave

@@ -400,21 +400,6 @@ class ObjectStorageConfig(BaseConfig):
     SECTION_NAME = "object-storage"
 
     @property
-    def username(self):
-        """Username to use for Object-Storage API requests."""
-        return self.get("username", "admin")
-
-    @property
-    def tenant_name(self):
-        """Tenant name to use for Object-Storage API requests."""
-        return self.get("tenant_name", "admin")
-
-    @property
-    def password(self):
-        """API key to use when authenticating."""
-        return self.get("password", "password")
-
-    @property
     def catalog_type(self):
         """Catalog type of the Object-Storage service."""
         return self.get("catalog_type", 'object-store')
