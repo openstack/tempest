@@ -70,11 +70,13 @@ class VolumesClientJSON(RestClient):
         Following optional keyword arguments are accepted:
         display_name: Optional Volume Name.
         metadata: A dictionary of values to be used as metadata.
+        volume_type: Optional Name of volume_type for the volume
         """
         post_body = {
             'size': size,
             'display_name': kwargs.get('display_name'),
             'metadata': kwargs.get('metadata'),
+            'volume_type': kwargs.get('volume_type')
         }
 
         post_body = json.dumps({'volume': post_body})
