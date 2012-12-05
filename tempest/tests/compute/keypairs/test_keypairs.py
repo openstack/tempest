@@ -137,6 +137,7 @@ class KeyPairsTestBase(object):
             self.fail('Expected BadRequest for invalid public key')
 
     @attr(type='negative')
+    @unittest.skip("Skipped until the Bug #1086980 is resolved")
     def test_keypair_delete_nonexistant_key(self):
         """Non-existant key deletion should throw a proper error"""
         k_name = rand_name("keypair-non-existant-")

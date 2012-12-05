@@ -232,6 +232,7 @@ class AuthorizationTest(BaseComputeTest):
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
+    @unittest.skip("Skipped until the Bug #1086980 is resolved")
     def test_delete_keypair_of_alt_account_fails(self):
         """A DELETE request for another user's keypair should fail"""
         self.alt_keypairs_client.delete_keypair(self.keypairname)
