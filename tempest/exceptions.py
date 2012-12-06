@@ -133,3 +133,17 @@ class SQLException(TempestException):
 
 class TearDownException(TempestException):
     message = "%(num)d cleanUp operation failed"
+
+
+class RFCViolation(TempestException):
+    message = "RFC Violation"
+
+
+class ResponseWithNonEmptyBody(RFCViolation):
+    message = ("RFC Violation! Response with %(status) HTTP Status Code "
+               "MUST NOT have a body")
+
+
+class ResponseWithEntity(RFCViolation):
+    message = ("RFC Violation! Response with 205 HTTP Status Code "
+               "MUST NOT have an entity")
