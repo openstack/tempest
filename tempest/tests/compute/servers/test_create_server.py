@@ -35,6 +35,9 @@ class ServersTest(object):
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '::babe:220.12.22.2'
+        # See: http://tools.ietf.org/html/rfc5952 (section 4)
+        # This is the canonicalized form of the above.
+        cls.accessIPv6canon = '::babe:dc0c:1602'
         cls.name = rand_name('server')
         file_contents = 'This is a test file.'
         personality = [{'path': '/etc/test.txt',
@@ -66,9 +69,9 @@ class ServersTest(object):
     @attr(type='smoke')
     def test_verify_server_details(self):
         """Verify the specified server attributes are set correctly"""
-
         self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
-        self.assertEqual(self.accessIPv6, self.server['accessIPv6'])
+        self.assertIn(self.server['accessIPv6'],
+                      [self.accessIPv6, self.accessIPv6canon])
         self.assertEqual(self.name, self.server['name'])
         self.assertEqual(self.image_ref, self.server['image']['id'])
         self.assertEqual(str(self.flavor_ref), self.server['flavor']['id'])
