@@ -16,6 +16,7 @@
 #    under the License.
 
 import json
+import urllib
 
 from tempest.common.rest_client import RestClient
 
@@ -81,11 +82,9 @@ class AccountClient(RestClient):
             DEFAULT:  Python-List returned in response body
         """
 
-        param_list = ['format=%s&' % self.format]
-        if params is not None:
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-        url = '?' + ''.join(param_list)
+        url = '?format=%s' % self.format
+        if params:
+            url += '&%s' + urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)

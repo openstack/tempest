@@ -16,6 +16,7 @@
 #    under the License.
 
 from lxml import etree
+import urllib
 
 from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
@@ -43,11 +44,8 @@ class FloatingIPsClientXML(RestClientXML):
     def list_floating_ips(self, params=None):
         """Returns a list of all floating IPs filtered by any parameters"""
         url = 'os-floating-ips'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s" % (param, value))
-            url += "?" + "&".join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url, self.headers)
         body = self._parse_array(etree.fromstring(body))

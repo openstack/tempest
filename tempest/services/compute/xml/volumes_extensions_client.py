@@ -17,6 +17,7 @@
 
 import time
 from lxml import etree
+import urllib
 
 from tempest import exceptions
 from tempest.common.rest_client import RestClientXML

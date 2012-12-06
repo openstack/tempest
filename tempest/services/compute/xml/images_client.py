@@ -89,8 +89,7 @@ class ImagesClientXML(RestClientXML):
         """Returns a list of all images filtered by any parameters"""
         url = 'images'
         if params:
-            param_list = urllib.urlencode(params)
-            url += "?" + param_list
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url, self.headers)
         body = xml_to_json(etree.fromstring(body))

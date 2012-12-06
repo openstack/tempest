@@ -19,6 +19,7 @@ from tempest.common.rest_client import RestClient
 from tempest import exceptions
 import json
 import time
+import urllib
 
 
 class ImagesClientJSON(RestClient):
@@ -50,12 +51,8 @@ class ImagesClientJSON(RestClient):
     def list_images(self, params=None):
         """Returns a list of all images filtered by any parameters"""
         url = 'images'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url = "images?" + "".join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
@@ -64,12 +61,8 @@ class ImagesClientJSON(RestClient):
     def list_images_with_detail(self, params=None):
         """Returns a detailed list of images filtered by any parameters"""
         url = 'images/detail'
-        if params is not None:
-            param_list = []
-            for param, value in params.iteritems():
-                param_list.append("%s=%s&" % (param, value))
-
-            url = "images/detail?" + "".join(param_list)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
         body = json.loads(body)
