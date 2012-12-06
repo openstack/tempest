@@ -60,7 +60,7 @@ class EC2VolumesTest(BotoTestCase):
         self.client.delete_volume(volume.id)
         self.cancelResourceCleanUp(cuk)
 
-    @unittest.skip("Skipped until the Bug #1080284 is resolved")
+    @attr(type='smoke')
     def test_create_volme_from_snapshot(self):
         """EC2 Create volume from snapshot"""
         volume = self.client.create_volume(1, self.zone)
@@ -78,7 +78,6 @@ class EC2VolumesTest(BotoTestCase):
             snap.update(validate=True)
             return snap.status
 
-        #self.assertVolumeStatusWait(_snap_status, "available")  # not a volume
         self.assertSnapshotStatusWait(_snap_status, "completed")
 
         svol = self.client.create_volume(1, self.zone, snapshot=snap)
