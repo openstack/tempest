@@ -24,6 +24,7 @@ import tempest.config
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest.tests.compute import base
+from tempest.tests import compute
 
 
 class ServersTest(object):
@@ -49,7 +50,8 @@ class ServersTest(object):
                                             meta=cls.meta,
                                             accessIPv4=cls.accessIPv4,
                                             accessIPv6=cls.accessIPv6,
-                                            personality=personality)
+                                            personality=personality,
+                                            disk_config=cls.disk_config)
         cls.resp, cls.server_initial = cli_resp
         cls.password = cls.server_initial['adminPass']
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
@@ -119,11 +121,49 @@ class ServersTest(object):
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
 
+@attr(type='positive')
+class ServersTestAutoDisk(base.BaseComputeTestJSON,
+                          ServersTest):
+    @classmethod
+    def setUpClass(cls):
+        if not compute.DISK_CONFIG_ENABLED:
+            msg = "DiskConfig extension not enabled."
+            raise nose.SkipTest(msg)
+        super(ServersTestAutoDisk, cls).setUpClass()
+        cls.disk_config = 'AUTO'
+        ServersTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        ServersTest.tearDownClass(cls)
+        super(ServersTestAutoDisk, cls).tearDownClass()
+
+
+@attr(type='positive')
+class ServersTestManualDisk(base.BaseComputeTestJSON,
+                            ServersTest):
+    @classmethod
+    def setUpClass(cls):
+        if not compute.DISK_CONFIG_ENABLED:
+            msg = "DiskConfig extension not enabled."
+            raise nose.SkipTest(msg)
+        super(ServersTestManualDisk, cls).setUpClass()
+        cls.disk_config = 'MANUAL'
+        ServersTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        ServersTest.tearDownClass(cls)
+        super(ServersTestManualDisk, cls).tearDownClass()
+
+
+@attr(type='smoke')
 class ServersTestJSON(base.BaseComputeTestJSON,
                       ServersTest):
     @classmethod
     def setUpClass(cls):
         super(ServersTestJSON, cls).setUpClass()
+        cls.disk_config = None
         ServersTest.setUpClass(cls)
 
     @classmethod
@@ -132,11 +172,13 @@ class ServersTestJSON(base.BaseComputeTestJSON,
         super(ServersTestJSON, cls).tearDownClass()
 
 
+@attr(type='smoke')
 class ServersTestXML(base.BaseComputeTestXML,
                      ServersTest):
     @classmethod
     def setUpClass(cls):
         super(ServersTestXML, cls).setUpClass()
+        cls.disk_config = None
         ServersTest.setUpClass(cls)
 
     @classmethod
