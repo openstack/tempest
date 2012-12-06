@@ -69,13 +69,30 @@ class ObjectClient(RestClient):
         resp, body = self.get(url)
         return resp, body
 
-    def copy_object(self, container, src_object_name, dest_object_name,
-                    metadata=None):
+    def copy_object_in_same_container(self, container, src_object_name,
+                                      dest_object_name, metadata=None):
         """Copy storage object's data to the new object using PUT"""
 
         url = "{0}/{1}".format(container, dest_object_name)
         headers = {}
         headers['X-Copy-From'] = "%s/%s" % (str(container),
+                                            str(src_object_name))
+        headers['content-length'] = '0'
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
+        resp, body = self.put(url, None, headers=headers)
+        return resp, body
+
+    def copy_object_across_containers(self, src_container, src_object_name,
+                                      dst_container, dst_object_name,
+                                      metadata=None):
+        """Copy storage object's data to the new object using PUT"""
+
+        url = "{0}/{1}".format(dst_container, dst_object_name)
+        headers = {}
+        headers['X-Copy-From'] = "%s/%s" % (str(src_container),
                                             str(src_object_name))
         headers['content-length'] = '0'
         if metadata:
