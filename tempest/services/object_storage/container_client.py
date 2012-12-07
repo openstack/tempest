@@ -94,8 +94,8 @@ class ContainerClient(RestClient):
             item count is beyond 10,000 item listing limit.
             Does not require any paramaters aside from container name.
         """
-        #TODO:  Rewite using json format to avoid newlines at end of obj names
-        #Set limit to API limit - 1 (max returned items = 9999)
+        #TODO(dwalleck):  Rewite using json format to avoid newlines at end of
+        #obj names. Set limit to API limit - 1 (max returned items = 9999)
         limit = 9999
         marker = None
         if params is not None:
