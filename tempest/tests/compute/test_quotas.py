@@ -45,5 +45,5 @@ class QuotasTest(BaseComputeTest):
             resp, quota_set = self.client.get_quota_set(self.tenant_id)
             self.assertEqual(200, resp.status)
             self.assertSequenceEqual(expected_quota_set, quota_set)
-        except:
+        except Exception:
             self.fail("Quota set for tenant did not have default limits")

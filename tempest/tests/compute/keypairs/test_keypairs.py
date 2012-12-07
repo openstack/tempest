@@ -93,7 +93,7 @@ class KeyPairsTestBase(object):
             public_key = keypair_detail['public_key']
             self.assertTrue(public_key is not None,
                             "Field public_key is empty or not found.")
-        except:
+        except Exception:
             self.fail("GET keypair details requested by keypair name "
                       "has failed")
         finally:

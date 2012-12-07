@@ -243,7 +243,7 @@ class ListImageFiltersTest(BaseComputeTest):
         """Negative test: GET on non existant image should fail"""
         try:
             resp, image = self.client.get_image(999)
-        except:
+        except Exception:
             pass
         else:
             self.fail('GET on non existant image should fail')

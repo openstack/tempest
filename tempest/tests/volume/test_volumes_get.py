@@ -58,7 +58,7 @@ class VolumesGetTestBase(object):
                              fetched_volume['metadata'],
                              'The fetched Volume is different '
                              'from the created Volume')
-        except:
+        except Exception:
             self.fail("Could not create a volume")
         finally:
             if volume:
@@ -85,7 +85,7 @@ class VolumesGetTestBase(object):
             resp, fetched_volume = self.client.get_volume(volume['id'])
             self.assertEqual(200, resp.status)
             self.assertEqual(fetched_volume['metadata'], {})
-        except:
+        except Exception:
             self.fail("Could not get volume metadata")
         finally:
             if volume:

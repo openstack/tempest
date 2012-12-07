@@ -149,7 +149,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
             self.assertEqual(1, result.deleted)
             self.assertEqual('deleted', result.vm_state)
             self.assertEqual(None, result.task_state)
-        except:
+        except Exception:
             self.fail("Should be able to delete a server when vm_state=%s and "
                       "task_state=%s" % (vm_state, task_state))
 
@@ -164,7 +164,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
             self.assertRaises(exceptions.Unauthorized,
                               self.client.delete_server,
                               self.shared_server['id'])
-        except:
+        except Exception:
             self.fail("Should not allow delete server when vm_state=%s and "
                       "task_state=%s" % (vm_state, task_state))
         finally:

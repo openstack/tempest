@@ -79,7 +79,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
             try:
                 self.compute_client.security_group_rules.create(
                         self.secgroup.id, **ruleset)
-            except:
+            except Exception:
                 self.fail("Failed to create rule in security group.")
 
     def test_003_boot_instance(self):

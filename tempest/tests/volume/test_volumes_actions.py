@@ -58,7 +58,7 @@ class VolumesActionsTest(BaseVolumeTest):
                                                    mountpoint)
             self.assertEqual(202, resp.status)
             self.client.wait_for_volume_status(self.volume['id'], 'in-use')
-        except:
+        except Exception:
             self.fail("Could not attach volume to instance")
         finally:
             # Detach the volume from the instance
@@ -83,7 +83,7 @@ class VolumesActionsTest(BaseVolumeTest):
             self.assertEqual(self.server['id'], attachment['server_id'])
             self.assertEqual(self.volume['id'], attachment['id'])
             self.assertEqual(self.volume['id'], attachment['volume_id'])
-        except:
+        except Exception:
             self.fail("Could not get attachment details from volume")
         finally:
             self.client.detach_volume(self.volume['id'])
