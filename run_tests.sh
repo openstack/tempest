@@ -52,10 +52,13 @@ function run_tests {
 
 function run_pep8 {
   echo "Running pep8 ..."
-  PEP8_EXCLUDE="etc,include,tools,*venv"
-  PEP8_OPTIONS="--exclude=$PEP8_EXCLUDE --repeat"
-  PEP8_INCLUDE="."
-  pep8 $PEP8_OPTIONS $PEP8_INCLUDE
+  srcfiles="`find tempest -type f -name "*.py"`"
+  srcfiles+=" `find tools -type f -name "*.py"`"
+  srcfiles+=" setup.py"
+
+  ignore='--ignore=N4,E121,E122,E125,E126'
+  
+  python tools/hacking.py ${ignore} ${srcfiles}
 }
 
 NOSETESTS="nosetests $noseargs"
