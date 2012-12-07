@@ -324,7 +324,6 @@ class AuthorizationTest(BaseComputeTest):
                           "happen if the tenant id does not match the"
                           " current user")
 
-    @unittest.skip("Skipped until the Bug #1001118 is resolved")
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_security_group_rule_of_alt_account_fails(self):
