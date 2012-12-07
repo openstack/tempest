@@ -15,21 +15,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
-from nose.plugins.attrib import attr
-import unittest2 as unittest
-from tempest.testboto import BotoTestCase
-from tempest.tests.boto.utils.s3 import s3_upload_dir
-import tempest.tests.boto
-from tempest.common.utils.data_utils import rand_name
-from tempest.exceptions import EC2RegisterImageException
-from tempest.tests.boto.utils.wait import state_wait, re_search_wait
-from tempest import openstack
-from tempest.common.utils.linux.remote_client import RemoteClient
-from boto.s3.key import Key
 from contextlib import closing
 import logging
 
+from boto.s3.key import Key
+import nose
+from nose.plugins.attrib import attr
+import unittest2 as unittest
+
+from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest.exceptions import EC2RegisterImageException
+from tempest import openstack
+from tempest.testboto import BotoTestCase
+import tempest.tests.boto
+from tempest.tests.boto.utils.s3 import s3_upload_dir
+from tempest.tests.boto.utils.wait import re_search_wait
+from tempest.tests.boto.utils.wait import state_wait
 
 LOG = logging.getLogger(__name__)
 

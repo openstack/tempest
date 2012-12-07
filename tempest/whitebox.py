@@ -17,15 +17,15 @@
 
 import logging
 import os
-import sys
 import shlex
 import subprocess
+import sys
 
 import nose
 from sqlalchemy import create_engine, MetaData
 
-from tempest.common.utils.data_utils import rand_name
 from tempest.common.ssh import Client
+from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest import test
 from tempest.tests import compute

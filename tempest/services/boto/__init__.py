@@ -15,16 +15,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import boto
-
 from ConfigParser import DuplicateSectionError
+from contextlib import closing
+import re
+from types import MethodType
+
+import boto
 
 from tempest.exceptions import InvalidConfiguration
 from tempest.exceptions import NotFound
-
-import re
-from types import MethodType
-from contextlib import closing
 
 
 class BotoClientBase(object):

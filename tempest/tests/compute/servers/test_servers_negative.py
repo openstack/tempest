@@ -17,13 +17,13 @@
 
 import sys
 
+import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-import nose
 
+from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest import openstack
-from tempest.common.utils.data_utils import rand_name
 from tempest.tests.compute.base import BaseComputeTest
 
 

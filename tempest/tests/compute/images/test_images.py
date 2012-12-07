@@ -15,16 +15,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-import nose
 
-from tempest.common.utils.data_utils import rand_name, parse_image_id
+from tempest.common.utils.data_utils import parse_image_id
+from tempest.common.utils.data_utils import rand_name
 import tempest.config
 from tempest import exceptions
 from tempest import openstack
-from tempest.tests.compute import base
 from tempest.tests import compute
+from tempest.tests.compute import base
 
 
 class ImagesTestBase(object):

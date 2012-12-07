@@ -15,19 +15,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
-import unittest2 as unittest
-from nose.plugins.attrib import attr
 import random
 import string
 
-from tempest.tests.compute import base
+import nose
+from nose.plugins.attrib import attr
+import unittest2 as unittest
+
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import config
 from tempest import exceptions
-
 from tempest.services.compute.json.hosts_client import HostsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
+from tempest.tests.compute import base
 
 
 @attr(category='live-migration')

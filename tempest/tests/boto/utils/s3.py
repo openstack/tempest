@@ -15,13 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import boto
-from boto.s3.key import Key
 from contextlib import closing
+import logging
 import os
 import re
-import logging
 
+import boto
+from boto.s3.key import Key
 
 LOG = logging.getLogger(__name__)
 

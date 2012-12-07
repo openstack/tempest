@@ -15,12 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-import socket
-import warnings
-import select
 
 from cStringIO import StringIO
+import select
+import socket
+import time
+import warnings
+
 from tempest import exceptions
 
 

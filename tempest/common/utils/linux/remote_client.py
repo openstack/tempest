@@ -1,10 +1,11 @@
-from tempest.common.ssh import Client
-from tempest.config import TempestConfig
-from tempest.common import utils
-from tempest.exceptions import SSHTimeout, ServerUnreachable
-
-import time
 import re
+import time
+
+from tempest.common.ssh import Client
+from tempest.common import utils
+from tempest.config import TempestConfig
+from tempest.exceptions import ServerUnreachable
+from tempest.exceptions import SSHTimeout
 
 
 class RemoteClient():

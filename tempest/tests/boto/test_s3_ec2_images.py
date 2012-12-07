@@ -15,19 +15,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from contextlib import closing
+import logging
+import os
+
+from boto.s3.key import Key
+import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
+
+from tempest.common.utils.data_utils import rand_name
 from tempest import openstack
 from tempest.testboto import BotoTestCase
 import tempest.tests.boto
-from tempest.tests.boto.utils.wait import state_wait
 from tempest.tests.boto.utils.s3 import s3_upload_dir
-from tempest.common.utils.data_utils import rand_name
-from contextlib import closing
-from boto.s3.key import Key
-import logging
-import nose
-import os
+from tempest.tests.boto.utils.wait import state_wait
 
 
 @attr("S3", "EC2")

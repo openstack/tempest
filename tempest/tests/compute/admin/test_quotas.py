@@ -17,9 +17,9 @@
 
 from nose.plugins.attrib import attr
 
-from tempest.tests.compute.base import BaseComputeTest
-from tempest.services.compute.admin.json import quotas_client as adm_quotas
 from tempest import exceptions
+from tempest.services.compute.admin.json import quotas_client as adm_quotas
+from tempest.tests.compute.base import BaseComputeTest
 
 
 class QuotasTest(BaseComputeTest):

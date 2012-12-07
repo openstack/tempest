@@ -17,8 +17,8 @@
 
 import nose
 
-from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.tests.identity import base
 
 

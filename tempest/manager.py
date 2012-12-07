@@ -29,19 +29,19 @@ except ImportError:
 import tempest.config
 from tempest import exceptions
 # Tempest REST Fuzz testing client libs
+from tempest.services.compute.json import console_output_client
+from tempest.services.compute.json import extensions_client
+from tempest.services.compute.json import flavors_client
+from tempest.services.compute.json import floating_ips_client
+from tempest.services.compute.json import images_client
+from tempest.services.compute.json import keypairs_client
+from tempest.services.compute.json import limits_client
+from tempest.services.compute.json import quotas_client
+from tempest.services.compute.json import security_groups_client
+from tempest.services.compute.json import servers_client
+from tempest.services.compute.json import volumes_extensions_client
 from tempest.services.network.json import network_client
 from tempest.services.volume.json import volumes_client
-from tempest.services.compute.json import images_client
-from tempest.services.compute.json import flavors_client
-from tempest.services.compute.json import servers_client
-from tempest.services.compute.json import limits_client
-from tempest.services.compute.json import extensions_client
-from tempest.services.compute.json import security_groups_client
-from tempest.services.compute.json import floating_ips_client
-from tempest.services.compute.json import keypairs_client
-from tempest.services.compute.json import volumes_extensions_client
-from tempest.services.compute.json import console_output_client
-from tempest.services.compute.json import quotas_client
 
 NetworkClient = network_client.NetworkClient
 ImagesClient = images_client.ImagesClientJSON

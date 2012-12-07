@@ -15,20 +15,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest2 as unittest
-import nose
-import tempest.tests.boto
-from tempest.exceptions import TearDownException
-from tempest.tests.boto.utils.wait import state_wait, wait_no_exception
-from tempest.tests.boto.utils.wait import re_search_wait, wait_exception
-import boto
-from boto.s3.key import Key
-from boto.s3.bucket import Bucket
-from boto.exception import BotoServerError
 from contextlib import closing
-import re
 import logging
+import re
 import time
+
+import boto
+from boto.exception import BotoServerError
+from boto.s3.bucket import Bucket
+from boto.s3.key import Key
+import nose
+import unittest2 as unittest
+
+from tempest.exceptions import TearDownException
+import tempest.tests.boto
+from tempest.tests.boto.utils.wait import re_search_wait
+from tempest.tests.boto.utils.wait import state_wait
+from tempest.tests.boto.utils.wait import wait_exception
+from tempest.tests.boto.utils.wait import wait_no_exception
 
 LOG = logging.getLogger(__name__)
 

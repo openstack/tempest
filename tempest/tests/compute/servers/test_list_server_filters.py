@@ -15,15 +15,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose.plugins.skip
+
+import nose
 from nose.plugins.attrib import attr
+import nose.plugins.skip
 import unittest2 as unittest
 
-from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.tests.compute import base
 from tempest.tests import utils
-import nose
 
 
 class ListServerFiltersTest(object):

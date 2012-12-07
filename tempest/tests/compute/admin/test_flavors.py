@@ -19,8 +19,8 @@ import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-from tempest.tests.compute import base
 from tempest.tests import compute
+from tempest.tests.compute import base
 
 
 class FlavorsAdminTestBase(object):

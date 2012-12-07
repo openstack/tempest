@@ -17,9 +17,10 @@
 
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-from tempest.testboto import BotoTestCase
+
 from tempest.common.utils.data_utils import rand_name
 from tempest import openstack
+from tempest.testboto import BotoTestCase
 
 
 @attr("S3")

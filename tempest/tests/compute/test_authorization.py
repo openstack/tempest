@@ -16,15 +16,16 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-from nose.tools import raises
 from nose import SkipTest
+from nose.tools import raises
 import unittest2 as unittest
 
-from tempest import openstack
-from tempest.common.utils.data_utils import rand_name, parse_image_id
+from tempest.common.utils.data_utils import parse_image_id
+from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.tests.compute.base import BaseComputeTest
+from tempest import openstack
 from tempest.tests import compute
+from tempest.tests.compute.base import BaseComputeTest
 
 
 class AuthorizationTest(BaseComputeTest):

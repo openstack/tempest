@@ -1,7 +1,8 @@
-from tempest.common.rest_client import RestClient
-from tempest import exceptions
 import httplib2
 import json
+
+from tempest.common.rest_client import RestClient
+from tempest import exceptions
 
 
 class AdminClientJSON(RestClient):

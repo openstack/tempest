@@ -15,10 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.rest_client import RestClient
-from tempest import exceptions
 import json
 import urllib
+
+from tempest.common.rest_client import RestClient
+from tempest import exceptions
 
 
 class FloatingIPsClientJSON(RestClient):
