@@ -15,19 +15,18 @@
 Users pass in a description of the workload and a nova manager object
 to the bash_openstack function call"""
 
-
-import random
 import datetime
+import random
 import time
 
-
-# local imports
-from test_case import *
-import utils.util
 from config import StressConfig
-from state import ClusterState, KeyPairState, FloatingIpState, VolumeState
+from state import ClusterState
+from state import FloatingIpState
+from state import KeyPairState
+from state import VolumeState
+from test_case import *
 from tempest.common.utils.data_utils import rand_name
-
+import utils.util
 
 # setup logging to file
 logging.basicConfig(

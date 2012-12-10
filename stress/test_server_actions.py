@@ -17,15 +17,12 @@ API calls on the Nova cluster having to do with Server Actions. Each
 sub-class will have a corresponding PendingServerAction. These pending
 actions veriy that the API call was successful or not."""
 
-
-# system imports
 import random
 import time
 
-# local imports
-import test_case
 import pending_action
 from tempest.exceptions import Duplicate
+import test_case
 from utils.util import *
 
 

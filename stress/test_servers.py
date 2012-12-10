@@ -17,15 +17,11 @@ API calls on the Nova cluster having to do with creating and deleting VMs.
 Each sub-class will have a corresponding PendingServerAction. These pending
 actions veriy that the API call was successful or not."""
 
-
-# system imports
 import random
 import time
 
-
-# local imports
-import test_case
 import pending_action
+import test_case
 
 
 class TestCreateVM(test_case.StressTestCase):
