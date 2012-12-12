@@ -213,7 +213,7 @@ class RestClient(object):
         #TODO(afazekas): Make sure we can validate all responses, and the
         #http library does not do any action automatically
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
-            method.upper() == 'HEAD') and body:
+            method.upper() == 'HEAD') and resp_body:
             raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
 
         #NOTE(afazekas):
