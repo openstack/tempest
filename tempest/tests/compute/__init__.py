@@ -30,6 +30,7 @@ RESIZE_AVAILABLE = CONFIG.compute.resize_available
 CHANGE_PASSWORD_AVAILABLE = CONFIG.compute.change_password_available
 WHITEBOX_ENABLED = CONFIG.compute.whitebox_enabled
 DISK_CONFIG_ENABLED = False
+DISK_CONFIG_ENABLED_OVERRIDE = CONFIG.compute.disk_config_enabled_override
 FLAVOR_EXTRA_DATA_ENABLED = False
 MULTI_USER = False
 
@@ -43,7 +44,8 @@ def setup_package():
     images_client = os.images_client
     flavors_client = os.flavors_client
     extensions_client = os.extensions_client
-    DISK_CONFIG_ENABLED = extensions_client.is_enabled('DiskConfig')
+    DISK_CONFIG_ENABLED = (DISK_CONFIG_ENABLED_OVERRIDE and
+                           extensions_client.is_enabled('DiskConfig'))
     FLAVOR_EXTRA_DATA_ENABLED = extensions_client.is_enabled('FlavorExtraData')
 
     # Validate reference data exists
