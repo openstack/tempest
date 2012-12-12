@@ -129,7 +129,6 @@ class FloatingIPsTestBase(object):
         else:
             self.fail('Should not be able to delete a nonexistent floating IP')
 
-    @unittest.skip("Skipped until the Bug #957706 is resolved")
     @attr(type='negative')
     def test_associate_nonexistant_floating_ip(self):
         """
@@ -204,7 +203,6 @@ class FloatingIPsTestBase(object):
         #Deletion of server created in this method
         resp, body = self.servers_client.delete_server(self.new_server_id)
 
-    @unittest.skip("Skipped until the Bug #957706 is resolved")
     @attr(type='negative')
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         """
