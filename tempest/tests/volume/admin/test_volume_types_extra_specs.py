@@ -16,8 +16,8 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.volume.base import BaseVolumeTest
 from tempest.services.volume.json.admin import volume_types_client
+from tempest.tests.volume.base import BaseVolumeTest
 
 
 class VolumeTypesExtraSpecsTest(BaseVolumeTest):
@@ -55,7 +55,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
             self.assertTrue(type(body), dict)
             self.assertTrue('spec1' in body, "Incorrect volume type extra"
                             " spec returned")
-        except:
+        except Exception:
             self.fail("Could not list volume types extra specs")
 
     def test_volume_type_extra_specs_update(self):
@@ -71,7 +71,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
                             "Volume type extra spec incorrectly updated")
             self.assertEqual(extra_spec['spec1'], body['spec1'],
                              "Volume type extra spec incorrectly updated")
-        except:
+        except Exception:
             self.fail("Couldnt update volume type extra spec")
 
     def test_volume_type_extra_spec_create_delete(self):
@@ -87,7 +87,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
             delete_volume_type_extra_specs(self.volume_type['id'],
                                            extra_specs.keys()[0])
             self.assertEqual(202, resp.status)
-        except:
+        except Exception:
             self.fail("Could not create a volume_type extra spec")
 
     def test_volume_type_extra_spec_create_get(self):
@@ -105,5 +105,5 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
             self.assertEqual(200, resp.status)
             self.assertEqual(extra_specs, body,
                              "Volume type extra spec incorrectly fetched")
-        except:
+        except Exception:
             self.fail("Could not create a volume_type extra spec")
