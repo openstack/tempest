@@ -46,7 +46,7 @@ class VolumeTypesTest(BaseVolumeTest):
             resp, body = self.client.list_volume_types()
             self.assertEqual(200, resp.status)
             self.assertTrue(type(body), list)
-        except:
+        except Exception:
             self.fail("Could not list volume types")
 
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
@@ -88,7 +88,7 @@ class VolumeTypesTest(BaseVolumeTest):
             self.assertEqual(vol_type_name, fetched_volume['volume_type'],
                              'The fetched Volume is different '
                              'from the created Volume')
-        except:
+        except Exception:
             self.fail("Could not create correct volume with volume_type")
         finally:
             if volume:
@@ -118,7 +118,7 @@ class VolumeTypesTest(BaseVolumeTest):
             resp, fetched_volume_type = self.client.\
             delete_volume_type(body['id'])
             self.assertEqual(202, resp.status)
-        except:
+        except Exception:
             self.fail("Could not create a volume_type")
 
     def test_volume_type_create_get(self):
@@ -148,7 +148,7 @@ class VolumeTypesTest(BaseVolumeTest):
             self.assertEqual(extra_specs, fetched_volume_type['extra_specs'],
                              'The fetched Volume_type is different '
                              'from the created Volume_type')
-        except:
+        except Exception:
             self.fail("Could not create a volume_type")
         finally:
             if body:
