@@ -12,16 +12,13 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-
-# system imports
-import random
-import time
-import telnetlib
 import logging
+import random
+import telnetlib
+import time
 
-# local imports
-import test_case
 import pending_action
+import test_case
 
 
 class TestChangeFloatingIp(test_case.StressTestCase):
@@ -85,7 +82,7 @@ class VerifyChangeFloatingIp(pending_action.PendingAction):
                                   (self.floating_ip.address, self.elapsed()))
                 self.floating_ip.change_pending = False
                 return True
-        except:
+        except Exception:
             if not self.add:
                 self._logger.info('%s removed [%.1f secs elapsed]' %
                                   (self.floating_ip.address, self.elapsed()))

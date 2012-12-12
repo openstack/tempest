@@ -13,11 +13,11 @@
 #    limitations under the License.
 """Stress test that associates/disasssociates floating ips"""
 
-# local imports
-from stress.test_floating_ips import TestChangeFloatingIp
 from stress.basher import BasherAction
 from stress.driver import *
+from stress.test_floating_ips import TestChangeFloatingIp
 from tempest import openstack
+
 
 choice_spec = [
     BasherAction(TestChangeFloatingIp(), 100)

@@ -14,9 +14,9 @@
 """Describe follow-up actions using `PendingAction` class to verify
 that nova API calls such as create/delete are completed"""
 
-
 import logging
 import time
+
 from tempest.exceptions import TimeoutException
 
 
