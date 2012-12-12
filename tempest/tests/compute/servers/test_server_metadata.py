@@ -135,7 +135,7 @@ class ServerMetadataTest(BaseComputeTest):
         """Negative test: GET on nonexistant server should not succeed"""
         try:
             resp, meta = self.client.get_server_metadata_item(999, 'test2')
-        except:
+        except Exception:
             pass
         else:
             self.fail('GET on nonexistant server should not succeed')
@@ -147,7 +147,7 @@ class ServerMetadataTest(BaseComputeTest):
         """
         try:
             resp, metadata = self.client.list_server_metadata(999)
-        except:
+        except Exception:
             pass
         else:
             self.fail('List metadata on a non existant server should'
@@ -161,7 +161,7 @@ class ServerMetadataTest(BaseComputeTest):
         meta = {'meta1': 'data1'}
         try:
             resp, metadata = self.client.set_server_metadata(999, meta)
-        except:
+        except Exception:
             pass
         else:
             self.fail('Set metadata on a non existant server should'
@@ -175,7 +175,7 @@ class ServerMetadataTest(BaseComputeTest):
         meta = {'key1': 'value1', 'key2': 'value2'}
         try:
             resp, metadata = self.client.update_server_metadata(999, meta)
-        except:
+        except Exception:
             pass
         else:
             self.fail('An update should not happen for a nonexistant image')
@@ -191,7 +191,7 @@ class ServerMetadataTest(BaseComputeTest):
         #Delete the metadata item
         try:
             resp, metadata = self.client.delete_server_metadata_item(999, 'd')
-        except:
+        except Exception:
             pass
         else:
             self.fail('A delete should not happen for a nonexistant image')

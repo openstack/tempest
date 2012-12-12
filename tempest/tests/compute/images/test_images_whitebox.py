@@ -73,7 +73,7 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
             self.assertRaises(exceptions.Duplicate,
                               self.client.create_image,
                               self.shared_server['id'], image_name)
-        except:
+        except Exception:
             self.fail("Should not allow create image when vm_state=%s and "
                       "task_state=%s" % (vm_state, task_state))
         finally:

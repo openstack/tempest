@@ -80,7 +80,7 @@ class VolumeListTestXML(base.BaseVolumeTestXML, VolumesListTestBase):
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])
-            except:
+            except Exception:
                 if cls.volume_list:
                     # We could not create all the volumes, though we were able
                     # to create *some* of the volumes. This is typically
@@ -126,7 +126,7 @@ class VolumeListTestJSON(base.BaseVolumeTestJSON, VolumesListTestBase):
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])
-            except:
+            except Exception:
                 if cls.volume_list:
                     # We could not create all the volumes, though we were able
                     # to create *some* of the volumes. This is typically

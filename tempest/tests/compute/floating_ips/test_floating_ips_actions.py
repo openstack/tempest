@@ -124,7 +124,7 @@ class FloatingIPsTestBase(object):
         #Deleting the non existent floating IP
         try:
             resp, body = self.client.delete_floating_ip(self.non_exist_id)
-        except:
+        except Exception:
             pass
         else:
             self.fail('Should not be able to delete a nonexistent floating IP')

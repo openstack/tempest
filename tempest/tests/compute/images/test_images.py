@@ -93,7 +93,7 @@ class ImagesTestBase(object):
             meta = {'image_type': 'test'}
             resp, body = self.client.create_image(server['id'], name, meta)
 
-        except:
+        except Exception:
             pass
 
         else:
@@ -199,7 +199,7 @@ class ImagesTestBase(object):
             snapshot_name = rand_name('a' * 260)
             self.assertRaises(exceptions.BadRequest, self.client.create_image,
                               server['id'], snapshot_name)
-        except:
+        except Exception:
             self.fail("Should return 400 Bad Request if image name is over 256"
                       " characters")
 
@@ -211,7 +211,7 @@ class ImagesTestBase(object):
             test_uuid = ('a' * 35)
             self.assertRaises(exceptions.NotFound, self.client.create_image,
                               test_uuid, snapshot_name)
-        except:
+        except Exception:
             self.fail("Should return 404 Not Found if server uuid is 35"
                       " characters or less")
 
@@ -223,7 +223,7 @@ class ImagesTestBase(object):
             test_uuid = ('a' * 37)
             self.assertRaises(exceptions.NotFound, self.client.create_image,
                               test_uuid, snapshot_name)
-        except:
+        except Exception:
             self.fail("Should return 404 Not Found if server uuid is 37"
                       " characters or more")
 
@@ -238,7 +238,7 @@ class ImagesTestBase(object):
             self.assertRaises(exceptions.BadRequest,
                               self.client.create_image, server['id'],
                               snapshot_name)
-        except:
+        except Exception:
             self.fail("Should return 400 Bad Request if multi byte characters"
                       " are used for image name")
 
@@ -254,7 +254,7 @@ class ImagesTestBase(object):
             self.assertRaises(exceptions.BadRequest, self.client.create_image,
                               server['id'], snapshot_name, meta)
 
-        except:
+        except Exception:
             self.fail("Should raise 400 Bad Request if meta data is invalid")
 
     @attr(type='negative')
@@ -269,7 +269,7 @@ class ImagesTestBase(object):
             self.assertRaises(exceptions.OverLimit, self.client.create_image,
                               server['id'], snapshot_name, meta)
 
-        except:
+        except Exception:
             self.fail("Should raise 413 Over Limit if meta data was too long")
 
     @attr(type='negative')
@@ -301,7 +301,7 @@ class ImagesTestBase(object):
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
                               '')
-        except:
+        except Exception:
             self.fail("Did not return HTTP 404 NotFound for blank image id")
 
     @attr(type='negative')
@@ -312,7 +312,7 @@ class ImagesTestBase(object):
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
                               image_id)
-        except:
+        except Exception:
             self.fail("Did not return HTTP 404 NotFound for non hex image")
 
     @attr(type='negative')
@@ -322,7 +322,7 @@ class ImagesTestBase(object):
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
                               -1)
-        except:
+        except Exception:
             self.fail("Did not return HTTP 404 NotFound for negative image id")
 
     @attr(type='negative')
@@ -332,7 +332,7 @@ class ImagesTestBase(object):
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
                               '11a22b9-120q-5555-cc11-00ab112223gj-3fac')
-        except:
+        except Exception:
             self.fail("Did not return HTTP 404 NotFound for image id that "
                       "exceeds 35 character ID length limit")
 

@@ -138,7 +138,7 @@ class BaseVolumeTest(unittest.TestCase):
         while True:
             try:
                 condition()
-            except:
+            except Exception:
                 pass
             else:
                 return

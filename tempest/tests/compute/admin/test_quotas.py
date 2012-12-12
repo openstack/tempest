@@ -73,7 +73,7 @@ class QuotasTest(BaseComputeTest):
             resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
             self.assertEqual(200, resp.status)
             self.assertSequenceEqual(expected_quota_set, quota_set)
-        except:
+        except Exception:
             self.fail("Admin could not get the default quota set for a tenant")
 
     def test_update_all_quota_resources_for_tenant(self):
@@ -91,7 +91,7 @@ class QuotasTest(BaseComputeTest):
                 **new_quota_set)
             self.assertEqual(200, resp.status)
             self.assertSequenceEqual(new_quota_set, quota_set)
-        except:
+        except Exception:
             self.fail("Admin could not update quota set for the tenant")
         finally:
             # Reset quota resource limits to default values
@@ -109,7 +109,7 @@ class QuotasTest(BaseComputeTest):
             resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
             self.assertEqual(200, resp.status)
             self.assertEqual(quota_set['ram'], 5120)
-        except:
+        except Exception:
             self.fail("Could not get the update quota limit for resource")
         finally:
             # Reset quota resource limits to default values

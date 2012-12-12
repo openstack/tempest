@@ -107,7 +107,7 @@ class RestClient(object):
         resp, body = self.http_obj.request(auth_url, 'GET', **params)
         try:
             return resp['x-auth-token'], resp['x-server-management-url']
-        except:
+        except Exception:
             raise
 
     def keystone_auth(self, user, password, auth_url, service, tenant_name):
