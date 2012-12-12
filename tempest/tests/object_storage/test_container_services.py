@@ -16,7 +16,9 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-from tempest.common.utils.data_utils import rand_name, arbitrary_string
+
+from tempest.common.utils.data_utils import arbitrary_string
+from tempest.common.utils.data_utils import rand_name
 from tempest.tests.object_storage import base
 
 

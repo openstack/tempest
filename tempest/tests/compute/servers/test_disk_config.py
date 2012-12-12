@@ -19,10 +19,10 @@ import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-from tempest import exceptions
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
+from tempest import exceptions
 from tempest.tests import compute
+from tempest.tests.compute.base import BaseComputeTest
 
 
 class TestServerDiskConfig(BaseComputeTest):

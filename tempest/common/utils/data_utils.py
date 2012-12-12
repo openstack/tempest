@@ -15,10 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import itertools
 import random
 import re
 import urllib
-import itertools
 
 from tempest import exceptions
 

@@ -1,5 +1,6 @@
-from tempest.common.rest_client import RestClient
 import json
+
+from tempest.common.rest_client import RestClient
 
 
 class HostsClientJSON(RestClient):

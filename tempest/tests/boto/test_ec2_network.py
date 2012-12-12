@@ -17,8 +17,9 @@
 
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-from tempest.testboto import BotoTestCase
+
 from tempest import openstack
+from tempest.testboto import BotoTestCase
 
 
 @attr("EC2")

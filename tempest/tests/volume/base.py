@@ -17,14 +17,14 @@
 
 import logging
 import time
-import nose
 
+import nose
 import unittest2 as unittest
 
-from tempest import config
-from tempest import openstack
 from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest import exceptions
+from tempest import openstack
 
 LOG = logging.getLogger(__name__)
 

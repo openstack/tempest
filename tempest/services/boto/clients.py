@@ -15,11 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import boto
-from boto.s3.connection import OrdinaryCallingFormat
-from boto.ec2.regioninfo import RegionInfo
-from tempest.services.boto import BotoClientBase
 import urlparse
+
+import boto
+from boto.ec2.regioninfo import RegionInfo
+from boto.s3.connection import OrdinaryCallingFormat
+
+from tempest.services.boto import BotoClientBase
 
 
 class APIClientEC2(BotoClientBase):

@@ -15,13 +15,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-from nose.plugins.attrib import attr
-from tempest.testboto import BotoTestCase
-from tempest import openstack
-import unittest2 as unittest
 import logging
 import time
+
+from nose.plugins.attrib import attr
+import unittest2 as unittest
+
+from tempest import openstack
+from tempest.testboto import BotoTestCase
 
 LOG = logging.getLogger(__name__)
 

@@ -15,11 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import exceptions
-from tempest.common.rest_client import RestClient
 import json
 import time
 import urllib
+
+from tempest.common.rest_client import RestClient
+from tempest import exceptions
 
 
 class VolumesExtensionsClientJSON(RestClient):

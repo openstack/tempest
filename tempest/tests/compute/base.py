@@ -18,13 +18,13 @@
 import logging
 import time
 
-import unittest2 as unittest
 import nose
+import unittest2 as unittest
 
+from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
 from tempest import openstack
-from tempest.common.utils.data_utils import rand_name
 
 __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
            'BaseComputeAdminTestJSON', 'BaseComputeAdminTestXML']

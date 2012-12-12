@@ -15,9 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.rest_client import RestClient
 import json
 import urllib
+
+from tempest.common.rest_client import RestClient
 
 
 class FlavorsClientJSON(RestClient):

@@ -15,8 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.rest_client import RestClient
 import json
+
+from tempest.common.rest_client import RestClient
 
 
 class ExtensionsClientJSON(RestClient):

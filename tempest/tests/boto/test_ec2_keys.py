@@ -15,12 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-from tempest.testboto import BotoTestCase
+
 from tempest.common.utils.data_utils import rand_name
 from tempest import openstack
+from tempest.testboto import BotoTestCase
 
 
 def compare_key_pairs(a, b):

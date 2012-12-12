@@ -15,9 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.rest_client import RestClientXML
 from lxml import etree
 from lxml import objectify
+
+from tempest.common.rest_client import RestClientXML
 
 NS = "{http://docs.openstack.org/common/api/v1.0}"
 

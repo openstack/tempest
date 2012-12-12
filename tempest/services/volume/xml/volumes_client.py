@@ -22,11 +22,11 @@ from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
+from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import Document
+from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml.common import XMLNS_11
 
 
 class VolumesClientXML(RestClientXML):

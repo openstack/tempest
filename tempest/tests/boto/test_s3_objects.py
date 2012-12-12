@@ -15,14 +15,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from contextlib import closing
+
+from boto.s3.key import Key
 from nose.plugins.attrib import attr
 import unittest2 as unittest
-from tempest.testboto import BotoTestCase
+
 from tempest.common.utils.data_utils import rand_name
 from tempest import openstack
+from tempest.testboto import BotoTestCase
 from tempest.tests import boto
-from boto.s3.key import Key
-from contextlib import closing
 
 
 @attr("S3")

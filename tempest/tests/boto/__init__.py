@@ -15,15 +15,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import tempest.config
-from tempest.common.utils.file_utils import have_effective_read_access
-import os
-import tempest.openstack
-import re
-import keystoneclient.exceptions
-import boto.exception
 import logging
+import os
+import re
 import urlparse
+
+import boto.exception
+import keystoneclient.exceptions
+
+from tempest.common.utils.file_utils import have_effective_read_access
+import tempest.config
+import tempest.openstack
 
 A_I_IMAGES_READY = False  # ari,ami,aki
 S3_CAN_CONNECT_ERROR = "Unknown Error"

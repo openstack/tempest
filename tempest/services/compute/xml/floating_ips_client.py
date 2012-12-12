@@ -20,9 +20,9 @@ import urllib
 
 from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
-from tempest.services.compute.xml.common import xml_to_json
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
+from tempest.services.compute.xml.common import xml_to_json
 
 
 class FloatingIPsClientXML(RestClientXML):

@@ -20,11 +20,12 @@ import base64
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-import tempest.config
+
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
-from tempest.tests.compute import base
+import tempest.config
 from tempest.tests import compute
+from tempest.tests.compute import base
 
 
 class ServersTest(object):

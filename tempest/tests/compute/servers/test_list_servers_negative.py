@@ -18,14 +18,14 @@
 import re
 import sys
 
-import unittest2 as unittest
 import nose
+import unittest2 as unittest
 
+from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest import openstack
-from tempest.common.utils.data_utils import rand_name
-from tempest.tests.compute.base import BaseComputeTest
 from tempest.tests import compute
+from tempest.tests.compute.base import BaseComputeTest
 
 
 class ListServersNegativeTest(BaseComputeTest):

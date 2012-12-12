@@ -15,12 +15,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import tempest.config
-import time
-from unittest2 import TestCase
 import logging
 import re
+import time
+
 from boto.exception import BotoServerError
+from unittest2 import TestCase
+
+import tempest.config
 
 LOG = logging.getLogger(__name__)
 
