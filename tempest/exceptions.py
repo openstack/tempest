@@ -66,11 +66,11 @@ class BuildErrorException(TempestException):
 
 
 class AddImageException(TempestException):
-    message = "Image %(image_id) failed to become ACTIVE in the allotted time"
+    message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
 
 class EC2RegisterImageException(TempestException):
-    message = ("Image %(image_id) failed to become 'available' "
+    message = ("Image %(image_id)s failed to become 'available' "
                "in the allotted time")
 
 
@@ -140,7 +140,7 @@ class RFCViolation(TempestException):
 
 
 class ResponseWithNonEmptyBody(RFCViolation):
-    message = ("RFC Violation! Response with %(status) HTTP Status Code "
+    message = ("RFC Violation! Response with %(status)d HTTP Status Code "
                "MUST NOT have a body")
 
 
