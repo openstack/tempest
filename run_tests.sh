@@ -12,7 +12,8 @@ function usage {
   echo "  -w, --whitebox           Only run whitebox tests"
   echo "  -p, --pep8               Just run pep8"
   echo "  -h, --help               Print this usage message"
-  echo "  -d. --debug              Debug this script -- set -o xtrace"
+  echo "  -d, --debug              Debug this script -- set -o xtrace"
+  echo "  -S, --stdout             Don't capture stdout"
   exit
 }
 
@@ -27,6 +28,7 @@ function process_option {
     -p|--pep8) let just_pep8=1;;
     -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
     -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
+    -S|--stdout) noseargs="$noseargs -s";;
     *) noseargs="$noseargs $1"
   esac
 }
@@ -76,7 +78,7 @@ function run_pep8 {
   srcfiles+=" setup.py"
 
   ignore='--ignore=N4,E121,E122,E125,E126'
-  
+
   ${wrapper} python tools/hacking.py ${ignore} ${srcfiles}
 }
 
