@@ -294,6 +294,12 @@ class ComputeConfig(BaseConfig):
         """Path to a private key file for SSH access to remote hosts"""
         return self.get("path_to_private_key")
 
+    @property
+    def disk_config_enabled_override(self):
+        """If false, skip config tests regardless of the extension status"""
+        return self.get("disk_config_enabled_override",
+                        'true').lower() == 'true'
+
 
 class ComputeAdminConfig(BaseConfig):
 

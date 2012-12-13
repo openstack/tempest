@@ -16,6 +16,7 @@
 #    under the License.
 
 import base64
+import nose
 
 from nose.plugins.attrib import attr
 import unittest2 as unittest
