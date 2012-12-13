@@ -470,6 +470,11 @@ class BotoConfig(BaseConfig):
         return self.get("http_socket_timeout", "3")
 
     @property
+    def num_retries(self):
+        """boto num_retries on error"""
+        return self.get("num_retries", "1")
+
+    @property
     def build_timeout(self):
         """status change timeout"""
         return float(self.get("build_timeout", "60"))

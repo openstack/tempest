@@ -36,6 +36,7 @@ class BotoClientBase(object):
                  *args, **kwargs):
 
         self.connection_timeout = config.boto.http_socket_timeout
+        self.num_retries = config.boto.num_retries
         self.build_timeout = config.boto.build_timeout
         # We do not need the "path":  "/token" part
         if auth_url:
@@ -63,12 +64,13 @@ class BotoClientBase(object):
             raise NotFound("Unable to get access and secret keys")
         return ec2_cred
 
-    def _config_boto_timeout(self, timeout):
+    def _config_boto_timeout(self, timeout, retries):
         try:
             boto.config.add_section("Boto")
         except DuplicateSectionError:
             pass
         boto.config.set("Boto", "http_socket_timeout", timeout)
+        boto.config.set("Boto", "num_retries", retries)
 
     def __getattr__(self, name):
         """Automatically creates methods for the allowed methods set"""
@@ -86,7 +88,7 @@ class BotoClientBase(object):
             raise AttributeError(name)
 
     def get_connection(self):
-        self._config_boto_timeout(self.connection_timeout)
+        self._config_boto_timeout(self.connection_timeout, self.num_retries)
         if not all((self.connection_data["aws_access_key_id"],
                    self.connection_data["aws_secret_access_key"])):
             if all(self.ks_cred.itervalues()):
