@@ -33,9 +33,10 @@ class ServersTestBase(object):
         try:
             server = None
             name = rand_name('server')
-            resp, server = self.client.create_server(name, self.image_ref,
-                                                     self.flavor_ref,
-                                                     adminPass='testpassword')
+            resp, server = self.create_server_with_extras(name, self.image_ref,
+                                                          self.flavor_ref,
+                                                          adminPass='test'
+                                                          'password')
 
             #Verify the password is set correctly in the response
             self.assertEqual('testpassword', server['adminPass'])
@@ -52,14 +53,14 @@ class ServersTestBase(object):
             id1 = None
             id2 = None
             server_name = rand_name('server')
-            resp, server = self.client.create_server(server_name,
-                                                     self.image_ref,
-                                                     self.flavor_ref)
+            resp, server = self.create_server_with_extras(server_name,
+                                                          self.image_ref,
+                                                          self.flavor_ref)
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
             id1 = server['id']
-            resp, server = self.client.create_server(server_name,
-                                                     self.image_ref,
-                                                     self.flavor_ref)
+            resp, server = self.create_server_with_extras(server_name,
+                                                          self.image_ref,
+                                                          self.flavor_ref)
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
             id2 = server['id']
             self.assertNotEqual(id1, id2, "Did not create a new server")
@@ -83,10 +84,10 @@ class ServersTestBase(object):
             resp, keypair = self.keypairs_client.create_keypair(key_name)
             resp, body = self.keypairs_client.list_keypairs()
             server_name = rand_name('server')
-            resp, server = self.client.create_server(server_name,
-                                                     self.image_ref,
-                                                     self.flavor_ref,
-                                                     key_name=key_name)
+            resp, server = self.create_server_with_extras(server_name,
+                                                          self.image_ref,
+                                                          self.flavor_ref,
+                                                          key_name=key_name)
             self.assertEqual('202', resp['status'])
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
             resp, server = self.client.get_server(server['id'])
@@ -101,8 +102,8 @@ class ServersTestBase(object):
         try:
             server = None
             name = rand_name('server')
-            resp, server = self.client.create_server(name, self.image_ref,
-                                                     self.flavor_ref)
+            resp, server = self.create_server_with_extras(name, self.image_ref,
+                                                          self.flavor_ref)
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
             #Update the server with a new name
@@ -128,8 +129,8 @@ class ServersTestBase(object):
         try:
             server = None
             name = rand_name('server')
-            resp, server = self.client.create_server(name, self.image_ref,
-                                                     self.flavor_ref)
+            resp, server = self.create_server_with_extras(name, self.image_ref,
+                                                          self.flavor_ref)
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
             #Update the IPv4 and IPv6 access addresses
@@ -152,8 +153,8 @@ class ServersTestBase(object):
     def test_delete_server_while_in_building_state(self):
         """Delete a server while it's VM state is Building"""
         name = rand_name('server')
-        resp, server = self.client.create_server(name, self.image_ref,
-                                                 self.flavor_ref)
+        resp, server = self.create_server_with_extras(name, self.image_ref,
+                                                      self.flavor_ref)
         self.client.wait_for_server_status(server['id'], 'BUILD')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])

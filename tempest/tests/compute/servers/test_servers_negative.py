@@ -42,8 +42,9 @@ class ServersNegativeTest(BaseComputeTest):
     def test_server_name_blank(self):
         """Create a server with name parameter empty"""
         try:
-                resp, server = self.client.create_server('', self.image_ref,
-                                                         self.flavor_ref)
+                resp, server = self.create_server_with_extras('',
+                                                              self.image_ref,
+                                                              self.flavor_ref)
         except exceptions.BadRequest:
             pass
         else:
@@ -53,14 +54,14 @@ class ServersNegativeTest(BaseComputeTest):
     def test_personality_file_contents_not_encoded(self):
         """Use an unencoded file when creating a server with personality"""
         file_contents = 'This is a test file.'
-        personality = [{'path': '/etc/testfile.txt',
-                        'contents': file_contents}]
+        person = [{'path': '/etc/testfile.txt',
+                   'contents': file_contents}]
 
         try:
-            resp, server = self.client.create_server('test',
-                                                     self.image_ref,
-                                                     self.flavor_ref,
-                                                     personality=personality)
+            resp, server = self.create_server_with_extras('test',
+                                                          self.image_ref,
+                                                          self.flavor_ref,
+                                                          personality=person)
         except exceptions.BadRequest:
             pass
         else:
@@ -70,8 +71,8 @@ class ServersNegativeTest(BaseComputeTest):
     def test_create_with_invalid_image(self):
         """Create a server with an unknown image"""
         try:
-            resp, server = self.client.create_server('fail', -1,
-                                                     self.flavor_ref)
+            resp, server = self.create_server_with_extras('fail', -1,
+                                                          self.flavor_ref)
         except exceptions.BadRequest:
             pass
         else:
@@ -81,7 +82,7 @@ class ServersNegativeTest(BaseComputeTest):
     def test_create_with_invalid_flavor(self):
         """Create a server with an unknown flavor"""
         try:
-            self.client.create_server('fail', self.image_ref, -1)
+            self.create_server_with_extras('fail', self.image_ref, -1)
         except exceptions.BadRequest:
             pass
         else:
@@ -90,13 +91,13 @@ class ServersNegativeTest(BaseComputeTest):
     @attr(type='negative')
     def test_invalid_access_ip_v4_address(self):
         """An access IPv4 address must match a valid address pattern"""
-        accessIPv4 = '1.1.1.1.1.1'
+        IPv4 = '1.1.1.1.1.1'
         name = rand_name('server')
         try:
-            resp, server = self.client.create_server(name,
-                                                     self.image_ref,
-                                                     self.flavor_ref,
-                                                     accessIPv4=accessIPv4)
+            resp, server = self.create_server_with_extras(name,
+                                                          self.image_ref,
+                                                          self.flavor_ref,
+                                                          accessIPv4=IPv4)
         except exceptions.BadRequest:
             pass
         else:
@@ -105,13 +106,13 @@ class ServersNegativeTest(BaseComputeTest):
     @attr(type='negative')
     def test_invalid_ip_v6_address(self):
         """An access IPv6 address must match a valid address pattern"""
-        accessIPv6 = 'notvalid'
+        IPv6 = 'notvalid'
         name = rand_name('server')
         try:
-            resp, server = self.client.create_server(name,
-                                                     self.image_ref,
-                                                     self.flavor_ref,
-                                                     accessIPv6=accessIPv6)
+            resp, server = self.create_server_with_extras(name,
+                                                          self.image_ref,
+                                                          self.flavor_ref,
+                                                          accessIPv6=IPv6)
         except exceptions.BadRequest:
             pass
         else:
@@ -121,9 +122,9 @@ class ServersNegativeTest(BaseComputeTest):
     def test_reboot_deleted_server(self):
         """Reboot a deleted server"""
         self.name = rand_name('server')
-        resp, create_server = self.client.create_server(self.name,
-                                                        self.image_ref,
-                                                        self.flavor_ref)
+        resp, create_server = self.create_server_with_extras(self.name,
+                                                             self.image_ref,
+                                                             self.flavor_ref)
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
@@ -138,9 +139,9 @@ class ServersNegativeTest(BaseComputeTest):
     def test_rebuild_deleted_server(self):
         """Rebuild a deleted server"""
         self.name = rand_name('server')
-        resp, create_server = self.client.create_server(self.name,
-                                                        self.image_ref,
-                                                        self.flavor_ref)
+        resp, create_server = self.create_server_with_extras(self.name,
+                                                             self.image_ref,
+                                                             self.flavor_ref)
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
@@ -157,7 +158,8 @@ class ServersNegativeTest(BaseComputeTest):
         """Create a server with a numeric name"""
 
         server_name = 12345
-        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
                           server_name, self.image_ref, self.flavor_ref)
 
     @attr(type='negative')
@@ -165,7 +167,8 @@ class ServersNegativeTest(BaseComputeTest):
         """Create a server with name length exceeding 256 characters"""
 
         server_name = 'a' * 256
-        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
                           server_name, self.image_ref, self.flavor_ref)
 
     @attr(type='negative')
@@ -175,7 +178,8 @@ class ServersNegativeTest(BaseComputeTest):
         server_name = rand_name('server')
         networks = [{'fixed_ip': '10.0.1.1', 'uuid':'a-b-c-d-e-f-g-h-i-j'}]
 
-        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
                           server_name, self.image_ref, self.flavor_ref,
                           networks=networks)
 
@@ -185,7 +189,8 @@ class ServersNegativeTest(BaseComputeTest):
 
         key_name = rand_name('key')
         server_name = rand_name('server')
-        self.assertRaises(exceptions.BadRequest, self.client.create_server,
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
                           server_name, self.image_ref, self.flavor_ref,
                           key_name=key_name)
 
@@ -196,7 +201,8 @@ class ServersNegativeTest(BaseComputeTest):
 
         server_name = rand_name('server')
         metadata = {'a': 'b' * 260}
-        self.assertRaises(exceptions.OverLimit, self.client.create_server,
+        self.assertRaises(exceptions.OverLimit,
+                          self.create_server_with_extras,
                           server_name, self.image_ref, self.flavor_ref,
                           meta=metadata)
 

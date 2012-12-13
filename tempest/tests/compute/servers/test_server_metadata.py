@@ -80,7 +80,8 @@ class ServerMetadataTest(BaseComputeTest):
             meta = {key: 'data1'}
             name = rand_name('server')
             self.assertRaises(exceptions.OverLimit,
-                              self.client.create_server, name, self.image_ref,
+                              self.create_server_with_extras,
+                              name, self.image_ref,
                               self.flavor_ref, meta=meta)
 
         # no teardown - all creates should fail

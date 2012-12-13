@@ -193,6 +193,24 @@ class BaseCompTest(unittest.TestCase):
         cls.servers.append(server)
         return server
 
+    @classmethod
+    def create_server_with_extras(cls, name, image_id=None,
+                                  flavor=None, **kwargs):
+        # TODO(sdague) transitional function because many
+        # server tests were using extra args and resp so can't
+        # easily be ported to create_server. Will be merged
+        # later
+        if not flavor:
+            flavor = cls.flavor_ref
+        if not image_id:
+            image_id = cls.image_ref
+
+        resp, server = cls.servers_client.create_server(name,
+                                                        image_id, flavor,
+                                                        **kwargs)
+        cls.servers.append(server)
+        return resp, server
+
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout"""
         start_time = int(time.time())

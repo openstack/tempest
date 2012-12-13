@@ -36,9 +36,9 @@ class ServerActionsTestBase(object):
 
     def setUp(self):
         self.name = rand_name('server')
-        resp, server = self.client.create_server(self.name,
-                                                 self.image_ref,
-                                                 self.flavor_ref)
+        resp, server = self.create_server_with_extras(self.name,
+                                                      self.image_ref,
+                                                      self.flavor_ref)
         self.server_id = server['id']
         self.password = server['adminPass']
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')

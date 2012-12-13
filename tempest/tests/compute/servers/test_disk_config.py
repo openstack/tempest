@@ -39,10 +39,10 @@ class TestServerDiskConfig(BaseComputeTest):
     def test_rebuild_server_with_manual_disk_config(self):
         """A server should be rebuilt using the manual disk config option"""
         name = rand_name('server')
-        resp, server = self.client.create_server(name,
-                                                 self.image_ref,
-                                                 self.flavor_ref,
-                                                 disk_config='AUTO')
+        resp, server = self.create_server_with_extras(name,
+                                                      self.image_ref,
+                                                      self.flavor_ref,
+                                                      disk_config='AUTO')
 
         #Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
@@ -69,10 +69,10 @@ class TestServerDiskConfig(BaseComputeTest):
     def test_rebuild_server_with_auto_disk_config(self):
         """A server should be rebuilt using the auto disk config option"""
         name = rand_name('server')
-        resp, server = self.client.create_server(name,
-                                                 self.image_ref,
-                                                 self.flavor_ref,
-                                                 disk_config='MANUAL')
+        resp, server = self.create_server_with_extras(name,
+                                                      self.image_ref,
+                                                      self.flavor_ref,
+                                                      disk_config='MANUAL')
 
         #Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
@@ -100,10 +100,10 @@ class TestServerDiskConfig(BaseComputeTest):
     def test_resize_server_from_manual_to_auto(self):
         """A server should be resized from manual to auto disk config"""
         name = rand_name('server')
-        resp, server = self.client.create_server(name,
-                                                 self.image_ref,
-                                                 self.flavor_ref,
-                                                 disk_config='MANUAL')
+        resp, server = self.create_server_with_extras(name,
+                                                      self.image_ref,
+                                                      self.flavor_ref,
+                                                      disk_config='MANUAL')
 
         #Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
@@ -126,10 +126,10 @@ class TestServerDiskConfig(BaseComputeTest):
     def test_resize_server_from_auto_to_manual(self):
         """A server should be resized from auto to manual disk config"""
         name = rand_name('server')
-        resp, server = self.client.create_server(name,
-                                                 self.image_ref,
-                                                 self.flavor_ref,
-                                                 disk_config='AUTO')
+        resp, server = self.create_server_with_extras(name,
+                                                      self.image_ref,
+                                                      self.flavor_ref,
+                                                      disk_config='AUTO')
 
         #Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
