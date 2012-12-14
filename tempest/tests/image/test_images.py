@@ -141,7 +141,6 @@ class ListImagesTest(unittest.TestCase):
         cls.os = openstack.ServiceManager()
         cls.client = cls.os.images.get_client()
         cls.created_images = []
-        cls.original_images = list(cls.client.images.list())
 
         # We add a few images here to test the listing functionality of
         # the images API
@@ -198,5 +197,5 @@ class ListImagesTest(unittest.TestCase):
         """
         Simple test to see all fixture images returned
         """
-        images = list(self.client.images.list())
-        self.assertEqual(10, len(images) - len(self.original_images))
+        current_images = set(i.id for i in self.client.images.list())
+        self.assertTrue(set(self.created_images) <= current_images)
