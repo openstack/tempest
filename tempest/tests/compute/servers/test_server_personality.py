@@ -41,8 +41,9 @@ class ServerPersonalityTestBase(object):
             personality.append({'path': path,
                                 'contents': base64.b64encode(file_contents)})
         try:
-            self.client.create_server(name, self.image_ref, self.flavor_ref,
-                                      personality=personality)
+            self.create_server_with_extras(name, self.image_ref,
+                                           self.flavor_ref,
+                                           personality=personality)
         except exceptions.OverLimit:
             pass
         else:
@@ -61,16 +62,16 @@ class ServerPersonalityTestBase(object):
             max_file_limit = \
                 self.user_client.get_specific_absolute_limit("maxPersonality")
 
-            personality = []
+            person = []
             for i in range(0, int(max_file_limit)):
                 path = 'etc/test' + str(i) + '.txt'
-                personality.append({
+                person.append({
                     'path': path,
                     'contents': base64.b64encode(file_contents),
                 })
-            resp, server = self.client.create_server(name, self.image_ref,
-                                                     self.flavor_ref,
-                                                     personality=personality)
+            resp, server = self.create_server_with_extras(name, self.image_ref,
+                                                          self.flavor_ref,
+                                                          personality=person)
             self.assertEqual('202', resp['status'])
 
         except Exception:
