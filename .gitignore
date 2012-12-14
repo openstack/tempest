@@ -8,5 +8,6 @@ include/swift_objects/swift_large
 *.swo
 *.egg-info
 .tox
+.venv
 dist
 build
