@@ -166,10 +166,15 @@ class DefaultClientManager(Manager):
                                                  auth_url=auth_url)
 
     def _get_network_client(self):
-        # TODO(mnewby) add network-specific auth configuration
-        username = self.config.compute.username
-        password = self.config.compute.password
-        tenant_name = self.config.compute.tenant_name
+        # The intended configuration is for the network client to have
+        # admin privileges and indicate for whom resources are being
+        # created via a 'tenant_id' parameter.  This will often be
+        # preferable to authenticating as a specific user because
+        # working with certain resources (public routers and networks)
+        # often requires admin privileges anyway.
+        username = self.config.network_admin.username
+        password = self.config.network_admin.password
+        tenant_name = self.config.network_admin.tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials for network client. "

@@ -185,6 +185,17 @@ api_version = v1.1
 # Catalog type of the Quantum Service
 catalog_type = network
 
+[network-admin]
+# This section contains configuration options for an administrative
+# user of the Network API.
+
+# This should be the username of a user WITH administrative privileges
+username = admin
+# The above administrative user's password
+password = pass
+# The above administrative user's tenant name
+tenant_name = admin
+
 [identity-admin]
 # This section contains configuration options for an administrative
 # user of the Compute API. These options are used in tests that stress

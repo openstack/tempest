@@ -379,6 +379,26 @@ class NetworkConfig(BaseConfig):
         return self.get("api_version", "v1.1")
 
 
+class NetworkAdminConfig(BaseConfig):
+
+    SECTION_NAME = "network-admin"
+
+    @property
+    def username(self):
+        """Administrative Username to use for Quantum  API requests."""
+        return self.get("username", "admin")
+
+    @property
+    def tenant_name(self):
+        """Administrative Tenant name to use for Quantum API requests."""
+        return self.get("tenant_name", "admin")
+
+    @property
+    def password(self):
+        """API key to use when authenticating as admin."""
+        return self.get("password", "pass")
+
+
 class VolumeConfig(BaseConfig):
     """Provides configuration information for connecting to an OpenStack Block
     Storage Service.
@@ -544,6 +564,7 @@ class TempestConfig:
         self.identity_admin = IdentityAdminConfig(self._conf)
         self.images = ImagesConfig(self._conf)
         self.network = NetworkConfig(self._conf)
+        self.network_admin = NetworkAdminConfig(self._conf)
         self.volume = VolumeConfig(self._conf)
         self.object_storage = ObjectStorageConfig(self._conf)
         self.boto = BotoConfig(self._conf)
