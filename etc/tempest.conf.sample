@@ -262,6 +262,9 @@ instance_type = m1.tiny
 #TCP/IP connection timeout
 http_socket_timeout = 5
 
+#Number of retries actions on connection or 5xx error
+num_retries = 1
+
 # Status change wait timout
 build_timeout = 120
 
