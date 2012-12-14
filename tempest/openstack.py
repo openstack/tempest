@@ -22,33 +22,33 @@ from tempest import exceptions
 from tempest.services.boto.clients import APIClientEC2
 from tempest.services.boto.clients import ObjectClientS3
 from tempest.services.compute.json.extensions_client import \
-        ExtensionsClientJSON
+    ExtensionsClientJSON
 from tempest.services.compute.json.flavors_client import FlavorsClientJSON
 from tempest.services.compute.json.floating_ips_client import \
-        FloatingIPsClientJSON
+    FloatingIPsClientJSON
 from tempest.services.compute.json.images_client import ImagesClientJSON
 from tempest.services.compute.json.limits_client import LimitsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.security_groups_client import \
-        SecurityGroupsClientJSON
+    SecurityGroupsClientJSON
 from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClient
 from tempest.services.compute.json.volumes_extensions_client import \
-        VolumesExtensionsClientJSON
+    VolumesExtensionsClientJSON
 from tempest.services.compute.json.console_output_client import \
-        ConsoleOutputsClient
+    ConsoleOutputsClient
 from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
 from tempest.services.compute.xml.flavors_client import FlavorsClientXML
 from tempest.services.compute.xml.floating_ips_client import \
-        FloatingIPsClientXML
+    FloatingIPsClientXML
 from tempest.services.compute.xml.images_client import ImagesClientXML
 from tempest.services.compute.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.compute.xml.limits_client import LimitsClientXML
 from tempest.services.compute.xml.security_groups_client \
-import SecurityGroupsClientXML
+    import SecurityGroupsClientXML
 from tempest.services.compute.xml.servers_client import ServersClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
-        VolumesExtensionsClientXML
+    VolumesExtensionsClientXML
 from tempest.services.identity.json.admin_client import AdminClientJSON
 from tempest.services.identity.json.admin_client import TokenClientJSON
 from tempest.services.identity.xml.admin_client import AdminClientXML
@@ -60,6 +60,8 @@ from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
+from tempest.services.object_storage.object_client import \
+    ObjectClientCustomizedHeader
 
 LOG = logging.getLogger(__name__)
 
@@ -191,6 +193,7 @@ class Manager(object):
         self.object_client = ObjectClient(*client_args)
         self.ec2api_client = APIClientEC2(*client_args)
         self.s3_client = ObjectClientS3(*client_args)
+        self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
 
 
 class AltManager(Manager):

@@ -32,6 +32,7 @@ class BaseObjectTest(unittest.TestCase):
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
         cls.config = cls.os.config
+        cls.custom_object_client = cls.os.custom_object_client
 
         try:
             cls.account_client.list_account_containers()

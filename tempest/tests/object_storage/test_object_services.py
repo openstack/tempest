@@ -263,3 +263,36 @@ class ObjectTest(base.BaseObjectTest):
                 src_container_name)
             resp, _ = self.container_client.delete_container(
                 dst_container_name)
+
+    @attr(type='smoke')
+    def test_access_object_without_using_creds(self):
+        """Make container public-readable, and access the object
+           anonymously, e.g. without using credentials"""
+
+        # Update Container Metadata to make public readable
+        headers = {'X-Container-Read': '.r:*,.rlistings'}
+        resp, body = \
+            self.container_client.update_container_metadata(
+                self.container_name, metadata=headers, metadata_prefix='')
+        self.assertIn(resp['status'], '204')
+
+        # Create Object
+        object_name = rand_name(name='Object')
+        data = arbitrary_string(size=len(object_name) * 1,
+                                base_text=object_name)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   object_name, data)
+        self.assertEqual(resp['status'], '201')
+
+        # List container metadata
+        resp, _ = \
+            self.container_client.list_container_metadata(self.container_name)
+        self.assertEqual(resp['status'], '204')
+        self.assertIn('x-container-read', resp)
+        self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
+
+        # Trying to Get Object with empty Headers as it is public readable
+        resp, body = \
+            self.custom_object_client.get_object(self.container_name,
+                                                 object_name, metadata={})
+        self.assertEqual(body, data)
