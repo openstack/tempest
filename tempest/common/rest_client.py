@@ -141,13 +141,7 @@ class RestClient(object):
 
             mgmt_url = None
             for ep in auth_data['serviceCatalog']:
-                if ep["type"] == service and service != 'volume':
-                    mgmt_url = ep['endpoints'][self.region][self.endpoint_url]
-                    tenant_id = auth_data['token']['tenant']['id']
-                    break
-
-                elif (ep["type"] == service and ep['name'] == 'cinder' and
-                      service == 'volume'):
+                if ep["type"] == service:
                     mgmt_url = ep['endpoints'][self.region][self.endpoint_url]
                     tenant_id = auth_data['token']['tenant']['id']
                     break
