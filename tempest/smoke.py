@@ -51,15 +51,29 @@ class DefaultClientSmokeTest(test.DefaultClientTest, SmokeTest):
         # order, and because test methods in smoke tests generally create
         # resources in a particular order, we destroy resources in the reverse
         # order in which resources are added to the smoke test class object
-        if not cls.resources:
-            return
-        thing = cls.resources.pop()
-        while True:
+        while cls.resources:
+            thing = cls.resources.pop()
             LOG.debug("Deleting %r from shared resources of %s" %
                       (thing, cls.__name__))
-            # Resources in novaclient all have a delete() method
-            # which destroys the resource...
+
+            # OpenStack resources are assumed to have a delete()
+            # method which destroys the resource...
             thing.delete()
-            if not cls.resources:
-                return
-            thing = cls.resources.pop()
+
+            def is_deletion_complete():
+                # Deletion testing is only required for objects whose
+                # existence cannot be checked via retrieval.
+                if isinstance(thing, dict):
+                    return True
+                try:
+                    thing.get()
+                except Exception as e:
+                    # Clients are expected to return an exception
+                    # called 'NotFound' if retrieval fails.
+                    if e.__class__.__name__ == 'NotFound':
+                        return True
+                    raise
+                return False
+
+            # Block until resource deletion has completed or timed-out
+            test.call_until_true(is_deletion_complete, 10, 1)
