@@ -22,6 +22,8 @@ path = tokens
 # Should typically be left as keystone unless you have a non-Keystone
 # authentication API service
 strategy = keystone
+# The identity region
+region = RegionOne
 
 [compute]
 # This section contains configuration options used when executing tests
@@ -53,6 +55,9 @@ alt_username = alt_demo
 alt_password = pass
 # The above non-administrative user's tenant name
 alt_tenant_name = alt_demo
+
+# The compute region
+region = RegionOne
 
 # Reference data for tests. The ref and ref_alt should be
 # distinct images/flavors.
@@ -260,6 +265,10 @@ build_timeout = 300
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "object-store"
 catalog_type = object-store
+
+# The object-store region
+region = RegionOne
+
 
 [boto]
 # This section contains configuration options used when executing tests

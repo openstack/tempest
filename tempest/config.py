@@ -96,6 +96,11 @@ class IdentityConfig(BaseConfig):
         """Which auth method does the environment use? (basic|keystone)"""
         return self.get("strategy", 'keystone')
 
+    @property
+    def region(self):
+        """The identity region name to use."""
+        return self.get("region")
+
 
 class IdentityAdminConfig(BaseConfig):
 
@@ -171,6 +176,11 @@ class ComputeConfig(BaseConfig):
     def alt_password(self):
         """API key to use when authenticating as alternate user."""
         return self.get("alt_password")
+
+    @property
+    def region(self):
+        """The compute region name to use."""
+        return self.get("region")
 
     @property
     def image_ref(self):
@@ -472,6 +482,11 @@ class ObjectStorageConfig(BaseConfig):
     def catalog_type(self):
         """Catalog type of the Object-Storage service."""
         return self.get("catalog_type", 'object-store')
+
+    @property
+    def region(self):
+        """The object-store region name to use."""
+        return self.get("region")
 
 
 class BotoConfig(BaseConfig):
