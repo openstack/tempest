@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import httplib2
+import json
 import re
 from tempest.common.rest_client import RestClient
 
@@ -115,4 +117,45 @@ class ObjectClient(RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.copy(url, headers=headers)
+        return resp, body
+
+
+class ObjectClientCustomizedHeader(RestClient):
+
+    def __init__(self, config, username, password, auth_url, tenant_name=None):
+        super(ObjectClientCustomizedHeader, self).__init__(config, username,
+                                                           password, auth_url,
+                                                           tenant_name)
+        #Overwrites json-specific header encoding in RestClient
+        self.service = self.config.object_storage.catalog_type
+        self.format = 'json'
+
+    def request(self, method, url, headers=None, body=None, wait=None):
+        """A simple HTTP request interface."""
+        self.http_obj = httplib2.Http()
+        if headers is None:
+            headers = {}
+        if self.base_url is None:
+            self._set_auth()
+
+        req_url = "%s/%s" % (self.base_url, url)
+        resp, resp_body = self.http_obj.request(req_url, method,
+                                                headers=headers, body=body)
+        if resp.status in (401, 403):
+            try:
+                resp_body = json.loads(resp_body)
+                raise exceptions.Unauthorized(resp_body['error']['message'])
+            except ValueError:
+                pass
+        return resp, resp_body
+
+    def get_object(self, container, object_name, metadata=None):
+        """Retrieve object's data."""
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
+        url = "{0}/{1}".format(container, object_name)
+        resp, body = self.get(url, headers=headers)
         return resp, body
