@@ -204,13 +204,13 @@ tenant_network_mask_bits = 29
 tenant_networks_reachable = false
 
 # Id of the public network that provides external connectivity.
-public_network_id = {$PUBLIC_NETWORK_UUID}
+public_network_id = {$PUBLIC_NETWORK_ID}
 
 # Id of a shared public router that provides external connectivity.
 # A shared public router would commonly be used where IP namespaces
 # were disabled.  If namespaces are enabled, it would be preferable
 # for each tenant to have their own router.
-public_router_id =
+public_router_id = {$PUBLIC_ROUTER_ID}
 
 [network-admin]
 # This section contains configuration options for an administrative
