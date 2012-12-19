@@ -44,7 +44,7 @@ class RestClient(object):
         self.token = None
         self.base_url = None
         self.config = config
-        self.region = 0
+        self.region = {'compute': self.config.compute.region}
         self.endpoint_url = 'publicURL'
         self.strategy = self.config.identity.strategy
         self.headers = {'Content-Type': 'application/%s' % self.TYPE,
@@ -142,7 +142,12 @@ class RestClient(object):
             mgmt_url = None
             for ep in auth_data['serviceCatalog']:
                 if ep["type"] == service:
-                    mgmt_url = ep['endpoints'][self.region][self.endpoint_url]
+                    for _ep in ep['endpoints']:
+                        if service in self.region and \
+                                _ep['region'] == self.region[service]:
+                            mgmt_url = _ep[self.endpoint_url]
+                    if not mgmt_url:
+                        mgmt_url = ep['endpoints'][0][self.endpoint_url]
                     tenant_id = auth_data['token']['tenant']['id']
                     break
 
