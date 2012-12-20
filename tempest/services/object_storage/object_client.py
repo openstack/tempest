@@ -19,6 +19,7 @@ import httplib2
 import json
 import re
 from tempest.common.rest_client import RestClient
+from tempest import exceptions
 
 
 class ObjectClient(RestClient):
@@ -141,12 +142,11 @@ class ObjectClientCustomizedHeader(RestClient):
         req_url = "%s/%s" % (self.base_url, url)
         resp, resp_body = self.http_obj.request(req_url, method,
                                                 headers=headers, body=body)
-        if resp.status in (401, 403):
-            try:
-                resp_body = json.loads(resp_body)
-                raise exceptions.Unauthorized(resp_body['error']['message'])
-            except ValueError:
-                pass
+
+        if resp.status == 401 or resp.status == 403:
+            self._log(req_url, body, resp, resp_body)
+            raise exceptions.Unauthorized()
+
         return resp, resp_body
 
     def get_object(self, container, object_name, metadata=None):
@@ -158,4 +158,23 @@ class ObjectClientCustomizedHeader(RestClient):
 
         url = "{0}/{1}".format(container, object_name)
         resp, body = self.get(url, headers=headers)
+        return resp, body
+
+    def create_object(self, container, object_name, data, metadata=None):
+        """Create storage object"""
+
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
+        url = "%s/%s" % (str(container), str(object_name))
+        resp, body = self.put(url, data, headers=headers)
+        return resp, body
+
+    def delete_object(self, container, object_name):
+        """Delete storage object"""
+
+        url = "%s/%s" % (str(container), str(object_name))
+        resp, body = self.delete(url)
         return resp, body
