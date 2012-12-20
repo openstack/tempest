@@ -56,9 +56,15 @@ class DefaultClientSmokeTest(test.DefaultClientTest, SmokeTest):
             LOG.debug("Deleting %r from shared resources of %s" %
                       (thing, cls.__name__))
 
-            # OpenStack resources are assumed to have a delete()
-            # method which destroys the resource...
-            thing.delete()
+            try:
+                # OpenStack resources are assumed to have a delete()
+                # method which destroys the resource...
+                thing.delete()
+            except Exception as e:
+                # If the resource is already missing, mission accomplished.
+                if e.__class__.__name__ == 'NotFound':
+                    continue
+                raise
 
             def is_deletion_complete():
                 # Deletion testing is only required for objects whose
