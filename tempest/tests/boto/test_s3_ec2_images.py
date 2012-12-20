@@ -23,8 +23,8 @@ import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
-from tempest import openstack
 from tempest.testboto import BotoTestCase
 import tempest.tests.boto
 from tempest.tests.boto.utils.s3 import s3_upload_dir
@@ -40,7 +40,7 @@ class S3ImagesTest(BotoTestCase):
         if not tempest.tests.boto.A_I_IMAGES_READY:
             raise nose.SkipTest("".join(("EC2 ", cls.__name__,
                                 ": requires ami/aki/ari manifest")))
-        cls.os = openstack.Manager()
+        cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.images_client = cls.os.ec2api_client
         config = cls.os.config

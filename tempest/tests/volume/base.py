@@ -21,10 +21,10 @@ import time
 import nose
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
-from tempest import openstack
 
 LOG = logging.getLogger(__name__)
 
@@ -41,11 +41,11 @@ class BaseVolumeTest(unittest.TestCase):
         if cls.config.compute.allow_tenant_isolation:
             creds = cls._get_isolated_creds()
             username, tenant_name, password = creds
-            os = openstack.Manager(username=username,
-                                   password=password,
-                                   tenant_name=tenant_name)
+            os = clients.Manager(username=username,
+                                 password=password,
+                                 tenant_name=tenant_name)
         else:
-            os = openstack.Manager()
+            os = clients.Manager()
 
         cls.os = os
         cls.volumes_client = os.volumes_client
@@ -73,7 +73,7 @@ class BaseVolumeTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        os = openstack.IdentityManager()
+        os = clients.IdentityManager()
         return os.admin_client
 
     @classmethod

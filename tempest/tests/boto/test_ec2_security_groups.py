@@ -18,8 +18,8 @@
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
-from tempest import openstack
 from tempest.testboto import BotoTestCase
 
 
@@ -29,7 +29,7 @@ class EC2SecurityGroupTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(EC2SecurityGroupTest, cls).setUpClass()
-        cls.os = openstack.Manager()
+        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
 
     @attr(type='smoke')

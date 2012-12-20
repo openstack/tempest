@@ -18,7 +18,7 @@
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-from tempest import openstack
+from tempest import clients
 from tempest.testboto import BotoTestCase
 
 
@@ -28,7 +28,7 @@ class EC2NetworkTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(EC2NetworkTest, cls).setUpClass()
-        cls.os = openstack.Manager()
+        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
 
 #Note(afazekas): these tests for things duable without an instance

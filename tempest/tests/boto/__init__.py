@@ -23,9 +23,9 @@ import urlparse
 import boto.exception
 import keystoneclient.exceptions
 
+import tempest.clients
 from tempest.common.utils.file_utils import have_effective_read_access
 import tempest.config
-import tempest.openstack
 
 A_I_IMAGES_READY = False  # ari,ami,aki
 S3_CAN_CONNECT_ERROR = "Unknown Error"
@@ -59,7 +59,7 @@ def setup_package():
         if not secret_matcher.match(connection_data["aws_secret_access_key"]):
             raise Exception("Invalid AWS secret Key")
         raise Exception("Unknown (Authentication?) Error")
-    openstack = tempest.openstack.Manager()
+    openstack = tempest.clients.Manager()
     try:
         if urlparse.urlparse(config.boto.ec2_url).hostname is None:
             raise Exception("Failed to get hostname from the ec2_url")

@@ -21,9 +21,9 @@ import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest import openstack
 from tempest.tests.compute.base import BaseComputeTest
 
 
@@ -35,7 +35,7 @@ class ServersNegativeTest(BaseComputeTest):
         super(ServersNegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client
-        cls.alt_os = openstack.AltManager()
+        cls.alt_os = clients.AltManager()
         cls.alt_client = cls.alt_os.servers_client
 
     @attr(type='negative')

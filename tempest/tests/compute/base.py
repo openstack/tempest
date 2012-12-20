@@ -21,10 +21,10 @@ import time
 import nose
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
-from tempest import openstack
 
 __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
            'BaseComputeAdminTestJSON', 'BaseComputeAdminTestXML']
@@ -44,12 +44,12 @@ class BaseCompTest(unittest.TestCase):
         if cls.config.compute.allow_tenant_isolation:
             creds = cls._get_isolated_creds()
             username, tenant_name, password = creds
-            os = openstack.Manager(username=username,
-                                   password=password,
-                                   tenant_name=tenant_name,
-                                   interface=cls._interface)
+            os = clients.Manager(username=username,
+                                 password=password,
+                                 tenant_name=tenant_name,
+                                 interface=cls._interface)
         else:
-            os = openstack.Manager(interface=cls._interface)
+            os = clients.Manager(interface=cls._interface)
 
         cls.os = os
         cls.servers_client = os.servers_client
@@ -78,7 +78,7 @@ class BaseCompTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        os = openstack.IdentityManager(interface=cls._interface)
+        os = clients.IdentityManager(interface=cls._interface)
         admin_client = os.admin_client
         return admin_client
 
@@ -260,7 +260,7 @@ class BaseComputeAdminTest(unittest.TestCase):
                    "in configuration.")
             raise nose.SkipTest(msg)
 
-        cls.os = openstack.AdminManager(interface=cls._interface)
+        cls.os = clients.AdminManager(interface=cls._interface)
 
 
 class BaseComputeAdminTestJSON(BaseComputeAdminTest):

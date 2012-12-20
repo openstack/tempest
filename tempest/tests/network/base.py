@@ -18,16 +18,16 @@
 import nose
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest import openstack
 
 
 class BaseNetworkTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os = openstack.Manager()
+        os = clients.Manager()
         client = os.network_client
         config = os.config
         networks = []
