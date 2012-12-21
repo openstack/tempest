@@ -16,7 +16,6 @@
 #    under the License.
 
 from contextlib import closing
-import logging
 import os
 
 from boto.s3.key import Key
