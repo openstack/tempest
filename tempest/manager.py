@@ -54,7 +54,7 @@ SecurityGroupsClient = security_groups_client.SecurityGroupsClientJSON
 KeyPairsClient = keypairs_client.KeyPairsClientJSON
 VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClientJSON
 VolumesClient = volumes_client.VolumesClientJSON
-ConsoleOutputsClient = console_output_client.ConsoleOutputsClient
+ConsoleOutputsClient = console_output_client.ConsoleOutputsClientJSON
 QuotasClient = quotas_client.QuotasClient
 
 LOG = logging.getLogger(__name__)
@@ -258,9 +258,9 @@ class ComputeFuzzClientAltManager(Manager):
     def __init__(self):
         conf = tempest.config.TempestConfig()
         super(ComputeFuzzClientAltManager, self).__init__(
-                conf.compute.alt_username,
-                conf.compute.alt_password,
-                conf.compute.alt_tenant_name)
+            conf.compute.alt_username,
+            conf.compute.alt_password,
+            conf.compute.alt_tenant_name)
 
 
 class ComputeFuzzClientAdminManager(Manager):
@@ -273,6 +273,6 @@ class ComputeFuzzClientAdminManager(Manager):
     def __init__(self):
         conf = tempest.config.TempestConfig()
         super(ComputeFuzzClientAdminManager, self).__init__(
-                conf.compute_admin.username,
-                conf.compute_admin.password,
-                conf.compute_admin.tenant_name)
+            conf.compute_admin.username,
+            conf.compute_admin.password,
+            conf.compute_admin.tenant_name)

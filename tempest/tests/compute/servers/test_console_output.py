@@ -20,14 +20,13 @@ import unittest2 as unittest
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ConsoleOutputTest(BaseComputeTest):
+class ConsoleOutputTest(object):
 
     @classmethod
-    def setUpClass(cls):
-        super(ConsoleOutputTest, cls).setUpClass()
+    def setUpClass(self, cls):
         cls.client = cls.console_outputs_client
         cls.servers_client = cls.servers_client
         cls.name = rand_name('server')
@@ -39,9 +38,8 @@ class ConsoleOutputTest(BaseComputeTest):
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
     @classmethod
-    def tearDownClass(cls):
+    def tearDownClass(self, cls):
         cls.servers_client.delete_server(cls.server_id)
-        super(ConsoleOutputTest, cls).tearDownClass()
 
     @attr(type='positive')
     def test_get_console_output(self):
@@ -92,3 +90,31 @@ class ConsoleOutputTest(BaseComputeTest):
         finally:
             self.servers_client.wait_for_server_status(self.server_id,
                                                        'ACTIVE')
+
+
+@attr(type='smoke')
+class ConsoleOutputTestJSON(base.BaseComputeTestJSON,
+                            ConsoleOutputTest):
+    @classmethod
+    def setUpClass(cls):
+        super(ConsoleOutputTestJSON, cls).setUpClass()
+        ConsoleOutputTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        ConsoleOutputTest.tearDownClass(cls)
+        super(ConsoleOutputTestJSON, cls).tearDownClass()
+
+
+@attr(type='smoke')
+class ConsoleOutputTestXML(base.BaseComputeTestXML,
+                           ConsoleOutputTest):
+    @classmethod
+    def setUpClass(cls):
+        super(ConsoleOutputTestXML, cls).setUpClass()
+        ConsoleOutputTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        ConsoleOutputTest.tearDownClass(cls)
+        super(ConsoleOutputTestXML, cls).tearDownClass()

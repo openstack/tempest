@@ -20,11 +20,12 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class ConsoleOutputsClient(RestClient):
+class ConsoleOutputsClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ConsoleOutputsClient, self).__init__(config, username, password,
-                                                   auth_url, tenant_name)
+        super(ConsoleOutputsClientJSON, self).__init__(config, username,
+                                                       password,
+                                                       auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
     def get_console_output(self, server_id, length):
