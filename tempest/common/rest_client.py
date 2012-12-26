@@ -212,8 +212,8 @@ class RestClient(object):
         #TODO(afazekas): Make sure we can validate all responses, and the
         #http library does not do any action automatically
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
-            method.upper() == 'HEAD') and resp_body:
-            raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
+                method.upper() == 'HEAD') and resp_body:
+                raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
 
         #NOTE(afazekas):
         # If the HTTP Status Code is 205
@@ -226,8 +226,8 @@ class RestClient(object):
 
         if (resp.status == 205 and
             0 != len(set(resp.keys()) - set(('status',)) -
-            self.response_header_lc - self.general_header_lc)):
-            raise exceptions.ResponseWithEntity()
+                     self.response_header_lc - self.general_header_lc)):
+                        raise exceptions.ResponseWithEntity()
 
         #NOTE(afazekas)
         # Now the swift sometimes (delete not empty container)
@@ -264,7 +264,7 @@ class RestClient(object):
             self._log(req_url, body, resp, resp_body)
             if 'overLimit' in resp_body:
                 raise exceptions.OverLimit(resp_body['overLimit']['message'])
-            elif 'limit' in resp_body['message']:
+            elif 'exceeded' in resp_body['message']:
                 raise exceptions.OverLimit(resp_body['message'])
             elif depth < MAX_RECURSION_DEPTH:
                 delay = resp['Retry-After'] if 'Retry-After' in resp else 60
