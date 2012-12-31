@@ -36,7 +36,7 @@ from tempest.services.compute.json.quotas_client import QuotasClient
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
 from tempest.services.compute.json.console_output_client import \
-    ConsoleOutputsClient
+    ConsoleOutputsClientJSON
 from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
 from tempest.services.compute.xml.flavors_client import FlavorsClientXML
 from tempest.services.compute.xml.floating_ips_client import \
@@ -49,6 +49,8 @@ from tempest.services.compute.xml.security_groups_client \
 from tempest.services.compute.xml.servers_client import ServersClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
+from tempest.services.compute.xml.console_output_client import \
+    ConsoleOutputsClientXML
 from tempest.services.identity.json.admin_client import AdminClientJSON
 from tempest.services.identity.json.admin_client import TokenClientJSON
 from tempest.services.identity.xml.admin_client import AdminClientXML
@@ -125,6 +127,11 @@ SECURITY_GROUPS_CLIENT = {
     "xml": SecurityGroupsClientXML,
 }
 
+CONSOLE_OUTPUT_CLIENT = {
+    "json": ConsoleOutputsClientJSON,
+    "xml": ConsoleOutputsClientXML,
+}
+
 
 class Manager(object):
 
@@ -182,10 +189,11 @@ class Manager(object):
             self.token_client = TOKEN_CLIENT[interface](self.config)
             self.security_groups_client = \
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
+            self.console_outputs_client = \
+                CONSOLE_OUTPUT_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
-        self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.quotas_client = QuotasClient(*client_args)
         self.network_client = NetworkClient(*client_args)
         self.account_client = AccountClient(*client_args)
