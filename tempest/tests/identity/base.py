@@ -18,15 +18,15 @@
 import nose
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
-from tempest import openstack
 
 
 class BaseIdAdminTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os = openstack.IdentityManager(interface=cls._interface)
+        os = clients.IdentityManager(interface=cls._interface)
         cls.client = os.admin_client
         cls.token_client = os.token_client
 
@@ -35,7 +35,7 @@ class BaseIdAdminTest(unittest.TestCase):
 
         cls.data = DataGenerator(cls.client)
 
-        os = openstack.IdentityNaManager(interface=cls._interface)
+        os = clients.IdentityNaManager(interface=cls._interface)
         cls.non_admin_client = os.admin_client
 
     @classmethod

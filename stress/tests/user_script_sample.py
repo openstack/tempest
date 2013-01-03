@@ -18,7 +18,7 @@ destroys them"""
 from stress.test_servers import *
 from stress.basher import BasherAction
 from stress.driver import *
-from tempest import openstack
+from tempest import clients
 
 choice_spec = [
     BasherAction(TestCreateVM(), 50,
@@ -27,7 +27,7 @@ choice_spec = [
 ]
 
 
-nova = openstack.Manager()
+nova = clients.Manager()
 
 bash_openstack(nova,
                choice_spec,

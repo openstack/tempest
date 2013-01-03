@@ -19,8 +19,8 @@ import logging
 
 import nose
 
+from tempest import clients
 from tempest import config
-from tempest import openstack
 
 LOG = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def setup_package():
     LOG.debug("Entering tempest.tests.compute.setup_package")
 
     global MULTI_USER, DISK_CONFIG_ENABLED, FLAVOR_EXTRA_DATA_ENABLED
-    os = openstack.Manager()
+    os = clients.Manager()
     images_client = os.images_client
     flavors_client = os.flavors_client
     extensions_client = os.extensions_client

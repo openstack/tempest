@@ -20,10 +20,10 @@ from nose import SkipTest
 from nose.tools import raises
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest import openstack
 from tempest.tests import compute
 from tempest.tests.compute.base import BaseComputeTest
 
@@ -47,12 +47,12 @@ class AuthorizationTest(BaseComputeTest):
         if cls.config.compute.allow_tenant_isolation:
             creds = cls._get_isolated_creds()
             username, tenant_name, password = creds
-            cls.alt_manager = openstack.Manager(username=username,
-                                                password=password,
-                                                tenant_name=tenant_name)
+            cls.alt_manager = clients.Manager(username=username,
+                                              password=password,
+                                              tenant_name=tenant_name)
         else:
             # Use the alt_XXX credentials in the config file
-            cls.alt_manager = openstack.AltManager()
+            cls.alt_manager = clients.AltManager()
 
         cls.alt_client = cls.alt_manager.servers_client
         cls.alt_images_client = cls.alt_manager.images_client

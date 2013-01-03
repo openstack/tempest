@@ -18,10 +18,10 @@
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
-from tempest import openstack
 from tempest.tests.compute import base
 
 

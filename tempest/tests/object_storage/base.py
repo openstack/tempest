@@ -18,16 +18,16 @@
 import nose
 import unittest2 as unittest
 
+from tempest import clients
 import tempest.config
 from tempest import exceptions
-from tempest import openstack
 
 
 class BaseObjectTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = openstack.Manager()
+        cls.os = clients.Manager()
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client

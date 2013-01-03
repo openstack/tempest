@@ -21,7 +21,7 @@ import time
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-from tempest import openstack
+from tempest import clients
 from tempest.testboto import BotoTestCase
 
 LOG = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ class EC2VolumesTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(EC2VolumesTest, cls).setUpClass()
-        cls.os = openstack.Manager()
+        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
         cls.zone = cls.client.get_good_zone()
 

@@ -21,8 +21,8 @@ from boto.s3.key import Key
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
+from tempest import clients
 from tempest.common.utils.data_utils import rand_name
-from tempest import openstack
 from tempest.testboto import BotoTestCase
 from tempest.tests import boto
 
@@ -33,7 +33,7 @@ class S3BucketsTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(S3BucketsTest, cls).setUpClass()
-        cls.os = openstack.Manager()
+        cls.os = clients.Manager()
         cls.client = cls.os.s3_client
         cls.config = cls.os.config
 

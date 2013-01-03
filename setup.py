@@ -19,10 +19,10 @@
 
 import setuptools
 
-from tempest.common import setup
+from tempest.openstack.common import setup as common_setup
 
-requires = setup.parse_requirements()
-depend_links = setup.parse_dependency_links()
+requires = common_setup.parse_requirements()
+depend_links = common_setup.parse_dependency_links()
 
 setuptools.setup(name='tempest',
                  version="2012.2",
@@ -40,7 +40,7 @@ setuptools.setup(name='tempest',
                               'Programming Language :: Python',
                               'Programming Language :: Python :: 2',
                               'Programming Language :: Python :: 2.7', ],
-                 cmdclass=setup.get_cmdclass(),
+                 cmdclass=common_setup.get_cmdclass(),
                  packages=setuptools.find_packages(exclude=['bin']),
                  install_requires=requires,
                  dependency_links=depend_links,

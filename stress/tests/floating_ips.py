@@ -16,14 +16,14 @@
 from stress.basher import BasherAction
 from stress.driver import *
 from stress.test_floating_ips import TestChangeFloatingIp
-from tempest import openstack
+from tempest import clients
 
 
 choice_spec = [
     BasherAction(TestChangeFloatingIp(), 100)
 ]
 
-nova = openstack.Manager()
+nova = clients.Manager()
 
 bash_openstack(nova,
                choice_spec,

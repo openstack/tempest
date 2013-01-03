@@ -30,7 +30,7 @@ try:
 except ImportError:
     pass
 
-from tempest import openstack
+from tempest import clients
 
 
 class CreateRegisterImagesTest(unittest.TestCase):
@@ -43,7 +43,7 @@ class CreateRegisterImagesTest(unittest.TestCase):
     def setUpClass(cls):
         if not GLANCE_INSTALLED:
             raise SkipTest('Glance not installed')
-        cls.os = openstack.ServiceManager()
+        cls.os = clients.ServiceManager()
         cls.client = cls.os.images.get_client()
         cls.created_images = []
 
@@ -138,7 +138,7 @@ class ListImagesTest(unittest.TestCase):
     def setUpClass(cls):
         if not GLANCE_INSTALLED:
             raise SkipTest('Glance not installed')
-        cls.os = openstack.ServiceManager()
+        cls.os = clients.ServiceManager()
         cls.client = cls.os.images.get_client()
         cls.created_images = []
 
