@@ -31,7 +31,7 @@ class TenantsTestBase(object):
             cls.data.tenants.append(tenant)
 
     def test_list_tenants(self):
-        """Return a list of all tenants"""
+        # Return a list of all tenants
         resp, body = self.client.list_tenants()
         found = [tenant for tenant in body if tenant in self.data.tenants]
         self.assertTrue(any(found), 'List did not return newly created '
@@ -40,19 +40,19 @@ class TenantsTestBase(object):
         self.assertTrue(resp['status'].startswith('2'))
 
     def test_list_tenants_by_unauthorized_user(self):
-        """Non-admin user should not be able to list tenants"""
+        # Non-admin user should not be able to list tenants
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.list_tenants)
 
     def test_list_tenant_request_without_token(self):
-        """Request to list tenants without a valid token should fail"""
+        # Request to list tenants without a valid token should fail
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.list_tenants)
         self.client.clear_auth()
 
     def test_tenant_delete(self):
-        """Create several tenants and delete them"""
+        # Create several tenants and delete them
         tenants = []
         for _ in xrange(5):
             resp, body = self.client.create_tenant(rand_name('tenant-new'))
@@ -70,14 +70,14 @@ class TenantsTestBase(object):
         self.assertFalse(any(found_2), 'Tenants failed to delete')
 
     def test_tenant_delete_by_unauthorized_user(self):
-        """Non-admin user should not be able to delete a tenant"""
+        # Non-admin user should not be able to delete a tenant
         tenant_name = rand_name('tenant-')
         resp, tenant = self.client.create_tenant(tenant_name)
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.delete_tenant, tenant['id'])
 
     def test_tenant_delete_request_without_token(self):
-        """Request to delete a tenant without a valid token should fail"""
+        # Request to delete a tenant without a valid token should fail
         tenant_name = rand_name('tenant-')
         resp, tenant = self.client.create_tenant(tenant_name)
         token = self.client.get_auth()
@@ -87,12 +87,12 @@ class TenantsTestBase(object):
         self.client.clear_auth()
 
     def test_delete_non_existent_tenant(self):
-        """Attempt to delete a non existent tenant should fail"""
+        # Attempt to delete a non existent tenant should fail
         self.assertRaises(exceptions.NotFound, self.client.delete_tenant,
                           'junk_tenant_123456abc')
 
     def test_tenant_create_with_description(self):
-        """Create tenant with a description"""
+        # Create tenant with a description
         tenant_name = rand_name('tenant-')
         tenant_desc = rand_name('desc-')
         resp, body = self.client.create_tenant(tenant_name,
@@ -110,7 +110,7 @@ class TenantsTestBase(object):
         self.client.delete_tenant(tenant_id)
 
     def test_tenant_create_enabled(self):
-        """Create a tenant that is enabled"""
+        # Create a tenant that is enabled
         tenant_name = rand_name('tenant-')
         resp, body = self.client.create_tenant(tenant_name, enabled=True)
         tenant_id = body['id']
@@ -124,7 +124,7 @@ class TenantsTestBase(object):
         self.client.delete_tenant(tenant_id)
 
     def test_tenant_create_not_enabled(self):
-        """Create a tenant that is not enabled"""
+        # Create a tenant that is not enabled
         tenant_name = rand_name('tenant-')
         resp, body = self.client.create_tenant(tenant_name, enabled=False)
         tenant_id = body['id']
@@ -140,7 +140,7 @@ class TenantsTestBase(object):
         self.client.delete_tenant(tenant_id)
 
     def test_tenant_create_duplicate(self):
-        """Tenant names should be unique"""
+        # Tenant names should be unique
         tenant_name = rand_name('tenant-dup-')
         resp, body = self.client.create_tenant(tenant_name)
         tenant1_id = body.get('id')
@@ -155,13 +155,13 @@ class TenantsTestBase(object):
             self.client.delete_tenant(tenant1_id)
 
     def test_create_tenant_by_unauthorized_user(self):
-        """Non-admin user should not be authorized to create a tenant"""
+        # Non-admin user should not be authorized to create a tenant
         tenant_name = rand_name('tenant-')
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.create_tenant, tenant_name)
 
     def test_create_tenant_request_without_token(self):
-        """Create tenant request without a token should not be authorized"""
+        # Create tenant request without a token should not be authorized
         tenant_name = rand_name('tenant-')
         token = self.client.get_auth()
         self.client.delete_token(token)
@@ -170,18 +170,18 @@ class TenantsTestBase(object):
         self.client.clear_auth()
 
     def test_create_tenant_with_empty_name(self):
-        """Tenant name should not be empty"""
+        # Tenant name should not be empty
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
                           name='')
 
     def test_create_tenants_name_length_over_64(self):
-        """Tenant name length should not be greater than 64 characters"""
+        # Tenant name length should not be greater than 64 characters
         tenant_name = 'a' * 65
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
                           tenant_name)
 
     def test_tenant_update_name(self):
-        """Update name attribute of a tenant"""
+        # Update name attribute of a tenant
         t_name1 = rand_name('tenant-')
         resp, body = self.client.create_tenant(t_name1)
         t_id = body['id']
@@ -204,7 +204,7 @@ class TenantsTestBase(object):
         self.client.delete_tenant(t_id)
 
     def test_tenant_update_desc(self):
-        """Update description attribute of a tenant"""
+        # Update description attribute of a tenant
         t_name = rand_name('tenant-')
         t_desc = rand_name('desc-')
         resp, body = self.client.create_tenant(t_name, description=t_desc)
@@ -228,7 +228,7 @@ class TenantsTestBase(object):
         self.client.delete_tenant(t_id)
 
     def test_tenant_update_enable(self):
-        """Update the enabled attribute of a tenant"""
+        # Update the enabled attribute of a tenant
         t_name = rand_name('tenant-')
         t_en = False
         resp, body = self.client.create_tenant(t_name, enabled=t_en)

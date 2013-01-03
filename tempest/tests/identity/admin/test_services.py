@@ -25,7 +25,7 @@ from tempest.tests.identity import base
 class ServicesTestBase(object):
 
     def test_create_get_delete_service(self):
-        """GET Service"""
+        # GET Service
         try:
             #Creating a Service
             name = rand_name('service-')

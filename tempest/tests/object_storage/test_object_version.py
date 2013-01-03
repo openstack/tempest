@@ -54,7 +54,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_versioned_container(self):
-        """Versioned container responses tests"""
+        # Versioned container responses tests
 
         # Create a containers
         vers_container_name = rand_name(name='TestVersionContainer')

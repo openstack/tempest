@@ -46,7 +46,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_create_container(self):
-        """Create a container, test responses"""
+        # Create a container, test responses
 
         #Create a container
         container_name = rand_name(name='TestContainer')
@@ -57,7 +57,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_delete_container(self):
-        """Create and Delete a container, test responses"""
+        # Create and Delete a container, test responses
 
         #Create a container
         container_name = rand_name(name='TestContainer')
@@ -71,7 +71,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_list_container_contents_json(self):
-        """Add metadata to object"""
+        # Add metadata to object
 
         #Create a container
         container_name = rand_name(name='TestContainer')
@@ -107,7 +107,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_container_metadata(self):
-        """Update/Retrieve/Delete Container Metadata"""
+        # Update/Retrieve/Delete Container Metadata
 
         # Create a container
         container_name = rand_name(name='TestContainer')

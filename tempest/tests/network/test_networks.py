@@ -31,7 +31,7 @@ class NetworksTest(base.BaseNetworkTest):
 
     @attr(type='positive')
     def test_create_delete_network(self):
-        """Creates and deletes a network for a tenant"""
+        # Creates and deletes a network for a tenant
         name = rand_name('network')
         resp, body = self.client.create_network(name)
         self.assertEqual('202', resp['status'])
@@ -42,7 +42,7 @@ class NetworksTest(base.BaseNetworkTest):
 
     @attr(type='positive')
     def test_show_network(self):
-        """Verifies the details of a network"""
+        # Verifies the details of a network
         resp, body = self.client.get_network(self.network['id'])
         self.assertEqual('200', resp['status'])
         network = body['network']
@@ -51,7 +51,7 @@ class NetworksTest(base.BaseNetworkTest):
 
     @attr(type='positive')
     def test_show_network_details(self):
-        """Verifies the full details of a network"""
+        # Verifies the full details of a network
         resp, body = self.client.get_network_details(self.network['id'])
         self.assertEqual('200', resp['status'])
         network = body['network']
@@ -61,7 +61,7 @@ class NetworksTest(base.BaseNetworkTest):
 
     @attr(type='positive')
     def test_list_networks(self):
-        """Verify the network exists in the list of all networks"""
+        # Verify the network exists in the list of all networks
         resp, body = self.client.list_networks()
         networks = body['networks']
         found = any(n for n in networks if n['id'] == self.network['id'])
@@ -69,7 +69,7 @@ class NetworksTest(base.BaseNetworkTest):
 
     @attr(type='positive')
     def test_list_networks_with_detail(self):
-        """Verify the network exists in the detailed list of all networks"""
+        # Verify the network exists in the detailed list of all networks
         resp, body = self.client.list_networks_details()
         networks = body['networks']
         found = any(n for n in networks if n['id'] == self.network['id'])

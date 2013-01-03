@@ -57,7 +57,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
     @unittest.skip('Until bug 1069849 is resolved.')
     @attr(type='regression')
     def test_get_object_after_expiry_time(self):
-        """GET object after expiry time"""
+        # GET object after expiry time
         #TODO(harika-vakadi): Similar test case has to be created for
         # "X-Delete-At", after this test case works.
 

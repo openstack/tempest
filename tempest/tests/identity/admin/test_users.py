@@ -33,7 +33,7 @@ class UsersTestBase(object):
 
     @attr(type='smoke')
     def test_create_user(self):
-        """Create a user"""
+        # Create a user
         self.data.setup_test_tenant()
         resp, user = self.client.create_user(self.alt_user, self.alt_password,
                                              self.data.tenant['id'],
@@ -44,7 +44,7 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_create_user_by_unauthorized_user(self):
-        """Non-admin should not be authorized to create a user"""
+        # Non-admin should not be authorized to create a user
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.create_user, self.alt_user,
@@ -53,7 +53,7 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_create_user_with_empty_name(self):
-        """User with an empty name should not be created"""
+        # User with an empty name should not be created
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user, '',
                           self.alt_password, self.data.tenant['id'],
@@ -62,7 +62,7 @@ class UsersTestBase(object):
     @attr(type='negative')
     @unittest.skip("Until Bug 966251 is fixed")
     def test_create_user_with_name_length_over_64(self):
-        """Length of user name filed should be restricted to 64 characters"""
+        # Length of user name filed should be restricted to 64 characters
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
                           'a' * 65, self.alt_password,
@@ -70,7 +70,7 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_create_user_with_duplicate_name(self):
-        """Duplicate user should not be created"""
+        # Duplicate user should not be created
         self.data.setup_test_user()
         self.assertRaises(exceptions.Duplicate, self.client.create_user,
                           self.data.test_user, self.data.test_password,
@@ -79,7 +79,7 @@ class UsersTestBase(object):
     @attr(type='negative')
     @unittest.skip("Until Bug 999084 is fixed")
     def test_create_user_with_empty_password(self):
-        """User with an empty password should not be created"""
+        # User with an empty password should not be created
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
                           self.alt_user, '', self.data.tenant['id'],
@@ -88,7 +88,7 @@ class UsersTestBase(object):
     @attr(type='nagative')
     @unittest.skip("Until Bug 999084 is fixed")
     def test_create_user_with_long_password(self):
-        """User having password exceeding max length should not be created"""
+        # User having password exceeding max length should not be created
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
                           self.alt_user, 'a' * 65, self.data.tenant['id'],
@@ -97,21 +97,21 @@ class UsersTestBase(object):
     @attr(type='negative')
     @unittest.skip("Until Bug 999084 is fixed")
     def test_create_user_with_invalid_email_format(self):
-        """Email format should be validated while creating a user"""
+        # Email format should be validated while creating a user
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
                           self.alt_user, '', self.data.tenant['id'], '12345')
 
     @attr(type='negative')
     def test_create_user_for_non_existant_tenant(self):
-        """Attempt to create a user in a non-existent tenant should fail"""
+        # Attempt to create a user in a non-existent tenant should fail
         self.assertRaises(exceptions.NotFound, self.client.create_user,
                           self.alt_user, self.alt_password, '49ffgg99999',
                           self.alt_email)
 
     @attr(type='negative')
     def test_create_user_request_without_a_token(self):
-        """Request to create a user without a valid token should fail"""
+        # Request to create a user without a valid token should fail
         self.data.setup_test_tenant()
         # Get the token of the current client
         token = self.client.get_auth()
@@ -126,7 +126,7 @@ class UsersTestBase(object):
 
     @attr(type='smoke')
     def test_delete_user(self):
-        """Delete a user"""
+        # Delete a user
         self.data.setup_test_tenant()
         resp, user = self.client.create_user('user_1234', self.alt_password,
                                              self.data.tenant['id'],
@@ -136,7 +136,7 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_delete_users_by_unauthorized_user(self):
-        """Non admin user should not be authorized to delete a user"""
+        # Non admin user should not be authorized to delete a user
         self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.delete_user,
@@ -144,13 +144,13 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_delete_non_existant_user(self):
-        """Attempt to delete a non-existent user should fail"""
+        # Attempt to delete a non-existent user should fail
         self.assertRaises(exceptions.NotFound, self.client.delete_user,
                           'junk12345123')
 
     @attr(type='smoke')
     def test_user_authentication(self):
-        """Valid user's token is authenticated"""
+        # Valid user's token is authenticated
         self.data.setup_test_user()
         # Get a token
         self.token_client.auth(self.data.test_user, self.data.test_password,
@@ -163,7 +163,7 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_authentication_for_disabled_user(self):
-        """Disabled user's token should not get authenticated"""
+        # Disabled user's token should not get authenticated
         self.data.setup_test_user()
         self.disable_user(self.data.test_user)
         self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
@@ -174,7 +174,7 @@ class UsersTestBase(object):
     @attr(type='negative')
     @unittest.skip('Until Bug 988920 is fixed')
     def test_authentication_when_tenant_is_disabled(self):
-        """User's token for a disabled tenant should not be authenticated"""
+        # User's token for a disabled tenant should not be authenticated
         self.data.setup_test_user()
         self.disable_tenant(self.data.test_tenant)
         self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
@@ -185,7 +185,7 @@ class UsersTestBase(object):
     @attr(type='negative')
     @unittest.skip('Until Bug 988920 is fixed')
     def test_authentication_with_invalid_tenant(self):
-        """User's token for an invalid tenant should not be authenticated"""
+        # User's token for an invalid tenant should not be authenticated
         self.data.setup_one_user()
         self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
                           self.data.test_user,
@@ -194,14 +194,14 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_authentication_with_invalid_username(self):
-        """Non-existent user's token should not get authenticated"""
+        # Non-existent user's token should not get authenticated
         self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
                           'junkuser123', self.data.test_password,
                           self.data.test_tenant)
 
     @attr(type='negative')
     def test_authentication_with_invalid_password(self):
-        """User's token with invalid password should not be authenticated"""
+        # User's token with invalid password should not be authenticated
         self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
                           self.data.test_user, 'junkpass1234',
@@ -209,7 +209,7 @@ class UsersTestBase(object):
 
     @attr(type='positive')
     def test_authentication_request_without_token(self):
-        """Request for token authentication with a valid token in header"""
+        # Request for token authentication with a valid token in header
         self.data.setup_test_user()
         self.token_client.auth(self.data.test_user, self.data.test_password,
                                self.data.test_tenant)
@@ -226,7 +226,7 @@ class UsersTestBase(object):
 
     @attr(type='smoke')
     def test_get_users(self):
-        """Get a list of users and find the test user"""
+        # Get a list of users and find the test user
         self.data.setup_test_user()
         resp, users = self.client.get_users()
         self.assertIn(self.data.test_user, [u['name'] for u in users],
@@ -234,14 +234,14 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_get_users_by_unauthorized_user(self):
-        """Non admin user should not be authorized to get user list"""
+        # Non admin user should not be authorized to get user list
         self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.get_users)
 
     @attr(type='negative')
     def test_get_users_request_without_token(self):
-        """Request to get list of users without a valid token should fail"""
+        # Request to get list of users without a valid token should fail
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.get_users)
@@ -249,7 +249,7 @@ class UsersTestBase(object):
 
     @attr(type='positive')
     def test_list_users_for_tenant(self):
-        """Return a list of all users for a tenant"""
+        # Return a list of all users for a tenant
         self.data.setup_test_tenant()
         user_ids = list()
         fetched_user_ids = list()
@@ -277,7 +277,7 @@ class UsersTestBase(object):
 
     @attr(type='positive')
     def test_list_users_with_roles_for_tenant(self):
-        """Return list of users on tenant when roles are assigned to users"""
+        # Return list of users on tenant when roles are assigned to users
         self.data.setup_test_user()
         self.data.setup_test_role()
         user = self.get_user_by_name(self.data.test_user)
@@ -309,10 +309,8 @@ class UsersTestBase(object):
 
     @attr(type='negative')
     def test_list_users_with_invalid_tenant(self):
-        """
-        Should not be able to return a list of all
-        users for a nonexistant tenant
-        """
+        # Should not be able to return a list of all
+        # users for a nonexistant tenant
         #Assign invalid tenant ids
         invalid_id = list()
         invalid_id.append(rand_name('999'))

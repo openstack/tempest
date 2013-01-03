@@ -49,7 +49,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_create_object(self):
-        """Create storage object, test response"""
+        # Create storage object, test response
 
         #Create Object
         object_name = rand_name(name='TestObject')
@@ -66,7 +66,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_delete_object(self):
-        """Create and delete a storage object, test responses"""
+        # Create and delete a storage object, test responses
 
         #Create Object
         object_name = rand_name(name='TestObject')
@@ -80,7 +80,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_object_metadata(self):
-        """Add metadata to storage object, test if metadata is retrievable"""
+        # Add metadata to storage object, test if metadata is retrievable
 
         #Create Object
         object_name = rand_name(name='TestObject')
@@ -110,7 +110,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_get_object(self):
-        """Retrieve object's data(in response body)"""
+        # Retrieve object's data(in response body)
 
         #Create Object
         object_name = rand_name(name='TestObject')
@@ -126,7 +126,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_copy_object_in_same_container(self):
-        """Copy storage object"""
+        # Copy storage object
 
         # Create source Object
         src_object_name = rand_name(name='SrcObject')
@@ -154,7 +154,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_copy_object_to_itself(self):
-        """Change the content type of an existing object"""
+        # Change the content type of an existing object
 
         # Create Object
         object_name = rand_name(name='TestObject')
@@ -179,7 +179,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_copy_object_2d_way(self):
-        """Copy storage object"""
+        # Copy storage object
 
         # Create source Object
         src_object_name = rand_name(name='SrcObject')
@@ -208,7 +208,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_copy_object_across_containers(self):
-        """Copy storage object across containers"""
+        # Copy storage object across containers
 
         #Create a container so as to use as source container
         src_container_name = rand_name(name='TestSourceContainer')
@@ -267,8 +267,8 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_access_public_container_object_without_using_creds(self):
-        """Make container public-readable, and access the object
-           anonymously, e.g. without using credentials"""
+        # Make container public-readable, and access the object
+           # anonymously, e.g. without using credentials
 
         try:
             resp_meta = None
@@ -318,8 +318,8 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='negative')
     def test_access_object_without_using_creds(self):
-        """Attempt to access the object anonymously, e.g.
-        not using any credentials"""
+        # Attempt to access the object anonymously, e.g.
+        # not using any credentials
 
         # Create Object
         object_name = rand_name(name='Object')
@@ -336,8 +336,8 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='negative')
     def test_write_object_without_using_creds(self):
-        """Attempt to write to the object anonymously, e.g.
-        not using any credentials"""
+        # Attempt to write to the object anonymously, e.g.
+        # not using any credentials
 
         # Trying to Create Object with empty Headers
         object_name = rand_name(name='Object')
@@ -353,8 +353,8 @@ class ObjectTest(base.BaseObjectTest):
 
     @attr(type='negative')
     def test_delete_object_without_using_creds(self):
-        """Attempt to delete the object anonymously,
-        e.g. not using any credentials"""
+        # Attempt to delete the object anonymously,
+        # e.g. not using any credentials
 
         # Create Object
         object_name = rand_name(name='Object')

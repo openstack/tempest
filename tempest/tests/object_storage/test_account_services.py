@@ -36,7 +36,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_list_containers(self):
-        """List of all containers should not be empty"""
+        # List of all containers should not be empty
 
         params = {'format': 'json'}
         resp, container_list = \
@@ -48,7 +48,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_list_account_metadata(self):
-        """List all account metadata"""
+        # List all account metadata
 
         resp, metadata = self.account_client.list_account_metadata()
         self.assertEqual(resp['status'], '204')
@@ -58,7 +58,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_create_account_metadata(self):
-        """Add metadata to account"""
+        # Add metadata to account
 
         metadata = {'test-account-meta': 'Meta!'}
         resp, _ = \
@@ -71,7 +71,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_delete_account_metadata(self):
-        """Delete metadata from account"""
+        # Delete metadata from account
 
         metadata = ['test-account-meta']
         resp, _ = \

@@ -54,7 +54,7 @@ class CreateRegisterImagesTest(unittest.TestCase):
 
     @attr(type='image')
     def test_register_with_invalid_data(self):
-        """Negative tests for invalid data supplied to POST /images"""
+        # Negative tests for invalid data supplied to POST /images
 
         metas = [
             {
@@ -76,7 +76,7 @@ class CreateRegisterImagesTest(unittest.TestCase):
 
     @attr(type='image')
     def test_register_then_upload(self):
-        """Register, then upload an image"""
+        # Register, then upload an image
         meta = {
             'name': 'New Name',
             'is_public': True,
@@ -108,7 +108,7 @@ class CreateRegisterImagesTest(unittest.TestCase):
 
     @attr(type='image')
     def test_register_remote_image(self):
-        """Register a new remote image"""
+        # Register a new remote image
         meta = {
             'name': 'New Remote Image',
             'is_public': True,
@@ -194,8 +194,6 @@ class ListImagesTest(unittest.TestCase):
 
     @attr(type='image')
     def test_index_no_params(self):
-        """
-        Simple test to see all fixture images returned
-        """
+        # Simple test to see all fixture images returned
         current_images = set(i.id for i in self.client.images.list())
         self.assertTrue(set(self.created_images) <= current_images)
