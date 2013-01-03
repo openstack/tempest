@@ -42,7 +42,7 @@ class FlavorsTestBase(object):
     def test_get_flavor(self):
         """The expected flavor details should be returned"""
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
-        self.assertEqual(self.flavor_ref, str(flavor['id']))
+        self.assertEqual(self.flavor_ref, int(flavor['id']))
 
     @attr(type='negative')
     def test_get_non_existant_flavor(self):

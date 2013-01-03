@@ -15,557 +15,445 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import ConfigParser
 import logging
 import os
 import sys
 
 from tempest.common.utils import data_utils
+from tempest.openstack.common import cfg
 
 LOG = logging.getLogger(__name__)
 
-
-class BaseConfig(object):
-
-    SECTION_NAME = None
-
-    def __init__(self, conf):
-        self.conf = conf
-
-    def get(self, item_name, default_value=None):
-        try:
-            return self.conf.get(self.SECTION_NAME, item_name, raw=True)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
-            return default_value
-
-    def getboolean(self, item_name, default_value=None):
-        try:
-            return self.conf.getboolean(self.SECTION_NAME, item_name)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
-            return default_value
-
-
-class IdentityConfig(BaseConfig):
-
-    """Provides configuration information for authenticating with Keystone."""
-
-    SECTION_NAME = "identity"
-
-    @property
-    def catalog_type(self):
-        """Catalog type of the Identity service."""
-        return self.get("catalog_type", 'identity')
-
-    @property
-    def host(self):
-        """Host IP for making Identity API requests."""
-        return self.get("host", "127.0.0.1")
-
-    @property
-    def port(self):
-        """Port for the Identity service."""
-        return self.get("port", "8773")
-
-    @property
-    def api_version(self):
-        """Version of the Identity API"""
-        return self.get("api_version", "v1.1")
-
-    @property
-    def path(self):
-        """Path of API request"""
-        return self.get("path", "/")
-
-    @property
-    def auth_url(self):
-        """The Identity URL (derived)"""
-        auth_url = data_utils.build_url(self.host,
-                                        self.port,
-                                        self.api_version,
-                                        self.path,
-                                        use_ssl=self.use_ssl)
-        return auth_url
-
-    @property
-    def use_ssl(self):
-        """Specifies if we are using https."""
-        return self.get("use_ssl", 'false').lower() != 'false'
-
-    @property
-    def strategy(self):
-        """Which auth method does the environment use? (basic|keystone)"""
-        return self.get("strategy", 'keystone')
-
-    @property
-    def region(self):
-        """The identity region name to use."""
-        return self.get("region")
-
-
-class IdentityAdminConfig(BaseConfig):
-
-    SECTION_NAME = "identity-admin"
-
-    @property
-    def username(self):
-        """Username to use for Identity Admin API requests"""
-        return self.get("username", "admin")
-
-    @property
-    def tenant_name(self):
-        """Tenant name to use for Identity Admin API requests"""
-        return self.get("tenant_name", "admin")
-
-    @property
-    def password(self):
-        """API key to use for Identity Admin API requests"""
-        return self.get("password", "pass")
-
-
-class ComputeConfig(BaseConfig):
-
-    SECTION_NAME = "compute"
-
-    @property
-    def allow_tenant_isolation(self):
-        """
-        Allows test cases to create/destroy tenants and users. This option
-        enables isolated test cases and better parallel execution,
-        but also requires that OpenStack Identity API admin credentials
-        are known.
-        """
-        return self.get("allow_tenant_isolation", 'false').lower() != 'false'
-
-    @property
-    def allow_tenant_reuse(self):
-        """
-        If allow_tenant_isolation is True and a tenant that would be created
-        for a given test already exists (such as from a previously-failed run),
-        re-use that tenant instead of failing because of the conflict. Note
-        that this would result in the tenant being deleted at the end of a
-        subsequent successful run.
-        """
-        return self.get("allow_tenant_reuse", 'true').lower() != 'false'
-
-    @property
-    def username(self):
-        """Username to use for Nova API requests."""
-        return self.get("username", "demo")
-
-    @property
-    def tenant_name(self):
-        """Tenant name to use for Nova API requests."""
-        return self.get("tenant_name", "demo")
-
-    @property
-    def password(self):
-        """API key to use when authenticating."""
-        return self.get("password", "pass")
-
-    @property
-    def alt_username(self):
-        """Username of alternate user to use for Nova API requests."""
-        return self.get("alt_username")
-
-    @property
-    def alt_tenant_name(self):
-        """Alternate user's Tenant name to use for Nova API requests."""
-        return self.get("alt_tenant_name")
-
-    @property
-    def alt_password(self):
-        """API key to use when authenticating as alternate user."""
-        return self.get("alt_password")
-
-    @property
-    def region(self):
-        """The compute region name to use."""
-        return self.get("region")
-
-    @property
-    def image_ref(self):
-        """Valid primary image to use in tests."""
-        return self.get("image_ref", "{$IMAGE_ID}")
-
-    @property
-    def image_ref_alt(self):
-        """Valid secondary image reference to be used in tests."""
-        return self.get("image_ref_alt", "{$IMAGE_ID_ALT}")
-
-    @property
-    def flavor_ref(self):
-        """Valid primary flavor to use in tests."""
-        return self.get("flavor_ref", 1)
-
-    @property
-    def flavor_ref_alt(self):
-        """Valid secondary flavor to be used in tests."""
-        return self.get("flavor_ref_alt", 2)
-
-    @property
-    def resize_available(self):
-        """Does the test environment support resizing?"""
-        return self.get("resize_available", 'false').lower() != 'false'
-
-    @property
-    def live_migration_available(self):
-        return self.get(
-            "live_migration_available", 'false').lower() == 'true'
-
-    @property
-    def use_block_migration_for_live_migration(self):
-        return self.get(
-            "use_block_migration_for_live_migration", 'false'
-        ).lower() == 'true'
-
-    @property
-    def change_password_available(self):
-        """Does the test environment support changing the admin password?"""
-        return self.get("change_password_available", 'false').lower() != \
-            'false'
-
-    @property
-    def create_image_enabled(self):
-        """Does the test environment support snapshots?"""
-        return self.get("create_image_enabled", 'false').lower() != 'false'
-
-    @property
-    def build_interval(self):
-        """Time in seconds between build status checks."""
-        return float(self.get("build_interval", 10))
-
-    @property
-    def build_timeout(self):
-        """Timeout in seconds to wait for an instance to build."""
-        return float(self.get("build_timeout", 300))
-
-    @property
-    def run_ssh(self):
-        """Does the test environment support snapshots?"""
-        return self.get("run_ssh", 'false').lower() != 'false'
-
-    @property
-    def ssh_user(self):
-        """User name used to authenticate to an instance."""
-        return self.get("ssh_user", "root")
-
-    @property
-    def ssh_timeout(self):
-        """Timeout in seconds to wait for authentcation to succeed."""
-        return float(self.get("ssh_timeout", 300))
-
-    @property
-    def network_for_ssh(self):
-        """Network used for SSH connections."""
-        return self.get("network_for_ssh", "public")
-
-    @property
-    def ip_version_for_ssh(self):
-        """IP version used for SSH connections."""
-        return int(self.get("ip_version_for_ssh", 4))
-
-    @property
-    def catalog_type(self):
-        """Catalog type of the Compute service."""
-        return self.get("catalog_type", 'compute')
-
-    @property
-    def log_level(self):
-        """Level for logging compute API calls."""
-        return self.get("log_level", 'ERROR')
-
-    @property
-    def whitebox_enabled(self):
-        """Does the test environment support whitebox tests for Compute?"""
-        return self.get("whitebox_enabled", 'false').lower() != 'false'
-
-    @property
-    def db_uri(self):
-        """Connection string to the database of Compute service"""
-        return self.get("db_uri", None)
-
-    @property
-    def source_dir(self):
-        """Path of nova source directory"""
-        return self.get("source_dir", "/opt/stack/nova")
-
-    @property
-    def config_path(self):
-        """Path of nova configuration file"""
-        return self.get("config_path", "/etc/nova/nova.conf")
-
-    @property
-    def bin_dir(self):
-        """Directory containing nova binaries such as nova-manage"""
-        return self.get("bin_dir", "/usr/local/bin/")
-
-    @property
-    def path_to_private_key(self):
-        """Path to a private key file for SSH access to remote hosts"""
-        return self.get("path_to_private_key")
-
-    @property
-    def disk_config_enabled_override(self):
-        """If false, skip config tests regardless of the extension status"""
-        return self.get("disk_config_enabled_override",
-                        'true').lower() == 'true'
-
-
-class ComputeAdminConfig(BaseConfig):
-
-    SECTION_NAME = "compute-admin"
-
-    @property
-    def username(self):
-        """Administrative Username to use for Nova API requests."""
-        return self.get("username", "admin")
-
-    @property
-    def tenant_name(self):
-        """Administrative Tenant name to use for Nova API requests."""
-        return self.get("tenant_name", "admin")
-
-    @property
-    def password(self):
-        """API key to use when authenticating as admin."""
-        return self.get("password", "pass")
-
-
-class ImagesConfig(BaseConfig):
-
-    """
-    Provides configuration information for connecting to an
-    OpenStack Images service.
-    """
-
-    SECTION_NAME = "image"
-
-    @property
-    def host(self):
-        """Host IP for making Images API requests. Defaults to '127.0.0.1'."""
-        return self.get("host", "127.0.0.1")
-
-    @property
-    def port(self):
-        """Listen port of the Images service."""
-        return int(self.get("port", "9292"))
-
-    @property
-    def api_version(self):
-        """Version of the API"""
-        return self.get("api_version", "1")
-
-    @property
-    def username(self):
-        """Username to use for Images API requests. Defaults to 'demo'."""
-        return self.get("username", "demo")
-
-    @property
-    def password(self):
-        """Password for user"""
-        return self.get("password", "pass")
-
-    @property
-    def tenant_name(self):
-        """Tenant to use for Images API requests. Defaults to 'demo'."""
-        return self.get("tenant_name", "demo")
-
-
-class NetworkConfig(BaseConfig):
-    """Provides configuration information for connecting to an OpenStack
-    Network Service.
-    """
-
-    SECTION_NAME = "network"
-
-    @property
-    def catalog_type(self):
-        """Catalog type of the Quantum service."""
-        return self.get("catalog_type", 'network')
-
-    @property
-    def api_version(self):
-        """Version of Quantum API"""
-        return self.get("api_version", "v1.1")
-
-    @property
-    def username(self):
-        """Username to use for Quantum API requests."""
-        return self.get("username", "demo")
-
-    @property
-    def tenant_name(self):
-        """Tenant name to use for Quantum API requests."""
-        return self.get("tenant_name", "demo")
-
-    @property
-    def password(self):
-        """API key to use when authenticating as admin."""
-        return self.get("password", "pass")
-
-    @property
-    def tenant_network_cidr(self):
-        """The cidr block to allocate tenant networks from"""
-        return self.get("tenant_network_cidr", "10.100.0.0/16")
-
-    @property
-    def tenant_network_mask_bits(self):
-        """The mask bits for tenant networks"""
-        return int(self.get("tenant_network_mask_bits", "29"))
-
-    @property
-    def tenant_networks_reachable(self):
-        """Whether tenant network connectivity should be evaluated directly"""
-        return (
-            self.get("tenant_networks_reachable", 'false').lower() != 'false'
-        )
-
-    @property
-    def public_network_id(self):
-        """Id of the public network that provides external connectivity"""
-        return self.get("public_network_id", "")
-
-    @property
-    def public_router_id(self):
-        """Id of the public router that provides external connectivity"""
-        return self.get("public_router_id", "")
-
-
-class NetworkAdminConfig(BaseConfig):
-
-    SECTION_NAME = "network-admin"
-
-    @property
-    def username(self):
-        """Administrative Username to use for Quantum API requests."""
-        return self.get("username", "admin")
-
-    @property
-    def tenant_name(self):
-        """Administrative Tenant name to use for Quantum API requests."""
-        return self.get("tenant_name", "admin")
-
-    @property
-    def password(self):
-        """API key to use when authenticating as admin."""
-        return self.get("password", "pass")
-
-
-class VolumeConfig(BaseConfig):
-    """Provides configuration information for connecting to an OpenStack Block
-    Storage Service.
-    """
-
-    SECTION_NAME = "volume"
-
-    @property
-    def build_interval(self):
-        """Time in seconds between volume availability checks."""
-        return float(self.get("build_interval", 10))
-
-    @property
-    def build_timeout(self):
-        """Timeout in seconds to wait for a volume to become available."""
-        return float(self.get("build_timeout", 300))
-
-    @property
-    def catalog_type(self):
-        """Catalog type of the Volume Service"""
-        return self.get("catalog_type", 'volume')
-
-
-class ObjectStorageConfig(BaseConfig):
-
-    SECTION_NAME = "object-storage"
-
-    @property
-    def catalog_type(self):
-        """Catalog type of the Object-Storage service."""
-        return self.get("catalog_type", 'object-store')
-
-    @property
-    def region(self):
-        """The object-store region name to use."""
-        return self.get("region")
-
-
-class BotoConfig(BaseConfig):
-    """Provides configuration information for connecting to EC2/S3."""
-    SECTION_NAME = "boto"
-
-    @property
-    def ec2_url(self):
-        """EC2 URL"""
-        return self.get("ec2_url", "http://localhost:8773/services/Cloud")
-
-    @property
-    def s3_url(self):
-        """S3 URL"""
-        return self.get("s3_url", "http://localhost:8080")
-
-    @property
-    def aws_secret(self):
-        """AWS Secret Key"""
-        return self.get("aws_secret")
-
-    @property
-    def aws_access(self):
-        """AWS Access Key"""
-        return self.get("aws_access")
-
-    @property
-    def aws_region(self):
-        """AWS Region"""
-        return self.get("aws_region", "RegionOne")
-
-    @property
-    def s3_materials_path(self):
-        return self.get("s3_materials_path",
-                        "/opt/stack/devstack/files/images/"
-                        "s3-materials/cirros-0.3.0")
-
-    @property
-    def ari_manifest(self):
-        """ARI Ramdisk Image manifest"""
-        return self.get("ari_manifest",
-                        "cirros-0.3.0-x86_64-initrd.manifest.xml")
-
-    @property
-    def ami_manifest(self):
-        """AMI Machine Image manifest"""
-        return self.get("ami_manifest",
-                        "cirros-0.3.0-x86_64-blank.img.manifest.xml")
-
-    @property
-    def aki_manifest(self):
-        """AKI Kernel Image manifest"""
-        return self.get("aki_manifest",
-                        "cirros-0.3.0-x86_64-vmlinuz.manifest.xml")
-
-    @property
-    def instance_type(self):
-        """Instance type"""
-        return self.get("Instance type", "m1.tiny")
-
-    @property
-    def http_socket_timeout(self):
-        """boto Http socket timeout"""
-        return self.get("http_socket_timeout", "3")
-
-    @property
-    def num_retries(self):
-        """boto num_retries on error"""
-        return self.get("num_retries", "1")
-
-    @property
-    def build_timeout(self):
-        """status change timeout"""
-        return float(self.get("build_timeout", "60"))
-
-    @property
-    def build_interval(self):
-        """status change test interval"""
-        return float(self.get("build_interval", 1))
+identity_group = cfg.OptGroup(name='identity',
+                              title="Keystone Configuration Options")
+
+IdentityGroup = [
+    cfg.StrOpt('catalog_type',
+               default='identity',
+               help="Catalog type of the Identity service."),
+    cfg.StrOpt('host',
+               default="127.0.0.1",
+               help="Host IP for making Identity API requests."),
+    cfg.IntOpt('port',
+               default=8773,
+               help="Port for the Identity service."),
+    cfg.StrOpt('api_version',
+               default="v1.1",
+               help="Version of the Identity API"),
+    cfg.StrOpt('path',
+               default='/',
+               help="Path of API request"),
+    cfg.BoolOpt('use_ssl',
+                default=False,
+                help="Specifies if we are using https."),
+    cfg.StrOpt('strategy',
+               default='keystone',
+               help="Which auth method does the environment use? "
+                    "(basic|keystone)"),
+    cfg.StrOpt('region',
+               default=None,
+               help="The identity region name to use."),
+]
+
+
+def register_identity_opts(conf):
+    conf.register_group(identity_group)
+    for opt in IdentityGroup:
+        conf.register_opt(opt, group='identity')
+
+    authurl = data_utils.build_url(conf.identity.host,
+                                   str(conf.identity.port),
+                                   conf.identity.api_version,
+                                   conf.identity.path,
+                                   use_ssl=conf.identity.use_ssl)
+
+    auth_url = cfg.StrOpt('auth_url',
+                          default=authurl,
+                          help="The Identity URL (derived)")
+    conf.register_opt(auth_url, group="identity")
+
+
+identity_admin_group = cfg.OptGroup(name='identity-admin',
+                                    title="Identity Admin Options")
+
+IdentityAdminGroup = [
+    cfg.StrOpt('username',
+               default='admin',
+               help="Username to use for Identity Admin API requests"),
+    cfg.StrOpt('tenant_name',
+               default='admin',
+               help="Tenant name to use for Identity Admin API requests"),
+    cfg.StrOpt('password',
+               default='pass',
+               help="API key to use for Identity Admin API requests",
+               secret=True),
+]
+
+
+def register_identity_admin_opts(conf):
+    conf.register_group(identity_admin_group)
+    for opt in IdentityAdminGroup:
+        conf.register_opt(opt, group='identity-admin')
+
+
+compute_group = cfg.OptGroup(name='compute',
+                             title='Compute Service Options')
+
+ComputeGroup = [
+    cfg.BoolOpt('allow_tenant_isolation',
+                default=False,
+                help="Allows test cases to create/destroy tenants and "
+                     "users. This option enables isolated test cases and "
+                     "better parallel execution, but also requires that "
+                     "OpenStack Identity API admin credentials are known."),
+    cfg.BoolOpt('allow_tenant_reuse',
+                default=True,
+                help="If allow_tenant_isolation is True and a tenant that "
+                     "would be created for a given test already exists (such "
+                     "as from a previously-failed run), re-use that tenant "
+                     "instead of failing because of the conflict. Note that "
+                     "this would result in the tenant being deleted at the "
+                     "end of a subsequent successful run."),
+    cfg.StrOpt('username',
+               default='demo',
+               help="Username to use for Nova API requests."),
+    cfg.StrOpt('tenant_name',
+               default='demo',
+               help="Tenant name to use for Nova API requests."),
+    cfg.StrOpt('password',
+               default='pass',
+               help="API key to use when authenticating.",
+               secret=True),
+    cfg.StrOpt('alt_username',
+               default=None,
+               help="Username of alternate user to use for Nova API "
+                    "requests."),
+    cfg.StrOpt('alt_tenant_name',
+               default=None,
+               help="Alternate user's Tenant name to use for Nova API "
+                    "requests."),
+    cfg.StrOpt('alt_password',
+               default=None,
+               help="API key to use when authenticating as alternate user.",
+               secret=True),
+    cfg.StrOpt('region',
+               default=None,
+               help="The compute region name to use."),
+    cfg.StrOpt('image_ref',
+               default="{$IMAGE_ID}",
+               help="Valid secondary image reference to be used in tests."),
+    cfg.StrOpt('image_ref_alt',
+               default="{$IMAGE_ID_ALT}",
+               help="Valid secondary image reference to be used in tests."),
+    cfg.IntOpt('flavor_ref',
+               default=1,
+               help="Valid primary flavor to use in tests."),
+    cfg.IntOpt('flavor_ref_alt',
+               default=2,
+               help='Valid secondary flavor to be used in tests.'),
+    cfg.BoolOpt('resize_available',
+                default=False,
+                help="Does the test environment support resizing?"),
+    cfg.BoolOpt('live_migration_available',
+                default=False,
+                help="Does the test environment support live migration "
+                     "available?"),
+    cfg.BoolOpt('use_block_migration_for_live_migration',
+                default=False,
+                help="Does the test environment use block devices for live "
+                     "migration"),
+    cfg.BoolOpt('change_password_available',
+                default=False,
+                help="Does the test environment support changing the admin "
+                     "password?"),
+    cfg.BoolOpt('create_image_enabled',
+                default=False,
+                help="Does the test environment support snapshots?"),
+    cfg.IntOpt('build_interval',
+               default=10,
+               help="Time in seconds between build status checks."),
+    cfg.IntOpt('build_timeout',
+               default=300,
+               help="Timeout in seconds to wait for an instance to build."),
+    cfg.BoolOpt('run_ssh',
+                default=False,
+                help="Does the test environment support snapshots?"),
+    cfg.StrOpt('ssh_user',
+               default='root',
+               help="User name used to authenticate to an instance."),
+    cfg.IntOpt('ssh_timeout',
+               default=300,
+               help="Timeout in seconds to wait for authentcation to "
+                    "succeed."),
+    cfg.StrOpt('network_for_ssh',
+               default='public',
+               help="Network used for SSH connections."),
+    cfg.IntOpt('ip_version_for_ssh',
+               default=4,
+               help="IP version used for SSH connections."),
+    cfg.StrOpt('catalog_type',
+               default='compute',
+               help="Catalog type of the Compute service."),
+    cfg.StrOpt('log_level',
+               default="ERROR",
+               help="Level for logging compute API calls."),
+    cfg.BoolOpt('whitebox_enabled',
+                default=False,
+                help="Does the test environment support whitebox tests for "
+                     "Compute?"),
+    cfg.StrOpt('db_uri',
+               default=None,
+               help="Connection string to the database of Compute service"),
+    cfg.StrOpt('source_dir',
+               default="/opt/stack/nova",
+               help="Path of nova source directory"),
+    cfg.StrOpt('config_path',
+               default='/etc/nova/nova.conf',
+               help="Path of nova configuration file"),
+    cfg.StrOpt('bin_dir',
+               default="/usr/local/bin/",
+               help="Directory containing nova binaries such as nova-manage"),
+    cfg.StrOpt('path_to_private_key',
+               default=None,
+               help="Path to a private key file for SSH access to remote "
+                    "hosts"),
+    cfg.BoolOpt('disk_config_enabled_override',
+                default=True,
+                help="If false, skip config tests regardless of the "
+                     "extension status"),
+]
+
+
+def register_compute_opts(conf):
+    conf.register_group(compute_group)
+    for opt in ComputeGroup:
+        conf.register_opt(opt, group='compute')
+
+compute_admin_group = cfg.OptGroup(name='compute-admin',
+                                   title="Compute Admin Options")
+
+ComputeAdminGroup = [
+    cfg.StrOpt('username',
+               default='admin',
+               help="Administrative Username to use for Nova API requests."),
+    cfg.StrOpt('tenant_name',
+               default='admin',
+               help="Administrative Tenant name to use for Nova API "
+                    "requests."),
+    cfg.StrOpt('password',
+               default='pass',
+               help="API key to use when authenticating as admin.",
+               secret=True),
+]
+
+
+def register_compute_admin_opts(conf):
+    conf.register_group(compute_admin_group)
+    for opt in ComputeAdminGroup:
+        conf.register_opt(opt, group='compute-admin')
+
+
+image_group = cfg.OptGroup(name='image',
+                           title="Image Service Options")
+
+ImageGroup = [
+    cfg.StrOpt('host',
+               default='127.0.0.1',
+               help="Host IP for making Images API requests. Defaults to "
+                    "'127.0.0.1'."),
+    cfg.IntOpt('port',
+               default=9292,
+               help="Listen port of the Images service."),
+    cfg.StrOpt('api_version',
+               default='1',
+               help="Version of the API"),
+    cfg.StrOpt('username',
+               default='demo',
+               help="Username to use for Images API requests. Defaults to "
+                    "'demo'."),
+    cfg.StrOpt('password',
+               default='pass',
+               help="Password for user",
+               secret=True),
+    cfg.StrOpt('tenant_name',
+               default="demo",
+               help="Tenant to use for Images API requests. Defaults to "
+                    "'demo'."),
+]
+
+
+def register_image_opts(conf):
+    conf.register_group(image_group)
+    for opt in ImageGroup:
+        conf.register_opt(opt, group='image')
+
+
+network_group = cfg.OptGroup(name='network',
+                             title='Network Service Options')
+
+NetworkGroup = [
+    cfg.StrOpt('catalog_type',
+               default='network',
+               help='Catalog type of the Quantum service.'),
+    cfg.StrOpt('api_version',
+               default="v1.1",
+               help="Version of Quantum API"),
+    cfg.StrOpt('username',
+               default="demo",
+               help="Username to use for Quantum API requests."),
+    cfg.StrOpt('tenant_name',
+               default="demo",
+               help="Tenant name to use for Quantum API requests."),
+    cfg.StrOpt('password',
+               default="pass",
+               help="API key to use when authenticating as admin.",
+               secret=True),
+    cfg.StrOpt('tenant_network_cidr',
+               default="10.100.0.0/16",
+               help="The cidr block to allocate tenant networks from"),
+    cfg.IntOpt('tenant_network_mask_bits',
+               default=29,
+               help="The mask bits for tenant networks"),
+    cfg.BoolOpt('tenant_networks_reachable',
+                default=False,
+                help="Whether tenant network connectivity should be "
+                     "evaluated directly"),
+    cfg.StrOpt('public_network_id',
+               default="",
+               help="Id of the public network that provides external "
+                    "connectivity"),
+    cfg.StrOpt('public_router_id',
+               default="",
+               help="Id of the public router that provides external "
+                    "connectivity"),
+]
+
+
+def register_network_opts(conf):
+    conf.register_group(network_group)
+    for opt in NetworkGroup:
+        conf.register_opt(opt, group='network')
+
+network_admin_group = cfg.OptGroup(name='network-admin',
+                                   title="Network Admin Options")
+
+NetworkAdminGroup = [
+    cfg.StrOpt('username',
+               default='admin',
+               help="Administrative Username to use for Quantum API "
+                    "requests."),
+    cfg.StrOpt('tenant_name',
+               default='admin',
+               help="Administrative Tenant name to use for Quantum API "
+                    "requests."),
+    cfg.StrOpt('password',
+               default='pass',
+               help="API key to use when authenticating as admin.",
+               secret=True),
+]
+
+
+def register_network_admin_opts(conf):
+    conf.register_group(network_admin_group)
+    for opt in NetworkAdminGroup:
+        conf.register_opt(opt, group='network-admin')
+
+
+volume_group = cfg.OptGroup(name='volume',
+                            title='Block Storage Options')
+
+VolumeGroup = [
+    cfg.IntOpt('build_interval',
+               default=10,
+               help='Time in seconds between volume availability checks.'),
+    cfg.IntOpt('build_timeout',
+               default=300,
+               help='Timeout in seconds to wait for a volume to become'
+                    'available.'),
+    cfg.StrOpt('catalog_type',
+               default='Volume',
+               help="Catalog type of the Volume Service"),
+]
+
+
+def register_volume_opts(conf):
+    conf.register_group(volume_group)
+    for opt in VolumeGroup:
+        conf.register_opt(opt, group='volume')
+
+
+object_storage_group = cfg.OptGroup(name='object-storage',
+                                    title='Object Storage Service Options')
+
+ObjectStoreConfig = [
+    cfg.StrOpt('catalog_type',
+               default='object-store',
+               help="Catalog type of the Object-Storage service."),
+    cfg.StrOpt('region',
+               default=None,
+               help='The object-store region name to use.'),
+]
+
+
+def register_object_storage_opts(conf):
+    conf.register_group(object_storage_group)
+    for opt in ObjectStoreConfig:
+        conf.register_opt(opt, group='object-storage')
+
+boto_group = cfg.OptGroup(name='boto',
+                          title='EC2/S3 options')
+BotoConfig = [
+    cfg.StrOpt('ec2_url',
+               default="http://localhost:8773/services/Cloud",
+               help="EC2 URL"),
+    cfg.StrOpt('s3_url',
+               default="http://localhost:8080",
+               help="S3 URL"),
+    cfg.StrOpt('aws_secret',
+               default=None,
+               help="AWS Secret Key",
+               secret=True),
+    cfg.StrOpt('aws_access',
+               default=None,
+               help="AWS Access Key"),
+    cfg.StrOpt('aws_region',
+               default=None,
+               help="AWS Region"),
+    cfg.StrOpt('s3_materials_path',
+               default="/opt/stack/devstack/files/images/"
+                       "s3-materials/cirros-0.3.0",
+               help="S3 Materials Path"),
+    cfg.StrOpt('ari_manifest',
+               default="cirros-0.3.0-x86_64-initrd.manifest.xml",
+               help="ARI Ramdisk Image manifest"),
+    cfg.StrOpt('ami_manifest',
+               default="cirros-0.3.0-x86_64-blank.img.manifest.xml",
+               help="AMI Machine Image manifest"),
+    cfg.StrOpt('aki_manifest',
+               default="cirros-0.3.0-x86_64-vmlinuz.manifest.xml",
+               help="AKI Kernel Image manifest"),
+    cfg.StrOpt('instance_type',
+               default="m1.tiny",
+               help="Instance type"),
+    cfg.IntOpt('http_socket_timeout',
+               default=3,
+               help="boto Http socket timeout"),
+    cfg.IntOpt('num_retries',
+               default=1,
+               help="boto num_retries on error"),
+    cfg.IntOpt('build_timeout',
+               default=60,
+               help="Status Change Timeout"),
+    cfg.IntOpt('build_interval',
+               default=1,
+               help="Status Change Test Interval"),
+]
+
+
+def register_boto_opts(conf):
+    conf.register_group(boto_group)
+    for opt in BotoConfig:
+        conf.register_opt(opt, group='boto')
 
 
 # TODO(jaypipes): Move this to a common utils (not data_utils...)
@@ -614,20 +502,25 @@ class TempestConfig:
             print >> sys.stderr, RuntimeError(msg)
             sys.exit(os.EX_NOINPUT)
 
-        self._conf = self.load_config(path)
-        self.compute = ComputeConfig(self._conf)
-        self.compute_admin = ComputeAdminConfig(self._conf)
-        self.identity = IdentityConfig(self._conf)
-        self.identity_admin = IdentityAdminConfig(self._conf)
-        self.images = ImagesConfig(self._conf)
-        self.network = NetworkConfig(self._conf)
-        self.network_admin = NetworkAdminConfig(self._conf)
-        self.volume = VolumeConfig(self._conf)
-        self.object_storage = ObjectStorageConfig(self._conf)
-        self.boto = BotoConfig(self._conf)
+        cfg.CONF([], project='tempest', default_config_files=[path])
 
-    def load_config(self, path):
-        """Read configuration from given path and return a config object."""
-        config = ConfigParser.SafeConfigParser()
-        config.read(path)
-        return config
+        register_compute_opts(cfg.CONF)
+        register_identity_opts(cfg.CONF)
+        register_identity_admin_opts(cfg.CONF)
+        register_compute_admin_opts(cfg.CONF)
+        register_image_opts(cfg.CONF)
+        register_network_opts(cfg.CONF)
+        register_network_admin_opts(cfg.CONF)
+        register_volume_opts(cfg.CONF)
+        register_object_storage_opts(cfg.CONF)
+        register_boto_opts(cfg.CONF)
+        self.compute = cfg.CONF.compute
+        self.compute_admin = cfg.CONF['compute-admin']
+        self.identity = cfg.CONF.identity
+        self.identity_admin = cfg.CONF['identity-admin']
+        self.images = cfg.CONF.image
+        self.network = cfg.CONF.network
+        self.network_admin = cfg.CONF['network-admin']
+        self.volume = cfg.CONF.volume
+        self.object_storage = cfg.CONF['object-storage']
+        self.boto = cfg.CONF.boto

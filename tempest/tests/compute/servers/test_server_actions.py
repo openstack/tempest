@@ -124,7 +124,7 @@ class ServerActionsTestBase(object):
         self.assertEqual(self.server_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
-        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
+        self.assertEqual(self.flavor_ref, int(rebuilt_server['flavor']['id']))
 
         #Verify the server properties after the rebuild completes
         self.client.wait_for_server_status(rebuilt_server['id'], 'ACTIVE')
