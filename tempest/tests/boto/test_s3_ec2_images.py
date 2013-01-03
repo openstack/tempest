@@ -62,7 +62,7 @@ class S3ImagesTest(BotoTestCase):
     # otherwise I would skip it too
     @attr(type='smoke')
     def test_register_get_deregister_ami_image(self):
-        """Register and deregister ami image"""
+        # Register and deregister ami image
         image = {"name": rand_name("ami-name-"),
                  "location": self.bucket_name + "/" + self.ami_manifest,
                  "type": "ami"}
@@ -90,7 +90,7 @@ class S3ImagesTest(BotoTestCase):
 
     @unittest.skip("Skipped until the Bug #1074904 is resolved")
     def test_register_get_deregister_aki_image(self):
-        """Register and deregister aki image"""
+        # Register and deregister aki image
         image = {"name": rand_name("aki-name-"),
                  "location": self.bucket_name + "/" + self.ari_manifest,
                  "type": "aki"}
@@ -118,7 +118,7 @@ class S3ImagesTest(BotoTestCase):
 
     @unittest.skip("Skipped until the Bug #1074908 and #1074904 is resolved")
     def test_register_get_deregister_ari_image(self):
-        """Register and deregister ari image"""
+        # Register and deregister ari image
         image = {"name": rand_name("ari-name-"),
                  "location": "/" + self.bucket_name + "/" + self.ari_manifest,
                  "type": "ari"}

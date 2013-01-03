@@ -45,7 +45,7 @@ class EC2VolumesTest(BotoTestCase):
 #NOTE(afazekas): as admin it can trigger the Bug #1074901
     @attr(type='smoke')
     def test_create_get_delete(self):
-        """EC2 Create, get, delete Volume"""
+        # EC2 Create, get, delete Volume
         volume = self.client.create_volume(1, self.zone)
         cuk = self.addResourceCleanUp(self.client.delete_volume, volume.id)
         self.assertIn(volume.status, self.valid_volume_status)
@@ -63,7 +63,7 @@ class EC2VolumesTest(BotoTestCase):
 
     @attr(type='smoke')
     def test_create_volme_from_snapshot(self):
-        """EC2 Create volume from snapshot"""
+        # EC2 Create volume from snapshot
         volume = self.client.create_volume(1, self.zone)
         self.addResourceCleanUp(self.client.delete_volume, volume.id)
 

@@ -40,7 +40,7 @@ class S3BucketsTest(BotoTestCase):
     @unittest.skip("Skipped until the Bug #1076534 is resolved")
     @attr(type='smoke')
     def test_create_get_delete_object(self):
-        """S3 Create, get and delete object"""
+        # S3 Create, get and delete object
         bucket_name = rand_name("s3bucket-")
         object_name = rand_name("s3object-")
         content = 'x' * 42

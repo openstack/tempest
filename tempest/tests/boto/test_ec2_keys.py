@@ -39,7 +39,7 @@ class EC2KeysTest(BotoTestCase):
 
     @attr(type='smoke')
     def test_create_ec2_keypair(self):
-        """EC2 create KeyPair"""
+        # EC2 create KeyPair
         key_name = rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
@@ -49,7 +49,7 @@ class EC2KeysTest(BotoTestCase):
     @attr(type='smoke')
     @unittest.skip("Skipped until the Bug #1072318 is resolved")
     def test_delete_ec2_keypair(self):
-        """EC2 delete KeyPair"""
+        # EC2 delete KeyPair
         key_name = rand_name("keypair-")
         self.client.create_key_pair(key_name)
         self.client.delete_key_pair(key_name)
@@ -57,7 +57,7 @@ class EC2KeysTest(BotoTestCase):
 
     @attr(type='smoke')
     def test_get_ec2_keypair(self):
-        """EC2 get KeyPair"""
+        # EC2 get KeyPair
         key_name = rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
@@ -67,7 +67,7 @@ class EC2KeysTest(BotoTestCase):
     @attr(type='smoke')
     @unittest.skip("Skipped until the Bug #1072762 is resolved")
     def test_duplicate_ec2_keypair(self):
-        """EC2 duplicate KeyPair"""
+        # EC2 duplicate KeyPair
         key_name = rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)

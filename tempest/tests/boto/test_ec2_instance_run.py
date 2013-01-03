@@ -93,7 +93,7 @@ class InstanceRunTest(BotoTestCase):
 
     @attr(type='smoke')
     def test_run_stop_terminate_instance(self):
-        """EC2 run, stop and terminate instance"""
+        # EC2 run, stop and terminate instance
         image_ami = self.ec2_client.get_image(self.images["ami"]
                                               ["image_id"])
         reservation = image_ami.run(kernel_id=self.images["aki"]["image_id"],
@@ -122,7 +122,7 @@ class InstanceRunTest(BotoTestCase):
 
     @attr(type='smoke')
     def test_run_terminate_instance(self):
-        """EC2 run, terminate immediately"""
+        # EC2 run, terminate immediately
         image_ami = self.ec2_client.get_image(self.images["ami"]
                                               ["image_id"])
         reservation = image_ami.run(kernel_id=self.images["aki"]["image_id"],
@@ -139,7 +139,7 @@ class InstanceRunTest(BotoTestCase):
     # with normal validation it would fail
     @attr("slow", type='smoke')
     def test_integration_1(self):
-        """EC2 1. integration test (not strict)"""
+        # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])
         sec_group_name = rand_name("securitygroup-")
         group_desc = sec_group_name + " security group description "

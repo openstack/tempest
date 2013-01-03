@@ -35,7 +35,7 @@ class EC2NetworkTest(BotoTestCase):
     @unittest.skip("Skipped until the Bug #1080406 is resolved")
     @attr(type='smoke')
     def test_disassociate_not_associated_floating_ip(self):
-        """EC2 disassociate not associated floating ip"""
+        # EC2 disassociate not associated floating ip
         ec2_codes = self.ec2_error_code
         address = self.client.allocate_address()
         public_ip = address.public_ip

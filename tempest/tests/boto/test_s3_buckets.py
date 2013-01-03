@@ -36,7 +36,7 @@ class S3BucketsTest(BotoTestCase):
     @unittest.skip("Skipped until the Bug #1076965 is resolved")
     @attr(type='smoke')
     def test_create_and_get_delete_bucket(self):
-        """S3 Create, get and delete bucket"""
+        # S3 Create, get and delete bucket
         bucket_name = rand_name("s3bucket-")
         cleanup_key = self.addResourceCleanUp(self.client.delete_bucket,
                                               bucket_name)

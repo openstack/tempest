@@ -34,7 +34,7 @@ class EC2SecurityGroupTest(BotoTestCase):
 
     @attr(type='smoke')
     def test_create_authorize_security_group(self):
-        """EC2 Create, authorize/revoke security group"""
+        # EC2 Create, authorize/revoke security group
         group_name = rand_name("securty_group-")
         group_description = group_name + " security group description "
         group = self.client.create_security_group(group_name,
