@@ -84,11 +84,6 @@ function run_pep8 {
 
 NOSETESTS="nosetests $noseargs"
 
-if [ $just_pep8 -eq 1 ]; then
-    run_pep8
-    exit
-fi
-
 if [ $never_venv -eq 0 ]
 then
   # Remove the virtual environment if --force used
@@ -113,6 +108,11 @@ then
       fi
     fi
   fi
+fi
+
+if [ $just_pep8 -eq 1 ]; then
+    run_pep8
+    exit
 fi
 
 run_tests || exit
