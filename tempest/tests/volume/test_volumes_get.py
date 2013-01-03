@@ -25,7 +25,7 @@ class VolumesGetTestBase(object):
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):
-        """Create a volume, Get it's details and Delete the volume"""
+        # Create a volume, Get it's details and Delete the volume
         try:
             volume = {}
             v_name = rand_name('Volume-')
@@ -69,7 +69,7 @@ class VolumesGetTestBase(object):
 
     @attr(type='positive')
     def test_volume_get_metadata_none(self):
-        """Create a volume without passing metadata, get details, and delete"""
+        # Create a volume without passing metadata, get details, and delete
         try:
             volume = {}
             v_name = rand_name('Volume-')

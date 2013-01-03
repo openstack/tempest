@@ -41,7 +41,7 @@ class VolumeTypesTest(BaseVolumeTest):
         super(VolumeTypesTest, cls).tearDownClass()
 
     def test_volume_type_list(self):
-        """List Volume types."""
+        # List Volume types.
         try:
             resp, body = self.client.list_volume_types()
             self.assertEqual(200, resp.status)
@@ -50,7 +50,7 @@ class VolumeTypesTest(BaseVolumeTest):
             self.fail("Could not list volume types")
 
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
-        """ Create/get/delete volume with volume_type and extra spec. """
+        # Create/get/delete volume with volume_type and extra spec.
         try:
             volume = {}
             vol_name = rand_name("volume-")
@@ -101,7 +101,7 @@ class VolumeTypesTest(BaseVolumeTest):
                 self.assertEqual(202, resp.status)
 
     def test_volume_type_create_delete(self):
-        """ Create/Delete volume type."""
+        # Create/Delete volume type.
         try:
             name = rand_name("volume-type-")
             extra_specs = {"Spec1": "Val1", "Spec2": "Val2"}
@@ -122,7 +122,7 @@ class VolumeTypesTest(BaseVolumeTest):
             self.fail("Could not create a volume_type")
 
     def test_volume_type_create_get(self):
-        """ Create/get volume type."""
+        # Create/get volume type.
         try:
             body = {}
             name = rand_name("volume-type-")

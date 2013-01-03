@@ -35,8 +35,7 @@ class VolumeTypesNegativeTestBase():
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_create_with_nonexistent_volume_type(self):
-        """ Should not be able to create volume with nonexistent volume_type.
-        """
+        # Should not be able to create volume with nonexistent volume_type.
         self.volumes_client.create_volume(size=1,
                                           display_name=str(uuid.uuid4()),
                                           volume_type=str(uuid.uuid4()))
@@ -45,20 +44,19 @@ class VolumeTypesNegativeTestBase():
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_with_empty_name(self):
-        """ Should not be able to create volume type with an empty name."""
+        # Should not be able to create volume type with an empty name.
         self.client.create_volume_type('')
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_nonexistent_type_id(self):
-        """ Should not be able to get volume type with nonexistent type id."""
+        # Should not be able to get volume type with nonexistent type id.
         self.client.get_volume_type(str(uuid.uuid4()))
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_nonexistent_type_id(self):
-        """ Should not be able to delete volume type with nonexistent type id.
-        """
+        # Should not be able to delete volume type with nonexistent type id.
         self.client.delete_volume_type(str(uuid.uuid4()))
 
 

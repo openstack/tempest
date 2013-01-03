@@ -47,7 +47,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
         cls.client.delete_volume_type(cls.volume_type['id'])
 
     def test_volume_type_extra_specs_list(self):
-        """List Volume types extra specs."""
+        # List Volume types extra specs.
         try:
             resp, body = self.client.\
             list_volume_types_extra_specs(self.volume_type['id'])
@@ -59,7 +59,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
             self.fail("Could not list volume types extra specs")
 
     def test_volume_type_extra_specs_update(self):
-        """ Update volume type extra specs"""
+        # Update volume type extra specs
         try:
             extra_spec = {"spec1": "val2"}
             resp, body = self.client.\
@@ -75,7 +75,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
             self.fail("Couldnt update volume type extra spec")
 
     def test_volume_type_extra_spec_create_delete(self):
-        """ Create/Delete volume type extra spec."""
+        # Create/Delete volume type extra spec.
         try:
             extra_specs = {"spec2": "val1"}
             resp, body = self.client.\
@@ -91,7 +91,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
             self.fail("Could not create a volume_type extra spec")
 
     def test_volume_type_extra_spec_create_get(self):
-        """ Create/get volume type extra spec"""
+        # Create/get volume type extra spec
         try:
             extra_specs = {"spec1": "val1"}
             resp, body = self.client.\

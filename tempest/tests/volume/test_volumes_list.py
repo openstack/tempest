@@ -34,7 +34,7 @@ class VolumesListTestBase(object):
 
     @attr(type='smoke')
     def test_volume_list(self):
-        """Get a list of Volumes"""
+        # Get a list of Volumes
         # Fetch all volumes
         resp, fetched_list = self.client.list_volumes()
         self.assertEqual(200, resp.status)
@@ -47,7 +47,7 @@ class VolumesListTestBase(object):
 
     @attr(type='smoke')
     def test_volume_list_with_details(self):
-        """Get a list of Volumes with details"""
+        # Get a list of Volumes with details
         # Fetch all Volumes
         resp, fetched_list = self.client.list_volumes_with_detail()
         self.assertEqual(200, resp.status)

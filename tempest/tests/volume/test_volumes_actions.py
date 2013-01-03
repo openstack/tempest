@@ -50,7 +50,7 @@ class VolumesActionsTest(BaseVolumeTest):
 
     @attr(type='smoke')
     def test_attach_detach_volume_to_instance(self):
-        """Volume is attached and detached successfully from an instance"""
+        # Volume is attached and detached successfully from an instance
         try:
             mountpoint = '/dev/vdc'
             resp, body = self.client.attach_volume(self.volume['id'],
@@ -67,7 +67,7 @@ class VolumesActionsTest(BaseVolumeTest):
             self.client.wait_for_volume_status(self.volume['id'], 'available')
 
     def test_get_volume_attachment(self):
-        """Verify that a volume's attachment information is retrieved"""
+        # Verify that a volume's attachment information is retrieved
         mountpoint = '/dev/vdc'
         resp, body = self.client.attach_volume(self.volume['id'],
                                                self.server['id'],

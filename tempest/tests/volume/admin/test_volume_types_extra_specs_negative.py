@@ -46,7 +46,7 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_update_no_body(self):
-        """ Should not update volume type extra specs with no body"""
+        # Should not update volume type extra specs with no body
         extra_spec = {"spec1": "val2"}
         self.client.update_volume_type_extra_specs(self.volume_type['id'],
                                                    extra_spec.keys()[0],
@@ -55,7 +55,7 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_update_nonexistent_extra_spec_id(self):
-        """ Should not update volume type extra specs with nonexistent id."""
+        # Should not update volume type extra specs with nonexistent id.
         extra_spec = {"spec1": "val2"}
         self.client.update_volume_type_extra_specs(self.volume_type['id'],
                                                    str(uuid.uuid4()),
@@ -64,7 +64,7 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_update_none_extra_spec_id(self):
-        """ Should not update volume type extra specs with none id."""
+        # Should not update volume type extra specs with none id.
         extra_spec = {"spec1": "val2"}
         self.client.update_volume_type_extra_specs(self.volume_type['id'],
                                                    None, extra_spec)
@@ -72,9 +72,8 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_update_multiple_extra_spec(self):
-        """ Should not update volume type extra specs with multiple specs as
-            body.
-        """
+        # Should not update volume type extra specs with multiple specs as
+            # body.
         extra_spec = {"spec1": "val2", 'spec2': 'val1'}
         self.client.update_volume_type_extra_specs(self.volume_type['id'],
                                                    extra_spec.keys()[0],
@@ -83,9 +82,8 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_create_nonexistent_type_id(self):
-        """ Should not create volume type extra spec for nonexistent volume
-            type id.
-        """
+        # Should not create volume type extra spec for nonexistent volume
+            # type id.
         extra_specs = {"spec2": "val1"}
         self.client.create_volume_type_extra_specs(str(uuid.uuid4()),
                                                    extra_specs)
@@ -94,7 +92,7 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_none_body(self):
-        """ Should not create volume type extra spec for none POST body."""
+        # Should not create volume type extra spec for none POST body.
         self.client.create_volume_type_extra_specs(self.volume_type['id'],
                                                    None)
 
@@ -102,16 +100,15 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_invalid_body(self):
-        """ Should not create volume type extra spec for invalid POST body."""
+        # Should not create volume type extra spec for invalid POST body.
         self.client.create_volume_type_extra_specs(self.volume_type['id'],
                                                    ['invalid'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_nonexistent_volume_type_id(self):
-        """ Should not delete volume type extra spec for nonexistent
-            type id.
-        """
+        # Should not delete volume type extra spec for nonexistent
+            # type id.
         extra_specs = {"spec1": "val1"}
         self.client.delete_volume_type_extra_specs(str(uuid.uuid4()),
                                                    extra_specs.keys()[0])
@@ -119,13 +116,13 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_list_nonexistent_volume_type_id(self):
-        """ Should not list volume type extra spec for nonexistent type id."""
+        # Should not list volume type extra spec for nonexistent type id.
         self.client.list_volume_types_extra_specs(str(uuid.uuid4()))
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_nonexistent_volume_type_id(self):
-        """ Should not get volume type extra spec for nonexistent type id."""
+        # Should not get volume type extra spec for nonexistent type id.
         extra_specs = {"spec1": "val1"}
         self.client.get_volume_type_extra_specs(str(uuid.uuid4()),
                                                 extra_specs.keys()[0])
@@ -133,9 +130,8 @@ class ExtraSpecsNegativeTestBase():
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_nonexistent_extra_spec_id(self):
-        """ Should not get volume type extra spec for nonexistent extra spec
-            id.
-        """
+        # Should not get volume type extra spec for nonexistent extra spec
+            # id.
         self.client.get_volume_type_extra_specs(self.volume_type['id'],
                                                 str(uuid.uuid4()))
 
