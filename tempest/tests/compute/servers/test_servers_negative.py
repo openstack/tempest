@@ -40,7 +40,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_server_name_blank(self):
-        """Create a server with name parameter empty"""
+        # Create a server with name parameter empty
         try:
                 resp, server = self.create_server_with_extras('',
                                                               self.image_ref,
@@ -52,7 +52,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_personality_file_contents_not_encoded(self):
-        """Use an unencoded file when creating a server with personality"""
+        # Use an unencoded file when creating a server with personality
         file_contents = 'This is a test file.'
         person = [{'path': '/etc/testfile.txt',
                    'contents': file_contents}]
@@ -69,7 +69,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_create_with_invalid_image(self):
-        """Create a server with an unknown image"""
+        # Create a server with an unknown image
         try:
             resp, server = self.create_server_with_extras('fail', -1,
                                                           self.flavor_ref)
@@ -80,7 +80,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_create_with_invalid_flavor(self):
-        """Create a server with an unknown flavor"""
+        # Create a server with an unknown flavor
         try:
             self.create_server_with_extras('fail', self.image_ref, -1)
         except exceptions.BadRequest:
@@ -90,7 +90,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_invalid_access_ip_v4_address(self):
-        """An access IPv4 address must match a valid address pattern"""
+        # An access IPv4 address must match a valid address pattern
         IPv4 = '1.1.1.1.1.1'
         name = rand_name('server')
         try:
@@ -105,7 +105,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_invalid_ip_v6_address(self):
-        """An access IPv6 address must match a valid address pattern"""
+        # An access IPv6 address must match a valid address pattern
         IPv6 = 'notvalid'
         name = rand_name('server')
         try:
@@ -120,7 +120,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_reboot_deleted_server(self):
-        """Reboot a deleted server"""
+        # Reboot a deleted server
         self.name = rand_name('server')
         resp, create_server = self.create_server_with_extras(self.name,
                                                              self.image_ref,
@@ -137,7 +137,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_rebuild_deleted_server(self):
-        """Rebuild a deleted server"""
+        # Rebuild a deleted server
         self.name = rand_name('server')
         resp, create_server = self.create_server_with_extras(self.name,
                                                              self.image_ref,
@@ -155,7 +155,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_create_numeric_server_name(self):
-        """Create a server with a numeric name"""
+        # Create a server with a numeric name
 
         server_name = 12345
         self.assertRaises(exceptions.BadRequest,
@@ -164,7 +164,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_create_server_name_length_exceeds_256(self):
-        """Create a server with name length exceeding 256 characters"""
+        # Create a server with name length exceeding 256 characters
 
         server_name = 'a' * 256
         self.assertRaises(exceptions.BadRequest,
@@ -173,7 +173,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_create_with_invalid_network_uuid(self):
-        """Pass invalid network uuid while creating a server"""
+        # Pass invalid network uuid while creating a server
 
         server_name = rand_name('server')
         networks = [{'fixed_ip': '10.0.1.1', 'uuid':'a-b-c-d-e-f-g-h-i-j'}]
@@ -185,7 +185,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_create_with_non_existant_keypair(self):
-        """Pass a non existant keypair while creating a server"""
+        # Pass a non existant keypair while creating a server
 
         key_name = rand_name('key')
         server_name = rand_name('server')
@@ -197,7 +197,7 @@ class ServersNegativeTest(BaseComputeTest):
     @unittest.skip("Until Bug 1004007 is fixed")
     @attr(type='negative')
     def test_create_server_metadata_exceeds_length_limit(self):
-        """Pass really long metadata while creating a server"""
+        # Pass really long metadata while creating a server
 
         server_name = rand_name('server')
         metadata = {'a': 'b' * 260}
@@ -208,7 +208,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_update_name_of_non_existent_server(self):
-        """Update name of a non-existent server"""
+        # Update name of a non-existent server
 
         server_name = rand_name('server')
         new_name = rand_name('server') + '_updated'
@@ -218,7 +218,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_update_server_set_empty_name(self):
-        """Update name of the server to an empty string"""
+        # Update name of the server to an empty string
 
         server_name = rand_name('server')
         new_name = ''
@@ -228,7 +228,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_update_server_of_another_tenant(self):
-        """Update name of a server that belongs to another tenant"""
+        # Update name of a server that belongs to another tenant
 
         server = self.create_server()
         new_name = server['id'] + '_new'
@@ -238,7 +238,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_update_server_name_length_exceeds_256(self):
-        """Update name of server exceed the name length limit"""
+        # Update name of server exceed the name length limit
 
         server = self.create_server()
         new_name = 'a' * 256
@@ -249,14 +249,14 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_delete_non_existent_server(self):
-        """Delete a non existent server"""
+        # Delete a non existent server
 
         self.assertRaises(exceptions.NotFound, self.client.delete_server,
                           '999erra43')
 
     @attr(type='negative')
     def test_delete_a_server_of_another_tenant(self):
-        """Delete a server that belongs to another tenant"""
+        # Delete a server that belongs to another tenant
         try:
             server = self.create_server()
             self.assertRaises(exceptions.NotFound,
@@ -267,13 +267,13 @@ class ServersNegativeTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_delete_server_pass_negative_id(self):
-        """Pass an invalid string parameter to delete server"""
+        # Pass an invalid string parameter to delete server
 
         self.assertRaises(exceptions.NotFound, self.client.delete_server, -1)
 
     @attr(type='negative')
     def test_delete_server_pass_id_exceeding_length_limit(self):
-        """Pass a server ID that exceeds length limit to delete server"""
+        # Pass a server ID that exceeds length limit to delete server
 
         self.assertRaises(exceptions.NotFound, self.client.delete_server,
                           sys.maxint + 1)

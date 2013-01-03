@@ -63,10 +63,8 @@ class FloatingIPsTestBase(object):
 
     @attr(type='positive')
     def test_allocate_floating_ip(self):
-        """
-        Positive test:Allocation of a new floating IP to a project
-        should be successful
-        """
+        # Positive test:Allocation of a new floating IP to a project
+        # should be successful
         try:
             resp, body = self.client.create_floating_ip()
             self.assertEqual(200, resp.status)
@@ -82,10 +80,8 @@ class FloatingIPsTestBase(object):
 
     @attr(type='positive')
     def test_delete_floating_ip(self):
-        """
-        Positive test:Deletion of valid floating IP from project
-        should be successful
-        """
+        # Positive test:Deletion of valid floating IP from project
+        # should be successful
         #Creating the floating IP that is to be deleted in this method
         resp, floating_ip_body = self.client.create_floating_ip()
         #Storing the details of floating IP before deleting it
@@ -99,10 +95,9 @@ class FloatingIPsTestBase(object):
 
     @attr(type='positive')
     def test_associate_disassociate_floating_ip(self):
-        """
-        Positive test:Associate and disassociate the provided floating IP to a
-        specific server should be successful
-        """
+        # Positive test:Associate and disassociate the provided floating IP
+        # to a specific server should be successful
+
         #Association of floating IP to fixed IP address
         resp, body =\
         self.client.associate_floating_ip_to_server(self.floating_ip,
@@ -131,10 +126,8 @@ class FloatingIPsTestBase(object):
 
     @attr(type='negative')
     def test_associate_nonexistant_floating_ip(self):
-        """
-        Negative test:Association of a non existent floating IP
-        to specific server should fail
-        """
+        # Negative test:Association of a non existent floating IP
+        # to specific server should fail
         #Associating non existent floating IP
         try:
             resp, body = \
@@ -148,9 +141,7 @@ class FloatingIPsTestBase(object):
 
     @attr(type='negative')
     def test_dissociate_nonexistant_floating_ip(self):
-        """
-        Negative test:Dissociation of a non existent floating IP should fail
-        """
+        # Negative test:Dissociation of a non existent floating IP should fail
         #Dissociating non existent floating IP
         try:
             resp, body = \
@@ -164,10 +155,8 @@ class FloatingIPsTestBase(object):
 
     @attr(type='positive')
     def test_associate_already_associated_floating_ip(self):
-        """
-        positive test:Association of an already associated floating IP
-        to specific server should change the association of the Floating IP
-        """
+        # positive test:Association of an already associated floating IP
+        # to specific server should change the association of the Floating IP
         #Create server so as to use for Multiple association
         resp, body = self.servers_client.create_server('floating-server2',
                                                        self.image_ref,
@@ -205,10 +194,8 @@ class FloatingIPsTestBase(object):
 
     @attr(type='negative')
     def test_associate_ip_to_server_without_passing_floating_ip(self):
-        """
-        Negative test:Association of empty floating IP to specific server
-        should raise NotFound exception
-        """
+        # Negative test:Association of empty floating IP to specific server
+        # should raise NotFound exception
         try:
             resp, body =\
             self.client.associate_floating_ip_to_server('',

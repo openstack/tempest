@@ -58,13 +58,13 @@ class ImagesMetadataTest(BaseComputeTest):
         self.assertEqual(resp.status, 200)
 
     def test_list_image_metadata(self):
-        """All metadata key/value pairs for an image should be returned"""
+        # All metadata key/value pairs for an image should be returned
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key1': 'value1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
     def test_set_image_metadata(self):
-        """The metadata for the image should match the new values"""
+        # The metadata for the image should match the new values
         req_metadata = {'meta2': 'value2', 'meta3': 'value3'}
         resp, body = self.client.set_image_metadata(self.image_id,
                                                     req_metadata)
@@ -73,7 +73,7 @@ class ImagesMetadataTest(BaseComputeTest):
         self.assertEqual(req_metadata, resp_metadata)
 
     def test_update_image_metadata(self):
-        """The metadata for the image should match the updated values"""
+        # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key3': 'value3'}
         resp, metadata = self.client.update_image_metadata(self.image_id,
                                                            req_metadata)
@@ -83,15 +83,14 @@ class ImagesMetadataTest(BaseComputeTest):
         self.assertEqual(expected, resp_metadata)
 
     def test_get_image_metadata_item(self):
-        """The value for a specific metadata key should be returned"""
+        # The value for a specific metadata key should be returned
         resp, meta = self.client.get_image_metadata_item(self.image_id,
                                                          'key2')
         self.assertTrue('value2', meta['key2'])
 
     def test_set_image_metadata_item(self):
-        """
-        The value provided for the given meta item should be set for the image
-        """
+        # The value provided for the given meta item should be set for
+        # the image
         meta = {'key1': 'alt'}
         resp, body = self.client.set_image_metadata_item(self.image_id,
                                                          'key1', meta)
@@ -100,7 +99,7 @@ class ImagesMetadataTest(BaseComputeTest):
         self.assertEqual(expected, resp_metadata)
 
     def test_delete_image_metadata_item(self):
-        """The metadata value/key pair should be deleted from the image"""
+        # The metadata value/key pair should be deleted from the image
         resp, body = self.client.delete_image_metadata_item(self.image_id,
                                                             'key1')
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
@@ -109,8 +108,8 @@ class ImagesMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_list_nonexistant_image_metadata(self):
-        """Negative test: List on nonexistant image
-        metadata should not happen"""
+        # Negative test: List on nonexistant image
+        # metadata should not happen
         try:
             resp, resp_metadata = self.client.list_image_metadata(999)
         except exceptions.NotFound:
@@ -121,7 +120,7 @@ class ImagesMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_update_nonexistant_image_metadata(self):
-        """Negative test:An update should not happen for a nonexistant image"""
+        # Negative test:An update should not happen for a nonexistant image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
         try:
             resp, metadata = self.client.update_image_metadata(999, meta)
@@ -132,7 +131,7 @@ class ImagesMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_get_nonexistant_image_metadata_item(self):
-        """Negative test: Get on nonexistant image should not happen"""
+        # Negative test: Get on nonexistant image should not happen
         try:
             resp, metadata = self.client.get_image_metadata_item(999, 'key2')
         except exceptions.NotFound:
@@ -142,7 +141,7 @@ class ImagesMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_set_nonexistant_image_metadata(self):
-        """Negative test: Metadata should not be set to a nonexistant image"""
+        # Negative test: Metadata should not be set to a nonexistant image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
         try:
             resp, meta = self.client.set_image_metadata(999, meta)
@@ -153,8 +152,8 @@ class ImagesMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_set_nonexistant_image_metadata_item(self):
-        """Negative test: Metadata item should not be set to a
-        nonexistant image"""
+        # Negative test: Metadata item should not be set to a
+        # nonexistant image
         meta = {'key1': 'alt'}
         try:
             resp, body = self.client.set_image_metadata_item(999, 'key1', meta)
@@ -166,8 +165,8 @@ class ImagesMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_delete_nonexistant_image_metadata_item(self):
-        """Negative test: Shouldnt be able to delete metadata
-                          item from nonexistant image"""
+        # Negative test: Shouldnt be able to delete metadata
+                          # item from nonexistant image
         try:
             resp, body = self.client.delete_image_metadata_item(999, 'key1')
             resp, metadata = self.client.list_image_metadata(999)

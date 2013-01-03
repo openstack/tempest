@@ -77,15 +77,14 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_get_image_not_existing(self):
-        """Check raises a NotFound"""
+        # Check raises a NotFound
         self.assertRaises(exceptions.NotFound, self.client.get_image,
                           "nonexistingimageid")
 
     @attr(type='positive')
     def test_list_images_filter_by_status(self):
-        """
-        The list of images should contain only images with the provided status
-        """
+        # The list of images should contain only images with the
+        # provided status
         params = {'status': 'ACTIVE'}
         resp, images = self.client.list_images(params)
 
@@ -95,9 +94,8 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_filter_by_name(self):
-        """
-        List of all images should contain the expected images filtered by name
-        """
+        # List of all images should contain the expected images filtered
+        # by name
         params = {'name': self.image1['name']}
         resp, images = self.client.list_images(params)
 
@@ -107,7 +105,7 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_filter_by_server_id(self):
-        """The images should contain images filtered by server id"""
+        # The images should contain images filtered by server id
         params = {'server': self.server1['id']}
         resp, images = self.client.list_images(params)
 
@@ -119,7 +117,7 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_filter_by_server_ref(self):
-        """The list of servers should be filtered by server ref"""
+        # The list of servers should be filtered by server ref
         server_links = self.server2['links']
 
         # Try all server link types
@@ -136,7 +134,7 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_filter_by_type(self):
-        """The list of servers should be filtered by image type"""
+        # The list of servers should be filtered by image type
         params = {'type': 'snapshot'}
         resp, images = self.client.list_images(params)
 
@@ -147,14 +145,14 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_limit_results(self):
-        """Verify only the expected number of results are returned"""
+        # Verify only the expected number of results are returned
         params = {'limit': '1'}
         resp, images = self.client.list_images(params)
         self.assertEqual(1, len(images))
 
     @attr(type='positive')
     def test_list_images_filter_by_changes_since(self):
-        """Verify only updated images are returned in the detailed list"""
+        # Verify only updated images are returned in the detailed list
 
         #Becoming ACTIVE will modify the updated time
         #Filter by the image's created time
@@ -165,10 +163,8 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_status(self):
-        """
-        Detailed list of all images should only contain images
-        with the provided status
-        """
+        # Detailed list of all images should only contain images
+        # with the provided status
         params = {'status': 'ACTIVE'}
         resp, images = self.client.list_images_with_detail(params)
 
@@ -178,10 +174,8 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_name(self):
-        """
-        Detailed list of all images should contain the expected
-        images filtered by name
-        """
+        # Detailed list of all images should contain the expected
+        # images filtered by name
         params = {'name': self.image1['name']}
         resp, images = self.client.list_images_with_detail(params)
 
@@ -191,17 +185,15 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_with_detail_limit_results(self):
-        """
-        Verify only the expected number of results (with full details)
-        are returned
-        """
+        # Verify only the expected number of results (with full details)
+        # are returned
         params = {'limit': '1'}
         resp, images = self.client.list_images_with_detail(params)
         self.assertEqual(1, len(images))
 
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_server_ref(self):
-        """Detailed list of servers should be filtered by server ref"""
+        # Detailed list of servers should be filtered by server ref
         server_links = self.server2['links']
 
         # Try all server link types
@@ -218,7 +210,7 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_type(self):
-        """The detailed list of servers should be filtered by image type"""
+        # The detailed list of servers should be filtered by image type
         params = {'type': 'snapshot'}
         resp, images = self.client.list_images_with_detail(params)
         resp, image4 = self.client.get_image(self.image_ref)
@@ -230,7 +222,7 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='positive')
     def test_list_images_with_detail_filter_by_changes_since(self):
-        """Verify an update image is returned"""
+        # Verify an update image is returned
 
         #Becoming ACTIVE will modify the updated time
         #Filter by the image's created time
@@ -240,7 +232,7 @@ class ListImageFiltersTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_get_nonexistant_image(self):
-        """Negative test: GET on non existant image should fail"""
+        # Negative test: GET on non existant image should fail
         try:
             resp, image = self.client.get_image(999)
         except Exception:

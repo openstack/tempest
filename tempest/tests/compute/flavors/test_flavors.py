@@ -24,7 +24,7 @@ class FlavorsTestBase(object):
 
     @attr(type='smoke')
     def test_list_flavors(self):
-        """List of all flavors should contain the expected flavor"""
+        # List of all flavors should contain the expected flavor
         resp, flavors = self.client.list_flavors()
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         flavor_min_detail = {'id': flavor['id'], 'links': flavor['links'],
@@ -33,40 +33,40 @@ class FlavorsTestBase(object):
 
     @attr(type='smoke')
     def test_list_flavors_with_detail(self):
-        """Detailed list of all flavors should contain the expected flavor"""
+        # Detailed list of all flavors should contain the expected flavor
         resp, flavors = self.client.list_flavors_with_detail()
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         self.assertTrue(flavor in flavors)
 
     @attr(type='smoke')
     def test_get_flavor(self):
-        """The expected flavor details should be returned"""
+        # The expected flavor details should be returned
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         self.assertEqual(self.flavor_ref, int(flavor['id']))
 
     @attr(type='negative')
     def test_get_non_existant_flavor(self):
-        """flavor details are not returned for non existant flavors"""
+        # flavor details are not returned for non existant flavors
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
                           999)
 
     @attr(type='positive', bug='lp912922')
     def test_list_flavors_limit_results(self):
-        """Only the expected number of flavors should be returned"""
+        # Only the expected number of flavors should be returned
         params = {'limit': 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertEqual(1, len(flavors))
 
     @attr(type='positive', bug='lp912922')
     def test_list_flavors_detailed_limit_results(self):
-        """Only the expected number of flavors (detailed) should be returned"""
+        # Only the expected number of flavors (detailed) should be returned
         params = {'limit': 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertEqual(1, len(flavors))
 
     @attr(type='positive')
     def test_list_flavors_using_marker(self):
-        """The list of flavors should start from the provided marker"""
+        # The list of flavors should start from the provided marker
         resp, flavors = self.client.list_flavors()
         flavor_id = flavors[0]['id']
 
@@ -77,7 +77,7 @@ class FlavorsTestBase(object):
 
     @attr(type='positive')
     def test_list_flavors_detailed_using_marker(self):
-        """The list of flavors should start from the provided marker"""
+        # The list of flavors should start from the provided marker
         resp, flavors = self.client.list_flavors_with_detail()
         flavor_id = flavors[0]['id']
 
@@ -88,7 +88,7 @@ class FlavorsTestBase(object):
 
     @attr(type='positive')
     def test_list_flavors_detailed_filter_by_min_disk(self):
-        """The detailed list of flavors should be filtered by disk space"""
+        # The detailed list of flavors should be filtered by disk space
         resp, flavors = self.client.list_flavors_with_detail()
         flavors = sorted(flavors, key=lambda k: k['disk'])
         flavor_id = flavors[0]['id']
@@ -99,7 +99,7 @@ class FlavorsTestBase(object):
 
     @attr(type='positive')
     def test_list_flavors_detailed_filter_by_min_ram(self):
-        """The detailed list of flavors should be filtered by RAM"""
+        # The detailed list of flavors should be filtered by RAM
         resp, flavors = self.client.list_flavors_with_detail()
         flavors = sorted(flavors, key=lambda k: k['ram'])
         flavor_id = flavors[0]['id']
@@ -110,7 +110,7 @@ class FlavorsTestBase(object):
 
     @attr(type='positive')
     def test_list_flavors_filter_by_min_disk(self):
-        """The list of flavors should be filtered by disk space"""
+        # The list of flavors should be filtered by disk space
         resp, flavors = self.client.list_flavors_with_detail()
         flavors = sorted(flavors, key=lambda k: k['disk'])
         flavor_id = flavors[0]['id']
@@ -121,7 +121,7 @@ class FlavorsTestBase(object):
 
     @attr(type='positive')
     def test_list_flavors_filter_by_min_ram(self):
-        """The list of flavors should be filtered by RAM"""
+        # The list of flavors should be filtered by RAM
         resp, flavors = self.client.list_flavors_with_detail()
         flavors = sorted(flavors, key=lambda k: k['ram'])
         flavor_id = flavors[0]['id']
@@ -132,7 +132,7 @@ class FlavorsTestBase(object):
 
     @attr(type='negative')
     def test_get_flavor_details_for_invalid_flavor_id(self):
-        """Ensure 404 returned for non-existant flavor ID"""
+        # Ensure 404 returned for non-existant flavor ID
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
                           9999)
 

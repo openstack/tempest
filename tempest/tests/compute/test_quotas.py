@@ -33,7 +33,7 @@ class QuotasTest(BaseComputeTest):
 
     @attr(type='smoke')
     def test_get_default_quotas(self):
-        """User can get the default quota set for it's tenant"""
+        # User can get the default quota set for it's tenant
         expected_quota_set = {'injected_file_content_bytes': 10240,
                               'metadata_items': 128, 'injected_files': 5,
                               'ram': 51200, 'floating_ips': 10,

@@ -97,7 +97,7 @@ class ListServersNegativeTest(BaseComputeTest):
         cls.deleted_fixtures.append(srv)
 
     def test_list_servers_with_a_deleted_server(self):
-        """Verify deleted servers do not show by default in list servers"""
+        # Verify deleted servers do not show by default in list servers
         # List servers and verify server not returned
         resp, body = self.client.list_servers()
         servers = body['servers']
@@ -108,7 +108,7 @@ class ListServersNegativeTest(BaseComputeTest):
         self.assertEqual([], actual)
 
     def test_list_servers_by_non_existing_image(self):
-        """Listing servers for a non existing image returns empty list"""
+        # Listing servers for a non existing image returns empty list
         non_existing_image = '1234abcd-zzz0-aaa9-ppp3-0987654abcde'
         resp, body = self.client.list_servers(dict(image=non_existing_image))
         servers = body['servers']
@@ -116,7 +116,7 @@ class ListServersNegativeTest(BaseComputeTest):
         self.assertEqual([], servers)
 
     def test_list_servers_by_non_existing_flavor(self):
-        """Listing servers by non existing flavor returns empty list"""
+        # Listing servers by non existing flavor returns empty list
         non_existing_flavor = 1234
         resp, body = self.client.list_servers(dict(flavor=non_existing_flavor))
         servers = body['servers']
@@ -124,7 +124,7 @@ class ListServersNegativeTest(BaseComputeTest):
         self.assertEqual([], servers)
 
     def test_list_servers_by_non_existing_server_name(self):
-        """Listing servers for a non existent server name returns empty list"""
+        # Listing servers for a non existent server name returns empty list
         non_existing_name = 'junk_server_1234'
         resp, body = self.client.list_servers(dict(name=non_existing_name))
         servers = body['servers']
@@ -133,7 +133,7 @@ class ListServersNegativeTest(BaseComputeTest):
 
     @unittest.skip("Skip until bug 1061712 is resolved")
     def test_list_servers_status_non_existing(self):
-        """Return an empty list when invalid status is specified"""
+        # Return an empty list when invalid status is specified
         non_existing_status = 'BALONEY'
         resp, body = self.client.list_servers(dict(status=non_existing_status))
         servers = body['servers']
@@ -141,29 +141,29 @@ class ListServersNegativeTest(BaseComputeTest):
         self.assertEqual([], servers)
 
     def test_list_servers_by_limits(self):
-        """List servers by specifying limits"""
+        # List servers by specifying limits
         resp, body = self.client.list_servers({'limit': 1})
         self.assertEqual('200', resp['status'])
         self.assertEqual(1, len(body['servers']))
 
     def test_list_servers_by_limits_greater_than_actual_count(self):
-        """List servers by specifying a greater value for limit"""
+        # List servers by specifying a greater value for limit
         resp, body = self.client.list_servers({'limit': 100})
         self.assertEqual('200', resp['status'])
         self.assertEqual(len(self.existing_fixtures), len(body['servers']))
 
     def test_list_servers_by_limits_pass_string(self):
-        """Return an error if a string value is passed for limit"""
+        # Return an error if a string value is passed for limit
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
                           {'limit': 'testing'})
 
     def test_list_servers_by_limits_pass_negative_value(self):
-        """Return an error if a negative value for limit is passed"""
+        # Return an error if a negative value for limit is passed
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
                           {'limit': -1})
 
     def test_list_servers_by_changes_since(self):
-        """Servers are listed by specifying changes-since date"""
+        # Servers are listed by specifying changes-since date
         changes_since = {'changes-since': '2011-01-01T12:34:00Z'}
         resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
@@ -173,19 +173,19 @@ class ListServersNegativeTest(BaseComputeTest):
         self.assertEqual(num_expected, len(body['servers']))
 
     def test_list_servers_by_changes_since_invalid_date(self):
-        """Return an error when invalid date format is passed"""
+        # Return an error when invalid date format is passed
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
                           {'changes-since': '2011/01/01'})
 
     def test_list_servers_by_changes_since_future_date(self):
-        """Return an empty list when a date in the future is passed"""
+        # Return an empty list when a date in the future is passed
         changes_since = {'changes-since': '2051-01-01T12:34:00Z'}
         resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
         self.assertEqual(0, len(body['servers']))
 
     def test_list_servers_detail_server_is_deleted(self):
-        """Server details are not listed for a deleted server"""
+        # Server details are not listed for a deleted server
         deleted_ids = [s['id'] for s in self.deleted_fixtures]
         resp, body = self.client.list_servers_with_detail()
         servers = body['servers']

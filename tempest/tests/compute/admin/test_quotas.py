@@ -66,7 +66,7 @@ class QuotasTest(BaseComputeTest):
 
     @attr(type='smoke')
     def test_get_default_quotas(self):
-        """Admin can get the default resource quota set for a tenant"""
+        # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set.copy()
         expected_quota_set['id'] = self.demo_tenant_id
         try:
@@ -77,7 +77,7 @@ class QuotasTest(BaseComputeTest):
             self.fail("Admin could not get the default quota set for a tenant")
 
     def test_update_all_quota_resources_for_tenant(self):
-        """Admin can update all the resource quota limits for a tenant"""
+        # Admin can update all the resource quota limits for a tenant
         new_quota_set = {'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,
                          'ram': 10240, 'floating_ips': 20, 'key_pairs': 200,
@@ -102,7 +102,7 @@ class QuotasTest(BaseComputeTest):
                              "defaults")
 
     def test_get_updated_quotas(self):
-        """Verify that GET shows the updated quota set"""
+        # Verify that GET shows the updated quota set
         self.adm_client.update_quota_set(self.demo_tenant_id,
                                          ram='5120')
         try:
@@ -120,7 +120,7 @@ class QuotasTest(BaseComputeTest):
                              "defaults")
 
     def test_create_server_when_cpu_quota_is_full(self):
-        """Disallow server creation when tenant's vcpu quota is full"""
+        # Disallow server creation when tenant's vcpu quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_vcpu_quota = quota_set['cores']
         vcpu_quota = 0  # Set the quota to zero to conserve resources
@@ -138,7 +138,7 @@ class QuotasTest(BaseComputeTest):
                                              cores=default_vcpu_quota)
 
     def test_create_server_when_memory_quota_is_full(self):
-        """Disallow server creation when tenant's memory quota is full"""
+        # Disallow server creation when tenant's memory quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_mem_quota = quota_set['ram']
         mem_quota = 0  # Set the quota to zero to conserve resources

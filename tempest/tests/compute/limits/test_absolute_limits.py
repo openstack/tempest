@@ -28,9 +28,7 @@ class AbsoluteLimitsTest(object):
 
     @unittest.skip("Skipped until the Bug #1025294 is resolved")
     def test_absLimits_get(self):
-        """
-        To check if all limits are present in the response
-        """
+        # To check if all limits are present in the response
         resp, absolute_limits = self.client.get_absolute_limits()
         expected_elements = ['maxImageMeta', 'maxPersonality',
                              'maxPersonalitySize',

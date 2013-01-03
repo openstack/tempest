@@ -65,14 +65,14 @@ class ServersTest(object):
 
     @attr(type='smoke')
     def test_create_server_response(self):
-        """Check that the required fields are returned with values"""
+        # Check that the required fields are returned with values
         self.assertEqual(202, self.resp.status)
         self.assertTrue(self.server_initial['id'] is not None)
         self.assertTrue(self.server_initial['adminPass'] is not None)
 
     @attr(type='smoke')
     def test_verify_server_details(self):
-        """Verify the specified server attributes are set correctly"""
+        # Verify the specified server attributes are set correctly
         self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
         self.assertIn(self.server['accessIPv6'],
                       [self.accessIPv6, self.accessIPv6canon])
@@ -83,7 +83,7 @@ class ServersTest(object):
 
     @attr(type='smoke')
     def test_list_servers(self):
-        """The created server should be in the list of all servers"""
+        # The created server should be in the list of all servers
         resp, body = self.client.list_servers()
         servers = body['servers']
         found = any([i for i in servers if i['id'] == self.server['id']])
@@ -91,7 +91,7 @@ class ServersTest(object):
 
     @attr(type='smoke')
     def test_list_servers_with_detail(self):
-        """The created server should be in the detailed list of all servers"""
+        # The created server should be in the detailed list of all servers
         resp, body = self.client.list_servers_with_detail()
         servers = body['servers']
         found = any([i for i in servers if i['id'] == self.server['id']])
@@ -100,17 +100,15 @@ class ServersTest(object):
     @attr(type='positive')
     @unittest.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     def test_can_log_into_created_server(self):
-        """Check that the user can authenticate with the generated password"""
+        # Check that the user can authenticate with the generated password
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertTrue(linux_client.can_authenticate())
 
     @attr(type='positive')
     @unittest.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     def test_verify_created_server_vcpus(self):
-        """
-        Verify that the number of vcpus reported by the instance matches
-        the amount stated by the flavor
-        """
+        # Verify that the number of vcpus reported by the instance matches
+        # the amount stated by the flavor
         resp, flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
@@ -118,7 +116,7 @@ class ServersTest(object):
     @attr(type='positive')
     @unittest.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     def test_host_name_is_same_as_server_name(self):
-        """Verify the instance host name is the same as the server name"""
+        # Verify the instance host name is the same as the server name
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 

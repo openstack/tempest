@@ -46,7 +46,7 @@ class ImagesTestBase(object):
     @unittest.skipUnless(compute.CREATE_IMAGE_ENABLED,
                          'Environment unable to create images.')
     def test_create_delete_image(self):
-        """An image for the provided server should be created"""
+        # An image for the provided server should be created
         server_name = rand_name('server')
         resp, server = self.servers_client.create_server(server_name,
                                                          self.image_ref,
@@ -77,7 +77,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_create_image_from_deleted_server(self):
-        """An image should not be created if the server instance is removed """
+        # An image should not be created if the server instance is removed
         server_name = rand_name('server')
         resp, server = self.servers_client.create_server(server_name,
                                                          self.image_ref,
@@ -105,7 +105,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_create_image_from_invalid_server(self):
-        """An image should not be created with invalid server id"""
+        # An image should not be created with invalid server id
         try:
             # Create a new image with invalid server id
             name = rand_name('image')
@@ -127,7 +127,7 @@ class ImagesTestBase(object):
     @attr(type='negative')
     @unittest.skipUnless(compute.MULTI_USER, 'Second user not configured')
     def test_create_image_for_server_in_another_tenant(self):
-        """Creating image of another tenant's server should be return error"""
+        # Creating image of another tenant's server should be return error
         server = self.create_server()
 
         snapshot_name = rand_name('test-snap-')
@@ -136,7 +136,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_create_image_when_server_is_building(self):
-        """Return error when creating an image of a server that is building"""
+        # Return error when creating an image of a server that is building
         server_name = rand_name('test-vm-')
         resp, server = self.servers_client.create_server(server_name,
                                                          self.image_ref,
@@ -149,7 +149,7 @@ class ImagesTestBase(object):
     @unittest.skip("Until Bug 1039739 is fixed")
     @attr(type='negative')
     def test_create_image_when_server_is_rebooting(self):
-        """Return error when creating an image of server that is rebooting"""
+        # Return error when creating an image of server that is rebooting
         server = self.create_server()
         self.servers_client.reboot(server['id'], 'HARD')
 
@@ -159,7 +159,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_create_image_when_server_is_terminating(self):
-        """Return an error when creating image of server that is terminating"""
+        # Return an error when creating image of server that is terminating
         server = self.create_server()
         self.servers_client.delete_server(server['id'])
 
@@ -169,7 +169,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_create_second_image_when_first_image_is_being_saved(self):
-        """Disallow creating another image when first image is being saved"""
+        # Disallow creating another image when first image is being saved
         server = self.create_server()
 
         try:
@@ -192,7 +192,7 @@ class ImagesTestBase(object):
     @attr(type='negative')
     @unittest.skip("Until Bug 1004564 is fixed")
     def test_create_image_specify_name_over_256_chars(self):
-        """Return an error if snapshot name over 256 characters is passed"""
+        # Return an error if snapshot name over 256 characters is passed
         server = self.create_server()
 
         try:
@@ -205,7 +205,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_create_image_specify_uuid_35_characters_or_less(self):
-        """Return an error if Image ID passed is 35 characters or less"""
+        # Return an error if Image ID passed is 35 characters or less
         try:
             snapshot_name = rand_name('test-snap-')
             test_uuid = ('a' * 35)
@@ -217,7 +217,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_create_image_specify_uuid_37_characters_or_more(self):
-        """Return an error if Image ID passed is 37 characters or more"""
+        # Return an error if Image ID passed is 37 characters or more
         try:
             snapshot_name = rand_name('test-snap-')
             test_uuid = ('a' * 37)
@@ -230,7 +230,7 @@ class ImagesTestBase(object):
     @attr(type='negative')
     @unittest.skip("Until Bug 1006725 is fixed")
     def test_create_image_specify_multibyte_character_image_name(self):
-        """Return an error if the image name has multi-byte characters"""
+        # Return an error if the image name has multi-byte characters
         server = self.create_server()
 
         try:
@@ -245,7 +245,7 @@ class ImagesTestBase(object):
     @attr(type='negative')
     @unittest.skip("Until Bug 1005423 is fixed")
     def test_create_image_specify_invalid_metadata(self):
-        """Return an error when creating image with invalid metadata"""
+        # Return an error when creating image with invalid metadata
         server = self.create_server()
 
         try:
@@ -260,7 +260,7 @@ class ImagesTestBase(object):
     @attr(type='negative')
     @unittest.skip("Until Bug 1005423 is fixed")
     def test_create_image_specify_metadata_over_limits(self):
-        """Return an error when creating image with meta data over 256 chars"""
+        # Return an error when creating image with meta data over 256 chars
         server = self.create_server()
 
         try:
@@ -274,7 +274,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_delete_image_with_invalid_image_id(self):
-        """An image should not be deleted with invalid image id"""
+        # An image should not be deleted with invalid image id
         try:
             # Delete an image with invalid image id
             resp, _ = self.client.delete_image('!@$%^&*()')
@@ -288,7 +288,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_delete_non_existent_image(self):
-        """Return an error while trying to delete a non-existent image"""
+        # Return an error while trying to delete a non-existent image
 
         non_existent_image_id = '11a22b9-12a9-5555-cc11-00ab112223fa'
         self.assertRaises(exceptions.NotFound, self.client.delete_image,
@@ -296,7 +296,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_delete_image_blank_id(self):
-        """Return an error while trying to delete an image with blank Id"""
+        # Return an error while trying to delete an image with blank Id
 
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
@@ -306,7 +306,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_delete_image_non_hex_string_id(self):
-        """Return an error while trying to delete an image with non hex id"""
+        # Return an error while trying to delete an image with non hex id
 
         image_id = '11a22b9-120q-5555-cc11-00ab112223gj'
         try:
@@ -317,7 +317,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_delete_image_negative_image_id(self):
-        """Return an error while trying to delete an image with negative id"""
+        # Return an error while trying to delete an image with negative id
 
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
@@ -327,7 +327,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_delete_image_id_is_over_35_character_limit(self):
-        """Return an error while trying to delete image with id over limit"""
+        # Return an error while trying to delete image with id over limit
 
         try:
             self.assertRaises(exceptions.NotFound, self.client.delete_image,
@@ -339,7 +339,7 @@ class ImagesTestBase(object):
     @attr(type='negative')
     @unittest.skipUnless(compute.MULTI_USER, 'Second user not configured')
     def test_delete_image_of_another_tenant(self):
-        """Return an error while trying to delete another tenant's image"""
+        # Return an error while trying to delete another tenant's image
 
         server = self.create_server()
 
@@ -356,7 +356,7 @@ class ImagesTestBase(object):
 
     @attr(type='negative')
     def test_delete_image_that_is_not_yet_active(self):
-        """Return an error while trying to delete an active that is creating"""
+        # Return an error while trying to delete an active that is creating
 
         server = self.create_server()
 

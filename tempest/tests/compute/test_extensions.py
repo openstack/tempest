@@ -24,7 +24,7 @@ class ExtensionsTestBase(object):
 
     @attr(type='positive')
     def test_list_extensions(self):
-        """List of all extensions"""
+        # List of all extensions
         resp, extensions = self.client.list_extensions()
         self.assertTrue("extensions" in extensions)
         self.assertEqual(200, resp.status)

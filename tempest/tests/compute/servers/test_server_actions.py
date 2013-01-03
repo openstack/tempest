@@ -50,7 +50,7 @@ class ServerActionsTestBase(object):
     @unittest.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
                          'Change password not available.')
     def test_change_server_password(self):
-        """The server's password should be set to the provided password"""
+        # The server's password should be set to the provided password
         new_password = 'Newpass1234'
         resp, body = self.client.change_password(self.server_id, new_password)
         self.assertEqual(202, resp.status)
@@ -64,7 +64,7 @@ class ServerActionsTestBase(object):
 
     @attr(type='smoke')
     def test_reboot_server_hard(self):
-        """ The server should be power cycled """
+        # The server should be power cycled
         if self.run_ssh:
             # Get the time the server was last rebooted,
             # waiting for one minute as who doesn't have seconds precision
@@ -86,7 +86,7 @@ class ServerActionsTestBase(object):
     @attr(type='smoke')
     @unittest.skip('Until bug 1014647 is dealt with.')
     def test_reboot_server_soft(self):
-        """The server should be signaled to reboot gracefully"""
+        # The server should be signaled to reboot gracefully
         if self.run_ssh:
             # Get the time the server was last rebooted,
             # waiting for one minute as who doesn't have seconds precision
@@ -107,7 +107,7 @@ class ServerActionsTestBase(object):
 
     @attr(type='smoke')
     def test_rebuild_server(self):
-        """ The server should be rebuilt using the provided image and data """
+        # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
         new_name = rand_name('server')
         file_contents = 'Test server rebuild.'
@@ -141,10 +141,8 @@ class ServerActionsTestBase(object):
     @attr(type='smoke')
     @unittest.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_confirm(self):
-        """
-        The server's RAM and disk space should be modified to that of
-        the provided flavor
-        """
+        # The server's RAM and disk space should be modified to that of
+        # the provided flavor
 
         resp, server = self.client.resize(self.server_id, self.flavor_ref_alt)
         self.assertEqual(202, resp.status)
@@ -159,10 +157,8 @@ class ServerActionsTestBase(object):
     @attr(type='positive')
     @unittest.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_revert(self):
-        """
-        The server's RAM and disk space should return to its original
-        values after a resize is reverted
-        """
+        # The server's RAM and disk space should return to its original
+        # values after a resize is reverted
 
         resp, server = self.client.resize(self.server_id, self.flavor_ref_alt)
         self.assertEqual(202, resp.status)
@@ -186,18 +182,14 @@ class ServerActionsTestBase(object):
 
     @attr(type='negative')
     def test_reboot_nonexistent_server_soft(self):
-        """
-        Negative Test: The server reboot on non existent server should return
-        an error
-        """
+        # Negative Test: The server reboot on non existent server should return
+        # an error
         self.assertRaises(exceptions.NotFound, self.client.reboot, 999, 'SOFT')
 
     @attr(type='negative')
     def test_rebuild_nonexistent_server(self):
-        """
-        Negative test: The server rebuild for a non existing server should not
-        be allowed
-        """
+        # Negative test: The server rebuild for a non existing server
+        # should not be allowed
         meta = {'rebuild': 'server'}
         new_name = rand_name('server')
         file_contents = 'Test server rebuild.'

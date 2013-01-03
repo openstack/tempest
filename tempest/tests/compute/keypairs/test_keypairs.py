@@ -28,7 +28,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='positive')
     def test_keypairs_create_list_delete(self):
-        """Keypairs created should be available in the response list"""
+        # Keypairs created should be available in the response list
         #Create 3 keypairs
         key_list = list()
         for i in range(3):
@@ -62,7 +62,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='positive')
     def test_keypair_create_delete(self):
-        """Keypair should be created, verified and deleted"""
+        # Keypair should be created, verified and deleted
         k_name = rand_name('keypair-')
         resp, keypair = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
@@ -79,7 +79,7 @@ class KeyPairsTestBase(object):
     @attr(type='positive')
     @unittest.skip("Skipped until the Bug #980688 is resolved")
     def test_get_keypair_detail(self):
-        """Keypair should be created, Got details by name and deleted"""
+        # Keypair should be created, Got details by name and deleted
         k_name = rand_name('keypair-')
         resp, keypair = self.client.create_keypair(k_name)
         try:
@@ -102,7 +102,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='positive')
     def test_keypair_create_with_pub_key(self):
-        """Keypair should be created with a given public key"""
+        # Keypair should be created with a given public key
         k_name = rand_name('keypair-')
         pub_key = ("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCs"
                    "Ne3/1ILNCqFyfYWDeTKLD6jEXC2OQHLmietMWW+/vd"
@@ -126,7 +126,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='negative')
     def test_keypair_create_with_invalid_pub_key(self):
-        """Keypair should not be created with a non RSA public key"""
+        # Keypair should not be created with a non RSA public key
         k_name = rand_name('keypair-')
         pub_key = "ssh-rsa JUNK nova@ubuntu"
         try:
@@ -139,7 +139,7 @@ class KeyPairsTestBase(object):
     @attr(type='negative')
     @unittest.skip("Skipped until the Bug #1086980 is resolved")
     def test_keypair_delete_nonexistant_key(self):
-        """Non-existant key deletion should throw a proper error"""
+        # Non-existant key deletion should throw a proper error
         k_name = rand_name("keypair-non-existant-")
         try:
             resp, _ = self.client.delete_keypair(k_name)
@@ -150,7 +150,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='negative')
     def test_create_keypair_with_empty_public_key(self):
-        """Keypair should not be created with an empty public key"""
+        # Keypair should not be created with an empty public key
         k_name = rand_name("keypair-")
         pub_key = ' '
         try:
@@ -162,7 +162,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='negative')
     def test_create_keypair_when_public_key_bits_exceeds_maximum(self):
-        """Keypair should not be created when public key bits are too long"""
+        # Keypair should not be created when public key bits are too long
         k_name = rand_name("keypair-")
         pub_key = 'ssh-rsa ' + 'A' * 2048 + ' openstack@ubuntu'
         try:
@@ -174,7 +174,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='negative')
     def test_create_keypair_with_duplicate_name(self):
-        """Keypairs with duplicate names should not be created"""
+        # Keypairs with duplicate names should not be created
         k_name = rand_name('keypair-')
         resp, _ = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
@@ -191,7 +191,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='negative')
     def test_create_keypair_with_empty_name_string(self):
-        """Keypairs with name being an empty string should not be created"""
+        # Keypairs with name being an empty string should not be created
         try:
             resp, _ = self.client.create_keypair('')
         except exceptions.BadRequest:
@@ -201,7 +201,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='negative')
     def test_create_keypair_with_long_keynames(self):
-        """Keypairs with name longer than 255 chars should not be created"""
+        # Keypairs with name longer than 255 chars should not be created
         k_name = 'keypair-'.ljust(260, '0')
         try:
             resp, _ = self.client.create_keypair(k_name)
@@ -212,7 +212,7 @@ class KeyPairsTestBase(object):
 
     @attr(type='negative')
     def test_create_keypair_invalid_name(self):
-        """Keypairs with name being an invalid name should not be created"""
+        # Keypairs with name being an invalid name should not be created
         k_name = 'key_/.\@:'
         try:
             resp, _ = self.client.create_keypair(k_name)

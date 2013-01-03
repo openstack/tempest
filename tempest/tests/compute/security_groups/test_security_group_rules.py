@@ -30,10 +30,8 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='positive')
     def test_security_group_rules_create(self):
-        """
-        Positive test: Creation of Security Group rule
-        should be successfull
-        """
+        # Positive test: Creation of Security Group rule
+        # should be successfull
         try:
             #Creating a Security Group to add rules to it
             s_name = rand_name('securitygroup-')
@@ -108,10 +106,8 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='positive')
     def test_security_group_rules_create_delete(self):
-        """
-        Positive test: Deletion of Security Group rule
-        should be successfull
-        """
+        # Positive test: Deletion of Security Group rule
+        # should be successfull
         try:
             #Creating a Security Group to add rule to it
             s_name = rand_name('securitygroup-')
@@ -137,10 +133,8 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_id(self):
-        """
-        Negative test: Creation of Security Group rule should FAIL
-        with invalid Parent group id
-        """
+        # Negative test: Creation of Security Group rule should FAIL
+        # with invalid Parent group id
         #Adding rules to the invalid Security Group id
         parent_group_id = rand_name('999')
         ip_protocol = 'tcp'
@@ -159,10 +153,8 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_ip_protocol(self):
-        """
-        Negative test: Creation of Security Group rule should FAIL
-        with invalid ip_protocol
-        """
+        # Negative test: Creation of Security Group rule should FAIL
+        # with invalid ip_protocol
         #Creating a Security Group to add rule to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
@@ -188,10 +180,8 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_from_port(self):
-        """
-        Negative test: Creation of Security Group rule should FAIL
-        with invalid from_port
-        """
+        # Negative test: Creation of Security Group rule should FAIL
+        # with invalid from_port
         #Creating a Security Group to add rule to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
@@ -217,10 +207,8 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_to_port(self):
-        """
-        Negative test: Creation of Security Group rule should FAIL
-        with invalid from_port
-        """
+        # Negative test: Creation of Security Group rule should FAIL
+        # with invalid from_port
         #Creating a Security Group to add rule to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
@@ -246,10 +234,8 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='negative')
     def test_security_group_rules_delete_with_invalid_id(self):
-        """
-        Negative test: Deletion of Security Group rule should be FAIL
-        with invalid rule id
-        """
+        # Negative test: Deletion of Security Group rule should be FAIL
+        # with invalid rule id
         try:
             self.client.delete_security_group_rule(rand_name('999'))
         except exceptions.NotFound:

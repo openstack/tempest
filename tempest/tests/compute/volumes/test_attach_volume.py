@@ -70,10 +70,8 @@ class AttachVolumeTest(object):
     @attr(type='positive')
     @unittest.skipIf(not run_ssh, 'SSH required for this test')
     def test_attach_detach_volume(self):
-        """
-        Stop and Start a server with an attached volume, ensuring that
-        the volume remains attached.
-        """
+        # Stop and Start a server with an attached volume, ensuring that
+        # the volume remains attached.
         server, volume = self._create_and_attach()
 
         attached = True

@@ -47,8 +47,8 @@ class FlavorsAdminTestBase(object):
 
     @attr(type='positive')
     def test_create_flavor(self):
-        """Create a flavor and ensure it is listed
-        This operation requires the user to have 'admin' role"""
+        # Create a flavor and ensure it is listed
+        # This operation requires the user to have 'admin' role
         #Create the flavor
         resp, flavor = self.client.create_flavor(self.flavor_name,
                                                  self.ram, self.vcpus,
@@ -77,8 +77,8 @@ class FlavorsAdminTestBase(object):
 
     @attr(type='positive')
     def test_create_flavor_verify_entry_in_list_details(self):
-        """Create a flavor and ensure it's details are listed
-        This operation requires the user to have 'admin' role"""
+        # Create a flavor and ensure it's details are listed
+        # This operation requires the user to have 'admin' role
         #Create the flavor
         resp, flavor = self.client.create_flavor(self.flavor_name,
                                                  self.ram, self.vcpus,
@@ -101,7 +101,7 @@ class FlavorsAdminTestBase(object):
 
     @attr(type='negative')
     def test_get_flavor_details_for_deleted_flavor(self):
-        """Delete a flavor and ensure it is not listed"""
+        # Delete a flavor and ensure it is not listed
         # Create a test flavor
         resp, flavor = self.client.create_flavor(self.flavor_name,
                                                  self.ram,

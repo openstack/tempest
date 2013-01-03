@@ -30,7 +30,7 @@ class SecurityGroupsTest(object):
 
     @attr(type='positive')
     def test_security_groups_create_list_delete(self):
-        """Positive test:Should return the list of Security Groups"""
+        # Positive test:Should return the list of Security Groups
         try:
             #Create 3 Security Groups
             security_group_list = list()
@@ -61,7 +61,7 @@ class SecurityGroupsTest(object):
 
     @attr(type='positive')
     def test_security_group_create_delete(self):
-        """Security Group should be created, verified and deleted"""
+        # Security Group should be created, verified and deleted
         try:
             s_name = rand_name('securitygroup-')
             s_description = rand_name('description-')
@@ -83,7 +83,7 @@ class SecurityGroupsTest(object):
 
     @attr(type='positive')
     def test_security_group_create_get_delete(self):
-        """Security Group should be created, fetched and deleted"""
+        # Security Group should be created, fetched and deleted
         try:
             s_name = rand_name('securitygroup-')
             s_description = rand_name('description-')
@@ -104,10 +104,8 @@ class SecurityGroupsTest(object):
 
     @attr(type='negative')
     def test_security_group_get_nonexistant_group(self):
-        """
-        Negative test:Should not be able to GET the details
-        of nonexistant Security Group
-        """
+        # Negative test:Should not be able to GET the details
+        # of nonexistant Security Group
         security_group_id = []
         resp, body = self.client.list_security_groups()
         for i in range(len(body)):
@@ -128,10 +126,8 @@ class SecurityGroupsTest(object):
 
     @attr(type='negative')
     def test_security_group_create_with_invalid_group_name(self):
-        """
-        Negative test: Security Group should not be created with group name as
-        an empty string/with white spaces/chars more than 255
-        """
+        # Negative test: Security Group should not be created with group name
+        # as an empty string/with white spaces/chars more than 255
         s_description = rand_name('description-')
         #Create Security Group with empty string as group name
         try:
@@ -161,10 +157,8 @@ class SecurityGroupsTest(object):
 
     @attr(type='negative')
     def test_security_group_create_with_invalid_group_description(self):
-        """
-        Negative test:Security Group should not be created with description as
-        an empty string/with white spaces/chars more than 255
-        """
+        # Negative test:Security Group should not be created with description
+        # as an empty string/with white spaces/chars more than 255
         s_name = rand_name('securitygroup-')
         #Create Security Group with empty string as description
         try:
@@ -194,10 +188,8 @@ class SecurityGroupsTest(object):
 
     @attr(type='negative')
     def test_security_group_create_with_duplicate_name(self):
-        """
-        Negative test:Security Group with duplicate name should not
-        be created
-        """
+        # Negative test:Security Group with duplicate name should not
+        # be created
         try:
             s_name = rand_name('securitygroup-')
             s_description = rand_name('description-')
@@ -220,9 +212,7 @@ class SecurityGroupsTest(object):
 
     @attr(type='negative')
     def test_delete_nonexistant_security_group(self):
-        """
-        Negative test:Deletion of a nonexistant Security Group should Fail
-        """
+        # Negative test:Deletion of a nonexistant Security Group should Fail
         security_group_id = []
         resp, body = self.client.list_security_groups()
         for i in range(len(body)):
@@ -242,10 +232,8 @@ class SecurityGroupsTest(object):
 
     @attr(type='negative')
     def test_delete_security_group_without_passing_id(self):
-        """
-        Negative test:Deletion of a Security Group with out passing ID
-        should Fail
-        """
+        # Negative test:Deletion of a Security Group with out passing ID
+        # should Fail
         try:
             resp, body = self.client.delete_security_group('')
         except exceptions.NotFound:
@@ -255,10 +243,8 @@ class SecurityGroupsTest(object):
                       'with out passing ID')
 
     def test_server_security_groups(self):
-        """
-        Checks that security groups may be added and linked to a server
-        and not deleted if the server is active.
-        """
+        # Checks that security groups may be added and linked to a server
+        # and not deleted if the server is active.
         # Create a couple security groups that we will use
         # for the server resource this test creates
         sg_name = rand_name('sg')

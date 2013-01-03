@@ -104,7 +104,7 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
     @unittest.skipIf(not live_migration_available,
                      'Block Live migration not available')
     def test_001_live_block_migration(self):
-        """Live block migrate an instance to another host"""
+        # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
             raise nose.SkipTest(
                 "Less than 2 compute nodes, skipping migration test.")
@@ -120,7 +120,7 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
     @unittest.skipIf(not live_migration_available,
                      'Block Live migration not available')
     def test_002_invalid_host_for_migration(self):
-        """Migrating to an invalid host should not change the status"""
+        # Migrating to an invalid host should not change the status
 
         server_id = self._get_an_active_server()
         target_host = self._get_non_existing_host_name()

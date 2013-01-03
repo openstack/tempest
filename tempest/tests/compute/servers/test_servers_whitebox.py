@@ -53,7 +53,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
                 continue
 
     def test_create_server_vcpu_quota_full(self):
-        """Disallow server creation when tenant's vcpu quota is full"""
+        # Disallow server creation when tenant's vcpu quota is full
         quotas = self.meta.tables['quotas']
         stmt = quotas.select().where(
             quotas.c.project_id == self.tenant_id).where(
@@ -85,7 +85,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
             self.connection.execute(stmt, autocommit=True)
 
     def test_create_server_memory_quota_full(self):
-        """Disallow server creation when tenant's memory quota is full"""
+        # Disallow server creation when tenant's memory quota is full
         quotas = self.meta.tables['quotas']
         stmt = quotas.select().where(
             quotas.c.project_id == self.tenant_id).where(
@@ -171,83 +171,81 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
             self.update_state(self.shared_server['id'], 'active', None)
 
     def test_delete_server_when_vm_eq_building_task_eq_networking(self):
-        """Delete server when instance states are building,networking"""
+        # Delete server when instance states are building,networking
         self._test_delete_server_base('building', 'networking')
 
     def test_delete_server_when_vm_eq_building_task_eq_bdm(self):
-        """
-        Delete server when instance states are building,block device mapping
-        """
+        # Delete server when instance states are building,block device mapping
         self._test_delete_server_base('building', 'block_device_mapping')
 
     def test_delete_server_when_vm_eq_building_task_eq_spawning(self):
-        """Delete server when instance states are building,spawning"""
+        # Delete server when instance states are building,spawning
         self._test_delete_server_base('building', 'spawning')
 
     def test_delete_server_when_vm_eq_active_task_eq_image_backup(self):
-        """Delete server when instance states are active,image_backup"""
+        # Delete server when instance states are active,image_backup
         self._test_delete_server_base('active', 'image_backup')
 
     def test_delete_server_when_vm_eq_active_task_eq_rebuilding(self):
-        """Delete server when instance states are active,rebuilding"""
+        # Delete server when instance states are active,rebuilding
         self._test_delete_server_base('active', 'rebuilding')
 
     def test_delete_server_when_vm_eq_error_task_eq_spawning(self):
-        """Delete server when instance states are error,spawning"""
+        # Delete server when instance states are error,spawning
         self._test_delete_server_base('error', 'spawning')
 
     def test_delete_server_when_vm_eq_resized_task_eq_resize_prep(self):
-        """Delete server when instance states are resized,resize_prep"""
+        # Delete server when instance states are resized,resize_prep
         self._test_delete_server_403_base('resized', 'resize_prep')
 
     def test_delete_server_when_vm_eq_resized_task_eq_resize_migrating(self):
-        """Delete server when instance states are resized,resize_migrating"""
+        # Delete server when instance states are resized,resize_migrating
         self._test_delete_server_403_base('resized', 'resize_migrating')
 
     def test_delete_server_when_vm_eq_resized_task_eq_resize_migrated(self):
-        """Delete server when instance states are resized,resize_migrated"""
+        # Delete server when instance states are resized,resize_migrated
         self._test_delete_server_403_base('resized', 'resize_migrated')
 
     def test_delete_server_when_vm_eq_resized_task_eq_resize_finish(self):
-        """Delete server when instance states are resized,resize_finish"""
+        # Delete server when instance states are resized,resize_finish
         self._test_delete_server_403_base('resized', 'resize_finish')
 
     def test_delete_server_when_vm_eq_resized_task_eq_resize_reverting(self):
-        """Delete server when instance states are resized,resize_reverting"""
+        # Delete server when instance states are resized,resize_reverting
         self._test_delete_server_403_base('resized', 'resize_reverting')
 
     def test_delete_server_when_vm_eq_resized_task_eq_resize_confirming(self):
-        """Delete server when instance states are resized,resize_confirming"""
+        # Delete server when instance states are resized,resize_confirming
         self._test_delete_server_403_base('resized', 'resize_confirming')
 
     def test_delete_server_when_vm_eq_active_task_eq_resize_verify(self):
-        """Delete server when instance states are active,resize_verify"""
+        # Delete server when instance states are active,resize_verify
         self._test_delete_server_base('active', 'resize_verify')
 
     def test_delete_server_when_vm_eq_active_task_eq_rebooting(self):
-        """Delete server when instance states are active,rebooting"""
+        # Delete server when instance states are active,rebooting
         self._test_delete_server_base('active', 'rebooting')
 
     def test_delete_server_when_vm_eq_building_task_eq_deleting(self):
-        """Delete server when instance states are building,deleting"""
+        # Delete server when instance states are building,deleting
         self._test_delete_server_base('building', 'deleting')
 
     def test_delete_server_when_vm_eq_active_task_eq_deleting(self):
-        """Delete server when instance states are active,deleting"""
+        # Delete server when instance states are active,deleting
         self._test_delete_server_base('active', 'deleting')
 
     def test_delete_server_when_vm_eq_error_task_eq_none(self):
-        """Delete server when instance states are error,None"""
+        # Delete server when instance states are error,None
         self._test_delete_server_base('error', None)
 
     def test_delete_server_when_vm_eq_resized_task_eq_none(self):
-        """Delete server when instance states are resized,None"""
+        # Delete server when instance states are resized,None
         self._test_delete_server_403_base('resized', None)
 
     def test_delete_server_when_vm_eq_error_task_eq_resize_prep(self):
-        """Delete server when instance states are error,resize_prep"""
+        # Delete server when instance states are error,resize_prep
         self._test_delete_server_base('error', 'resize_prep')
 
     def test_delete_server_when_vm_eq_error_task_eq_error(self):
-        """Delete server when instance states are error,error"""
+        # Delete server when instance states are error,error
         self._test_delete_server_base('error', 'error')

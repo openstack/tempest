@@ -37,7 +37,7 @@ class TestServerDiskConfig(BaseComputeTest):
 
     @attr(type='positive')
     def test_rebuild_server_with_manual_disk_config(self):
-        """A server should be rebuilt using the manual disk config option"""
+        # A server should be rebuilt using the manual disk config option
         name = rand_name('server')
         resp, server = self.create_server_with_extras(name,
                                                       self.image_ref,
@@ -67,7 +67,7 @@ class TestServerDiskConfig(BaseComputeTest):
 
     @attr(type='positive')
     def test_rebuild_server_with_auto_disk_config(self):
-        """A server should be rebuilt using the auto disk config option"""
+        # A server should be rebuilt using the auto disk config option
         name = rand_name('server')
         resp, server = self.create_server_with_extras(name,
                                                       self.image_ref,
@@ -98,7 +98,7 @@ class TestServerDiskConfig(BaseComputeTest):
     @attr(type='positive')
     @unittest.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     def test_resize_server_from_manual_to_auto(self):
-        """A server should be resized from manual to auto disk config"""
+        # A server should be resized from manual to auto disk config
         name = rand_name('server')
         resp, server = self.create_server_with_extras(name,
                                                       self.image_ref,
@@ -124,7 +124,7 @@ class TestServerDiskConfig(BaseComputeTest):
     @attr(type='positive')
     @unittest.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     def test_resize_server_from_auto_to_manual(self):
-        """A server should be resized from auto to manual disk config"""
+        # A server should be resized from auto to manual disk config
         name = rand_name('server')
         resp, server = self.create_server_with_extras(name,
                                                       self.image_ref,

@@ -27,10 +27,8 @@ from tempest.tests.compute import base
 class ServerPersonalityTestBase(object):
 
     def test_personality_files_exceed_limit(self):
-        """
-        Server creation should fail if greater than the maximum allowed
-        number of files are injected into the server.
-        """
+        # Server creation should fail if greater than the maximum allowed
+        # number of files are injected into the server.
         name = rand_name('server')
         file_contents = 'This is a test file.'
         personality = []
@@ -51,10 +49,8 @@ class ServerPersonalityTestBase(object):
 
     @attr(type='positive')
     def test_can_create_server_with_max_number_personality_files(self):
-        """
-        Server should be created successfully if maximum allowed number of
-        files is injected into the server during creation.
-        """
+        # Server should be created successfully if maximum allowed number of
+        # files is injected into the server during creation.
         try:
             name = rand_name('server')
             file_contents = 'This is a test file.'

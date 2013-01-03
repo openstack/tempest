@@ -94,7 +94,7 @@ class ListServerFiltersTest(object):
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='positive')
     def test_list_servers_filter_by_image(self):
-        """Filter the list of servers by image"""
+        # Filter the list of servers by image
         params = {'image': self.image_ref}
         resp, body = self.client.list_servers(params)
         servers = body['servers']
@@ -105,7 +105,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_filter_by_flavor(self):
-        """Filter the list of servers by flavor"""
+        # Filter the list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
         resp, body = self.client.list_servers(params)
         servers = body['servers']
@@ -116,7 +116,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_filter_by_server_name(self):
-        """Filter the list of servers by server name"""
+        # Filter the list of servers by server name
         params = {'name': self.s1_name}
         resp, body = self.client.list_servers(params)
         servers = body['servers']
@@ -127,7 +127,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_filter_by_server_status(self):
-        """Filter the list of servers by server status"""
+        # Filter the list of servers by server status
         params = {'status': 'active'}
         resp, body = self.client.list_servers(params)
         servers = body['servers']
@@ -138,7 +138,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_limit_results(self):
-        """Verify only the expected number of servers are returned"""
+        # Verify only the expected number of servers are returned
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))
@@ -146,7 +146,7 @@ class ListServerFiltersTest(object):
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_image(self):
-        """Filter the detailed list of servers by image"""
+        # Filter the detailed list of servers by image
         params = {'image': self.image_ref}
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
@@ -157,7 +157,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_flavor(self):
-        """Filter the detailed list of servers by flavor"""
+        # Filter the detailed list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
@@ -168,7 +168,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_name(self):
-        """Filter the detailed list of servers by server name"""
+        # Filter the detailed list of servers by server name
         params = {'name': self.s1_name}
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
@@ -179,7 +179,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_status(self):
-        """Filter the detailed list of servers by server status"""
+        # Filter the detailed list of servers by server status
         params = {'status': 'active'}
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
@@ -190,7 +190,7 @@ class ListServerFiltersTest(object):
 
     @attr(type='positive')
     def test_list_servers_detailed_limit_results(self):
-        """Verify only the expected number of detailed results are returned"""
+        # Verify only the expected number of detailed results are returned
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))

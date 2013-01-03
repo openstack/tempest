@@ -43,7 +43,7 @@ class FloatingIPDetailsTestBase(object):
 
     @attr(type='positive')
     def test_list_floating_ips(self):
-        """Positive test:Should return the list of floating IPs"""
+        # Positive test:Should return the list of floating IPs
         resp, body = self.client.list_floating_ips()
         self.assertEqual(200, resp.status)
         floating_ips = body
@@ -54,7 +54,7 @@ class FloatingIPDetailsTestBase(object):
 
     @attr(type='positive')
     def test_get_floating_ip_details(self):
-        """Positive test:Should be able to GET the details of floatingIP"""
+        # Positive test:Should be able to GET the details of floatingIP
         #Creating a floating IP for which details are to be checked
         try:
             resp, body = self.client.create_floating_ip()
@@ -78,10 +78,8 @@ class FloatingIPDetailsTestBase(object):
 
     @attr(type='negative')
     def test_get_nonexistant_floating_ip_details(self):
-        """
-        Negative test:Should not be able to GET the details
-        of nonexistant floating IP
-        """
+        # Negative test:Should not be able to GET the details
+        # of nonexistant floating IP
         floating_ip_id = []
         resp, body = self.client.list_floating_ips()
         for i in range(len(body)):

@@ -32,7 +32,7 @@ class VolumesTestBase(object):
     """
 
     def test_volume_list(self):
-        """Should return the list of Volumes"""
+        # Should return the list of Volumes
         # Fetch all Volumes
         resp, fetched_list = self.client.list_volumes()
         self.assertEqual(200, resp.status)
@@ -47,7 +47,7 @@ class VolumesTestBase(object):
                                    for m_vol in missing_volumes))
 
     def test_volume_list_with_details(self):
-        """Should return the list of Volumes with details"""
+        # Should return the list of Volumes with details
         #Fetch all Volumes
         resp, fetched_list = self.client.list_volumes_with_detail()
         self.assertEqual(200, resp.status)

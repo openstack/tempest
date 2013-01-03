@@ -25,7 +25,7 @@ class VolumesGetTestBase(object):
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):
-        """CREATE, GET, DELETE Volume"""
+        # CREATE, GET, DELETE Volume
         volume = None
         try:
             v_name = rand_name('Volume-%s-') % self._interface
@@ -71,7 +71,7 @@ class VolumesGetTestBase(object):
 
     @attr(type='positive')
     def test_volume_get_metadata_none(self):
-        """CREATE, GET empty metadata dict"""
+        # CREATE, GET empty metadata dict
         try:
             v_name = rand_name('Volume-')
             #Create volume

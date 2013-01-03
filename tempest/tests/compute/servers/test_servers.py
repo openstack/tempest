@@ -25,10 +25,8 @@ class ServersTestBase(object):
 
     @attr(type='positive')
     def test_create_server_with_admin_password(self):
-        """
-        If an admin password is provided on server creation, the server's root
-        password should be set to that password.
-        """
+        # If an admin password is provided on server creation, the server's
+        # root password should be set to that password.
 
         try:
             server = None
@@ -47,7 +45,7 @@ class ServersTestBase(object):
                 self.client.delete_server(server['id'])
 
     def test_create_with_existing_server_name(self):
-        """Creating a server with a name that already exists is allowed"""
+        # Creating a server with a name that already exists is allowed
 
         try:
             id1 = None
@@ -76,7 +74,7 @@ class ServersTestBase(object):
 
     @attr(type='positive')
     def test_create_specify_keypair(self):
-        """Specify a keypair while creating a server"""
+        # Specify a keypair while creating a server
 
         try:
             server = None
@@ -98,7 +96,7 @@ class ServersTestBase(object):
 
     @attr(type='positive')
     def test_update_server_name(self):
-        """The server name should be changed to the the provided value"""
+        # The server name should be changed to the the provided value
         try:
             server = None
             name = rand_name('server')
@@ -123,9 +121,7 @@ class ServersTestBase(object):
 
     @attr(type='positive')
     def test_update_access_server_address(self):
-        """
-        The server's access addresses should reflect the provided values
-        """
+        # The server's access addresses should reflect the provided values
         try:
             server = None
             name = rand_name('server')
@@ -151,7 +147,7 @@ class ServersTestBase(object):
                 self.client.delete_server(server['id'])
 
     def test_delete_server_while_in_building_state(self):
-        """Delete a server while it's VM state is Building"""
+        # Delete a server while it's VM state is Building
         name = rand_name('server')
         resp, server = self.create_server_with_extras(name, self.image_ref,
                                                       self.flavor_ref)

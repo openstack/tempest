@@ -36,20 +36,20 @@ class ListImagesTest(BaseComputeTest):
 
     @attr(type='smoke')
     def test_get_image(self):
-        """Returns the correct details for a single image"""
+        # Returns the correct details for a single image
         resp, image = self.client.get_image(self.image_ref)
         self.assertEqual(self.image_ref, image['id'])
 
     @attr(type='smoke')
     def test_list_images(self):
-        """The list of all images should contain the image"""
+        # The list of all images should contain the image
         resp, images = self.client.list_images()
         found = any([i for i in images if i['id'] == self.image_ref])
         self.assertTrue(found)
 
     @attr(type='smoke')
     def test_list_images_with_detail(self):
-        """Detailed list of all images should contain the expected images"""
+        # Detailed list of all images should contain the expected images
         resp, images = self.client.list_images_with_detail()
         found = any([i for i in images if i['id'] == self.image_ref])
         self.assertTrue(found)

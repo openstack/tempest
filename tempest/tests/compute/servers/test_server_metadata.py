@@ -49,7 +49,7 @@ class ServerMetadataTest(BaseComputeTest):
         self.assertEqual(resp.status, 200)
 
     def test_list_server_metadata(self):
-        """All metadata key/value pairs for a server should be returned"""
+        # All metadata key/value pairs for a server should be returned
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
 
         #Verify the expected metadata items are in the list
@@ -58,7 +58,7 @@ class ServerMetadataTest(BaseComputeTest):
         self.assertEqual(expected, resp_metadata)
 
     def test_set_server_metadata(self):
-        """The server's metadata should be replaced with the provided values"""
+        # The server's metadata should be replaced with the provided values
         #Create a new set of metadata for the server
         req_metadata = {'meta2': 'data2', 'meta3': 'data3'}
         resp, metadata = self.client.set_server_metadata(self.server_id,
@@ -71,10 +71,10 @@ class ServerMetadataTest(BaseComputeTest):
         self.assertEqual(resp_metadata, req_metadata)
 
     def test_server_create_metadata_key_too_long(self):
-        """
-        Attempt to start a server with a meta-data key that is > 255 characters
-        Try a few values
-        """
+        # Attempt to start a server with a meta-data key that is > 255
+        # characters
+
+        # Try a few values
         for sz in [256, 257, 511, 1023]:
             key = "k" * sz
             meta = {key: 'data1'}
@@ -87,10 +87,8 @@ class ServerMetadataTest(BaseComputeTest):
         # no teardown - all creates should fail
 
     def test_update_server_metadata(self):
-        """
-        The server's metadata values should be updated to the
-        provided values
-        """
+        # The server's metadata values should be updated to the
+        # provided values
         meta = {'key1': 'alt1', 'key3': 'value3'}
         resp, metadata = self.client.update_server_metadata(self.server_id,
                                                             meta)
@@ -102,13 +100,13 @@ class ServerMetadataTest(BaseComputeTest):
         self.assertEqual(expected, resp_metadata)
 
     def test_get_server_metadata_item(self):
-        """ The value for a specic metadata key should be returned """
+        # The value for a specic metadata key should be returned
         resp, meta = self.client.get_server_metadata_item(self.server_id,
                                                           'key2')
         self.assertTrue('value2', meta['key2'])
 
     def test_set_server_metadata_item(self):
-        """The item's value should be updated to the provided value"""
+        # The item's value should be updated to the provided value
         #Update the metadata value
         meta = {'nova': 'alt'}
         resp, body = self.client.set_server_metadata_item(self.server_id,
@@ -121,7 +119,7 @@ class ServerMetadataTest(BaseComputeTest):
         self.assertEqual(expected, resp_metadata)
 
     def test_delete_server_metadata_item(self):
-        """The metadata value/key pair should be deleted from the server"""
+        # The metadata value/key pair should be deleted from the server
         resp, meta = self.client.delete_server_metadata_item(self.server_id,
                                                              'key1')
         self.assertEqual(204, resp.status)
@@ -133,7 +131,7 @@ class ServerMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_get_nonexistant_server_metadata_item(self):
-        """Negative test: GET on nonexistant server should not succeed"""
+        # Negative test: GET on nonexistant server should not succeed
         try:
             resp, meta = self.client.get_server_metadata_item(999, 'test2')
         except Exception:
@@ -143,9 +141,8 @@ class ServerMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_list_nonexistant_server_metadata(self):
-        """
-        Negative test:List metadata on a non existant server should not succeed
-        """
+        # Negative test:List metadata on a non existant server should
+        # not succeed
         try:
             resp, metadata = self.client.list_server_metadata(999)
         except Exception:
@@ -156,9 +153,8 @@ class ServerMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_set_nonexistant_server_metadata(self):
-        """
-        Negative test: Set metadata on a non existant server should not succeed
-        """
+        # Negative test: Set metadata on a non existant server should not
+        # succeed
         meta = {'meta1': 'data1'}
         try:
             resp, metadata = self.client.set_server_metadata(999, meta)
@@ -170,9 +166,7 @@ class ServerMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_update_nonexistant_server_metadata(self):
-        """
-        Negative test: An update should not happen for a nonexistant image
-        """
+        # Negative test: An update should not happen for a nonexistant image
         meta = {'key1': 'value1', 'key2': 'value2'}
         try:
             resp, metadata = self.client.update_server_metadata(999, meta)
@@ -183,10 +177,8 @@ class ServerMetadataTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_delete_nonexistant_server_metadata_item(self):
-        """
-        Negative test: Should not be able to delete metadata item from a
-        nonexistant server
-        """
+        # Negative test: Should not be able to delete metadata item from a
+        # nonexistant server
         meta = {'d': 'delvalue'}
 
         #Delete the metadata item

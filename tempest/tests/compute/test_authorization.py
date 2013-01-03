@@ -105,41 +105,37 @@ class AuthorizationTest(BaseComputeTest):
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_server_for_alt_account_fails(self):
-        """A GET request for a server on another user's account should fail"""
+        # A GET request for a server on another user's account should fail
         self.alt_client.get_server(self.server['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_server_for_alt_account_fails(self):
-        """A DELETE request for another user's server should fail"""
+        # A DELETE request for another user's server should fail
         self.alt_client.delete_server(self.server['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_update_server_for_alt_account_fails(self):
-        """An update server request for another user's server should fail"""
+        # An update server request for another user's server should fail
         self.alt_client.update_server(self.server['id'], name='test')
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_list_server_addresses_for_alt_account_fails(self):
-        """A list addresses request for another user's server should fail"""
+        # A list addresses request for another user's server should fail
         self.alt_client.list_addresses(self.server['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_list_server_addresses_by_network_for_alt_account_fails(self):
-        """
-        A list address/network request for another user's server should fail
-        """
+        # A list address/network request for another user's server should fail
         server_id = self.server['id']
         self.alt_client.list_addresses_by_network(server_id, 'public')
 
     def test_list_servers_with_alternate_tenant(self):
-        """
-        A list on servers from one tenant should not
-        show on alternate tenant
-        """
+        # A list on servers from one tenant should not
+        # show on alternate tenant
         #Listing servers from alternate tenant
         alt_server_ids = []
         resp, body = self.alt_client.list_servers()
@@ -149,47 +145,45 @@ class AuthorizationTest(BaseComputeTest):
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_change_password_for_alt_account_fails(self):
-        """A change password request for another user's server should fail"""
+        # A change password request for another user's server should fail
         self.alt_client.change_password(self.server['id'], 'newpass')
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_reboot_server_for_alt_account_fails(self):
-        """A reboot request for another user's server should fail"""
+        # A reboot request for another user's server should fail
         self.alt_client.reboot(self.server['id'], 'HARD')
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_rebuild_server_for_alt_account_fails(self):
-        """A rebuild request for another user's server should fail"""
+        # A rebuild request for another user's server should fail
         self.alt_client.rebuild(self.server['id'], self.image_ref_alt)
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_resize_server_for_alt_account_fails(self):
-        """A resize request for another user's server should fail"""
+        # A resize request for another user's server should fail
         self.alt_client.resize(self.server['id'], self.flavor_ref_alt)
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_create_image_for_alt_account_fails(self):
-        """A create image request for another user's server should fail"""
+        # A create image request for another user's server should fail
         self.alt_images_client.create_image(self.server['id'], 'testImage')
 
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_server_with_unauthorized_image(self):
-        """Server creation with another user's image should fail"""
+        # Server creation with another user's image should fail
         self.alt_client.create_server('test', self.image['id'],
                                       self.flavor_ref)
 
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_server_fails_when_tenant_incorrect(self):
-        """
-        A create server request should fail if the tenant id does not match
-        the current user
-        """
+        # A create server request should fail if the tenant id does not match
+        # the current user
         saved_base_url = self.alt_client.base_url
         try:
             # Change the base URL to impersonate another user
@@ -203,10 +197,8 @@ class AuthorizationTest(BaseComputeTest):
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_keypair_in_analt_user_tenant(self):
-        """
-        A create keypair request should fail if the tenant id does not match
-        the current user
-        """
+        # A create keypair request should fail if the tenant id does not match
+        # the current user
         #POST keypair with other user tenant
         k_name = rand_name('keypair-')
         self.alt_keypairs_client._set_auth()
@@ -228,35 +220,33 @@ class AuthorizationTest(BaseComputeTest):
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_keypair_of_alt_account_fails(self):
-        """A GET request for another user's keypair should fail"""
+        # A GET request for another user's keypair should fail
         self.alt_keypairs_client.get_keypair(self.keypairname)
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     @unittest.skip("Skipped until the Bug #1086980 is resolved")
     def test_delete_keypair_of_alt_account_fails(self):
-        """A DELETE request for another user's keypair should fail"""
+        # A DELETE request for another user's keypair should fail
         self.alt_keypairs_client.delete_keypair(self.keypairname)
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_image_for_alt_account_fails(self):
-        """A GET request for an image on another user's account should fail"""
+        # A GET request for an image on another user's account should fail
         self.alt_images_client.get_image(self.image['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_image_for_alt_account_fails(self):
-        """A DELETE request for another user's image should fail"""
+        # A DELETE request for another user's image should fail
         self.alt_images_client.delete_image(self.image['id'])
 
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_security_group_in_analt_user_tenant(self):
-        """
-        A create security group request should fail if the tenant id does not
-        match the current user
-        """
+        # A create security group request should fail if the tenant id does not
+        # match the current user
         #POST security group with other user tenant
         s_name = rand_name('security-')
         s_description = rand_name('security')
@@ -281,23 +271,21 @@ class AuthorizationTest(BaseComputeTest):
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_security_group_of_alt_account_fails(self):
-        """A GET request for another user's security group should fail"""
+        # A GET request for another user's security group should fail
         self.alt_security_client.get_security_group(self.security_group['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_security_group_of_alt_account_fails(self):
-        """A DELETE request for another user's security group should fail"""
+        # A DELETE request for another user's security group should fail
         self.alt_security_client.delete_security_group(
             self.security_group['id'])
 
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_security_group_rule_in_analt_user_tenant(self):
-        """
-        A create security group rule request should fail if the tenant id
-        does not match the current user
-        """
+        # A create security group rule request should fail if the tenant id
+        # does not match the current user
         #POST security group rule with other user tenant
         parent_group_id = self.security_group['id']
         ip_protocol = 'icmp'
@@ -328,30 +316,28 @@ class AuthorizationTest(BaseComputeTest):
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_delete_security_group_rule_of_alt_account_fails(self):
-        """
-        A DELETE request for another user's security group rule
-        should fail
-        """
+        # A DELETE request for another user's security group rule
+        # should fail
         self.alt_security_client.delete_security_group_rule(self.rule['id'])
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_set_metadata_of_alt_account_server_fails(self):
-        """ A set metadata for another user's server should fail """
+        # A set metadata for another user's server should fail
         req_metadata = {'meta1': 'data1', 'meta2': 'data2'}
         self.alt_client.set_server_metadata(self.server['id'], req_metadata)
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_set_metadata_of_alt_account_image_fails(self):
-        """ A set metadata for another user's image should fail """
+        # A set metadata for another user's image should fail
         req_metadata = {'meta1': 'value1', 'meta2': 'value2'}
         self.alt_images_client.set_image_metadata(self.image['id'],
                                                   req_metadata)
 
     @attr(type='negative')
     def test_get_metadata_of_alt_account_server_fails(self):
-        """ A get metadata for another user's server should fail """
+        # A get metadata for another user's server should fail
         req_metadata = {'meta1': 'data1'}
         self.client.set_server_metadata(self.server['id'], req_metadata)
         try:
@@ -366,7 +352,7 @@ class AuthorizationTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_get_metadata_of_alt_account_image_fails(self):
-        """ A get metadata for another user's image should fail """
+        # A get metadata for another user's image should fail
         req_metadata = {'meta1': 'value1'}
         self.images_client.set_image_metadata(self.image['id'],
                                               req_metadata)
@@ -382,7 +368,7 @@ class AuthorizationTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_delete_metadata_of_alt_account_server_fails(self):
-        """ A delete metadata for another user's server should fail """
+        # A delete metadata for another user's server should fail
         req_metadata = {'meta1': 'data1'}
         self.client.set_server_metadata(self.server['id'], req_metadata)
         try:
@@ -397,7 +383,7 @@ class AuthorizationTest(BaseComputeTest):
 
     @attr(type='negative')
     def test_delete_metadata_of_alt_account_image_fails(self):
-        """ A delete metadata for another user's image should fail """
+        # A delete metadata for another user's image should fail
         req_metadata = {'meta1': 'data1'}
         self.images_client.set_image_metadata(self.image['id'],
                                               req_metadata)
@@ -415,8 +401,6 @@ class AuthorizationTest(BaseComputeTest):
     @raises(exceptions.NotFound)
     @attr(type='negative')
     def test_get_console_output_of_alt_account_server_fails(self):
-        """
-        A Get Console Output for another user's server should fail
-        """
+        # A Get Console Output for another user's server should fail
         self.alt_console_outputs_client.get_console_output(self.server['id'],
                                                            10)

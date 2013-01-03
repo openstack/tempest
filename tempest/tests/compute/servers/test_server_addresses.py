@@ -42,7 +42,7 @@ class ServerAddressesTest(BaseComputeTest):
 
     @attr(type='negative', category='server-addresses')
     def test_list_server_addresses_invalid_server_id(self):
-        """List addresses request should fail if server id not in system"""
+        # List addresses request should fail if server id not in system
 
         try:
             self.client.list_addresses('999')
@@ -54,7 +54,7 @@ class ServerAddressesTest(BaseComputeTest):
 
     @attr(type='negative', category='server-addresses')
     def test_list_server_addresses_by_network_neg(self):
-        """List addresses by network should fail if network name not valid"""
+        # List addresses by network should fail if network name not valid
 
         try:
             self.client.list_addresses_by_network(self.server['id'], 'invalid')
@@ -66,8 +66,8 @@ class ServerAddressesTest(BaseComputeTest):
 
     @attr(type='smoke', category='server-addresses')
     def test_list_server_addresses(self):
-        """All public and private addresses for
-        a server should be returned"""
+        # All public and private addresses for
+        # a server should be returned
 
         resp, addresses = self.client.list_addresses(self.server['id'])
         self.assertEqual('200', resp['status'])
@@ -83,8 +83,8 @@ class ServerAddressesTest(BaseComputeTest):
 
     @attr(type='smoke', category='server-addresses')
     def test_list_server_addresses_by_network(self):
-        """Providing a network type should filter
-        the addresses return by that type"""
+        # Providing a network type should filter
+        # the addresses return by that type
 
         resp, addresses = self.client.list_addresses(self.server['id'])
 

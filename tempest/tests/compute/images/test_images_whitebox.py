@@ -80,89 +80,89 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
             self.update_state(self.shared_server['id'], 'active', None)
 
     def test_create_image_when_vm_eq_building_task_eq_scheduling(self):
-        """409 error when instance states are building,scheduling"""
+        # 409 error when instance states are building,scheduling
         self._test_create_image_409_base("building", "scheduling")
 
     def test_create_image_when_vm_eq_building_task_eq_networking(self):
-        """409 error when instance states are building,networking"""
+        # 409 error when instance states are building,networking
         self._test_create_image_409_base("building", "networking")
 
     def test_create_image_when_vm_eq_building_task_eq_bdm(self):
-        """409 error when instance states are building,block_device_mapping"""
+        # 409 error when instance states are building,block_device_mapping
         self._test_create_image_409_base("building", "block_device_mapping")
 
     def test_create_image_when_vm_eq_building_task_eq_spawning(self):
-        """409 error when instance states are building,spawning"""
+        # 409 error when instance states are building,spawning
         self._test_create_image_409_base("building", "spawning")
 
     def test_create_image_when_vm_eq_active_task_eq_image_backup(self):
-        """409 error when instance states are active,image_backup"""
+        # 409 error when instance states are active,image_backup
         self._test_create_image_409_base("active", "image_backup")
 
     def test_create_image_when_vm_eq_resized_task_eq_resize_prep(self):
-        """409 error when instance states are resized,resize_prep"""
+        # 409 error when instance states are resized,resize_prep
         self._test_create_image_409_base("resized", "resize_prep")
 
     def test_create_image_when_vm_eq_resized_task_eq_resize_migrating(self):
-        """409 error when instance states are resized,resize_migrating"""
+        # 409 error when instance states are resized,resize_migrating
         self._test_create_image_409_base("resized", "resize_migrating")
 
     def test_create_image_when_vm_eq_resized_task_eq_resize_migrated(self):
-        """409 error when instance states are resized,resize_migrated"""
+        # 409 error when instance states are resized,resize_migrated
         self._test_create_image_409_base("resized", "resize_migrated")
 
     def test_create_image_when_vm_eq_resized_task_eq_resize_finish(self):
-        """409 error when instance states are resized,resize_finish"""
+        # 409 error when instance states are resized,resize_finish
         self._test_create_image_409_base("resized", "resize_finish")
 
     def test_create_image_when_vm_eq_resized_task_eq_resize_reverting(self):
-        """409 error when instance states are resized,resize_reverting"""
+        # 409 error when instance states are resized,resize_reverting
         self._test_create_image_409_base("resized", "resize_reverting")
 
     def test_create_image_when_vm_eq_resized_task_eq_resize_confirming(self):
-        """409 error when instance states are resized,resize_confirming"""
+        # 409 error when instance states are resized,resize_confirming
         self._test_create_image_409_base("resized", "resize_confirming")
 
     def test_create_image_when_vm_eq_active_task_eq_resize_verify(self):
-        """409 error when instance states are active,resize_verify"""
+        # 409 error when instance states are active,resize_verify
         self._test_create_image_409_base("active", "resize_verify")
 
     def test_create_image_when_vm_eq_active_task_eq_updating_password(self):
-        """409 error when instance states are active,updating_password"""
+        # 409 error when instance states are active,updating_password
         self._test_create_image_409_base("active", "updating_password")
 
     def test_create_image_when_vm_eq_active_task_eq_rebuilding(self):
-        """409 error when instance states are active,rebuilding"""
+        # 409 error when instance states are active,rebuilding
         self._test_create_image_409_base("active", "rebuilding")
 
     def test_create_image_when_vm_eq_active_task_eq_rebooting(self):
-        """409 error when instance states are active,rebooting"""
+        # 409 error when instance states are active,rebooting
         self._test_create_image_409_base("active", "rebooting")
 
     def test_create_image_when_vm_eq_building_task_eq_deleting(self):
-        """409 error when instance states are building,deleting"""
+        # 409 error when instance states are building,deleting
         self._test_create_image_409_base("building", "deleting")
 
     def test_create_image_when_vm_eq_active_task_eq_deleting(self):
-        """409 error when instance states are active,deleting"""
+        # 409 error when instance states are active,deleting
         self._test_create_image_409_base("active", "deleting")
 
     def test_create_image_when_vm_eq_error_task_eq_building(self):
-        """409 error when instance states are error,building"""
+        # 409 error when instance states are error,building
         self._test_create_image_409_base("error", "building")
 
     def test_create_image_when_vm_eq_error_task_eq_none(self):
-        """409 error when instance states are error,None"""
+        # 409 error when instance states are error,None
         self._test_create_image_409_base("error", None)
 
     def test_create_image_when_vm_eq_deleted_task_eq_none(self):
-        """409 error when instance states are deleted,None"""
+        # 409 error when instance states are deleted,None
         self._test_create_image_409_base("deleted", None)
 
     def test_create_image_when_vm_eq_resized_task_eq_none(self):
-        """409 error when instance states are resized,None"""
+        # 409 error when instance states are resized,None
         self._test_create_image_409_base("resized", None)
 
     def test_create_image_when_vm_eq_error_task_eq_resize_prep(self):
-        """409 error when instance states are error,resize_prep"""
+        # 409 error when instance states are error,resize_prep
         self._test_create_image_409_base("error", "resize_prep")
