@@ -39,15 +39,15 @@ class StressConfig(object):
 
     @property
     def nova_logdir(self):
-        """Directory containing log files on the compute nodes"""
+        """Directory containing log files on the compute nodes."""
         return self.get("nova_logdir", None)
 
     @property
     def controller(self):
-        """Controller host"""
+        """Controller host."""
         return self.get("controller", None)
 
     @property
     def max_instances(self):
-        """Maximum number of instances to create during test"""
+        """Maximum number of instances to create during test."""
         return self.get("max_instances", 16)

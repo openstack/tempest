@@ -42,7 +42,7 @@ class FloatingIPsClientXML(RestClientXML):
         return json
 
     def list_floating_ips(self, params=None):
-        """Returns a list of all floating IPs filtered by any parameters"""
+        """Returns a list of all floating IPs filtered by any parameters."""
         url = 'os-floating-ips'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -52,7 +52,7 @@ class FloatingIPsClientXML(RestClientXML):
         return resp, body
 
     def get_floating_ip_details(self, floating_ip_id):
-        """Get the details of a floating IP"""
+        """Get the details of a floating IP."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.get(url, self.headers)
         body = self._parse_floating_ip(etree.fromstring(body))
@@ -61,20 +61,20 @@ class FloatingIPsClientXML(RestClientXML):
         return resp, body
 
     def create_floating_ip(self):
-        """Allocate a floating IP to the project"""
+        """Allocate a floating IP to the project."""
         url = 'os-floating-ips'
         resp, body = self.post(url, None, self.headers)
         body = self._parse_floating_ip(etree.fromstring(body))
         return resp, body
 
     def delete_floating_ip(self, floating_ip_id):
-        """Deletes the provided floating IP from the project"""
+        """Deletes the provided floating IP from the project."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.delete(url, self.headers)
         return resp, body
 
     def associate_floating_ip_to_server(self, floating_ip, server_id):
-        """Associate the provided floating IP to a specific server"""
+        """Associate the provided floating IP to a specific server."""
         url = "servers/%s/action" % str(server_id)
         doc = Document()
         server = Element("addFloatingIp")
@@ -84,7 +84,7 @@ class FloatingIPsClientXML(RestClientXML):
         return resp, body
 
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
-        """Disassociate the provided floating IP from a specific server"""
+        """Disassociate the provided floating IP from a specific server."""
         url = "servers/%s/action" % str(server_id)
         doc = Document()
         server = Element("removeFloatingIp")

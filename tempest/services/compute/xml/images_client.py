@@ -43,7 +43,7 @@ class ImagesClientXML(RestClientXML):
         return self._parse_links(node, json)
 
     def _parse_image(self, node):
-        """Parses detailed XML image information into dictionary"""
+        """Parses detailed XML image information into dictionary."""
         json = xml_to_json(node)
 
         self._parse_links(node, json)
@@ -61,7 +61,7 @@ class ImagesClientXML(RestClientXML):
         return json
 
     def _parse_links(self, node, json):
-        """Append multiple links under a list"""
+        """Append multiple links under a list."""
         # look for links
         if 'link' in json:
             # remove single link element
@@ -71,7 +71,7 @@ class ImagesClientXML(RestClientXML):
         return json
 
     def create_image(self, server_id, name, meta=None):
-        """Creates an image of the original server"""
+        """Creates an image of the original server."""
         post_body = Element('createImage', name=name)
 
         if meta:
@@ -86,7 +86,7 @@ class ImagesClientXML(RestClientXML):
         return resp, body
 
     def list_images(self, params=None):
-        """Returns a list of all images filtered by any parameters"""
+        """Returns a list of all images filtered by any parameters."""
         url = 'images'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -96,7 +96,7 @@ class ImagesClientXML(RestClientXML):
         return resp, body['images']
 
     def list_images_with_detail(self, params=None):
-        """Returns a detailed list of images filtered by any parameters"""
+        """Returns a detailed list of images filtered by any parameters."""
         url = 'images/detail'
         if params:
             param_list = urllib.urlencode(params)
@@ -108,13 +108,13 @@ class ImagesClientXML(RestClientXML):
         return resp, body['images']
 
     def get_image(self, image_id):
-        """Returns the details of a single image"""
+        """Returns the details of a single image."""
         resp, body = self.get("images/%s" % str(image_id), self.headers)
         body = self._parse_image(etree.fromstring(body))
         return resp, body
 
     def delete_image(self, image_id):
-        """Deletes the provided image"""
+        """Deletes the provided image."""
         return self.delete("images/%s" % str(image_id), self.headers)
 
     def wait_for_image_resp_code(self, image_id, code):
@@ -147,14 +147,14 @@ class ImagesClientXML(RestClientXML):
                 raise exceptions.TimeoutException
 
     def list_image_metadata(self, image_id):
-        """Lists all metadata items for an image"""
+        """Lists all metadata items for an image."""
         resp, body = self.get("images/%s/metadata" % str(image_id),
                               self.headers)
         body = xml_to_json(etree.fromstring(body))
         return resp, body['metadata']
 
     def set_image_metadata(self, image_id, meta):
-        """Sets the metadata for an image"""
+        """Sets the metadata for an image."""
         post_body = json.dumps({'metadata': meta})
         resp, body = self.put('images/%s/metadata' % str(image_id),
                               post_body, self.headers)
@@ -162,7 +162,7 @@ class ImagesClientXML(RestClientXML):
         return resp, body['metadata']
 
     def update_image_metadata(self, image_id, meta):
-        """Updates the metadata for an image"""
+        """Updates the metadata for an image."""
         post_body = Element('metadata', meta)
         for k, v in meta:
             metadata = Element('meta', key=k)
@@ -176,14 +176,14 @@ class ImagesClientXML(RestClientXML):
         return resp, body['metadata']
 
     def get_image_metadata_item(self, image_id, key):
-        """Returns the value for a specific image metadata key"""
+        """Returns the value for a specific image metadata key."""
         resp, body = self.get("images/%s/metadata/%s.xml" %
                               (str(image_id), key), self.headers)
         body = xml_to_json(etree.fromstring(body))
         return resp, body['meta']
 
     def set_image_metadata_item(self, image_id, key, meta):
-        """Sets the value for a specific image metadata key"""
+        """Sets the value for a specific image metadata key."""
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
                               post_body, self.headers)
@@ -191,7 +191,7 @@ class ImagesClientXML(RestClientXML):
         return resp, body['meta']
 
     def delete_image_metadata_item(self, image_id, key):
-        """Deletes a single image metadata key/value pair"""
+        """Deletes a single image metadata key/value pair."""
         resp, body = self.delete("images/%s/metadata/%s" % (str(image_id), key,
                                  self.headers))
         return resp, body

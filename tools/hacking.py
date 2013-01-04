@@ -273,7 +273,8 @@ def tempest_docstring_start_space(physical_line):
     T401
     """
     pos = max([physical_line.find(i) for i in DOCSTRING_TRIPLE])  # start
-    if (pos != -1 and len(physical_line) > pos + 1):
+    end = max([physical_line[-4:-1] == i for i in DOCSTRING_TRIPLE])  # end
+    if (pos != -1 and end and len(physical_line) > pos + 4):
         if (physical_line[pos + 3] == ' '):
             return (pos, "T401: one line docstring should not start"
                          " with a space")

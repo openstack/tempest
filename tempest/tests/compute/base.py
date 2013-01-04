@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 
 class BaseCompTest(unittest.TestCase):
 
-    """Base test case class for all Compute API tests"""
+    """Base test case class for all Compute API tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -179,7 +179,7 @@ class BaseCompTest(unittest.TestCase):
 
     @classmethod
     def create_server(cls, image_id=None, flavor=None):
-        """Wrapper utility that returns a test server"""
+        """Wrapper utility that returns a test server."""
         server_name = rand_name(cls.__name__ + "-instance")
 
         if not flavor:
@@ -212,7 +212,7 @@ class BaseCompTest(unittest.TestCase):
         return resp, server
 
     def wait_for(self, condition):
-        """Repeatedly calls condition() until a timeout"""
+        """Repeatedly calls condition() until a timeout."""
         start_time = int(time.time())
         while True:
             try:
@@ -246,7 +246,7 @@ class BaseComputeTestXML(BaseCompTest):
 
 class BaseComputeAdminTest(unittest.TestCase):
 
-    """Base test case class for all Compute Admin API tests"""
+    """Base test case class for all Compute Admin API tests."""
 
     @classmethod
     def setUpClass(cls):

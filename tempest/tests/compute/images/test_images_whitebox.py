@@ -36,7 +36,7 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        """Terminate test instances created after a test is executed"""
+        """Terminate test instances created after a test is executed."""
 
         for server in cls.servers:
             cls.update_state(server['id'], "active", None)
@@ -51,7 +51,7 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
 
     @classmethod
     def update_state(self, server_id, vm_state, task_state, deleted=False):
-        """Update states of an instance in database for validation"""
+        """Update states of an instance in database for validation."""
         if not task_state:
             task_state = "NULL"
 
@@ -64,7 +64,7 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
         self.connection.execute(stmt, autocommit=True)
 
     def _test_create_image_409_base(self, vm_state, task_state, deleted=False):
-        """Base method for create image tests based on vm and task states"""
+        """Base method for create image tests based on vm and task states."""
         try:
             self.update_state(self.shared_server['id'], vm_state,
                               task_state, deleted)

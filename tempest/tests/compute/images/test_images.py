@@ -31,7 +31,7 @@ from tempest.tests.compute import base
 class ImagesTestBase(object):
 
     def tearDown(self):
-        """Terminate test instances created after a test is executed"""
+        """Terminate test instances created after a test is executed."""
         for server in self.servers:
             resp, body = self.servers_client.delete_server(server['id'])
             if resp['status'] == '204':

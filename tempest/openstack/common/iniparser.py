@@ -100,15 +100,15 @@ class BaseParser(object):
             self._assignment(key, value)
 
     def assignment(self, key, value):
-        """Called when a full assignment is parsed"""
+        """Called when a full assignment is parsed."""
         raise NotImplementedError()
 
     def new_section(self, section):
-        """Called when a new section is started"""
+        """Called when a new section is started."""
         raise NotImplementedError()
 
     def comment(self, comment):
-        """Called when a comment is parsed"""
+        """Called when a comment is parsed."""
         pass
 
     def error_invalid_assignment(self, line):

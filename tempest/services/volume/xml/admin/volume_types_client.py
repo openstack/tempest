@@ -67,7 +67,7 @@ class VolumeTypesClientXML(RestClientXML):
             return extra_spec
 
     def list_volume_types(self, params=None):
-        """List all the volume_types created"""
+        """List all the volume_types created."""
         url = 'types'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -81,7 +81,7 @@ class VolumeTypesClientXML(RestClientXML):
         return resp, volume_types
 
     def get_volume_type(self, type_id):
-        """Returns the details of a single volume_type"""
+        """Returns the details of a single volume_type."""
         url = "types/%s" % str(type_id)
         resp, body = self.get(url, self.headers)
         body = etree.fromstring(body)
@@ -114,11 +114,11 @@ class VolumeTypesClientXML(RestClientXML):
         return resp, body
 
     def delete_volume_type(self, type_id):
-        """Deletes the Specified Volume_type"""
+        """Deletes the Specified Volume_type."""
         return self.delete("types/%s" % str(type_id))
 
     def list_volume_types_extra_specs(self, vol_type_id, params=None):
-        """List all the volume_types extra specs created"""
+        """List all the volume_types extra specs created."""
         url = 'types/%s/extra_specs' % str(vol_type_id)
 
         if params:
@@ -133,7 +133,7 @@ class VolumeTypesClientXML(RestClientXML):
         return resp, extra_specs
 
     def get_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
-        """Returns the details of a single volume_type extra spec"""
+        """Returns the details of a single volume_type extra spec."""
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
         resp, body = self.get(url, self.headers)
@@ -161,7 +161,7 @@ class VolumeTypesClientXML(RestClientXML):
         return resp, body
 
     def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
-        """Deletes the Specified Volume_type extra spec"""
+        """Deletes the Specified Volume_type extra spec."""
         return self.delete("types/%s/extra_specs/%s" % ((str(vol_id)),
                                                         str(extra_spec_name)))
 

@@ -33,7 +33,7 @@ class ImagesClientJSON(RestClient):
         self.build_timeout = self.config.compute.build_timeout
 
     def create_image(self, server_id, name, meta=None):
-        """Creates an image of the original server"""
+        """Creates an image of the original server."""
 
         post_body = {
             'createImage': {
@@ -50,7 +50,7 @@ class ImagesClientJSON(RestClient):
         return resp, body
 
     def list_images(self, params=None):
-        """Returns a list of all images filtered by any parameters"""
+        """Returns a list of all images filtered by any parameters."""
         url = 'images'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -60,7 +60,7 @@ class ImagesClientJSON(RestClient):
         return resp, body['images']
 
     def list_images_with_detail(self, params=None):
-        """Returns a detailed list of images filtered by any parameters"""
+        """Returns a detailed list of images filtered by any parameters."""
         url = 'images/detail'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -70,13 +70,13 @@ class ImagesClientJSON(RestClient):
         return resp, body['images']
 
     def get_image(self, image_id):
-        """Returns the details of a single image"""
+        """Returns the details of a single image."""
         resp, body = self.get("images/%s" % str(image_id))
         body = json.loads(body)
         return resp, body['image']
 
     def delete_image(self, image_id):
-        """Deletes the provided image"""
+        """Deletes the provided image."""
         return self.delete("images/%s" % str(image_id))
 
     def wait_for_image_resp_code(self, image_id, code):
@@ -110,13 +110,13 @@ class ImagesClientJSON(RestClient):
                 raise exceptions.TimeoutException
 
     def list_image_metadata(self, image_id):
-        """Lists all metadata items for an image"""
+        """Lists all metadata items for an image."""
         resp, body = self.get("images/%s/metadata" % str(image_id))
         body = json.loads(body)
         return resp, body['metadata']
 
     def set_image_metadata(self, image_id, meta):
-        """Sets the metadata for an image"""
+        """Sets the metadata for an image."""
         post_body = json.dumps({'metadata': meta})
         resp, body = self.put('images/%s/metadata' % str(image_id),
                               post_body, self.headers)
@@ -124,7 +124,7 @@ class ImagesClientJSON(RestClient):
         return resp, body['metadata']
 
     def update_image_metadata(self, image_id, meta):
-        """Updates the metadata for an image"""
+        """Updates the metadata for an image."""
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('images/%s/metadata' % str(image_id),
                                post_body, self.headers)
@@ -132,13 +132,13 @@ class ImagesClientJSON(RestClient):
         return resp, body['metadata']
 
     def get_image_metadata_item(self, image_id, key):
-        """Returns the value for a specific image metadata key"""
+        """Returns the value for a specific image metadata key."""
         resp, body = self.get("images/%s/metadata/%s" % (str(image_id), key))
         body = json.loads(body)
         return resp, body['meta']
 
     def set_image_metadata_item(self, image_id, key, meta):
-        """Sets the value for a specific image metadata key"""
+        """Sets the value for a specific image metadata key."""
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
                               post_body, self.headers)
@@ -146,7 +146,7 @@ class ImagesClientJSON(RestClient):
         return resp, body['meta']
 
     def delete_image_metadata_item(self, image_id, key):
-        """Deletes a single image metadata key/value pair"""
+        """Deletes a single image metadata key/value pair."""
         resp, body = self.delete("images/%s/metadata/%s" %
                                  (str(image_id), key))
         return resp, body

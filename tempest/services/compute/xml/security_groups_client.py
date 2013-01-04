@@ -44,7 +44,7 @@ class SecurityGroupsClientXML(RestClientXML):
         return json
 
     def list_security_groups(self, params=None):
-        """List all security groups for a user"""
+        """List all security groups for a user."""
 
         url = 'os-security-groups'
         if params:
@@ -55,7 +55,7 @@ class SecurityGroupsClientXML(RestClientXML):
         return resp, body
 
     def get_security_group(self, security_group_id):
-        """Get the details of a Security Group"""
+        """Get the details of a Security Group."""
         url = "os-security-groups/%s" % str(security_group_id)
         resp, body = self.get(url, self.headers)
         body = self._parse_body(etree.fromstring(body))
@@ -78,7 +78,7 @@ class SecurityGroupsClientXML(RestClientXML):
         return resp, body
 
     def delete_security_group(self, security_group_id):
-        """Deletes the provided Security Group"""
+        """Deletes the provided Security Group."""
         return self.delete('os-security-groups/%s' %
                            str(security_group_id), self.headers)
 
@@ -125,6 +125,6 @@ class SecurityGroupsClientXML(RestClientXML):
         return resp, body
 
     def delete_security_group_rule(self, group_rule_id):
-        """Deletes the provided Security Group rule"""
+        """Deletes the provided Security Group rule."""
         return self.delete('os-security-group-rules/%s' %
                            str(group_rule_id), self.headers)

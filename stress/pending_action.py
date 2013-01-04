@@ -46,7 +46,7 @@ class PendingAction(object):
         return False
 
     def check_timeout(self):
-        """Check for timeouts of TestCase actions"""
+        """Check for timeouts of TestCase actions."""
         time_diff = time.time() - self._start_time
         if time_diff > self._timeout:
             self._logger.error('%s exceeded timeout of %d' %
@@ -76,7 +76,7 @@ class PendingServerAction(PendingAction):
         self._target = target_server
 
     def _check_for_status(self, state_string):
-        """Check to see if the machine has transitioned states"""
+        """Check to see if the machine has transitioned states."""
         t = time.time()  # for debugging
         target = self._target
         _resp, body = self._manager.servers_client.get_server(target['id'])

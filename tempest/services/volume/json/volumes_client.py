@@ -37,7 +37,7 @@ class VolumesClientJSON(RestClient):
         self.build_timeout = self.config.volume.build_timeout
 
     def list_volumes(self, params=None):
-        """List all the volumes created"""
+        """List all the volumes created."""
         url = 'volumes'
         if params:
                 url += '?%s' % urllib.urlencode(params)
@@ -47,7 +47,7 @@ class VolumesClientJSON(RestClient):
         return resp, body['volumes']
 
     def list_volumes_with_detail(self, params=None):
-        """List the details of all volumes"""
+        """List the details of all volumes."""
         url = 'volumes/detail'
         if params:
                 url += '?%s' % urllib.urlencode(params)
@@ -57,7 +57,7 @@ class VolumesClientJSON(RestClient):
         return resp, body['volumes']
 
     def get_volume(self, volume_id, wait=None):
-        """Returns the details of a single volume"""
+        """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
         resp, body = self.get(url, wait=wait)
         body = json.loads(body)
@@ -85,11 +85,11 @@ class VolumesClientJSON(RestClient):
         return resp, body['volume']
 
     def delete_volume(self, volume_id):
-        """Deletes the Specified Volume"""
+        """Deletes the Specified Volume."""
         return self.delete("volumes/%s" % str(volume_id))
 
     def attach_volume(self, volume_id, instance_uuid, mountpoint):
-        """Attaches a volume to a given instance on a given mountpoint"""
+        """Attaches a volume to a given instance on a given mountpoint."""
         post_body = {
             'instance_uuid': instance_uuid,
             'mountpoint': mountpoint,
@@ -100,7 +100,7 @@ class VolumesClientJSON(RestClient):
         return resp, body
 
     def detach_volume(self, volume_id):
-        """Detaches a volume from an instance"""
+        """Detaches a volume from an instance."""
         post_body = {}
         post_body = json.dumps({'os-detach': post_body})
         url = 'volumes/%s/action' % (volume_id)
@@ -108,7 +108,7 @@ class VolumesClientJSON(RestClient):
         return resp, body
 
     def wait_for_volume_status(self, volume_id, status):
-        """Waits for a Volume to reach a given status"""
+        """Waits for a Volume to reach a given status."""
         resp, body = self.get_volume(volume_id)
         volume_name = body['display_name']
         volume_status = body['status']

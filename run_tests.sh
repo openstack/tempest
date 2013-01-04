@@ -75,9 +75,10 @@ function run_pep8 {
   echo "Running pep8 ..."
   srcfiles="`find tempest -type f -name "*.py"`"
   srcfiles+=" `find tools -type f -name "*.py"`"
+  srcfiles+=" `find stress -type f -name "*.py"`"
   srcfiles+=" setup.py"
 
-  ignore='--ignore=T401,T402,E121,E122,E125,E126'
+  ignore='--ignore=E121,E122,E125,E126'
 
     ${wrapper} python tools/hacking.py ${ignore} ${srcfiles}
 }

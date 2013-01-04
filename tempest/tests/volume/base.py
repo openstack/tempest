@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
 
 class BaseVolumeTest(unittest.TestCase):
 
-    """Base test case class for all Cinder API tests"""
+    """Base test case class for all Cinder API tests."""
 
     @classmethod
     def setUpClass(cls):
@@ -122,7 +122,7 @@ class BaseVolumeTest(unittest.TestCase):
         cls.clear_isolated_creds()
 
     def create_volume(self, size=1, metadata={}):
-        """Wrapper utility that returns a test volume"""
+        """Wrapper utility that returns a test volume."""
         display_name = rand_name(self.__class__.__name__ + "-volume")
         cli_resp = self.volumes_client.create_volume(size=size,
                                                      display_name=display_name,
@@ -133,7 +133,7 @@ class BaseVolumeTest(unittest.TestCase):
         return volume
 
     def wait_for(self, condition):
-        """Repeatedly calls condition() until a timeout"""
+        """Repeatedly calls condition() until a timeout."""
         start_time = int(time.time())
         while True:
             try:

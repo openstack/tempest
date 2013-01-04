@@ -303,7 +303,7 @@ class RestClient(object):
         return resp, resp_body
 
     def wait_for_resource_deletion(self, id):
-        """Waits for a resource to be deleted"""
+        """Waits for a resource to be deleted."""
         start_time = int(time.time())
         while True:
             if self.is_resource_deleted(id):

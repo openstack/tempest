@@ -48,7 +48,7 @@ class Client(object):
         self.buf_size = 1024
 
     def _get_ssh_connection(self):
-        """Returns an ssh connection to the specified host"""
+        """Returns an ssh connection to the specified host."""
         _timeout = True
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(
@@ -79,7 +79,7 @@ class Client(object):
         return (time.time() - timeout) > start_time
 
     def connect_until_closed(self):
-        """Connect to the server and wait until connection is lost"""
+        """Connect to the server and wait until connection is lost."""
         try:
             ssh = self._get_ssh_connection()
             _transport = ssh.get_transport()
@@ -137,7 +137,7 @@ class Client(object):
         return ''.join(out_data)
 
     def test_connection_auth(self):
-        """ Returns true if ssh can connect to server"""
+        """Returns true if ssh can connect to server."""
         try:
             connection = self._get_ssh_connection()
             connection.close()

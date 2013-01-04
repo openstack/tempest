@@ -95,7 +95,7 @@ class DataGenerator(object):
             self.role_name = None
 
         def setup_test_user(self):
-            """Set up a test user"""
+            """Set up a test user."""
             self.setup_test_tenant()
             self.test_user = rand_name('test_user_')
             self.test_password = rand_name('pass_')
@@ -107,7 +107,7 @@ class DataGenerator(object):
             self.users.append(self.user)
 
         def setup_test_tenant(self):
-            """Set up a test tenant"""
+            """Set up a test tenant."""
             self.test_tenant = rand_name('test_tenant_')
             self.test_description = rand_name('desc_')
             resp, self.tenant = self.client.create_tenant(
@@ -116,7 +116,7 @@ class DataGenerator(object):
             self.tenants.append(self.tenant)
 
         def setup_test_role(self):
-            """Set up a test role"""
+            """Set up a test role."""
             self.test_role = rand_name('role')
             resp, self.role = self.client.create_role(self.test_role)
             self.roles.append(self.role)

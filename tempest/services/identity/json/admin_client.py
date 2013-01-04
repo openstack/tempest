@@ -25,7 +25,7 @@ class AdminClientJSON(RestClient):
         return self._has_admin_extensions
 
     def create_role(self, name):
-        """Create a role"""
+        """Create a role."""
         post_body = {
             'name': name,
         }
@@ -52,19 +52,19 @@ class AdminClientJSON(RestClient):
         return resp, body['tenant']
 
     def delete_role(self, role_id):
-        """Delete a role"""
+        """Delete a role."""
         resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
         return resp, body
 
     def list_user_roles(self, tenant_id, user_id):
-        """Returns a list of roles assigned to a user for a tenant"""
+        """Returns a list of roles assigned to a user for a tenant."""
         url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['roles']
 
     def assign_user_role(self, tenant_id, user_id, role_id):
-        """Add roles to a user on a tenant"""
+        """Add roles to a user on a tenant."""
         post_body = json.dumps({})
         resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                               (tenant_id, user_id, role_id), post_body,
@@ -73,29 +73,29 @@ class AdminClientJSON(RestClient):
         return resp, body['role']
 
     def remove_user_role(self, tenant_id, user_id, role_id):
-        """Removes a role assignment for a user on a tenant"""
+        """Removes a role assignment for a user on a tenant."""
         return self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                            (tenant_id, user_id, role_id))
 
     def delete_tenant(self, tenant_id):
-        """Delete a tenant"""
+        """Delete a tenant."""
         resp, body = self.delete('tenants/%s' % str(tenant_id))
         return resp, body
 
     def get_tenant(self, tenant_id):
-        """Get tenant details"""
+        """Get tenant details."""
         resp, body = self.get('tenants/%s' % str(tenant_id))
         body = json.loads(body)
         return resp, body['tenant']
 
     def list_roles(self):
-        """Returns roles"""
+        """Returns roles."""
         resp, body = self.get('OS-KSADM/roles')
         body = json.loads(body)
         return resp, body['roles']
 
     def list_tenants(self):
-        """Returns tenants"""
+        """Returns tenants."""
         resp, body = self.get('tenants')
         body = json.loads(body)
         return resp, body['tenants']
@@ -108,7 +108,7 @@ class AdminClientJSON(RestClient):
         raise exceptions.NotFound('No such tenant')
 
     def update_tenant(self, tenant_id, **kwargs):
-        """Updates a tenant"""
+        """Updates a tenant."""
         resp, body = self.get_tenant(tenant_id)
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
@@ -126,7 +126,7 @@ class AdminClientJSON(RestClient):
         return resp, body['tenant']
 
     def create_user(self, name, password, tenant_id, email):
-        """Create a user"""
+        """Create a user."""
         post_body = {
             'name': name,
             'password': password,
@@ -139,18 +139,18 @@ class AdminClientJSON(RestClient):
         return resp, body['user']
 
     def delete_user(self, user_id):
-        """Delete a user"""
+        """Delete a user."""
         resp, body = self.delete("users/%s" % user_id)
         return resp, body
 
     def get_users(self):
-        """Get the list of users"""
+        """Get the list of users."""
         resp, body = self.get("users")
         body = json.loads(body)
         return resp, body['users']
 
     def enable_disable_user(self, user_id, enabled):
-        """Enables or disables a user"""
+        """Enables or disables a user."""
         put_body = {
                 'enabled': enabled
         }
@@ -161,12 +161,12 @@ class AdminClientJSON(RestClient):
         return resp, body
 
     def delete_token(self, token_id):
-        """Delete a token"""
+        """Delete a token."""
         resp, body = self.delete("tokens/%s" % token_id)
         return resp, body
 
     def list_users_for_tenant(self, tenant_id):
-        """List users for a Tenant"""
+        """List users for a Tenant."""
         resp, body = self.get('/tenants/%s/users' % tenant_id)
         body = json.loads(body)
         return resp, body['users']
@@ -179,7 +179,7 @@ class AdminClientJSON(RestClient):
         raise exceptions.NotFound('No such user')
 
     def create_service(self, name, type, **kwargs):
-        """Create a service"""
+        """Create a service."""
         post_body = {
             'name': name,
             'type': type,
@@ -191,14 +191,14 @@ class AdminClientJSON(RestClient):
         return resp, body['OS-KSADM:service']
 
     def get_service(self, service_id):
-        """Get Service"""
+        """Get Service."""
         url = '/OS-KSADM/services/%s' % service_id
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['OS-KSADM:service']
 
     def delete_service(self, service_id):
-        """Delete Service"""
+        """Delete Service."""
         url = '/OS-KSADM/services/%s' % service_id
         return self.delete(url)
 

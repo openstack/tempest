@@ -29,7 +29,7 @@ def rand_name(name='test'):
 
 def build_url(host, port, api_version=None, path=None,
               params=None, use_ssl=False):
-    """Build the request URL from given host, port, path and parameters"""
+    """Build the request URL from given host, port, path and parameters."""
 
     pattern = 'v\d\.\d'
     if re.match(pattern, path):
@@ -59,7 +59,7 @@ def build_url(host, port, api_version=None, path=None,
 
 
 def parse_image_id(image_ref):
-    """Return the image id from a given image ref"""
+    """Return the image id from a given image ref."""
     return  image_ref.rsplit('/')[-1]
 
 

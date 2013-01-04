@@ -63,7 +63,7 @@ class AdminClientXML(RestClientXML):
         return self._has_admin_extensions
 
     def create_role(self, name):
-        """Create a role"""
+        """Create a role."""
         create_role = Element("role", xmlns=XMLNS, name=name)
         resp, body = self.post('OS-KSADM/roles', str(Document(create_role)),
                                self.headers)
@@ -89,55 +89,55 @@ class AdminClientXML(RestClientXML):
         return resp, body
 
     def delete_role(self, role_id):
-        """Delete a role"""
+        """Delete a role."""
         resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id),
                                  self.headers)
         return resp, body
 
     def list_user_roles(self, tenant_id, user_id):
-        """Returns a list of roles assigned to a user for a tenant"""
+        """Returns a list of roles assigned to a user for a tenant."""
         url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
         resp, body = self.get(url, self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def assign_user_role(self, tenant_id, user_id, role_id):
-        """Add roles to a user on a tenant"""
+        """Add roles to a user on a tenant."""
         resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                               (tenant_id, user_id, role_id), '', self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def remove_user_role(self, tenant_id, user_id, role_id):
-        """Removes a role assignment for a user on a tenant"""
+        """Removes a role assignment for a user on a tenant."""
         return self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
                            (tenant_id, user_id, role_id), self.headers)
 
     def delete_tenant(self, tenant_id):
-        """Delete a tenant"""
+        """Delete a tenant."""
         resp, body = self.delete('tenants/%s' % str(tenant_id), self.headers)
         return resp, body
 
     def get_tenant(self, tenant_id):
-        """Get tenant details"""
+        """Get tenant details."""
         resp, body = self.get('tenants/%s' % str(tenant_id), self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_roles(self):
-        """Returns roles"""
+        """Returns roles."""
         resp, body = self.get('OS-KSADM/roles', self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def list_tenants(self):
-        """Returns tenants"""
+        """Returns tenants."""
         resp, body = self.get('tenants', self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def update_tenant(self, tenant_id, **kwargs):
-        """Updates a tenant"""
+        """Updates a tenant."""
         resp, body = self.get_tenant(tenant_id)
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
@@ -156,7 +156,7 @@ class AdminClientXML(RestClientXML):
         return resp, body
 
     def create_user(self, name, password, tenant_id, email):
-        """Create a user"""
+        """Create a user."""
         create_user = Element("user",
                               xmlns=XMLNS,
                               name=name,
@@ -169,18 +169,18 @@ class AdminClientXML(RestClientXML):
         return resp, body
 
     def delete_user(self, user_id):
-        """Delete a user"""
+        """Delete a user."""
         resp, body = self.delete("users/%s" % user_id, self.headers)
         return resp, body
 
     def get_users(self):
-        """Get the list of users"""
+        """Get the list of users."""
         resp, body = self.get("users", self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def enable_disable_user(self, user_id, enabled):
-        """Enables or disables a user"""
+        """Enables or disables a user."""
         enable_user = Element("user", enabled=str(enabled).lower())
         resp, body = self.put('users/%s/enabled' % user_id,
                               str(Document(enable_user)), self.headers)
@@ -188,18 +188,18 @@ class AdminClientXML(RestClientXML):
         return resp, body
 
     def delete_token(self, token_id):
-        """Delete a token"""
+        """Delete a token."""
         resp, body = self.delete("tokens/%s" % token_id, self.headers)
         return resp, body
 
     def list_users_for_tenant(self, tenant_id):
-        """List users for a Tenant"""
+        """List users for a Tenant."""
         resp, body = self.get('/tenants/%s/users' % tenant_id, self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def create_service(self, name, type, **kwargs):
-        """Create a service"""
+        """Create a service."""
         OS_KSADM = "http://docs.openstack.org/identity/api/ext/OS-KSADM/v1.0"
         create_service = Element("service",
                                  xmlns=OS_KSADM,
@@ -213,14 +213,14 @@ class AdminClientXML(RestClientXML):
         return resp, body
 
     def get_service(self, service_id):
-        """Get Service"""
+        """Get Service."""
         url = '/OS-KSADM/services/%s' % service_id
         resp, body = self.get(url, self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_service(self, service_id):
-        """Delete Service"""
+        """Delete Service."""
         url = '/OS-KSADM/services/%s' % service_id
         return self.delete(url, self.headers)
 

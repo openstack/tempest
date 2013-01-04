@@ -96,7 +96,7 @@ class TestCreateVM(test_case.StressTestCase):
 
 
 class VerifyCreateVM(pending_action.PendingServerAction):
-    """Verify that VM was built and is running"""
+    """Verify that VM was built and is running."""
     def __init__(self, manager,
                  state,
                  created_server,
@@ -175,7 +175,7 @@ class TestKillActiveVM(test_case.StressTestCase):
 
 
 class VerifyKillActiveVM(pending_action.PendingServerAction):
-    """Verify that server was destroyed"""
+    """Verify that server was destroyed."""
 
     def retry(self):
         """
@@ -238,7 +238,7 @@ VerifyKillAnyVM = VerifyKillActiveVM
 
 
 class TestUpdateVMName(test_case.StressTestCase):
-    """Class to change the name of the active server"""
+    """Class to change the name of the active server."""
     def run(self, manager, state, *pargs, **kwargs):
         """
         Issue HTTP POST request to change the name of active server.
@@ -288,7 +288,7 @@ class TestUpdateVMName(test_case.StressTestCase):
 
 
 class VerifyUpdateVMName(pending_action.PendingServerAction):
-    """Check that VM has new name"""
+    """Check that VM has new name."""
     def retry(self):
         """
         Check that VM has new name. Update local view of `state` to RUNNING.

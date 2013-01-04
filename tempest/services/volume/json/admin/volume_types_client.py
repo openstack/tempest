@@ -35,7 +35,7 @@ class VolumeTypesClientJSON(RestClient):
         self.build_timeout = self.config.volume.build_timeout
 
     def list_volume_types(self, params=None):
-        """List all the volume_types created"""
+        """List all the volume_types created."""
         url = 'types'
         if params is not None:
             url += '?%s' % urllib.urlencode(params)
@@ -45,7 +45,7 @@ class VolumeTypesClientJSON(RestClient):
         return resp, body['volume_types']
 
     def get_volume_type(self, volume_id):
-        """Returns the details of a single volume_type"""
+        """Returns the details of a single volume_type."""
         url = "types/%s" % str(volume_id)
         resp, body = self.get(url)
         body = json.loads(body)
@@ -69,11 +69,11 @@ class VolumeTypesClientJSON(RestClient):
         return resp, body['volume_type']
 
     def delete_volume_type(self, volume_id):
-        """Deletes the Specified Volume_type"""
+        """Deletes the Specified Volume_type."""
         return self.delete("types/%s" % str(volume_id))
 
     def list_volume_types_extra_specs(self, vol_type_id, params=None):
-        """List all the volume_types extra specs created"""
+        """List all the volume_types extra specs created."""
         url = 'types/%s/extra_specs' % str(vol_type_id)
         if params is not None:
             url += '?%s' % urllib.urlencode(params)
@@ -83,7 +83,7 @@ class VolumeTypesClientJSON(RestClient):
         return resp, body['extra_specs']
 
     def get_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
-        """Returns the details of a single volume_type extra spec"""
+        """Returns the details of a single volume_type extra spec."""
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
         resp, body = self.get(url)
@@ -103,7 +103,7 @@ class VolumeTypesClientJSON(RestClient):
         return resp, body['extra_specs']
 
     def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
-        """Deletes the Specified Volume_type extra spec"""
+        """Deletes the Specified Volume_type extra spec."""
         return self.delete("types/%s/extra_specs/%s" % ((str(vol_id)),
                                                         str(extra_spec_name)))
 
