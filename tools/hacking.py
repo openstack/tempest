@@ -36,13 +36,13 @@ import pep8
 # Don't need this for testing
 logging.disable('LOG')
 
-#N1xx comments
-#N2xx except
-#N3xx imports
-#N4xx docstrings
-#N5xx dictionaries/lists
-#N6xx calling methods
-#N7xx localization
+#T1xx comments
+#T2xx except
+#T3xx imports
+#T4xx docstrings
+#T5xx dictionaries/lists
+#T6xx calling methods
+#T7xx localization
 #N8xx git commit messages
 
 IMPORT_EXCEPTIONS = ['sqlalchemy', 'migrate']
@@ -110,13 +110,13 @@ def tempest_todo_format(physical_line):
 
     tempest HACKING guide recommendation for TODO:
     Include your name with TODOs as in "#TODO(termie)"
-    N101
+    T101
     """
     pos = physical_line.find('TODO')
     pos1 = physical_line.find('TODO(')
     pos2 = physical_line.find('#')  # make sure it's a comment
     if (pos != pos1 and pos2 >= 0 and pos2 < pos):
-        return pos, "TEMPEST N101: Use TODO(NAME)"
+        return pos, "T101: Use TODO(NAME)"
 
 
 def tempest_except_format(logical_line):
@@ -124,10 +124,10 @@ def tempest_except_format(logical_line):
 
     tempest HACKING guide recommends not using except:
     Do not write "except:", use "except Exception:" at the very least
-    N201
+    T201
     """
     if logical_line.startswith("except:"):
-        yield 6, "TEMPEST N201: no 'except:' at least use 'except Exception:'"
+        yield 6, "T201: no 'except:' at least use 'except Exception:'"
 
 
 def tempest_except_format_assert(logical_line):
@@ -135,10 +135,10 @@ def tempest_except_format_assert(logical_line):
 
     tempest HACKING guide recommends not using assertRaises(Exception...):
     Do not use overly broad Exception type
-    N202
+    T202
     """
     if logical_line.startswith("self.assertRaises(Exception"):
-        yield 1, "TEMPEST N202: assertRaises Exception too broad"
+        yield 1, "T202: assertRaises Exception too broad"
 
 
 def tempest_one_import_per_line(logical_line):
@@ -149,14 +149,14 @@ def tempest_one_import_per_line(logical_line):
 
     Examples:
     BAD: from tempest.common.rest_client import RestClient, RestClientXML
-    N301
+    T301
     """
     pos = logical_line.find(',')
     parts = logical_line.split()
     if (pos > -1 and (parts[0] == "import" or
                       parts[0] == "from" and parts[2] == "import") and
         not is_import_exception(parts[1])):
-        yield pos, "TEMPEST N301: one import per line"
+        yield pos, "T301: one import per line"
 
 _missingImport = set([])
 
@@ -166,9 +166,9 @@ def tempest_import_module_only(logical_line):
 
     tempest HACKING guide recommends importing only modules:
     Do not import objects, only modules
-    N302 import only modules
-    N303 Invalid Import
-    N304 Relative Import
+    T302 import only modules
+    T303 Invalid Import
+    T304 Relative Import
     """
     def importModuleCheck(mod, parent=None, added=False):
         """
@@ -193,12 +193,12 @@ def tempest_import_module_only(logical_line):
                     if added:
                         sys.path.pop()
                         added = False
-                        return logical_line.find(mod), ("TEMPEST N304: No "
+                        return logical_line.find(mod), ("T304: No "
                                                         "relative  imports. "
                                                         "'%s' is a relative "
                                                         "import"
                                                         % logical_line)
-                    return logical_line.find(mod), ("TEMPEST N302: import only"
+                    return logical_line.find(mod), ("T302: import only"
                                                     " modules. '%s' does not "
                                                     "import a module"
                                                     % logical_line)
@@ -222,7 +222,7 @@ def tempest_import_module_only(logical_line):
 
         except AttributeError:
             # Invalid import
-            return logical_line.find(mod), ("TEMPEST N303: Invalid import, "
+            return logical_line.find(mod), ("T303: Invalid import, "
                                             "AttributeError raised")
 
     # convert "from x import y" to " import x.y"
@@ -240,7 +240,7 @@ def tempest_import_module_only(logical_line):
 
     # TODO(jogo) handle "from x import *"
 
-#TODO(jogo): import template: N305
+#TODO(jogo): import template: T305
 
 
 def tempest_import_alphabetical(logical_line, line_number, lines):
@@ -248,7 +248,7 @@ def tempest_import_alphabetical(logical_line, line_number, lines):
 
     Tempest HACKING guide recommendation for imports:
     imports in human alphabetical order
-    N306
+    T306
     """
     # handle import x
     # use .lower since capitalization shouldn't dictate order
@@ -260,7 +260,7 @@ def tempest_import_alphabetical(logical_line, line_number, lines):
     if (len(split_line) in length and len(split_previous) in length and
         split_line[0] == "import" and split_previous[0] == "import"):
         if split_line[1] < split_previous[1]:
-            yield (0, "TEMPEST N306: imports not in alphabetical order"
+            yield (0, "T306: imports not in alphabetical order"
                       " (%s, %s)"
                       % (split_previous[1], split_line[1]))
 
@@ -270,12 +270,12 @@ def tempest_docstring_start_space(physical_line):
 
     tempest HACKING guide recommendation for docstring:
     Docstring should not start with space
-    N401
+    T401
     """
     pos = max([physical_line.find(i) for i in DOCSTRING_TRIPLE])  # start
     if (pos != -1 and len(physical_line) > pos + 1):
         if (physical_line[pos + 3] == ' '):
-            return (pos, "TEMPEST N401: one line docstring should not start"
+            return (pos, "T401: one line docstring should not start"
                          " with a space")
 
 
@@ -284,13 +284,13 @@ def tempest_docstring_one_line(physical_line):
 
     tempest HACKING guide recommendation for one line docstring:
     A one line docstring looks like this and ends in a period.
-    N402
+    T402
     """
     pos = max([physical_line.find(i) for i in DOCSTRING_TRIPLE])  # start
     end = max([physical_line[-4:-1] == i for i in DOCSTRING_TRIPLE])  # end
     if (pos != -1 and end and len(physical_line) > pos + 4):
         if (physical_line[-5] != '.'):
-            return pos, "N402: one line docstring needs a period"
+            return pos, "T402: one line docstring needs a period"
 
 
 def tempest_docstring_multiline_end(physical_line):
@@ -298,12 +298,12 @@ def tempest_docstring_multiline_end(physical_line):
 
     Tempest HACKING guide recommendation for docstring:
     Docstring should end on a new line
-    N403
+    T403
     """
     pos = max([physical_line.find(i) for i in DOCSTRING_TRIPLE])  # start
     if (pos != -1 and len(physical_line) == pos):
         if (physical_line[pos + 3] == ' '):
-            return (pos, "TEMPEST N403: multi line docstring end on new line")
+            return (pos, "T403: multi line docstring end on new line")
 
 
 def tempest_no_test_docstring(physical_line, previous_logical, filename):
@@ -313,13 +313,13 @@ def tempest_no_test_docstring(physical_line, previous_logical, filename):
     of them being hidden behind generic descriptions of the
     functions.
 
-    N404
+    T404
     """
     if "tempest/test" in filename:
         pos = max([physical_line.find(i) for i in DOCSTRING_TRIPLE])
         if pos != -1:
             if previous_logical.startswith("def test_"):
-                return (pos, "TEMPEST N404: test functions must "
+                return (pos, "T404: test functions must "
                         "not have doc strings")
 
 
@@ -370,25 +370,25 @@ def check_i18n():
 
             if not format_string:
                 raise LocalizationError(start,
-                                        "TEMEPST N701: Empty localization "
+                                        "T701: Empty localization "
                                         "string")
             if token_type != tokenize.OP:
                 raise LocalizationError(start,
-                                        "TEMPEST N701: Invalid localization "
+                                        "T701: Invalid localization "
                                         "call")
             if text != ")":
                 if text == "%":
                     raise LocalizationError(start,
-                                            "TEMPEST N702: Formatting "
+                                            "T702: Formatting "
                                             "operation should be outside"
                                             " of localization method call")
                 elif text == "+":
                     raise LocalizationError(start,
-                                            "TEMPEST N702: Use bare string "
+                                            "T702: Use bare string "
                                             "concatenation instead of +")
                 else:
                     raise LocalizationError(start,
-                                            "TEMPEST N702: Argument to _ must"
+                                            "T702: Argument to _ must"
                                             " be just a string")
 
             format_specs = FORMAT_RE.findall(format_string)
@@ -397,16 +397,16 @@ def check_i18n():
             # not spec means %%, key means %(smth)s
             if len(positional_specs) > 1:
                 raise LocalizationError(start,
-                                        "TEMPEST N703: Multiple positional "
+                                        "T703: Multiple positional "
                                         "placeholders")
 
 
 def tempest_localization_strings(logical_line, tokens):
     """Check localization in line.
 
-    N701: bad localization call
-    N702: complex expression instead of string as argument to _()
-    N703: multiple positional placeholders
+    T701: bad localization call
+    T702: complex expression instead of string as argument to _()
+    T703: multiple positional placeholders
     """
 
     gen = check_i18n()
@@ -448,8 +448,8 @@ def once_git_check_commit_title():
 
     tempest HACKING recommends not referencing a bug or blueprint
     in first line, it should provide an accurate description of the change
-    N801
-    N802 Title limited to 50 chars
+    T801
+    T802 Title limited to 50 chars
     """
     #Get title of most recent commit
 
@@ -470,12 +470,12 @@ def once_git_check_commit_title():
     error = False
     #NOTE(jogo) if match regex but over 3 words, acceptable title
     if GIT_REGEX.search(title) is not None and len(title.split()) <= 3:
-        print ("N801: git commit title ('%s') should provide an accurate "
+        print ("T801: git commit title ('%s') should provide an accurate "
                "description of the change, not just a reference to a bug "
                "or blueprint" % title.strip())
         error = True
     if len(title.decode('utf-8')) > 72:
-        print ("N802: git commit title ('%s') should be under 50 chars"
+        print ("T802: git commit title ('%s') should be under 50 chars"
                % title.strip())
         error = True
     return error
@@ -485,8 +485,8 @@ if __name__ == "__main__":
     sys.path.append(os.getcwd())
     #Run once tests (not per line)
     once_error = once_git_check_commit_title()
-    #TEMPEST error codes start with an N
-    pep8.ERRORCODE_REGEX = re.compile(r'[EWN]\d{3}')
+    #TEMPEST error codes start with a T
+    pep8.ERRORCODE_REGEX = re.compile(r'[EWT]\d{3}')
     add_tempest()
     pep8.current_file = current_file
     pep8.readlines = readlines
