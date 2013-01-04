@@ -43,7 +43,7 @@ class ServersTest(object):
         cls.accessIPv6canon = '::babe:dc0c:1602'
         cls.name = rand_name('server')
         file_contents = 'This is a test file.'
-        personality = [{'path': '/etc/test.txt',
+        personality = [{'path': '/test.txt',
                        'contents': base64.b64encode(file_contents)}]
         cls.client = cls.servers_client
         cli_resp = cls.client.create_server(cls.name,
