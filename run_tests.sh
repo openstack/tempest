@@ -77,9 +77,9 @@ function run_pep8 {
   srcfiles+=" `find tools -type f -name "*.py"`"
   srcfiles+=" setup.py"
 
-  ignore='--ignore=N4,E121,E122,E125,E126'
+  ignore='--ignore=N401,N402,E121,E122,E125,E126'
 
-  ${wrapper} python tools/hacking.py ${ignore} ${srcfiles}
+    ${wrapper} python tools/hacking.py ${ignore} ${srcfiles}
 }
 
 NOSETESTS="nosetests $noseargs"

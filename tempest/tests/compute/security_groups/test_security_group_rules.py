@@ -58,11 +58,10 @@ class SecurityGroupRulesTest(object):
 
     @attr(type='positive')
     def test_security_group_rules_create_with_optional_arguments(self):
-        """
-        Positive test: Creation of Security Group rule
-        with optional arguments
-        should be successfull
-        """
+        # Positive test: Creation of Security Group rule
+        # with optional arguments
+        # should be successfull
+
         rule_id = None
         secgroup1 = None
         secgroup2 = None

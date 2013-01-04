@@ -111,11 +111,9 @@ class FloatingIPsTestBase(object):
 
     @attr(type='negative')
     def test_delete_nonexistant_floating_ip(self):
-        """
+        # Negative test:Deletion of a nonexistent floating IP
+        # from project should fail
 
-        Negative test:Deletion of a nonexistent floating IP
-        from project should fail
-        """
         #Deleting the non existent floating IP
         try:
             resp, body = self.client.delete_floating_ip(self.non_exist_id)

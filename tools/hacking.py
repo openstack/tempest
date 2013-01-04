@@ -290,7 +290,7 @@ def tempest_docstring_one_line(physical_line):
     end = max([physical_line[-4:-1] == i for i in DOCSTRING_TRIPLE])  # end
     if (pos != -1 and end and len(physical_line) > pos + 4):
         if (physical_line[-5] != '.'):
-            return pos, "TEMPEST N402: one line docstring needs a period"
+            return pos, "N402: one line docstring needs a period"
 
 
 def tempest_docstring_multiline_end(physical_line):
@@ -304,6 +304,23 @@ def tempest_docstring_multiline_end(physical_line):
     if (pos != -1 and len(physical_line) == pos):
         if (physical_line[pos + 3] == ' '):
             return (pos, "TEMPEST N403: multi line docstring end on new line")
+
+
+def tempest_no_test_docstring(physical_line, previous_logical, filename):
+    """Check that test_ functions don't have docstrings
+
+    This ensure we get better results out of tempest, instead
+    of them being hidden behind generic descriptions of the
+    functions.
+
+    N404
+    """
+    if "tempest/test" in filename:
+        pos = max([physical_line.find(i) for i in DOCSTRING_TRIPLE])
+        if pos != -1:
+            if previous_logical.startswith("def test_"):
+                return (pos, "TEMPEST N404: test functions must "
+                        "not have doc strings")
 
 
 FORMAT_RE = re.compile("%(?:"
