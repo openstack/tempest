@@ -57,9 +57,9 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
 
         instances = self.meta.tables['instances']
         stmt = instances.update().where(instances.c.uuid == server_id).values(
-                                                               deleted=deleted,
-                                                             vm_state=vm_state,
-                                                         task_state=task_state)
+            deleted=deleted,
+            vm_state=vm_state,
+            task_state=task_state)
 
         self.connection.execute(stmt, autocommit=True)
 

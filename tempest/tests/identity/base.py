@@ -111,8 +111,8 @@ class DataGenerator(object):
             self.test_tenant = rand_name('test_tenant_')
             self.test_description = rand_name('desc_')
             resp, self.tenant = self.client.create_tenant(
-                                                        name=self.test_tenant,
-                                             description=self.test_description)
+                name=self.test_tenant,
+                description=self.test_description)
             self.tenants.append(self.tenant)
 
         def setup_test_role(self):

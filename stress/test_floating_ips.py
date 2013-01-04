@@ -36,14 +36,13 @@ class TestChangeFloatingIp(test_case.StressTestCase):
             return None
         floating_ip.change_pending = True
         timeout = int(kwargs.get('timeout', 60))
+        cli = manager.floating_ips_client
         if floating_ip.server_id is None:
             server = random.choice(self.server_ids)
             address = floating_ip.address
             self._logger.info('Adding %s to server %s' % (address, server))
-            resp, body =\
-            manager.floating_ips_client.associate_floating_ip_to_server(
-                                                        address,
-                                                        server)
+            resp, body = cli.associate_floating_ip_to_server(address,
+                                                             server)
             if resp.status != 202:
                 raise Exception("response: %s body: %s" % (resp, body))
             floating_ip.server_id = server
@@ -53,9 +52,8 @@ class TestChangeFloatingIp(test_case.StressTestCase):
             server = floating_ip.server_id
             address = floating_ip.address
             self._logger.info('Removing %s from server %s' % (address, server))
-            resp, body =\
-            manager.floating_ips_client.disassociate_floating_ip_from_server(
-                                                           address, server)
+            resp, body = cli.disassociate_floating_ip_from_server(address,
+                                                                  server)
             if resp.status != 202:
                 raise Exception("response: %s body: %s" % (resp, body))
             return VerifyChangeFloatingIp(manager, floating_ip,

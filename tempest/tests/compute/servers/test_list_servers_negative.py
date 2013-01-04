@@ -164,8 +164,8 @@ class ListServersNegativeTest(BaseComputeTest):
 
     def test_list_servers_by_changes_since(self):
         """Servers are listed by specifying changes-since date"""
-        resp, body = self.client.list_servers(
-                         {'changes-since': '2011-01-01T12:34:00Z'})
+        changes_since = {'changes-since': '2011-01-01T12:34:00Z'}
+        resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
         # changes-since returns all instances, including deleted.
         num_expected = (len(self.existing_fixtures) +
@@ -179,8 +179,8 @@ class ListServersNegativeTest(BaseComputeTest):
 
     def test_list_servers_by_changes_since_future_date(self):
         """Return an empty list when a date in the future is passed"""
-        resp, body = self.client.list_servers(
-                         {'changes-since': '2051-01-01T12:34:00Z'})
+        changes_since = {'changes-since': '2051-01-01T12:34:00Z'}
+        resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
         self.assertEqual(0, len(body['servers']))
 

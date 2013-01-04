@@ -56,8 +56,8 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
         """Disallow server creation when tenant's vcpu quota is full"""
         quotas = self.meta.tables['quotas']
         stmt = quotas.select().where(
-                              quotas.c.project_id == self.tenant_id).where(
-                              quotas.c.resource == 'cores')
+            quotas.c.project_id == self.tenant_id).where(
+            quotas.c.resource == 'cores')
         result = self.connection.execute(stmt).first()
 
         # Set vcpu quota for tenant if not already set
@@ -88,8 +88,8 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
         """Disallow server creation when tenant's memory quota is full"""
         quotas = self.meta.tables['quotas']
         stmt = quotas.select().where(
-                              quotas.c.project_id == self.tenant_id).where(
-                              quotas.c.resource == 'ram')
+            quotas.c.project_id == self.tenant_id).where(
+            quotas.c.resource == 'ram')
         result = self.connection.execute(stmt).first()
 
         # Set memory quota for tenant if not already set
@@ -123,9 +123,9 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
 
         instances = self.meta.tables['instances']
         stmt = instances.update().where(instances.c.uuid == server_id).values(
-                                                               deleted=deleted,
-                                                             vm_state=vm_state,
-                                                         task_state=task_state)
+            deleted=deleted,
+            vm_state=vm_state,
+            task_state=task_state)
         self.connection.execute(stmt, autocommit=True)
 
     def _test_delete_server_base(self, vm_state, task_state):

@@ -181,9 +181,10 @@ class AdminClientJSON(RestClient):
     def create_service(self, name, type, **kwargs):
         """Create a service"""
         post_body = {
-                      'name': name,
-                      'type': type,
-                      'description': kwargs.get('description')}
+            'name': name,
+            'type': type,
+            'description': kwargs.get('description')
+        }
         post_body = json.dumps({'OS-KSADM:service': post_body})
         resp, body = self.post('/OS-KSADM/services', post_body, self.headers)
         body = json.loads(body)

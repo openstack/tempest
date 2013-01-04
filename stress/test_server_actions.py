@@ -56,8 +56,7 @@ class TestRebootVM(test_case.StressTestCase):
         reboot_target = target[0]
         # It seems that doing a reboot when in reboot is an error.
         try:
-            response, body = manager.servers_client.reboot(
-                                                           reboot_target['id'],
+            response, body = manager.servers_client.reboot(reboot_target['id'],
                                                            _reboot_arg)
         except Duplicate:
             return

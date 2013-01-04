@@ -41,7 +41,7 @@ class EC2SecurityGroupTest(BotoTestCase):
                                                   group_description)
         self.addResourceCleanUp(self.client.delete_security_group, group_name)
         groups_get = self.client.get_all_security_groups(
-                                                  groupnames=(group_name,))
+            groupnames=(group_name,))
         self.assertEqual(len(groups_get), 1)
         group_get = groups_get[0]
         self.assertEqual(group.name, group_get.name)
@@ -63,7 +63,7 @@ class EC2SecurityGroupTest(BotoTestCase):
         self.assertTrue(success)
         #TODO(afazekas): Duplicate tests
         group_get = self.client.get_all_security_groups(
-                                                 groupnames=(group_name,))[0]
+            groupnames=(group_name,))[0]
         #remove listed rules
         for ip_permission in group_get.rules:
             for cidr in ip_permission.grants:
@@ -74,6 +74,6 @@ class EC2SecurityGroupTest(BotoTestCase):
                                 to_port=ip_permission.to_port))
 
         group_get = self.client.get_all_security_groups(
-                                                 groupnames=(group_name,))[0]
+            groupnames=(group_name,))[0]
         #all rules shuld be removed now
         self.assertEqual(0, len(group_get.rules))
