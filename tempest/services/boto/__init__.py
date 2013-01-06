@@ -35,8 +35,8 @@ class BotoClientBase(object):
                  auth_url=None, tenant_name=None,
                  *args, **kwargs):
 
-        self.connection_timeout = config.boto.http_socket_timeout
-        self.num_retries = config.boto.num_retries
+        self.connection_timeout = str(config.boto.http_socket_timeout)
+        self.num_retries = str(config.boto.num_retries)
         self.build_timeout = config.boto.build_timeout
         # We do not need the "path":  "/token" part
         if auth_url:
