@@ -33,6 +33,69 @@ from tempest.services.compute.xml.common import XMLNS_11
 LOG = logging.getLogger(__name__)
 
 
+def _translate_ip_xml_json(ip):
+    """
+    Convert the address version to int.
+    """
+    ip = dict(ip)
+    version = ip.get('version')
+    if version:
+        ip['version'] = int(version)
+    return ip
+
+
+def _translate_network_xml_to_json(network):
+    return [_translate_ip_xml_json(ip.attrib)
+            for ip in network.findall('{%s}ip' % XMLNS_11)]
+
+
+def _translate_addresses_xml_to_json(xml_addresses):
+    return dict((network.attrib['id'], _translate_network_xml_to_json(network))
+                for network in xml_addresses.findall('{%s}network' % XMLNS_11))
+
+
+def _translate_server_xml_to_json(xml_dom):
+    """ Convert server XML to server JSON.
+
+    The addresses collection does not convert well by the dumb xml_to_json.
+    This method does some pre and post-processing to deal with that.
+
+    Translate XML addresses subtree to JSON.
+
+    Having xml_doc similar to
+    <api:server  xmlns:api="http://docs.openstack.org/compute/api/v1.1">
+        <api:addresses>
+            <api:network id="foo_novanetwork">
+                <api:ip version="4" addr="192.168.0.4"/>
+            </api:network>
+            <api:network id="bar_novanetwork">
+                <api:ip version="4" addr="10.1.0.4"/>
+                <api:ip version="6" addr="2001:0:0:1:2:3:4:5"/>
+            </api:network>
+        </api:addresses>
+    </api:server>
+
+    the _translate_server_xml_to_json(etree.fromstring(xml_doc)) should produce
+    something like
+
+    {'addresses': {'bar_novanetwork': [{'addr': '10.1.0.4', 'version': 4},
+                                       {'addr': '2001:0:0:1:2:3:4:5',
+                                        'version': 6}],
+                   'foo_novanetwork': [{'addr': '192.168.0.4', 'version': 4}]}}
+    """
+    nsmap = {'api': XMLNS_11}
+    addresses = xml_dom.xpath('/api:server/api:addresses', namespaces=nsmap)
+    if addresses:
+        if len(addresses) > 1:
+            raise ValueError('Expected only single `addresses` element.')
+        json_addresses = _translate_addresses_xml_to_json(addresses[0])
+        json = xml_to_json(xml_dom)
+        json['addresses'] = json_addresses
+    else:
+        json = xml_to_json(xml_dom)
+    return json
+
+
 class ServersClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
@@ -54,7 +117,8 @@ class ServersClientXML(RestClientXML):
             json['links'].append(xml_to_json(linknode))
 
     def _parse_server(self, body):
-        json = xml_to_json(body)
+        json = _translate_server_xml_to_json(body)
+
         if 'metadata' in json and json['metadata']:
             # NOTE(danms): if there was metadata, we need to re-parse
             # that as a special type
@@ -65,7 +129,6 @@ class ServersClientXML(RestClientXML):
         for sub in ['image', 'flavor']:
             if sub in json and 'link' in json[sub]:
                 self._parse_links(body, json[sub])
-
         return json
 
     def get_server(self, server_id):
