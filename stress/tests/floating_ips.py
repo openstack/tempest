@@ -11,7 +11,7 @@
 #    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
-"""Stress test that associates/disasssociates floating ips"""
+"""Stress test that associates/disasssociates floating ips."""
 
 from stress.basher import BasherAction
 from stress.driver import *

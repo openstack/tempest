@@ -117,7 +117,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
             self.connection.execute(stmt, autocommit=True)
 
     def update_state(self, server_id, vm_state, task_state, deleted=False):
-        """Update states of an instance in database for validation"""
+        """Update states of an instance in database for validation."""
         if not task_state:
             task_state = 'NULL'
 

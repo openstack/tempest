@@ -48,7 +48,7 @@ class BaseNetworkTest(unittest.TestCase):
             cls.client.delete_network(network['id'])
 
     def create_network(self, network_name=None):
-        """Wrapper utility that returns a test network"""
+        """Wrapper utility that returns a test network."""
         network_name = network_name or rand_name('test-network')
 
         resp, body = self.client.create_network(network_name)

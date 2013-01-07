@@ -56,7 +56,7 @@ class VolumesClientXML(RestClientXML):
             return vol
 
     def list_volumes(self, params=None):
-        """List all the volumes created"""
+        """List all the volumes created."""
         url = 'volumes'
 
         if params:
@@ -70,7 +70,7 @@ class VolumesClientXML(RestClientXML):
         return resp, volumes
 
     def list_volumes_with_detail(self, params=None):
-        """List all the details of volumes"""
+        """List all the details of volumes."""
         url = 'volumes/detail'
 
         if params:
@@ -84,7 +84,7 @@ class VolumesClientXML(RestClientXML):
         return resp, volumes
 
     def get_volume(self, volume_id, wait=None):
-        """Returns the details of a single volume"""
+        """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
         resp, body = self.get(url, self.headers, wait=wait)
         body = etree.fromstring(body)
@@ -116,11 +116,11 @@ class VolumesClientXML(RestClientXML):
         return resp, body
 
     def delete_volume(self, volume_id):
-        """Deletes the Specified Volume"""
+        """Deletes the Specified Volume."""
         return self.delete("volumes/%s" % str(volume_id))
 
     def wait_for_volume_status(self, volume_id, status):
-        """Waits for a Volume to reach a given status"""
+        """Waits for a Volume to reach a given status."""
         resp, body = self.get_volume(volume_id)
         volume_name = body['displayName']
         volume_status = body['status']

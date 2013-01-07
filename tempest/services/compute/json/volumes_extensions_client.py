@@ -34,7 +34,7 @@ class VolumesExtensionsClientJSON(RestClient):
         self.build_timeout = self.config.volume.build_timeout
 
     def list_volumes(self, params=None):
-        """List all the volumes created"""
+        """List all the volumes created."""
         url = 'os-volumes'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -44,7 +44,7 @@ class VolumesExtensionsClientJSON(RestClient):
         return resp, body['volumes']
 
     def list_volumes_with_detail(self, params=None):
-        """List all the details of volumes"""
+        """List all the details of volumes."""
         url = 'os-volumes/detail'
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -54,7 +54,7 @@ class VolumesExtensionsClientJSON(RestClient):
         return resp, body['volumes']
 
     def get_volume(self, volume_id, wait=None):
-        """Returns the details of a single volume"""
+        """Returns the details of a single volume."""
         url = "os-volumes/%s" % str(volume_id)
         resp, body = self.get(url, wait=wait)
         body = json.loads(body)
@@ -80,11 +80,11 @@ class VolumesExtensionsClientJSON(RestClient):
         return resp, body['volume']
 
     def delete_volume(self, volume_id):
-        """Deletes the Specified Volume"""
+        """Deletes the Specified Volume."""
         return self.delete("os-volumes/%s" % str(volume_id))
 
     def wait_for_volume_status(self, volume_id, status):
-        """Waits for a Volume to reach a given status"""
+        """Waits for a Volume to reach a given status."""
         resp, body = self.get_volume(volume_id)
         volume_name = body['displayName']
         volume_status = body['status']

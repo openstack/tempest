@@ -50,6 +50,6 @@ def execute_on_all(keypath, user, nodes, command):
 
 
 def enum(*sequential, **named):
-    """Create auto-incremented enumerated types"""
+    """Create auto-incremented enumerated types."""
     enums = dict(zip(sequential, range(len(sequential))), **named)
     return type('Enum', (), enums)

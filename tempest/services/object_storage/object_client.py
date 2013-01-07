@@ -30,25 +30,25 @@ class ObjectClient(RestClient):
         self.service = self.config.object_storage.catalog_type
 
     def create_object(self, container, object_name, data):
-        """Create storage object"""
+        """Create storage object."""
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.put(url, data, self.headers)
         return resp, body
 
     def update_object(self, container, object_name, data):
-        """Upload data to replace current storage object"""
+        """Upload data to replace current storage object."""
         return create_object(container, object_name, data)
 
     def delete_object(self, container, object_name):
-        """Delete storage object"""
+        """Delete storage object."""
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.delete(url)
         return resp, body
 
     def update_object_metadata(self, container, object_name, metadata,
                                metadata_prefix='X-Object-Meta-'):
-        """Add, remove, or change X-Object-Meta metadata for storage object"""
+        """Add, remove, or change X-Object-Meta metadata for storage object."""
 
         headers = {}
         for key in metadata:
@@ -59,7 +59,7 @@ class ObjectClient(RestClient):
         return resp, body
 
     def list_object_metadata(self, container, object_name):
-        """List all storage object X-Object-Meta- metadata"""
+        """List all storage object X-Object-Meta- metadata."""
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.head(url)
@@ -74,7 +74,7 @@ class ObjectClient(RestClient):
 
     def copy_object_in_same_container(self, container, src_object_name,
                                       dest_object_name, metadata=None):
-        """Copy storage object's data to the new object using PUT"""
+        """Copy storage object's data to the new object using PUT."""
 
         url = "{0}/{1}".format(container, dest_object_name)
         headers = {}
@@ -91,7 +91,7 @@ class ObjectClient(RestClient):
     def copy_object_across_containers(self, src_container, src_object_name,
                                       dst_container, dst_object_name,
                                       metadata=None):
-        """Copy storage object's data to the new object using PUT"""
+        """Copy storage object's data to the new object using PUT."""
 
         url = "{0}/{1}".format(dst_container, dst_object_name)
         headers = {}
@@ -107,7 +107,7 @@ class ObjectClient(RestClient):
 
     def copy_object_2d_way(self, container, src_object_name, dest_object_name,
                            metadata=None):
-        """Copy storage object's data to the new object using COPY"""
+        """Copy storage object's data to the new object using COPY."""
 
         url = "{0}/{1}".format(container, src_object_name)
         headers = {}
@@ -161,7 +161,7 @@ class ObjectClientCustomizedHeader(RestClient):
         return resp, body
 
     def create_object(self, container, object_name, data, metadata=None):
-        """Create storage object"""
+        """Create storage object."""
 
         headers = {}
         if metadata:
@@ -173,7 +173,7 @@ class ObjectClientCustomizedHeader(RestClient):
         return resp, body
 
     def delete_object(self, container, object_name):
-        """Delete storage object"""
+        """Delete storage object."""
 
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.delete(url)

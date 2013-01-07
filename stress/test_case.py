@@ -25,5 +25,5 @@ class StressTestCase(object):
         self._logger = logging.getLogger(self.__class__.__name__)
 
     def run(self, nova_manager, state_obj, *pargs, **kargs):
-        """Nova API methods to call that would modify state of the cluster"""
+        """Nova API methods to call that would modify state of the cluster."""
         return

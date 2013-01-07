@@ -40,7 +40,7 @@ class AccountClient(RestClient):
 
     def create_account_metadata(self, metadata,
                                 metadata_prefix='X-Account-Meta-'):
-        """Creates an account metadata entry"""
+        """Creates an account metadata entry."""
         headers = {}
         for key in metadata:
             headers[metadata_prefix + key] = metadata[key]

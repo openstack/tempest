@@ -30,7 +30,7 @@ class SecurityGroupsClientJSON(RestClient):
         self.service = self.config.compute.catalog_type
 
     def list_security_groups(self, params=None):
-        """List all security groups for a user"""
+        """List all security groups for a user."""
 
         url = 'os-security-groups'
         if params:
@@ -41,7 +41,7 @@ class SecurityGroupsClientJSON(RestClient):
         return resp, body['security_groups']
 
     def get_security_group(self, security_group_id):
-        """Get the details of a Security Group"""
+        """Get the details of a Security Group."""
         url = "os-security-groups/%s" % str(security_group_id)
         resp, body = self.get(url)
         body = json.loads(body)
@@ -63,7 +63,7 @@ class SecurityGroupsClientJSON(RestClient):
         return resp, body['security_group']
 
     def delete_security_group(self, security_group_id):
-        """Deletes the provided Security Group"""
+        """Deletes the provided Security Group."""
         return self.delete('os-security-groups/%s' % str(security_group_id))
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
@@ -93,5 +93,5 @@ class SecurityGroupsClientJSON(RestClient):
         return resp, body['security_group_rule']
 
     def delete_security_group_rule(self, group_rule_id):
-        """Deletes the provided Security Group rule"""
+        """Deletes the provided Security Group rule."""
         return self.delete('os-security-group-rules/%s' % str(group_rule_id))

@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""Common utilities used in testing"""
+"""Common utilities used in testing."""
 
 import nose.plugins.skip
 

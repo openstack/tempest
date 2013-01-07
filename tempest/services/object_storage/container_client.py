@@ -48,14 +48,14 @@ class ContainerClient(RestClient):
         return resp, body
 
     def delete_container(self, container_name):
-        """Deletes the container (if it's empty)"""
+        """Deletes the container (if it's empty)."""
         url = str(container_name)
         resp, body = self.delete(url)
         return resp, body
 
     def update_container_metadata(self, container_name, metadata,
                                   metadata_prefix='X-Container-Meta-'):
-        """Updates arbitrary metadata on container"""
+        """Updates arbitrary metadata on container."""
         url = str(container_name)
         headers = {}
 
@@ -68,7 +68,7 @@ class ContainerClient(RestClient):
 
     def delete_container_metadata(self, container_name, metadata,
                                   metadata_prefix='X-Remove-Container-Meta-'):
-        """Deletes arbitrary metadata on container"""
+        """Deletes arbitrary metadata on container."""
         url = str(container_name)
         headers = {}
 

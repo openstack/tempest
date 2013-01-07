@@ -62,7 +62,7 @@ def state_wait(lfunction, final_set=set(), valid_set=None):
 
 
 def re_search_wait(lfunction, regexp):
-    """Stops waiting on success"""
+    """Stops waiting on success."""
     start_time = time.time()
     while True:
         text = lfunction()
@@ -84,7 +84,7 @@ def re_search_wait(lfunction, regexp):
 
 
 def wait_no_exception(lfunction, exc_class=None, exc_matcher=None):
-    """Stops waiting on success"""
+    """Stops waiting on success."""
     start_time = time.time()
     if exc_matcher is not None:
         exc_class = BotoServerError
@@ -114,7 +114,7 @@ def wait_no_exception(lfunction, exc_class=None, exc_matcher=None):
 
 #NOTE(afazekas): EC2/boto normally raise exception instead of empty list
 def wait_exception(lfunction):
-    """Returns with the exception or raises one"""
+    """Returns with the exception or raises one."""
     start_time = time.time()
     while True:
         try:

@@ -61,7 +61,7 @@ class TestChangeFloatingIp(test_case.StressTestCase):
 
 
 class VerifyChangeFloatingIp(pending_action.PendingAction):
-    """Verify that floating ip was changed"""
+    """Verify that floating ip was changed."""
     def __init__(self, manager, floating_ip, timeout, add=None):
         super(VerifyChangeFloatingIp, self).__init__(manager, timeout=timeout)
         self.floating_ip = floating_ip

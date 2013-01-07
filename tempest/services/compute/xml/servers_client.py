@@ -41,7 +41,7 @@ class ServersClientXML(RestClientXML):
         self.service = self.config.compute.catalog_type
 
     def _parse_key_value(self, node):
-        """Parse <foo key='key'>value</foo> data into {'key': 'value'}"""
+        """Parse <foo key='key'>value</foo> data into {'key': 'value'}."""
         data = {}
         for node in node.getchildren():
             data[node.get('key')] = node.text
@@ -69,13 +69,13 @@ class ServersClientXML(RestClientXML):
         return json
 
     def get_server(self, server_id):
-        """Returns the details of an existing server"""
+        """Returns the details of an existing server."""
         resp, body = self.get("servers/%s" % str(server_id), self.headers)
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
     def delete_server(self, server_id):
-        """Deletes the given server"""
+        """Deletes the given server."""
         return self.delete("servers/%s" % str(server_id))
 
     def _parse_array(self, node):
@@ -179,7 +179,7 @@ class ServersClientXML(RestClientXML):
         return resp, server
 
     def wait_for_server_status(self, server_id, status):
-        """Waits for a server to reach a given status"""
+        """Waits for a server to reach a given status."""
         resp, body = self.get_server(server_id)
         server_status = body['status']
         start = int(time.time())
@@ -202,7 +202,7 @@ class ServersClientXML(RestClientXML):
                 raise exceptions.TimeoutException(message)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
-        """Waits for server to reach termination"""
+        """Waits for server to reach termination."""
         start_time = int(time.time())
         while True:
             try:
@@ -227,7 +227,7 @@ class ServersClientXML(RestClientXML):
         return {node.get('id'): addrs}
 
     def list_addresses(self, server_id):
-        """Lists all addresses for a server"""
+        """Lists all addresses for a server."""
         resp, body = self.get("servers/%s/ips" % str(server_id), self.headers)
 
         networks = {}
@@ -238,7 +238,7 @@ class ServersClientXML(RestClientXML):
         return resp, networks
 
     def list_addresses_by_network(self, server_id, network_id):
-        """Lists all addresses of a specific network type for a server"""
+        """Lists all addresses of a specific network type for a server."""
         resp, body = self.get("servers/%s/ips/%s" % (str(server_id),
                                                      network_id),
                               self.headers)

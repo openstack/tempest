@@ -11,7 +11,7 @@ class HostsClientJSON(RestClient):
         self.service = self.config.compute.catalog_type
 
     def list_hosts(self):
-        """Lists all hosts"""
+        """Lists all hosts."""
 
         url = 'os-hosts'
         resp, body = self.get(url)

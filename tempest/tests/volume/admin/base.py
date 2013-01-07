@@ -27,7 +27,7 @@ from tempest.tests.volume.base import BaseVolumeTest
 
 
 class BaseVolumeAdminTest(BaseVolumeTest):
-    """Base test case class for all Volume Admin API tests"""
+    """Base test case class for all Volume Admin API tests."""
     @classmethod
     def setUpClass(cls):
         super(BaseVolumeAdminTest, cls).setUpClass()

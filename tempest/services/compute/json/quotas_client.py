@@ -28,7 +28,7 @@ class QuotasClient(RestClient):
         self.service = self.config.compute.catalog_type
 
     def get_quota_set(self, tenant_id):
-        """List the quota set for a tenant"""
+        """List the quota set for a tenant."""
 
         url = 'os-quota-sets/%s' % str(tenant_id)
         resp, body = self.get(url)

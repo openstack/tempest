@@ -106,7 +106,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
 
     @classmethod
     def create_server(cls, image_id=None):
-        """Wrapper utility that returns a test server"""
+        """Wrapper utility that returns a test server."""
         server_name = rand_name(cls.__name__ + "-instance")
         flavor = cls.flavor_ref
         if not image_id:
@@ -120,7 +120,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
 
     @classmethod
     def get_db_handle_and_meta(cls, database='nova'):
-        """Return a connection handle and metadata of an OpenStack database"""
+        """Return a connection handle and metadata of an OpenStack database."""
         engine_args = {"echo": False,
                        "convert_unicode": True,
                        "pool_recycle": 3600
@@ -138,7 +138,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         return connection, meta
 
     def nova_manage(self, category, action, params):
-        """Executes nova-manage command for the given action"""
+        """Executes nova-manage command for the given action."""
 
         nova_manage_path = os.path.join(self.compute_bin_dir, 'nova-manage')
         cmd = ' '.join([nova_manage_path, category, action, params])
@@ -161,7 +161,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         return result
 
     def get_ssh_connection(self, host, username, password):
-        """Create an SSH connection object to a host"""
+        """Create an SSH connection object to a host."""
         ssh_timeout = self.config.compute.ssh_timeout
         ssh_client = Client(host, username, password, ssh_timeout)
         if not ssh_client.test_connection_auth():

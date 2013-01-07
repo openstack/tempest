@@ -122,7 +122,7 @@ def friendly_function_call_str(call_able, *args, **kwargs):
 
 
 class BotoTestCase(unittest.TestCase):
-    """Recommended to use as base class for boto related test"""
+    """Recommended to use as base class for boto related test."""
     @classmethod
     def setUpClass(cls):
         # The trash contains cleanup functions and paramaters in tuples
@@ -148,7 +148,7 @@ class BotoTestCase(unittest.TestCase):
 
     @classmethod
     def cancelResourceCleanUp(cls, key):
-        """Cancel Clean up request"""
+        """Cancel Clean up request."""
         del cls._resource_trash_bin[key]
 
     #TODO(afazekas): Add "with" context handling
@@ -293,7 +293,7 @@ class BotoTestCase(unittest.TestCase):
 
     @classmethod
     def destroy_bucket(cls, connection_data, bucket):
-        """Destroys the bucket and its content, just for teardown"""
+        """Destroys the bucket and its content, just for teardown."""
         exc_num = 0
         try:
             with closing(boto.connect_s3(**connection_data)) as conn:
@@ -316,7 +316,7 @@ class BotoTestCase(unittest.TestCase):
 
     @classmethod
     def destroy_reservation(cls, reservation):
-        """Terminate instances in a reservation, just for teardown"""
+        """Terminate instances in a reservation, just for teardown."""
         exc_num = 0
 
         def _instance_state():
@@ -383,7 +383,7 @@ class BotoTestCase(unittest.TestCase):
 
     @classmethod
     def destroy_snapshot_wait(cls, snapshot):
-        """delete snaphot, wait until not exists"""
+        """delete snaphot, wait until not exists."""
         snapshot.delete()
 
         def _update():

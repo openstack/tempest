@@ -118,7 +118,7 @@ class SSHTimeout(TempestException):
 
 
 class SSHExecCommandFailed(TempestException):
-    ''' Raised when remotely executed command returns nonzero status.  '''
+    """Raised when remotely executed command returns nonzero status."""
     message = ("Command '%(command)s', exit status: %(exit_status)d, "
                "Error:\n%(strerror)s")
 

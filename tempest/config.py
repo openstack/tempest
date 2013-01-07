@@ -458,7 +458,7 @@ def register_boto_opts(conf):
 
 # TODO(jaypipes): Move this to a common utils (not data_utils...)
 def singleton(cls):
-    """Simple wrapper for classes that should only have a single instance"""
+    """Simple wrapper for classes that should only have a single instance."""
     instances = {}
 
     def getinstance():

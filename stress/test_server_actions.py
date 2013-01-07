@@ -27,7 +27,7 @@ from utils.util import *
 
 
 class TestRebootVM(test_case.StressTestCase):
-    """Reboot a server"""
+    """Reboot a server."""
 
     def run(self, manager, state, *pargs, **kwargs):
         """
@@ -132,7 +132,7 @@ class VerifyRebootVM(pending_action.PendingServerAction):
 
 # This code needs to be tested against a cluster that supports resize.
 #class TestResizeVM(test_case.StressTestCase):
-#    """Resize a server (change flavors)"""
+#    """Resize a server (change flavors)."""
 #
 #    def run(self, manager, state, *pargs, **kwargs):
 #        """
@@ -193,7 +193,7 @@ class VerifyRebootVM(pending_action.PendingServerAction):
 #                              timeout=_timeout)
 #
 #class VerifyResizeVM(pending_action.PendingServerAction):
-#    """Verify that resizing of a VM was successful"""
+#    """Verify that resizing of a VM was successful."""
 #    States = enum('VERIFY_RESIZE_CHECK', 'ACTIVE_CHECK')
 #
 #    def __init__(self, manager, state, created_server,

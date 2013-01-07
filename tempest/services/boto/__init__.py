@@ -73,7 +73,7 @@ class BotoClientBase(object):
         boto.config.set("Boto", "num_retries", retries)
 
     def __getattr__(self, name):
-        """Automatically creates methods for the allowed methods set"""
+        """Automatically creates methods for the allowed methods set."""
         if name in self.ALLOWED_METHODS:
             def func(self, *args, **kwargs):
                 with closing(self.get_connection()) as conn:

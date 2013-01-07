@@ -110,17 +110,17 @@ class ServersClientJSON(RestClient):
         return resp, body['server']
 
     def get_server(self, server_id):
-        """Returns the details of an existing server"""
+        """Returns the details of an existing server."""
         resp, body = self.get("servers/%s" % str(server_id))
         body = json.loads(body)
         return resp, body['server']
 
     def delete_server(self, server_id):
-        """Deletes the given server"""
+        """Deletes the given server."""
         return self.delete("servers/%s" % str(server_id))
 
     def list_servers(self, params=None):
-        """Lists all servers for a user"""
+        """Lists all servers for a user."""
 
         url = 'servers'
         if params:
@@ -131,7 +131,7 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def list_servers_with_detail(self, params=None):
-        """Lists all servers in detail for a user"""
+        """Lists all servers in detail for a user."""
 
         url = 'servers/detail'
         if params:
@@ -142,7 +142,7 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def wait_for_server_status(self, server_id, status):
-        """Waits for a server to reach a given status"""
+        """Waits for a server to reach a given status."""
         resp, body = self.get_server(server_id)
         server_status = body['status']
         start = int(time.time())
@@ -165,7 +165,7 @@ class ServersClientJSON(RestClient):
                 raise exceptions.TimeoutException(message)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
-        """Waits for server to reach termination"""
+        """Waits for server to reach termination."""
         start_time = int(time.time())
         while True:
             try:
@@ -183,20 +183,20 @@ class ServersClientJSON(RestClient):
             time.sleep(self.build_interval)
 
     def list_addresses(self, server_id):
-        """Lists all addresses for a server"""
+        """Lists all addresses for a server."""
         resp, body = self.get("servers/%s/ips" % str(server_id))
         body = json.loads(body)
         return resp, body['addresses']
 
     def list_addresses_by_network(self, server_id, network_id):
-        """Lists all addresses of a specific network type for a server"""
+        """Lists all addresses of a specific network type for a server."""
         resp, body = self.get("servers/%s/ips/%s" %
                               (str(server_id), network_id))
         body = json.loads(body)
         return resp, body
 
     def change_password(self, server_id, password):
-        """Changes the root password for the server"""
+        """Changes the root password for the server."""
         post_body = {
             'changePassword': {
                 'adminPass': password,
@@ -208,7 +208,7 @@ class ServersClientJSON(RestClient):
                          post_body, self.headers)
 
     def reboot(self, server_id, reboot_type):
-        """Reboots a server"""
+        """Reboots a server."""
         post_body = {
             'reboot': {
                 'type': reboot_type,
@@ -221,7 +221,7 @@ class ServersClientJSON(RestClient):
 
     def rebuild(self, server_id, image_ref, name=None, meta=None,
                 personality=None, adminPass=None, disk_config=None):
-        """Rebuilds a server with a new image"""
+        """Rebuilds a server with a new image."""
         post_body = {
                 'imageRef': image_ref,
         }
@@ -264,7 +264,7 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def confirm_resize(self, server_id):
-        """Confirms the flavor change for a server"""
+        """Confirms the flavor change for a server."""
         post_body = {
             'confirmResize': None,
         }
@@ -275,7 +275,7 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def revert_resize(self, server_id):
-        """Reverts a server back to its original flavor"""
+        """Reverts a server back to its original flavor."""
         post_body = {
             'revertResize': None,
         }
@@ -286,7 +286,7 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def create_image(self, server_id, image_name):
-        """Creates an image of the given server"""
+        """Creates an image of the given server."""
         post_body = {
             'createImage': {
                 'name': image_name,
@@ -345,7 +345,7 @@ class ServersClientJSON(RestClient):
                                post_body, self.headers)
 
     def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
-        """Attaches a volume to a server instance"""
+        """Attaches a volume to a server instance."""
         post_body = json.dumps({
             'volumeAttachment': {
                 'volumeId': volume_id,
@@ -357,13 +357,13 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def detach_volume(self, server_id, volume_id):
-        """Detaches a volume from a server instance"""
+        """Detaches a volume from a server instance."""
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id))
         return resp, body
 
     def add_security_group(self, server_id, security_group_name):
-        """Adds a security group to the server"""
+        """Adds a security group to the server."""
         post_body = {
             'addSecurityGroup': {
                 'name': security_group_name
@@ -374,7 +374,7 @@ class ServersClientJSON(RestClient):
                          post_body, self.headers)
 
     def remove_security_group(self, server_id, security_group_name):
-        """Removes a security group from the server"""
+        """Removes a security group from the server."""
         post_body = {
             'removeSecurityGroup': {
                 'name': security_group_name
@@ -385,7 +385,7 @@ class ServersClientJSON(RestClient):
                          post_body, self.headers)
 
     def live_migrate_server(self, server_id, dest_host, use_block_migration):
-        """ This should be called with administrator privileges """
+        """This should be called with administrator privileges ."""
 
         migrate_params = {
             "disk_over_commit": False,
@@ -409,7 +409,7 @@ class ServersClientJSON(RestClient):
         return resp, body['servers']
 
     def migrate_server(self, server_id):
-        """Migrates a server to a new host"""
+        """Migrates a server to a new host."""
         post_body = {'migrate': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
@@ -417,7 +417,7 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def confirm_migration(self, server_id):
-        """Confirms the migration of a server"""
+        """Confirms the migration of a server."""
         post_body = {'confirmResize': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
@@ -425,63 +425,63 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def lock_server(self, server_id):
-        """Locks the given server"""
+        """Locks the given server."""
         post_body = {'lock': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def unlock_server(self, server_id):
-        """UNlocks the given server"""
+        """UNlocks the given server."""
         post_body = {'unlock': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def start_server(self, server_id):
-        """Starts the given server"""
+        """Starts the given server."""
         post_body = {'os-start': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def stop_server(self, server_id):
-        """Stops the given server"""
+        """Stops the given server."""
         post_body = {'os-stop': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def suspend_server(self, server_id):
-        """Suspends the provded server"""
+        """Suspends the provded server."""
         post_body = {'suspend': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def resume_server(self, server_id):
-        """Un-suspends the provded server"""
+        """Un-suspends the provded server."""
         post_body = {'resume': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def pause_server(self, server_id):
-        """Pauses the provded server"""
+        """Pauses the provded server."""
         post_body = {'pause': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def unpause_server(self, server_id):
-        """Un-pauses the provded server"""
+        """Un-pauses the provded server."""
         post_body = {'unpause': 'null'}
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
 
     def reset_state(self, server_id, new_state='error'):
-        """Resets the state of a server to active/error"""
+        """Resets the state of a server to active/error."""
         post_body = {
             'os-resetState': {
                 'state': new_state
