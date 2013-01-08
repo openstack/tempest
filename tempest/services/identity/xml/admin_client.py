@@ -136,6 +136,13 @@ class AdminClientXML(RestClientXML):
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
+    def get_tenant_by_name(self, tenant_name):
+        resp, tenants = self.list_tenants()
+        for tenant in tenants:
+            if tenant['name'] == tenant_name:
+                return tenant
+        raise exceptions.NotFound('No such tenant')
+
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant."""
         resp, body = self.get_tenant(tenant_id)
@@ -197,6 +204,13 @@ class AdminClientXML(RestClientXML):
         resp, body = self.get('/tenants/%s/users' % tenant_id, self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
+
+    def get_user_by_username(self, tenant_id, username):
+        resp, users = self.list_users_for_tenant(tenant_id)
+        for user in users:
+            if user['name'] == username:
+                return user
+        raise exceptions.NotFound('No such user')
 
     def create_service(self, name, type, **kwargs):
         """Create a service."""
