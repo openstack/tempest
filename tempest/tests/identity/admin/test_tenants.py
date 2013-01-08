@@ -17,27 +17,13 @@
 
 import unittest2 as unittest
 
+from nose.plugins.attrib import attr
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests.identity import base
 
 
 class TenantsTestBase(object):
-
-    @staticmethod
-    def setUpClass(cls):
-        for _ in xrange(5):
-            resp, tenant = cls.client.create_tenant(rand_name('tenant-'))
-            cls.data.tenants.append(tenant)
-
-    def test_list_tenants(self):
-        # Return a list of all tenants
-        resp, body = self.client.list_tenants()
-        found = [tenant for tenant in body if tenant in self.data.tenants]
-        self.assertTrue(any(found), 'List did not return newly created '
-                        'tenants')
-        self.assertEqual(len(found), len(self.data.tenants))
-        self.assertTrue(resp['status'].startswith('2'))
 
     def test_list_tenants_by_unauthorized_user(self):
         # Non-admin user should not be able to list tenants
@@ -51,41 +37,50 @@ class TenantsTestBase(object):
         self.assertRaises(exceptions.Unauthorized, self.client.list_tenants)
         self.client.clear_auth()
 
-    def test_tenant_delete(self):
+    def test_tenant_list_delete(self):
         # Create several tenants and delete them
         tenants = []
-        for _ in xrange(5):
-            resp, body = self.client.create_tenant(rand_name('tenant-new'))
-            tenants.append(body['id'])
-
+        for _ in xrange(3):
+            resp, tenant = self.client.create_tenant(rand_name('tenant-new'))
+            self.data.tenants.append(tenant)
+            tenants.append(tenant)
+        tenant_ids = map(lambda x: x['id'], tenants)
         resp, body = self.client.list_tenants()
-        found_1 = [tenant for tenant in body if tenant['id'] in tenants]
-        for tenant_id in tenants:
-            resp, body = self.client.delete_tenant(tenant_id)
+        self.assertTrue(resp['status'].startswith('2'))
+        found = [tenant for tenant in body if tenant['id'] in tenant_ids]
+        self.assertEqual(len(found), len(tenants), 'Tenants not created')
+
+        for tenant in tenants:
+            resp, body = self.client.delete_tenant(tenant['id'])
             self.assertTrue(resp['status'].startswith('2'))
+            self.data.tenants.remove(tenant)
 
         resp, body = self.client.list_tenants()
-        found_2 = [tenant for tenant in body if tenant['id'] in tenants]
-        self.assertTrue(any(found_1), 'Tenants not created')
-        self.assertFalse(any(found_2), 'Tenants failed to delete')
+        found = [tenant for tenant in body if tenant['id'] in tenant_ids]
+        self.assertFalse(any(found), 'Tenants failed to delete')
 
+    @attr(type='negative')
     def test_tenant_delete_by_unauthorized_user(self):
         # Non-admin user should not be able to delete a tenant
         tenant_name = rand_name('tenant-')
         resp, tenant = self.client.create_tenant(tenant_name)
+        self.data.tenants.append(tenant)
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.delete_tenant, tenant['id'])
 
+    @attr(type='negative')
     def test_tenant_delete_request_without_token(self):
         # Request to delete a tenant without a valid token should fail
         tenant_name = rand_name('tenant-')
         resp, tenant = self.client.create_tenant(tenant_name)
+        self.data.tenants.append(tenant)
         token = self.client.get_auth()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.delete_tenant,
                           tenant['id'])
         self.client.clear_auth()
 
+    @attr(type='negative')
     def test_delete_non_existent_tenant(self):
         # Attempt to delete a non existent tenant should fail
         self.assertRaises(exceptions.NotFound, self.client.delete_tenant,
@@ -97,6 +92,8 @@ class TenantsTestBase(object):
         tenant_desc = rand_name('desc-')
         resp, body = self.client.create_tenant(tenant_name,
                                                description=tenant_desc)
+        tenant = body
+        self.data.tenants.append(tenant)
         st1 = resp['status']
         tenant_id = body['id']
         desc1 = body['description']
@@ -108,11 +105,14 @@ class TenantsTestBase(object):
         self.assertEqual(desc2, tenant_desc, 'Description does not appear'
                          'to be set')
         self.client.delete_tenant(tenant_id)
+        self.data.tenants.remove(tenant)
 
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
         tenant_name = rand_name('tenant-')
         resp, body = self.client.create_tenant(tenant_name, enabled=True)
+        tenant = body
+        self.data.tenants.append(tenant)
         tenant_id = body['id']
         st1 = resp['status']
         en1 = body['enabled']
@@ -122,11 +122,14 @@ class TenantsTestBase(object):
         en2 = body['enabled']
         self.assertTrue(en2, 'Enable should be True in lookup')
         self.client.delete_tenant(tenant_id)
+        self.data.tenants.remove(tenant)
 
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
         tenant_name = rand_name('tenant-')
         resp, body = self.client.create_tenant(tenant_name, enabled=False)
+        tenant = body
+        self.data.tenants.append(tenant)
         tenant_id = body['id']
         st1 = resp['status']
         en1 = body['enabled']
@@ -138,11 +141,15 @@ class TenantsTestBase(object):
         self.assertEqual('false', str(en2).lower(),
                          'Enable should be False in lookup')
         self.client.delete_tenant(tenant_id)
+        self.data.tenants.remove(tenant)
 
+    @attr(type='negative')
     def test_tenant_create_duplicate(self):
         # Tenant names should be unique
         tenant_name = rand_name('tenant-dup-')
         resp, body = self.client.create_tenant(tenant_name)
+        tenant = body
+        self.data.tenants.append(tenant)
         tenant1_id = body.get('id')
 
         try:
@@ -151,15 +158,17 @@ class TenantsTestBase(object):
             self.fail('Should not be able to create a duplicate tenant name')
         except exceptions.Duplicate:
             pass
-        if tenant1_id:
-            self.client.delete_tenant(tenant1_id)
+        self.client.delete_tenant(tenant1_id)
+        self.data.tenants.remove(tenant)
 
+    @attr(type='negative')
     def test_create_tenant_by_unauthorized_user(self):
         # Non-admin user should not be authorized to create a tenant
         tenant_name = rand_name('tenant-')
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.create_tenant, tenant_name)
 
+    @attr(type='negative')
     def test_create_tenant_request_without_token(self):
         # Create tenant request without a token should not be authorized
         tenant_name = rand_name('tenant-')
@@ -169,6 +178,7 @@ class TenantsTestBase(object):
                           tenant_name)
         self.client.clear_auth()
 
+    @attr(type='negative')
     def test_create_tenant_with_empty_name(self):
         # Tenant name should not be empty
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
@@ -184,6 +194,9 @@ class TenantsTestBase(object):
         # Update name attribute of a tenant
         t_name1 = rand_name('tenant-')
         resp, body = self.client.create_tenant(t_name1)
+        tenant = body
+        self.data.tenants.append(tenant)
+
         t_id = body['id']
         resp1_name = body['name']
 
@@ -202,12 +215,16 @@ class TenantsTestBase(object):
         self.assertEqual(resp2_name, resp3_name)
 
         self.client.delete_tenant(t_id)
+        self.data.tenants.remove(tenant)
 
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
         t_name = rand_name('tenant-')
         t_desc = rand_name('desc-')
         resp, body = self.client.create_tenant(t_name, description=t_desc)
+        tenant = body
+        self.data.tenants.append(tenant)
+
         t_id = body['id']
         resp1_desc = body['description']
 
@@ -226,12 +243,16 @@ class TenantsTestBase(object):
         self.assertEqual(resp2_desc, resp3_desc)
 
         self.client.delete_tenant(t_id)
+        self.data.tenants.remove(tenant)
 
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
         t_name = rand_name('tenant-')
         t_en = False
         resp, body = self.client.create_tenant(t_name, enabled=t_en)
+        tenant = body
+        self.data.tenants.append(tenant)
+
         t_id = body['id']
         resp1_en = body['enabled']
 
@@ -250,6 +271,7 @@ class TenantsTestBase(object):
         self.assertEqual(resp2_en, resp3_en)
 
         self.client.delete_tenant(t_id)
+        self.data.tenants.remove(tenant)
 
 
 class TenantsTestJSON(base.BaseIdentityAdminTestJSON,
@@ -258,7 +280,6 @@ class TenantsTestJSON(base.BaseIdentityAdminTestJSON,
     @classmethod
     def setUpClass(cls):
         super(TenantsTestJSON, cls).setUpClass()
-        TenantsTestBase.setUpClass(cls)
 
 
 class TenantsTestXML(base.BaseIdentityAdminTestXML, TenantsTestBase):
@@ -266,4 +287,3 @@ class TenantsTestXML(base.BaseIdentityAdminTestXML, TenantsTestBase):
     @classmethod
     def setUpClass(cls):
         super(TenantsTestXML, cls).setUpClass()
-        TenantsTestBase.setUpClass(cls)
