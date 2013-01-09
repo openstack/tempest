@@ -15,11 +15,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from hashlib import sha1
+import hmac
 import httplib2
 import json
 import re
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
+from urlparse import urlparse
 
 
 class ObjectClient(RestClient):
@@ -118,6 +121,23 @@ class ObjectClient(RestClient):
                 headers[str(key)] = metadata[key]
 
         resp, body = self.copy(url, headers=headers)
+        return resp, body
+
+    def get_object_using_temp_url(self, container, object_name, expires, key):
+        """Retrieve object's data using temp URL."""
+
+        self._set_auth()
+        method = 'GET'
+        path = "%s/%s/%s" % (urlparse(self.base_url).path, container,
+                             object_name)
+        hmac_body = '%s\n%s\n%s' % (method, expires, path)
+        sig = hmac.new(key, hmac_body, sha1).hexdigest()
+
+        url = "%s/%s?temp_url_sig=%s&temp_url_expires=%s" % (container,
+                                                             object_name,
+                                                             sig, expires)
+
+        resp, body = self.get(url)
         return resp, body
 
 

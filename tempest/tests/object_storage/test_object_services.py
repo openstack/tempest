@@ -21,6 +21,7 @@ from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests.object_storage import base
+from time import time
 import unittest2 as unittest
 
 
@@ -611,3 +612,47 @@ class ObjectTest(base.BaseObjectTest):
                           self.custom_object_client.delete_object,
                           self.container_name, object_name,
                           metadata=self.custom_headers)
+
+    @unittest.skip('Until bug 1097137 is resolved.')
+    @attr(type='positive')
+    def test_get_object_using_temp_url(self):
+        #Access object using temp url within expiry time
+
+        try:
+            #Update Account Metadata
+            # Flag to check if account metadata got updated
+            flag = False
+            key = 'Meta'
+            metadata = {'Temp-URL-Key': key}
+            resp, _ = \
+                self.account_client.create_account_metadata(metadata=metadata)
+            self.assertEqual(resp['status'], '204')
+            flag = True
+
+            resp, _ = self.account_client.list_account_metadata()
+            self.assertIn('x-account-meta-temp-url-key', resp)
+            self.assertEqual(resp['x-account-meta-temp-url-key'], key)
+
+            # Create Object
+            object_name = rand_name(name='ObjectTemp')
+            data = arbitrary_string(size=len(object_name),
+                                    base_text=object_name)
+            self.object_client.create_object(self.container_name,
+                                             object_name, data)
+
+            expires = int(time() + 10)
+
+            #Trying to GET object using temp URL with in expiry time
+            _, body = \
+                self.object_client.get_object_using_temp_url(
+                    self.container_name, object_name, expires, key)
+
+            self.assertEqual(body, data)
+
+        finally:
+            if flag:
+                resp, _ = \
+                    self.account_client.delete_account_metadata(
+                        metadata=metadata)
+                resp, _ = self.account_client.list_account_metadata()
+                self.assertNotIn('x-account-meta-temp-url-key', resp)
