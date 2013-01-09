@@ -87,8 +87,9 @@ class VolumeListTestXML(base.BaseVolumeTestXML, VolumesListTestBase):
                     # because the backing file size of the volume group is
                     # too small. So, here, we clean up whatever we did manage
                     # to create and raise a SkipTest
-                    for volume in cls.volume_id_list:
-                        cls.client.delete_volume(volume)
+                    for volid in cls.volume_id_list:
+                        cls.client.delete_volume(volid)
+                        cls.client.wait_for_resource_deletion(volid)
                     msg = ("Failed to create ALL necessary volumes to run "
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
@@ -99,9 +100,9 @@ class VolumeListTestXML(base.BaseVolumeTestXML, VolumesListTestBase):
     @classmethod
     def tearDownClass(cls):
         # Delete the created volumes
-        for volume in cls.volume_id_list:
-            resp, _ = cls.client.delete_volume(volume)
-            cls.client.wait_for_resource_deletion(volume)
+        for volid in cls.volume_id_list:
+            resp, _ = cls.client.delete_volume(volid)
+            cls.client.wait_for_resource_deletion(volid)
         super(VolumeListTestXML, cls).tearDownClass()
 
 
@@ -133,8 +134,9 @@ class VolumeListTestJSON(base.BaseVolumeTestJSON, VolumesListTestBase):
                     # because the backing file size of the volume group is
                     # too small. So, here, we clean up whatever we did manage
                     # to create and raise a SkipTest
-                    for volume in cls.volume_id_list:
-                        cls.client.delete_volume(volume)
+                    for volid in cls.volume_id_list:
+                        cls.client.delete_volume(volid)
+                        cls.client.wait_for_resource_deletion(volid)
                     msg = ("Failed to create ALL necessary volumes to run "
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
@@ -145,7 +147,7 @@ class VolumeListTestJSON(base.BaseVolumeTestJSON, VolumesListTestBase):
     @classmethod
     def tearDownClass(cls):
         # Delete the created volumes
-        for volume in cls.volume_id_list:
-            resp, _ = cls.client.delete_volume(volume)
-            cls.client.wait_for_resource_deletion(volume)
+        for volid in cls.volume_id_list:
+            resp, _ = cls.client.delete_volume(volid)
+            cls.client.wait_for_resource_deletion(volid)
         super(VolumeListTestJSON, cls).tearDownClass()
