@@ -328,6 +328,14 @@ ObjectStoreConfig = [
     cfg.StrOpt('region',
                default=None,
                help='The object-store region name to use.'),
+    cfg.StrOpt('container_sync_timeout',
+               default=120,
+               help="Number of seconds to time on waiting for a container"
+                    "to container synchronization complete."),
+    cfg.StrOpt('container_sync_interval',
+               default=5,
+               help="Number of seconds to wait while looping to check the"
+                    "status of a container to container synchronization"),
 ]
 
 
