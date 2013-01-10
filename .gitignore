@@ -1,3 +1,5 @@
+AUTHORS
+ChangeLog
 *.pyc
 etc/tempest.conf
 include/swift_objects/swift_small
@@ -6,7 +8,7 @@ include/swift_objects/swift_large
 *.log
 *.swp
 *.swo
-*.egg-info
+*.egg*
 .tox
 .venv
 dist
