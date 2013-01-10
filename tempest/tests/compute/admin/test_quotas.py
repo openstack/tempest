@@ -18,23 +18,21 @@
 from nose.plugins.attrib import attr
 
 from tempest import exceptions
-from tempest.services.compute.admin.json import quotas_client as adm_quotas
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.services.compute.admin.json \
+    import quotas_client as adm_quotas_json
+from tempest.services.compute.admin.xml import quotas_client as adm_quotas_xml
+from tempest.tests import compute
+from tempest.tests.compute import base
 
 
-class QuotasTest(BaseComputeTest):
+class QuotasAdminTestBase(object):
 
     @classmethod
     def setUpClass(cls):
-        super(QuotasTest, cls).setUpClass()
-        c_adm_user = cls.config.compute_admin.username
-        c_adm_pass = cls.config.compute_admin.password
-        c_adm_tenant = cls.config.compute_admin.tenant_name
-        auth_url = cls.config.identity.uri
-
-        cls.adm_client = adm_quotas.AdminQuotasClient(cls.config, c_adm_user,
-                                                      c_adm_pass, auth_url,
-                                                      c_adm_tenant)
+        cls.c_adm_user = cls.config.compute_admin.username
+        cls.c_adm_pass = cls.config.compute_admin.password
+        cls.c_adm_tenant = cls.config.compute_admin.tenant_name
+        cls.auth_url = cls.config.identity.uri
         cls.client = cls.os.quotas_client
         cls.identity_admin_client = cls._get_identity_admin_client()
         resp, tenants = cls.identity_admin_client.list_tenants()
@@ -63,7 +61,6 @@ class QuotasTest(BaseComputeTest):
                 cls.servers_client.delete_server(server['id'])
             except exceptions.NotFound:
                 continue
-        super(QuotasTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_get_default_quotas(self):
@@ -155,3 +152,43 @@ class QuotasTest(BaseComputeTest):
         finally:
             self.adm_client.update_quota_set(self.demo_tenant_id,
                                              ram=default_mem_quota)
+
+
+class QuotasAdminTestJSON(QuotasAdminTestBase, base.BaseComputeAdminTestJSON,
+                          base.BaseComputeTest):
+
+    @classmethod
+    def setUpClass(cls):
+        base.BaseComputeAdminTestJSON.setUpClass()
+        base.BaseComputeTest.setUpClass()
+        super(QuotasAdminTestJSON, cls).setUpClass()
+
+        cls.adm_client = adm_quotas_json.AdminQuotasClientJSON(
+            cls.config, cls.c_adm_user, cls.c_adm_pass,
+            cls.auth_url, cls.c_adm_tenant)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(QuotasAdminTestJSON, cls).tearDownClass()
+        base.BaseComputeTest.tearDownClass()
+
+
+class QuotasAdminTestXML(QuotasAdminTestBase, base.BaseComputeAdminTestXML,
+                         base.BaseComputeTest):
+
+    @classmethod
+    def setUpClass(cls):
+        base.BaseComputeAdminTestXML.setUpClass()
+        base.BaseComputeTest.setUpClass()
+        super(QuotasAdminTestXML, cls).setUpClass()
+
+        cls.adm_client = adm_quotas_xml.AdminQuotasClientXML(cls.config,
+                                                             cls.c_adm_user,
+                                                             cls.c_adm_pass,
+                                                             cls.auth_url,
+                                                             cls.c_adm_tenant)
+
+    @classmethod
+    def tearDownClass(cls):
+        super(QuotasAdminTestXML, cls).tearDownClass()
+        base.BaseComputeTest.tearDownClass()

@@ -17,14 +17,14 @@
 
 import json
 
-from tempest.services.compute.json.quotas_client import QuotasClient
+from tempest.services.compute.json.quotas_client import QuotasClientJSON
 
 
-class AdminQuotasClient(QuotasClient):
+class AdminQuotasClientJSON(QuotasClientJSON):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AdminQuotasClient, self).__init__(config, username, password,
-                                                auth_url, tenant_name)
+        super(AdminQuotasClientJSON, self).__init__(config, username, password,
+                                                    auth_url, tenant_name)
 
     def update_quota_set(self, tenant_id, injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
