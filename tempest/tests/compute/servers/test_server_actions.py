@@ -44,7 +44,7 @@ class ServerActionsTestBase(object):
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     def tearDown(self):
-        self.client.delete_server(self.server_id)
+        self.clear_servers()
 
     @attr(type='smoke')
     @unittest.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
@@ -67,11 +67,9 @@ class ServerActionsTestBase(object):
         # The server should be power cycled
         if self.run_ssh:
             # Get the time the server was last rebooted,
-            # waiting for one minute as who doesn't have seconds precision
             resp, server = self.client.get_server(self.server_id)
             linux_client = RemoteClient(server, self.ssh_user, self.password)
             boot_time = linux_client.get_boot_time()
-            time.sleep(60)
 
         resp, body = self.client.reboot(self.server_id, 'HARD')
         self.assertEqual(202, resp.status)
@@ -89,11 +87,9 @@ class ServerActionsTestBase(object):
         # The server should be signaled to reboot gracefully
         if self.run_ssh:
             # Get the time the server was last rebooted,
-            # waiting for one minute as who doesn't have seconds precision
             resp, server = self.client.get_server(self.server_id)
             linux_client = RemoteClient(server, self.ssh_user, self.password)
             boot_time = linux_client.get_boot_time()
-            time.sleep(60)
 
         resp, body = self.client.reboot(self.server_id, 'SOFT')
         self.assertEqual(202, resp.status)
