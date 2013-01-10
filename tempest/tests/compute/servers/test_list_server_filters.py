@@ -208,7 +208,6 @@ class ListServerFiltersTestJSON(base.BaseComputeTestJSON,
                                 ListServerFiltersTest):
     @classmethod
     def setUpClass(cls):
-        raise nose.SkipTest("Until Bug 1039753 is fixed")
         super(ListServerFiltersTestJSON, cls).setUpClass()
         ListServerFiltersTest.setUpClass(cls)
 
@@ -222,7 +221,6 @@ class ListServerFiltersTestXML(base.BaseComputeTestXML,
                                ListServerFiltersTest):
     @classmethod
     def setUpClass(cls):
-        raise nose.SkipTest("Until Bug 1039753 is fixed")
         super(ListServerFiltersTestXML, cls).setUpClass()
         ListServerFiltersTest.setUpClass(cls)
 
