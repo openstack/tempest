@@ -126,7 +126,8 @@ class VolumeTypesTest(BaseVolumeTest):
         try:
             body = {}
             name = rand_name("volume-type-")
-            extra_specs = {"Spec1": "Val1", "Spec2": "Val2"}
+            extra_specs = {"storage_protocol": "iSCSI",
+                           "vendor_name": "Open Source"}
             resp, body = self.client.\
             create_volume_type(name, extra_specs=extra_specs)
             self.assertEqual(200, resp.status)
