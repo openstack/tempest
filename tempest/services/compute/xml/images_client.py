@@ -70,6 +70,13 @@ class ImagesClientXML(RestClientXML):
                              node.findall('{http://www.w3.org/2005/Atom}link')]
         return json
 
+    def _parse_images(self, xml):
+        json = {'images': []}
+        images = xml.getchildren()
+        for image in images:
+            json['images'].append(self._parse_image(image))
+        return json
+
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""
         post_body = Element('createImage', name=name)
@@ -92,7 +99,7 @@ class ImagesClientXML(RestClientXML):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url, self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        body = self._parse_images(etree.fromstring(body))
         return resp, body['images']
 
     def list_images_with_detail(self, params=None):
@@ -104,7 +111,7 @@ class ImagesClientXML(RestClientXML):
             url = "images/detail?" + param_list
 
         resp, body = self.get(url, self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        body = self._parse_images(etree.fromstring(body))
         return resp, body['images']
 
     def get_image(self, image_id):
