@@ -121,6 +121,7 @@ class InstanceRunTest(BotoTestCase):
         self.cancelResourceCleanUp(rcuk)
 
     @attr(type='smoke')
+    @unittest.skip("Skipped until the Bug #1098112 is resolved")
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
         image_ami = self.ec2_client.get_image(self.images["ami"]
