@@ -131,7 +131,6 @@ class ListServersNegativeTest(BaseComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    @unittest.skip("Skip until bug 1061712 is resolved")
     def test_list_servers_status_non_existing(self):
         # Return an empty list when invalid status is specified
         non_existing_status = 'BALONEY'
