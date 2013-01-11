@@ -46,7 +46,10 @@ class VolumesActionsTest(BaseVolumeTest):
         super(VolumesActionsTest, cls).tearDownClass()
         # Delete the test instance and volume
         cls.client.delete_volume(cls.volume['id'])
+        cls.client.wait_for_resource_deletion(cls.volume['id'])
+
         cls.servers_client.delete_server(cls.server['id'])
+        cls.client.wait_for_resource_deletion(cls.server['id'])
 
     @attr(type='smoke')
     def test_attach_detach_volume_to_instance(self):
