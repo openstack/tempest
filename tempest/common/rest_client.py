@@ -269,18 +269,9 @@ class RestClient(object):
         if resp.status == 413:
             resp_body = self._parse_resp(resp_body)
             self._log(req_url, body, resp, resp_body)
-            if 'overLimit' in resp_body:
-                raise exceptions.OverLimit(resp_body['overLimit']['message'])
-            elif 'exceeded' in resp_body['message']:
-                raise exceptions.OverLimit(resp_body['message'])
-            elif depth < MAX_RECURSION_DEPTH:
-                delay = resp['Retry-After'] if 'Retry-After' in resp else 60
-                time.sleep(int(delay))
-                return self.request(method, url, headers, body, depth + 1)
-            else:
-                raise exceptions.RateLimitExceeded(
-                    message=resp_body['overLimitFault']['message'],
-                    details=resp_body['overLimitFault']['details'])
+            #Checking whether Absolute/Rate limit
+            return self.check_over_limit(resp_body, method, url, headers, body,
+                                         depth, wait)
 
         if resp.status in (500, 501):
             resp_body = self._parse_resp(resp_body)
@@ -309,6 +300,36 @@ class RestClient(object):
 
         return resp, resp_body
 
+    def check_over_limit(self, resp_body, method, url,
+                         headers, body, depth, wait):
+        self.is_absolute_limit(resp_body['overLimit'])
+        return self.is_rate_limit_retry_max_recursion_depth(
+            resp_body['overLimit'], method, url, headers,
+            body, depth, wait)
+
+    def is_absolute_limit(self, resp_body):
+        if 'exceeded' in resp_body['message']:
+            raise exceptions.OverLimit(resp_body['message'])
+        else:
+            return
+
+    def is_rate_limit_retry_max_recursion_depth(self, resp_body, method,
+                                                url, headers, body, depth,
+                                                wait):
+        if 'retryAfter' in resp_body:
+            if depth < MAX_RECURSION_DEPTH:
+                delay = resp_body['retryAfter']
+                time.sleep(int(delay))
+                return self.request(method, url, headers=headers,
+                                    body=body,
+                                    depth=depth + 1, wait=wait)
+            else:
+                raise exceptions.RateLimitExceeded(
+                    message=resp_body['overLimitFault']['message'],
+                    details=resp_body['overLimitFault']['details'])
+        else:
+            raise exceptions.OverLimit(resp_body['message'])
+
     def wait_for_resource_deletion(self, id):
         """Waits for a resource to be deleted."""
         start_time = int(time.time())
@@ -331,3 +352,10 @@ class RestClientXML(RestClient):
 
     def _parse_resp(self, body):
         return xml_to_json(etree.fromstring(body))
+
+    def check_over_limit(self, resp_body, method, url,
+                         headers, body, depth, wait):
+        self.is_absolute_limit(resp_body)
+        return self.is_rate_limit_retry_max_recursion_depth(
+            resp_body, method, url, headers,
+            body, depth, wait)
