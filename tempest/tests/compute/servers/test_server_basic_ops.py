@@ -37,7 +37,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
      * Terminate the instance
     """
 
-    def test_001_create_keypair(self):
+    def create_keypair(self):
         kp_name = rand_name('keypair-smoke')
         self.keypair = self.compute_client.keypairs.create(kp_name)
         try:
@@ -46,7 +46,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         except AttributeError:
             self.fail("Keypair object not successfully created.")
 
-    def test_002_create_security_group(self):
+    def create_security_group(self):
         sg_name = rand_name('secgroup-smoke')
         sg_desc = sg_name + " description"
         self.secgroup = self.compute_client.security_groups.create(sg_name,
@@ -82,7 +82,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
             except Exception:
                 self.fail("Failed to create rule in security group.")
 
-    def test_003_boot_instance(self):
+    def boot_instance(self):
         i_name = rand_name('instance')
         flavor_id = self.config.compute.flavor_ref
         base_image_id = self.config.compute.image_ref
@@ -99,11 +99,11 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
 
         self.assertEqual(self.instance.status, 'BUILD')
 
-    def test_004_wait_on_active(self):
+    def wait_on_active(self):
         instance_id = self.get_resource('instance').id
         self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
-    def test_005_pause_server(self):
+    def pause_server(self):
         instance = self.get_resource('instance')
         instance_id = instance.id
         LOG.debug("Pausing instance %s. Current status: %s",
@@ -111,7 +111,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         instance.pause()
         self.status_timeout(self.compute_client.servers, instance_id, 'PAUSED')
 
-    def test_006_unpause_server(self):
+    def unpause_server(self):
         instance = self.get_resource('instance')
         instance_id = instance.id
         LOG.debug("Unpausing instance %s. Current status: %s",
@@ -119,7 +119,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         instance.unpause()
         self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
-    def test_007_suspend_server(self):
+    def suspend_server(self):
         instance = self.get_resource('instance')
         instance_id = instance.id
         LOG.debug("Suspending instance %s. Current status: %s",
@@ -128,7 +128,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         self.status_timeout(self.compute_client.servers,
                             instance_id, 'SUSPENDED')
 
-    def test_008_resume_server(self):
+    def resume_server(self):
         instance = self.get_resource('instance')
         instance_id = instance.id
         LOG.debug("Resuming instance %s. Current status: %s",
@@ -136,7 +136,18 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         instance.resume()
         self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
-    def test_099_terminate_instance(self):
+    def terminate_instance(self):
         instance = self.get_resource('instance')
         instance.delete()
         self.remove_resource('instance')
+
+    def test_server_basicops(self):
+        self.create_keypair()
+        self.create_security_group()
+        self.boot_instance()
+        self.wait_on_active()
+        self.pause_server()
+        self.unpause_server()
+        self.suspend_server()
+        self.resume_server()
+        self.terminate_instance()
