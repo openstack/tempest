@@ -22,6 +22,7 @@ import time
 
 import boto
 from boto.exception import BotoServerError
+from boto.exception import EC2ResponseError
 from boto.s3.bucket import Bucket
 from boto.s3.key import Key
 import nose
@@ -203,26 +204,32 @@ class BotoTestCase(unittest.TestCase):
                                'deleting', 'deleted', 'error'))
     valid_snapshot_status = set(('pending', 'completed', 'error'))
 
-    #TODO(afazekas): object base version for resurces supports update
-    def waitImageState(self, lfunction, wait_for):
-        state = state_wait(lfunction, wait_for, self.valid_image_state)
-        self.assertIn(state, self.valid_image_state)
+    gone_set = set(('_GONE',))
+
+    def state_wait_gone(self, lfunction, final_set, valid_set):
+        if not isinstance(final_set, set):
+            final_set = set((final_set,))
+        final_set |= self.gone_set
+        state = state_wait(lfunction, final_set, valid_set)
+        self.assertIn(state, valid_set | self.gone_set)
         return state
+
+    #TODO(afazekas): object based versions for resurces which supports update
+    def waitImageState(self, lfunction, wait_for):
+        return self.state_wait_gone(lfunction, wait_for,
+                                    self.valid_image_state)
 
     def waitInstanceState(self, lfunction, wait_for):
-        state = state_wait(lfunction, wait_for, self.valid_instance_state)
-        self.assertIn(state, self.valid_instance_state)
-        return state
+        return self.state_wait_gone(lfunction, wait_for,
+                                    self.valid_instance_state)
 
     def waitVolumeStatus(self, lfunction, wait_for):
-        state = state_wait(lfunction, wait_for, self.valid_volume_status)
-        self.assertIn(state, self.valid_volume_status)
-        return state
+        return self.state_wait_gone(lfunction, wait_for,
+                                    self.valid_volume_status)
 
     def waitSnapshotStatus(self, lfunction, wait_for):
-        state = state_wait(lfunction, wait_for, self.valid_snapshot_status)
-        self.assertIn(state, self.valid_snapshot_status)
-        return state
+        return self.state_wait_gone(lfunction, wait_for,
+                                    self.valid_snapshot_status)
 
     def assertImageStateWait(self, lfunction, wait_for):
         state = self.waitImageState(lfunction, wait_for)
@@ -323,13 +330,22 @@ class BotoTestCase(unittest.TestCase):
             try:
                 instance.update(validate=True)
             except ValueError:
-                return "terminated"
+                return "_GONE"
+            except EC2ResponseError as exc:
+                if cls.ec2_error_code.\
+                client.InvalidInstanceID.NotFound.match(exc):
+                    return "_GONE"
+                #NOTE(afazekas): incorrect code,
+                # but the resource must be destoreyd
+                if exc.error_code == "InstanceNotFound":
+                    return "_GONE"
+
             return instance.state
 
         for instance in reservation.instances:
             try:
                 instance.terminate()
-                re_search_wait(_instance_state, "terminated")
+                re_search_wait(_instance_state, "_GONE")
             except BaseException as exc:
                 LOG.exception(exc)
                 exc_num += 1
@@ -345,8 +361,6 @@ class BotoTestCase(unittest.TestCase):
            Use just for teardown!
         """
         #NOTE(afazekas): should wait/try until all related instance terminates
-        #2.   looks like it is locked even if the instance not listed
-        time.sleep(1)
         group.delete()
 
     @classmethod
