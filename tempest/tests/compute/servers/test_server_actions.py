@@ -34,18 +34,6 @@ class ServerActionsTestBase(object):
     resize_available = tempest.config.TempestConfig().compute.resize_available
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
-    def setUp(self):
-        self.name = rand_name('server')
-        resp, server = self.create_server_with_extras(self.name,
-                                                      self.image_ref,
-                                                      self.flavor_ref)
-        self.server_id = server['id']
-        self.password = server['adminPass']
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-
-    def tearDown(self):
-        self.clear_servers()
-
     @attr(type='smoke')
     @unittest.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
                          'Change password not available.')
@@ -207,27 +195,69 @@ class ServerActionsTestBase(object):
 
 class ServerActionsTestXML(base.BaseComputeTestXML,
                            ServerActionsTestBase):
+    def setUp(self):
+        super(ServerActionsTestXML, self).setUp()
+        # Check if the server is in a clean state after test
+        try:
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except exceptions:
+            # Rebuild server if something happened to it during a test
+            self.clear_servers()
+            resp, server = self.create_server_with_extras(self.name,
+                                                          self.image_ref,
+                                                          self.flavor_ref)
+            self.server_id = server['id']
+            self.password = server['adminPass']
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
     @classmethod
     def setUpClass(cls):
         super(ServerActionsTestXML, cls).setUpClass()
         cls.client = cls.servers_client
+        cls.name = rand_name('server')
+        resp, server = cls.create_server_with_extras(cls.name,
+                                                     cls.image_ref,
+                                                     cls.flavor_ref)
+        cls.server_id = server['id']
+        cls.password = server['adminPass']
+        cls.client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
-    def setUp(self):
-        ServerActionsTestBase.setUp(self)
-
-    def tearDown(self):
-        ServerActionsTestBase.tearDown(self)
+    @classmethod
+    def tearDownClass(cls):
+        cls.clear_servers()
+        super(ServerActionsTestXML, cls).tearDownClass()
 
 
 class ServerActionsTestJSON(base.BaseComputeTestJSON,
                             ServerActionsTestBase):
+    def setUp(self):
+        super(ServerActionsTestJSON, self).setUp()
+        # Check if the server is in a clean state after test
+        try:
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except exceptions:
+            # Rebuild server if something happened to it during a test
+            self.clear_servers()
+            resp, server = self.create_server_with_extras(self.name,
+                                                          self.image_ref,
+                                                          self.flavor_ref)
+            self.server_id = server['id']
+            self.password = server['adminPass']
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
     @classmethod
     def setUpClass(cls):
         super(ServerActionsTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
+        cls.name = rand_name('server')
+        resp, server = cls.create_server_with_extras(cls.name,
+                                                     cls.image_ref,
+                                                     cls.flavor_ref)
+        cls.server_id = server['id']
+        cls.password = server['adminPass']
+        cls.client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
-    def setUp(self):
-        ServerActionsTestBase.setUp(self)
-
-    def tearDown(self):
-        ServerActionsTestBase.tearDown(self)
+    @classmethod
+    def tearDownClass(cls):
+        cls.clear_servers()
+        super(ServerActionsTestJSON, cls).tearDownClass()
