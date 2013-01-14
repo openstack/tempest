@@ -21,6 +21,7 @@ import nose
 
 from tempest import clients
 from tempest import config
+from tempest.exceptions import InvalidConfiguration
 
 LOG = logging.getLogger(__name__)
 
@@ -51,19 +52,15 @@ def setup_package():
     # Validate reference data exists
     # If not, we raise the exception here and prevent
     # going forward...
-    try:
-        image_ref = CONFIG.compute.image_ref
-        image_ref_alt = CONFIG.compute.image_ref_alt
-        images_client.get_image(image_ref)
-        images_client.get_image(image_ref_alt)
+    image_ref = CONFIG.compute.image_ref
+    image_ref_alt = CONFIG.compute.image_ref_alt
+    images_client.get_image(image_ref)
+    images_client.get_image(image_ref_alt)
 
-        flavor_ref = CONFIG.compute.flavor_ref
-        flavor_ref_alt = CONFIG.compute.flavor_ref_alt
-        flavors_client.get_flavor_details(flavor_ref)
-        flavors_client.get_flavor_details(flavor_ref_alt)
-    except Exception as e:
-        msg = "Failed basic configuration: %s" % e
-        raise nose.SkipTest(msg)
+    flavor_ref = CONFIG.compute.flavor_ref
+    flavor_ref_alt = CONFIG.compute.flavor_ref_alt
+    flavors_client.get_flavor_details(flavor_ref)
+    flavors_client.get_flavor_details(flavor_ref_alt)
 
     # Determine if there are two regular users that can be
     # used in testing. If the test cases are allowed to create
@@ -79,6 +76,7 @@ def setup_package():
             user2_tenant_name = CONFIG.compute.alt_tenant_name
             if not user2_password or not user2_tenant_name:
                 msg = ("Alternate user specified but not alternate "
-                       "tenant or password")
-                raise nose.SkipTest(msg)
+                       "tenant or password: alt_tenant_name=%s alt_password=%s"
+                       % (user2_tenant_name, user2_password))
+                raise InvalidConfiguration(msg)
             MULTI_USER = True
