@@ -172,7 +172,6 @@ class UsersTestBase(object):
                           self.data.test_tenant)
 
     @attr(type='negative')
-    @unittest.skip('Until Bug 988920 is fixed')
     def test_authentication_when_tenant_is_disabled(self):
         # User's token for a disabled tenant should not be authenticated
         self.data.setup_test_user()
