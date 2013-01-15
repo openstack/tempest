@@ -195,6 +195,7 @@ class UsersTestBase(object):
     @attr(type='negative')
     def test_authentication_with_invalid_username(self):
         # Non-existent user's token should not get authenticated
+        self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
                           'junkuser123', self.data.test_password,
                           self.data.test_tenant)
