@@ -18,6 +18,7 @@
 from contextlib import closing
 import logging
 
+from boto.exception import EC2ResponseError
 from boto.s3.key import Key
 import nose
 from nose.plugins.attrib import attr
@@ -121,7 +122,7 @@ class InstanceRunTest(BotoTestCase):
         self.cancelResourceCleanUp(rcuk)
 
     @attr(type='smoke')
-    @unittest.skip("Skipped until the Bug #1098112 is resolved")
+    @unittest.skip("Skipped until the Bug #1098891 is resolved")
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -132,9 +133,18 @@ class InstanceRunTest(BotoTestCase):
 
         for instance in reservation.instances:
             instance.terminate()
-
-        instance.update(validate=True)
-        self.assertNotEqual(instance.state, "running")
+        try:
+            instance.update(validate=True)
+        except ValueError:
+            pass
+        except EC2ResponseError as exc:
+            if self.ec2_error_code.\
+                client.InvalidInstanceID.NotFound.match(exc):
+                pass
+            else:
+                raise
+        else:
+            self.assertNotEqual(instance.state, "running")
 
     #NOTE(afazekas): doctored test case,
     # with normal validation it would fail
