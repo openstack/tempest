@@ -95,9 +95,9 @@ class Distro(object):
 
 
 class Fedora(Distro):
-    """This covers all Fedora-based distributions.
+    """This covers Fedora-based distributions.
 
-    Includes: Fedora, RHEL, CentOS, Scientific Linux"""
+    Includes: Fedora, RHEL, Scientific Linux"""
 
     def check_pkg(self, pkg):
         return run_command_with_code(['rpm', '-q', pkg],
@@ -141,10 +141,23 @@ class Fedora(Distro):
                          'contrib/redhat-eventlet.patch')
 
 
+class CentOS(Fedora):
+    """This covers CentOS."""
+
+    def post_process(self):
+        if not self.check_pkg('openssl-devel'):
+            self.yum.install('openssl-devel', check_exit_code=False)
+
+
 def get_distro():
     if (os.path.exists('/etc/fedora-release') or
-        os.path.exists('/etc/redhat-release')):
-        return Fedora()
+            os.path.exists('/etc/redhat-release')):
+        if os.path.exists('/etc/redhat-release') \
+            and run_command_with_code(['grep', 'CentOS',
+                                       '/etc/redhat-release']) == 0:
+            return CentOS()
+        else:
+            return Fedora()
     else:
         return Distro()
 
