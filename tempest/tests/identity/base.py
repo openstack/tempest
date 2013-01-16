@@ -48,7 +48,7 @@ class BaseIdAdminTest(unittest.TestCase):
 
     def disable_tenant(self, tenant_name):
         tenant = self.get_tenant_by_name(tenant_name)
-        self.client.update_tenant(tenant['id'], tenant['description'], False)
+        self.client.update_tenant(tenant['id'], enabled=False)
 
     def get_user_by_name(self, name):
         _, users = self.client.get_users()
