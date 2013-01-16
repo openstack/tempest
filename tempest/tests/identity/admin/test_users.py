@@ -181,10 +181,9 @@ class UsersTestBase(object):
                           self.data.test_tenant)
 
     @attr(type='negative')
-    @unittest.skip('Until Bug 988920 is fixed')
     def test_authentication_with_invalid_tenant(self):
         # User's token for an invalid tenant should not be authenticated
-        self.data.setup_one_user()
+        self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized, self.token_client.auth,
                           self.data.test_user,
                           self.data.test_password,
