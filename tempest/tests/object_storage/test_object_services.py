@@ -656,3 +656,40 @@ class ObjectTest(base.BaseObjectTest):
                         metadata=metadata)
                 resp, _ = self.account_client.list_account_metadata()
                 self.assertNotIn('x-account-meta-temp-url-key', resp)
+
+    @attr(type='positive')
+    def test_object_upload_in_segments(self):
+        #Attempt to upload object in segments
+
+        #Create Object
+        object_name = rand_name(name='LObject')
+        data = arbitrary_string(size=len(object_name),
+                                base_text=object_name)
+        segments = 10
+        self.object_client.create_object(self.container_name,
+                                         object_name, data)
+        #Uploading 10 segments
+        for i in range(segments):
+            resp, _ = \
+                self.object_client.create_object_segments(self.container_name,
+                                                          object_name, i, data)
+        # Creating a Manifest File (Metadata Update)
+
+        metadata = {'X-Object-Manifest': '%s/%s/'
+                    % (self.container_name, object_name)}
+        resp, _ = \
+            self.object_client.update_object_metadata(self.container_name,
+                                                      object_name, metadata,
+                                                      metadata_prefix='')
+        resp, _ = \
+            self.object_client.list_object_metadata(self.container_name,
+                                                    object_name)
+        self.assertIn('x-object-manifest', resp)
+        self.assertEqual(resp['x-object-manifest'],
+                         '%s/%s/' % (self.container_name, object_name))
+
+        #Downloading the object
+        resp, body = \
+            self.object_client.get_object(self.container_name, object_name)
+
+        self.assertEqual(data * segments, body)
