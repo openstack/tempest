@@ -60,7 +60,6 @@ class UsersTestBase(object):
                           self.alt_email)
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 966251 is fixed")
     def test_create_user_with_name_length_over_64(self):
         # Length of user name filed should be restricted to 64 characters
         self.data.setup_test_tenant()

@@ -194,7 +194,6 @@ class ServersNegativeTest(BaseComputeTest):
                           server_name, self.image_ref, self.flavor_ref,
                           key_name=key_name)
 
-    @unittest.skip("Until Bug 1004007 is fixed")
     @attr(type='negative')
     def test_create_server_metadata_exceeds_length_limit(self):
         # Pass really long metadata while creating a server
