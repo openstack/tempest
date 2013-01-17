@@ -82,6 +82,8 @@ class ImagesOneServerTestBase(object):
             self.fail("Should raise 413 Over Limit if meta data was too long")
 
     @attr(type='negative')
+    @unittest.skipUnless(compute.MULTI_USER,
+                         'Need multiple users for this test.')
     def test_delete_image_of_another_tenant(self):
         # Return an error while trying to delete another tenant's image
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
@@ -121,6 +123,8 @@ class ImagesOneServerTestBase(object):
         self.assertEqual(original_image['minDisk'], image['minDisk'])
 
     @attr(type='negative')
+    @unittest.skipUnless(compute.MULTI_USER,
+                         'Need multiple users for this test.')
     def test_create_image_for_server_in_another_tenant(self):
         # Creating image of another tenant's server should be return error
 
