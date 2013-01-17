@@ -7,6 +7,9 @@
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "identity"
 catalog_type = identity
+# Ignore SSL certificate validation failures? Use when in testing
+# environments that have self-signed SSL certs.
+disable_ssl_certificate_validation = False
 # Set to True if your test environment's Keystone authentication service should
 # be accessed over HTTPS
 use_ssl = False

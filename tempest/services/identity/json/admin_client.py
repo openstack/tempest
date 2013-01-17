@@ -207,6 +207,7 @@ class TokenClientJSON(RestClient):
 
     def __init__(self, config):
         self.auth_url = config.identity.auth_url
+        self.config = config
 
     def auth(self, user, password, tenant):
         creds = {
@@ -225,7 +226,8 @@ class TokenClientJSON(RestClient):
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        self.http_obj = httplib2.Http()
+        dscv = self.config.identity.disable_ssl_certificate_validation
+        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
 
