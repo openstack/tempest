@@ -310,3 +310,10 @@ build_timeout = 120
 
 # Status change wait interval
 build_interval = 1
+
+[general]
+#This section contains configuration options that are used for all of tempest
+#that are not specific to a single project or API
+
+#Use xml containe for tests that support both JSON and XML?
+use_xml = False

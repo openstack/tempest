@@ -193,10 +193,9 @@ class ServerActionsTestBase(object):
                       ' be allowed')
 
 
-class ServerActionsTestXML(base.BaseComputeTestXML,
-                           ServerActionsTestBase):
+class ServerActionsTest(base.BaseCompTest, ServerActionsTestBase):
     def setUp(self):
-        super(ServerActionsTestXML, self).setUp()
+        super(ServerActionsTest, self).setUp()
         # Check if the server is in a clean state after test
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
@@ -212,7 +211,7 @@ class ServerActionsTestXML(base.BaseComputeTestXML,
 
     @classmethod
     def setUpClass(cls):
-        super(ServerActionsTestXML, cls).setUpClass()
+        super(ServerActionsTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.name = rand_name('server')
         resp, server = cls.create_server_with_extras(cls.name,
@@ -225,39 +224,4 @@ class ServerActionsTestXML(base.BaseComputeTestXML,
     @classmethod
     def tearDownClass(cls):
         cls.clear_servers()
-        super(ServerActionsTestXML, cls).tearDownClass()
-
-
-class ServerActionsTestJSON(base.BaseComputeTestJSON,
-                            ServerActionsTestBase):
-    def setUp(self):
-        super(ServerActionsTestJSON, self).setUp()
-        # Check if the server is in a clean state after test
-        try:
-            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-        except exceptions:
-            # Rebuild server if something happened to it during a test
-            self.clear_servers()
-            resp, server = self.create_server_with_extras(self.name,
-                                                          self.image_ref,
-                                                          self.flavor_ref)
-            self.server_id = server['id']
-            self.password = server['adminPass']
-            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-
-    @classmethod
-    def setUpClass(cls):
-        super(ServerActionsTestJSON, cls).setUpClass()
-        cls.client = cls.servers_client
-        cls.name = rand_name('server')
-        resp, server = cls.create_server_with_extras(cls.name,
-                                                     cls.image_ref,
-                                                     cls.flavor_ref)
-        cls.server_id = server['id']
-        cls.password = server['adminPass']
-        cls.client.wait_for_server_status(cls.server_id, 'ACTIVE')
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.clear_servers()
-        super(ServerActionsTestJSON, cls).tearDownClass()
+        super(ServerActionsTest, cls).tearDownClass()

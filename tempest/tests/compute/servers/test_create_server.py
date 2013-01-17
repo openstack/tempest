@@ -29,7 +29,7 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class ServersTest(object):
+class ServersTestBase(object):
 
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
@@ -122,8 +122,7 @@ class ServersTest(object):
 
 
 @attr(type='positive')
-class ServersTestAutoDisk(base.BaseComputeTestJSON,
-                          ServersTest):
+class ServersTestAutoDisk(base.BaseCompTest, ServersTestBase):
     @classmethod
     def setUpClass(cls):
         if not compute.DISK_CONFIG_ENABLED:
@@ -131,17 +130,16 @@ class ServersTestAutoDisk(base.BaseComputeTestJSON,
             raise nose.SkipTest(msg)
         super(ServersTestAutoDisk, cls).setUpClass()
         cls.disk_config = 'AUTO'
-        ServersTest.setUpClass(cls)
+        ServersTestBase.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
+        ServersTestBase.tearDownClass(cls)
         super(ServersTestAutoDisk, cls).tearDownClass()
 
 
 @attr(type='positive')
-class ServersTestManualDisk(base.BaseComputeTestJSON,
-                            ServersTest):
+class ServersTestManualDisk(base.BaseCompTest, ServersTestBase):
     @classmethod
     def setUpClass(cls):
         if not compute.DISK_CONFIG_ENABLED:
@@ -149,39 +147,23 @@ class ServersTestManualDisk(base.BaseComputeTestJSON,
             raise nose.SkipTest(msg)
         super(ServersTestManualDisk, cls).setUpClass()
         cls.disk_config = 'MANUAL'
-        ServersTest.setUpClass(cls)
+        ServersTestBase.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
+        ServersTestBase.tearDownClass(cls)
         super(ServersTestManualDisk, cls).tearDownClass()
 
 
 @attr(type='smoke')
-class ServersTestJSON(base.BaseComputeTestJSON,
-                      ServersTest):
+class ServersTest(base.BaseCompTest, ServersTestBase):
     @classmethod
     def setUpClass(cls):
-        super(ServersTestJSON, cls).setUpClass()
+        super(ServersTest, cls).setUpClass()
         cls.disk_config = None
-        ServersTest.setUpClass(cls)
+        ServersTestBase.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
-        super(ServersTestJSON, cls).tearDownClass()
-
-
-@attr(type='smoke')
-class ServersTestXML(base.BaseComputeTestXML,
-                     ServersTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ServersTestXML, cls).setUpClass()
-        cls.disk_config = None
-        ServersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
-        super(ServersTestXML, cls).tearDownClass()
+        ServersTestBase.tearDownClass(cls)
+        super(ServersTest, cls).tearDownClass()

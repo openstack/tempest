@@ -146,17 +146,3 @@ class BaseVolumeTest(unittest.TestCase):
                 condition()
                 return
             time.sleep(self.build_interval)
-
-
-class BaseVolumeTestJSON(BaseVolumeTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(BaseVolumeTestJSON, cls).setUpClass()
-
-
-class BaseVolumeTestXML(BaseVolumeTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(BaseVolumeTestXML, cls).setUpClass()

@@ -24,10 +24,10 @@ import unittest2 as unittest
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute.base import BaseCompTest
 
 
-class ServersNegativeTest(BaseComputeTest):
+class ServersNegativeTest(BaseCompTest):
 
     @classmethod
     def setUpClass(cls):

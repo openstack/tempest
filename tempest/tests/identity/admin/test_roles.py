@@ -100,21 +100,10 @@ class RolesTestBase(object):
         self.client.delete_role(role1_id)
 
 
-class RolesTestJSON(base.BaseIdentityAdminTestJSON,
-                    RolesTestBase):
-
+class RolesTest(base.BaseIdentityAdminTest, RolesTestBase):
     @classmethod
     def setUpClass(cls):
-        super(RolesTestJSON, cls).setUpClass()
-        RolesTestBase.setUpClass(cls)
-
-
-class RolesTestXML(base.BaseIdentityAdminTestXML,
-                   RolesTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(RolesTestXML, cls).setUpClass()
+        super(RolesTest, cls).setUpClass()
         RolesTestBase.setUpClass(cls)
 
 
@@ -264,17 +253,8 @@ class UserRolesTestBase(RolesTestBase):
                           tenant['id'], 'junk-role-aabbcc11')
 
 
-class UserRolesTestJSON(RolesTestJSON,
-                        UserRolesTestBase):
+class UserRolesTest(RolesTest, UserRolesTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(UserRolesTestJSON, cls).setUpClass()
-
-
-class UserRolesTestXML(RolesTestXML,
-                       UserRolesTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(UserRolesTestXML, cls).setUpClass()
+        super(UserRolesTest, cls).setUpClass()

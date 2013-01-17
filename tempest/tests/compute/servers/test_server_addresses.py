@@ -19,10 +19,10 @@ from nose.plugins.attrib import attr
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute.base import BaseCompTest
 
 
-class ServerAddressesTest(BaseComputeTest):
+class ServerAddressesTest(BaseCompTest):
 
     @classmethod
     def setUpClass(cls):

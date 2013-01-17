@@ -25,10 +25,10 @@ from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests import compute
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute.base import BaseCompTest
 
 
-class ListServersNegativeTest(BaseComputeTest):
+class ListServersNegativeTest(BaseCompTest):
 
     @classmethod
     def setUpClass(cls):

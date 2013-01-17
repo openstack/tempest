@@ -274,16 +274,8 @@ class TenantsTestBase(object):
         self.data.tenants.remove(tenant)
 
 
-class TenantsTestJSON(base.BaseIdentityAdminTestJSON,
-                      TenantsTestBase):
+class TenantsTest(base.BaseIdentityAdminTest, TenantsTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(TenantsTestJSON, cls).setUpClass()
-
-
-class TenantsTestXML(base.BaseIdentityAdminTestXML, TenantsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(TenantsTestXML, cls).setUpClass()
+        super(TenantsTest, cls).setUpClass()

@@ -19,10 +19,10 @@ from nose.plugins.attrib import attr
 
 from tempest import exceptions
 from tempest.services.compute.admin.json import quotas_client as adm_quotas
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute.base import BaseCompTest
 
 
-class QuotasTest(BaseComputeTest):
+class QuotasTest(BaseCompTest):
 
     @classmethod
     def setUpClass(cls):

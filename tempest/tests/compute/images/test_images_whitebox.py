@@ -24,7 +24,7 @@ from tempest import whitebox
 
 
 @attr(type='whitebox')
-class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
+class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseCompTest):
 
     @classmethod
     def setUpClass(cls):

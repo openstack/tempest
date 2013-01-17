@@ -23,8 +23,7 @@ from nose.tools import raises
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.tests.volume.admin.base import BaseVolumeAdminTestJSON
-from tempest.tests.volume.admin.base import BaseVolumeAdminTestXML
+from tempest.tests.volume.admin.base import BaseVolumeAdminTest
 
 
 class ExtraSpecsNegativeTestBase():
@@ -136,29 +135,14 @@ class ExtraSpecsNegativeTestBase():
                                                 str(uuid.uuid4()))
 
 
-class ExtraSpecsNegativeTestXML(BaseVolumeAdminTestXML,
-                                ExtraSpecsNegativeTestBase):
+class ExtraSpecsNegativeTest(BaseVolumeAdminTest, ExtraSpecsNegativeTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(ExtraSpecsNegativeTestXML, cls).setUpClass()
+        super(ExtraSpecsNegativeTest, cls).setUpClass()
         ExtraSpecsNegativeTestBase.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
-        super(ExtraSpecsNegativeTestXML, cls).tearDownClass()
-        ExtraSpecsNegativeTestBase.tearDownClass(cls)
-
-
-class ExtraSpecsNegativeTestJSON(BaseVolumeAdminTestJSON,
-                                 ExtraSpecsNegativeTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ExtraSpecsNegativeTestJSON, cls).setUpClass()
-        ExtraSpecsNegativeTestBase.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        super(ExtraSpecsNegativeTestJSON, cls).tearDownClass()
+        super(ExtraSpecsNegativeTest, cls).tearDownClass()
         ExtraSpecsNegativeTestBase.tearDownClass(cls)
