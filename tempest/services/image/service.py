@@ -41,12 +41,15 @@ class Service(BaseService):
             import glanceclient
             import keystoneclient.v2_0.client
 
+            dscv = self.config.identity.disable_ssl_certificate_validation
+
             auth_url = self.config.identity.auth_url.rstrip('tokens')
             keystone = keystoneclient.v2_0.client.Client(
                     username=config.images.username,
                     password=config.images.password,
                     tenant_name=config.images.tenant_name,
-                    auth_url=auth_url)
+                    auth_url=auth_url,
+                    insecure=dscv)
             token = keystone.auth_token
             endpoint = keystone.service_catalog.url_for(
                     service_type='image',
@@ -54,7 +57,8 @@ class Service(BaseService):
 
             self._client = glanceclient.Client('1',
                                                endpoint=endpoint,
-                                               token=token)
+                                               token=token,
+                                               insecure=dscv)
         else:
             raise NotImplementedError
 

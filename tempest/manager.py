@@ -128,6 +128,7 @@ class DefaultClientManager(Manager):
 
         # Novaclient adds a /tokens/ part to the auth URL automatically
         auth_url = self.config.identity.auth_url.rstrip('tokens')
+        dscv = self.config.identity.disable_ssl_certificate_validation
 
         client_args = (username, password, tenant_name, auth_url)
 
@@ -136,14 +137,17 @@ class DefaultClientManager(Manager):
         return novaclient.client.Client(self.NOVACLIENT_VERSION,
                                         *client_args,
                                         service_type=service_type,
-                                        no_cache=True)
+                                        no_cache=True,
+                                        insecure=dscv)
 
     def _get_image_client(self):
         keystone = self._get_identity_client()
         token = keystone.auth_token
         endpoint = keystone.service_catalog.url_for(service_type='image',
                                                     endpoint_type='publicURL')
-        return glanceclient.Client('1', endpoint=endpoint, token=token)
+        dscv = self.config.identity.disable_ssl_certificate_validation
+        return glanceclient.Client('1', endpoint=endpoint, token=token,
+                                   insecure=dscv)
 
     def _get_identity_client(self, username=None, password=None,
                              tenant_name=None):
@@ -163,11 +167,13 @@ class DefaultClientManager(Manager):
             raise exceptions.InvalidConfiguration(msg)
 
         auth_url = self.config.identity.auth_url.rstrip('tokens')
+        dscv = self.config.identity.disable_ssl_certificate_validation
 
         return keystoneclient.v2_0.client.Client(username=username,
                                                  password=password,
                                                  tenant_name=tenant_name,
-                                                 auth_url=auth_url)
+                                                 auth_url=auth_url,
+                                                 insecure=dscv)
 
     def _get_network_client(self):
         # The intended configuration is for the network client to have
@@ -187,11 +193,13 @@ class DefaultClientManager(Manager):
             raise exceptions.InvalidConfiguration(msg)
 
         auth_url = self.config.identity.auth_url.rstrip('tokens')
+        dscv = self.config.identity.disable_ssl_certificate_validation
 
         return quantumclient.v2_0.client.Client(username=username,
                                                 password=password,
                                                 tenant_name=tenant_name,
-                                                auth_url=auth_url)
+                                                auth_url=auth_url,
+                                                insecure=dscv)
 
 
 class ComputeFuzzClientManager(FuzzClientManager):

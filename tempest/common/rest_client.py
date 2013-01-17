@@ -103,7 +103,8 @@ class RestClient(object):
         params['headers'] = {'User-Agent': 'Test-Client', 'X-Auth-User': user,
                              'X-Auth-Key': password}
 
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=True)
+        dscv = self.config.identity.disable_ssl_certificate_validation
+        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         resp, body = self.http_obj.request(auth_url, 'GET', **params)
         try:
             return resp['x-auth-token'], resp['x-server-management-url']
@@ -125,7 +126,8 @@ class RestClient(object):
             }
         }
 
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=True)
+        dscv = self.config.identity.disable_ssl_certificate_validation
+        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         headers = {'Content-Type': 'application/json'}
         body = json.dumps(creds)
         resp, body = self.http_obj.request(auth_url, 'POST',
@@ -200,7 +202,8 @@ class RestClient(object):
         if (self.token is None) or (self.base_url is None):
             self._set_auth()
 
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=True)
+        dscv = self.config.identity.disable_ssl_certificate_validation
+        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
         headers['X-Auth-Token'] = self.token

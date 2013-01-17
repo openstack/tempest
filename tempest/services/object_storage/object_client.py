@@ -133,7 +133,8 @@ class ObjectClientCustomizedHeader(RestClient):
 
     def request(self, method, url, headers=None, body=None, wait=None):
         """A simple HTTP request interface."""
-        self.http_obj = httplib2.Http()
+        dscv = self.config.identity.disable_ssl_certificate_validation
+        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
         if self.base_url is None:
