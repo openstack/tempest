@@ -150,16 +150,16 @@ class CentOS(Fedora):
 
 
 def get_distro():
-    if (os.path.exists('/etc/fedora-release') or
-            os.path.exists('/etc/redhat-release')):
-        if os.path.exists('/etc/redhat-release') \
-            and run_command_with_code(['grep', 'CentOS',
-                                       '/etc/redhat-release']) == 0:
-            return CentOS()
-        else:
-            return Fedora()
-    else:
-        return Distro()
+    if os.path.exists('/etc/redhat-release'):
+        with open('/etc/redhat-release') as rh_release:
+            if 'CentOS' in rh_release.read():
+                return CentOS()
+        return Fedora()
+
+    if os.path.exists('/etc/fedora-release'):
+        return Fedora()
+
+    return Distro()
 
 
 def check_dependencies():
