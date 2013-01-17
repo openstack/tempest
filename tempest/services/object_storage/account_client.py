@@ -15,10 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import httplib2
 import json
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest import exceptions
 
 
 class AccountClient(RestClient):
@@ -88,4 +90,67 @@ class AccountClient(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        return resp, body
+
+
+class AccountClientCustomizedHeader(RestClient):
+
+    def __init__(self, config, username, password, auth_url, tenant_name=None):
+        super(AccountClientCustomizedHeader, self).__init__(config, username,
+                                                            password, auth_url,
+                                                            tenant_name)
+        #Overwrites json-specific header encoding in RestClient
+        self.service = self.config.object_storage.catalog_type
+        self.format = 'json'
+
+    def request(self, method, url, headers=None, body=None, wait=None):
+        """A simple HTTP request interface."""
+        self.http_obj = httplib2.Http()
+        if headers is None:
+            headers = {}
+        if self.base_url is None:
+            self._set_auth()
+
+        req_url = "%s/%s" % (self.base_url, url)
+        resp, resp_body = self.http_obj.request(req_url, method,
+                                                headers=headers, body=body)
+
+        if resp.status == 401 or resp.status == 403:
+            self._log(req_url, body, resp, resp_body)
+            raise exceptions.Unauthorized()
+
+        return resp, resp_body
+
+    def list_account_containers(self, params=None, metadata=None):
+        """
+        GET on the (base) storage URL
+        Given the X-Storage-URL and a valid X-Auth-Token, returns
+        a list of all containers for the account.
+
+        Optional Arguments:
+        limit=[integer value N]
+            Limits the number of results to at most N values
+            DEFAULT:  10,000
+
+        marker=[string value X]
+            Given string value X, return object names greater in value
+            than the specified marker.
+            DEFAULT: No Marker
+
+        format=[string value, either 'json' or 'xml']
+            Specify either json or xml to return the respective serialized
+            response.
+            DEFAULT:  Python-List returned in response body
+        """
+
+        url = '?format=%s' % self.format
+        if params:
+            url += '&%s' + urllib.urlencode(params)
+
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
+        resp, body = self.get(url, headers=headers)
         return resp, body

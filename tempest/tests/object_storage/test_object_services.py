@@ -21,6 +21,7 @@ from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests.object_storage import base
+import unittest2 as unittest
 
 
 class ObjectTest(base.BaseObjectTest):
@@ -32,6 +33,20 @@ class ObjectTest(base.BaseObjectTest):
         #Create a container
         cls.container_name = rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
+
+        # Randomly creating user
+        cls.data.setup_test_user()
+
+        resp, body = \
+            cls.token_client.auth(cls.data.test_user,
+                                  cls.data.test_password,
+                                  cls.data.test_tenant)
+        cls.new_token = \
+            cls.token_client.get_token(cls.data.test_user,
+                                       cls.data.test_password,
+                                       cls.data.test_tenant)
+
+        cls.custom_headers = {'X-Auth-Token': cls.new_token}
 
     @classmethod
     def tearDownClass(cls):
@@ -46,6 +61,9 @@ class ObjectTest(base.BaseObjectTest):
 
         #Attempt to delete the container
         resp, _ = cls.container_client.delete_container(cls.container_name)
+
+        #Attempt to the delete the user setup created
+        cls.data.teardown_all()
 
     @attr(type='smoke')
     def test_create_object(self):
@@ -316,10 +334,184 @@ class ObjectTest(base.BaseObjectTest):
                 self.assertIn('x-container-read', resp)
                 self.assertEqual(resp['x-container-read'], 'x')
 
+    @unittest.skip('Until Bug 1091669  is resolved.')
+    @attr(type='smoke')
+    def test_access_public_object_with_another_user_creds(self):
+        #Make container public-readable, and access the object
+            #anonymously, e.g. using another user credentials
+
+        try:
+            resp_meta = None
+            cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
+            resp_meta, body = \
+                self.container_client.update_container_metadata(
+                    self.container_name, metadata=cont_headers,
+                    metadata_prefix='')
+            self.assertEqual(resp_meta['status'], '204')
+            # Create Object
+            object_name = rand_name(name='Object')
+            data = arbitrary_string(size=len(object_name) * 1,
+                                    base_text=object_name)
+            resp, _ = self.object_client.create_object(self.container_name,
+                                                       object_name, data)
+            self.assertEqual(resp['status'], '201')
+
+            # List container metadata
+            resp, _ = \
+                self.container_client.list_container_metadata(
+                    self.container_name)
+            self.assertEqual(resp['status'], '204')
+            self.assertIn('x-container-read', resp)
+            self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
+
+            # Trying to GET Auth Token of Alternate user
+            token = self.admin_client_alt.get_auth()
+            headers = {'X-Auth-Token': token}
+
+            # Trying to create object with Alternate user creds
+            resp, body = \
+                self.custom_object_client.get_object(
+                    self.container_name, object_name, metadata=headers)
+            self.assertEqual(body, data)
+
+        except Exception as e:
+            self.fail("Failed to get public readable object with another"
+                      " user creds raised exception is %s" % e)
+
+        finally:
+            if resp_meta['status'] == '204':
+                # Delete updated container metadata, to revert back.
+                resp, body = \
+                    self.container_client.delete_container_metadata(
+                        self.container_name, metadata=cont_headers,
+                        metadata_prefix='')
+
+                resp, _ = \
+                    self.container_client.list_container_metadata(
+                        self.container_name)
+                self.assertEqual(resp['status'], '204')
+                self.assertIn('x-container-read', resp)
+                self.assertEqual(resp['x-container-read'], 'x')
+
+    @unittest.skip('Until Bug #1020722 is resolved.')
+    @attr(type='smoke')
+    def test_write_public_object_without_using_creds(self):
+        #Make container public-writable, and create object
+            #anonymously, e.g. without using credentials
+        try:
+            resp_meta = None
+            # Update Container Metadata to make public readable
+            cont_headers = {'X-Container-Write': '-*'}
+            resp_meta, body = \
+                self.container_client.update_container_metadata(
+                    self.container_name, metadata=cont_headers,
+                    metadata_prefix='')
+            self.assertEqual(resp_meta['status'], '204')
+            # List container metadata
+            resp, _ = \
+                self.container_client.list_container_metadata(
+                    self.container_name)
+
+            self.assertEqual(resp['status'], '204')
+            self.assertIn('x-container-write', resp)
+            self.assertEqual(resp['x-container-write'], '-*')
+
+            object_name = rand_name(name='Object')
+            data = arbitrary_string(size=len(object_name),
+                                    base_text=object_name)
+
+            headers = {'Content-Type': 'application/json',
+                       'Accept': 'application/json'}
+
+            #Trying to Create object without using creds
+            resp, body = \
+                self.custom_object_client.create_object(self.container_name,
+                                                        object_name, data,
+                                                        metadata=headers)
+            self.assertEqual(resp['status'], '201')
+
+        except Exception as e:
+            self.fail("Failed to create public writable object without using"
+                      " creds raised exception is %s" % e)
+
+        finally:
+            if resp_meta['status'] == '204':
+                # Delete updated container metadata, to revert back.
+                resp, body = \
+                    self.container_client.delete_container_metadata(
+                        self.container_name, metadata=cont_headers,
+                        metadata_prefix='')
+
+                resp, _ = \
+                    self.container_client.list_container_metadata(
+                        self.container_name)
+                self.assertEqual(resp['status'], '204')
+                self.assertIn('x-container-write', resp)
+                self.assertEqual(resp['x-container-write'], 'x')
+
+    @unittest.skip('Until Bug #1020722 is resolved.')
+    @attr(type='smoke')
+    def test_write_public_with_another_user_creds(self):
+        #Make container public-writable, and create object
+            #anonymously, e.g. with another user credentials
+
+        try:
+            resp_meta = None
+            # Update Container Metadata to make public readable
+            cont_headers = {'X-Container-Write': '-*'}
+            resp_meta, body = \
+                self.container_client.update_container_metadata(
+                    self.container_name, metadata=cont_headers,
+                    metadata_prefix='')
+            self.assertEqual(resp_meta['status'], '204')
+            # List container metadata
+            resp, _ = \
+                self.container_client.list_container_metadata(
+                    self.container_name)
+
+            self.assertEqual(resp['status'], '204')
+            self.assertIn('x-container-write', resp)
+            self.assertEqual(resp['x-container-write'], '-*')
+
+            #Trying to GET auth token of Alternate user
+            token = self.admin_client_alt.get_auth()
+
+            headers = {'Content-Type': 'application/json',
+                       'Accept': 'application/json',
+                       'X-Auth-Token': token}
+
+            #Trying to Create an object with another user creds
+            object_name = rand_name(name='Object')
+            data = arbitrary_string(size=len(object_name),
+                                    base_text=object_name)
+            resp, body = \
+                self.custom_object_client.create_object(
+                    self.container_name, object_name, data, metadata=headers)
+            self.assertEqual(resp['status'], '201')
+
+        except Exception as e:
+            self.fail("Failed to create public writable object with another"
+                      " user creds raised exception is %s" % e)
+
+        finally:
+            if resp_meta['status'] == '204':
+                # Delete updated container metadata, to revert back.
+                resp, body = \
+                    self.container_client.delete_container_metadata(
+                        self.container_name, metadata=cont_headers,
+                        metadata_prefix='')
+
+                resp, _ = \
+                    self.container_client.list_container_metadata(
+                        self.container_name)
+                self.assertEqual(resp['status'], '204')
+                self.assertIn('x-container-write', resp)
+                self.assertEqual(resp['x-container-write'], 'x')
+
     @attr(type='negative')
     def test_access_object_without_using_creds(self):
         # Attempt to access the object anonymously, e.g.
-        # not using any credentials
+            # not using any credentials
 
         # Create Object
         object_name = rand_name(name='Object')
@@ -354,7 +546,7 @@ class ObjectTest(base.BaseObjectTest):
     @attr(type='negative')
     def test_delete_object_without_using_creds(self):
         # Attempt to delete the object anonymously,
-        # e.g. not using any credentials
+            # e.g. not using any credentials
 
         # Create Object
         object_name = rand_name(name='Object')
@@ -367,3 +559,55 @@ class ObjectTest(base.BaseObjectTest):
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.delete_object,
                           self.container_name, object_name)
+
+    @attr(type='negative')
+    def test_write_object_with_non_authorized_user(self):
+        #Attempt to upload another file using non authorized user
+
+        object_name = rand_name(name='Object')
+        data = arbitrary_string(size=len(object_name) * 5,
+                                base_text=object_name)
+
+        # Trying to Create Object with non authorized user token
+        self.assertRaises(exceptions.Unauthorized,
+                          self.custom_object_client.create_object,
+                          self.container_name, object_name, data,
+                          metadata=self.custom_headers)
+
+    @attr(type='negative')
+    def test_read_object_with_non_authorized_user(self):
+        #Attempt to download the file using non authorized user
+
+        object_name = rand_name(name='Object')
+        data = arbitrary_string(size=len(object_name) * 5,
+                                base_text=object_name)
+
+        resp, body = \
+            self.object_client.create_object(self.container_name,
+                                             object_name, data)
+        self.assertEqual(resp['status'], '201')
+
+        # Trying to Get Object with non authorized user token
+        self.assertRaises(exceptions.Unauthorized,
+                          self.custom_object_client.get_object,
+                          self.container_name, object_name,
+                          metadata=self.custom_headers)
+
+    @attr(type='negative')
+    def test_delete_object_with_non_authorized_user(self):
+        #Attempt to delete container using non authorized user
+
+        object_name = rand_name(name='Object')
+        data = arbitrary_string(size=len(object_name) * 5,
+                                base_text=object_name)
+
+        resp, body = \
+            self.object_client.create_object(self.container_name,
+                                             object_name, data)
+        self.assertEqual(resp['status'], '201')
+
+        # Trying to Delete Object with non authorized user token
+        self.assertRaises(exceptions.Unauthorized,
+                          self.custom_object_client.delete_object,
+                          self.container_name, object_name,
+                          metadata=self.custom_headers)

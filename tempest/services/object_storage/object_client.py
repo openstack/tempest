@@ -172,9 +172,14 @@ class ObjectClientCustomizedHeader(RestClient):
         resp, body = self.put(url, data, headers=headers)
         return resp, body
 
-    def delete_object(self, container, object_name):
+    def delete_object(self, container, object_name, metadata=None):
         """Delete storage object."""
 
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
         url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.delete(url)
+        resp, body = self.delete(url, headers=headers)
         return resp, body

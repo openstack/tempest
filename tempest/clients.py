@@ -64,6 +64,8 @@ from tempest.services.volume.json.volumes_client import VolumesClientJSON
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
 from tempest.services.object_storage.object_client import \
     ObjectClientCustomizedHeader
+from tempest.services.object_storage.account_client import \
+    AccountClientCustomizedHeader
 
 LOG = logging.getLogger(__name__)
 
@@ -202,6 +204,8 @@ class Manager(object):
         self.ec2api_client = APIClientEC2(*client_args)
         self.s3_client = ObjectClientS3(*client_args)
         self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
+        self.custom_account_client = \
+            AccountClientCustomizedHeader(*client_args)
 
 
 class AltManager(Manager):

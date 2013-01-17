@@ -17,6 +17,7 @@
 
 from nose.plugins.attrib import attr
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.tests.object_storage import base
 
 
@@ -80,3 +81,30 @@ class AccountTest(base.BaseObjectTest):
 
         resp, metadata = self.account_client.list_account_metadata()
         self.assertNotIn('x-account-meta-test-account-meta', resp)
+
+    @attr(type='negative')
+    def test_list_containers_with_non_authorized_user(self):
+        #Listing containers with using non authorized user
+
+        # Randomly creating user
+        self.data.setup_test_user()
+
+        resp, body = \
+            self.token_client.auth(self.data.test_user,
+                                   self.data.test_password,
+                                   self.data.test_tenant)
+        new_token = \
+            self.token_client.get_token(self.data.test_user,
+                                        self.data.test_password,
+                                        self.data.test_tenant)
+
+        custom_headers = {'X-Auth-Token': new_token}
+
+        params = {'format': 'json'}
+        # Trying to list containers with non authorized user token
+        self.assertRaises(exceptions.Unauthorized,
+                          self.custom_account_client.list_account_containers,
+                          params=params, metadata=custom_headers)
+
+        #Attempt to the delete the user setup created
+        self.data.teardown_all()
