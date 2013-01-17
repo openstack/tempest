@@ -34,21 +34,25 @@ IdentityGroup = [
     cfg.BoolOpt('disable_ssl_certificate_validation',
                 default=False,
                 help="Set to True if using self-signed SSL certificates."),
+    cfg.StrOpt('uri',
+               default=None,
+               help="Full URI of the OpenStack Identity API (Keystone)"),
     cfg.StrOpt('host',
                default="127.0.0.1",
-               help="Host IP for making Identity API requests."),
+               help="(DEPRECATED, use uri) Host IP for making Identity "
+                    "API requests."),
     cfg.IntOpt('port',
                default=8773,
-               help="Port for the Identity service."),
+               help="(DEPRECATED, use uri) Port for the Identity service."),
     cfg.StrOpt('api_version',
                default="v1.1",
-               help="Version of the Identity API"),
+               help="(DEPRECATED, use uri) Version of the Identity API"),
     cfg.StrOpt('path',
                default='/',
-               help="Path of API request"),
+               help="(IGNORED) Path of API request"),
     cfg.BoolOpt('use_ssl',
                 default=False,
-                help="Specifies if we are using https."),
+                help="(DEPRECATED, use uri) Specifies if we are using https."),
     cfg.StrOpt('strategy',
                default='keystone',
                help="Which auth method does the environment use? "
@@ -64,16 +68,15 @@ def register_identity_opts(conf):
     for opt in IdentityGroup:
         conf.register_opt(opt, group='identity')
 
+    # Fall back to piecemeal identity URI for legacy support
     authurl = data_utils.build_url(conf.identity.host,
                                    str(conf.identity.port),
                                    conf.identity.api_version,
-                                   conf.identity.path,
+                                   path='',  # Ignore path...
                                    use_ssl=conf.identity.use_ssl)
 
-    auth_url = cfg.StrOpt('auth_url',
-                          default=authurl,
-                          help="The Identity URL (derived)")
-    conf.register_opt(auth_url, group="identity")
+    if not conf.identity.uri:
+        conf.identity.uri = authurl
 
 
 identity_admin_group = cfg.OptGroup(name='identity-admin',

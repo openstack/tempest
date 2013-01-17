@@ -116,6 +116,10 @@ class RestClient(object):
         Provides authentication via Keystone
         """
 
+        # Normalize URI to ensure /tokens is in it.
+        if 'tokens' not in auth_url:
+            auth_url = auth_url.rstrip('/') + '/tokens'
+
         creds = {
             'auth': {
                 'passwordCredentials': {

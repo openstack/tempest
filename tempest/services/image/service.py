@@ -42,8 +42,7 @@ class Service(BaseService):
             import keystoneclient.v2_0.client
 
             dscv = self.config.identity.disable_ssl_certificate_validation
-
-            auth_url = self.config.identity.auth_url.rstrip('tokens')
+            auth_url = self.config.identity.uri
             keystone = keystoneclient.v2_0.client.Client(
                     username=config.images.username,
                     password=config.images.password,

@@ -24,7 +24,7 @@ identity = tempest.config.TempestConfig().identity
 compute = tempest.config.TempestConfig().compute
 
 nt = client.Client(compute.username, compute.password,
-                   compute.tenant_name, identity.auth_url)
+                   compute.tenant_name, identity.uri)
 
 flavor_list = nt.flavors.list()
 server_list = nt.servers.list()

@@ -38,10 +38,6 @@ class BotoClientBase(object):
         self.connection_timeout = str(config.boto.http_socket_timeout)
         self.num_retries = str(config.boto.num_retries)
         self.build_timeout = config.boto.build_timeout
-        # We do not need the "path":  "/token" part
-        if auth_url:
-            auth_url = re.sub("(.*)" + re.escape(config.identity.path) + "$",
-                              "\\1", auth_url)
         self.ks_cred = {"username": username,
                         "password": password,
                         "auth_url": auth_url,

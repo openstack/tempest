@@ -166,7 +166,7 @@ class Manager(object):
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
 
-        self.auth_url = self.config.identity.auth_url
+        self.auth_url = self.config.identity.uri
 
         if self.config.identity.strategy == 'keystone':
             client_args = (self.config, self.username, self.password,
