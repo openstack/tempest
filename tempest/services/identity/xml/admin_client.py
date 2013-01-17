@@ -242,7 +242,14 @@ class AdminClientXML(RestClientXML):
 class TokenClientXML(RestClientXML):
 
     def __init__(self, config):
-        self.auth_url = config.identity.auth_url
+        auth_url = config.identity.uri
+
+        # TODO(jaypipes) Why is this all repeated code in here?
+        # Normalize URI to ensure /tokens is in it.
+        if 'tokens' not in auth_url:
+            auth_url = auth_url.rstrip('/') + '/tokens'
+
+        self.auth_url = auth_url
         self.config = config
 
     def auth(self, user, password, tenant):

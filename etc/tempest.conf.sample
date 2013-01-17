@@ -10,18 +10,8 @@ catalog_type = identity
 # Ignore SSL certificate validation failures? Use when in testing
 # environments that have self-signed SSL certs.
 disable_ssl_certificate_validation = False
-# Set to True if your test environment's Keystone authentication service should
-# be accessed over HTTPS
-use_ssl = False
-# This is the main host address of the authentication service API
-host = 127.0.0.1
-# Port that the authentication service API is running on
-port = 5000
-# Version of the authentication service API (a string)
-api_version = v2.0
-# Path to the authentication service tokens resource (do not modify unless you
-# have a custom authentication API and are not using Keystone)
-path = tokens
+# URL for where to find the OpenStack Identity API endpoint (Keystone)
+uri = http://127.0.0.1:5000/v2.0/
 # Should typically be left as keystone unless you have a non-Keystone
 # authentication API service
 strategy = keystone

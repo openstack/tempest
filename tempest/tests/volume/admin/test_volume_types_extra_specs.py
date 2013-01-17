@@ -29,7 +29,7 @@ class VolumeTypesExtraSpecsTest(BaseVolumeTest):
         adm_user = cls.config.compute_admin.username
         adm_pass = cls.config.compute_admin.password
         adm_tenant = cls.config.compute_admin.tenant_name
-        auth_url = cls.config.identity.auth_url
+        auth_url = cls.config.identity.uri
 
         cls.client = volume_types_client.VolumeTypesClientJSON(cls.config,
                                                                adm_user,

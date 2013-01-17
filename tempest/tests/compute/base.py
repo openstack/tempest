@@ -89,7 +89,7 @@ class BaseCompTest(unittest.TestCase):
             cls.config,
             cls.config.identity_admin.username,
             cls.config.identity_admin.password,
-            cls.config.identity.auth_url
+            cls.config.identity.uri
         )
 
     @classmethod

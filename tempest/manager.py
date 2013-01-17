@@ -126,8 +126,7 @@ class DefaultClientManager(Manager):
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
 
-        # Novaclient adds a /tokens/ part to the auth URL automatically
-        auth_url = self.config.identity.auth_url.rstrip('tokens')
+        auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
 
         client_args = (username, password, tenant_name, auth_url)
@@ -166,7 +165,7 @@ class DefaultClientManager(Manager):
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
 
-        auth_url = self.config.identity.auth_url.rstrip('tokens')
+        auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
 
         return keystoneclient.v2_0.client.Client(username=username,
@@ -192,7 +191,7 @@ class DefaultClientManager(Manager):
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
 
-        auth_url = self.config.identity.auth_url.rstrip('tokens')
+        auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
 
         return quantumclient.v2_0.client.Client(username=username,
@@ -233,7 +232,11 @@ class ComputeFuzzClientManager(FuzzClientManager):
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
 
-        auth_url = self.config.identity.auth_url
+        auth_url = self.config.identity.uri
+
+        # Ensure /tokens is in the URL for Keystone...
+        if 'tokens' not in auth_url:
+            auth_url = auth_url.rstrip('/') + '/tokens'
 
         if self.config.identity.strategy == 'keystone':
             client_args = (self.config, username, password, auth_url,

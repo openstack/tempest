@@ -35,7 +35,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         cls.adm_user = cls.config.compute_admin.username
         cls.adm_pass = cls.config.compute_admin.password
         cls.adm_tenant = cls.config.compute_admin.tenant_name
-        cls.auth_url = cls.config.identity.auth_url
+        cls.auth_url = cls.config.identity.uri
 
         if not cls.adm_user and cls.adm_pass and cls.adm_tenant:
             msg = ("Missing Volume Admin API credentials "
