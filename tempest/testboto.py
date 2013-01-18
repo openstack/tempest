@@ -26,6 +26,7 @@ from boto.exception import EC2ResponseError
 from boto.s3.bucket import Bucket
 from boto.s3.key import Key
 import nose
+import testresources
 import unittest2 as unittest
 
 from tempest.exceptions import TearDownException
@@ -122,8 +123,12 @@ def friendly_function_call_str(call_able, *args, **kwargs):
     return string + ")"
 
 
-class BotoTestCase(unittest.TestCase):
+class BotoTestCase(unittest.TestCase,
+                   testresources.ResourcedTestCase):
     """Recommended to use as base class for boto related test."""
+
+    resources = [('boto_init', tempest.tests.boto.generic_setup_package())]
+
     @classmethod
     def setUpClass(cls):
         # The trash contains cleanup functions and paramaters in tuples
