@@ -137,9 +137,19 @@ class FlavorsTestBase(object):
                           9999)
 
 
-class FlavorsTest(base.BaseCompTest, FlavorsTestBase):
+class FlavorsTestXML(base.BaseComputeTestXML,
+                     FlavorsTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsTest, cls).setUpClass()
+        super(FlavorsTestXML, cls).setUpClass()
+        cls.client = cls.flavors_client
+
+
+class FlavorsTestJSON(base.BaseComputeTestJSON,
+                      FlavorsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FlavorsTestJSON, cls).setUpClass()
         cls.client = cls.flavors_client

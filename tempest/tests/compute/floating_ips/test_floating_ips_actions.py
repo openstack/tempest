@@ -205,13 +205,25 @@ class FloatingIPsTestBase(object):
                       ' with out passing floating IP  should raise BadRequest')
 
 
-class FloatingIPsTest(base.BaseCompTest, FloatingIPsTestBase):
+class FloatingIPsTestJSON(base.BaseComputeTestJSON, FloatingIPsTestBase):
     @classmethod
     def setUpClass(cls):
-        super(FloatingIPsTest, cls).setUpClass()
+        super(FloatingIPsTestJSON, cls).setUpClass()
         FloatingIPsTestBase.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
         FloatingIPsTestBase.tearDownClass(cls)
-        super(FloatingIPsTest, cls).tearDownClass()
+        super(FloatingIPsTestJSON, cls).tearDownClass()
+
+
+class FloatingIPsTestXML(base.BaseComputeTestXML, FloatingIPsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(FloatingIPsTestXML, cls).setUpClass()
+        FloatingIPsTestBase.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        FloatingIPsTestBase.tearDownClass(cls)
+        super(FloatingIPsTestXML, cls).tearDownClass()

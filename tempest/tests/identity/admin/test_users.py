@@ -329,7 +329,14 @@ class UsersTestBase(object):
                       'tenant ids %s' % fail)
 
 
-class UsersTest(base.BaseIdentityAdminTest, UsersTestBase):
+class UsersTestJSON(base.BaseIdentityAdminTestJSON,
+                    UsersTestBase):
     @classmethod
     def setUpClass(cls):
-        super(UsersTest, cls).setUpClass()
+        super(UsersTestJSON, cls).setUpClass()
+
+
+class UsersTestXML(base.BaseIdentityAdminTestXML, UsersTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(UsersTestXML, cls).setUpClass()

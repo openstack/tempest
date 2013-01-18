@@ -461,20 +461,6 @@ def register_boto_opts(conf):
     for opt in BotoConfig:
         conf.register_opt(opt, group='boto')
 
-general_group = cfg.OptGroup(name='general', title='General Tempest Options')
-
-GeneralOpts = [
-    cfg.BoolOpt('use_xml',
-                default=False,
-                help="Use xml for the container format"),
-]
-
-
-def register_general_opts(conf):
-    conf.register_group(general_group)
-    for opt in GeneralOpts:
-        conf.register_opt(opt, group='general')
-
 
 # TODO(jaypipes): Move this to a common utils (not data_utils...)
 def singleton(cls):
@@ -532,7 +518,6 @@ class TempestConfig:
         register_volume_opts(cfg.CONF)
         register_object_storage_opts(cfg.CONF)
         register_boto_opts(cfg.CONF)
-        register_general_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
         self.compute_admin = cfg.CONF['compute-admin']
         self.identity = cfg.CONF.identity
@@ -543,4 +528,3 @@ class TempestConfig:
         self.volume = cfg.CONF.volume
         self.object_storage = cfg.CONF['object-storage']
         self.boto = cfg.CONF.boto
-        self.general = cfg.CONF.general

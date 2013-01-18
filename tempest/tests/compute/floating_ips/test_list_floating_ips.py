@@ -99,13 +99,27 @@ class FloatingIPDetailsTestBase(object):
                       'nonexistant floating IP')
 
 
-class FloatingIPDetailsTest(base.BaseCompTest, FloatingIPDetailsTestBase):
+class FloatingIPDetailsTestJSON(base.BaseComputeTestJSON,
+                                FloatingIPDetailsTestBase):
     @classmethod
     def setUpClass(cls):
-        super(FloatingIPDetailsTest, cls).setUpClass()
+        super(FloatingIPDetailsTestJSON, cls).setUpClass()
         FloatingIPDetailsTestBase.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
         FloatingIPDetailsTestBase.tearDownClass(cls)
-        super(FloatingIPDetailsTest, cls).tearDownClass()
+        super(FloatingIPDetailsTestJSON, cls).tearDownClass()
+
+
+class FloatingIPDetailsTestXML(base.BaseComputeTestXML,
+                               FloatingIPDetailsTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(FloatingIPDetailsTestXML, cls).setUpClass()
+        FloatingIPDetailsTestBase.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        FloatingIPDetailsTestBase.tearDownClass(cls)
+        super(FloatingIPDetailsTestXML, cls).tearDownClass()

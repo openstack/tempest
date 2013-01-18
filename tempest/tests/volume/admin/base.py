@@ -42,15 +42,26 @@ class BaseVolumeAdminTest(BaseVolumeTest):
                    "in configuration.")
             raise nose.SkipTest(msg)
 
-        if cls.config.general.use_xml:
-            cls.client = volumes_types_xml_client.\
-            VolumeTypesClient(cls.config, cls.adm_user, cls.adm_pass,
-                              cls.auth_url, cls.adm_tenant)
-        else:
-            cls.client = volume_types_json_client.\
-            VolumeTypesClientJSON(cls.config, cls.adm_user, cls.adm_pass,
-                                  cls.auth_url, cls.adm_tenant)
-
     @classmethod
     def tearDownClass(cls):
         super(BaseVolumeAdminTest, cls).tearDownClass()
+
+
+class BaseVolumeAdminTestJSON(BaseVolumeAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(BaseVolumeAdminTestJSON, cls).setUpClass()
+        cls.client = volume_types_json_client.\
+        VolumeTypesClientJSON(cls.config, cls.adm_user, cls.adm_pass,
+                              cls.auth_url, cls.adm_tenant)
+
+
+class BaseVolumeAdminTestXML(BaseVolumeAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(BaseVolumeAdminTestXML, cls).setUpClass()
+        cls.client = volume_types_xml_client.\
+        VolumeTypesClientXML(cls.config, cls.adm_user, cls.adm_pass,
+                             cls.auth_url, cls.adm_tenant)

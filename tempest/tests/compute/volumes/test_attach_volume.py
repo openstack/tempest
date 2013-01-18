@@ -107,8 +107,17 @@ class AttachVolumeTest(object):
             self._delete(server['id'], volume['id'])
 
 
-class TestAttachVolume(base.BaseCompTest, AttachVolumeTest):
+class TestAttachVolumeJSON(base.BaseComputeTestJSON,
+                           AttachVolumeTest):
     @classmethod
     def setUpClass(cls):
-        super(TestAttachVolume, cls).setUpClass()
+        super(TestAttachVolumeJSON, cls).setUpClass()
+        AttachVolumeTest.setUpClass(cls)
+
+
+class TestAttachVolumeXML(base.BaseComputeTestXML,
+                          AttachVolumeTest):
+    @classmethod
+    def setUpClass(cls):
+        super(TestAttachVolumeXML, cls).setUpClass()
         AttachVolumeTest.setUpClass(cls)

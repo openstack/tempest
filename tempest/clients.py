@@ -141,7 +141,8 @@ class Manager(object):
     Top level manager for OpenStack Compute clients
     """
 
-    def __init__(self, username=None, password=None, tenant_name=None):
+    def __init__(self, username=None, password=None, tenant_name=None,
+                 interface='json'):
         """
         We allow overriding of the credentials used within the various
         client classes managed by the Manager object. Left as None, the
@@ -158,10 +159,6 @@ class Manager(object):
         self.username = username or self.config.compute.username
         self.password = password or self.config.compute.password
         self.tenant_name = tenant_name or self.config.compute.tenant_name
-        if self.config.general.use_xml:
-            interface = 'xml'
-        else:
-            interface = 'json'
 
         if None in (self.username, self.password, self.tenant_name):
             msg = ("Missing required credentials. "
@@ -232,11 +229,12 @@ class AdminManager(Manager):
     managed client objects
     """
 
-    def __init__(self):
+    def __init__(self, interface='json'):
         conf = config.TempestConfig()
         super(AdminManager, self).__init__(conf.compute_admin.username,
                                            conf.compute_admin.password,
-                                           conf.compute_admin.tenant_name)
+                                           conf.compute_admin.tenant_name,
+                                           interface=interface)
 
 
 class ServiceManager(object):
@@ -259,11 +257,12 @@ class IdentityManager(Manager):
     managed client objects
     """
 
-    def __init__(self):
+    def __init__(self, interface='json'):
         conf = config.TempestConfig()
         super(IdentityManager, self).__init__(conf.identity_admin.username,
                                               conf.identity_admin.password,
-                                              conf.identity_admin.tenant_name)
+                                              conf.identity_admin.tenant_name,
+                                              interface)
 
 
 class IdentityNaManager(Manager):
@@ -273,8 +272,9 @@ class IdentityNaManager(Manager):
     managed client objects
     """
 
-    def __init__(self):
+    def __init__(self, interface='json'):
         conf = config.TempestConfig()
         super(IdentityNaManager, self).__init__(conf.compute.username,
                                                 conf.compute.password,
-                                                conf.compute.tenant_name)
+                                                conf.compute.tenant_name,
+                                                interface)

@@ -20,7 +20,7 @@ import unittest2 as unittest
 from tempest.tests.compute import base
 
 
-class AbsoluteLimitsTestBase(object):
+class AbsoluteLimitsTest(object):
 
     @staticmethod
     def setUpClass(cls):
@@ -50,8 +50,17 @@ class AbsoluteLimitsTestBase(object):
                          % ', '.join(ele for ele in missing_elements))
 
 
-class AbsoluteLimitsTest(base.BaseCompTest, AbsoluteLimitsTestBase):
+class AbsoluteLimitsTestJSON(base.BaseComputeTestJSON,
+                             AbsoluteLimitsTest):
     @classmethod
     def setUpClass(cls):
-        super(AbsoluteLimitsTest, cls).setUpClass()
-        AbsoluteLimitsTestBase.setUpClass(cls)
+        super(AbsoluteLimitsTestJSON, cls).setUpClass()
+        AbsoluteLimitsTest.setUpClass(cls)
+
+
+class AbsoluteLimitsTestXML(base.BaseComputeTestXML,
+                            AbsoluteLimitsTest):
+    @classmethod
+    def setUpClass(cls):
+        super(AbsoluteLimitsTestXML, cls).setUpClass()
+        AbsoluteLimitsTest.setUpClass(cls)

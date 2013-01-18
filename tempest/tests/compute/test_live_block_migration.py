@@ -31,7 +31,7 @@ from tempest.tests.compute import base
 
 
 @attr(category='live-migration')
-class LiveBlockMigrationTest(base.BaseCompTest):
+class LiveBlockMigrationTest(base.BaseComputeTest):
 
     live_migration_available = (
         config.TempestConfig().compute.live_migration_available)

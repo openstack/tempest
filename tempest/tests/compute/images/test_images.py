@@ -213,13 +213,40 @@ class ImagesTestBase(object):
                       "exceeds 35 character ID length limit")
 
 
-class ImagesTest(base.BaseCompTest, ImagesTestBase):
+class ImagesTestJSON(base.BaseComputeTestJSON,
+                     ImagesTestBase):
     def tearDown(self):
         ImagesTestBase.tearDown(self)
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesTest, cls).setUpClass()
+        super(ImagesTestJSON, cls).setUpClass()
+        cls.client = cls.images_client
+        cls.servers_client = cls.servers_client
+
+        cls.image_ids = []
+
+        if compute.MULTI_USER:
+            if cls.config.compute.allow_tenant_isolation:
+                creds = cls._get_isolated_creds()
+                username, tenant_name, password = creds
+                cls.alt_manager = clients.Manager(username=username,
+                                                  password=password,
+                                                  tenant_name=tenant_name)
+            else:
+                # Use the alt_XXX credentials in the config file
+                cls.alt_manager = clients.AltManager()
+            cls.alt_client = cls.alt_manager.images_client
+
+
+class ImagesTestXML(base.BaseComputeTestXML,
+                    ImagesTestBase):
+    def tearDown(self):
+        ImagesTestBase.tearDown(self)
+
+    @classmethod
+    def setUpClass(cls):
+        super(ImagesTestXML, cls).setUpClass()
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
 

@@ -23,7 +23,7 @@ from tempest import exceptions
 from tempest.tests.compute import base
 
 
-class ConsoleOutputTestBase(object):
+class ConsoleOutputTest(object):
 
     @classmethod
     def setUpClass(self, cls):
@@ -87,13 +87,28 @@ class ConsoleOutputTestBase(object):
 
 
 @attr(type='smoke')
-class ConsoleOutputTest(base.BaseCompTest, ConsoleOutputTestBase):
+class ConsoleOutputTestJSON(base.BaseComputeTestJSON,
+                            ConsoleOutputTest):
     @classmethod
     def setUpClass(cls):
-        super(ConsoleOutputTest, cls).setUpClass()
-        ConsoleOutputTestBase.setUpClass(cls)
+        super(ConsoleOutputTestJSON, cls).setUpClass()
+        ConsoleOutputTest.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
-        ConsoleOutputTestBase.tearDownClass(cls)
-        super(ConsoleOutputTest, cls).tearDownClass()
+        ConsoleOutputTest.tearDownClass(cls)
+        super(ConsoleOutputTestJSON, cls).tearDownClass()
+
+
+@attr(type='smoke')
+class ConsoleOutputTestXML(base.BaseComputeTestXML,
+                           ConsoleOutputTest):
+    @classmethod
+    def setUpClass(cls):
+        super(ConsoleOutputTestXML, cls).setUpClass()
+        ConsoleOutputTest.setUpClass(cls)
+
+    @classmethod
+    def tearDownClass(cls):
+        ConsoleOutputTest.tearDownClass(cls)
+        super(ConsoleOutputTestXML, cls).tearDownClass()

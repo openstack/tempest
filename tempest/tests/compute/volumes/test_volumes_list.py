@@ -62,17 +62,19 @@ class VolumesTestBase(object):
                                    for m_vol in missing_volumes))
 
 
-class VolumesTest(base.BaseCompTest, VolumesTestBase):
+class VolumesTestXML(base.BaseComputeTestXML, VolumesTestBase):
     @classmethod
     def setUpClass(cls):
-        super(VolumesTest, cls).setUpClass()
+        cls._interface = 'xml'
+        super(VolumesTestXML, cls).setUpClass()
         cls.client = cls.volumes_extensions_client
         # Create 3 Volumes
-        cls.volume_list = []
-        cls.volume_id_list = []
+        cls.volume_list = list()
+        cls.volume_id_list = list()
         for i in range(3):
-            v_name = rand_name('volume-%s')
+            v_name = rand_name('volume')
             metadata = {'Type': 'work'}
+            v_name += cls._interface
             try:
                 resp, volume = cls.client.create_volume(size=1,
                                                         display_name=v_name,
@@ -103,4 +105,50 @@ class VolumesTest(base.BaseCompTest, VolumesTestBase):
         for volume in cls.volume_list:
             resp, _ = cls.client.delete_volume(volume['id'])
             cls.client.wait_for_resource_deletion(volume['id'])
-        super(VolumesTest, cls).tearDownClass()
+        super(VolumesTestXML, cls).tearDownClass()
+
+
+class VolumesTestJSON(base.BaseComputeTestJSON, VolumesTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = 'json'
+        super(VolumesTestJSON, cls).setUpClass()
+        cls.client = cls.volumes_extensions_client
+        # Create 3 Volumes
+        cls.volume_list = []
+        cls.volume_id_list = []
+        for i in range(3):
+            v_name = rand_name('volume-%s')
+            metadata = {'Type': 'work'}
+            v_name += cls._interface
+            try:
+                resp, volume = cls.client.create_volume(size=1,
+                                                        display_name=v_name,
+                                                        metadata=metadata)
+                cls.client.wait_for_volume_status(volume['id'], 'available')
+                resp, volume = cls.client.get_volume(volume['id'])
+                cls.volume_list.append(volume)
+                cls.volume_id_list.append(volume['id'])
+            except Exception:
+                if cls.volume_list:
+                    # We could not create all the volumes, though we were able
+                    # to create *some* of the volumes. This is typically
+                    # because the backing file size of the volume group is
+                    # too small. So, here, we clean up whatever we did manage
+                    # to create and raise a SkipTest
+                    for volume in cls.volume_list:
+                        cls.client.delete_volume(volume)
+                    msg = ("Failed to create ALL necessary volumes to run "
+                           "test. This typically means that the backing file "
+                           "size of the nova-volumes group is too small to "
+                           "create the 3 volumes needed by this test case")
+                    raise nose.SkipTest(msg)
+                raise
+
+    @classmethod
+    def tearDownClass(cls):
+        # Delete the created Volumes
+        for volume in cls.volume_list:
+            resp, _ = cls.client.delete_volume(volume['id'])
+            cls.client.wait_for_resource_deletion(volume['id'])
+        super(VolumesTestJSON, cls).tearDownClass()

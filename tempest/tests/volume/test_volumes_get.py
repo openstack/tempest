@@ -95,8 +95,17 @@ class VolumesGetTestBase(object):
                 self.client.wait_for_resource_deletion(volume['id'])
 
 
-class VolumesGetTest(base.BaseVolumeTest, VolumesGetTestBase):
+class VolumesGetTestXML(base.BaseVolumeTestXML, VolumesGetTestBase):
     @classmethod
     def setUpClass(cls):
-        super(VolumesGetTest, cls).setUpClass()
+        cls._interface = "xml"
+        super(VolumesGetTestXML, cls).setUpClass()
+        cls.client = cls.volumes_client
+
+
+class VolumesGetTestJSON(base.BaseVolumeTestJSON, VolumesGetTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(VolumesGetTestJSON, cls).setUpClass()
         cls.client = cls.volumes_client
