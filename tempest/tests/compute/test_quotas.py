@@ -17,10 +17,10 @@
 
 from nose.plugins.attrib import attr
 
-from tempest.tests.compute.base import BaseCompTest
+from tempest.tests.compute.base import BaseComputeTest
 
 
-class QuotasTest(BaseCompTest):
+class QuotasTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):

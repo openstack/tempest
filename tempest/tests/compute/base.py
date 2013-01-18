@@ -26,7 +26,8 @@ from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
 
-__all__ = ['BaseCompTest', 'BaseComputeAdminTest']
+__all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
+           'BaseComputeAdminTestJSON', 'BaseComputeAdminTestXML']
 
 LOG = logging.getLogger(__name__)
 
@@ -45,9 +46,10 @@ class BaseCompTest(unittest.TestCase):
             username, tenant_name, password = creds
             os = clients.Manager(username=username,
                                  password=password,
-                                 tenant_name=tenant_name)
+                                 tenant_name=tenant_name,
+                                 interface=cls._interface)
         else:
-            os = clients.Manager()
+            os = clients.Manager(interface=cls._interface)
 
         cls.os = os
         cls.servers_client = os.servers_client
@@ -76,7 +78,7 @@ class BaseCompTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.IdentityManager()
+        os = clients.IdentityManager(interface=cls._interface)
         admin_client = os.admin_client
         return admin_client
 
@@ -225,6 +227,23 @@ class BaseCompTest(unittest.TestCase):
             time.sleep(self.build_interval)
 
 
+class BaseComputeTestJSON(BaseCompTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(BaseComputeTestJSON, cls).setUpClass()
+
+# NOTE(danms): For transition, keep the old name active as JSON
+BaseComputeTest = BaseComputeTestJSON
+
+
+class BaseComputeTestXML(BaseCompTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(BaseComputeTestXML, cls).setUpClass()
+
+
 class BaseComputeAdminTest(unittest.TestCase):
 
     """Base test case class for all Compute Admin API tests."""
@@ -241,4 +260,18 @@ class BaseComputeAdminTest(unittest.TestCase):
                    "in configuration.")
             raise nose.SkipTest(msg)
 
-        cls.os = clients.AdminManager()
+        cls.os = clients.AdminManager(interface=cls._interface)
+
+
+class BaseComputeAdminTestJSON(BaseComputeAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(BaseComputeAdminTestJSON, cls).setUpClass()
+
+
+class BaseComputeAdminTestXML(BaseComputeAdminTest):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "xml"
+        super(BaseComputeAdminTestXML, cls).setUpClass()

@@ -18,11 +18,8 @@
 import nose
 
 from tempest.common.utils.data_utils import rand_name
-from tempest import config
 from tempest import exceptions
 from tempest.tests.identity import base
-
-CONF = config.TempestConfig()
 
 
 class ServicesTestBase(object):
@@ -68,9 +65,15 @@ class ServicesTestBase(object):
                               service_data['id'])
 
 
-class ServicesTest(base.BaseIdentityAdminTest, ServicesTestBase):
+class ServicesTestJSON(base.BaseIdentityAdminTestJSON, ServicesTestBase):
     @classmethod
     def setUpClass(cls):
-        super(ServicesTest, cls).setUpClass()
-        if CONF.general.use_xml:
-            raise nose.SkipTest("Skipping until Bug #1061738 resolved")
+        super(ServicesTestJSON, cls).setUpClass()
+
+
+class ServicesTestXML(base.BaseIdentityAdminTestXML,
+                      ServicesTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(ServicesTestXML, cls).setUpClass()
+        raise nose.SkipTest("Skipping until Bug #1061738 resolved")

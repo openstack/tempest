@@ -19,11 +19,8 @@ import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
-from tempest import config
 from tempest.tests import compute
 from tempest.tests.compute import base
-
-CONF = config.TempestConfig()
 
 
 class FlavorsAdminTestBase(object):
@@ -71,12 +68,12 @@ class FlavorsAdminTestBase(object):
             self.assertEqual(flavor['rxtx_factor'], self.rxtx)
             self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'],
                              self.ephemeral)
-            if CONF.general.use_xml:
+            if self._interface == "xml":
                 XMLNS_OS_FLV_ACCESS = "http://docs.openstack.org/compute/ext/"\
                     "flavor_access/api/v2"
                 key = "{" + XMLNS_OS_FLV_ACCESS + "}is_public"
                 self.assertEqual(flavor[key], "True")
-            else:
+            if self._interface == "json":
                 self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
             #Verify flavor is retrieved
@@ -167,12 +164,12 @@ class FlavorsAdminTestBase(object):
             self.assertEqual(flavor['swap'], '')
             self.assertEqual(int(flavor['rxtx_factor']), 1)
             self.assertEqual(int(flavor['OS-FLV-EXT-DATA:ephemeral']), 0)
-            if CONF.general.use_xml:
+            if self._interface == "xml":
                 XMLNS_OS_FLV_ACCESS = "http://docs.openstack.org/compute/ext/"\
                     "flavor_access/api/v2"
                 key = "{" + XMLNS_OS_FLV_ACCESS + "}is_public"
                 self.assertEqual(flavor[key], "True")
-            else:
+            if self._interface == "json":
                 self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
             #Verify flavor is retrieved
@@ -244,11 +241,23 @@ class FlavorsAdminTestBase(object):
             self.client.wait_for_resource_deletion(self.new_flavor_id)
 
 
-class FlavorsAdminTest(base.BaseComputeAdminTest, base.BaseCompTest,
-                       FlavorsAdminTestBase):
+class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,
+                          base.BaseComputeTestXML,
+                          FlavorsAdminTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsAdminTest, cls).setUpClass()
-        base.BaseCompTest.setUpClass()
+        super(FlavorsAdminTestXML, cls).setUpClass()
+        base.BaseComputeTestXML.setUpClass()
+        FlavorsAdminTestBase.setUpClass(cls)
+
+
+class FlavorsAdminTestJSON(base.BaseComputeAdminTestJSON,
+                           base.BaseComputeTestJSON,
+                           FlavorsAdminTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(FlavorsAdminTestJSON, cls).setUpClass()
+        base.BaseComputeTestJSON.setUpClass()
         FlavorsAdminTestBase.setUpClass(cls)

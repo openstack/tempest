@@ -22,7 +22,7 @@ from tempest import exceptions
 from tempest.tests.compute import base
 
 
-class SecurityGroupsTestBase(object):
+class SecurityGroupsTest(object):
 
     @staticmethod
     def setUpClass(cls):
@@ -298,8 +298,17 @@ class SecurityGroupsTestBase(object):
         self.assertEqual(202, resp.status)
 
 
-class SecurityGroupsTest(base.BaseCompTest, SecurityGroupsTestBase):
+class SecurityGroupsTestJSON(base.BaseComputeTestJSON,
+                             SecurityGroupsTest):
     @classmethod
     def setUpClass(cls):
-        super(SecurityGroupsTest, cls).setUpClass()
-        SecurityGroupsTestBase.setUpClass(cls)
+        super(SecurityGroupsTestJSON, cls).setUpClass()
+        SecurityGroupsTest.setUpClass(cls)
+
+
+class SecurityGroupsTestXML(base.BaseComputeTestXML,
+                            SecurityGroupsTest):
+    @classmethod
+    def setUpClass(cls):
+        super(SecurityGroupsTestXML, cls).setUpClass()
+        SecurityGroupsTest.setUpClass(cls)

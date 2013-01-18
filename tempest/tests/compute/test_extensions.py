@@ -30,9 +30,17 @@ class ExtensionsTestBase(object):
         self.assertEqual(200, resp.status)
 
 
-class ExtensionsTest(base.BaseCompTest):
+class ExtensionsTestJSON(base.BaseComputeTest, ExtensionsTestBase):
 
     @classmethod
     def setUpClass(cls):
-        super(ExtensionsTest, cls).setUpClass()
+        super(ExtensionsTestJSON, cls).setUpClass()
+        cls.client = cls.extensions_client
+
+
+class ExtensionsTestXML(base.BaseComputeTestXML, ExtensionsTestBase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(ExtensionsTestXML, cls).setUpClass()
         cls.client = cls.extensions_client

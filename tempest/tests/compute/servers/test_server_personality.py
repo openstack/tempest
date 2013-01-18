@@ -78,9 +78,21 @@ class ServerPersonalityTestBase(object):
             self.client.delete_server(server['id'])
 
 
-class ServerPersonalityTest(base.BaseCompTest, ServerPersonalityTestBase):
+class ServerPersonalityTestXML(base.BaseComputeTestXML,
+                               ServerPersonalityTestBase):
     @classmethod
     def setUpClass(cls):
-        super(ServerPersonalityTest, cls).setUpClass()
+        cls._interface = "xml"
+        super(ServerPersonalityTestXML, cls).setUpClass()
+        cls.client = cls.servers_client
+        cls.user_client = cls.limits_client
+
+
+class ServerPersonalityTestJSON(base.BaseComputeTestJSON,
+                                ServerPersonalityTestBase):
+    @classmethod
+    def setUpClass(cls):
+        cls._interface = "json"
+        super(ServerPersonalityTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client

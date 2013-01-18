@@ -22,7 +22,8 @@ from nose.plugins.attrib import attr
 from nose.tools import raises
 
 from tempest import exceptions
-from tempest.tests.volume.admin.base import BaseVolumeAdminTest
+from tempest.tests.volume.admin.base import BaseVolumeAdminTestJSON
+from tempest.tests.volume.admin.base import BaseVolumeAdminTestXML
 
 
 class VolumeTypesNegativeTestBase():
@@ -59,9 +60,17 @@ class VolumeTypesNegativeTestBase():
         self.client.delete_volume_type(str(uuid.uuid4()))
 
 
-class VolumesTypesNegativeTest(BaseVolumeAdminTest,
-                               VolumeTypesNegativeTestBase):
+class VolumesTypesNegativeTestXML(BaseVolumeAdminTestXML,
+                                  VolumeTypesNegativeTestBase):
     @classmethod
     def setUpClass(cls):
-        super(VolumesTypesNegativeTest, cls).setUpClass()
+        super(VolumesTypesNegativeTestXML, cls).setUpClass()
+        VolumeTypesNegativeTestBase.setUpClass(cls)
+
+
+class VolumesTypesNegativeTestJSON(BaseVolumeAdminTestJSON,
+                                   VolumeTypesNegativeTestBase):
+    @classmethod
+    def setUpClass(cls):
+        super(VolumesTypesNegativeTestJSON, cls).setUpClass()
         VolumeTypesNegativeTestBase.setUpClass(cls)
