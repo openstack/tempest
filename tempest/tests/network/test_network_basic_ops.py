@@ -195,6 +195,8 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
         cls.keypairs = {}
         cls.security_groups = {}
         cls.networks = []
+        cls.subnets = []
+        cls.routers = []
         cls.servers = []
         cls.floating_ips = {}
 
@@ -301,6 +303,18 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
         self.set_resource(name, network)
         return network
 
+    def _list_networks(self):
+        nets = self.network_client.list_networks()
+        return nets['networks']
+
+    def _list_subnets(self):
+        subnets = self.network_client.list_subnets()
+        return subnets['subnets']
+
+    def _list_routers(self):
+        routers = self.network_client.list_routers()
+        return routers['routers']
+
     def _create_subnet(self, network):
         """
         Create a subnet for the given network within the cidr block
@@ -406,8 +420,43 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
         subnet = self._create_subnet(network)
         subnet.add_to_router(router.id)
         self.networks.append(network)
+        self.subnets.append(subnet)
+        self.routers.append(router)
 
-    def test_004_create_servers(self):
+    def test_004_check_networks(self):
+        #Checks that we see the newly created network/subnet/router via
+        #checking the result of list_[networks,routers,subnets]
+        seen_nets = self._list_networks()
+        seen_names = [n['name'] for n in seen_nets]
+        seen_ids = [n['id'] for n in seen_nets]
+        for mynet in self.networks:
+            assert mynet.name in seen_names, \
+            "Did not see expected network with name %s" % mynet.name
+            assert mynet.id in seen_ids, \
+            "Did not see expected network with id %s" % mynet.id
+        seen_subnets = self._list_subnets()
+        seen_net_ids = [n['network_id'] for n in seen_subnets]
+        seen_subnet_ids = [n['id'] for n in seen_subnets]
+        for mynet in self.networks:
+            assert mynet.id in seen_net_ids, \
+            "Did not see subnet belonging to network %s/%s" % \
+            (mynet.name, mynet.id)
+        for mysubnet in self.subnets:
+            assert mysubnet.id in seen_subnet_ids, \
+            "Did not see expected subnet with id %s" % \
+            mysubnet.id
+        seen_routers = self._list_routers()
+        seen_router_ids = [n['id'] for n in seen_routers]
+        seen_router_names = [n['name'] for n in seen_routers]
+        for myrouter in self.routers:
+            assert myrouter.name in seen_router_names, \
+            "Did not see expected router with name %s" % \
+            myrouter.name
+            assert myrouter.id in seen_router_ids, \
+            "Did not see expected router with id %s" % \
+            myrouter.id
+
+    def test_005_create_servers(self):
         if not (self.keypairs or self.security_groups or self.networks):
             raise nose.SkipTest('Necessary resources have not been defined')
         for i, network in enumerate(self.networks):
@@ -419,7 +468,7 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
                                          name, keypair_name, security_groups)
             self.servers.append(server)
 
-    def test_005_check_tenant_network_connectivity(self):
+    def test_006_check_tenant_network_connectivity(self):
         if not self.config.network.tenant_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
             raise nose.SkipTest(msg)
@@ -432,7 +481,7 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
                                     "Timed out waiting for %s's ip to become "
                                     "reachable" % server.name)
 
-    def test_006_assign_floating_ips(self):
+    def test_007_assign_floating_ips(self):
         public_network_id = self.config.network.public_network_id
         if not public_network_id:
             raise nose.SkipTest('Public network not configured')
@@ -443,7 +492,7 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
             self.floating_ips.setdefault(server, [])
             self.floating_ips[server].append(floating_ip)
 
-    def test_007_check_public_network_connectivity(self):
+    def test_008_check_public_network_connectivity(self):
         if not self.floating_ips:
             raise nose.SkipTest('No floating ips have been allocated.')
         for server, floating_ips in self.floating_ips.iteritems():
