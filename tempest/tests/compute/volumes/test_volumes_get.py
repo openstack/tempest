@@ -28,7 +28,7 @@ class VolumesGetTestBase(object):
         # CREATE, GET, DELETE Volume
         volume = None
         try:
-            v_name = rand_name('Volume-%s-') % self._interface
+            v_name = rand_name('Volume-')
             metadata = {'Type': 'work'}
             #Create volume
             resp, volume = self.client.create_volume(size=1,
@@ -95,17 +95,8 @@ class VolumesGetTestBase(object):
             self.client.wait_for_resource_deletion(volume['id'])
 
 
-class VolumesGetTestXML(base.BaseComputeTestXML, VolumesGetTestBase):
+class VolumesGetTest(base.BaseCompTest, VolumesGetTestBase):
     @classmethod
     def setUpClass(cls):
-        cls._interface = "xml"
-        super(VolumesGetTestXML, cls).setUpClass()
-        cls.client = cls.volumes_extensions_client
-
-
-class VolumesGetTestJSON(base.BaseComputeTestJSON, VolumesGetTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(VolumesGetTestJSON, cls).setUpClass()
+        super(VolumesGetTest, cls).setUpClass()
         cls.client = cls.volumes_extensions_client

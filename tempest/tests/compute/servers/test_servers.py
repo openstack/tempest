@@ -156,10 +156,10 @@ class ServersTestBase(object):
         self.assertEqual('204', resp['status'])
 
 
-class ServersTestJSON(base.BaseComputeTestJSON, ServersTestBase):
+class ServersTest(base.BaseCompTest, ServersTestBase):
     @classmethod
     def setUpClass(cls):
-        super(ServersTestJSON, cls).setUpClass()
+        super(ServersTest, cls).setUpClass()
         cls.client = cls.servers_client
 
     def tearDown(self):
@@ -169,20 +169,4 @@ class ServersTestJSON(base.BaseComputeTestJSON, ServersTestBase):
         # memory
         self.clear_servers()
 
-        super(ServersTestJSON, self).tearDown()
-
-
-class ServersTestXML(base.BaseComputeTestXML, ServersTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(ServersTestXML, cls).setUpClass()
-        cls.client = cls.servers_client
-
-    def tearDown(self):
-        # clean up any remaining servers and wait for them to fully
-        # delete. This is done because delete calls are async, and if
-        # deletes are running slow we could very well overrun system
-        # memory
-        self.clear_servers()
-
-        super(ServersTestXML, self).tearDown()
+        super(ServersTest, self).tearDown()

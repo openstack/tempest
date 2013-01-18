@@ -20,8 +20,7 @@ import unittest2 as unittest
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.tests.compute.base import BaseComputeTestJSON
-from tempest.tests.compute.base import BaseComputeTestXML
+from tempest.tests.compute.base import BaseCompTest
 
 
 class KeyPairsTestBase(object):
@@ -222,15 +221,8 @@ class KeyPairsTestBase(object):
             self.fail('invalid name')
 
 
-class KeyPairsTestXML(BaseComputeTestXML, KeyPairsTestBase):
+class KeyPairsTest(BaseCompTest, KeyPairsTestBase):
     @classmethod
     def setUpClass(cls):
-        super(KeyPairsTestXML, cls).setUpClass()
-        cls.client = cls.keypairs_client
-
-
-class KeyPairsTestJSON(BaseComputeTestJSON, KeyPairsTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(KeyPairsTestJSON, cls).setUpClass()
+        super(KeyPairsTest, cls).setUpClass()
         cls.client = cls.keypairs_client

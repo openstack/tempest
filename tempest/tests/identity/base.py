@@ -26,7 +26,7 @@ class BaseIdAdminTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os = clients.IdentityManager(interface=cls._interface)
+        os = clients.IdentityManager()
         cls.client = os.admin_client
         cls.token_client = os.token_client
 
@@ -35,7 +35,7 @@ class BaseIdAdminTest(unittest.TestCase):
 
         cls.data = DataGenerator(cls.client)
 
-        os = clients.IdentityNaManager(interface=cls._interface)
+        os = clients.IdentityNaManager()
         cls.non_admin_client = os.admin_client
 
     @classmethod
@@ -69,20 +69,10 @@ class BaseIdAdminTest(unittest.TestCase):
             return role[0]
 
 
-class BaseIdentityAdminTestJSON(BaseIdAdminTest):
+class BaseIdentityAdminTest(BaseIdAdminTest):
     @classmethod
     def setUpClass(cls):
-        cls._interface = "json"
-        super(BaseIdentityAdminTestJSON, cls).setUpClass()
-
-BaseIdentityAdminTest = BaseIdentityAdminTestJSON
-
-
-class BaseIdentityAdminTestXML(BaseIdAdminTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(BaseIdentityAdminTestXML, cls).setUpClass()
+        super(BaseIdentityAdminTest, cls).setUpClass()
 
 
 class DataGenerator(object):

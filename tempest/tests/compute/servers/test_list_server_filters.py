@@ -27,7 +27,7 @@ from tempest.tests.compute import base
 from tempest.tests import utils
 
 
-class ListServerFiltersTest(object):
+class ListServerFiltersTestBase(object):
 
     @staticmethod
     def setUpClass(cls):
@@ -204,27 +204,13 @@ class ListServerFiltersTest(object):
         return min_detail
 
 
-class ListServerFiltersTestJSON(base.BaseComputeTestJSON,
-                                ListServerFiltersTest):
+class ListServerFiltersTest(base.BaseCompTest, ListServerFiltersTestBase):
     @classmethod
     def setUpClass(cls):
-        super(ListServerFiltersTestJSON, cls).setUpClass()
-        ListServerFiltersTest.setUpClass(cls)
+        super(ListServerFiltersTest, cls).setUpClass()
+        ListServerFiltersTestBase.setUpClass(cls)
 
     @classmethod
     def tearDownClass(cls):
-        super(ListServerFiltersTestJSON, cls).tearDownClass()
-        ListServerFiltersTest.tearDownClass(cls)
-
-
-class ListServerFiltersTestXML(base.BaseComputeTestXML,
-                               ListServerFiltersTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ListServerFiltersTestXML, cls).setUpClass()
-        ListServerFiltersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        super(ListServerFiltersTestXML, cls).tearDownClass()
-        ListServerFiltersTest.tearDownClass(cls)
+        super(ListServerFiltersTest, cls).tearDownClass()
+        ListServerFiltersTestBase.tearDownClass(cls)

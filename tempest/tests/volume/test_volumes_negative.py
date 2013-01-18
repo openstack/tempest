@@ -114,16 +114,8 @@ class VolumesNegativeTestBase(object):
         resp, volume = self.client.delete_volume('')
 
 
-class VolumesNegativeTestXML(base.BaseVolumeTestXML, VolumesNegativeTestBase):
+class VolumesNegativeTest(base.BaseVolumeTest, VolumesNegativeTestBase):
     @classmethod
     def setUpClass(cls):
-        super(VolumesNegativeTestXML, cls).setUpClass()
-        cls.client = cls.volumes_client
-
-
-class VolumesNegativeTestJSON(base.BaseVolumeTestJSON,
-                              VolumesNegativeTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(VolumesNegativeTestJSON, cls).setUpClass()
+        super(VolumesNegativeTest, cls).setUpClass()
         cls.client = cls.volumes_client

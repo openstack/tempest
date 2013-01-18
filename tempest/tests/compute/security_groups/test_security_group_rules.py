@@ -22,7 +22,7 @@ from tempest import exceptions
 from tempest.tests.compute import base
 
 
-class SecurityGroupRulesTest(object):
+class SecurityGroupRulesTestBase(object):
 
     @staticmethod
     def setUpClass(cls):
@@ -244,17 +244,8 @@ class SecurityGroupRulesTest(object):
                       'with nonexistant rule id')
 
 
-class SecurityGroupRulesTestJSON(base.BaseComputeTestJSON,
-                                 SecurityGroupRulesTest):
+class SecurityGroupRulesTest(base.BaseCompTest, SecurityGroupRulesTestBase):
     @classmethod
     def setUpClass(cls):
-        super(SecurityGroupRulesTestJSON, cls).setUpClass()
-        SecurityGroupRulesTest.setUpClass(cls)
-
-
-class SecurityGroupRulesTestXML(base.BaseComputeTestXML,
-                                SecurityGroupRulesTest):
-    @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupRulesTestXML, cls).setUpClass()
-        SecurityGroupRulesTest.setUpClass(cls)
+        super(SecurityGroupRulesTest, cls).setUpClass()
+        SecurityGroupRulesTestBase.setUpClass(cls)
