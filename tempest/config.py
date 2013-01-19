@@ -37,22 +37,6 @@ IdentityGroup = [
     cfg.StrOpt('uri',
                default=None,
                help="Full URI of the OpenStack Identity API (Keystone)"),
-    cfg.StrOpt('host',
-               default="127.0.0.1",
-               help="(DEPRECATED, use uri) Host IP for making Identity "
-                    "API requests."),
-    cfg.IntOpt('port',
-               default=8773,
-               help="(DEPRECATED, use uri) Port for the Identity service."),
-    cfg.StrOpt('api_version',
-               default="v1.1",
-               help="(DEPRECATED, use uri) Version of the Identity API"),
-    cfg.StrOpt('path',
-               default='/',
-               help="(IGNORED) Path of API request"),
-    cfg.BoolOpt('use_ssl',
-                default=False,
-                help="(DEPRECATED, use uri) Specifies if we are using https."),
     cfg.StrOpt('strategy',
                default='keystone',
                help="Which auth method does the environment use? "
@@ -101,16 +85,6 @@ def register_identity_opts(conf):
     conf.register_group(identity_group)
     for opt in IdentityGroup:
         conf.register_opt(opt, group='identity')
-
-    # Fall back to piecemeal identity URI for legacy support
-    authurl = data_utils.build_url(conf.identity.host,
-                                   str(conf.identity.port),
-                                   conf.identity.api_version,
-                                   path='',  # Ignore path...
-                                   use_ssl=conf.identity.use_ssl)
-
-    if not conf.identity.uri:
-        conf.identity.uri = authurl
 
 
 compute_group = cfg.OptGroup(name='compute',
@@ -249,13 +223,6 @@ image_group = cfg.OptGroup(name='image',
                            title="Image Service Options")
 
 ImageGroup = [
-    cfg.StrOpt('host',
-               default='127.0.0.1',
-               help="Host IP for making Images API requests. Defaults to "
-                    "'127.0.0.1'."),
-    cfg.IntOpt('port',
-               default=9292,
-               help="Listen port of the Images service."),
     cfg.StrOpt('api_version',
                default='1',
                help="Version of the API"),

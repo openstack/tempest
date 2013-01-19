@@ -162,12 +162,6 @@ catalog_type = image
 # The version of the OpenStack Images API to use
 api_version = 1
 
-# This is the main host address of the Image API
-host = 127.0.0.1
-
-# Port that the Image API is running on
-port = 9292
-
 [network]
 # This section contains configuration options used when executing tests
 # against the OpenStack Network API.
