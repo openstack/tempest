@@ -132,14 +132,14 @@ class ServersTestBase(object):
             #Update the IPv4 and IPv6 access addresses
             resp, body = self.client.update_server(server['id'],
                                                    accessIPv4='1.1.1.1',
-                                                   accessIPv6='::babe:2.2.2.2')
+                                                   accessIPv6='::babe:202:202')
             self.assertEqual(200, resp.status)
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
             #Verify the access addresses have been updated
             resp, server = self.client.get_server(server['id'])
             self.assertEqual('1.1.1.1', server['accessIPv4'])
-            self.assertEqual('::babe:2.2.2.2', server['accessIPv6'])
+            self.assertEqual('::babe:202:202', server['accessIPv6'])
 
         #Teardown
         finally:
