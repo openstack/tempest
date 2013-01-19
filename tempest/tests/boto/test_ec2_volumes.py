@@ -49,12 +49,7 @@ class EC2VolumesTest(BotoTestCase):
         retrieved = self.client.get_all_volumes((volume.id,))
         self.assertEqual(1, len(retrieved))
         self.assertTrue(compare_volumes(volume, retrieved[0]))
-
-        def _status():
-            volume.update(validate=True)
-            return volume.status
-
-        self.assertVolumeStatusWait(_status, "available")
+        self.assertVolumeStatusWait(volume, "available")
         self.client.delete_volume(volume.id)
         self.cancelResourceCleanUp(cuk)
 
@@ -63,28 +58,13 @@ class EC2VolumesTest(BotoTestCase):
         # EC2 Create volume from snapshot
         volume = self.client.create_volume(1, self.zone)
         self.addResourceCleanUp(self.client.delete_volume, volume.id)
-
-        def _status():
-            volume.update(validate=True)
-            return volume.status
-
-        self.assertVolumeStatusWait(_status, "available")
+        self.assertVolumeStatusWait(volume, "available")
         snap = self.client.create_snapshot(volume.id)
         self.addResourceCleanUp(self.destroy_snapshot_wait, snap)
-
-        def _snap_status():
-            snap.update(validate=True)
-            return snap.status
-
-        self.assertSnapshotStatusWait(_snap_status, "completed")
+        self.assertSnapshotStatusWait(snap, "completed")
 
         svol = self.client.create_volume(1, self.zone, snapshot=snap)
         cuk = self.addResourceCleanUp(svol.delete)
-
-        def _snap_vol_status():
-            svol.update(validate=True)
-            return svol.status
-
-        self.assertVolumeStatusWait(_snap_vol_status, "available")
+        self.assertVolumeStatusWait(svol, "available")
         svol.delete()
         self.cancelResourceCleanUp(cuk)

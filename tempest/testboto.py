@@ -20,13 +20,13 @@ import logging
 import re
 
 import boto
-from boto.exception import BotoServerError
-from boto.exception import EC2ResponseError
-from boto.s3.bucket import Bucket
+from boto import ec2
+from boto import exception
+from boto import s3
 import testresources
 import testtools
 
-from tempest.exceptions import TearDownException
+from tempest import exceptions
 import tempest.tests.boto
 from tempest.tests.boto.utils.wait import re_search_wait
 from tempest.tests.boto.utils.wait import state_wait
@@ -40,7 +40,7 @@ class BotoExceptionMatcher(object):
     CODE_RE = '.*'  # regexp makes sense in group match
 
     def match(self, exc):
-        if not isinstance(exc, BotoServerError):
+        if not isinstance(exc, exception.BotoServerError):
             return "%r not an BotoServerError instance" % exc
         LOG.info("Status: %s , error_code: %s", exc.status, exc.error_code)
         if re.match(self.STATUS_RE, str(exc.status)) is None:
@@ -164,7 +164,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
                                  key_name)"""
         try:
             callableObj(*args, **kwargs)
-        except BotoServerError as exc:
+        except exception.BotoServerError as exc:
             error_msg = excMatcher.match(exc)
             if error_msg is not None:
                 raise self.failureException, error_msg
@@ -190,7 +190,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
             finally:
                 del cls._resource_trash_bin[key]
         if fail_count:
-            raise TearDownException(num=fail_count)
+            raise exceptions.TearDownException(num=fail_count)
 
     ec2_error_code = BotoExceptionMatcher()
     # InsufficientInstanceCapacity can be both server and client error
@@ -210,15 +210,50 @@ class BotoTestCase(testtools.testcase.WithAttributes,
 
     gone_set = set(('_GONE',))
 
+    @classmethod
+    def get_lfunction_gone(cls, obj):
+        """ If the object is instance of a well know type returns back with
+            with the correspoding function otherwise it assumes the obj itself
+            is the function"""
+        ec = cls.ec2_error_code
+        if isinstance(obj, ec2.instance.Instance):
+            colusure_matcher = ec.client.InvalidInstanceID.NotFound
+            status_attr = "state"
+        elif isinstance(obj, ec2.image.Image):
+            colusure_matcher = ec.client.InvalidAMIID.NotFound
+            status_attr = "state"
+        elif isinstance(obj, ec2.snapshot.Snapshot):
+            colusure_matcher = ec.client.InvalidSnapshot.NotFound
+            status_attr = "status"
+        elif isinstance(obj, ec2.volume.Volume):
+            colusure_matcher = ec.client.InvalidVolume.NotFound
+            status_attr = "status"
+        else:
+            return obj
+
+        def _status():
+            try:
+                obj.update(validate=True)
+            except ValueError:
+                return "_GONE"
+            except exception.EC2ResponseError as exc:
+                if colusure_matcher.match(exc):
+                    return "_GONE"
+                else:
+                    raise
+            return getattr(obj, status_attr)
+
+        return _status
+
     def state_wait_gone(self, lfunction, final_set, valid_set):
         if not isinstance(final_set, set):
             final_set = set((final_set,))
         final_set |= self.gone_set
+        lfunction = self.get_lfunction_gone(lfunction)
         state = state_wait(lfunction, final_set, valid_set)
         self.assertIn(state, valid_set | self.gone_set)
         return state
 
-    #TODO(afazekas): object based versions for resurces which supports update
     def waitImageState(self, lfunction, wait_for):
         return self.state_wait_gone(lfunction, wait_for,
                                     self.valid_image_state)
@@ -227,13 +262,13 @@ class BotoTestCase(testtools.testcase.WithAttributes,
         return self.state_wait_gone(lfunction, wait_for,
                                     self.valid_instance_state)
 
-    def waitVolumeStatus(self, lfunction, wait_for):
-        return self.state_wait_gone(lfunction, wait_for,
-                                    self.valid_volume_status)
-
     def waitSnapshotStatus(self, lfunction, wait_for):
         return self.state_wait_gone(lfunction, wait_for,
                                     self.valid_snapshot_status)
+
+    def waitVolumeStatus(self, lfunction, wait_for):
+        return self.state_wait_gone(lfunction, wait_for,
+                                    self.valid_volume_status)
 
     def assertImageStateWait(self, lfunction, wait_for):
         state = self.waitImageState(lfunction, wait_for)
@@ -310,7 +345,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
             with closing(boto.connect_s3(**connection_data)) as conn:
                 if isinstance(bucket, basestring):
                     bucket = conn.lookup(bucket)
-                    assert isinstance(bucket, Bucket)
+                    assert isinstance(bucket, s3.bucket.Bucket)
                 for obj in bucket.list():
                     try:
                         bucket.delete_key(obj.key)
@@ -323,7 +358,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
             LOG.exception(exc)
             exc_num += 1
         if exc_num:
-            raise TearDownException(num=exc_num)
+            raise exceptions.TearDownException(num=exc_num)
 
     @classmethod
     def destroy_reservation(cls, reservation):
@@ -335,7 +370,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
                 instance.update(validate=True)
             except ValueError:
                 return "_GONE"
-            except EC2ResponseError as exc:
+            except exception.EC2ResponseError as exc:
                 if cls.ec2_error_code.\
                 client.InvalidInstanceID.NotFound.match(exc):
                     return "_GONE"
@@ -354,7 +389,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
                 LOG.exception(exc)
                 exc_num += 1
         if exc_num:
-            raise TearDownException(num=exc_num)
+            raise exceptions.TearDownException(num=exc_num)
 
     #NOTE(afazekas): The incorrect ErrorCodes makes very, very difficult
     # to write better teardown
@@ -397,7 +432,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
             LOG.exception(exc)
             exc_num += 1
         if exc_num:
-            raise TearDownException(num=exc_num)
+            raise exceptions.TearDownException(num=exc_num)
 
     @classmethod
     def destroy_snapshot_wait(cls, snapshot):
