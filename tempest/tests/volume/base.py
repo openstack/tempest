@@ -73,8 +73,8 @@ class BaseVolumeTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.IdentityManager()
-        return os.admin_client
+        os = clients.AdminManager()
+        return os.identity_client
 
     @classmethod
     def _get_isolated_creds(cls):

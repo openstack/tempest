@@ -43,7 +43,7 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
     def setUpClass(cls):
         super(LiveBlockMigrationTest, cls).setUpClass()
 
-        tenant_name = cls.config.identity_admin.tenant_name
+        tenant_name = cls.config.compute_admin.tenant_name
         cls.admin_hosts_client = HostsClientJSON(
             *cls._get_client_args(), tenant_name=tenant_name)
 

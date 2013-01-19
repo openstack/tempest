@@ -79,29 +79,6 @@ def register_identity_opts(conf):
         conf.identity.uri = authurl
 
 
-identity_admin_group = cfg.OptGroup(name='identity-admin',
-                                    title="Identity Admin Options")
-
-IdentityAdminGroup = [
-    cfg.StrOpt('username',
-               default='admin',
-               help="Username to use for Identity Admin API requests"),
-    cfg.StrOpt('tenant_name',
-               default='admin',
-               help="Tenant name to use for Identity Admin API requests"),
-    cfg.StrOpt('password',
-               default='pass',
-               help="API key to use for Identity Admin API requests",
-               secret=True),
-]
-
-
-def register_identity_admin_opts(conf):
-    conf.register_group(identity_admin_group)
-    for opt in IdentityAdminGroup:
-        conf.register_opt(opt, group='identity-admin')
-
-
 compute_group = cfg.OptGroup(name='compute',
                              title='Compute Service Options')
 
@@ -273,18 +250,6 @@ ImageGroup = [
     cfg.StrOpt('api_version',
                default='1',
                help="Version of the API"),
-    cfg.StrOpt('username',
-               default='demo',
-               help="Username to use for Images API requests. Defaults to "
-                    "'demo'."),
-    cfg.StrOpt('password',
-               default='pass',
-               help="Password for user",
-               secret=True),
-    cfg.StrOpt('tenant_name',
-               default="demo",
-               help="Tenant to use for Images API requests. Defaults to "
-                    "'demo'."),
 ]
 
 
@@ -304,16 +269,6 @@ NetworkGroup = [
     cfg.StrOpt('api_version',
                default="v1.1",
                help="Version of Quantum API"),
-    cfg.StrOpt('username',
-               default="demo",
-               help="Username to use for Quantum API requests."),
-    cfg.StrOpt('tenant_name',
-               default="demo",
-               help="Tenant name to use for Quantum API requests."),
-    cfg.StrOpt('password',
-               default="pass",
-               help="API key to use when authenticating as admin.",
-               secret=True),
     cfg.StrOpt('tenant_network_cidr',
                default="10.100.0.0/16",
                help="The cidr block to allocate tenant networks from"),
@@ -339,31 +294,6 @@ def register_network_opts(conf):
     conf.register_group(network_group)
     for opt in NetworkGroup:
         conf.register_opt(opt, group='network')
-
-network_admin_group = cfg.OptGroup(name='network-admin',
-                                   title="Network Admin Options")
-
-NetworkAdminGroup = [
-    cfg.StrOpt('username',
-               default='admin',
-               help="Administrative Username to use for Quantum API "
-                    "requests."),
-    cfg.StrOpt('tenant_name',
-               default='admin',
-               help="Administrative Tenant name to use for Quantum API "
-                    "requests."),
-    cfg.StrOpt('password',
-               default='pass',
-               help="API key to use when authenticating as admin.",
-               secret=True),
-]
-
-
-def register_network_admin_opts(conf):
-    conf.register_group(network_admin_group)
-    for opt in NetworkAdminGroup:
-        conf.register_opt(opt, group='network-admin')
-
 
 volume_group = cfg.OptGroup(name='volume',
                             title='Block Storage Options')
@@ -510,21 +440,17 @@ class TempestConfig:
 
         register_compute_opts(cfg.CONF)
         register_identity_opts(cfg.CONF)
-        register_identity_admin_opts(cfg.CONF)
         register_compute_admin_opts(cfg.CONF)
         register_image_opts(cfg.CONF)
         register_network_opts(cfg.CONF)
-        register_network_admin_opts(cfg.CONF)
         register_volume_opts(cfg.CONF)
         register_object_storage_opts(cfg.CONF)
         register_boto_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
         self.compute_admin = cfg.CONF['compute-admin']
         self.identity = cfg.CONF.identity
-        self.identity_admin = cfg.CONF['identity-admin']
         self.images = cfg.CONF.image
         self.network = cfg.CONF.network
-        self.network_admin = cfg.CONF['network-admin']
         self.volume = cfg.CONF.volume
         self.object_storage = cfg.CONF['object-storage']
         self.boto = cfg.CONF.boto

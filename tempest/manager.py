@@ -153,17 +153,18 @@ class DefaultClientManager(Manager):
         # This identity client is not intended to check the security
         # of the identity service, so use admin credentials by default.
         if not username:
-            username = self.config.identity_admin.username
+            username = self.config.compute_admin.username
         if not password:
-            password = self.config.identity_admin.password
+            password = self.config.compute_admin.password
         if not tenant_name:
-            tenant_name = self.config.identity_admin.tenant_name
+            tenant_name = self.config.compute_admin.tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials for identity client. "
                    "username: %(username)s, password: %(password)s, "
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
+        #TODO(afazekas): Above is a code dpulication, net to be resolved
 
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
@@ -181,9 +182,9 @@ class DefaultClientManager(Manager):
         # preferable to authenticating as a specific user because
         # working with certain resources (public routers and networks)
         # often requires admin privileges anyway.
-        username = self.config.network_admin.username
-        password = self.config.network_admin.password
-        tenant_name = self.config.network_admin.tenant_name
+        username = self.config.compute_admin.username
+        password = self.config.compute_admin.password
+        tenant_name = self.config.compute_admin.tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials for network client. "

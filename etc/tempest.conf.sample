@@ -155,13 +155,6 @@ host = 127.0.0.1
 # Port that the Image API is running on
 port = 9292
 
-# This should be the username of a user WITHOUT administrative privileges
-username = demo
-# The above non-administrative user's password
-password = pass
-# The above non-administrative user's tenant name
-tenant_name = demo
-
 [compute-admin]
 # This section contains configuration options for an administrative
 # user of the Compute API. These options are used in tests that stress
@@ -209,29 +202,6 @@ public_network_id = {$PUBLIC_NETWORK_ID}
 # were disabled.  If namespaces are enabled, it would be preferable
 # for each tenant to have their own router.
 public_router_id = {$PUBLIC_ROUTER_ID}
-
-[network-admin]
-# This section contains configuration options for an administrative
-# user of the Network API.
-
-# This should be the username of a user WITH administrative privileges
-username = admin
-# The above administrative user's password
-password = pass
-# The above administrative user's tenant name
-tenant_name = admin
-
-[identity-admin]
-# This section contains configuration options for an administrative
-# user of the Compute API. These options are used in tests that stress
-# the admin-only parts of the Compute API
-
-# This should be the username of a user WITH administrative privileges
-username = admin
-# The above administrative user's password
-password = pass
-# The above administrative user's tenant name
-tenant_name = admin
 
 [volume]
 # This section contains the configuration options used when executing tests
