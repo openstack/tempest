@@ -85,7 +85,7 @@ def setup_package():
         s3client = openstack.s3_client
         try:
             s3client.get_bucket("^INVALID*#()@INVALID.")
-        except  boto.exception.BotoServerError as exc:
+        except boto.exception.BotoServerError as exc:
             if exc.status == 403:
                 _cred_sub_check(s3client.connection_data)
     except Exception as exc:

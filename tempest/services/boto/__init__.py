@@ -96,4 +96,4 @@ class BotoClientBase(object):
             else:
                 raise InvalidConfiguration(
                                     "Unable to get access and secret keys")
-        return  self.connect_method(**self.connection_data)
+        return self.connect_method(**self.connection_data)

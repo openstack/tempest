@@ -176,7 +176,7 @@ class ServersNegativeTest(BaseComputeTest):
         # Pass invalid network uuid while creating a server
 
         server_name = rand_name('server')
-        networks = [{'fixed_ip': '10.0.1.1', 'uuid':'a-b-c-d-e-f-g-h-i-j'}]
+        networks = [{'fixed_ip': '10.0.1.1', 'uuid': 'a-b-c-d-e-f-g-h-i-j'}]
 
         self.assertRaises(exceptions.BadRequest,
                           self.create_server_with_extras,

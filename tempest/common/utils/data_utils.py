@@ -60,7 +60,7 @@ def build_url(host, port, api_version=None, path=None,
 
 def parse_image_id(image_ref):
     """Return the image id from a given image ref."""
-    return  image_ref.rsplit('/')[-1]
+    return image_ref.rsplit('/')[-1]
 
 
 def arbitrary_string(size=4, base_text=None):
