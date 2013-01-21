@@ -44,9 +44,9 @@ class Service(BaseService):
             dscv = self.config.identity.disable_ssl_certificate_validation
             auth_url = self.config.identity.uri
             keystone = keystoneclient.v2_0.client.Client(
-                    username=config.images.username,
-                    password=config.images.password,
-                    tenant_name=config.images.tenant_name,
+                    username=config.compute.username,
+                    password=config.compute.password,
+                    tenant_name=config.compute.tenant_name,
                     auth_url=auth_url,
                     insecure=dscv)
             token = keystone.auth_token

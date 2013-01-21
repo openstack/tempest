@@ -34,16 +34,16 @@ class BaseObjectTest(unittest.TestCase):
         cls.account_client = cls.os.account_client
         cls.config = cls.os.config
         cls.custom_object_client = cls.os.custom_object_client
-        cls.os_admin = clients.IdentityManager()
+        cls.os_admin = clients.AdminManager()
         cls.token_client = cls.os_admin.token_client
-        cls.admin_client = cls.os_admin.admin_client
+        cls.identity_admin_client = cls.os_admin.identity_client
         cls.custom_account_client = cls.os.custom_account_client
         cls.os_alt = clients.AltManager()
         cls.object_client_alt = cls.os_alt.object_client
         cls.container_client_alt = cls.os_alt.container_client
-        cls.admin_client_alt = cls.os_alt.admin_client
+        cls.identity_client_alt = cls.os_alt.identity_client
 
-        cls.data = DataGenerator(cls.admin_client)
+        cls.data = DataGenerator(cls.identity_admin_client)
 
         try:
             cls.account_client.list_account_containers()

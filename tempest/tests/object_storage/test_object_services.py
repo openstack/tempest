@@ -366,7 +366,7 @@ class ObjectTest(base.BaseObjectTest):
             self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
 
             # Trying to GET Auth Token of Alternate user
-            token = self.admin_client_alt.get_auth()
+            token = self.identity_client_alt.get_auth()
             headers = {'X-Auth-Token': token}
 
             # Trying to create object with Alternate user creds
@@ -475,7 +475,7 @@ class ObjectTest(base.BaseObjectTest):
             self.assertEqual(resp['x-container-write'], '-*')
 
             #Trying to GET auth token of Alternate user
-            token = self.admin_client_alt.get_auth()
+            token = self.identity_client_alt.get_auth()
 
             headers = {'Content-Type': 'application/json',
                        'Accept': 'application/json',

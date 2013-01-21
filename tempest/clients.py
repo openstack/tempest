@@ -51,10 +51,10 @@ from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
 from tempest.services.compute.xml.console_output_client import \
     ConsoleOutputsClientXML
-from tempest.services.identity.json.admin_client import AdminClientJSON
-from tempest.services.identity.json.admin_client import TokenClientJSON
-from tempest.services.identity.xml.admin_client import AdminClientXML
-from tempest.services.identity.xml.admin_client import TokenClientXML
+from tempest.services.identity.json.identity_client import IdentityClientJSON
+from tempest.services.identity.json.identity_client import TokenClientJSON
+from tempest.services.identity.xml.identity_client import IdentityClientXML
+from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image import service as image_service
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.object_storage.account_client import AccountClient
@@ -114,9 +114,9 @@ VOLUMES_CLIENTS = {
     "xml": VolumesClientXML,
 }
 
-ADMIN_CLIENT = {
-    "json": AdminClientJSON,
-    "xml": AdminClientXML,
+IDENTITY_CLIENT = {
+    "json": IdentityClientJSON,
+    "xml": IdentityClientXML,
 }
 
 TOKEN_CLIENT = {
@@ -187,7 +187,7 @@ class Manager(object):
             self.volumes_extensions_client = vol_ext_cli
             self.floating_ips_client = FLOAT_CLIENTS[interface](*client_args)
             self.volumes_client = VOLUMES_CLIENTS[interface](*client_args)
-            self.admin_client = ADMIN_CLIENT[interface](*client_args)
+            self.identity_client = IDENTITY_CLIENT[interface](*client_args)
             self.token_client = TOKEN_CLIENT[interface](self.config)
             self.security_groups_client = \
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
@@ -206,6 +206,21 @@ class Manager(object):
         self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
         self.custom_account_client = \
             AccountClientCustomizedHeader(*client_args)
+
+
+class NonAdminManager(Manager):
+
+    """
+    Manager object that uses the alt_XXX credentials for its
+    managed client objects
+    """
+
+    def __init__(self, interface='json'):
+        conf = config.TempestConfig()
+        super(NonAdminManager, self).__init__(conf.compute.username,
+                                              conf.compute.password,
+                                              conf.compute.tenant_name,
+                                              interface=interface)
 
 
 class AltManager(Manager):
@@ -248,33 +263,3 @@ class ServiceManager(object):
         self.services = {}
         self.services['image'] = image_service.Service(self.config)
         self.images = self.services['image']
-
-
-class IdentityManager(Manager):
-
-    """
-    Manager object that uses the alt_XXX credentials for its
-    managed client objects
-    """
-
-    def __init__(self, interface='json'):
-        conf = config.TempestConfig()
-        super(IdentityManager, self).__init__(conf.identity_admin.username,
-                                              conf.identity_admin.password,
-                                              conf.identity_admin.tenant_name,
-                                              interface)
-
-
-class IdentityNaManager(Manager):
-
-    """
-    Manager object that uses the alt_XXX credentials for its
-    managed client objects
-    """
-
-    def __init__(self, interface='json'):
-        conf = config.TempestConfig()
-        super(IdentityNaManager, self).__init__(conf.compute.username,
-                                                conf.compute.password,
-                                                conf.compute.tenant_name,
-                                                interface)

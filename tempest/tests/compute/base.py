@@ -78,8 +78,8 @@ class BaseCompTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.IdentityManager(interface=cls._interface)
-        admin_client = os.admin_client
+        os = clients.AdminManager(interface=cls._interface)
+        admin_client = os.identity_client
         return admin_client
 
     @classmethod
@@ -87,8 +87,8 @@ class BaseCompTest(unittest.TestCase):
 
         return (
             cls.config,
-            cls.config.identity_admin.username,
-            cls.config.identity_admin.password,
+            cls.config.compute_admin.username,
+            cls.config.compute_admin.password,
             cls.config.identity.uri
         )
 

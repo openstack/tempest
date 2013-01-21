@@ -26,8 +26,8 @@ class BaseIdAdminTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        os = clients.IdentityManager(interface=cls._interface)
-        cls.client = os.admin_client
+        os = clients.AdminManager(interface=cls._interface)
+        cls.client = os.identity_client
         cls.token_client = os.token_client
 
         if not cls.client.has_admin_extensions():
@@ -35,8 +35,8 @@ class BaseIdAdminTest(unittest.TestCase):
 
         cls.data = DataGenerator(cls.client)
 
-        os = clients.IdentityNaManager(interface=cls._interface)
-        cls.non_admin_client = os.admin_client
+        os = clients.NonAdminManager(interface=cls._interface)
+        cls.non_admin_client = os.identity_client
 
     @classmethod
     def tearDownClass(cls):

@@ -33,11 +33,11 @@ from tempest.services.compute.xml.common import xml_to_json
 XMLNS = "http://docs.openstack.org/identity/api/v2.0"
 
 
-class AdminClientXML(RestClientXML):
+class IdentityClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AdminClientXML, self).__init__(config, username, password,
-                                             auth_url, tenant_name)
+        super(IdentityClientXML, self).__init__(config, username, password,
+                                                auth_url, tenant_name)
         self.service = self.config.identity.catalog_type
         self.endpoint_url = 'adminURL'
 

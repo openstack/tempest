@@ -5,11 +5,11 @@ from tempest.common.rest_client import RestClient
 from tempest import exceptions
 
 
-class AdminClientJSON(RestClient):
+class IdentityClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AdminClientJSON, self).__init__(config, username, password,
-                                              auth_url, tenant_name)
+        super(IdentityClientJSON, self).__init__(config, username, password,
+                                                 auth_url, tenant_name)
         self.service = self.config.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
