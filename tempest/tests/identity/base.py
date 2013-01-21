@@ -35,7 +35,7 @@ class BaseIdAdminTest(unittest.TestCase):
 
         cls.data = DataGenerator(cls.client)
 
-        os = clients.NonAdminManager(interface=cls._interface)
+        os = clients.Manager(interface=cls._interface)
         cls.non_admin_client = os.identity_client
 
     @classmethod

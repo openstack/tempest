@@ -18,6 +18,28 @@ strategy = keystone
 # The identity region
 region = RegionOne
 
+# This should be the username of a user WITHOUT administrative privileges
+username = demo
+# The above non-administrative user's password
+password = secret
+# The above non-administrative user's tenant name
+tenant_name = demo
+
+# This should be the username of an alternate user WITHOUT
+# administrative privileges
+alt_username = alt_demo
+# The above non-administrative user's password
+alt_password = secret
+# The above non-administrative user's tenant name
+alt_tenant_name = alt_demo
+
+# This should be the username of a user WITH administrative privileges
+admin_username = admin
+# The above non-administrative user's password
+admin_password = secret
+# The above non-administrative user's tenant name
+admin_tenant_name = admin
+
 [compute]
 # This section contains configuration options used when executing tests
 # against the OpenStack Compute API.
@@ -33,24 +55,6 @@ allow_tenant_isolation = true
 # but also requires that OpenStack Identity API admin credentials
 # are known.
 allow_tenant_reuse = true
-
-# This should be the username of a user WITHOUT administrative privileges
-username = demo
-# The above non-administrative user's password
-password = pass
-# The above non-administrative user's tenant name
-tenant_name = demo
-
-# This should be the username of an alternate user WITHOUT
-# administrative privileges
-alt_username = alt_demo
-# The above non-administrative user's password
-alt_password = pass
-# The above non-administrative user's tenant name
-alt_tenant_name = alt_demo
-
-# The compute region
-region = RegionOne
 
 # Reference data for tests. The ref and ref_alt should be
 # distinct images/flavors.
@@ -73,13 +77,13 @@ build_timeout = 600
 run_ssh = false
 
 # Name of a user used to authenticated to an instance
-ssh_user = {$SSH_USER}
+ssh_user = cirros
 
 # Network id used for SSH (public, private, etc)
-network_for_ssh = {$SSH_NETWORK}
+network_for_ssh = private
 
 # IP version of the address used for SSH
-ip_version_for_ssh = {$SSH_IP_VERSION}
+ip_version_for_ssh = 4
 
 # Number of seconds to wait to authenticate to an instance
 ssh_timeout = 300
@@ -107,6 +111,18 @@ log_level = ERROR
 # whitebox test cases, which look at internal Nova database state,
 # SSH into VMs to check instance state, etc.
 
+# Run live migration tests (requires 2 hosts)
+live_migration_available = false
+
+# Use block live migration (Otherwise, non-block migration will be
+# performed, which requires XenServer pools in case of using XS)
+use_block_migration_for_live_migration = false
+
+# By default, rely on the status of the diskConfig extension to
+# decide if to execute disk config tests. When set to false, tests
+# are forced to skip, regardless of the extension status
+disk_config_enabled_override = true
+
 # Should we run whitebox tests for Compute?
 whitebox_enabled = true
 
@@ -119,23 +135,20 @@ config_path = /etc/nova/nova.conf
 # Directory containing nova binaries such as nova-manage
 bin_dir = /usr/local/bin
 
+# Connection string to the database of Compute service
+db_uri = mysql://nova:secret@localhost/nova
+
 # Path to a private key file for SSH access to remote hosts
 path_to_private_key = /home/user/.ssh/id_rsa
 
-# Connection string to the database of Compute service
-db_uri = mysql://user:pass@localhost/nova
-
-# Run live migration tests (requires 2 hosts)
-live_migration_available = false
-
-# Use block live migration (Otherwise, non-block migration will be
-# performed, which requires XenServer pools in case of using XS)
-use_block_migration_for_live_migration = false
-
-# By default, rely on the status of the diskConfig extension to
-# decide if to execute disk config tests. When set to false, tests
-# are forced to skip, regardless of the extension status
-disk_config_enabled_override = true
+[compute-admin]
+# This should be the username of a user WITH administrative privileges
+# If not defined the admin user from the identity section will be used
+username =
+# The above administrative user's password
+password =
+# The above administrative user's tenant name
+tenant_name =
 
 [image]
 # This section contains configuration options used when executing tests
@@ -155,18 +168,6 @@ host = 127.0.0.1
 # Port that the Image API is running on
 port = 9292
 
-[compute-admin]
-# This section contains configuration options for an administrative
-# user of the Compute API. These options are used in tests that stress
-# the admin-only parts of the Compute API
-
-# This should be the username of a user WITH administrative privileges
-username = admin
-# The above administrative user's password
-password = pass
-# The above administrative user's tenant name
-tenant_name = admin
-
 [network]
 # This section contains configuration options used when executing tests
 # against the OpenStack Network API.
@@ -175,13 +176,6 @@ tenant_name = admin
 api_version = v1.1
 # Catalog type of the Quantum Service
 catalog_type = network
-
-# This should be the username of a user WITHOUT administrative privileges
-username = demo
-# The above non-administrative user's password
-password = pass
-# The above non-administrative user's tenant name
-tenant_name = demo
 
 # A large private cidr block from which to allocate smaller blocks for
 # tenant networks.
@@ -229,9 +223,6 @@ build_timeout = 300
 # this value as "object-store"
 catalog_type = object-store
 
-# The object-store region
-region = RegionOne
-
 # Number of seconds to time on waiting for a container to container
 # synchronization complete
 container_sync_timeout = 120
@@ -251,9 +242,6 @@ s3_url = http://localhost:3333
 # Use keystone ec2-* command to get those values for your test user and tenant
 aws_access =
 aws_secret =
-
-#Region
-aws_region = RegionOne
 
 #Image materials for S3 upload
 # ALL content of the specified directory will be uploaded to S3

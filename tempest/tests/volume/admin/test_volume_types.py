@@ -25,9 +25,9 @@ class VolumeTypesTest(BaseVolumeTest):
     @classmethod
     def setUpClass(cls):
         super(VolumeTypesTest, cls).setUpClass()
-        adm_user = cls.config.compute_admin.username
-        adm_pass = cls.config.compute_admin.password
-        adm_tenant = cls.config.compute_admin.tenant_name
+        adm_user = cls.config.identity.admin_username
+        adm_pass = cls.config.identity.admin_password
+        adm_tenant = cls.config.identity.admin_tenant_name
         auth_url = cls.config.identity.uri
 
         cls.client = volume_types_client.VolumeTypesClientJSON(cls.config,

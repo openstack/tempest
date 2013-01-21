@@ -58,8 +58,42 @@ IdentityGroup = [
                help="Which auth method does the environment use? "
                     "(basic|keystone)"),
     cfg.StrOpt('region',
-               default=None,
+               default='RegionOne',
                help="The identity region name to use."),
+    cfg.StrOpt('username',
+               default='demo',
+               help="Username to use for Nova API requests."),
+    cfg.StrOpt('tenant_name',
+               default='demo',
+               help="Tenant name to use for Nova API requests."),
+    cfg.StrOpt('password',
+               default='pass',
+               help="API key to use when authenticating.",
+               secret=True),
+    cfg.StrOpt('alt_username',
+               default=None,
+               help="Username of alternate user to use for Nova API "
+                    "requests."),
+    cfg.StrOpt('alt_tenant_name',
+               default=None,
+               help="Alternate user's Tenant name to use for Nova API "
+                    "requests."),
+    cfg.StrOpt('alt_password',
+               default=None,
+               help="API key to use when authenticating as alternate user.",
+               secret=True),
+    cfg.StrOpt('admin_username',
+               default='admin',
+               help="Administrative Username to use for"
+                    "Keystone API requests."),
+    cfg.StrOpt('admin_tenant_name',
+               default='admin',
+               help="Administrative Tenant name to use for Keystone API "
+                    "requests."),
+    cfg.StrOpt('admin_password',
+               default='pass',
+               help="API key to use when authenticating as admin.",
+               secret=True),
 ]
 
 
@@ -97,31 +131,6 @@ ComputeGroup = [
                      "instead of failing because of the conflict. Note that "
                      "this would result in the tenant being deleted at the "
                      "end of a subsequent successful run."),
-    cfg.StrOpt('username',
-               default='demo',
-               help="Username to use for Nova API requests."),
-    cfg.StrOpt('tenant_name',
-               default='demo',
-               help="Tenant name to use for Nova API requests."),
-    cfg.StrOpt('password',
-               default='pass',
-               help="API key to use when authenticating.",
-               secret=True),
-    cfg.StrOpt('alt_username',
-               default=None,
-               help="Username of alternate user to use for Nova API "
-                    "requests."),
-    cfg.StrOpt('alt_tenant_name',
-               default=None,
-               help="Alternate user's Tenant name to use for Nova API "
-                    "requests."),
-    cfg.StrOpt('alt_password',
-               default=None,
-               help="API key to use when authenticating as alternate user.",
-               secret=True),
-    cfg.StrOpt('region',
-               default=None,
-               help="The compute region name to use."),
     cfg.StrOpt('image_ref',
                default="{$IMAGE_ID}",
                help="Valid secondary image reference to be used in tests."),
@@ -180,6 +189,14 @@ ComputeGroup = [
     cfg.StrOpt('log_level',
                default="ERROR",
                help="Level for logging compute API calls."),
+    cfg.StrOpt('path_to_private_key',
+               default=None,
+               help="Path to a private key file for SSH access to remote "
+                    "hosts"),
+    cfg.BoolOpt('disk_config_enabled_override',
+                default=True,
+                help="If false, skip config tests regardless of the "
+                     "extension status"),
     cfg.BoolOpt('whitebox_enabled',
                 default=False,
                 help="Does the test environment support whitebox tests for "
@@ -196,14 +213,6 @@ ComputeGroup = [
     cfg.StrOpt('bin_dir',
                default="/usr/local/bin/",
                help="Directory containing nova binaries such as nova-manage"),
-    cfg.StrOpt('path_to_private_key',
-               default=None,
-               help="Path to a private key file for SSH access to remote "
-                    "hosts"),
-    cfg.BoolOpt('disk_config_enabled_override',
-                default=True,
-                help="If false, skip config tests regardless of the "
-                     "extension status"),
 ]
 
 
@@ -325,9 +334,6 @@ ObjectStoreConfig = [
     cfg.StrOpt('catalog_type',
                default='object-store',
                help="Catalog type of the Object-Storage service."),
-    cfg.StrOpt('region',
-               default=None,
-               help='The object-store region name to use.'),
     cfg.StrOpt('container_sync_timeout',
                default=120,
                help="Number of seconds to time on waiting for a container"
@@ -360,9 +366,6 @@ BotoConfig = [
     cfg.StrOpt('aws_access',
                default=None,
                help="AWS Access Key"),
-    cfg.StrOpt('aws_region',
-               default=None,
-               help="AWS Region"),
     cfg.StrOpt('s3_materials_path',
                default="/opt/stack/devstack/files/images/"
                        "s3-materials/cirros-0.3.0",
@@ -448,17 +451,21 @@ class TempestConfig:
 
         register_compute_opts(cfg.CONF)
         register_identity_opts(cfg.CONF)
-        register_compute_admin_opts(cfg.CONF)
         register_image_opts(cfg.CONF)
         register_network_opts(cfg.CONF)
         register_volume_opts(cfg.CONF)
         register_object_storage_opts(cfg.CONF)
         register_boto_opts(cfg.CONF)
+        register_compute_admin_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
-        self.compute_admin = cfg.CONF['compute-admin']
         self.identity = cfg.CONF.identity
         self.images = cfg.CONF.image
         self.network = cfg.CONF.network
         self.volume = cfg.CONF.volume
         self.object_storage = cfg.CONF['object-storage']
         self.boto = cfg.CONF.boto
+        self.compute_admin = cfg.CONF['compute-admin']
+        if not self.compute_admin.username:
+            self.compute_admin.username = self.identity.admin_username
+            self.compute_admin.password = self.identity.admin_password
+            self.compute_admin.tenant_name = self.identity.admin_tenant_name
