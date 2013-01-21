@@ -171,22 +171,6 @@ ComputeGroup = [
                 default=True,
                 help="If false, skip config tests regardless of the "
                      "extension status"),
-    cfg.BoolOpt('whitebox_enabled',
-                default=False,
-                help="Does the test environment support whitebox tests for "
-                     "Compute?"),
-    cfg.StrOpt('db_uri',
-               default=None,
-               help="Connection string to the database of Compute service"),
-    cfg.StrOpt('source_dir',
-               default="/opt/stack/nova",
-               help="Path of nova source directory"),
-    cfg.StrOpt('config_path',
-               default='/etc/nova/nova.conf',
-               help="Path of nova configuration file"),
-    cfg.StrOpt('bin_dir',
-               default="/usr/local/bin/",
-               help="Directory containing nova binaries such as nova-manage"),
 ]
 
 
@@ -217,6 +201,35 @@ def register_compute_admin_opts(conf):
     conf.register_group(compute_admin_group)
     for opt in ComputeAdminGroup:
         conf.register_opt(opt, group='compute-admin')
+
+
+whitebox_group = cfg.OptGroup(name='whitebox',
+                              title="Whitebox Options")
+
+WhiteboxGroup = [
+    cfg.BoolOpt('whitebox_enabled',
+                default=False,
+                help="Does the test environment support whitebox tests for "
+                     "Compute?"),
+    cfg.StrOpt('db_uri',
+               default=None,
+               help="Connection string to the database of Compute service"),
+    cfg.StrOpt('source_dir',
+               default="/opt/stack/nova",
+               help="Path of nova source directory"),
+    cfg.StrOpt('config_path',
+               default='/etc/nova/nova.conf',
+               help="Path of nova configuration file"),
+    cfg.StrOpt('bin_dir',
+               default="/usr/local/bin/",
+               help="Directory containing nova binaries such as nova-manage"),
+]
+
+
+def register_whitebox_opts(conf):
+    conf.register_group(whitebox_group)
+    for opt in WhiteboxGroup:
+        conf.register_opt(opt, group='whitebox')
 
 
 image_group = cfg.OptGroup(name='image',
@@ -418,6 +431,7 @@ class TempestConfig:
 
         register_compute_opts(cfg.CONF)
         register_identity_opts(cfg.CONF)
+        register_whitebox_opts(cfg.CONF)
         register_image_opts(cfg.CONF)
         register_network_opts(cfg.CONF)
         register_volume_opts(cfg.CONF)
@@ -425,6 +439,7 @@ class TempestConfig:
         register_boto_opts(cfg.CONF)
         register_compute_admin_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
+        self.whitebox = cfg.CONF.whitebox
         self.identity = cfg.CONF.identity
         self.images = cfg.CONF.image
         self.network = cfg.CONF.network

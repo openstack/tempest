@@ -107,9 +107,6 @@ change_password_available=true
 # Level to log Compute API request/response details.
 log_level = ERROR
 
-# Whitebox options for compute. Whitebox options enable the
-# whitebox test cases, which look at internal Nova database state,
-# SSH into VMs to check instance state, etc.
 
 # Run live migration tests (requires 2 hosts)
 live_migration_available = false
@@ -122,6 +119,12 @@ use_block_migration_for_live_migration = false
 # decide if to execute disk config tests. When set to false, tests
 # are forced to skip, regardless of the extension status
 disk_config_enabled_override = true
+
+
+[whitebox]
+# Whitebox options for compute. Whitebox options enable the
+# whitebox test cases, which look at internal Nova database state,
+# SSH into VMs to check instance state, etc.
 
 # Should we run whitebox tests for Compute?
 whitebox_enabled = true

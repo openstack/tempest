@@ -64,9 +64,9 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         super(ComputeWhiteboxTest, cls).setUpClass()
 
         # Add some convenience attributes that tests use...
-        cls.nova_dir = cls.config.compute.source_dir
-        cls.compute_bin_dir = cls.config.compute.bin_dir
-        cls.compute_config_path = cls.config.compute.config_path
+        cls.nova_dir = cls.config.whitebox.source_dir
+        cls.compute_bin_dir = cls.config.whitebox.bin_dir
+        cls.compute_config_path = cls.config.whitebox.config_path
         cls.servers_client = cls.manager.servers_client
         cls.images_client = cls.manager.images_client
         cls.flavors_client = cls.manager.flavors_client
@@ -127,7 +127,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
                        }
 
         try:
-            engine = create_engine(cls.config.compute.db_uri, **engine_args)
+            engine = create_engine(cls.config.whitebox.db_uri, **engine_args)
             connection = engine.connect()
             meta = MetaData()
             meta.reflect(bind=engine)
