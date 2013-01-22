@@ -138,6 +138,7 @@ class ObjectClient(RestClient):
                                                              sig, expires)
 
         resp, body = self.get(url)
+        return resp, body
 
     def create_object_segments(self, container, object_name, segment, data):
         """Creates object segments."""
