@@ -36,7 +36,9 @@ class EC2KeysTest(BotoTestCase):
         super(EC2KeysTest, cls).setUpClass()
         cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
+        cls.ec = cls.ec2_error_code
 
+#TODO(afazekas): merge create, delete, get test cases
     @attr(type='smoke')
     def test_create_ec2_keypair(self):
         # EC2 create KeyPair
@@ -65,15 +67,13 @@ class EC2KeysTest(BotoTestCase):
                         self.client.get_key_pair(key_name)))
 
     @attr(type='smoke')
-    @testtools.skip("Skipped until the Bug #1072762 is resolved")
     def test_duplicate_ec2_keypair(self):
         # EC2 duplicate KeyPair
         key_name = rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
-        self.assertEC2ResponseError(self.error_code.client.
-                                    InvalidKeyPair.Duplicate,
-                                    self.client.create_key_pair,
-                                    key_name)
+        self.assertBotoError(self.ec.client.InvalidKeyPair.Duplicate,
+                             self.client.create_key_pair,
+                             key_name)
         self.assertTrue(compare_key_pairs(keypair,
                         self.client.get_key_pair(key_name)))
