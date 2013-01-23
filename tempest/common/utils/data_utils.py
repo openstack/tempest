@@ -27,6 +27,10 @@ def rand_name(name='test'):
     return name + str(random.randint(1, 999999))
 
 
+def rand_int_id(start=0, end=999999):
+    return random.randint(start, end)
+
+
 def build_url(host, port, api_version=None, path=None,
               params=None, use_ssl=False):
     """Build the request URL from given host, port, path and parameters."""

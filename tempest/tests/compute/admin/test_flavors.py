@@ -19,6 +19,8 @@ import nose
 from nose.plugins.attrib import attr
 import unittest2 as unittest
 
+from tempest.common.utils.data_utils import rand_int_id
+from tempest.common.utils.data_utils import rand_name
 from tempest.tests import compute
 from tempest.tests.compute import base
 
@@ -36,12 +38,11 @@ class FlavorsAdminTestBase(object):
             raise nose.SkipTest(msg)
 
         cls.client = cls.os.flavors_client
-        cls.flavor_name = 'test_flavor'
+        cls.flavor_name_prefix = 'test_flavor_'
         cls.ram = 512
         cls.vcpus = 1
         cls.disk = 10
         cls.ephemeral = 10
-        cls.new_flavor_id = 1234
         cls.swap = 1024
         cls.rxtx = 2
 
@@ -49,21 +50,24 @@ class FlavorsAdminTestBase(object):
     def test_create_flavor(self):
         # Create a flavor and ensure it is listed
         # This operation requires the user to have 'admin' role
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
         try:
             #Create the flavor
-            resp, flavor = self.client.create_flavor(self.flavor_name,
+            resp, flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
-                                                     self.new_flavor_id,
+                                                     new_flavor_id,
                                                      ephemeral=self.ephemeral,
                                                      swap=self.swap,
                                                      rxtx=self.rxtx)
             self.assertEqual(200, resp.status)
-            self.assertEqual(flavor['name'], self.flavor_name)
+            self.assertEqual(flavor['name'], flavor_name)
             self.assertEqual(flavor['vcpus'], self.vcpus)
             self.assertEqual(flavor['disk'], self.disk)
             self.assertEqual(flavor['ram'], self.ram)
-            self.assertEqual(int(flavor['id']), self.new_flavor_id)
+            self.assertEqual(int(flavor['id']), new_flavor_id)
             self.assertEqual(flavor['swap'], self.swap)
             self.assertEqual(flavor['rxtx_factor'], self.rxtx)
             self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'],
@@ -77,26 +81,29 @@ class FlavorsAdminTestBase(object):
                 self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
             #Verify flavor is retrieved
-            resp, flavor = self.client.get_flavor_details(self.new_flavor_id)
+            resp, flavor = self.client.get_flavor_details(new_flavor_id)
             self.assertEqual(resp.status, 200)
-            self.assertEqual(flavor['name'], self.flavor_name)
+            self.assertEqual(flavor['name'], flavor_name)
 
         finally:
             #Delete the flavor
-            resp, body = self.client.delete_flavor(self.new_flavor_id)
+            resp, body = self.client.delete_flavor(new_flavor_id)
             self.assertEqual(resp.status, 202)
-            self.client.wait_for_resource_deletion(self.new_flavor_id)
+            self.client.wait_for_resource_deletion(new_flavor_id)
 
     @attr(type='positive')
     def test_create_flavor_verify_entry_in_list_details(self):
         # Create a flavor and ensure it's details are listed
         # This operation requires the user to have 'admin' role
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
         try:
             #Create the flavor
-            resp, flavor = self.client.create_flavor(self.flavor_name,
+            resp, flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
-                                                     self.new_flavor_id,
+                                                     new_flavor_id,
                                                      ephemeral=self.ephemeral,
                                                      swap=self.swap,
                                                      rxtx=self.rxtx)
@@ -105,62 +112,68 @@ class FlavorsAdminTestBase(object):
             resp, flavors = self.client.list_flavors_with_detail()
             self.assertEqual(resp.status, 200)
             for flavor in flavors:
-                if flavor['name'] == self.flavor_name:
+                if flavor['name'] == flavor_name:
                     flag = True
             self.assertTrue(flag)
 
         finally:
             #Delete the flavor
-            resp, body = self.client.delete_flavor(self.new_flavor_id)
+            resp, body = self.client.delete_flavor(new_flavor_id)
             self.assertEqual(resp.status, 202)
-            self.client.wait_for_resource_deletion(self.new_flavor_id)
+            self.client.wait_for_resource_deletion(new_flavor_id)
 
     @attr(type='negative')
     def test_get_flavor_details_for_deleted_flavor(self):
         # Delete a flavor and ensure it is not listed
         # Create a test flavor
-        resp, flavor = self.client.create_flavor(self.flavor_name,
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
+        resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram,
                                                  self.vcpus, self.disk,
-                                                 self.new_flavor_id,
+                                                 new_flavor_id,
                                                  ephemeral=self.ephemeral,
                                                  swap=self.swap,
                                                  rxtx=self.rxtx)
         self.assertEquals(200, resp.status)
 
         # Delete the flavor
-        resp, _ = self.client.delete_flavor(self.new_flavor_id)
+        resp, _ = self.client.delete_flavor(new_flavor_id)
         self.assertEqual(resp.status, 202)
 
         # Deleted flavors can be seen via detailed GET
-        resp, flavor = self.client.get_flavor_details(self.new_flavor_id)
+        resp, flavor = self.client.get_flavor_details(new_flavor_id)
         self.assertEqual(resp.status, 200)
-        self.assertEqual(flavor['name'], self.flavor_name)
+        self.assertEqual(flavor['name'], flavor_name)
 
         # Deleted flavors should not show up in a list however
         resp, flavors = self.client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         flag = True
         for flavor in flavors:
-            if flavor['name'] == self.flavor_name:
+            if flavor['name'] == flavor_name:
                 flag = False
         self.assertTrue(flag)
 
     def test_create_list_flavor_without_extra_data(self):
         #Create a flavor and ensure it is listed
         #This operation requires the user to have 'admin' role
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
         try:
             #Create the flavor
-            resp, flavor = self.client.create_flavor(self.flavor_name,
+            resp, flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
-                                                     self.new_flavor_id)
+                                                     new_flavor_id)
             self.assertEqual(200, resp.status)
-            self.assertEqual(flavor['name'], self.flavor_name)
+            self.assertEqual(flavor['name'], flavor_name)
             self.assertEqual(flavor['ram'], self.ram)
             self.assertEqual(flavor['vcpus'], self.vcpus)
             self.assertEqual(flavor['disk'], self.disk)
-            self.assertEqual(int(flavor['id']), self.new_flavor_id)
+            self.assertEqual(int(flavor['id']), new_flavor_id)
             self.assertEqual(flavor['swap'], '')
             self.assertEqual(int(flavor['rxtx_factor']), 1)
             self.assertEqual(int(flavor['OS-FLV-EXT-DATA:ephemeral']), 0)
@@ -173,57 +186,63 @@ class FlavorsAdminTestBase(object):
                 self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
             #Verify flavor is retrieved
-            resp, flavor = self.client.get_flavor_details(self.new_flavor_id)
+            resp, flavor = self.client.get_flavor_details(new_flavor_id)
             self.assertEqual(resp.status, 200)
-            self.assertEqual(flavor['name'], self.flavor_name)
+            self.assertEqual(flavor['name'], flavor_name)
             #Check if flavor is present in list
             resp, flavors = self.client.list_flavors_with_detail()
             self.assertEqual(resp.status, 200)
             for flavor in flavors:
-                if flavor['name'] == self.flavor_name:
+                if flavor['name'] == flavor_name:
                     flag = True
             self.assertTrue(flag)
 
         finally:
             #Delete the flavor
-            resp, body = self.client.delete_flavor(self.new_flavor_id)
+            resp, body = self.client.delete_flavor(new_flavor_id)
             self.assertEqual(resp.status, 202)
-            self.client.wait_for_resource_deletion(self.new_flavor_id)
+            self.client.wait_for_resource_deletion(new_flavor_id)
 
     @attr(type='positive')
     def test_flavor_not_public_verify_entry_not_in_list_details(self):
         #Create a flavor with os-flavor-access:is_public false should not
         #be present in list_details.
         #This operation requires the user to have 'admin' role
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
         try:
             #Create the flavor
-            resp, flavor = self.client.create_flavor(self.flavor_name,
+            resp, flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
-                                                     self.new_flavor_id,
+                                                     new_flavor_id,
                                                      is_public="False")
             flag = False
             #Verify flavor is retrieved
             resp, flavors = self.client.list_flavors_with_detail()
             self.assertEqual(resp.status, 200)
             for flavor in flavors:
-                if flavor['name'] == self.flavor_name:
+                if flavor['name'] == flavor_name:
                     flag = True
             self.assertFalse(flag)
         finally:
             #Delete the flavor
-            resp, body = self.client.delete_flavor(self.new_flavor_id)
+            resp, body = self.client.delete_flavor(new_flavor_id)
             self.assertEqual(resp.status, 202)
 
     def test_list_public_flavor_with_other_user(self):
         #Create a Flavor with public access.
         #Try to List/Get flavor with another user
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
         try:
             #Create the flavor
-            resp, flavor = self.client.create_flavor(self.flavor_name,
+            resp, flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
-                                                     self.new_flavor_id,
+                                                     new_flavor_id,
                                                      is_public="True")
             flag = False
             self.new_client = self.flavors_client
@@ -231,14 +250,14 @@ class FlavorsAdminTestBase(object):
             resp, flavors = self.new_client.list_flavors_with_detail()
             self.assertEqual(resp.status, 200)
             for flavor in flavors:
-                if flavor['name'] == self.flavor_name:
+                if flavor['name'] == flavor_name:
                     flag = True
             self.assertTrue(flag)
         finally:
             #Delete the flavor
-            resp, body = self.client.delete_flavor(self.new_flavor_id)
+            resp, body = self.client.delete_flavor(new_flavor_id)
             self.assertEqual(resp.status, 202)
-            self.client.wait_for_resource_deletion(self.new_flavor_id)
+            self.client.wait_for_resource_deletion(new_flavor_id)
 
 
 class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,
