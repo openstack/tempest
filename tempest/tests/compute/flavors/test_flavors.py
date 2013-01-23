@@ -104,7 +104,7 @@ class FlavorsTestBase(object):
         flavors = sorted(flavors, key=lambda k: k['ram'])
         flavor_id = flavors[0]['id']
 
-        params = {'minRam': flavors[1]['ram']}
+        params = {'minRam': flavors[0]['ram'] + 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
@@ -126,7 +126,7 @@ class FlavorsTestBase(object):
         flavors = sorted(flavors, key=lambda k: k['ram'])
         flavor_id = flavors[0]['id']
 
-        params = {'minRam': flavors[1]['ram']}
+        params = {'minRam': flavors[0]['ram'] + 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
