@@ -232,6 +232,12 @@ catalog_type = object-store
 # The object-store region
 region = RegionOne
 
+# Number of seconds to time on waiting for a container to container
+# synchronization complete
+container_sync_timeout = 120
+# Number of seconds to wait while looping to check the status of a
+# container to container synchronization
+container_sync_interval = 5
 
 [boto]
 # This section contains configuration options used when executing tests
