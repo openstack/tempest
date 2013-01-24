@@ -63,7 +63,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
         # Set vcpu quota for tenant if not already set
         if not result:
             cores_hard_limit = 2
-            stmt = quotas.insert().values(deleted=False,
+            stmt = quotas.insert().values(deleted=0,
                                           project_id=self.tenant_id,
                                           resource='cores',
                                           hard_limit=cores_hard_limit)
@@ -95,7 +95,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
         # Set memory quota for tenant if not already set
         if not result:
             ram_hard_limit = 1024
-            stmt = quotas.insert().values(deleted=False,
+            stmt = quotas.insert().values(deleted=0,
                                           project_id=self.tenant_id,
                                           resource='ram',
                                           hard_limit=ram_hard_limit)
@@ -116,7 +116,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
             stmt = quotas.delete()
             self.connection.execute(stmt, autocommit=True)
 
-    def update_state(self, server_id, vm_state, task_state, deleted=False):
+    def update_state(self, server_id, vm_state, task_state, deleted=0):
         """Update states of an instance in database for validation."""
         if not task_state:
             task_state = 'NULL'
