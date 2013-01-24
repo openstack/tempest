@@ -17,11 +17,11 @@
 
 import logging
 
-import nose
 
 from tempest import clients
 from tempest import config
 from tempest.exceptions import InvalidConfiguration
+from testresources import TestResourceManager
 
 LOG = logging.getLogger(__name__)
 
@@ -80,3 +80,8 @@ def generic_setup_package():
                        % (user2_tenant_name, user2_password))
                 raise InvalidConfiguration(msg)
             MULTI_USER = True
+
+
+class ComputeResource(TestResourceManager):
+    def make(self, dependency_resources=None):
+        return generic_setup_package()

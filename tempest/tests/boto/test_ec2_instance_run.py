@@ -20,9 +20,8 @@ import logging
 
 from boto.exception import EC2ResponseError
 from boto.s3.key import Key
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -44,8 +43,8 @@ class InstanceRunTest(BotoTestCase):
     def setUpClass(cls):
         super(InstanceRunTest, cls).setUpClass()
         if not tempest.tests.boto.A_I_IMAGES_READY:
-            raise nose.SkipTest("".join(("EC2 ", cls.__name__,
-                                ": requires ami/aki/ari manifest")))
+            raise cls.skipException("".join(("EC2 ", cls.__name__,
+                                    ": requires ami/aki/ari manifest")))
         cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.ec2_client = cls.os.ec2api_client
@@ -122,7 +121,7 @@ class InstanceRunTest(BotoTestCase):
         self.cancelResourceCleanUp(rcuk)
 
     @attr(type='smoke')
-    @unittest.skip("Skipped until the Bug #1098891 is resolved")
+    @testtools.skip("Skipped until the Bug #1098891 is resolved")
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
         image_ami = self.ec2_client.get_image(self.images["ami"]

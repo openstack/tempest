@@ -25,9 +25,8 @@ from boto.exception import BotoServerError
 from boto.exception import EC2ResponseError
 from boto.s3.bucket import Bucket
 from boto.s3.key import Key
-import nose
 import testresources
-import unittest2 as unittest
+import testtools
 
 from tempest.exceptions import TearDownException
 import tempest.tests.boto
@@ -123,11 +122,11 @@ def friendly_function_call_str(call_able, *args, **kwargs):
     return string + ")"
 
 
-class BotoTestCase(unittest.TestCase,
+class BotoTestCase(testtools.TestCase,
                    testresources.ResourcedTestCase):
     """Recommended to use as base class for boto related test."""
 
-    resources = [('boto_init', tempest.tests.boto.generic_setup_package())]
+    resources = [('boto_init', tempest.tests.boto.BotoResource())]
 
     @classmethod
     def setUpClass(cls):
@@ -137,11 +136,11 @@ class BotoTestCase(unittest.TestCase,
         cls._sequence = -1
         if (hasattr(cls, "EC2") and
             tempest.tests.boto.EC2_CAN_CONNECT_ERROR is not None):
-                raise nose.SkipTest("EC2 " + cls.__name__ + ": " +
+            raise cls.skipException("EC2 " + cls.__name__ + ": " +
                                     tempest.tests.boto.EC2_CAN_CONNECT_ERROR)
         if (hasattr(cls, "S3") and
             tempest.tests.boto.S3_CAN_CONNECT_ERROR is not None):
-                raise nose.SkipTest("S3 " + cls.__name__ + ": " +
+            raise cls.skipException("S3 " + cls.__name__ + ": " +
                                     tempest.tests.boto.S3_CAN_CONNECT_ERROR)
 
     @classmethod

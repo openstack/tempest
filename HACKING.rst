@@ -56,8 +56,8 @@ Example::
   import logging
   import random
   import StringIO
+  import testtools
   import time
-  import unittest
 
   import eventlet
   import webob.exc

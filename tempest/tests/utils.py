@@ -17,41 +17,7 @@
 
 """Common utilities used in testing."""
 
-import nose.plugins.skip
-
-
-class skip_if(object):
-    """Decorator that skips a test if condition is true."""
-    def __init__(self, condition, msg):
-        self.condition = condition
-        self.message = msg
-
-    def __call__(self, func):
-        def _skipper(*args, **kw):
-            """Wrapped skipper function."""
-            if self.condition:
-                raise nose.SkipTest(self.message)
-            func(*args, **kw)
-        _skipper.__name__ = func.__name__
-        _skipper.__doc__ = func.__doc__
-        return _skipper
-
-
-class skip_unless(object):
-    """Decorator that skips a test if condition is not true."""
-    def __init__(self, condition, msg):
-        self.condition = condition
-        self.message = msg
-
-    def __call__(self, func):
-        def _skipper(*args, **kw):
-            """Wrapped skipper function."""
-            if not self.condition:
-                raise nose.SkipTest(self.message)
-            func(*args, **kw)
-        _skipper.__name__ = func.__name__
-        _skipper.__doc__ = func.__doc__
-        return _skipper
+from testtools import TestCase
 
 
 class skip_unless_attr(object):
@@ -66,7 +32,7 @@ class skip_unless_attr(object):
             """Wrapped skipper function."""
             testobj = args[0]
             if not getattr(testobj, self.attr, False):
-                raise nose.SkipTest(self.message)
+                raise TestCase.skipException(self.message)
             func(*args, **kw)
         _skipper.__name__ = func.__name__
         _skipper.__doc__ = func.__doc__

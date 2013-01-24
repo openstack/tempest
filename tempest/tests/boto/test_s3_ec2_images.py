@@ -19,9 +19,8 @@ from contextlib import closing
 import os
 
 from boto.s3.key import Key
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -38,8 +37,8 @@ class S3ImagesTest(BotoTestCase):
     def setUpClass(cls):
         super(S3ImagesTest, cls).setUpClass()
         if not tempest.tests.boto.A_I_IMAGES_READY:
-            raise nose.SkipTest("".join(("EC2 ", cls.__name__,
-                                ": requires ami/aki/ari manifest")))
+            raise cls.skipException("".join(("EC2 ", cls.__name__,
+                                    ": requires ami/aki/ari manifest")))
         cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.images_client = cls.os.ec2api_client
@@ -88,7 +87,7 @@ class S3ImagesTest(BotoTestCase):
         #TODO(afazekas): double deregister ?
         self.cancelResourceCleanUp(image["cleanUp"])
 
-    @unittest.skip("Skipped until the Bug #1074904 is resolved")
+    @testtools.skip("Skipped until the Bug #1074904 is resolved")
     def test_register_get_deregister_aki_image(self):
         # Register and deregister aki image
         image = {"name": rand_name("aki-name-"),
@@ -116,7 +115,7 @@ class S3ImagesTest(BotoTestCase):
         self.assertIn(retrieved_image.state, self.valid_image_state)
         self.cancelResourceCleanUp(image["cleanUp"])
 
-    @unittest.skip("Skipped until the Bug #1074908 and #1074904 is resolved")
+    @testtools.skip("Skipped until the Bug #1074908 and #1074904 is resolved")
     def test_register_get_deregister_ari_image(self):
         # Register and deregister ari image
         image = {"name": rand_name("ari-name-"),

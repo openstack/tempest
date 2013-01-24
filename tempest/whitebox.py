@@ -21,7 +21,6 @@ import shlex
 import subprocess
 import sys
 
-import nose
 from sqlalchemy import create_engine, MetaData
 
 from tempest.common.ssh import Client
@@ -59,7 +58,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
     def setUpClass(cls):
         if not compute.WHITEBOX_ENABLED:
             msg = "Whitebox testing disabled"
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
         super(ComputeWhiteboxTest, cls).setUpClass()
 

@@ -18,10 +18,10 @@
 import cStringIO as StringIO
 import random
 
-import unittest2 as unittest
+import testtools
 
 from nose.plugins.attrib import attr
-from nose.plugins.skip import SkipTest
+
 
 GLANCE_INSTALLED = False
 try:
@@ -33,7 +33,7 @@ except ImportError:
 from tempest import clients
 
 
-class CreateRegisterImagesTest(unittest.TestCase):
+class CreateRegisterImagesTest(testtools.TestCase):
 
     """
     Here we test the registration and creation of images
@@ -42,7 +42,7 @@ class CreateRegisterImagesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if not GLANCE_INSTALLED:
-            raise SkipTest('Glance not installed')
+            raise cls.skipException('Glance not installed')
         cls.os = clients.ServiceManager()
         cls.client = cls.os.images.get_client()
         cls.created_images = []
@@ -128,7 +128,7 @@ class CreateRegisterImagesTest(unittest.TestCase):
         self.assertEqual('active', results.status)
 
 
-class ListImagesTest(unittest.TestCase):
+class ListImagesTest(testtools.TestCase):
 
     """
     Here we test the listing of image information
@@ -137,7 +137,7 @@ class ListImagesTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         if not GLANCE_INSTALLED:
-            raise SkipTest('Glance not installed')
+            raise cls.skipException('Glance not installed')
         cls.os = clients.ServiceManager()
         cls.client = cls.os.images.get_client()
         cls.created_images = []

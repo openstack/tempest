@@ -15,9 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import parse_image_id
@@ -43,7 +42,7 @@ class ImagesOneServerTestBase(object):
             self.image_ids.remove(image_id)
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 1006725 is fixed")
+    @testtools.skip("Until Bug 1006725 is fixed")
     def test_create_image_specify_multibyte_character_image_name(self):
         # Return an error if the image name has multi-byte characters
         try:
@@ -56,7 +55,7 @@ class ImagesOneServerTestBase(object):
                       " are used for image name")
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 1005423 is fixed")
+    @testtools.skip("Until Bug 1005423 is fixed")
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
         try:
@@ -69,7 +68,7 @@ class ImagesOneServerTestBase(object):
             self.fail("Should raise 400 Bad Request if meta data is invalid")
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 1005423 is fixed")
+    @testtools.skip("Until Bug 1005423 is fixed")
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
         try:
@@ -82,8 +81,8 @@ class ImagesOneServerTestBase(object):
             self.fail("Should raise 413 Over Limit if meta data was too long")
 
     @attr(type='negative')
-    @unittest.skipUnless(compute.MULTI_USER,
-                         'Need multiple users for this test.')
+    @testtools.skipUnless(compute.MULTI_USER,
+                          'Need multiple users for this test.')
     def test_delete_image_of_another_tenant(self):
         # Return an error while trying to delete another tenant's image
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
@@ -99,8 +98,8 @@ class ImagesOneServerTestBase(object):
                           self.alt_client.delete_image, image_id)
 
     @attr(type='smoke')
-    @unittest.skipUnless(compute.CREATE_IMAGE_ENABLED,
-                         'Environment unable to create images.')
+    @testtools.skipUnless(compute.CREATE_IMAGE_ENABLED,
+                          'Environment unable to create images.')
     def test_create_delete_image(self):
 
         # Create a new image
@@ -123,8 +122,8 @@ class ImagesOneServerTestBase(object):
         self.assertEqual(original_image['minDisk'], image['minDisk'])
 
     @attr(type='negative')
-    @unittest.skipUnless(compute.MULTI_USER,
-                         'Need multiple users for this test.')
+    @testtools.skipUnless(compute.MULTI_USER,
+                          'Need multiple users for this test.')
     def test_create_image_for_server_in_another_tenant(self):
         # Creating image of another tenant's server should be return error
 
@@ -157,7 +156,7 @@ class ImagesOneServerTestBase(object):
                       "of the server is still being saved")
 
     @attr(type='negative')
-    @unittest.skip("Until Bug 1004564 is fixed")
+    @testtools.skip("Until Bug 1004564 is fixed")
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
@@ -192,6 +191,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTestJSON,
 
     def tearDown(self):
         ImagesOneServerTestBase.tearDown(self)
+        base.BaseComputeTestJSON.tearDown(self)
 
     @classmethod
     def setUpClass(cls):
@@ -220,6 +220,7 @@ class ImagesOneServerTestXML(base.BaseComputeTestXML,
 
     def tearDown(self):
         ImagesOneServerTestBase.tearDown(self)
+        base.BaseComputeTestXML.tearDown(self)
 
     @classmethod
     def setUpClass(cls):

@@ -19,7 +19,7 @@ import logging
 import time
 
 import nose
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -29,7 +29,7 @@ from tempest import exceptions
 LOG = logging.getLogger(__name__)
 
 
-class BaseVolumeTest(unittest.TestCase):
+class BaseVolumeTest(testtools.TestCase):
 
     """Base test case class for all Cinder API tests."""
 
@@ -66,7 +66,7 @@ class BaseVolumeTest(unittest.TestCase):
                                              cls.os.tenant_name)
         except exceptions.EndpointNotFound:
             cls.clear_isolated_creds()
-            raise nose.SkipTest(skip_msg)
+            raise cls.skipException(skip_msg)
 
     @classmethod
     def _get_identity_admin_client(cls):

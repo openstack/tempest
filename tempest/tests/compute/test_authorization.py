@@ -16,9 +16,8 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-from nose import SkipTest
 from nose.tools import raises
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import parse_image_id
@@ -34,7 +33,7 @@ class AuthorizationTest(BaseComputeTest):
     def setUpClass(cls):
         if not compute.MULTI_USER:
             msg = "Need >1 user"
-            raise SkipTest(msg)
+            raise cls.skipException(msg)
 
         super(AuthorizationTest, cls).setUpClass()
 
@@ -225,7 +224,7 @@ class AuthorizationTest(BaseComputeTest):
 
     @raises(exceptions.NotFound)
     @attr(type='negative')
-    @unittest.skip("Skipped until the Bug #1086980 is resolved")
+    @testtools.skip("Skipped until the Bug #1086980 is resolved")
     def test_delete_keypair_of_alt_account_fails(self):
         # A DELETE request for another user's keypair should fail
         self.alt_keypairs_client.delete_keypair(self.keypairname)

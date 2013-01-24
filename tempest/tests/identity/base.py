@@ -15,14 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 
 
-class BaseIdAdminTest(unittest.TestCase):
+class BaseIdAdminTest(testtools.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -31,7 +30,7 @@ class BaseIdAdminTest(unittest.TestCase):
         cls.token_client = os.token_client
 
         if not cls.client.has_admin_extensions():
-            raise nose.SkipTest("Admin extensions disabled")
+            raise cls.skipException("Admin extensions disabled")
 
         cls.data = DataGenerator(cls.client)
 

@@ -15,8 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
-
 
 from tempest import config
 import tempest.services.volume.json.admin.volume_types_client \
@@ -40,7 +38,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         if not cls.adm_user and cls.adm_pass and cls.adm_tenant:
             msg = ("Missing Volume Admin API credentials "
                    "in configuration.")
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
     @classmethod
     def tearDownClass(cls):

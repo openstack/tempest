@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
@@ -76,4 +75,4 @@ class ServicesTestXML(base.BaseIdentityAdminTestXML,
     @classmethod
     def setUpClass(cls):
         super(ServicesTestXML, cls).setUpClass()
-        raise nose.SkipTest("Skipping until Bug #1061738 resolved")
+        raise cls.skipException("Skipping until Bug #1061738 resolved")

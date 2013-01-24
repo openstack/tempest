@@ -15,9 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
@@ -31,7 +30,7 @@ class TestServerDiskConfig(BaseComputeTest):
     def setUpClass(cls):
         if not compute.DISK_CONFIG_ENABLED:
             msg = "DiskConfig extension not enabled."
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
         super(TestServerDiskConfig, cls).setUpClass()
         cls.client = cls.os.servers_client
 
@@ -96,7 +95,7 @@ class TestServerDiskConfig(BaseComputeTest):
         resp, body = self.client.delete_server(server['id'])
 
     @attr(type='positive')
-    @unittest.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
+    @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     def test_resize_server_from_manual_to_auto(self):
         # A server should be resized from manual to auto disk config
         name = rand_name('server')
@@ -122,7 +121,7 @@ class TestServerDiskConfig(BaseComputeTest):
         resp, body = self.client.delete_server(server['id'])
 
     @attr(type='positive')
-    @unittest.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
+    @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     def test_resize_server_from_auto_to_manual(self):
         # A server should be resized from auto to manual disk config
         name = rand_name('server')

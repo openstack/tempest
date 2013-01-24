@@ -19,7 +19,7 @@ from nose.plugins.attrib import attr
 from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests.object_storage import base
-import unittest2 as unittest
+import testtools
 
 
 class ContainerSyncTest(base.BaseObjectTest):
@@ -61,7 +61,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             #Attempt to delete the container
             resp, _ = client[0].delete_container(cont_name)
 
-    @unittest.skip('Until Bug 1093743 is resolved.')
+    @testtools.skip('Until Bug 1093743 is resolved.')
     @attr(type='positive')
     def test_container_synchronization(self):
         #Container to container synchronization

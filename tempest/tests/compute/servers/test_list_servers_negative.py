@@ -18,8 +18,7 @@
 import re
 import sys
 
-import nose
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -64,7 +63,7 @@ class ListServersNegativeTest(BaseComputeTest):
             tenant_name = cls.os.tenant_name
             msg = ("User/tenant %(username)s/%(tenant_name)s already have "
                    "existing server instances. Skipping test.") % locals()
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
         resp, body = cls.alt_client.list_servers()
         servers = body['servers']
@@ -74,7 +73,7 @@ class ListServersNegativeTest(BaseComputeTest):
             tenant_name = cls.alt_manager.tenant_name
             msg = ("Alt User/tenant %(username)s/%(tenant_name)s already have "
                    "existing server instances. Skipping test.") % locals()
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
         # The following servers are created for use
         # by the test methods in this class. These

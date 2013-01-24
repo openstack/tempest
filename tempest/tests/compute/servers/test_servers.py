@@ -168,7 +168,6 @@ class ServersTestJSON(base.BaseComputeTestJSON, ServersTestBase):
         # deletes are running slow we could very well overrun system
         # memory
         self.clear_servers()
-
         super(ServersTestJSON, self).tearDown()
 
 
@@ -184,5 +183,4 @@ class ServersTestXML(base.BaseComputeTestXML, ServersTestBase):
         # deletes are running slow we could very well overrun system
         # memory
         self.clear_servers()
-
         super(ServersTestXML, self).tearDown()

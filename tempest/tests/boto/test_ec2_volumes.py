@@ -19,7 +19,7 @@ import logging
 import time
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.testboto import BotoTestCase

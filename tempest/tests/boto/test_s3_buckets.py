@@ -16,7 +16,7 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -33,7 +33,7 @@ class S3BucketsTest(BotoTestCase):
         cls.client = cls.os.s3_client
         cls.config = cls.os.config
 
-    @unittest.skip("Skipped until the Bug #1076965 is resolved")
+    @testtools.skip("Skipped until the Bug #1076965 is resolved")
     @attr(type='smoke')
     def test_create_and_get_delete_bucket(self):
         # S3 Create, get and delete bucket

@@ -9,6 +9,6 @@ TODO:
 Use virtualenv to install all needed packages. Till then, the following
 packages must be installed:
 -httplib2
--unittest2
+-testtools
 -paramiko
 -nose

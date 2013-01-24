@@ -20,8 +20,8 @@ from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests.object_storage import base
+import testtools
 from time import sleep
-import unittest2 as unittest
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
@@ -54,7 +54,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         #Attempt to delete the container
         resp, _ = cls.container_client.delete_container(cls.container_name)
 
-    @unittest.skip('Until bug 1069849 is resolved.')
+    @testtools.skip('Until bug 1069849 is resolved.')
     @attr(type='regression')
     def test_get_object_after_expiry_time(self):
         # GET object after expiry time

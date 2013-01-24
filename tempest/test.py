@@ -18,14 +18,14 @@
 import logging
 import time
 
-import unittest2 as unittest
+import testtools
 
 from tempest import manager
 
 LOG = logging.getLogger(__name__)
 
 
-class TestCase(unittest.TestCase):
+class TestCase(testtools.TestCase):
 
     """
     Base test case class for all Tempest tests

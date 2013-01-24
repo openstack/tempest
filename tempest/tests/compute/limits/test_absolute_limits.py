@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest2 as unittest
+import testtools
 
 from tempest.tests.compute import base
 
@@ -26,7 +26,7 @@ class AbsoluteLimitsTest(object):
     def setUpClass(cls):
         cls.client = cls.limits_client
 
-    @unittest.skip("Skipped until the Bug #1025294 is resolved")
+    @testtools.skip("Skipped until the Bug #1025294 is resolved")
     def test_absLimits_get(self):
         # To check if all limits are present in the response
         resp, absolute_limits = self.client.get_absolute_limits()

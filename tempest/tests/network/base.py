@@ -15,15 +15,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 
 
-class BaseNetworkTest(unittest.TestCase):
+class BaseNetworkTest(testtools.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -40,7 +39,7 @@ class BaseNetworkTest(unittest.TestCase):
         except exceptions.EndpointNotFound:
             enabled = False
             skip_msg = "No OpenStack Network API endpoint"
-            raise nose.SkipTest(skip_msg)
+            raise cls.skipException(skip_msg)
 
     @classmethod
     def tearDownClass(cls):

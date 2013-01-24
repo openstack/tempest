@@ -18,9 +18,8 @@
 import random
 import string
 
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import config
@@ -101,12 +100,12 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
             return server_id
 
     @attr(type='positive')
-    @unittest.skipIf(not live_migration_available,
-                     'Block Live migration not available')
+    @testtools.skipIf(not live_migration_available,
+                      'Block Live migration not available')
     def test_001_live_block_migration(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
-            raise nose.SkipTest(
+            raise self.skipTest(
                 "Less than 2 compute nodes, skipping migration test.")
         server_id = self._get_an_active_server()
         actual_host = self._get_host_for_server(server_id)
@@ -116,9 +115,9 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
         self.assertEquals(target_host, self._get_host_for_server(server_id))
 
     @attr(type='positive', bug='lp1051881')
-    @unittest.skip('Until bug 1051881 is dealt with.')
-    @unittest.skipIf(not live_migration_available,
-                     'Block Live migration not available')
+    @testtools.skip('Until bug 1051881 is dealt with.')
+    @testtools.skipIf(not live_migration_available,
+                      'Block Live migration not available')
     def test_002_invalid_host_for_migration(self):
         # Migrating to an invalid host should not change the status
 

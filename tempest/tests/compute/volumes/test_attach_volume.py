@@ -16,7 +16,7 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -68,7 +68,7 @@ class AttachVolumeTest(object):
         return server, volume
 
     @attr(type='positive')
-    @unittest.skipIf(not run_ssh, 'SSH required for this test')
+    @testtools.skipIf(not run_ssh, 'SSH required for this test')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.

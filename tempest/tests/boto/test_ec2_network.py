@@ -16,7 +16,7 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.testboto import BotoTestCase
@@ -32,7 +32,7 @@ class EC2NetworkTest(BotoTestCase):
         cls.client = cls.os.ec2api_client
 
 #Note(afazekas): these tests for things duable without an instance
-    @unittest.skip("Skipped until the Bug #1080406 is resolved")
+    @testtools.skip("Skipped until the Bug #1080406 is resolved")
     @attr(type='smoke')
     def test_disassociate_not_associated_floating_ip(self):
         # EC2 disassociate not associated floating ip

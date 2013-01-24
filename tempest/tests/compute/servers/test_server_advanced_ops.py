@@ -17,7 +17,6 @@
 
 import logging
 
-import nose
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import test
@@ -39,13 +38,13 @@ class TestServerAdvancedOps(test.DefaultClientTest):
 
         if not cls.config.compute.resize_available:
             msg = "Skipping test - resize not available on this host"
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
         resize_flavor = cls.config.compute.flavor_ref_alt
 
         if resize_flavor == cls.config.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
     @classmethod
     def tearDownClass(cls):

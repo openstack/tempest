@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
 
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests.compute import base
@@ -96,7 +95,7 @@ class VolumesTestXML(base.BaseComputeTestXML, VolumesTestBase):
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
                            "create the 3 volumes needed by this test case")
-                    raise nose.SkipTest(msg)
+                    raise cls.skipException(msg)
                 raise
 
     @classmethod
@@ -142,7 +141,7 @@ class VolumesTestJSON(base.BaseComputeTestJSON, VolumesTestBase):
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
                            "create the 3 volumes needed by this test case")
-                    raise nose.SkipTest(msg)
+                    raise cls.skipException(msg)
                 raise
 
     @classmethod

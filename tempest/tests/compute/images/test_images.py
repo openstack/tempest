@@ -15,9 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import parse_image_id
@@ -113,7 +112,7 @@ class ImagesTestBase(object):
         self.assertRaises(exceptions.Duplicate, self.client.create_image,
                           server['id'], snapshot_name)
 
-    @unittest.skip("Until Bug 1039739 is fixed")
+    @testtools.skip("Until Bug 1039739 is fixed")
     @attr(type='negative')
     def test_create_image_when_server_is_rebooting(self):
         # Return error when creating an image of server that is rebooting
@@ -217,6 +216,7 @@ class ImagesTestJSON(base.BaseComputeTestJSON,
                      ImagesTestBase):
     def tearDown(self):
         ImagesTestBase.tearDown(self)
+        base.BaseComputeTestJSON.tearDown(self)
 
     @classmethod
     def setUpClass(cls):
@@ -243,6 +243,7 @@ class ImagesTestXML(base.BaseComputeTestXML,
                     ImagesTestBase):
     def tearDown(self):
         ImagesTestBase.tearDown(self)
+        base.BaseComputeTestXML.tearDown(self)
 
     @classmethod
     def setUpClass(cls):

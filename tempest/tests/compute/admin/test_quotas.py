@@ -57,12 +57,13 @@ class QuotasTest(BaseComputeTest):
                                  'cores': 20, 'security_groups': 10}
 
     @classmethod
-    def tearDown(cls):
+    def tearDownClass(cls):
         for server in cls.servers:
             try:
                 cls.servers_client.delete_server(server['id'])
             except exceptions.NotFound:
                 continue
+        super(QuotasTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_get_default_quotas(self):

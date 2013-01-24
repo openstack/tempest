@@ -44,6 +44,7 @@ class ServerMetadataTest(BaseComputeTest):
         super(ServerMetadataTest, cls).tearDownClass()
 
     def setUp(self):
+        super(ServerMetadataTest, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
         resp, _ = self.client.set_server_metadata(self.server_id, meta)
         self.assertEqual(resp.status, 200)

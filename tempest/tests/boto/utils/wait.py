@@ -20,7 +20,7 @@ import re
 import time
 
 from boto.exception import BotoServerError
-from unittest2 import TestCase
+from testtools import TestCase
 
 import tempest.config
 

@@ -16,10 +16,9 @@
 #    under the License.
 
 import base64
-import nose
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 
 from tempest.common.utils.data_utils import rand_name
@@ -98,14 +97,14 @@ class ServersTest(object):
         self.assertTrue(found)
 
     @attr(type='positive')
-    @unittest.skipIf(not run_ssh, 'Instance validation tests are disabled.')
+    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     def test_can_log_into_created_server(self):
         # Check that the user can authenticate with the generated password
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertTrue(linux_client.can_authenticate())
 
     @attr(type='positive')
-    @unittest.skipIf(not run_ssh, 'Instance validation tests are disabled.')
+    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
@@ -114,7 +113,7 @@ class ServersTest(object):
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @attr(type='positive')
-    @unittest.skipIf(not run_ssh, 'Instance validation tests are disabled.')
+    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
@@ -128,7 +127,7 @@ class ServersTestAutoDisk(base.BaseComputeTestJSON,
     def setUpClass(cls):
         if not compute.DISK_CONFIG_ENABLED:
             msg = "DiskConfig extension not enabled."
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
         super(ServersTestAutoDisk, cls).setUpClass()
         cls.disk_config = 'AUTO'
         ServersTest.setUpClass(cls)
@@ -146,7 +145,7 @@ class ServersTestManualDisk(base.BaseComputeTestJSON,
     def setUpClass(cls):
         if not compute.DISK_CONFIG_ENABLED:
             msg = "DiskConfig extension not enabled."
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
         super(ServersTestManualDisk, cls).setUpClass()
         cls.disk_config = 'MANUAL'
         ServersTest.setUpClass(cls)

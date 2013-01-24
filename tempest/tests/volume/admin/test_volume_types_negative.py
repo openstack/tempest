@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest
+import testtools
 import uuid
 
 from nose.plugins.attrib import attr
@@ -40,7 +40,7 @@ class VolumeTypesNegativeTestBase():
                                           display_name=str(uuid.uuid4()),
                                           volume_type=str(uuid.uuid4()))
 
-    @unittest.skip('Until bug 1090356 is fixed')
+    @testtools.skip('Until bug 1090356 is fixed')
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_with_empty_name(self):

@@ -15,9 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
@@ -35,7 +34,7 @@ class FlavorsAdminTestBase(object):
     def setUpClass(self, cls):
         if not compute.FLAVOR_EXTRA_DATA_ENABLED:
             msg = "FlavorExtraData extension not enabled."
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
         cls.client = cls.os.flavors_client
         cls.flavor_name_prefix = 'test_flavor_'

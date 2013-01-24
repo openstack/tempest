@@ -18,9 +18,8 @@
 import logging
 import time
 
-import nose
 import testresources
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -34,12 +33,11 @@ __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
 LOG = logging.getLogger(__name__)
 
 
-class BaseCompTest(unittest.TestCase,
+class BaseCompTest(testtools.TestCase,
                    testresources.ResourcedTestCase):
-
     """Base test case class for all Compute API tests."""
 
-    resources = [('compute_init', compute.generic_setup_package())]
+    resources = [('compute_init', compute.ComputeResource())]
 
     @classmethod
     def setUpClass(cls):
@@ -249,7 +247,7 @@ class BaseComputeTestXML(BaseCompTest):
         super(BaseComputeTestXML, cls).setUpClass()
 
 
-class BaseComputeAdminTest(unittest.TestCase):
+class BaseComputeAdminTest(testtools.TestCase):
 
     """Base test case class for all Compute Admin API tests."""
 
@@ -263,7 +261,7 @@ class BaseComputeAdminTest(unittest.TestCase):
         if not cls.admin_username and cls.admin_password and cls.admin_tenant:
             msg = ("Missing Compute Admin API credentials "
                    "in configuration.")
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
         cls.os = clients.ComputeAdminManager(interface=cls._interface)
 

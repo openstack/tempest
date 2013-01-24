@@ -21,8 +21,8 @@ from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests.object_storage import base
+import testtools
 from time import time
-import unittest2 as unittest
 
 
 class ObjectTest(base.BaseObjectTest):
@@ -327,7 +327,7 @@ class ObjectTest(base.BaseObjectTest):
                 self.assertIn('x-container-read', resp)
                 self.assertEqual(resp['x-container-read'], 'x')
 
-    @unittest.skip('Until Bug 1091669  is resolved.')
+    @testtools.skip('Until Bug 1091669  is resolved.')
     @attr(type='smoke')
     def test_access_public_object_with_another_user_creds(self):
         #Make container public-readable, and access the object
@@ -382,7 +382,7 @@ class ObjectTest(base.BaseObjectTest):
                 self.assertIn('x-container-read', resp)
                 self.assertEqual(resp['x-container-read'], 'x')
 
-    @unittest.skip('Until Bug #1020722 is resolved.')
+    @testtools.skip('Until Bug #1020722 is resolved.')
     @attr(type='smoke')
     def test_write_public_object_without_using_creds(self):
         #Make container public-writable, and create object
@@ -433,7 +433,7 @@ class ObjectTest(base.BaseObjectTest):
                 self.assertIn('x-container-write', resp)
                 self.assertEqual(resp['x-container-write'], 'x')
 
-    @unittest.skip('Until Bug #1020722 is resolved.')
+    @testtools.skip('Until Bug #1020722 is resolved.')
     @attr(type='smoke')
     def test_write_public_with_another_user_creds(self):
         #Make container public-writable, and create object
@@ -592,7 +592,7 @@ class ObjectTest(base.BaseObjectTest):
                           self.container_name, object_name,
                           metadata=self.custom_headers)
 
-    @unittest.skip('Until bug 1097137 is resolved.')
+    @testtools.skip('Until bug 1097137 is resolved.')
     @attr(type='positive')
     def test_get_object_using_temp_url(self):
         #Access object using temp url within expiry time

@@ -19,7 +19,6 @@ import logging
 import subprocess
 
 import netaddr
-import nose
 
 from quantumclient.common import exceptions as exc
 
@@ -179,7 +178,7 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
 
         cls.enabled = not bool(msg)
         if msg:
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
     @classmethod
     def setUpClass(cls):
@@ -458,7 +457,7 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
 
     def test_005_create_servers(self):
         if not (self.keypairs or self.security_groups or self.networks):
-            raise nose.SkipTest('Necessary resources have not been defined')
+            raise self.skipTest('Necessary resources have not been defined')
         for i, network in enumerate(self.networks):
             tenant_id = network.tenant_id
             name = rand_name('server-smoke-%d-' % i)
@@ -471,9 +470,9 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
     def test_006_check_tenant_network_connectivity(self):
         if not self.config.network.tenant_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
-            raise nose.SkipTest(msg)
+            raise self.skipTest(msg)
         if not self.servers:
-            raise nose.SkipTest("No VM's have been created")
+            raise self.skipTest("No VM's have been created")
         for server in self.servers:
             for net_name, ip_addresses in server.networks.iteritems():
                 for ip_address in ip_addresses:
@@ -484,9 +483,9 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
     def test_007_assign_floating_ips(self):
         public_network_id = self.config.network.public_network_id
         if not public_network_id:
-            raise nose.SkipTest('Public network not configured')
+            raise self.skipTest('Public network not configured')
         if not self.servers:
-            raise nose.SkipTest("No VM's have been created")
+            raise self.skipTest("No VM's have been created")
         for server in self.servers:
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips.setdefault(server, [])
@@ -494,7 +493,7 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
 
     def test_008_check_public_network_connectivity(self):
         if not self.floating_ips:
-            raise nose.SkipTest('No floating ips have been allocated.')
+            raise self.skipTest('No floating ips have been allocated.')
         for server, floating_ips in self.floating_ips.iteritems():
             for floating_ip in floating_ips:
                 ip_address = floating_ip.floating_ip_address

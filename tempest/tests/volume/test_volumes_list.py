@@ -94,7 +94,7 @@ class VolumeListTestXML(base.BaseVolumeTestXML, VolumesListTestBase):
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
                            "create the 3 volumes needed by this test case")
-                    raise nose.SkipTest(msg)
+                    raise cls.skipException(msg)
                 raise
 
     @classmethod
@@ -141,7 +141,7 @@ class VolumeListTestJSON(base.BaseVolumeTestJSON, VolumesListTestBase):
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
                            "create the 3 volumes needed by this test case")
-                    raise nose.SkipTest(msg)
+                    raise cls.skipException(msg)
                 raise
 
     @classmethod

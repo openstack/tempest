@@ -16,7 +16,7 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions

@@ -17,9 +17,8 @@
 
 import sys
 
-import nose
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -31,7 +30,7 @@ class ServersNegativeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        raise nose.SkipTest("Until Bug 1046870 is fixed")
+        raise cls.skipException("Until Bug 1046870 is fixed")
         super(ServersNegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client

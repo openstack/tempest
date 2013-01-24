@@ -16,7 +16,7 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -47,7 +47,7 @@ class EC2KeysTest(BotoTestCase):
                         self.client.get_key_pair(key_name)))
 
     @attr(type='smoke')
-    @unittest.skip("Skipped until the Bug #1072318 is resolved")
+    @testtools.skip("Skipped until the Bug #1072318 is resolved")
     def test_delete_ec2_keypair(self):
         # EC2 delete KeyPair
         key_name = rand_name("keypair-")
@@ -65,7 +65,7 @@ class EC2KeysTest(BotoTestCase):
                         self.client.get_key_pair(key_name)))
 
     @attr(type='smoke')
-    @unittest.skip("Skipped until the Bug #1072762 is resolved")
+    @testtools.skip("Skipped until the Bug #1072762 is resolved")
     def test_duplicate_ec2_keypair(self):
         # EC2 duplicate KeyPair
         key_name = rand_name("keypair-")

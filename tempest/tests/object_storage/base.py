@@ -15,8 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
-import unittest2 as unittest
+import testtools
 
 from tempest import clients
 import tempest.config
@@ -24,7 +23,7 @@ from tempest import exceptions
 from tempest.tests.identity.base import DataGenerator
 
 
-class BaseObjectTest(unittest.TestCase):
+class BaseObjectTest(testtools.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -50,4 +49,4 @@ class BaseObjectTest(unittest.TestCase):
         except exceptions.EndpointNotFound:
             enabled = False
             skip_msg = "No OpenStack Object Storage API endpoint"
-            raise nose.SkipTest(skip_msg)
+            raise cls.skipException(skip_msg)

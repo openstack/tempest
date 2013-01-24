@@ -19,7 +19,7 @@ import base64
 import time
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
@@ -35,8 +35,8 @@ class ServerActionsTestBase(object):
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
     @attr(type='smoke')
-    @unittest.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
-                         'Change password not available.')
+    @testtools.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
+                          'Change password not available.')
     def test_change_server_password(self):
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
@@ -70,7 +70,7 @@ class ServerActionsTestBase(object):
             self.assertGreater(new_boot_time, boot_time)
 
     @attr(type='smoke')
-    @unittest.skip('Until bug 1014647 is dealt with.')
+    @testtools.skip('Until bug 1014647 is dealt with.')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
         if self.run_ssh:
@@ -123,7 +123,7 @@ class ServerActionsTestBase(object):
             self.assertTrue(linux_client.can_authenticate())
 
     @attr(type='smoke')
-    @unittest.skipIf(not resize_available, 'Resize not available.')
+    @testtools.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_confirm(self):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
@@ -139,7 +139,7 @@ class ServerActionsTestBase(object):
         self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
 
     @attr(type='positive')
-    @unittest.skipIf(not resize_available, 'Resize not available.')
+    @testtools.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_revert(self):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted

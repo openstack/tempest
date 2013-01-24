@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
 from nose.plugins.attrib import attr
 
 from tempest import exceptions
@@ -28,7 +27,7 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
 
     @classmethod
     def setUpClass(cls):
-        raise nose.SkipTest("Until Bug 1034129 is fixed")
+        raise cls.skipException("Until Bug 1034129 is fixed")
         super(ServersWhiteboxTest, cls).setUpClass()
         BaseIdentityAdminTest.setUpClass()
         cls.client = cls.servers_client

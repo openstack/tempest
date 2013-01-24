@@ -16,7 +16,7 @@
 #    under the License.
 
 from nose.plugins.attrib import attr
-import unittest2 as unittest
+import testtools
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
@@ -77,7 +77,7 @@ class KeyPairsTestBase(object):
         self.assertEqual(202, resp.status)
 
     @attr(type='positive')
-    @unittest.skip("Skipped until the Bug #980688 is resolved")
+    @testtools.skip("Skipped until the Bug #980688 is resolved")
     def test_get_keypair_detail(self):
         # Keypair should be created, Got details by name and deleted
         k_name = rand_name('keypair-')
@@ -137,7 +137,7 @@ class KeyPairsTestBase(object):
             self.fail('Expected BadRequest for invalid public key')
 
     @attr(type='negative')
-    @unittest.skip("Skipped until the Bug #1086980 is resolved")
+    @testtools.skip("Skipped until the Bug #1086980 is resolved")
     def test_keypair_delete_nonexistant_key(self):
         # Non-existant key deletion should throw a proper error
         k_name = rand_name("keypair-non-existant-")

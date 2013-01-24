@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest
+import testtools
 import uuid
 
 from nose.plugins.attrib import attr
@@ -42,7 +42,7 @@ class ExtraSpecsNegativeTestBase():
     def tearDownClass(cls):
         cls.client.delete_volume_type(cls.volume_type['id'])
 
-    @unittest.skip('Until bug 1090320 is fixed')
+    @testtools.skip('Until bug 1090320 is fixed')
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_update_no_body(self):
@@ -88,7 +88,7 @@ class ExtraSpecsNegativeTestBase():
         self.client.create_volume_type_extra_specs(str(uuid.uuid4()),
                                                    extra_specs)
 
-    @unittest.skip('Until bug 1090322 is fixed')
+    @testtools.skip('Until bug 1090322 is fixed')
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_none_body(self):
@@ -96,7 +96,7 @@ class ExtraSpecsNegativeTestBase():
         self.client.create_volume_type_extra_specs(self.volume_type['id'],
                                                    None)
 
-    @unittest.skip('Until bug 1090322 is fixed')
+    @testtools.skip('Until bug 1090322 is fixed')
     @raises(exceptions.BadRequest)
     @attr(type='negative')
     def test_create_invalid_body(self):
