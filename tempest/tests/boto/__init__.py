@@ -32,7 +32,7 @@ S3_CAN_CONNECT_ERROR = "Unknown Error"
 EC2_CAN_CONNECT_ERROR = "Unknown Error"
 
 
-def setup_package():
+def generic_setup_package():
     global A_I_IMAGES_READY
     global S3_CAN_CONNECT_ERROR
     global EC2_CAN_CONNECT_ERROR

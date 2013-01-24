@@ -19,12 +19,14 @@ import logging
 import time
 
 import nose
+import testresources
 import unittest2 as unittest
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
+from tempest.tests import compute
 
 __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
            'BaseComputeAdminTestJSON', 'BaseComputeAdminTestXML']
@@ -32,9 +34,12 @@ __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
 LOG = logging.getLogger(__name__)
 
 
-class BaseCompTest(unittest.TestCase):
+class BaseCompTest(unittest.TestCase,
+                   testresources.ResourcedTestCase):
 
     """Base test case class for all Compute API tests."""
+
+    resources = [('compute_init', compute.generic_setup_package())]
 
     @classmethod
     def setUpClass(cls):

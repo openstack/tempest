@@ -37,7 +37,7 @@ MULTI_USER = False
 
 
 # All compute tests -- single setup function
-def setup_package():
+def generic_setup_package():
     LOG.debug("Entering tempest.tests.compute.setup_package")
 
     global MULTI_USER, DISK_CONFIG_ENABLED, FLAVOR_EXTRA_DATA_ENABLED
