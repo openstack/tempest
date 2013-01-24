@@ -38,22 +38,20 @@ class ObjectTest(base.BaseObjectTest):
         # Randomly creating user
         cls.data.setup_test_user()
 
-        resp, body = \
-            cls.token_client.auth(cls.data.test_user,
-                                  cls.data.test_password,
-                                  cls.data.test_tenant)
-        cls.new_token = \
-            cls.token_client.get_token(cls.data.test_user,
-                                       cls.data.test_password,
-                                       cls.data.test_tenant)
+        resp, body = cls.token_client.auth(cls.data.test_user,
+                                           cls.data.test_password,
+                                           cls.data.test_tenant)
+        cls.new_token = cls.token_client.get_token(cls.data.test_user,
+                                                   cls.data.test_password,
+                                                   cls.data.test_tenant)
 
         cls.custom_headers = {'X-Auth-Token': cls.new_token}
 
     @classmethod
     def tearDownClass(cls):
         #Get list of all object in the container
-        objlist = \
-            cls.container_client.list_all_container_objects(cls.container_name)
+        objlist = cls.container_client.list_all_container_objects(
+            cls.container_name)
 
         #Attempt to delete every object in the container
         for obj in objlist:
@@ -112,16 +110,15 @@ class ObjectTest(base.BaseObjectTest):
         meta_value = rand_name(name='MetaValue-')
         orig_metadata = {meta_key: meta_value}
 
-        resp, _ = \
-            self.object_client.update_object_metadata(self.container_name,
-                                                      object_name,
-                                                      orig_metadata)
+        resp, _ = self.object_client.update_object_metadata(
+            self.container_name, object_name,
+            orig_metadata)
         self.assertEqual(resp['status'], '202')
 
         #Get Object Metadata
-        resp, resp_metadata = \
-            self.object_client.list_object_metadata(self.container_name,
-                                                    object_name)
+        resp, resp_metadata = self.object_client.list_object_metadata(
+            self.container_name, object_name)
+
         self.assertEqual(resp['status'], '200')
         actual_meta_key = 'x-object-meta-' + meta_key
         self.assertTrue(actual_meta_key in resp)
@@ -248,10 +245,9 @@ class ObjectTest(base.BaseObjectTest):
         meta_value = rand_name(name='MetaValue-')
         orig_metadata = {meta_key: meta_value}
 
-        resp, _ = \
-            self.object_client.update_object_metadata(src_container_name,
-                                                      object_name,
-                                                      orig_metadata)
+        resp, _ = self.object_client.update_object_metadata(src_container_name,
+                                                            object_name,
+                                                            orig_metadata)
         self.assertEqual(resp['status'], '202')
 
         try:
@@ -293,10 +289,9 @@ class ObjectTest(base.BaseObjectTest):
             resp_meta = None
             # Update Container Metadata to make public readable
             cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
-            resp_meta, body = \
-                self.container_client.update_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
+            resp_meta, body = self.container_client.update_container_metadata(
+                self.container_name, metadata=cont_headers,
+                metadata_prefix='')
             self.assertEqual(resp_meta['status'], '204')
 
             # Create Object
@@ -308,29 +303,26 @@ class ObjectTest(base.BaseObjectTest):
             self.assertEqual(resp['status'], '201')
 
             # List container metadata
-            resp_meta, _ = \
-                self.container_client.list_container_metadata(
-                    self.container_name)
+            resp_meta, _ = self.container_client.list_container_metadata(
+                self.container_name)
             self.assertEqual(resp_meta['status'], '204')
             self.assertIn('x-container-read', resp_meta)
             self.assertEqual(resp_meta['x-container-read'], '.r:*,.rlistings')
 
             # Trying to Get Object with empty Headers as it is public readable
-            resp, body = \
-                self.custom_object_client.get_object(self.container_name,
-                                                     object_name, metadata={})
+            resp, body = self.custom_object_client.get_object(
+                self.container_name, object_name,
+                metadata={})
             self.assertEqual(body, data)
         finally:
             if resp_meta['status'] == '204':
                 # Delete updated container metadata, to revert back.
-                resp, body = \
-                    self.container_client.delete_container_metadata(
-                        self.container_name, metadata=cont_headers,
-                        metadata_prefix='')
+                resp, body = self.container_client.delete_container_metadata(
+                    self.container_name, metadata=cont_headers,
+                    metadata_prefix='')
 
-                resp, _ = \
-                    self.container_client.list_container_metadata(
-                        self.container_name)
+                resp, _ = self.container_client.list_container_metadata(
+                    self.container_name)
                 self.assertEqual(resp['status'], '204')
                 self.assertIn('x-container-read', resp)
                 self.assertEqual(resp['x-container-read'], 'x')
@@ -344,10 +336,9 @@ class ObjectTest(base.BaseObjectTest):
         try:
             resp_meta = None
             cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
-            resp_meta, body = \
-                self.container_client.update_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
+            resp_meta, body = self.container_client.update_container_metadata(
+                self.container_name, metadata=cont_headers,
+                metadata_prefix='')
             self.assertEqual(resp_meta['status'], '204')
             # Create Object
             object_name = rand_name(name='Object')
@@ -358,9 +349,8 @@ class ObjectTest(base.BaseObjectTest):
             self.assertEqual(resp['status'], '201')
 
             # List container metadata
-            resp, _ = \
-                self.container_client.list_container_metadata(
-                    self.container_name)
+            resp, _ = self.container_client.list_container_metadata(
+                self.container_name)
             self.assertEqual(resp['status'], '204')
             self.assertIn('x-container-read', resp)
             self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
@@ -370,9 +360,9 @@ class ObjectTest(base.BaseObjectTest):
             headers = {'X-Auth-Token': token}
 
             # Trying to create object with Alternate user creds
-            resp, body = \
-                self.custom_object_client.get_object(
-                    self.container_name, object_name, metadata=headers)
+            resp, body = self.custom_object_client.get_object(
+                self.container_name, object_name,
+                metadata=headers)
             self.assertEqual(body, data)
 
         except Exception as e:
@@ -382,14 +372,12 @@ class ObjectTest(base.BaseObjectTest):
         finally:
             if resp_meta['status'] == '204':
                 # Delete updated container metadata, to revert back.
-                resp, body = \
-                    self.container_client.delete_container_metadata(
-                        self.container_name, metadata=cont_headers,
-                        metadata_prefix='')
+                resp, body = self.container_client.delete_container_metadata(
+                    self.container_name, metadata=cont_headers,
+                    metadata_prefix='')
 
-                resp, _ = \
-                    self.container_client.list_container_metadata(
-                        self.container_name)
+                resp, _ = self.container_client.list_container_metadata(
+                    self.container_name)
                 self.assertEqual(resp['status'], '204')
                 self.assertIn('x-container-read', resp)
                 self.assertEqual(resp['x-container-read'], 'x')
@@ -403,15 +391,13 @@ class ObjectTest(base.BaseObjectTest):
             resp_meta = None
             # Update Container Metadata to make public readable
             cont_headers = {'X-Container-Write': '-*'}
-            resp_meta, body = \
-                self.container_client.update_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
+            resp_meta, body = self.container_client.update_container_metadata(
+                self.container_name, metadata=cont_headers,
+                metadata_prefix='')
             self.assertEqual(resp_meta['status'], '204')
             # List container metadata
-            resp, _ = \
-                self.container_client.list_container_metadata(
-                    self.container_name)
+            resp, _ = self.container_client.list_container_metadata(
+                self.container_name)
 
             self.assertEqual(resp['status'], '204')
             self.assertIn('x-container-write', resp)
@@ -425,10 +411,9 @@ class ObjectTest(base.BaseObjectTest):
                        'Accept': 'application/json'}
 
             #Trying to Create object without using creds
-            resp, body = \
-                self.custom_object_client.create_object(self.container_name,
-                                                        object_name, data,
-                                                        metadata=headers)
+            resp, body = self.custom_object_client.create_object(
+                self.container_name, object_name,
+                data, metadata=headers)
             self.assertEqual(resp['status'], '201')
 
         except Exception as e:
@@ -438,14 +423,12 @@ class ObjectTest(base.BaseObjectTest):
         finally:
             if resp_meta['status'] == '204':
                 # Delete updated container metadata, to revert back.
-                resp, body = \
-                    self.container_client.delete_container_metadata(
-                        self.container_name, metadata=cont_headers,
-                        metadata_prefix='')
+                resp, body = self.container_client.delete_container_metadata(
+                    self.container_name, metadata=cont_headers,
+                    metadata_prefix='')
 
-                resp, _ = \
-                    self.container_client.list_container_metadata(
-                        self.container_name)
+                resp, _ = self.container_client.list_container_metadata(
+                    self.container_name)
                 self.assertEqual(resp['status'], '204')
                 self.assertIn('x-container-write', resp)
                 self.assertEqual(resp['x-container-write'], 'x')
@@ -460,15 +443,13 @@ class ObjectTest(base.BaseObjectTest):
             resp_meta = None
             # Update Container Metadata to make public readable
             cont_headers = {'X-Container-Write': '-*'}
-            resp_meta, body = \
-                self.container_client.update_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
+            resp_meta, body = self.container_client.update_container_metadata(
+                self.container_name, metadata=cont_headers,
+                metadata_prefix='')
             self.assertEqual(resp_meta['status'], '204')
             # List container metadata
-            resp, _ = \
-                self.container_client.list_container_metadata(
-                    self.container_name)
+            resp, _ = self.container_client.list_container_metadata(
+                self.container_name)
 
             self.assertEqual(resp['status'], '204')
             self.assertIn('x-container-write', resp)
@@ -485,9 +466,9 @@ class ObjectTest(base.BaseObjectTest):
             object_name = rand_name(name='Object')
             data = arbitrary_string(size=len(object_name),
                                     base_text=object_name)
-            resp, body = \
-                self.custom_object_client.create_object(
-                    self.container_name, object_name, data, metadata=headers)
+            resp, body = self.custom_object_client.create_object(
+                self.container_name, object_name,
+                data, metadata=headers)
             self.assertEqual(resp['status'], '201')
 
         except Exception as e:
@@ -497,14 +478,12 @@ class ObjectTest(base.BaseObjectTest):
         finally:
             if resp_meta['status'] == '204':
                 # Delete updated container metadata, to revert back.
-                resp, body = \
-                    self.container_client.delete_container_metadata(
-                        self.container_name, metadata=cont_headers,
-                        metadata_prefix='')
+                resp, body = self.container_client.delete_container_metadata(
+                    self.container_name, metadata=cont_headers,
+                    metadata_prefix='')
 
-                resp, _ = \
-                    self.container_client.list_container_metadata(
-                        self.container_name)
+                resp, _ = self.container_client.list_container_metadata(
+                    self.container_name)
                 self.assertEqual(resp['status'], '204')
                 self.assertIn('x-container-write', resp)
                 self.assertEqual(resp['x-container-write'], 'x')
@@ -583,9 +562,9 @@ class ObjectTest(base.BaseObjectTest):
         data = arbitrary_string(size=len(object_name) * 5,
                                 base_text=object_name)
 
-        resp, body = \
-            self.object_client.create_object(self.container_name,
-                                             object_name, data)
+        resp, body = self.object_client.create_object(
+            self.container_name, object_name,
+            data)
         self.assertEqual(resp['status'], '201')
 
         # Trying to Get Object with non authorized user token
@@ -602,9 +581,9 @@ class ObjectTest(base.BaseObjectTest):
         data = arbitrary_string(size=len(object_name) * 5,
                                 base_text=object_name)
 
-        resp, body = \
-            self.object_client.create_object(self.container_name,
-                                             object_name, data)
+        resp, body = self.object_client.create_object(
+            self.container_name, object_name,
+            data)
         self.assertEqual(resp['status'], '201')
 
         # Trying to Delete Object with non authorized user token
@@ -624,8 +603,8 @@ class ObjectTest(base.BaseObjectTest):
             flag = False
             key = 'Meta'
             metadata = {'Temp-URL-Key': key}
-            resp, _ = \
-                self.account_client.create_account_metadata(metadata=metadata)
+            resp, _ = self.account_client.create_account_metadata(
+                metadata=metadata)
             self.assertEqual(resp['status'], '204')
             flag = True
 
@@ -643,17 +622,16 @@ class ObjectTest(base.BaseObjectTest):
             expires = int(time() + 10)
 
             #Trying to GET object using temp URL with in expiry time
-            _, body = \
-                self.object_client.get_object_using_temp_url(
-                    self.container_name, object_name, expires, key)
+            _, body = self.object_client.get_object_using_temp_url(
+                self.container_name, object_name,
+                expires, key)
 
             self.assertEqual(body, data)
 
         finally:
             if flag:
-                resp, _ = \
-                    self.account_client.delete_account_metadata(
-                        metadata=metadata)
+                resp, _ = self.account_client.delete_account_metadata(
+                    metadata=metadata)
                 resp, _ = self.account_client.list_account_metadata()
                 self.assertNotIn('x-account-meta-temp-url-key', resp)
 
@@ -670,26 +648,24 @@ class ObjectTest(base.BaseObjectTest):
                                          object_name, data)
         #Uploading 10 segments
         for i in range(segments):
-            resp, _ = \
-                self.object_client.create_object_segments(self.container_name,
-                                                          object_name, i, data)
+            resp, _ = self.object_client.create_object_segments(
+                self.container_name, object_name,
+                i, data)
         # Creating a Manifest File (Metadata Update)
 
         metadata = {'X-Object-Manifest': '%s/%s/'
                     % (self.container_name, object_name)}
-        resp, _ = \
-            self.object_client.update_object_metadata(self.container_name,
-                                                      object_name, metadata,
-                                                      metadata_prefix='')
-        resp, _ = \
-            self.object_client.list_object_metadata(self.container_name,
-                                                    object_name)
+        resp, _ = self.object_client.update_object_metadata(
+            self.container_name, object_name,
+            metadata, metadata_prefix='')
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name, object_name)
         self.assertIn('x-object-manifest', resp)
         self.assertEqual(resp['x-object-manifest'],
                          '%s/%s/' % (self.container_name, object_name))
 
         #Downloading the object
-        resp, body = \
-            self.object_client.get_object(self.container_name, object_name)
+        resp, body = self.object_client.get_object(
+            self.container_name, object_name)
 
         self.assertEqual(data * segments, body)
