@@ -125,3 +125,25 @@ class FlavorsClientXML(RestClientXML):
             if flavor['id'] == id:
                 return False
         return True
+
+    def set_flavor_extra_spec(self, flavor_id, specs):
+        """Sets extra Specs to the mentioned flavor."""
+        extra_specs = Element("extra_specs")
+        for key in specs.keys():
+            extra_specs.add_attr(key, specs[key])
+        resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
+                               str(Document(extra_specs)), self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def get_flavor_extra_spec(self, flavor_id):
+        """Gets extra Specs of the mentioned flavor."""
+        resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id,
+                              self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def unset_flavor_extra_spec(self, flavor_id, key):
+        """Unsets an extra spec based on the mentioned flavor and key."""
+        return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
+                           key))

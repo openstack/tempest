@@ -87,3 +87,22 @@ class FlavorsClientJSON(RestClient):
             if flavor['id'] == id:
                 return False
         return True
+
+    def set_flavor_extra_spec(self, flavor_id, specs):
+        """Sets extra Specs to the mentioned flavor."""
+        post_body = json.dumps({'extra_specs': specs})
+        resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
+                               post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['extra_specs']
+
+    def get_flavor_extra_spec(self, flavor_id):
+        """Gets extra Specs details of the mentioned flavor."""
+        resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id)
+        body = json.loads(body)
+        return resp, body['extra_specs']
+
+    def unset_flavor_extra_spec(self, flavor_id, key):
+        """Unsets extra Specs from the mentioned flavor."""
+        return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
+                           key))
