@@ -226,6 +226,12 @@ class IdentityClientXML(RestClientXML):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def list_services(self):
+        """Returns services."""
+        resp, body = self.get('OS-KSADM/services', self.headers)
+        body = self._parse_array(etree.fromstring(body))
+        return resp, body
+
     def get_service(self, service_id):
         """Get Service."""
         url = '/OS-KSADM/services/%s' % service_id
