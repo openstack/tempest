@@ -62,7 +62,7 @@ class EC2VolumesTest(BotoTestCase):
         self.cancelResourceCleanUp(cuk)
 
     @attr(type='smoke')
-    def test_create_volme_from_snapshot(self):
+    def test_create_volume_from_snapshot(self):
         # EC2 Create volume from snapshot
         volume = self.client.create_volume(1, self.zone)
         self.addResourceCleanUp(self.client.delete_volume, volume.id)
