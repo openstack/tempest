@@ -69,11 +69,11 @@ def generic_setup_package():
     if CONFIG.compute.allow_tenant_isolation:
         MULTI_USER = True
     else:
-        user1 = CONFIG.compute.username
-        user2 = CONFIG.compute.alt_username
+        user1 = CONFIG.identity.username
+        user2 = CONFIG.identity.alt_username
         if user2 and user1 != user2:
-            user2_password = CONFIG.compute.alt_password
-            user2_tenant_name = CONFIG.compute.alt_tenant_name
+            user2_password = CONFIG.identity.alt_password
+            user2_tenant_name = CONFIG.identity.alt_tenant_name
             if not user2_password or not user2_tenant_name:
                 msg = ("Alternate user specified but not alternate "
                        "tenant or password: alt_tenant_name=%s alt_password=%s"

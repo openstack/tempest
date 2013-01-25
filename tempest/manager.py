@@ -114,11 +114,11 @@ class DefaultClientManager(Manager):
         # identified user, so a new client needs to be created for
         # each user that operations need to be performed for.
         if not username:
-            username = self.config.compute.username
+            username = self.config.identity.username
         if not password:
-            password = self.config.compute.password
+            password = self.config.identity.password
         if not tenant_name:
-            tenant_name = self.config.compute.tenant_name
+            tenant_name = self.config.identity.tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials for compute client. "
@@ -153,18 +153,17 @@ class DefaultClientManager(Manager):
         # This identity client is not intended to check the security
         # of the identity service, so use admin credentials by default.
         if not username:
-            username = self.config.compute_admin.username
+            username = self.config.identity.admin_username
         if not password:
-            password = self.config.compute_admin.password
+            password = self.config.identity.admin_password
         if not tenant_name:
-            tenant_name = self.config.compute_admin.tenant_name
+            tenant_name = self.config.identity.admin_tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials for identity client. "
                    "username: %(username)s, password: %(password)s, "
                    "tenant_name: %(tenant_name)s") % locals()
             raise exceptions.InvalidConfiguration(msg)
-        #TODO(afazekas): Above is a code dpulication, net to be resolved
 
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
@@ -182,9 +181,9 @@ class DefaultClientManager(Manager):
         # preferable to authenticating as a specific user because
         # working with certain resources (public routers and networks)
         # often requires admin privileges anyway.
-        username = self.config.compute_admin.username
-        password = self.config.compute_admin.password
-        tenant_name = self.config.compute_admin.tenant_name
+        username = self.config.identity.admin_username
+        password = self.config.identity.admin_password
+        tenant_name = self.config.identity.admin_tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials for network client. "
@@ -223,9 +222,9 @@ class ComputeFuzzClientManager(FuzzClientManager):
 
         # If no creds are provided, we fall back on the defaults
         # in the config file for the Compute API.
-        username = username or self.config.compute.username
-        password = password or self.config.compute.password
-        tenant_name = tenant_name or self.config.compute.tenant_name
+        username = username or self.config.identity.username
+        password = password or self.config.identity.password
+        tenant_name = tenant_name or self.config.identity.tenant_name
 
         if None in (username, password, tenant_name):
             msg = ("Missing required credentials. "
@@ -270,9 +269,9 @@ class ComputeFuzzClientAltManager(Manager):
     def __init__(self):
         conf = tempest.config.TempestConfig()
         super(ComputeFuzzClientAltManager, self).__init__(
-            conf.compute.alt_username,
-            conf.compute.alt_password,
-            conf.compute.alt_tenant_name)
+            conf.identity.alt_username,
+            conf.identity.alt_password,
+            conf.identity.alt_tenant_name)
 
 
 class ComputeFuzzClientAdminManager(Manager):

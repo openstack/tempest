@@ -27,14 +27,14 @@ class QuotasTest(BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         super(QuotasTest, cls).setUpClass()
-        adm_user = cls.config.compute_admin.username
-        adm_pass = cls.config.compute_admin.password
-        adm_tenant = cls.config.compute_admin.tenant_name
+        c_adm_user = cls.config.compute_admin.username
+        c_adm_pass = cls.config.compute_admin.password
+        c_adm_tenant = cls.config.compute_admin.tenant_name
         auth_url = cls.config.identity.uri
 
-        cls.adm_client = adm_quotas.AdminQuotasClient(cls.config, adm_user,
-                                                      adm_pass, auth_url,
-                                                      adm_tenant)
+        cls.adm_client = adm_quotas.AdminQuotasClient(cls.config, c_adm_user,
+                                                      c_adm_pass, auth_url,
+                                                      c_adm_tenant)
         cls.client = cls.os.quotas_client
         cls.identity_admin_client = cls._get_identity_admin_client()
         resp, tenants = cls.identity_admin_client.list_tenants()
@@ -43,7 +43,7 @@ class QuotasTest(BaseComputeTest):
             cls.demo_tenant_id = cls.isolated_creds[0][0]['tenantId']
         else:
             cls.demo_tenant_id = [tnt['id'] for tnt in tenants if tnt['name']
-                                  == cls.config.compute.tenant_name][0]
+                                  == cls.config.identity.tenant_name][0]
 
         cls.adm_tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
                              cls.config.compute_admin.tenant_name][0]

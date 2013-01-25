@@ -32,9 +32,9 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     def setUpClass(cls):
         super(BaseVolumeAdminTest, cls).setUpClass()
         cls.config = config.TempestConfig()
-        cls.adm_user = cls.config.compute_admin.username
-        cls.adm_pass = cls.config.compute_admin.password
-        cls.adm_tenant = cls.config.compute_admin.tenant_name
+        cls.adm_user = cls.config.identity.admin_username
+        cls.adm_pass = cls.config.identity.admin_password
+        cls.adm_tenant = cls.config.identity.admin_tenant_name
         cls.auth_url = cls.config.identity.uri
 
         if not cls.adm_user and cls.adm_pass and cls.adm_tenant:

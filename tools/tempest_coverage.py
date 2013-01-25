@@ -138,9 +138,9 @@ def parse_opts(argv):
 
 def main(argv):
     CLI = parse_opts(argv)
-    client_args = (CONF, CONF.compute_admin.username,
-                   CONF.compute_admin.password, CONF.identity.uri,
-                   CONF.compute_admin.tenant_name)
+    client_args = (CONF, CONF.identity.admin_username,
+                   CONF.identity.admin_password, CONF.identity.uri,
+                   CONF.identity.admin_tenant_name)
     coverage_client = CoverageClientJSON(*client_args)
 
     if CLI.command == 'start':

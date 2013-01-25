@@ -156,9 +156,9 @@ class Manager(object):
 
         # If no creds are provided, we fall back on the defaults
         # in the config file for the Compute API.
-        self.username = username or self.config.compute.username
-        self.password = password or self.config.compute.password
-        self.tenant_name = tenant_name or self.config.compute.tenant_name
+        self.username = username or self.config.identity.username
+        self.password = password or self.config.identity.password
+        self.tenant_name = tenant_name or self.config.identity.tenant_name
 
         if None in (self.username, self.password, self.tenant_name):
             msg = ("Missing required credentials. "
@@ -208,21 +208,6 @@ class Manager(object):
             AccountClientCustomizedHeader(*client_args)
 
 
-class NonAdminManager(Manager):
-
-    """
-    Manager object that uses the alt_XXX credentials for its
-    managed client objects
-    """
-
-    def __init__(self, interface='json'):
-        conf = config.TempestConfig()
-        super(NonAdminManager, self).__init__(conf.compute.username,
-                                              conf.compute.password,
-                                              conf.compute.tenant_name,
-                                              interface=interface)
-
-
 class AltManager(Manager):
 
     """
@@ -232,24 +217,40 @@ class AltManager(Manager):
 
     def __init__(self):
         conf = config.TempestConfig()
-        super(AltManager, self).__init__(conf.compute.alt_username,
-                                         conf.compute.alt_password,
-                                         conf.compute.alt_tenant_name)
+        super(AltManager, self).__init__(conf.identity.alt_username,
+                                         conf.identity.alt_password,
+                                         conf.identity.alt_tenant_name)
 
 
 class AdminManager(Manager):
 
     """
-    Manager object that uses the alt_XXX credentials for its
+    Manager object that uses the admin credentials for its
     managed client objects
     """
 
     def __init__(self, interface='json'):
         conf = config.TempestConfig()
-        super(AdminManager, self).__init__(conf.compute_admin.username,
-                                           conf.compute_admin.password,
-                                           conf.compute_admin.tenant_name,
+        super(AdminManager, self).__init__(conf.identity.admin_username,
+                                           conf.identity.admin_password,
+                                           conf.identity.admin_tenant_name,
                                            interface=interface)
+
+
+class ComputeAdminManager(Manager):
+
+    """
+    Manager object that uses the compute_admin credentials for its
+    managed client objects
+    """
+
+    def __init__(self, interface='json'):
+        conf = config.TempestConfig()
+        base = super(ComputeAdminManager, self)
+        base.__init__(conf.compute_admin.username,
+                      conf.compute_admin.password,
+                      conf.compute_admin.tenant_name,
+                      interface=interface)
 
 
 class ServiceManager(object):

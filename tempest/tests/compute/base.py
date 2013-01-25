@@ -92,8 +92,8 @@ class BaseCompTest(unittest.TestCase,
 
         return (
             cls.config,
-            cls.config.compute_admin.username,
-            cls.config.compute_admin.password,
+            cls.config.identity.admin_username,
+            cls.config.identity.admin_password,
             cls.config.identity.uri
         )
 
@@ -256,16 +256,16 @@ class BaseComputeAdminTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.config = config.TempestConfig()
-        cls.admin_username = cls.config.compute_admin.username
-        cls.admin_password = cls.config.compute_admin.password
-        cls.admin_tenant = cls.config.compute_admin.tenant_name
+        cls.admin_username = cls.config.identity.admin_username
+        cls.admin_password = cls.config.identity.admin_password
+        cls.admin_tenant = cls.config.identity.admin_tenant_name
 
         if not cls.admin_username and cls.admin_password and cls.admin_tenant:
             msg = ("Missing Compute Admin API credentials "
                    "in configuration.")
             raise nose.SkipTest(msg)
 
-        cls.os = clients.AdminManager(interface=cls._interface)
+        cls.os = clients.ComputeAdminManager(interface=cls._interface)
 
 
 class BaseComputeAdminTestJSON(BaseComputeAdminTest):

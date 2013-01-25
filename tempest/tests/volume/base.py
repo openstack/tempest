@@ -73,7 +73,7 @@ class BaseVolumeTest(unittest.TestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.AdminManager()
+        os = clients.ComputeAdminManager()
         return os.identity_client
 
     @classmethod
