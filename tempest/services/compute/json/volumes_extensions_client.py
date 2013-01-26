@@ -105,7 +105,7 @@ class VolumesExtensionsClientJSON(RestClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_volume(id, wait=True)
+            self.get_volume(id)
         except exceptions.NotFound:
             return True
         return False
