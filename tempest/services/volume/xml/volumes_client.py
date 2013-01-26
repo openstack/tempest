@@ -84,10 +84,10 @@ class VolumesClientXML(RestClientXML):
             volumes += [self._parse_volume(vol) for vol in list(body)]
         return resp, volumes
 
-    def get_volume(self, volume_id, wait=None):
+    def get_volume(self, volume_id):
         """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
-        resp, body = self.get(url, self.headers, wait=wait)
+        resp, body = self.get(url, self.headers)
         body = etree.fromstring(body)
         return resp, self._parse_volume(body)
 

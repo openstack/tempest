@@ -56,10 +56,10 @@ class VolumesClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['volumes']
 
-    def get_volume(self, volume_id, wait=None):
+    def get_volume(self, volume_id):
         """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
-        resp, body = self.get(url, wait=wait)
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['volume']
 

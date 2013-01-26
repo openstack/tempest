@@ -191,15 +191,15 @@ class ImageClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['images']
 
-    def get_image(self, image_id, wait=None):
+    def get_image(self, image_id):
         url = 'v1/images/%s' % image_id
-        resp, __ = self.get(url, wait=wait)
+        resp, __ = self.get(url)
         body = self._image_meta_from_headers(resp)
         return resp, body
 
     def is_resource_deleted(self, id):
         try:
-            self.get_image(id, wait=True)
+            self.get_image(id)
         except exceptions.NotFound:
             return True
         return False
