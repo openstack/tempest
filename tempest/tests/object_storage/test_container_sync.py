@@ -103,7 +103,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             self.assertEqual(resp['status'], '200',
                              'Error listing the destination container`s'
                              ' "%s" contents' % (self.containers[0]))
-            object_list_0 = {obj['name']: obj for obj in object_list_0}
+            object_list_0 = dict((obj['name'], obj) for obj in object_list_0)
             # get second container content
             resp, object_list_1 = \
                 cont_client[1].\
@@ -111,7 +111,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             self.assertEqual(resp['status'], '200',
                              'Error listing the destination container`s'
                              ' "%s" contents' % (self.containers[1]))
-            object_list_1 = {obj['name']: obj for obj in object_list_1}
+            object_list_1 = dict((obj['name'], obj) for obj in object_list_1)
             # check that containers is not empty and has equal keys()
             # or wait for next attepmt
             if not object_list_0 or not object_list_1 or \
