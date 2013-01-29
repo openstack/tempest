@@ -26,7 +26,6 @@ import keystoneclient.exceptions
 import tempest.clients
 from tempest.common.utils.file_utils import have_effective_read_access
 import tempest.config
-from testresources import TestResourceManager
 
 A_I_IMAGES_READY = False  # ari,ami,aki
 S3_CAN_CONNECT_ERROR = "Unknown Error"
@@ -97,8 +96,3 @@ def generic_setup_package():
     else:
         S3_CAN_CONNECT_ERROR = None
     boto_logger.setLevel(level)
-
-
-class BotoResource(TestResourceManager):
-    def make(self, dependency_resources=None):
-        return generic_setup_package()

@@ -126,7 +126,7 @@ class BotoTestCase(testtools.TestCase,
                    testresources.ResourcedTestCase):
     """Recommended to use as base class for boto related test."""
 
-    resources = [('boto_init', tempest.tests.boto.BotoResource())]
+    conclusion = tempest.tests.boto.generic_setup_package()
 
     @classmethod
     def setUpClass(cls):
