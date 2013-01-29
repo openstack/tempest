@@ -161,9 +161,6 @@ ComputeGroup = [
     cfg.StrOpt('catalog_type',
                default='compute',
                help="Catalog type of the Compute service."),
-    cfg.StrOpt('log_level',
-               default="ERROR",
-               help="Level for logging compute API calls."),
     cfg.StrOpt('path_to_private_key',
                default=None,
                help="Path to a private key file for SSH access to remote "
