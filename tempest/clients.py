@@ -64,7 +64,11 @@ from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
     EndPointClientJSON
+from tempest.services.identity.v3.json.identity_client import \
+    IdentityV3ClientJSON
 from tempest.services.identity.v3.xml.endpoints_client import EndPointClientXML
+from tempest.services.identity.v3.xml.identity_client import \
+    IdentityV3ClientXML
 from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.v1.json.image_client import ImageClientJSON
@@ -151,6 +155,11 @@ VOLUME_TYPES_CLIENTS = {
 IDENTITY_CLIENT = {
     "json": IdentityClientJSON,
     "xml": IdentityClientXML,
+}
+
+IDENTITY_V3_CLIENT = {
+    "json": IdentityV3ClientJSON,
+    "xml": IdentityV3ClientXML,
 }
 
 TOKEN_CLIENT = {
@@ -241,6 +250,8 @@ class Manager(object):
             self.volume_types_client = \
                 VOLUME_TYPES_CLIENTS[interface](*client_args)
             self.identity_client = IDENTITY_CLIENT[interface](*client_args)
+            self.identity_v3_client = \
+                IDENTITY_V3_CLIENT[interface](*client_args)
             self.token_client = TOKEN_CLIENT[interface](self.config)
             self.security_groups_client = \
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
