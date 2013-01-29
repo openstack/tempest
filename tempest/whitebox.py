@@ -89,18 +89,18 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         # NOTE(jaypipes): Tests often add things in a particular order
         # so we destroy resources in the reverse order in which resources
         # are added to the test class object
-        if not cls.resources:
+        if not cls.os_resources:
             return
-        thing = cls.resources.pop()
+        thing = cls.os_resources.pop()
         while True:
             LOG.debug("Deleting %r from shared resources of %s" %
                       (thing, cls.__name__))
             # Resources in novaclient all have a delete() method
             # which destroys the resource...
             thing.delete()
-            if not cls.resources:
+            if not cls.os_resources:
                 return
-            thing = cls.resources.pop()
+            thing = cls.os_resources.pop()
 
     @classmethod
     def create_server(cls, image_id=None):

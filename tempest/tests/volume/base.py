@@ -18,24 +18,20 @@
 import logging
 import time
 
-import testtools
-
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
-from tempest import config
 from tempest import exceptions
+import tempest.test
 
 LOG = logging.getLogger(__name__)
 
 
-class BaseVolumeTest(testtools.testcase.WithAttributes,
-                     testtools.TestCase):
+class BaseVolumeTest(tempest.test.BaseTestCase):
 
     """Base test case class for all Cinder API tests."""
 
     @classmethod
     def setUpClass(cls):
-        cls.config = config.TempestConfig()
         cls.isolated_creds = []
 
         if cls.config.compute.allow_tenant_isolation:

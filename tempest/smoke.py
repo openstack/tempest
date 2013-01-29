@@ -51,8 +51,8 @@ class DefaultClientSmokeTest(test.DefaultClientTest, SmokeTest):
         # order, and because test methods in smoke tests generally create
         # resources in a particular order, we destroy resources in the reverse
         # order in which resources are added to the smoke test class object
-        while cls.resources:
-            thing = cls.resources.pop()
+        while cls.os_resources:
+            thing = cls.os_resources.pop()
             LOG.debug("Deleting %r from shared resources of %s" %
                       (thing, cls.__name__))
 

@@ -15,15 +15,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 
 from tempest import clients
 from tempest import exceptions
+import tempest.test
 from tempest.tests.identity.base import DataGenerator
 
 
-class BaseObjectTest(testtools.testcase.WithAttributes,
-                     testtools.TestCase):
+class BaseObjectTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -31,7 +30,6 @@ class BaseObjectTest(testtools.testcase.WithAttributes,
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
-        cls.config = cls.os.config
         cls.custom_object_client = cls.os.custom_object_client
         cls.os_admin = clients.AdminManager()
         cls.token_client = cls.os_admin.token_client

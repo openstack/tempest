@@ -23,10 +23,9 @@ import boto
 from boto import ec2
 from boto import exception
 from boto import s3
-import testresources
-import testtools
 
 from tempest import exceptions
+import tempest.test
 import tempest.tests.boto
 from tempest.tests.boto.utils.wait import re_search_wait
 from tempest.tests.boto.utils.wait import state_wait
@@ -119,9 +118,7 @@ def friendly_function_call_str(call_able, *args, **kwargs):
     return string + ")"
 
 
-class BotoTestCase(testtools.testcase.WithAttributes,
-                   testtools.TestCase,
-                   testresources.ResourcedTestCase):
+class BotoTestCase(tempest.test.BaseTestCase):
     """Recommended to use as base class for boto related test."""
 
     conclusion = tempest.tests.boto.generic_setup_package()

@@ -34,7 +34,6 @@ class S3BucketsTest(BotoTestCase):
         super(S3BucketsTest, cls).setUpClass()
         cls.os = clients.Manager()
         cls.client = cls.os.s3_client
-        cls.config = cls.os.config
 
     @testtools.skip("Skipped until the Bug #1076534 is resolved")
     @attr(type='smoke')
