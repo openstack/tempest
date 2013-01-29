@@ -199,6 +199,34 @@ class RestClient(object):
     def _parse_resp(self, body):
         return json.loads(body)
 
+    def response_checker(self, method, url, headers, body, resp, resp_body):
+        if (resp.status in set((204, 205, 304)) or resp.status < 200 or
+            method.upper() == 'HEAD') and resp_body:
+            raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
+        #NOTE(afazekas):
+        # If the HTTP Status Code is 205
+        #   'The response MUST NOT include an entity.'
+        # A HTTP entity has an entity-body and an 'entity-header'.
+        # In the HTTP response specification (Section 6) the 'entity-header'
+        # 'generic-header' and 'response-header' are in OR relation.
+        # All headers not in the above two group are considered as entity
+        # header in every interpretation.
+
+        if (resp.status == 205 and
+            0 != len(set(resp.keys()) - set(('status',)) -
+                     self.response_header_lc - self.general_header_lc)):
+                        raise exceptions.ResponseWithEntity()
+        #NOTE(afazekas)
+        # Now the swift sometimes (delete not empty container)
+        # returns with non json error response, we can create new rest class
+        # for swift.
+        # Usually RFC2616 says error responses SHOULD contain an explanation.
+        # The warning is normal for SHOULD/SHOULD NOT case
+
+        # Likely it will cause error
+        if not body and resp.status >= 400:
+            self.log.warning("status >= 400 response with empty body")
+
     def request(self, method, url,
                 headers=None, body=None, depth=0, wait=None):
         """A simple HTTP request interface."""
@@ -215,37 +243,7 @@ class RestClient(object):
         req_url = "%s/%s" % (self.base_url, url)
         resp, resp_body = self.http_obj.request(req_url, method,
                                                 headers=headers, body=body)
-
-        #TODO(afazekas): Make sure we can validate all responses, and the
-        #http library does not do any action automatically
-        if (resp.status in set((204, 205, 304)) or resp.status < 200 or
-                method.upper() == 'HEAD') and resp_body:
-                raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
-
-        #NOTE(afazekas):
-        # If the HTTP Status Code is 205
-        #   'The response MUST NOT include an entity.'
-        # A HTTP entity has an entity-body and an 'entity-header'.
-        # In the HTTP response specification (Section 6) the 'entity-header'
-        # 'generic-header' and 'response-header' are in OR relation.
-        # All headers not in the above two group are considered as entity
-        # header in every interpretation.
-
-        if (resp.status == 205 and
-            0 != len(set(resp.keys()) - set(('status',)) -
-                     self.response_header_lc - self.general_header_lc)):
-                        raise exceptions.ResponseWithEntity()
-
-        #NOTE(afazekas)
-        # Now the swift sometimes (delete not empty container)
-        # returns with non json error response, we can create new rest class
-        # for swift.
-        # Usually RFC2616 says error responses SHOULD contain an explanation.
-        # The warning is normal for SHOULD/SHOULD NOT case
-
-        # Likely it will cause error
-        if not body and resp.status >= 400:
-            self.log.warning("status >= 400 response with empty body")
+        self.response_checker(method, url, headers, body, resp, resp_body)
 
         if resp.status == 401 or resp.status == 403:
             self._log(req_url, body, resp, resp_body)
