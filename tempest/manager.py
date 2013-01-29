@@ -29,7 +29,6 @@ except ImportError:
 import tempest.config
 from tempest import exceptions
 # Tempest REST Fuzz testing client libs
-from tempest.services.compute.json import console_output_client
 from tempest.services.compute.json import extensions_client
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import floating_ips_client
@@ -54,7 +53,6 @@ SecurityGroupsClient = security_groups_client.SecurityGroupsClientJSON
 KeyPairsClient = keypairs_client.KeyPairsClientJSON
 VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClientJSON
 VolumesClient = volumes_client.VolumesClientJSON
-ConsoleOutputsClient = console_output_client.ConsoleOutputsClientJSON
 QuotasClient = quotas_client.QuotasClientJSON
 
 LOG = logging.getLogger(__name__)
@@ -254,7 +252,6 @@ class ComputeFuzzClientManager(FuzzClientManager):
         self.floating_ips_client = FloatingIPsClient(*client_args)
         self.volumes_extensions_client = VolumesExtensionsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)
-        self.console_outputs_client = ConsoleOutputsClient(*client_args)
         self.quotas_client = QuotasClient(*client_args)
         self.network_client = NetworkClient(*client_args)
 

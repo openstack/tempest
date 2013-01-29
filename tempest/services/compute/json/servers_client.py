@@ -490,3 +490,11 @@ class ServersClientJSON(RestClient):
         resp, body = self.post('servers/%s/action' % server_id,
                                post_body, self.headers)
         return resp, body
+
+    def get_console_output(self, server_id, length):
+        post_body = {'os-getConsoleOutput': {'length': length}}
+        url = "/servers/%s/action" % server_id
+        post_body = json.dumps(post_body)
+        resp, body = self.post(url, post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['output']

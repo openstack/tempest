@@ -35,8 +35,6 @@ from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
-from tempest.services.compute.json.console_output_client import \
-    ConsoleOutputsClientJSON
 from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
 from tempest.services.compute.xml.flavors_client import FlavorsClientXML
 from tempest.services.compute.xml.floating_ips_client import \
@@ -50,8 +48,6 @@ from tempest.services.compute.xml.security_groups_client \
 from tempest.services.compute.xml.servers_client import ServersClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
-from tempest.services.compute.xml.console_output_client import \
-    ConsoleOutputsClientXML
 from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.xml.identity_client import IdentityClientXML
@@ -135,11 +131,6 @@ SECURITY_GROUPS_CLIENT = {
     "xml": SecurityGroupsClientXML,
 }
 
-CONSOLE_OUTPUT_CLIENT = {
-    "json": ConsoleOutputsClientJSON,
-    "xml": ConsoleOutputsClientXML,
-}
-
 
 class Manager(object):
 
@@ -198,8 +189,6 @@ class Manager(object):
             self.token_client = TOKEN_CLIENT[interface](self.config)
             self.security_groups_client = \
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
-            self.console_outputs_client = \
-                CONSOLE_OUTPUT_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)

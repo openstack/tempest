@@ -41,7 +41,6 @@ class AuthorizationTest(BaseComputeTest):
         cls.images_client = cls.os.images_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_client = cls.os.security_groups_client
-        cls.console_outputs_client = cls.os.console_outputs_client
 
         if cls.config.compute.allow_tenant_isolation:
             creds = cls._get_isolated_creds()
@@ -57,7 +56,6 @@ class AuthorizationTest(BaseComputeTest):
         cls.alt_images_client = cls.alt_manager.images_client
         cls.alt_keypairs_client = cls.alt_manager.keypairs_client
         cls.alt_security_client = cls.alt_manager.security_groups_client
-        cls.alt_console_outputs_client = cls.alt_manager.console_outputs_client
 
         cls.alt_security_client._set_auth()
         name = rand_name('server')
@@ -401,5 +399,4 @@ class AuthorizationTest(BaseComputeTest):
     @attr(type='negative')
     def test_get_console_output_of_alt_account_server_fails(self):
         # A Get Console Output for another user's server should fail
-        self.alt_console_outputs_client.get_console_output(self.server['id'],
-                                                           10)
+        self.alt_client.get_console_output(self.server['id'], 10)
