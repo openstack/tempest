@@ -55,7 +55,7 @@ KeyPairsClient = keypairs_client.KeyPairsClientJSON
 VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClientJSON
 VolumesClient = volumes_client.VolumesClientJSON
 ConsoleOutputsClient = console_output_client.ConsoleOutputsClientJSON
-QuotasClient = quotas_client.QuotasClient
+QuotasClient = quotas_client.QuotasClientJSON
 
 LOG = logging.getLogger(__name__)
 

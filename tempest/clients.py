@@ -32,7 +32,7 @@ from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
 from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
-from tempest.services.compute.json.quotas_client import QuotasClient
+from tempest.services.compute.json.quotas_client import QuotasClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
 from tempest.services.compute.json.console_output_client import \
@@ -44,6 +44,7 @@ from tempest.services.compute.xml.floating_ips_client import \
 from tempest.services.compute.xml.images_client import ImagesClientXML
 from tempest.services.compute.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.compute.xml.limits_client import LimitsClientXML
+from tempest.services.compute.xml.quotas_client import QuotasClientXML
 from tempest.services.compute.xml.security_groups_client \
     import SecurityGroupsClientXML
 from tempest.services.compute.xml.servers_client import ServersClientXML
@@ -77,6 +78,11 @@ IMAGES_CLIENTS = {
 KEYPAIRS_CLIENTS = {
     "json": KeyPairsClientJSON,
     "xml": KeyPairsClientXML,
+}
+
+QUOTAS_CLIENTS = {
+    "json": QuotasClientJSON,
+    "xml": QuotasClientXML,
 }
 
 SERVERS_CLIENTS = {
@@ -180,6 +186,7 @@ class Manager(object):
             self.limits_client = LIMITS_CLIENTS[interface](*client_args)
             self.images_client = IMAGES_CLIENTS[interface](*client_args)
             self.keypairs_client = KEYPAIRS_CLIENTS[interface](*client_args)
+            self.quotas_client = QUOTAS_CLIENTS[interface](*client_args)
             self.flavors_client = FLAVORS_CLIENTS[interface](*client_args)
             ext_cli = EXTENSIONS_CLIENTS[interface](*client_args)
             self.extensions_client = ext_cli
@@ -196,7 +203,6 @@ class Manager(object):
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
-        self.quotas_client = QuotasClient(*client_args)
         self.network_client = NetworkClient(*client_args)
         self.account_client = AccountClient(*client_args)
         self.container_client = ContainerClient(*client_args)

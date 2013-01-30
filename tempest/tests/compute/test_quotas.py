@@ -17,14 +17,13 @@
 
 from nose.plugins.attrib import attr
 
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class QuotasTest(BaseComputeTest):
+class QuotasTestBase(object):
 
     @classmethod
     def setUpClass(cls):
-        super(QuotasTest, cls).setUpClass()
         cls.client = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
         resp, tenants = cls.admin_client.list_tenants()
@@ -47,3 +46,19 @@ class QuotasTest(BaseComputeTest):
             self.assertSequenceEqual(expected_quota_set, quota_set)
         except Exception:
             self.fail("Quota set for tenant did not have default limits")
+
+
+class QuotasTestJSON(QuotasTestBase, base.BaseComputeTestJSON):
+
+    @classmethod
+    def setUpClass(cls):
+        base.BaseComputeTestJSON.setUpClass()
+        super(QuotasTestJSON, cls).setUpClass()
+
+
+class QuotasTestXML(QuotasTestBase, base.BaseComputeTestXML):
+
+    @classmethod
+    def setUpClass(cls):
+        base.BaseComputeTestXML.setUpClass()
+        super(QuotasTestXML, cls).setUpClass()
