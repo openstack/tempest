@@ -344,7 +344,9 @@ class RestClient(object):
         """
         Subclasses override with specific deletion detection.
         """
-        return False
+        message = ('"%s" does not implement is_resource_deleted'
+                   % self.__class__.__name__)
+        raise NotImplementedError(message)
 
 
 class RestClientXML(RestClient):
