@@ -186,9 +186,9 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
         cls.check_preconditions()
         cfg = cls.config.network
         cls.tenant_id = cls.manager._get_identity_client(
-            cfg.username,
-            cfg.password,
-            cfg.tenant_name).tenant_id
+            cls.config.identity.username,
+            cls.config.identity.password,
+            cls.config.identity.tenant_name).tenant_id
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
         cls.keypairs = {}
