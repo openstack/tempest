@@ -197,6 +197,12 @@ class IdentityClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['OS-KSADM:service']
 
+    def list_services(self):
+        """List Service - Returns Services."""
+        resp, body = self.get('/OS-KSADM/services/')
+        body = json.loads(body)
+        return resp, body['OS-KSADM:services']
+
     def delete_service(self, service_id):
         """Delete Service."""
         url = '/OS-KSADM/services/%s' % service_id

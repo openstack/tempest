@@ -16,6 +16,9 @@
 #    under the License.
 
 
+from nose.plugins.attrib import attr
+import unittest2 as unittest
+
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests.identity import base
@@ -30,8 +33,8 @@ class ServicesTestBase(object):
             name = rand_name('service-')
             type = rand_name('type--')
             description = rand_name('description-')
-            resp, service_data = \
-            self.client.create_service(name, type, description=description)
+            resp, service_data = self.client.create_service(
+                name, type, description=description)
             self.assertTrue(resp['status'].startswith('2'))
             #Verifying response body of create service
             self.assertTrue('id' in service_data)
@@ -62,6 +65,32 @@ class ServicesTestBase(object):
             #Checking whether service is deleted successfully
             self.assertRaises(exceptions.NotFound, self.client.get_service,
                               service_data['id'])
+
+    def test_list_services(self):
+        # Create, List, Verify and Delete Services
+        services = []
+        for _ in xrange(3):
+            name = rand_name('service-')
+            type = rand_name('type--')
+            description = rand_name('description-')
+            resp, service = self.client.create_service(
+                name, type, description=description)
+            services.append(service)
+        service_ids = map(lambda x: x['id'], services)
+
+        # List and Verify Services
+        resp, body = self.client.list_services()
+        self.assertTrue(resp['status'].startswith('2'))
+        found = [service for service in body if service['id'] in service_ids]
+        self.assertEqual(len(found), len(services), 'Services not found')
+
+        # Delete Services
+        for service in services:
+            resp, body = self.client.delete_service(service['id'])
+            self.assertTrue(resp['status'].startswith('2'))
+        resp, body = self.client.list_services()
+        found = [service for service in body if service['id'] in service_ids]
+        self.assertFalse(any(found), 'Services failed to delete')
 
 
 class ServicesTestJSON(base.BaseIdentityAdminTestJSON, ServicesTestBase):
