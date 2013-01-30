@@ -74,9 +74,9 @@ class ServerAddressesTest(BaseComputeTest):
 
         # We do not know the exact network configuration, but an instance
         # should at least have a single public or private address
-        self.assertGreaterEqual(len(addresses), 1)
+        self.assertTrue(len(addresses) >= 1)
         for network_name, network_addresses in addresses.iteritems():
-            self.assertGreaterEqual(len(network_addresses), 1)
+            self.assertTrue(len(network_addresses) >= 1)
             for address in network_addresses:
                 self.assertTrue(address['addr'])
                 self.assertTrue(address['version'])
