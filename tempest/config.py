@@ -20,6 +20,7 @@ import os
 import sys
 
 from tempest.common.utils import data_utils
+from tempest.common.utils.misc import singleton
 from tempest.openstack.common import cfg
 
 LOG = logging.getLogger(__name__)
@@ -381,18 +382,6 @@ def register_boto_opts(conf):
     conf.register_group(boto_group)
     for opt in BotoConfig:
         conf.register_opt(opt, group='boto')
-
-
-# TODO(jaypipes): Move this to a common utils (not data_utils...)
-def singleton(cls):
-    """Simple wrapper for classes that should only have a single instance."""
-    instances = {}
-
-    def getinstance():
-        if cls not in instances:
-            instances[cls] = cls()
-        return instances[cls]
-    return getinstance
 
 
 @singleton
