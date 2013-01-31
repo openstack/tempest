@@ -43,9 +43,10 @@ class BaseVolumeTest(testtools.TestCase):
             username, tenant_name, password = creds
             os = clients.Manager(username=username,
                                  password=password,
-                                 tenant_name=tenant_name)
+                                 tenant_name=tenant_name,
+                                 interface=cls._interface)
         else:
-            os = clients.Manager()
+            os = clients.Manager(interface=cls._interface)
 
         cls.os = os
         cls.volumes_client = os.volumes_client

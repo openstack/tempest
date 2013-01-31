@@ -21,6 +21,7 @@ from tempest.tests.volume.base import BaseVolumeTest
 
 
 class VolumeTypesExtraSpecsTest(BaseVolumeTest):
+    _interface = "json"
 
     @classmethod
     def setUpClass(cls):
