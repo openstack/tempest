@@ -40,6 +40,7 @@ from tempest.services.compute.json import security_groups_client
 from tempest.services.compute.json import servers_client
 from tempest.services.compute.json import volumes_extensions_client
 from tempest.services.network.json import network_client
+from tempest.services.volume.json import snapshots_client
 from tempest.services.volume.json import volumes_client
 
 NetworkClient = network_client.NetworkClient
@@ -53,6 +54,7 @@ SecurityGroupsClient = security_groups_client.SecurityGroupsClientJSON
 KeyPairsClient = keypairs_client.KeyPairsClientJSON
 VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClientJSON
 VolumesClient = volumes_client.VolumesClientJSON
+SnapshotsClient = snapshots_client.SnapshotsClientJSON
 QuotasClient = quotas_client.QuotasClientJSON
 
 LOG = logging.getLogger(__name__)
@@ -252,6 +254,7 @@ class ComputeFuzzClientManager(FuzzClientManager):
         self.floating_ips_client = FloatingIPsClient(*client_args)
         self.volumes_extensions_client = VolumesExtensionsClient(*client_args)
         self.volumes_client = VolumesClient(*client_args)
+        self.snapshots_client = SnapshotsClient(*client_args)
         self.quotas_client = QuotasClient(*client_args)
         self.network_client = NetworkClient(*client_args)
 

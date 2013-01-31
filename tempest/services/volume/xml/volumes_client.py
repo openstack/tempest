@@ -101,6 +101,7 @@ class VolumesClientXML(RestClientXML):
         :param snapshot_id: When specified the volume is created from
                             this snapshot
         """
+        #NOTE(afazekas): it should use a volume namespace
         volume = Element("volume", xmlns=XMLNS_11, size=size)
 
         if 'metadata' in kwargs:

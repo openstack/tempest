@@ -71,14 +71,10 @@ class VolumesClientJSON(RestClient):
         display_name: Optional Volume Name.
         metadata: A dictionary of values to be used as metadata.
         volume_type: Optional Name of volume_type for the volume
+        snapshot_id: When specified the volume is created from this snapshot
         """
-        post_body = {
-            'size': size,
-            'display_name': kwargs.get('display_name'),
-            'metadata': kwargs.get('metadata'),
-            'volume_type': kwargs.get('volume_type')
-        }
-
+        post_body = {'size': size}
+        post_body.update(kwargs)
         post_body = json.dumps({'volume': post_body})
         resp, body = self.post('volumes', post_body, self.headers)
         body = json.loads(body)

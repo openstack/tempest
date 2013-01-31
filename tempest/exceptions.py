@@ -86,6 +86,10 @@ class VolumeBuildErrorException(TempestException):
     message = "Volume %(volume_id)s failed to build and is in ERROR status"
 
 
+class SnapshotBuildErrorException(TempestException):
+    message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
+
+
 class BadRequest(RestClientException):
     message = "Bad request"
 
