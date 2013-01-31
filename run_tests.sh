@@ -6,7 +6,7 @@ function usage {
   echo ""
   echo "  -V, --virtual-env        Always use virtualenv.  Install automatically if not present"
   echo "  -N, --no-virtual-env     Don't use virtualenv.  Run tests in local environment"
-  echo "  -s, --no-site-packages   Isolate the virtualenv from the global Python environment"
+  echo "  -n, --no-site-packages   Isolate the virtualenv from the global Python environment"
   echo "  -f, --force              Force a clean re-build of the virtual environment. Useful when dependencies have been added."
   echo "  -s, --smoke              Only run smoke tests"
   echo "  -w, --whitebox           Only run whitebox tests"
@@ -23,7 +23,7 @@ function process_option {
     -h|--help) usage;;
     -V|--virtual-env) always_venv=1; never_venv=0;;
     -N|--no-virtual-env) always_venv=0; never_venv=1;;
-    -s|--no-site-packages) no_site_packages=1;;
+    -n|--no-site-packages) no_site_packages=1;;
     -f|--force) force=1;;
     -d|--debug) set -o xtrace;;
     -c|--nova-coverage) let nova_coverage=1;;
