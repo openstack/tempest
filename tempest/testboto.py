@@ -202,8 +202,10 @@ class BotoTestCase(testtools.TestCase,
     s3_error_code.server = ServerError()
     s3_error_code.client = ClientError()
     valid_image_state = set(('available', 'pending', 'failed'))
+    #NOTE(afazekas): 'paused' is not valid status in EC2, but it does not have
+    # a good mapping, because it uses memory, but not really a running machine
     valid_instance_state = set(('pending', 'running', 'shutting-down',
-                                'terminated', 'stopping', 'stopped'))
+                                'terminated', 'stopping', 'stopped', 'paused'))
     valid_volume_status = set(('creating', 'available', 'in-use',
                                'deleting', 'deleted', 'error'))
     valid_snapshot_status = set(('pending', 'completed', 'error'))
