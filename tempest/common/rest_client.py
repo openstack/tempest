@@ -296,7 +296,7 @@ class RestClient(object):
         if resp.status >= 400:
             resp_body = self._parse_resp(resp_body)
             self._log(req_url, body, resp, resp_body)
-            raise exceptions.TempestException(str(resp.status))
+            raise exceptions.RestClientException(str(resp.status))
 
         return resp, resp_body
 
