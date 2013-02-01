@@ -11,3 +11,5 @@ python-keystoneclient>=0.2.0
 python-novaclient>=2.10.0
 python-quantumclient>=2.1
 testresources
+unittest2
+keyring
