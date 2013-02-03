@@ -27,9 +27,8 @@ class ConsoleOutputTest(object):
 
     @classmethod
     def setUpClass(self, cls):
-        cls.client = cls.console_outputs_client
-        cls.servers_client = cls.servers_client
         cls.name = rand_name('server')
+        cls.client = cls.servers_client
         resp, server = cls.servers_client.create_server(cls.name,
                                                         cls.image_ref,
                                                         cls.flavor_ref)

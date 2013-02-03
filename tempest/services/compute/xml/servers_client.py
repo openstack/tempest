@@ -385,3 +385,11 @@ class ServersClientXML(RestClientXML):
         secgrp = Element('removeSecurityGroup', name=security_group_name)
         return self.post('servers/%s/action' % server_id,
                          str(Document(secgrp)), self.headers)
+
+    def get_console_output(self, server_id, length):
+        post_body = Element("os-getConsoleOutput", length=length)
+        resp, body = self.post("/servers/%s/action" % server_id,
+                               headers=self.headers,
+                               body=str(Document(post_body)))
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body

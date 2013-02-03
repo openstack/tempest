@@ -62,7 +62,6 @@ class BaseCompTest(testtools.TestCase,
         cls.floating_ips_client = os.floating_ips_client
         cls.keypairs_client = os.keypairs_client
         cls.security_groups_client = os.security_groups_client
-        cls.console_outputs_client = os.console_outputs_client
         cls.quotas_client = os.quotas_client
         cls.limits_client = os.limits_client
         cls.volumes_extensions_client = os.volumes_extensions_client

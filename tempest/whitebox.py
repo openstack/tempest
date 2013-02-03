@@ -73,7 +73,6 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         cls.floating_ips_client = cls.manager.floating_ips_client
         cls.keypairs_client = cls.manager.keypairs_client
         cls.security_groups_client = cls.manager.security_groups_client
-        cls.console_outputs_client = cls.manager.console_outputs_client
         cls.limits_client = cls.manager.limits_client
         cls.volumes_client = cls.manager.volumes_client
         cls.build_interval = cls.config.compute.build_interval
