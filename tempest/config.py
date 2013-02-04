@@ -404,9 +404,9 @@ class TempestConfig:
 
         path = os.path.join(conf_dir, conf_file)
 
-        if (not os.path.isfile(path) and
-                not 'TEMPEST_CONFIG_DIR' in os.environ and
-                not 'TEMPEST_CONFIG' in os.environ):
+        if not (os.path.isfile(path) or
+                'TEMPEST_CONFIG_DIR' in os.environ or
+                'TEMPEST_CONFIG' in os.environ):
             path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
 
         LOG.info("Using tempest config file %s" % path)
