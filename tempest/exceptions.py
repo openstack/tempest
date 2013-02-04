@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest2 as unittest
+import testtools
 
 
 class TempestException(Exception):
@@ -53,7 +53,7 @@ class InvalidConfiguration(TempestException):
 
 
 class RestClientException(TempestException,
-                          unittest.TestCase.failureException):
+                          testtools.TestCase.failureException):
     pass
 
 

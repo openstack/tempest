@@ -21,7 +21,7 @@ from nose.plugins.attrib import attr
 from tempest import exceptions
 from tempest.tests import compute
 from tempest.tests.compute import base
-import unittest2 as unittest
+import testtools
 
 
 class FlavorsExtraSpecsTestBase(object):
@@ -79,7 +79,7 @@ class FlavorsExtraSpecsTestBase(object):
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key1")
         self.assertEqual(unset_resp.status, 200)
 
-    @unittest.skip('Until bug 1094142 is resolved.')
+    @testtools.skip('Until bug 1094142 is resolved.')
     def test_flavor_non_admin_set_get_unset_keys(self):
         #Test to SET, GET UNSET flavor extra spec as a user
         #with out admin privileges.
