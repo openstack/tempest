@@ -43,7 +43,6 @@ class RestClient(object):
         self.service = None
         self.token = None
         self.base_url = None
-        self.config = config
         self.region = {'compute': self.config.identity.region}
         self.endpoint_url = 'publicURL'
         self.strategy = self.config.identity.strategy
