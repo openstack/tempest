@@ -20,6 +20,7 @@ from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest.tests.object_storage import base
 import testtools
+import time
 
 
 class ContainerSyncTest(base.BaseObjectTest):
