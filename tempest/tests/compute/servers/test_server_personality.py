@@ -70,9 +70,6 @@ class ServerPersonalityTestBase(object):
                                                           personality=person)
             self.assertEqual('202', resp['status'])
 
-        except Exception:
-            raise Error(resp['message'])
-
         #Teardown
         finally:
             self.client.delete_server(server['id'])
