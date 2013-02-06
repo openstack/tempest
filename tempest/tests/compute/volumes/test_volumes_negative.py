@@ -15,9 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from nose.plugins.attrib import attr
-from nose.tools import raises
-
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.tests.compute import base
@@ -25,7 +22,6 @@ from tempest.tests.compute import base
 
 class VolumesNegativeTestBase(object):
 
-    @attr(type='negative')
     def test_volume_get_nonexistant_volume_id(self):
         # Negative: Should not be able to get details of nonexistant volume
         #Creating a nonexistant volume id
@@ -46,7 +42,6 @@ class VolumesNegativeTestBase(object):
             self.fail('Should not be able to GET the details from a '
                       'nonexistant volume')
 
-    @attr(type='negative')
     def test_volume_delete_nonexistant_volume_id(self):
         # Negative: Should not be able to delete nonexistant Volume
         #Creating nonexistant volume id
@@ -66,62 +61,47 @@ class VolumesNegativeTestBase(object):
         else:
             self.fail('Should not be able to DELETE a nonexistant volume')
 
-    @raises(exceptions.BadRequest)
-    @attr(type='negative')
     def test_create_volume_with_invalid_size(self):
         # Negative: Should not be able to create volume with invalid size
         # in request
         v_name = rand_name('Volume-')
         metadata = {'Type': 'work'}
-        resp, volume = self.client.create_volume(size='#$%',
-                                                 display_name=v_name,
-                                                 metadata=metadata)
+        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+                          size='#$%', display_name=v_name, metadata=metadata)
 
-    @raises(exceptions.BadRequest)
-    @attr(type='negative')
     def test_create_volume_with_out_passing_size(self):
         # Negative: Should not be able to create volume without passing size
         # in request
         v_name = rand_name('Volume-')
         metadata = {'Type': 'work'}
-        resp, volume = self.client.create_volume(size='',
-                                                 display_name=v_name,
-                                                 metadata=metadata)
+        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+                          size='', display_name=v_name, metadata=metadata)
 
-    @raises(exceptions.BadRequest)
-    @attr(type='negative')
     def test_create_volume_with_size_zero(self):
         # Negative: Should not be able to create volume with size zero
         v_name = rand_name('Volume-')
         metadata = {'Type': 'work'}
-        resp, volume = self.client.create_volume(size='0',
-                                                 display_name=v_name,
-                                                 metadata=metadata)
+        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+                          size='0', display_name=v_name, metadata=metadata)
 
-    @raises(exceptions.NotFound)
-    @attr(type='negative')
     def test_get_invalid_volume_id(self):
         # Negative: Should not be able to get volume with invalid id
-        resp, volume = self.client.get_volume('#$%%&^&^')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_volume, '#$%%&^&^')
 
-    @raises(exceptions.NotFound)
-    @attr(type='negative')
     def test_get_volume_without_passing_volume_id(self):
         # Negative: Should not be able to get volume when empty ID is passed
-        resp, volume = self.client.get_volume('')
+        self.assertRaises(exceptions.NotFound, self.client.get_volume, '')
 
-    @raises(exceptions.NotFound)
-    @attr(type='negative')
     def test_delete_invalid_volume_id(self):
         # Negative: Should not be able to delete volume when invalid ID is
         # passed
-        resp, volume = self.client.delete_volume('!@#$%^&*()')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_volume, '!@#$%^&*()')
 
-    @raises(exceptions.NotFound)
-    @attr(type='negative')
     def test_delete_volume_without_passing_volume_id(self):
         # Negative: Should not be able to delete volume when empty ID is passed
-        resp, volume = self.client.delete_volume('')
+        self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
 
 
 class VolumesNegativeTestXML(base.BaseComputeTestXML,

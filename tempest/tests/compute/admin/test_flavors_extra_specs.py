@@ -15,9 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import nose
-from nose.plugins.attrib import attr
-
 from tempest import exceptions
 from tempest.tests import compute
 from tempest.tests.compute import base
@@ -36,7 +33,7 @@ class FlavorsExtraSpecsTestBase(object):
     def setUpClass(self, cls):
         if not compute.FLAVOR_EXTRA_DATA_ENABLED:
             msg = "FlavorExtraData extension not enabled."
-            raise nose.SkipTest(msg)
+            raise cls.skipException(msg)
 
         cls.client = cls.os.flavors_client
         flavor_name = 'test_flavor2'

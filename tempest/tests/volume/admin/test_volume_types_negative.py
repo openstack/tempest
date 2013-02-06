@@ -18,9 +18,6 @@
 import testtools
 import uuid
 
-from nose.plugins.attrib import attr
-from nose.tools import raises
-
 from tempest import exceptions
 from tempest.tests.volume.admin.base import BaseVolumeAdminTestJSON
 from tempest.tests.volume.admin.base import BaseVolumeAdminTestXML
@@ -32,32 +29,28 @@ class VolumeTypesNegativeTestBase():
     def setUpClass(cls):
         cls.client = cls.client
 
-    @raises(exceptions.NotFound)
-    @attr(type='negative')
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
-        self.volumes_client.create_volume(size=1,
-                                          display_name=str(uuid.uuid4()),
-                                          volume_type=str(uuid.uuid4()))
+        self.assertRaises(exceptions.NotFound,
+                          self.volumes_client.create_volume, size=1,
+                          display_name=str(uuid.uuid4()),
+                          volume_type=str(uuid.uuid4()))
 
     @testtools.skip('Until bug 1090356 is fixed')
-    @raises(exceptions.BadRequest)
-    @attr(type='negative')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
-        self.client.create_volume_type('')
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_volume_type, '')
 
-    @raises(exceptions.NotFound)
-    @attr(type='negative')
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
-        self.client.get_volume_type(str(uuid.uuid4()))
+        self.assertRaises(exceptions.NotFound, self.client.get_volume_type,
+                          str(uuid.uuid4()))
 
-    @raises(exceptions.NotFound)
-    @attr(type='negative')
     def test_delete_nonexistent_type_id(self):
         # Should not be able to delete volume type with nonexistent type id.
-        self.client.delete_volume_type(str(uuid.uuid4()))
+        self.assertRaises(exceptions.NotFound, self.client.delete_volume_type,
+                          str(uuid.uuid4()))
 
 
 class VolumesTypesNegativeTestXML(BaseVolumeAdminTestXML,

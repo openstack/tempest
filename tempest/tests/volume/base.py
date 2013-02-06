@@ -18,7 +18,6 @@
 import logging
 import time
 
-import nose
 import testtools
 
 from tempest import clients
