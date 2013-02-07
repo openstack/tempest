@@ -104,10 +104,6 @@ resize_available = true
 # Does the compute API support changing the admin password?
 change_password_available=true
 
-# Level to log Compute API request/response details.
-log_level = ERROR
-
-
 # Run live migration tests (requires 2 hosts)
 live_migration_available = false
 

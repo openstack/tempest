@@ -15,10 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import hashlib
 import httplib2
 import json
 import logging
 from lxml import etree
+import re
 import time
 
 from tempest import exceptions
@@ -26,14 +28,14 @@ from tempest.services.compute.xml.common import xml_to_json
 
 # redrive rate limited calls at most twice
 MAX_RECURSION_DEPTH = 2
+TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
 
 class RestClient(object):
     TYPE = "json"
+    LOG = logging.getLogger(__name__)
 
     def __init__(self, config, user, password, auth_url, tenant_name=None):
-        self.log = logging.getLogger(__name__)
-        self.log.setLevel(getattr(logging, config.compute.log_level))
         self.config = config
         self.user = user
         self.password = password
@@ -189,11 +191,38 @@ class RestClient(object):
     def copy(self, url, headers=None):
         return self.request('COPY', url, headers)
 
-    def _log(self, req_url, body, resp, resp_body):
-        self.log.error('Request URL: ' + req_url)
-        self.log.error('Request Body: ' + str(body))
-        self.log.error('Response Headers: ' + str(resp))
-        self.log.error('Response Body: ' + str(resp_body))
+    def _log_request(self, method, req_url, headers, body):
+        self.LOG.info('Request: ' + method + ' ' + req_url)
+        if headers:
+            print_headers = headers
+            if 'X-Auth-Token' in headers and headers['X-Auth-Token']:
+                token = headers['X-Auth-Token']
+                if len(token) > 64 and TOKEN_CHARS_RE.match(token):
+                    print_headers = headers.copy()
+                    print_headers['X-Auth-Token'] = "<Token omitted>"
+            self.LOG.debug('Request Headers: ' + str(print_headers))
+        if body:
+            str_body = str(body)
+            length = len(str_body)
+            self.LOG.debug('Request Body: ' + str_body[:2048])
+            if length >= 2048:
+                self.LOG.debug("Large body (%d) md5 summary: %s", length,
+                               hashlib.md5(str_body).hexdigest())
+
+    def _log_response(self, resp, resp_body):
+        status = resp['status']
+        self.LOG.info("Response Status: " + status)
+        headers = resp.copy()
+        del headers['status']
+        if len(headers):
+            self.LOG.debug('Response Headers: ' + str(headers))
+        if resp_body:
+            str_body = str(resp_body)
+            length = len(str_body)
+            self.LOG.debug('Response Body: ' + str_body[:2048])
+            if length >= 2048:
+                self.LOG.debug("Large body (%d) md5 summary: %s", length,
+                               hashlib.md5(str_body).hexdigest())
 
     def _parse_resp(self, body):
         return json.loads(body)
@@ -224,7 +253,7 @@ class RestClient(object):
 
         # Likely it will cause error
         if not body and resp.status >= 400:
-            self.log.warning("status >= 400 response with empty body")
+            self.LOG.warning("status >= 400 response with empty body")
 
     def request(self, method, url,
                 headers=None, body=None, depth=0, wait=None):
@@ -240,39 +269,34 @@ class RestClient(object):
         headers['X-Auth-Token'] = self.token
 
         req_url = "%s/%s" % (self.base_url, url)
+        self._log_request(method, req_url, headers, body)
         resp, resp_body = self.http_obj.request(req_url, method,
                                                 headers=headers, body=body)
+        self._log_response(resp, resp_body)
         self.response_checker(method, url, headers, body, resp, resp_body)
 
         if resp.status == 401 or resp.status == 403:
-            self._log(req_url, body, resp, resp_body)
             raise exceptions.Unauthorized()
 
         if resp.status == 404:
-            if not wait:
-                self._log(req_url, body, resp, resp_body)
             raise exceptions.NotFound(resp_body)
 
         if resp.status == 400:
             resp_body = self._parse_resp(resp_body)
-            self._log(req_url, body, resp, resp_body)
             raise exceptions.BadRequest(resp_body)
 
         if resp.status == 409:
             resp_body = self._parse_resp(resp_body)
-            self._log(req_url, body, resp, resp_body)
             raise exceptions.Duplicate(resp_body)
 
         if resp.status == 413:
             resp_body = self._parse_resp(resp_body)
-            self._log(req_url, body, resp, resp_body)
             #Checking whether Absolute/Rate limit
             return self.check_over_limit(resp_body, method, url, headers, body,
                                          depth, wait)
 
         if resp.status in (500, 501):
             resp_body = self._parse_resp(resp_body)
-            self._log(req_url, body, resp, resp_body)
             #I'm seeing both computeFault and cloudServersFault come back.
             #Will file a bug to fix, but leave as is for now.
 
@@ -292,7 +316,6 @@ class RestClient(object):
 
         if resp.status >= 400:
             resp_body = self._parse_resp(resp_body)
-            self._log(req_url, body, resp, resp_body)
             raise exceptions.RestClientException(str(resp.status))
 
         return resp, resp_body
