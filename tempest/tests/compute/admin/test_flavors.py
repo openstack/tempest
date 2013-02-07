@@ -20,6 +20,7 @@ import testtools
 
 from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.tests import compute
 from tempest.tests.compute import base
 
@@ -306,6 +307,12 @@ class FlavorsAdminTestBase(object):
                 resp, body = self.client.delete_flavor(flavor_id)
                 self.assertEqual(resp.status, 202)
                 self.client.wait_for_resource_deletion(flavor_id)
+
+    @attr(type='negative')
+    def test_invalid_is_public_string(self):
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.list_flavors_with_detail,
+                          {'is_public': 'invalid'})
 
 
 class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,
