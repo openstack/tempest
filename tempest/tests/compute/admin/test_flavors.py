@@ -258,6 +258,55 @@ class FlavorsAdminTestBase(object):
             self.assertEqual(resp.status, 202)
             self.client.wait_for_resource_deletion(new_flavor_id)
 
+    @attr(type='positive')
+    def test_is_public_string_variations(self):
+        try:
+            flavor_id_not_public = rand_int_id(start=1000)
+            flavor_name_not_public = rand_name(self.flavor_name_prefix)
+            flavor_id_public = rand_int_id(start=1000)
+            flavor_name_public = rand_name(self.flavor_name_prefix)
+
+            # Create a non public flavor
+            resp, flavor = self.client.create_flavor(flavor_name_not_public,
+                                                     self.ram, self.vcpus,
+                                                     self.disk,
+                                                     flavor_id_not_public,
+                                                     is_public="False")
+
+            # Create a public flavor
+            resp, flavor = self.client.create_flavor(flavor_name_public,
+                                                     self.ram, self.vcpus,
+                                                     self.disk,
+                                                     flavor_id_public,
+                                                     is_public="True")
+
+            def _flavor_lookup(flavors, flavor_name):
+                for flavor in flavors:
+                    if flavor['name'] == flavor_name:
+                        return flavor
+                return None
+
+            def _test_string_variations(variations, flavor_name):
+                for string in variations:
+                    params = {'is_public': string}
+                    r, flavors = self.client.list_flavors_with_detail(params)
+                    self.assertEqual(r.status, 200)
+                    flavor = _flavor_lookup(flavors, flavor_name)
+                    self.assertNotEqual(flavor, None)
+
+            _test_string_variations(['f', 'false', 'no', '0'],
+                                    flavor_name_not_public)
+
+            _test_string_variations(['t', 'true', 'yes', '1'],
+                                    flavor_name_public)
+
+        finally:
+            # Delete flavors
+            for flavor_id in [flavor_id_not_public, flavor_id_public]:
+                resp, body = self.client.delete_flavor(flavor_id)
+                self.assertEqual(resp.status, 202)
+                self.client.wait_for_resource_deletion(flavor_id)
+
 
 class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,
                           base.BaseComputeTestXML,
