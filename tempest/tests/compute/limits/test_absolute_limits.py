@@ -26,22 +26,18 @@ class AbsoluteLimitsTest(object):
     def setUpClass(cls):
         cls.client = cls.limits_client
 
-    @testtools.skip("Skipped until the Bug #1025294 is resolved")
     def test_absLimits_get(self):
         # To check if all limits are present in the response
         resp, absolute_limits = self.client.get_absolute_limits()
         expected_elements = ['maxImageMeta', 'maxPersonality',
                              'maxPersonalitySize',
-                             'maxPersonalityFilePathSize',
                              'maxServerMeta', 'maxTotalCores',
                              'maxTotalFloatingIps', 'maxSecurityGroups',
                              'maxSecurityGroupRules', 'maxTotalInstances',
                              'maxTotalKeypairs', 'maxTotalRAMSize',
-                             'maxTotalVolumeGigabytes', 'maxTotalVolumes',
                              'totalCoresUsed', 'totalFloatingIpsUsed',
                              'totalSecurityGroupsUsed', 'totalInstancesUsed',
-                             'totalKeyPairsUsed', 'totalRAMUsed',
-                             'totalVolumeGigabytesUsed', 'totalVolumesUsed']
+                             'totalRAMUsed']
         # check whether all expected elements exist
         missing_elements =\
             [ele for ele in expected_elements if ele not in absolute_limits]
