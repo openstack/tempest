@@ -73,11 +73,13 @@ from tempest.services.identity.v3.json.endpoints_client import \
     EndPointClientJSON
 from tempest.services.identity.v3.json.identity_client import \
     IdentityV3ClientJSON
+from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
 from tempest.services.identity.v3.xml.endpoints_client import EndPointClientXML
 from tempest.services.identity.v3.xml.identity_client import \
     IdentityV3ClientXML
+from tempest.services.identity.v3.xml.policy_client import PolicyClientXML
 from tempest.services.identity.v3.xml.service_client import \
     ServiceClientXML
 from tempest.services.identity.xml.identity_client import IdentityClientXML
@@ -225,6 +227,11 @@ TENANT_USAGES_CLIENT = {
     "xml": TenantUsagesClientXML,
 }
 
+POLICY_CLIENT = {
+    "json": PolicyClientJSON,
+    "xml": PolicyClientXML,
+}
+
 
 class Manager(object):
 
@@ -298,6 +305,7 @@ class Manager(object):
             self.services_client = SERVICES_CLIENT[interface](*client_args)
             self.tenant_usages_client = \
                 TENANT_USAGES_CLIENT[interface](*client_args)
+            self.policy_client = POLICY_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
