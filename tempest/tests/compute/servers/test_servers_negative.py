@@ -275,3 +275,17 @@ class ServersNegativeTest(BaseComputeTest):
 
         self.assertRaises(exceptions.NotFound, self.client.delete_server,
                           sys.maxint + 1)
+
+    @attr(type='negative')
+    def test_create_with_nonexistent_security_group(self):
+        # Create a server with a nonexistent security group
+        try:
+            security_groups = [{'name': 'does_not_exist'}]
+            self.create_server_with_extras('fail',
+                                           self.image_ref,
+                                           self.flavor_ref,
+                                           security_groups=security_groups)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('Server was created with nonexistent security group')
