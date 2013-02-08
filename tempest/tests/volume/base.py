@@ -49,12 +49,14 @@ class BaseVolumeTest(testtools.TestCase):
 
         cls.os = os
         cls.volumes_client = os.volumes_client
+        cls.snapshots_client = os.snapshots_client
         cls.servers_client = os.servers_client
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.build_interval = cls.config.volume.build_interval
         cls.build_timeout = cls.config.volume.build_timeout
-        cls.volumes = {}
+        cls.snapshots = []
+        cls.volumes = []
 
         skip_msg = ("%s skipped as Cinder endpoint is not available" %
                     cls.__name__)
@@ -119,18 +121,60 @@ class BaseVolumeTest(testtools.TestCase):
 
     @classmethod
     def tearDownClass(cls):
+        cls.clear_snapshots()
+        cls.clear_volumes()
         cls.clear_isolated_creds()
 
-    def create_volume(self, size=1, metadata={}):
+    @classmethod
+    def create_snapshot(cls, volume_id=1, **kwargs):
+        """Wrapper utility that returns a test snapshot."""
+        resp, snapshot = cls.snapshots_client.create_snapshot(volume_id,
+                                                              **kwargs)
+        assert 200 == resp.status
+        cls.snapshots_client.wait_for_snapshot_status(snapshot['id'],
+                                                      'available')
+        cls.snapshots.append(snapshot)
+        return snapshot
+
+    #NOTE(afazekas): these create_* and clean_* could be defined
+    # only in a single location in the source, and could be more general.
+
+    @classmethod
+    def create_volume(cls, size=1, **kwargs):
         """Wrapper utility that returns a test volume."""
-        display_name = rand_name(self.__class__.__name__ + "-volume")
-        cli_resp = self.volumes_client.create_volume(size=size,
-                                                     display_name=display_name,
-                                                     metdata=metadata)
-        resp, volume = cli_resp
-        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
-        self.volumes.append(volume)
+        resp, volume = cls.volumes_client.create_volume(size, **kwargs)
+        assert 200 == resp.status
+        cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        cls.volumes.append(volume)
         return volume
+
+    @classmethod
+    def clear_volumes(cls):
+        for volume in cls.volumes:
+            try:
+                cls.volume_client.delete_volume(volume['id'])
+            except Exception:
+                pass
+
+        for volume in cls.volumes:
+            try:
+                cls.servers_client.wait_for_resource_deletion(volume['id'])
+            except Exception:
+                pass
+
+    @classmethod
+    def clear_snapshots(cls):
+        for snapshot in cls.snapshots:
+            try:
+                cls.snapshots_client.delete_snapshot(snapshot['id'])
+            except Exception:
+                pass
+
+        for snapshot in cls.snapshots:
+            try:
+                cls.snapshots_client.wait_for_resource_deletion(snapshot['id'])
+            except Exception:
+                pass
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""
