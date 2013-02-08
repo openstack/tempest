@@ -18,11 +18,31 @@
 import logging
 import time
 
+import nose.plugins.attrib
 import testtools
 
 from tempest import manager
 
 LOG = logging.getLogger(__name__)
+
+
+def attr(*args, **kwargs):
+    """A decorator which applies the nose and testtools attr decorator
+
+    This decorator applies the nose attr decorator as well as the
+    the testtools.testcase.attr if it is in the list of attributes
+    to testtools we want to apply."""
+
+    def decorator(f):
+        testtool_attributes = ('smoke')
+
+        if 'type' in kwargs and kwargs['type'] in testtool_attributes:
+            return nose.plugins.attrib.attr(*args, **kwargs)(
+                testtools.testcase.attr(kwargs['type'])(f))
+        else:
+            return nose.plugins.attrib.attr(*args, **kwargs)(f)
+
+    return decorator
 
 
 class TestCase(testtools.TestCase):
