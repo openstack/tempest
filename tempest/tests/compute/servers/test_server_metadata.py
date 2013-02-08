@@ -87,6 +87,16 @@ class ServerMetadataTest(BaseComputeTest):
 
         # no teardown - all creates should fail
 
+    @attr(type='negative')
+    def test_create_metadata_key_error(self):
+        # Blank key should trigger an error.
+        meta = {'': 'data1'}
+        name = rand_name('server')
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
+                          name, self.image_ref,
+                          self.flavor_ref, meta=meta)
+
     def test_update_server_metadata(self):
         # The server's metadata values should be updated to the
         # provided values
@@ -175,6 +185,14 @@ class ServerMetadataTest(BaseComputeTest):
             pass
         else:
             self.fail('An update should not happen for a nonexistant image')
+
+    @attr(type='negative')
+    def test_update_metadata_key_error(self):
+        # Blank key should trigger an error.
+        meta = {'': 'data1'}
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.update_server_metadata,
+                          self.server_id, meta=meta)
 
     @attr(type='negative')
     def test_delete_nonexistant_server_metadata_item(self):
