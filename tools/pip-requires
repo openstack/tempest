@@ -12,3 +12,4 @@ python-novaclient>=2.10.0
 python-quantumclient>=2.1
 testresources
 keyring
+testrepository
