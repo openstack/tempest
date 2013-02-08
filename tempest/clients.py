@@ -48,8 +48,11 @@ from tempest.services.compute.xml.security_groups_client \
 from tempest.services.compute.xml.servers_client import ServersClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
+from tempest.services.identity.v3.json.endpoints_client import \
+    EndPointClientJSON
 from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
+from tempest.services.identity.v3.xml.endpoints_client import EndPointClientXML
 from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.v1.json.image_client import ImageClientJSON
@@ -157,6 +160,11 @@ INTERFACES_CLIENT = {
     "xml": InterfacesClientXML,
 }
 
+ENDPOINT_CLIENT = {
+    "json": EndPointClientJSON,
+    "xml": EndPointClientXML,
+}
+
 
 class Manager(object):
 
@@ -219,6 +227,7 @@ class Manager(object):
             self.security_groups_client = \
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
             self.interfaces_client = INTERFACES_CLIENT[interface](*client_args)
+            self.endpoints_client = ENDPOINT_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
