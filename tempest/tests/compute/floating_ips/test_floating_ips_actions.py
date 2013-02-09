@@ -15,12 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from nose.plugins.attrib import attr
 import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.test import attr
 from tempest.tests.compute import base
 
 

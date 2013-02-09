@@ -15,8 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from nose.plugins.attrib import attr
-
+from tempest.test import attr
 from tempest.tests.compute import base
 
 

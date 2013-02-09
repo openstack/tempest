@@ -18,7 +18,6 @@
 import random
 import string
 
-from nose.plugins.attrib import attr
 import testtools
 
 from tempest.common.utils.linux.remote_client import RemoteClient
@@ -26,6 +25,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.services.compute.json.hosts_client import HostsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
+from tempest.test import attr
 from tempest.tests.compute import base
 
 

@@ -15,12 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from nose.plugins.attrib import attr
-
 from tempest import exceptions
 from tempest.services.compute.admin.json \
     import quotas_client as adm_quotas_json
 from tempest.services.compute.admin.xml import quotas_client as adm_quotas_xml
+from tempest.test import attr
 from tempest.tests import compute
 from tempest.tests.compute import base
 

@@ -17,13 +17,13 @@
 
 import base64
 
-from nose.plugins.attrib import attr
 import testtools
 
 
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
+from tempest.test import attr
 from tempest.tests import compute
 from tempest.tests.compute import base
 

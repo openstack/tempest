@@ -15,9 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from nose.plugins.attrib import attr
-
 from tempest import exceptions
+from tempest.test import attr
 from tempest.tests.identity.base import BaseIdentityAdminTest
 from tempest import whitebox
 
