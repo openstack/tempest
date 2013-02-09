@@ -23,7 +23,8 @@ from tempest import exceptions
 from tempest.tests.identity.base import DataGenerator
 
 
-class BaseObjectTest(testtools.TestCase):
+class BaseObjectTest(testtools.testcase.WithAttributes,
+                     testtools.TestCase):
 
     @classmethod
     def setUpClass(cls):

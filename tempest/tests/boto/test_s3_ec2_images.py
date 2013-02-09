@@ -19,11 +19,11 @@ from contextlib import closing
 import os
 
 from boto.s3.key import Key
-from nose.plugins.attrib import attr
 import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
+from tempest.test import attr
 from tempest.testboto import BotoTestCase
 import tempest.tests.boto
 from tempest.tests.boto.utils.s3 import s3_upload_dir

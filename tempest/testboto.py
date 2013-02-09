@@ -122,7 +122,8 @@ def friendly_function_call_str(call_able, *args, **kwargs):
     return string + ")"
 
 
-class BotoTestCase(testtools.TestCase,
+class BotoTestCase(testtools.testcase.WithAttributes,
+                   testtools.TestCase,
                    testresources.ResourcedTestCase):
     """Recommended to use as base class for boto related test."""
 

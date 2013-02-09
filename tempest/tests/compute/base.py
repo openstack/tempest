@@ -33,7 +33,8 @@ __all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
 LOG = logging.getLogger(__name__)
 
 
-class BaseCompTest(testtools.TestCase,
+class BaseCompTest(testtools.testcase.WithAttributes,
+                   testtools.TestCase,
                    testresources.ResourcedTestCase):
     """Base test case class for all Compute API tests."""
 

@@ -28,7 +28,8 @@ from tempest import exceptions
 LOG = logging.getLogger(__name__)
 
 
-class BaseVolumeTest(testtools.TestCase):
+class BaseVolumeTest(testtools.testcase.WithAttributes,
+                     testtools.TestCase):
 
     """Base test case class for all Cinder API tests."""
 
