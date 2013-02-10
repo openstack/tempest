@@ -21,7 +21,8 @@ from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 
 
-class BaseIdAdminTest(testtools.TestCase):
+class BaseIdAdminTest(testtools.testcase.WithAttributes,
+                      testtools.TestCase):
 
     @classmethod
     def setUpClass(cls):

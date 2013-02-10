@@ -18,11 +18,11 @@
 from contextlib import closing
 
 from boto.s3.key import Key
-from nose.plugins.attrib import attr
 import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
+from tempest.test import attr
 from tempest.testboto import BotoTestCase
 from tempest.tests import boto
 

@@ -20,7 +20,7 @@ import random
 
 import testtools
 
-from nose.plugins.attrib import attr
+from tempest.test import attr
 
 
 GLANCE_INSTALLED = False
@@ -33,7 +33,8 @@ except ImportError:
 from tempest import clients
 
 
-class CreateRegisterImagesTest(testtools.TestCase):
+class CreateRegisterImagesTest(testtools.testcase.WithAttributes,
+                               testtools.TestCase):
 
     """
     Here we test the registration and creation of images
@@ -128,7 +129,8 @@ class CreateRegisterImagesTest(testtools.TestCase):
         self.assertEqual('active', results.status)
 
 
-class ListImagesTest(testtools.TestCase):
+class ListImagesTest(testtools.testcase.WithAttributes,
+                     testtools.TestCase):
 
     """
     Here we test the listing of image information

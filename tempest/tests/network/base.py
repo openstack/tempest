@@ -22,7 +22,8 @@ from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 
 
-class BaseNetworkTest(testtools.TestCase):
+class BaseNetworkTest(testtools.testcase.WithAttributes,
+                      testtools.TestCase):
 
     @classmethod
     def setUpClass(cls):

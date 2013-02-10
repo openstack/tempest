@@ -18,10 +18,10 @@
 import logging
 import time
 
-from nose.plugins.attrib import attr
 import testtools
 
 from tempest import clients
+from tempest.test import attr
 from tempest.testboto import BotoTestCase
 
 LOG = logging.getLogger(__name__)
