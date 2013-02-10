@@ -136,7 +136,7 @@ class ServerActionsTestBase(object):
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
         resp, server = self.client.get_server(self.server_id)
-        self.assertEqual(self.flavor_ref_alt, server['flavor']['id'])
+        self.assertEqual(self.flavor_ref_alt, int(server['flavor']['id']))
 
     @attr(type='positive')
     @testtools.skipIf(not resize_available, 'Resize not available.')
