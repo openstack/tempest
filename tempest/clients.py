@@ -19,8 +19,7 @@ import logging
 
 from tempest import config
 from tempest import exceptions
-from tempest.services.boto.clients import APIClientEC2
-from tempest.services.boto.clients import ObjectClientS3
+from tempest.services import botoclients
 from tempest.services.compute.json.extensions_client import \
     ExtensionsClientJSON
 from tempest.services.compute.json.flavors_client import FlavorsClientJSON
@@ -204,8 +203,8 @@ class Manager(object):
         self.account_client = AccountClient(*client_args)
         self.container_client = ContainerClient(*client_args)
         self.object_client = ObjectClient(*client_args)
-        self.ec2api_client = APIClientEC2(*client_args)
-        self.s3_client = ObjectClientS3(*client_args)
+        self.ec2api_client = botoclients.APIClientEC2(*client_args)
+        self.s3_client = botoclients.ObjectClientS3(*client_args)
         self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
         self.custom_account_client = \
             AccountClientCustomizedHeader(*client_args)
