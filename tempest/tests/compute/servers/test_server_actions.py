@@ -122,13 +122,24 @@ class ServerActionsTestBase(object):
             linux_client = RemoteClient(server, self.ssh_user, password)
             self.assertTrue(linux_client.can_authenticate())
 
+    def _detect_server_image_flavor(self, server_id):
+        # Detects the current server image flavor ref.
+        resp, server = self.client.get_server(self.server_id)
+        current_flavor = server['flavor']['id']
+        new_flavor_ref = self.flavor_ref_alt \
+            if int(current_flavor) == self.flavor_ref else self.flavor_ref
+        return int(current_flavor), int(new_flavor_ref)
+
     @attr(type='smoke')
     @testtools.skipIf(not resize_available, 'Resize not available.')
     def test_resize_server_confirm(self):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
 
-        resp, server = self.client.resize(self.server_id, self.flavor_ref_alt)
+        previous_flavor_ref, new_flavor_ref = \
+            self._detect_server_image_flavor(self.server_id)
+
+        resp, server = self.client.resize(self.server_id, new_flavor_ref)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
@@ -136,7 +147,7 @@ class ServerActionsTestBase(object):
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
         resp, server = self.client.get_server(self.server_id)
-        self.assertEqual(self.flavor_ref_alt, int(server['flavor']['id']))
+        self.assertEqual(new_flavor_ref, int(server['flavor']['id']))
 
     @attr(type='positive')
     @testtools.skipIf(not resize_available, 'Resize not available.')
@@ -144,7 +155,10 @@ class ServerActionsTestBase(object):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted
 
-        resp, server = self.client.resize(self.server_id, self.flavor_ref_alt)
+        previous_flavor_ref, new_flavor_ref = \
+            self._detect_server_image_flavor(self.server_id)
+
+        resp, server = self.client.resize(self.server_id, new_flavor_ref)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
@@ -155,7 +169,7 @@ class ServerActionsTestBase(object):
         resp, server = self.client.get_server(self.server_id)
         start = int(time.time())
 
-        while server['flavor']['id'] != self.flavor_ref:
+        while int(server['flavor']['id']) != previous_flavor_ref:
             time.sleep(self.build_interval)
             resp, server = self.client.get_server(self.server_id)
 
