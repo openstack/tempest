@@ -69,7 +69,7 @@ class QuotasAdminTestBase(object):
         try:
             resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
             self.assertEqual(200, resp.status)
-            self.assertSequenceEqual(expected_quota_set, quota_set)
+            self.assertEqual(expected_quota_set, quota_set)
         except Exception:
             self.fail("Admin could not get the default quota set for a tenant")
 
@@ -87,7 +87,7 @@ class QuotasAdminTestBase(object):
                 self.demo_tenant_id,
                 **new_quota_set)
             self.assertEqual(200, resp.status)
-            self.assertSequenceEqual(new_quota_set, quota_set)
+            self.assertEqual(new_quota_set, quota_set)
         except Exception:
             self.fail("Admin could not update quota set for the tenant")
         finally:
