@@ -37,38 +37,38 @@ class AdminQuotasClientJSON(QuotasClientJSON):
         """
         post_body = {}
 
-        if injected_file_content_bytes >= 0:
+        if injected_file_content_bytes is not None:
             post_body['injected_file_content_bytes'] = \
                 injected_file_content_bytes
 
-        if metadata_items >= 0:
+        if metadata_items is not None:
             post_body['metadata_items'] = metadata_items
 
-        if ram >= 0:
+        if ram is not None:
             post_body['ram'] = ram
 
-        if floating_ips >= 0:
+        if floating_ips is not None:
             post_body['floating_ips'] = floating_ips
 
-        if key_pairs >= 0:
+        if key_pairs is not None:
             post_body['key_pairs'] = key_pairs
 
-        if instances >= 0:
+        if instances is not None:
             post_body['instances'] = instances
 
-        if security_group_rules >= 0:
+        if security_group_rules is not None:
             post_body['security_group_rules'] = security_group_rules
 
-        if injected_files >= 0:
+        if injected_files is not None:
             post_body['injected_files'] = injected_files
 
-        if cores >= 0:
+        if cores is not None:
             post_body['cores'] = cores
 
-        if injected_file_path_bytes >= 0:
+        if injected_file_path_bytes is not None:
             post_body['injected_file_path_bytes'] = injected_file_path_bytes
 
-        if security_groups >= 0:
+        if security_groups is not None:
             post_body['security_groups'] = security_groups
 
         post_body = json.dumps({'quota_set': post_body})
