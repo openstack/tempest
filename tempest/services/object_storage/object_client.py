@@ -41,7 +41,7 @@ class ObjectClient(RestClient):
 
     def update_object(self, container, object_name, data):
         """Upload data to replace current storage object."""
-        return create_object(container, object_name, data)
+        return self.create_object(container, object_name, data)
 
     def delete_object(self, container, object_name):
         """Delete storage object."""

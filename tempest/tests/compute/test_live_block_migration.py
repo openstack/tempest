@@ -124,8 +124,8 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
         server_id = self._get_an_active_server()
         target_host = self._get_non_existing_host_name()
 
-        with self.assertRaises(exceptions.BadRequest) as cm:
-            self._migrate_server_to(server_id, target_host)
+        self.assertRaises(exceptions.BadRequest, self._migrate_server_to,
+                          server_id, target_host)
         self.assertEquals('ACTIVE', self._get_server_status(server_id))
 
     @classmethod

@@ -184,7 +184,6 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
     def setUpClass(cls):
         super(TestNetworkBasicOps, cls).setUpClass()
         cls.check_preconditions()
-        cfg = cls.config.network
         cls.tenant_id = cls.manager._get_identity_client(
             cls.config.identity.username,
             cls.config.identity.password,

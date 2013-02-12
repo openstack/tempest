@@ -379,7 +379,7 @@ class BotoTestCase(testtools.testcase.WithAttributes,
         snaps = volume.snapshots()
         if len(snaps):
             LOG.critical("%s Volume has %s snapshot(s)", volume.id,
-                         map(snps.id, snaps))
+                         map(snaps.id, snaps))
 
         #Note(afazekas): detaching/attching not valid EC2 status
         def _volume_state():

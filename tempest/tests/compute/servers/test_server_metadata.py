@@ -197,7 +197,6 @@ class ServerMetadataTest(BaseComputeTest):
     def test_delete_nonexistant_server_metadata_item(self):
         # Negative test: Should not be able to delete metadata item from a
         # nonexistant server
-        meta = {'d': 'delvalue'}
 
         #Delete the metadata item
         try:

@@ -243,7 +243,6 @@ class AuthorizationTest(BaseComputeTest):
             # Reset the base_url...
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] is not None:
-                resp, _ = \
                 self.alt_security_client.delete_security_group(body['id'])
                 self.fail("Create Security Group request should not happen if"
                           "the tenant id does not match the current user")
@@ -283,7 +282,6 @@ class AuthorizationTest(BaseComputeTest):
             # Reset the base_url...
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] is not None:
-                resp, _ = \
                 self.alt_security_client.delete_security_group_rule(
                                         body['id'])
                 self.fail("Create security group rule request should not "
