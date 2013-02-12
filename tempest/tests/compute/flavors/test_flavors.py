@@ -131,6 +131,18 @@ class FlavorsTestBase(object):
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
     @attr(type='negative')
+    def test_invalid_minRam_filter(self):
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.list_flavors_with_detail,
+                          {'minRam': 'invalid'})
+
+    @attr(type='negative')
+    def test_invalid_minDisk_filter(self):
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.list_flavors_with_detail,
+                          {'minDisk': 'invalid'})
+
+    @attr(type='negative')
     def test_get_flavor_details_for_invalid_flavor_id(self):
         # Ensure 404 returned for non-existant flavor ID
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
