@@ -39,43 +39,43 @@ class ImagesClientXML(RestClientXML):
         self.build_timeout = self.config.compute.build_timeout
 
     def _parse_server(self, node):
-        json = xml_to_json(node)
-        return self._parse_links(node, json)
+        data = xml_to_json(node)
+        return self._parse_links(node, data)
 
     def _parse_image(self, node):
         """Parses detailed XML image information into dictionary."""
-        json = xml_to_json(node)
+        data = xml_to_json(node)
 
-        self._parse_links(node, json)
+        self._parse_links(node, data)
 
         # parse all metadata
-        if 'metadata' in json:
+        if 'metadata' in data:
             tag = node.find('{%s}metadata' % XMLNS_11)
-            json['metadata'] = dict((x.get('key'), x.text)
+            data['metadata'] = dict((x.get('key'), x.text)
                                     for x in tag.getchildren())
 
         # parse server information
-        if 'server' in json:
+        if 'server' in data:
             tag = node.find('{%s}server' % XMLNS_11)
-            json['server'] = self._parse_server(tag)
-        return json
+            data['server'] = self._parse_server(tag)
+        return data
 
-    def _parse_links(self, node, json):
+    def _parse_links(self, node, data):
         """Append multiple links under a list."""
         # look for links
-        if 'link' in json:
+        if 'link' in data:
             # remove single link element
-            del json['link']
-            json['links'] = [xml_to_json(x) for x in
+            del data['link']
+            data['links'] = [xml_to_json(x) for x in
                              node.findall('{http://www.w3.org/2005/Atom}link')]
-        return json
+        return data
 
     def _parse_images(self, xml):
-        json = {'images': []}
+        data = {'images': []}
         images = xml.getchildren()
         for image in images:
-            json['images'].append(self._parse_image(image))
-        return json
+            data['images'].append(self._parse_image(image))
+        return data
 
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""
@@ -160,9 +160,17 @@ class ImagesClientXML(RestClientXML):
         body = xml_to_json(etree.fromstring(body))
         return resp, body['metadata']
 
+    def _metadata_body(image_id, meta):
+        post_body = Document('metadata')
+        for k, v in meta:
+            text = Text(v)
+            metadata = Element('meta', text, key=k)
+            post_body.append(metadata)
+        return post_body
+
     def set_image_metadata(self, image_id, meta):
         """Sets the metadata for an image."""
-        post_body = json.dumps({'metadata': meta})
+        post_body = self._metadata_body(image_id, meta)
         resp, body = self.put('images/%s/metadata' % str(image_id),
                               post_body, self.headers)
         body = xml_to_json(etree.fromstring(body))
@@ -170,13 +178,7 @@ class ImagesClientXML(RestClientXML):
 
     def update_image_metadata(self, image_id, meta):
         """Updates the metadata for an image."""
-        post_body = Element('metadata', meta)
-        for k, v in meta:
-            metadata = Element('meta', key=k)
-            text = Text(v)
-            metadata.append(text)
-            post_body.append(metadata)
-
+        post_body = self._metadata_body(image_id, meta)
         resp, body = self.post('images/%s/metadata' % str(image_id),
                                post_body, self.headers)
         body = xml_to_json(etree.fromstring(body))
@@ -191,7 +193,15 @@ class ImagesClientXML(RestClientXML):
 
     def set_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key."""
-        post_body = json.dumps({'meta': meta})
+        post_body = Document('meta', Text(meta), key=key)
+        resp, body = self.post('images/%s/metadata/%s' % (str(image_id), key),
+                               post_body, self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body['meta']
+
+    def update_image_metadata_item(self, image_id, key, meta):
+        """Sets the value for a specific image metadata key."""
+        post_body = Document('meta', Text(meta), key=key)
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
                               post_body, self.headers)
         body = xml_to_json(etree.fromstring(body))
