@@ -15,15 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import urllib
-
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
 
 class QuotasClientXML(RestClientXML):

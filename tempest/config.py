@@ -19,7 +19,6 @@ import logging
 import os
 import sys
 
-from tempest.common.utils import data_utils
 from tempest.common.utils.misc import singleton
 from tempest.openstack.common import cfg
 

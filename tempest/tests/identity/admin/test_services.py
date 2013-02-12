@@ -18,7 +18,6 @@
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.test import attr
 from tempest.tests.identity import base
 
 

@@ -15,10 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from contextlib import closing
 import os
 
-from boto.s3.key import Key
 import testtools
 
 from tempest import clients

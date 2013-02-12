@@ -20,7 +20,6 @@ from tempest.services.compute.admin.json \
     import quotas_client as adm_quotas_json
 from tempest.services.compute.admin.xml import quotas_client as adm_quotas_xml
 from tempest.test import attr
-from tempest.tests import compute
 from tempest.tests.compute import base
 
 

@@ -18,13 +18,11 @@
 from contextlib import closing
 import logging
 import re
-import time
 
 import boto
 from boto.exception import BotoServerError
 from boto.exception import EC2ResponseError
 from boto.s3.bucket import Bucket
-from boto.s3.key import Key
 import testresources
 import testtools
 
@@ -33,7 +31,6 @@ import tempest.tests.boto
 from tempest.tests.boto.utils.wait import re_search_wait
 from tempest.tests.boto.utils.wait import state_wait
 from tempest.tests.boto.utils.wait import wait_exception
-from tempest.tests.boto.utils.wait import wait_no_exception
 
 LOG = logging.getLogger(__name__)
 

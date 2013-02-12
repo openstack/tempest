@@ -16,9 +16,6 @@
 #    under the License.
 
 import logging
-import time
-
-import testtools
 
 from tempest import clients
 from tempest.test import attr
