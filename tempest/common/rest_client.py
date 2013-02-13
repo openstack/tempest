@@ -275,6 +275,45 @@ class RestClient(object):
         self._log_response(resp, resp_body)
         self.response_checker(method, url, headers, body, resp, resp_body)
 
+        self._error_checker(method, url, headers, body, resp, resp_body, depth,
+                            wait)
+
+        return resp, resp_body
+
+    def _error_checker(self, method, url,
+                       headers, body, resp, resp_body, depth=0, wait=None):
+
+        # NOTE(mtreinish): Check for httplib response from glance_http. The
+        # object can't be used here because importing httplib breaks httplib2.
+        # If another object from a class not imported were passed here as
+        # resp this could possibly fail
+        if str(type(resp)) == "<type 'instance'>":
+            ctype = resp.getheader('content-type')
+        else:
+            try:
+                ctype = resp['content-type']
+            # NOTE(mtreinish): Keystone delete user responses doesn't have a
+            # content-type header. (They don't have a body) So just pretend it
+            # is set.
+            except KeyError:
+                ctype = 'application/json'
+
+        JSON_ENC = ['application/json; charset=UTF-8', 'application/json',
+                    'application/json; charset=utf-8']
+        # NOTE(mtreinish): This is for compatibility with Glance and swift
+        # APIs. These are the return content types that Glance api v1
+        # (and occasionally swift) are using.
+        TXT_ENC = ['text/plain; charset=UTF-8', 'text/html; charset=UTF-8',
+                   'text/plain; charset=utf-8']
+        XML_ENC = ['application/xml', 'application/xml; charset=UTF-8']
+
+        if ctype in JSON_ENC or ctype in XML_ENC:
+            parse_resp = True
+        elif ctype in TXT_ENC:
+            parse_resp = False
+        else:
+            raise exceptions.RestClientException(str(resp.status))
+
         if resp.status == 401 or resp.status == 403:
             raise exceptions.Unauthorized()
 
@@ -282,43 +321,44 @@ class RestClient(object):
             raise exceptions.NotFound(resp_body)
 
         if resp.status == 400:
-            resp_body = self._parse_resp(resp_body)
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
             raise exceptions.BadRequest(resp_body)
 
         if resp.status == 409:
-            resp_body = self._parse_resp(resp_body)
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
             raise exceptions.Duplicate(resp_body)
 
         if resp.status == 413:
-            resp_body = self._parse_resp(resp_body)
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
             #Checking whether Absolute/Rate limit
             return self.check_over_limit(resp_body, method, url, headers, body,
                                          depth, wait)
 
         if resp.status in (500, 501):
-            resp_body = self._parse_resp(resp_body)
-            #I'm seeing both computeFault and cloudServersFault come back.
-            #Will file a bug to fix, but leave as is for now.
-
-            if 'cloudServersFault' in resp_body:
-                message = resp_body['cloudServersFault']['message']
-            elif 'computeFault' in resp_body:
-                message = resp_body['computeFault']['message']
-            elif 'error' in resp_body:  # Keystone errors
-                message = resp_body['error']['message']
-                raise exceptions.IdentityError(message)
-            elif 'message' in resp_body:
-                message = resp_body['message']
-            else:
-                message = resp_body
+            message = resp_body
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
+                #I'm seeing both computeFault and cloudServersFault come back.
+                #Will file a bug to fix, but leave as is for now.
+                if 'cloudServersFault' in resp_body:
+                    message = resp_body['cloudServersFault']['message']
+                elif 'computeFault' in resp_body:
+                    message = resp_body['computeFault']['message']
+                elif 'error' in resp_body:  # Keystone errors
+                    message = resp_body['error']['message']
+                    raise exceptions.IdentityError(message)
+                elif 'message' in resp_body:
+                    message = resp_body['message']
 
             raise exceptions.ComputeFault(message)
 
         if resp.status >= 400:
-            resp_body = self._parse_resp(resp_body)
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
             raise exceptions.RestClientException(str(resp.status))
-
-        return resp, resp_body
 
     def check_over_limit(self, resp_body, method, url,
                          headers, body, depth, wait):
