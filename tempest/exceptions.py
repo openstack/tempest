@@ -116,6 +116,10 @@ class ComputeFault(TempestException):
     message = "Got compute fault"
 
 
+class ImageFault(TempestException):
+    message = "Got image fault"
+
+
 class IdentityError(TempestException):
     message = "Got identity error"
 

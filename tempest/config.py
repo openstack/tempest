@@ -237,6 +237,9 @@ ImageGroup = [
     cfg.StrOpt('api_version',
                default='1',
                help="Version of the API"),
+    cfg.StrOpt('catalog_type',
+               default='image',
+               help='Catalog type of the Image service.')
 ]
 
 

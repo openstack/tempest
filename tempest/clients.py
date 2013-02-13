@@ -52,7 +52,7 @@ from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
-from tempest.services.image import service as image_service
+from tempest.services.image.json.image_client import ImageClientJSON
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
@@ -202,6 +202,7 @@ class Manager(object):
             raise exceptions.InvalidConfiguration(msg)
         self.network_client = NetworkClient(*client_args)
         self.account_client = AccountClient(*client_args)
+        self.image_client = ImageClientJSON(*client_args)
         self.container_client = ContainerClient(*client_args)
         self.object_client = ObjectClient(*client_args)
         self.ec2api_client = APIClientEC2(*client_args)
@@ -254,16 +255,3 @@ class ComputeAdminManager(Manager):
                       conf.compute_admin.password,
                       conf.compute_admin.tenant_name,
                       interface=interface)
-
-
-class ServiceManager(object):
-
-    """
-    Top-level object housing clients for OpenStack APIs
-    """
-
-    def __init__(self):
-        self.config = config.TempestConfig()
-        self.services = {}
-        self.services['image'] = image_service.Service(self.config)
-        self.images = self.services['image']
