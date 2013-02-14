@@ -153,10 +153,25 @@ Rather than constructing parameters inline, it is better to break things up::
                              kwarg2=dict_of_numbers)
 
 
+openstack-common
+----------------
+
+A number of modules from openstack-common are imported into the project.
+
+These modules are "incubating" in openstack-common and are kept in sync
+with the help of openstack-common's update.py script. See:
+
+  http://wiki.openstack.org/CommonLibrary#Incubation
+
+The copy of the code should never be directly modified here. Please
+always update openstack-common first and then run the script to copy
+the changes across.
+
+
 OpenStack Trademark
 -------------------
 
-OpenStack is a registered trademark of OpenStack, LLC, and uses the
+OpenStack is a registered trademark of the OpenStack Foundation, and uses the
 following capitalization:
 
    OpenStack
