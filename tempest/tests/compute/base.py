@@ -154,7 +154,7 @@ class BaseCompTest(testtools.testcase.WithAttributes,
     @classmethod
     def clear_isolated_creds(cls):
         if not cls.isolated_creds:
-            pass
+            return
         admin_client = cls._get_identity_admin_client()
 
         for user, tenant in cls.isolated_creds:
