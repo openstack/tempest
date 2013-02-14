@@ -193,15 +193,18 @@ class BaseVolumeTest(testtools.testcase.WithAttributes,
             time.sleep(self.build_interval)
 
 
-class BaseVolumeTestJSON(BaseVolumeTest):
+class BaseVolumeAdminTest(BaseVolumeTest):
+    """Base test case class for all Volume Admin API tests."""
     @classmethod
     def setUpClass(cls):
-        cls._interface = "json"
-        super(BaseVolumeTestJSON, cls).setUpClass()
+        super(BaseVolumeAdminTest, cls).setUpClass()
+        cls.adm_user = cls.config.identity.admin_username
+        cls.adm_pass = cls.config.identity.admin_password
+        cls.adm_tenant = cls.config.identity.admin_tenant_name
+        if not all((cls.adm_user, cls.adm_pass, cls.adm_tenant)):
+            msg = ("Missing Volume Admin API credentials "
+                   "in configuration.")
+            raise cls.skipException(msg)
 
-
-class BaseVolumeTestXML(BaseVolumeTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(BaseVolumeTestXML, cls).setUpClass()
+        cls.os_adm = clients.AdminManager(interface=cls._interface)
+        cls.client = cls.os_adm.volume_types_client

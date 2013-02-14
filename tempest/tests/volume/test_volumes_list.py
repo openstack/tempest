@@ -20,7 +20,7 @@ from tempest.test import attr
 from tempest.tests.volume import base
 
 
-class VolumesListTestBase(object):
+class VolumesListTest(base.BaseVolumeTest):
 
     """
     This test creates a number of 1G volumes. To run successfully,
@@ -29,6 +29,52 @@ class VolumesListTestBase(object):
     If you are running a Devstack environment, ensure that the
     VOLUME_BACKING_FILE_SIZE is atleast 4G in your localrc
     """
+
+    _interface = 'json'
+
+    @classmethod
+    def setUpClass(cls):
+        super(VolumesListTest, cls).setUpClass()
+        cls.client = cls.volumes_client
+
+        # Create 3 test volumes
+        cls.volume_list = []
+        cls.volume_id_list = []
+        for i in range(3):
+            v_name = rand_name('volume')
+            metadata = {'Type': 'work'}
+            try:
+                resp, volume = cls.client.create_volume(size=1,
+                                                        display_name=v_name,
+                                                        metadata=metadata)
+                cls.client.wait_for_volume_status(volume['id'], 'available')
+                resp, volume = cls.client.get_volume(volume['id'])
+                cls.volume_list.append(volume)
+                cls.volume_id_list.append(volume['id'])
+            except Exception:
+                if cls.volume_list:
+                    # We could not create all the volumes, though we were able
+                    # to create *some* of the volumes. This is typically
+                    # because the backing file size of the volume group is
+                    # too small. So, here, we clean up whatever we did manage
+                    # to create and raise a SkipTest
+                    for volid in cls.volume_id_list:
+                        cls.client.delete_volume(volid)
+                        cls.client.wait_for_resource_deletion(volid)
+                    msg = ("Failed to create ALL necessary volumes to run "
+                           "test. This typically means that the backing file "
+                           "size of the nova-volumes group is too small to "
+                           "create the 3 volumes needed by this test case")
+                    raise cls.skipException(msg)
+                raise
+
+    @classmethod
+    def tearDownClass(cls):
+        # Delete the created volumes
+        for volid in cls.volume_id_list:
+            resp, _ = cls.client.delete_volume(volid)
+            cls.client.wait_for_resource_deletion(volid)
+        super(VolumesListTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_volume_list(self):
@@ -57,95 +103,5 @@ class VolumesListTestBase(object):
                                    for m_vol in missing_vols))
 
 
-class VolumeListTestXML(base.BaseVolumeTestXML, VolumesListTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = 'xml'
-        super(VolumeListTestXML, cls).setUpClass()
-        cls.client = cls.volumes_client
-
-        # Create 3 test volumes
-        cls.volume_list = []
-        cls.volume_id_list = []
-        for i in range(3):
-            v_name = rand_name('volume')
-            metadata = {'Type': 'work'}
-            try:
-                resp, volume = cls.client.create_volume(size=1,
-                                                        display_name=v_name,
-                                                        metadata=metadata)
-                cls.client.wait_for_volume_status(volume['id'], 'available')
-                resp, volume = cls.client.get_volume(volume['id'])
-                cls.volume_list.append(volume)
-                cls.volume_id_list.append(volume['id'])
-            except Exception:
-                if cls.volume_list:
-                    # We could not create all the volumes, though we were able
-                    # to create *some* of the volumes. This is typically
-                    # because the backing file size of the volume group is
-                    # too small. So, here, we clean up whatever we did manage
-                    # to create and raise a SkipTest
-                    for volid in cls.volume_id_list:
-                        cls.client.delete_volume(volid)
-                        cls.client.wait_for_resource_deletion(volid)
-                    msg = ("Failed to create ALL necessary volumes to run "
-                           "test. This typically means that the backing file "
-                           "size of the nova-volumes group is too small to "
-                           "create the 3 volumes needed by this test case")
-                    raise cls.skipException(msg)
-                raise
-
-    @classmethod
-    def tearDownClass(cls):
-        # Delete the created volumes
-        for volid in cls.volume_id_list:
-            resp, _ = cls.client.delete_volume(volid)
-            cls.client.wait_for_resource_deletion(volid)
-        super(VolumeListTestXML, cls).tearDownClass()
-
-
-class VolumeListTestJSON(base.BaseVolumeTestJSON, VolumesListTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = 'json'
-        super(VolumeListTestJSON, cls).setUpClass()
-        cls.client = cls.volumes_client
-
-        # Create 3 test volumes
-        cls.volume_list = []
-        cls.volume_id_list = []
-        for i in range(3):
-            v_name = rand_name('volume')
-            metadata = {'Type': 'work'}
-            try:
-                resp, volume = cls.client.create_volume(size=1,
-                                                        display_name=v_name,
-                                                        metadata=metadata)
-                cls.client.wait_for_volume_status(volume['id'], 'available')
-                resp, volume = cls.client.get_volume(volume['id'])
-                cls.volume_list.append(volume)
-                cls.volume_id_list.append(volume['id'])
-            except Exception:
-                if cls.volume_list:
-                    # We could not create all the volumes, though we were able
-                    # to create *some* of the volumes. This is typically
-                    # because the backing file size of the volume group is
-                    # too small. So, here, we clean up whatever we did manage
-                    # to create and raise a SkipTest
-                    for volid in cls.volume_id_list:
-                        cls.client.delete_volume(volid)
-                        cls.client.wait_for_resource_deletion(volid)
-                    msg = ("Failed to create ALL necessary volumes to run "
-                           "test. This typically means that the backing file "
-                           "size of the nova-volumes group is too small to "
-                           "create the 3 volumes needed by this test case")
-                    raise cls.skipException(msg)
-                raise
-
-    @classmethod
-    def tearDownClass(cls):
-        # Delete the created volumes
-        for volid in cls.volume_id_list:
-            resp, _ = cls.client.delete_volume(volid)
-            cls.client.wait_for_resource_deletion(volid)
-        super(VolumeListTestJSON, cls).tearDownClass()
+class VolumeListTestXML(VolumesListTest):
+    _interface = 'xml'

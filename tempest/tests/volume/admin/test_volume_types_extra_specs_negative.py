@@ -20,23 +20,24 @@ import uuid
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest.tests.volume.admin.base import BaseVolumeAdminTestJSON
-from tempest.tests.volume.admin.base import BaseVolumeAdminTestXML
+from tempest.tests.volume import base
 
 
-class ExtraSpecsNegativeTestBase():
+class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
+    _interface = 'json'
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
-        cls.client = cls.client
+        super(ExtraSpecsNegativeTest, cls).setUpClass()
         vol_type_name = rand_name('Volume-type-')
         cls.extra_specs = {"spec1": "val1"}
         resp, cls.volume_type = cls.client.create_volume_type(vol_type_name,
                                                               extra_specs=
                                                               cls.extra_specs)
 
-    @staticmethod
+    @classmethod
     def tearDownClass(cls):
+        super(ExtraSpecsNegativeTest, cls).tearDownClass()
         cls.client.delete_volume_type(cls.volume_type['id'])
 
     @testtools.skip('Until bug 1090320 is fixed')
@@ -122,29 +123,5 @@ class ExtraSpecsNegativeTestBase():
                           self.volume_type['id'], str(uuid.uuid4()))
 
 
-class ExtraSpecsNegativeTestXML(BaseVolumeAdminTestXML,
-                                ExtraSpecsNegativeTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ExtraSpecsNegativeTestXML, cls).setUpClass()
-        ExtraSpecsNegativeTestBase.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        super(ExtraSpecsNegativeTestXML, cls).tearDownClass()
-        ExtraSpecsNegativeTestBase.tearDownClass(cls)
-
-
-class ExtraSpecsNegativeTestJSON(BaseVolumeAdminTestJSON,
-                                 ExtraSpecsNegativeTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ExtraSpecsNegativeTestJSON, cls).setUpClass()
-        ExtraSpecsNegativeTestBase.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        super(ExtraSpecsNegativeTestJSON, cls).tearDownClass()
-        ExtraSpecsNegativeTestBase.tearDownClass(cls)
+class ExtraSpecsNegativeTestXML(ExtraSpecsNegativeTest):
+    _interface = 'xml'
