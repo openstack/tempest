@@ -29,8 +29,6 @@ class BaseNetworkTest(testtools.testcase.WithAttributes,
     def setUpClass(cls):
         os = clients.Manager()
         client = os.network_client
-        config = os.config
-        networks = []
         enabled = True
 
         # Validate that there is even an endpoint configured

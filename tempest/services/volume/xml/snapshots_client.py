@@ -85,10 +85,6 @@ class SnapshotsClientXML(RestClientXML):
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
-    def _get_snapshot_status(self, snapshot_id):
-        resp, body = self.get_snapshot(snapshot_id)
-        return body['status']
-
     #NOTE(afazekas): just for the wait function
     def _get_snapshot_status(self, snapshot_id):
         resp, body = self.get_snapshot(snapshot_id)

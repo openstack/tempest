@@ -403,7 +403,7 @@ class ServersClientJSON(RestClient):
 
         url = self.base_url + '/servers?all_tenants=1'
         resp = self.requests.get(url)
-        resp, body = self.post('servers', post_body, self.headers)
+        resp, body = self.get('servers', self.headers)
 
         body = json.loads(body)
         return resp, body['servers']

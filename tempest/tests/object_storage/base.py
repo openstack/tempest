@@ -47,6 +47,5 @@ class BaseObjectTest(testtools.testcase.WithAttributes,
         try:
             cls.account_client.list_account_containers()
         except exceptions.EndpointNotFound:
-            enabled = False
             skip_msg = "No OpenStack Object Storage API endpoint"
             raise cls.skipException(skip_msg)

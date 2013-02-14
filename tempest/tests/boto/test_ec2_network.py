@@ -47,4 +47,4 @@ class EC2NetworkTest(BotoTestCase):
                              address.disassociate)
         self.client.release_address(public_ip)
         self.cancelResourceCleanUp(rcuk)
-        assertAddressReleasedWait(address)
+        self.assertAddressReleasedWait(address)

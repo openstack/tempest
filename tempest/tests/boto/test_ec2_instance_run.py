@@ -85,8 +85,8 @@ class InstanceRunTest(BotoTestCase):
             state = state_wait(_state, "available")
             if state != "available":
                 for _image in cls.images.itervalues():
-                    ec2_client.deregister_image(_image["image_id"])
-                raise RegisterImageException(image_id=image["image_id"])
+                    cls.ec2_client.deregister_image(_image["image_id"])
+                raise EC2RegisterImageException(image_id=image["image_id"])
 
     @attr(type='smoke')
     def test_run_stop_terminate_instance(self):
