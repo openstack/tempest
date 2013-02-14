@@ -244,8 +244,10 @@ class TokenClientJSON(RestClient):
         if headers is None:
             headers = {}
 
+        self._log_request(method, url, headers, body)
         resp, resp_body = self.http_obj.request(url, method,
                                                 headers=headers, body=body)
+        self._log_response(resp, resp_body)
 
         if resp.status in (401, 403):
             resp_body = json.loads(resp_body)
