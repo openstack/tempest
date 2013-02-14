@@ -58,7 +58,7 @@ class InstallVenv(object):
                               check_exit_code=True):
         """Runs a command in an out-of-process shell.
 
-        Returns the output of that command. Working directory is ROOT.
+        Returns the output of that command. Working directory is self.root.
         """
         if redirect_output:
             stdout = subprocess.PIPE
@@ -101,7 +101,7 @@ class InstallVenv(object):
             else:
                 self.run_command(['virtualenv', '-q', self.venv])
             print 'done.'
-            print 'Installing pip in virtualenv...',
+            print 'Installing pip in venv...',
             if not self.run_command(['tools/with_venv.sh', 'easy_install',
                                     'pip>1.0']).strip():
                 self.die("Failed to install pip.")

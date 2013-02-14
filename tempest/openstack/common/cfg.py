@@ -217,7 +217,7 @@ log files::
         ...
      ]
 
-This module also contains a global instance of the CommonConfigOpts class
+This module also contains a global instance of the ConfigOpts class
 in order to support a common usage pattern in OpenStack::
 
     from tempest.openstack.common import cfg
@@ -236,10 +236,11 @@ in order to support a common usage pattern in OpenStack::
 Positional command line arguments are supported via a 'positional' Opt
 constructor argument::
 
-    >>> CONF.register_cli_opt(MultiStrOpt('bar', positional=True))
+    >>> conf = ConfigOpts()
+    >>> conf.register_cli_opt(MultiStrOpt('bar', positional=True))
     True
-    >>> CONF(['a', 'b'])
-    >>> CONF.bar
+    >>> conf(['a', 'b'])
+    >>> conf.bar
     ['a', 'b']
 
 It is also possible to use argparse "sub-parsers" to parse additional
@@ -249,10 +250,11 @@ command line arguments using the SubCommandOpt class:
     ...     list_action = subparsers.add_parser('list')
     ...     list_action.add_argument('id')
     ...
-    >>> CONF.register_cli_opt(SubCommandOpt('action', handler=add_parsers))
+    >>> conf = ConfigOpts()
+    >>> conf.register_cli_opt(SubCommandOpt('action', handler=add_parsers))
     True
-    >>> CONF(['list', '10'])
-    >>> CONF.action.name, CONF.action.id
+    >>> conf(args=['list', '10'])
+    >>> conf.action.name, conf.action.id
     ('list', '10')
 
 """
@@ -861,7 +863,7 @@ class SubCommandOpt(Opt):
                                            description=self.description,
                                            help=self.help)
 
-        if not self.handler is None:
+        if self.handler is not None:
             self.handler(subparsers)
 
 
@@ -1295,6 +1297,24 @@ class ConfigOpts(collections.Mapping):
         __import__(module_str)
         self._get_opt_info(name, group)
 
+    def import_group(self, group, module_str):
+        """Import an option group from a module.
+
+        Import a module and check that a given option group is registered.
+
+        This is intended for use with global configuration objects
+        like cfg.CONF where modules commonly register options with
+        CONF at module load time. If one module requires an option group
+        defined by another module it can use this method to explicitly
+        declare the dependency.
+
+        :param group: an option OptGroup object or group name
+        :param module_str: the name of a module to import
+        :raises: ImportError, NoSuchGroupError
+        """
+        __import__(module_str)
+        self._get_group(group)
+
     @__clear_cache
     def set_override(self, name, override, group=None):
         """Override an opt value.
@@ -1417,7 +1437,7 @@ class ConfigOpts(collections.Mapping):
         logger.log(lvl, "=" * 80)
 
         def _sanitize(opt, value):
-            """Obfuscate values of options declared secret."""
+            """Obfuscate values of options declared secret"""
             return value if not opt.secret else '*' * len(str(value))
 
         for opt_name in sorted(self._opts):
@@ -1545,8 +1565,8 @@ class ConfigOpts(collections.Mapping):
         group = group_or_name if isinstance(group_or_name, OptGroup) else None
         group_name = group.name if group else group_or_name
 
-        if not group_name in self._groups:
-            if not group is None or not autocreate:
+        if group_name not in self._groups:
+            if group is not None or not autocreate:
                 raise NoSuchGroupError(group_name)
 
             self.register_group(OptGroup(name=group_name))
@@ -1566,7 +1586,7 @@ class ConfigOpts(collections.Mapping):
             group = self._get_group(group)
             opts = group._opts
 
-        if not opt_name in opts:
+        if opt_name not in opts:
             raise NoSuchOptError(opt_name, group)
 
         return opts[opt_name]
@@ -1604,7 +1624,7 @@ class ConfigOpts(collections.Mapping):
             opt = info['opt']
 
             if opt.required:
-                if ('default' in info or 'override' in info):
+                if 'default' in info or 'override' in info:
                     continue
 
                 if self._get(opt.dest, group) is None:
@@ -1623,7 +1643,7 @@ class ConfigOpts(collections.Mapping):
         """
         self._args = args
 
-        for opt, group in self._all_cli_opts():
+        for opt, group in sorted(self._all_cli_opts()):
             opt._add_to_cli(self._oparser, group)
 
         return vars(self._oparser.parse_args(args))
@@ -1726,62 +1746,4 @@ class ConfigOpts(collections.Mapping):
             return value
 
 
-class CommonConfigOpts(ConfigOpts):
-
-    DEFAULT_LOG_FORMAT = "%(asctime)s %(levelname)8s [%(name)s] %(message)s"
-    DEFAULT_LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-
-    common_cli_opts = [
-        BoolOpt('debug',
-                short='d',
-                default=False,
-                help='Print debugging output'),
-        BoolOpt('verbose',
-                short='v',
-                default=False,
-                help='Print more verbose output'),
-    ]
-
-    logging_cli_opts = [
-        StrOpt('log-config',
-               metavar='PATH',
-               help='If this option is specified, the logging configuration '
-                    'file specified is used and overrides any other logging '
-                    'options specified. Please see the Python logging module '
-                    'documentation for details on logging configuration '
-                    'files.'),
-        StrOpt('log-format',
-               default=DEFAULT_LOG_FORMAT,
-               metavar='FORMAT',
-               help='A logging.Formatter log message format string which may '
-                    'use any of the available logging.LogRecord attributes. '
-                    'Default: %(default)s'),
-        StrOpt('log-date-format',
-               default=DEFAULT_LOG_DATE_FORMAT,
-               metavar='DATE_FORMAT',
-               help='Format string for %%(asctime)s in log records. '
-                    'Default: %(default)s'),
-        StrOpt('log-file',
-               metavar='PATH',
-               deprecated_name='logfile',
-               help='(Optional) Name of log file to output to. '
-                    'If not set, logging will go to stdout.'),
-        StrOpt('log-dir',
-               deprecated_name='logdir',
-               help='(Optional) The directory to keep log files in '
-                    '(will be prepended to --log-file)'),
-        BoolOpt('use-syslog',
-                default=False,
-                help='Use syslog for logging.'),
-        StrOpt('syslog-log-facility',
-               default='LOG_USER',
-               help='syslog facility to receive log lines')
-    ]
-
-    def __init__(self):
-        super(CommonConfigOpts, self).__init__()
-        self.register_cli_opts(self.common_cli_opts)
-        self.register_cli_opts(self.logging_cli_opts)
-
-
-CONF = CommonConfigOpts()
+CONF = ConfigOpts()
