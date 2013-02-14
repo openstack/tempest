@@ -28,7 +28,6 @@ class ConsoleOutputTest(object):
     @classmethod
     def setUpClass(self, cls):
         cls.name = rand_name('server')
-        cls.client = cls.servers_client
         resp, server = cls.servers_client.create_server(cls.name,
                                                         cls.image_ref,
                                                         cls.flavor_ref)
@@ -45,7 +44,8 @@ class ConsoleOutputTest(object):
         # Positive test:Should be able to GET the console output
         # for a given server_id and number of lines
         def get_output():
-            resp, output = self.client.get_console_output(self.server_id, 10)
+            resp, output = self.servers_client.get_console_output(
+                self.server_id, 10)
             self.assertEqual(200, resp.status)
             self.assertNotEqual(output, None)
             lines = len(output.split('\n'))
@@ -57,7 +57,8 @@ class ConsoleOutputTest(object):
         # Negative test: Should not be able to get the console output
         # for an invalid server_id
         try:
-            resp, output = self.client.get_console_output('!@#$%^&*()', 10)
+            resp, output = self.servers_client.get_console_output(
+                '!@#$%^&*()', 10)
         except exceptions.NotFound:
             pass
 
@@ -72,8 +73,8 @@ class ConsoleOutputTest(object):
                                                        'REBOOT')
             resp, server = self.servers_client.get_server(self.server_id)
             if (server['status'] == 'REBOOT'):
-                resp, output = self.client.get_console_output(self.server_id,
-                                                              10)
+                resp, output = self.servers_client.get_console_output(
+                    self.server_id, 10)
                 self.assertEqual(200, resp.status)
                 self.assertNotEqual(output, None)
                 lines = len(output.split('\n'))
