@@ -15,17 +15,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from contextlib import closing
 import logging
 
 from boto.exception import EC2ResponseError
-from boto.s3.key import Key
 import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
-from tempest.exceptions import EC2RegisterImageException
 from tempest.test import attr
 from tempest.testboto import BotoTestCase
 import tempest.tests.boto

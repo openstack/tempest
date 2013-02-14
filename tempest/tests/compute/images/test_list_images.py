@@ -15,9 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.compute.base import BaseComputeTest
 

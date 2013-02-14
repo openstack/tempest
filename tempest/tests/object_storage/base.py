@@ -18,7 +18,6 @@
 import testtools
 
 from tempest import clients
-import tempest.config
 from tempest import exceptions
 from tempest.tests.identity.base import DataGenerator
 

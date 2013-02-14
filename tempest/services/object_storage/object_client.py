@@ -18,11 +18,10 @@
 from hashlib import sha1
 import hmac
 import httplib2
-import json
-import re
+from urlparse import urlparse
+
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
-from urlparse import urlparse
 
 
 class ObjectClient(RestClient):

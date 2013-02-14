@@ -17,7 +17,6 @@
 
 import testtools
 
-from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config

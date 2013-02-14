@@ -20,7 +20,6 @@ import string
 
 import testtools
 
-from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import config
 from tempest import exceptions
 from tempest.services.compute.json.hosts_client import HostsClientJSON
