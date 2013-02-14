@@ -16,6 +16,7 @@
 #    under the License.
 
 import copy
+import errno
 import json
 import os
 import time
