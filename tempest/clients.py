@@ -26,12 +26,12 @@ from tempest.services.compute.json.flavors_client import FlavorsClientJSON
 from tempest.services.compute.json.floating_ips_client import \
     FloatingIPsClientJSON
 from tempest.services.compute.json.images_client import ImagesClientJSON
+from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.limits_client import LimitsClientJSON
-from tempest.services.compute.json.servers_client import ServersClientJSON
+from tempest.services.compute.json.quotas_client import QuotasClientJSON
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
-from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
-from tempest.services.compute.json.quotas_client import QuotasClientJSON
+from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
 from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
@@ -54,20 +54,20 @@ from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.json.image_client import ImageClientJSON
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.object_storage.account_client import AccountClient
-from tempest.services.object_storage.container_client import ContainerClient
-from tempest.services.object_storage.object_client import ObjectClient
-from tempest.services.volume.json.admin.volume_types_client import \
-    VolumeTypesClientJSON
-from tempest.services.volume.xml.admin.volume_types_client import \
-    VolumeTypesClientXML
-from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
-from tempest.services.volume.json.volumes_client import VolumesClientJSON
-from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
-from tempest.services.volume.xml.volumes_client import VolumesClientXML
-from tempest.services.object_storage.object_client import \
-    ObjectClientCustomizedHeader
 from tempest.services.object_storage.account_client import \
     AccountClientCustomizedHeader
+from tempest.services.object_storage.container_client import ContainerClient
+from tempest.services.object_storage.object_client import ObjectClient
+from tempest.services.object_storage.object_client import \
+    ObjectClientCustomizedHeader
+from tempest.services.volume.json.admin.volume_types_client import \
+    VolumeTypesClientJSON
+from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
+from tempest.services.volume.json.volumes_client import VolumesClientJSON
+from tempest.services.volume.xml.admin.volume_types_client import \
+    VolumeTypesClientXML
+from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
+from tempest.services.volume.xml.volumes_client import VolumesClientXML
 
 LOG = logging.getLogger(__name__)
 
