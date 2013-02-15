@@ -11,28 +11,12 @@ function usage {
   echo "  -s, --smoke              Only run smoke tests"
   echo "  -w, --whitebox           Only run whitebox tests"
   echo "  -c, --nova-coverage      Enable Nova coverage collection"
+  echo "  -C, --config             Config file location"
   echo "  -p, --pep8               Just run pep8"
   echo "  -h, --help               Print this usage message"
   echo "  -d, --debug              Debug this script -- set -o xtrace"
   echo "  -S, --stdout             Don't capture stdout"
-  exit
-}
-
-function process_option {
-  case "$1" in
-    -h|--help) usage;;
-    -V|--virtual-env) always_venv=1; never_venv=0;;
-    -N|--no-virtual-env) always_venv=0; never_venv=1;;
-    -n|--no-site-packages) no_site_packages=1;;
-    -f|--force) force=1;;
-    -d|--debug) set -o xtrace;;
-    -c|--nova-coverage) let nova_coverage=1;;
-    -p|--pep8) let just_pep8=1;;
-    -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
-    -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
-    -S|--stdout) noseargs="$noseargs -s";;
-    *) noseargs="$noseargs $1"
-  esac
+  echo "  -- [NOSEOPTIONS]         After the first '--' you can pass arbitrary arguments to nosetests "
 }
 
 noseargs=""
@@ -45,6 +29,44 @@ no_site_packages=0
 force=0
 wrapper=""
 nova_coverage=0
+config_file=""
+
+if ! options=$(getopt -o VNnfswcphdsC: -l virtual-env,no-virtual-env,no-site-packages,force,smoke,whitebox,nova-coverage,pep8,help,debug,stdout,config: -- "$@")
+then
+    # parse error
+    usage
+    exit 1
+fi
+
+eval set -- $options
+first_uu=yes
+while [ $# -gt 0 ]; do
+  case "$1" in
+    -h|--help) usage; exit;;
+    -V|--virtual-env) always_venv=1; never_venv=0;;
+    -N|--no-virtual-env) always_venv=0; never_venv=1;;
+    -n|--no-site-packages) no_site_packages=1;;
+    -f|--force) force=1;;
+    -d|--debug) set -o xtrace;;
+    -c|--nova-coverage) let nova_coverage=1;;
+    -C|--config) config_file=$2; shift;;
+    -p|--pep8) let just_pep8=1;;
+    -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
+    -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
+    -S|--stdout) noseargs="$noseargs -s";;
+    --) [ "yes" == "$first_uu" ] || noseargs="$noseargs $1"; first_uu=no  ;;
+    *) noseargs="$noseargs $1"
+  esac
+  shift
+done
+
+if [ -n "$config_file" ]; then
+    config_file=`readlink -f "$config_file"`
+    export TEMPEST_CONFIG_DIR=`dirname "$config_file"`
+    export TEMPEST_CONFIG=`basename "$config_file"`
+fi
+
+cd `dirname "$0"`
 
 export NOSE_WITH_OPENSTACK=1
 export NOSE_OPENSTACK_COLOR=1
@@ -52,10 +74,6 @@ export NOSE_OPENSTACK_RED=15.00
 export NOSE_OPENSTACK_YELLOW=3.00
 export NOSE_OPENSTACK_SHOW_ELAPSED=1
 export NOSE_OPENSTACK_STDOUT=1
-
-for arg in "$@"; do
-  process_option $arg
-done
 
 if [ $no_site_packages -eq 1 ]; then
   installvenvopts="--no-site-packages"
@@ -67,7 +85,6 @@ if [[ "x$noseargs" =~ "tempest" ]]; then
 else
   noseargs="$noseargs tempest"
 fi
-
 
 function run_tests {
   ${wrapper} $NOSETESTS
