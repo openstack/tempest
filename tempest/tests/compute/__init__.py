@@ -30,10 +30,10 @@ CREATE_IMAGE_ENABLED = CONFIG.compute.create_image_enabled
 RESIZE_AVAILABLE = CONFIG.compute.resize_available
 CHANGE_PASSWORD_AVAILABLE = CONFIG.compute.change_password_available
 WHITEBOX_ENABLED = CONFIG.whitebox.whitebox_enabled
-DISK_CONFIG_ENABLED = False
+DISK_CONFIG_ENABLED = True
 DISK_CONFIG_ENABLED_OVERRIDE = CONFIG.compute.disk_config_enabled_override
-FLAVOR_EXTRA_DATA_ENABLED = False
-MULTI_USER = False
+FLAVOR_EXTRA_DATA_ENABLED = True
+MULTI_USER = True
 
 
 # All compute tests -- single setup function
@@ -66,12 +66,12 @@ def generic_setup_package():
     # used in testing. If the test cases are allowed to create
     # users (config.compute.allow_tenant_isolation is true,
     # then we allow multi-user.
-    if CONFIG.compute.allow_tenant_isolation:
-        MULTI_USER = True
-    else:
+    if not CONFIG.compute.allow_tenant_isolation:
         user1 = CONFIG.identity.username
         user2 = CONFIG.identity.alt_username
-        if user2 and user1 != user2:
+        if not user2 or user1 == user2:
+            MULTI_USER = False
+        else:
             user2_password = CONFIG.identity.alt_password
             user2_tenant_name = CONFIG.identity.alt_tenant_name
             if not user2_password or not user2_tenant_name:
@@ -79,7 +79,6 @@ def generic_setup_package():
                        "tenant or password: alt_tenant_name=%s alt_password=%s"
                        % (user2_tenant_name, user2_password))
                 raise InvalidConfiguration(msg)
-            MULTI_USER = True
 
 
 class ComputeResource(TestResourceManager):

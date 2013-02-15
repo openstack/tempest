@@ -27,9 +27,9 @@ import tempest.clients
 from tempest.common.utils.file_utils import have_effective_read_access
 import tempest.config
 
-A_I_IMAGES_READY = False  # ari,ami,aki
-S3_CAN_CONNECT_ERROR = "Unknown Error"
-EC2_CAN_CONNECT_ERROR = "Unknown Error"
+A_I_IMAGES_READY = True  # ari,ami,aki
+S3_CAN_CONNECT_ERROR = None
+EC2_CAN_CONNECT_ERROR = None
 
 
 def generic_setup_package():
@@ -76,8 +76,6 @@ def generic_setup_package():
                                 " faild to get them even by keystoneclient"
     except Exception as exc:
         EC2_CAN_CONNECT_ERROR = str(exc)
-    else:
-        EC2_CAN_CONNECT_ERROR = None
 
     try:
         if urlparse.urlparse(config.boto.s3_url).hostname is None:
@@ -93,6 +91,4 @@ def generic_setup_package():
     except keystoneclient.exceptions.Unauthorized:
         S3_CAN_CONNECT_ERROR = "AWS credentials not set," +\
                                " faild to get them even by keystoneclient"
-    else:
-        S3_CAN_CONNECT_ERROR = None
     boto_logger.setLevel(level)
