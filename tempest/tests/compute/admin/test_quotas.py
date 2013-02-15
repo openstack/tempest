@@ -16,9 +16,6 @@
 #    under the License.
 
 from tempest import exceptions
-from tempest.services.compute.admin.json \
-    import quotas_client as adm_quotas_json
-from tempest.services.compute.admin.xml import quotas_client as adm_quotas_xml
 from tempest.test import attr
 from tempest.tests.compute import base
 
@@ -27,22 +24,20 @@ class QuotasAdminTestBase(object):
 
     @classmethod
     def setUpClass(cls):
-        cls.c_adm_user = cls.config.compute_admin.username
-        cls.c_adm_pass = cls.config.compute_admin.password
-        cls.c_adm_tenant = cls.config.compute_admin.tenant_name
         cls.auth_url = cls.config.identity.uri
         cls.client = cls.os.quotas_client
+        cls.adm_client = cls.os_adm.quotas_client
         cls.identity_admin_client = cls._get_identity_admin_client()
+
         resp, tenants = cls.identity_admin_client.list_tenants()
 
+        #NOTE(afazekas): these test cases should always create and use a new
+        # tenant most of them should be skipped if we can't do that
         if cls.config.compute.allow_tenant_isolation:
             cls.demo_tenant_id = cls.isolated_creds[0][0]['tenantId']
         else:
             cls.demo_tenant_id = [tnt['id'] for tnt in tenants if tnt['name']
                                   == cls.config.identity.tenant_name][0]
-
-        cls.adm_tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
-                             cls.config.compute_admin.tenant_name][0]
 
         cls.default_quota_set = {'injected_file_content_bytes': 10240,
                                  'metadata_items': 128, 'injected_files': 5,
@@ -97,6 +92,7 @@ class QuotasAdminTestBase(object):
             self.assertEqual(200, resp.status, "Failed to reset quota "
                              "defaults")
 
+    #TODO(afazekas): merge these test cases
     def test_get_updated_quotas(self):
         # Verify that GET shows the updated quota set
         self.adm_client.update_quota_set(self.demo_tenant_id,
@@ -151,6 +147,8 @@ class QuotasAdminTestBase(object):
             self.adm_client.update_quota_set(self.demo_tenant_id,
                                              ram=default_mem_quota)
 
+#TODO(afazekas): Add test that tried to update the quota_set as a regular user
+
 
 class QuotasAdminTestJSON(QuotasAdminTestBase, base.BaseComputeAdminTestJSON,
                           base.BaseComputeTest):
@@ -160,10 +158,6 @@ class QuotasAdminTestJSON(QuotasAdminTestBase, base.BaseComputeAdminTestJSON,
         base.BaseComputeAdminTestJSON.setUpClass()
         base.BaseComputeTest.setUpClass()
         super(QuotasAdminTestJSON, cls).setUpClass()
-
-        cls.adm_client = adm_quotas_json.AdminQuotasClientJSON(
-            cls.config, cls.c_adm_user, cls.c_adm_pass,
-            cls.auth_url, cls.c_adm_tenant)
 
     @classmethod
     def tearDownClass(cls):
@@ -179,12 +173,6 @@ class QuotasAdminTestXML(QuotasAdminTestBase, base.BaseComputeAdminTestXML,
         base.BaseComputeAdminTestXML.setUpClass()
         base.BaseComputeTest.setUpClass()
         super(QuotasAdminTestXML, cls).setUpClass()
-
-        cls.adm_client = adm_quotas_xml.AdminQuotasClientXML(cls.config,
-                                                             cls.c_adm_user,
-                                                             cls.c_adm_pass,
-                                                             cls.auth_url,
-                                                             cls.c_adm_tenant)
 
     @classmethod
     def tearDownClass(cls):

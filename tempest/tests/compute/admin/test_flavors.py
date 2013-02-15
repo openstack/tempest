@@ -35,7 +35,7 @@ class FlavorsAdminTestBase(object):
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
 
-        cls.client = cls.os.flavors_client
+        cls.client = cls.os_adm.flavors_client
         cls.flavor_name_prefix = 'test_flavor_'
         cls.ram = 512
         cls.vcpus = 1
@@ -311,6 +311,8 @@ class FlavorsAdminTestBase(object):
         self.assertRaises(exceptions.BadRequest,
                           self.client.list_flavors_with_detail,
                           {'is_public': 'invalid'})
+
+#TODO(afazekas): Negative tests with regular user
 
 
 class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,

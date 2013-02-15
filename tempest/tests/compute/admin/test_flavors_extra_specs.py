@@ -35,7 +35,7 @@ class FlavorsExtraSpecsTestBase(object):
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
 
-        cls.client = cls.os.flavors_client
+        cls.client = cls.os_adm.flavors_client
         flavor_name = 'test_flavor2'
         ram = 512
         vcpus = 1

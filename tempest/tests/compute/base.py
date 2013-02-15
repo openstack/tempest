@@ -247,23 +247,23 @@ class BaseComputeTestXML(BaseCompTest):
         super(BaseComputeTestXML, cls).setUpClass()
 
 
-class BaseComputeAdminTest(testtools.TestCase):
+class BaseComputeAdminTest(BaseCompTest):
 
     """Base test case class for all Compute Admin API tests."""
 
     @classmethod
     def setUpClass(cls):
-        cls.config = config.TempestConfig()
-        cls.admin_username = cls.config.identity.admin_username
-        cls.admin_password = cls.config.identity.admin_password
-        cls.admin_tenant = cls.config.identity.admin_tenant_name
+        super(BaseComputeAdminTest, cls).setUpClass()
+        admin_username = cls.config.compute_admin.username
+        admin_password = cls.config.compute_admin.password
+        admin_tenant = cls.config.compute_admin.tenant_name
 
-        if not cls.admin_username and cls.admin_password and cls.admin_tenant:
+        if not (admin_username and admin_password and admin_tenant):
             msg = ("Missing Compute Admin API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
 
-        cls.os = clients.ComputeAdminManager(interface=cls._interface)
+        cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
 
 
 class BaseComputeAdminTestJSON(BaseComputeAdminTest):
