@@ -383,6 +383,58 @@ class ServersClientXML(RestClientXML):
     def remove_security_group(self, server_id, name):
         return self.action(server_id, 'removeSecurityGroup', None, name=name)
 
+    def list_server_metadata(self, server_id):
+        resp, body = self.get("servers/%s/metadata" % str(server_id),
+                              self.headers)
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
+
+    def set_server_metadata(self, server_id, meta):
+        doc = Document()
+        metadata = Element("metadata")
+        doc.append(metadata)
+        for k, v in meta.items():
+            meta_element = Element("meta", key=k)
+            meta_element.append(Text(v))
+            metadata.append(meta_element)
+        resp, body = self.put('servers/%s/metadata' % str(server_id),
+                              str(doc), self.headers)
+        return resp, xml_to_json(etree.fromstring(body))
+
+    def update_server_metadata(self, server_id, meta):
+        doc = Document()
+        metadata = Element("metadata")
+        doc.append(metadata)
+        for k, v in meta.items():
+            meta_element = Element("meta", key=k)
+            meta_element.append(Text(v))
+            metadata.append(meta_element)
+        resp, body = self.post("/servers/%s/metadata" % str(server_id),
+                               str(doc), headers=self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def get_server_metadata_item(self, server_id, key):
+        resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key),
+                              headers=self.headers)
+        return resp, dict([(etree.fromstring(body).attrib['key'],
+                            xml_to_json(etree.fromstring(body)))])
+
+    def set_server_metadata_item(self, server_id, key, meta):
+        doc = Document()
+        for k, v in meta.items():
+            meta_element = Element("meta", key=k)
+            meta_element.append(Text(v))
+            doc.append(meta_element)
+        resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
+                              str(doc), self.headers)
+        return resp, xml_to_json(etree.fromstring(body))
+
+    def delete_server_metadata_item(self, server_id, key):
+        resp, body = self.delete("servers/%s/metadata/%s" %
+                                 (str(server_id), key))
+        return resp, body
+
     def get_console_output(self, server_id, length):
         return self.action(server_id, 'os-getConsoleOutput', 'output',
                            length=length)
