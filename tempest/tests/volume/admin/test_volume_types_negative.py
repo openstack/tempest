@@ -19,15 +19,11 @@ import testtools
 import uuid
 
 from tempest import exceptions
-from tempest.tests.volume.admin.base import BaseVolumeAdminTestJSON
-from tempest.tests.volume.admin.base import BaseVolumeAdminTestXML
+from tempest.tests.volume import base
 
 
-class VolumeTypesNegativeTestBase():
-
-    @staticmethod
-    def setUpClass(cls):
-        cls.client = cls.client
+class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
+    _interface = 'json'
 
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
@@ -53,17 +49,5 @@ class VolumeTypesNegativeTestBase():
                           str(uuid.uuid4()))
 
 
-class VolumesTypesNegativeTestXML(BaseVolumeAdminTestXML,
-                                  VolumeTypesNegativeTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(VolumesTypesNegativeTestXML, cls).setUpClass()
-        VolumeTypesNegativeTestBase.setUpClass(cls)
-
-
-class VolumesTypesNegativeTestJSON(BaseVolumeAdminTestJSON,
-                                   VolumeTypesNegativeTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(VolumesTypesNegativeTestJSON, cls).setUpClass()
-        VolumeTypesNegativeTestBase.setUpClass(cls)
+class VolumesTypesNegativeTestXML(VolumeTypesNegativeTest):
+    _interface = 'xml'

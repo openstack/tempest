@@ -56,6 +56,10 @@ from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
+from tempest.services.volume.json.admin.volume_types_client import \
+    VolumeTypesClientJSON
+from tempest.services.volume.xml.admin.volume_types_client import \
+    VolumeTypesClientXML
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
 from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
@@ -120,6 +124,11 @@ SNAPSHOTS_CLIENTS = {
 VOLUMES_CLIENTS = {
     "json": VolumesClientJSON,
     "xml": VolumesClientXML,
+}
+
+VOLUME_TYPES_CLIENTS = {
+    "json": VolumeTypesClientJSON,
+    "xml": VolumeTypesClientXML,
 }
 
 IDENTITY_CLIENT = {
@@ -192,6 +201,8 @@ class Manager(object):
             self.floating_ips_client = FLOAT_CLIENTS[interface](*client_args)
             self.snapshots_client = SNAPSHOTS_CLIENTS[interface](*client_args)
             self.volumes_client = VOLUMES_CLIENTS[interface](*client_args)
+            self.volume_types_client = \
+                VOLUME_TYPES_CLIENTS[interface](*client_args)
             self.identity_client = IDENTITY_CLIENT[interface](*client_args)
             self.token_client = TOKEN_CLIENT[interface](self.config)
             self.security_groups_client = \

@@ -20,7 +20,14 @@ from tempest.test import attr
 from tempest.tests.volume import base
 
 
-class VolumesGetTestBase(object):
+class VolumesGetTest(base.BaseVolumeTest):
+
+    _interface = "json"
+
+    @classmethod
+    def setUpClass(cls):
+        super(VolumesGetTest, cls).setUpClass()
+        cls.client = cls.volumes_client
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):
@@ -94,17 +101,5 @@ class VolumesGetTestBase(object):
                 self.client.wait_for_resource_deletion(volume['id'])
 
 
-class VolumesGetTestXML(base.BaseVolumeTestXML, VolumesGetTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(VolumesGetTestXML, cls).setUpClass()
-        cls.client = cls.volumes_client
-
-
-class VolumesGetTestJSON(base.BaseVolumeTestJSON, VolumesGetTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(VolumesGetTestJSON, cls).setUpClass()
-        cls.client = cls.volumes_client
+class VolumesGetTestXML(VolumesGetTest):
+    _interface = "xml"

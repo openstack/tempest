@@ -16,28 +16,15 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.services.volume.json.admin import volume_types_client
-from tempest.tests.volume.base import BaseVolumeTest
+from tempest.tests.volume import base
 
 
-class VolumeTypesExtraSpecsTest(BaseVolumeTest):
+class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
     _interface = "json"
 
     @classmethod
     def setUpClass(cls):
         super(VolumeTypesExtraSpecsTest, cls).setUpClass()
-
-        adm_user = cls.config.identity.admin_username
-        adm_pass = cls.config.identity.admin_password
-        adm_tenant = cls.config.identity.admin_tenant_name
-        auth_url = cls.config.identity.uri
-
-        cls.client = volume_types_client.VolumeTypesClientJSON(cls.config,
-                                                               adm_user,
-                                                               adm_pass,
-                                                               auth_url,
-                                                               adm_tenant)
-
         vol_type_name = rand_name('Volume-type-')
         resp, cls.volume_type = cls.client.create_volume_type(vol_type_name)
 
