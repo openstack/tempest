@@ -17,6 +17,7 @@
 
 import base64
 
+import netaddr
 import testtools
 
 
@@ -36,10 +37,7 @@ class ServersTest(object):
     def setUpClass(cls):
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
-        cls.accessIPv6 = '::babe:220.12.22.2'
-        # See: http://tools.ietf.org/html/rfc5952 (section 4)
-        # This is the canonicalized form of the above.
-        cls.accessIPv6canon = '::babe:dc0c:1602'
+        cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
         cls.name = rand_name('server')
         file_contents = 'This is a test file.'
         personality = [{'path': '/test.txt',
@@ -73,8 +71,10 @@ class ServersTest(object):
     def test_verify_server_details(self):
         # Verify the specified server attributes are set correctly
         self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
-        self.assertIn(self.server['accessIPv6'],
-                      [self.accessIPv6, self.accessIPv6canon])
+        # NOTE(maurosr): See http://tools.ietf.org/html/rfc5952 (section 4)
+        # Here we compare directly with the canonicalized format.
+        self.assertEqual(self.server['accessIPv6'],
+                         str(netaddr.IPAddress(self.accessIPv6)))
         self.assertEqual(self.name, self.server['name'])
         self.assertEqual(self.image_ref, self.server['image']['id'])
         self.assertEqual(str(self.flavor_ref), self.server['flavor']['id'])
