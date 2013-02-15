@@ -101,4 +101,3 @@ class ServicesTestXML(base.BaseIdentityAdminTestXML,
     @classmethod
     def setUpClass(cls):
         super(ServicesTestXML, cls).setUpClass()
-        raise cls.skipException("Skipping until Bug #1061738 resolved")
