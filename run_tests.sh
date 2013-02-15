@@ -8,6 +8,7 @@ function usage {
   echo "  -N, --no-virtual-env     Don't use virtualenv.  Run tests in local environment"
   echo "  -n, --no-site-packages   Isolate the virtualenv from the global Python environment"
   echo "  -f, --force              Force a clean re-build of the virtual environment. Useful when dependencies have been added."
+  echo "  -u, --update             Update the virtual environment with any newer package versions"
   echo "  -s, --smoke              Only run smoke tests"
   echo "  -w, --whitebox           Only run whitebox tests"
   echo "  -c, --nova-coverage      Enable Nova coverage collection"
@@ -30,6 +31,7 @@ force=0
 wrapper=""
 nova_coverage=0
 config_file=""
+update=0
 
 if ! options=$(getopt -o VNnfswcphdsC: -l virtual-env,no-virtual-env,no-site-packages,force,smoke,whitebox,nova-coverage,pep8,help,debug,stdout,config: -- "$@")
 then
@@ -47,6 +49,7 @@ while [ $# -gt 0 ]; do
     -N|--no-virtual-env) always_venv=0; never_venv=1;;
     -n|--no-site-packages) no_site_packages=1;;
     -f|--force) force=1;;
+    -u|--update) update=1;;
     -d|--debug) set -o xtrace;;
     -c|--nova-coverage) let nova_coverage=1;;
     -C|--config) config_file=$2; shift;;
@@ -120,6 +123,10 @@ then
   if [ $force -eq 1 ]; then
     echo "Cleaning virtualenv..."
     rm -rf ${venv}
+  fi
+  if [ $update -eq 1 ]; then
+      echo "Updating virtualenv..."
+      python tools/install_venv.py $installvenvopts
   fi
   if [ -e ${venv} ]; then
     wrapper="${with_venv}"
