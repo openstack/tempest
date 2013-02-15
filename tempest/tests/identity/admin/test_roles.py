@@ -118,13 +118,19 @@ class RolesTestXML(base.BaseIdentityAdminTestXML,
 
 class UserRolesTestBase(RolesTestBase):
 
+    def assert_role_in_role_list(self, role, roles):
+        found = False
+        for user_role in roles:
+            if user_role['id'] == role['id']:
+                found = True
+        self.assertTrue(found, "assigned role was not in list")
+
     def test_assign_user_role(self):
         # Assign a role to a user on a tenant
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         resp, roles = self.client.list_user_roles(tenant['id'], user['id'])
-        self.assertEquals(1, len(roles))
-        self.assertEquals(roles[0]['id'], role['id'])
+        self.assert_role_in_role_list(role, roles)
 
     def test_assign_user_role_by_unauthorized_user(self):
         # Non admin user should not be authorized to assign a role to user
@@ -232,8 +238,7 @@ class UserRolesTestBase(RolesTestBase):
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         resp, roles = self.client.list_user_roles(tenant['id'], user['id'])
-        self.assertEquals(1, len(roles))
-        self.assertEquals(role['id'], roles[0]['id'])
+        self.assert_role_in_role_list(role, roles)
 
     def test_list_user_roles_by_unauthorized_user(self):
         # Non admin user should not be authorized to list a user's roles
