@@ -18,7 +18,6 @@ Each sub-class will have a corresponding PendingServerAction. These pending
 actions veriy that the API call was successful or not."""
 
 import random
-import time
 
 import pending_action
 import test_case
@@ -39,7 +38,6 @@ class TestCreateVM(test_case.StressTestCase):
         `pargs`      : positional arguments
         `kwargs`     : keyword arguments, which include:
                        `key_name`  : name of keypair
-                       `timeout`   : how long to wait before issuing Exception
                        `image_ref` : index to image types availablexs
                        `flavor_ref`: index to flavor types available
                                      (default = 1, which is tiny)
@@ -52,8 +50,6 @@ class TestCreateVM(test_case.StressTestCase):
             return None
 
         _key_name = kwargs.get('key_name', '')
-        _timeout = int(kwargs.get('timeout',
-                                  manager.config.compute.build_timeout))
         _image_ref = kwargs.get('image_ref', manager.config.compute.image_ref)
         _flavor_ref = kwargs.get('flavor_ref',
                                  manager.config.compute.flavor_ref)

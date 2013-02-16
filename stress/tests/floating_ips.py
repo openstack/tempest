@@ -13,8 +13,10 @@
 #    limitations under the License.
 """Stress test that associates/disasssociates floating ips."""
 
+import datetime
+
 from stress.basher import BasherAction
-from stress.driver import *
+from stress.driver import bash_openstack
 from stress.test_floating_ips import TestChangeFloatingIp
 from tempest import clients
 
