@@ -96,7 +96,8 @@ def xml_to_json(node):
     """This does a really braindead conversion of an XML tree to
     something that looks like a json dump. In cases where the XML
     and json structures are the same, then this "just works". In
-    others, it requires a little hand-editing of the result."""
+    others, it requires a little hand-editing of the result.
+    """
     json = {}
     for attr in node.keys():
         json[attr] = node.get(attr)

@@ -129,7 +129,7 @@ class HTTPClient(object):
         LOG.debug('\n'.join(dump))
 
     def _http_request(self, url, method, **kwargs):
-        """ Send an http request with the specified characteristics.
+        """Send an http request with the specified characteristics.
 
         Wrapper around httplib.HTTP(S)Connection.request to handle tasks such
         as setting headers and error handling.

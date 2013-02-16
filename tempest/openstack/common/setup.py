@@ -277,7 +277,8 @@ def _get_revno():
 def _get_version_from_git(pre_version):
     """Return a version which is equal to the tag that's on the current
     revision if there is one, or tag plus number of additional revisions
-    if the current revision has no tag."""
+    if the current revision has no tag.
+    """
 
     if os.path.isdir('.git'):
         if pre_version:

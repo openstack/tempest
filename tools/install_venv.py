@@ -38,6 +38,8 @@ class CentOS(install_venv.Fedora):
 
 
 def print_help():
+    """This prints Help."""
+
     help = """
     Tempest development environment setup is complete.
 

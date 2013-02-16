@@ -144,7 +144,8 @@ class BotoTestCase(testtools.testcase.WithAttributes,
     @classmethod
     def addResourceCleanUp(cls, function, *args, **kwargs):
         """Adds CleanUp callable, used by tearDownClass.
-        Recommended to a use (deep)copy on the mutable args"""
+        Recommended to a use (deep)copy on the mutable args.
+        """
         cls._sequence = cls._sequence + 1
         cls._resource_trash_bin[cls._sequence] = (function, args, kwargs)
         return cls._sequence
@@ -161,7 +162,8 @@ class BotoTestCase(testtools.testcase.WithAttributes,
             self.assertBotoError(self.ec2_error_code.client.
                                  InvalidKeyPair.Duplicate,
                                  self.client.create_keypair,
-                                 key_name)"""
+                                 key_name)
+        """
         try:
             callableObj(*args, **kwargs)
         except BotoServerError as exc:
@@ -173,8 +175,9 @@ class BotoTestCase(testtools.testcase.WithAttributes,
 
     @classmethod
     def tearDownClass(cls):
-        """ Calls the callables added by addResourceCleanUp,
-        when you overwire this function dont't forget to call this too"""
+        """Calls the callables added by addResourceCleanUp,
+        when you overwire this function dont't forget to call this too.
+        """
         fail_count = 0
         trash_keys = sorted(cls._resource_trash_bin, reverse=True)
         for key in trash_keys:

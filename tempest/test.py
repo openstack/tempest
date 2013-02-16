@@ -31,7 +31,8 @@ def attr(*args, **kwargs):
 
     This decorator applies the nose attr decorator as well as the
     the testtools.testcase.attr if it is in the list of attributes
-    to testtools we want to apply."""
+    to testtools we want to apply.
+    """
 
     def decorator(f):
         testtool_attributes = ('smoke')
