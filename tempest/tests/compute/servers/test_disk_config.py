@@ -20,10 +20,11 @@ import testtools
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 from tempest.tests import compute
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class TestServerDiskConfig(BaseComputeTest):
+class TestServerDiskConfig(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -19,10 +19,12 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class QuotasTestBase(object):
+class QuotasTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
+        super(QuotasTestJSON, cls).setUpClass()
         cls.client = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
         resp, tenants = cls.admin_client.list_tenants()
@@ -47,17 +49,5 @@ class QuotasTestBase(object):
             self.fail("Quota set for tenant did not have default limits")
 
 
-class QuotasTestJSON(QuotasTestBase, base.BaseComputeTestJSON):
-
-    @classmethod
-    def setUpClass(cls):
-        base.BaseComputeTestJSON.setUpClass()
-        super(QuotasTestJSON, cls).setUpClass()
-
-
-class QuotasTestXML(QuotasTestBase, base.BaseComputeTestXML):
-
-    @classmethod
-    def setUpClass(cls):
-        base.BaseComputeTestXML.setUpClass()
-        super(QuotasTestXML, cls).setUpClass()
+class QuotasTestXML(QuotasTestJSON):
+    _interface = 'xml'

@@ -20,10 +20,12 @@ import testtools
 from tempest.tests.compute import base
 
 
-class AbsoluteLimitsTest(object):
+class AbsoluteLimitsTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
+        super(AbsoluteLimitsTestJSON, cls).setUpClass()
         cls.client = cls.limits_client
 
     def test_absLimits_get(self):
@@ -46,17 +48,5 @@ class AbsoluteLimitsTest(object):
                          % ', '.join(ele for ele in missing_elements))
 
 
-class AbsoluteLimitsTestJSON(base.BaseComputeTestJSON,
-                             AbsoluteLimitsTest):
-    @classmethod
-    def setUpClass(cls):
-        super(AbsoluteLimitsTestJSON, cls).setUpClass()
-        AbsoluteLimitsTest.setUpClass(cls)
-
-
-class AbsoluteLimitsTestXML(base.BaseComputeTestXML,
-                            AbsoluteLimitsTest):
-    @classmethod
-    def setUpClass(cls):
-        super(AbsoluteLimitsTestXML, cls).setUpClass()
-        AbsoluteLimitsTest.setUpClass(cls)
+class AbsoluteLimitsTestXML(AbsoluteLimitsTestJSON):
+    _interface = 'xml'

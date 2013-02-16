@@ -20,7 +20,13 @@ from tempest import exceptions
 from tempest.tests.compute import base
 
 
-class VolumesNegativeTestBase(object):
+class VolumesNegativeTest(base.BaseComputeTest):
+    _interface = 'json'
+
+    @classmethod
+    def setUpClass(cls):
+        super(VolumesNegativeTest, cls).setUpClass()
+        cls.client = cls.volumes_extensions_client
 
     def test_volume_get_nonexistant_volume_id(self):
         # Negative: Should not be able to get details of nonexistant volume
@@ -104,19 +110,5 @@ class VolumesNegativeTestBase(object):
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
 
 
-class VolumesNegativeTestXML(base.BaseComputeTestXML,
-                             VolumesNegativeTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(VolumesNegativeTestXML, cls).setUpClass()
-        cls.client = cls.volumes_extensions_client
-
-
-class VolumesNegativeTestJSON(base.BaseComputeTestJSON,
-                              VolumesNegativeTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(VolumesNegativeTestJSON, cls).setUpClass()
-        cls.client = cls.volumes_extensions_client
+class VolumesNegativeTestXML(VolumesNegativeTest):
+    _interface = "xml"

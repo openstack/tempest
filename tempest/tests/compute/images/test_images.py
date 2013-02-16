@@ -26,7 +26,28 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class ImagesTestBase(object):
+class ImagesTestJSON(base.BaseComputeTest):
+    _interface = 'json'
+
+    @classmethod
+    def setUpClass(cls):
+        super(ImagesTestJSON, cls).setUpClass()
+        cls.client = cls.images_client
+        cls.servers_client = cls.servers_client
+
+        cls.image_ids = []
+
+        if compute.MULTI_USER:
+            if cls.config.compute.allow_tenant_isolation:
+                creds = cls._get_isolated_creds()
+                username, tenant_name, password = creds
+                cls.alt_manager = clients.Manager(username=username,
+                                                  password=password,
+                                                  tenant_name=tenant_name)
+            else:
+                # Use the alt_XXX credentials in the config file
+                cls.alt_manager = clients.AltManager()
+            cls.alt_client = cls.alt_manager.images_client
 
     def tearDown(self):
         """Terminate test instances created after a test is executed."""
@@ -39,6 +60,7 @@ class ImagesTestBase(object):
         for image_id in self.image_ids:
             self.client.delete_image(image_id)
             self.image_ids.remove(image_id)
+        super(ImagesTestJSON, self).tearDown()
 
     @attr(type='negative')
     def test_create_image_from_deleted_server(self):
@@ -211,55 +233,5 @@ class ImagesTestBase(object):
                       "exceeds 35 character ID length limit")
 
 
-class ImagesTestJSON(base.BaseComputeTestJSON,
-                     ImagesTestBase):
-    def tearDown(self):
-        ImagesTestBase.tearDown(self)
-        base.BaseComputeTestJSON.tearDown(self)
-
-    @classmethod
-    def setUpClass(cls):
-        super(ImagesTestJSON, cls).setUpClass()
-        cls.client = cls.images_client
-        cls.servers_client = cls.servers_client
-
-        cls.image_ids = []
-
-        if compute.MULTI_USER:
-            if cls.config.compute.allow_tenant_isolation:
-                creds = cls._get_isolated_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.images_client
-
-
-class ImagesTestXML(base.BaseComputeTestXML,
-                    ImagesTestBase):
-    def tearDown(self):
-        ImagesTestBase.tearDown(self)
-        base.BaseComputeTestXML.tearDown(self)
-
-    @classmethod
-    def setUpClass(cls):
-        super(ImagesTestXML, cls).setUpClass()
-        cls.client = cls.images_client
-        cls.servers_client = cls.servers_client
-
-        cls.image_ids = []
-
-        if compute.MULTI_USER:
-            if cls.config.compute.allow_tenant_isolation:
-                creds = cls._get_isolated_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.images_client
+class ImagesTestXML(ImagesTestJSON):
+    _interface = 'xml'

@@ -20,7 +20,13 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ServersTestBase(object):
+class ServersTestJSON(base.BaseComputeTest):
+    _interface = 'json'
+
+    @classmethod
+    def setUpClass(cls):
+        super(ServersTestJSON, cls).setUpClass()
+        cls.client = cls.servers_client
 
     @attr(type='positive')
     def test_create_server_with_admin_password(self):
@@ -155,15 +161,5 @@ class ServersTestBase(object):
         self.assertEqual('204', resp['status'])
 
 
-class ServersTestJSON(base.BaseComputeTestJSON, ServersTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(ServersTestJSON, cls).setUpClass()
-        cls.client = cls.servers_client
-
-
-class ServersTestXML(base.BaseComputeTestXML, ServersTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(ServersTestXML, cls).setUpClass()
-        cls.client = cls.servers_client
+class ServersTestXML(ServersTestJSON):
+    _interface = 'xml'

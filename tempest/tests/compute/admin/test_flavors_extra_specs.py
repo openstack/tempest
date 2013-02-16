@@ -21,7 +21,7 @@ from tempest.tests.compute import base
 import testtools
 
 
-class FlavorsExtraSpecsTestBase(object):
+class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
 
     """
     Tests Flavor Extra Spec API extension.
@@ -29,8 +29,11 @@ class FlavorsExtraSpecsTestBase(object):
     GET Flavor Extra specs can be performed even by without admin privileges.
     """
 
+    _interface = 'json'
+
     @classmethod
-    def setUpClass(self, cls):
+    def setUpClass(cls):
+        super(FlavorsExtraSpecsTestJSON, cls).setUpClass()
         if not compute.FLAVOR_EXTRA_DATA_ENABLED:
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
@@ -53,8 +56,9 @@ class FlavorsExtraSpecsTestBase(object):
                                                     swap=swap, rxtx=rxtx)
 
     @classmethod
-    def tearDownClass(self, cls):
+    def tearDownClass(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
+        super(FlavorsExtraSpecsTestJSON, cls).tearDownClass()
 
     def test_flavor_set_get_unset_keys(self):
         #Test to SET, GET UNSET flavor extra spec as a user
@@ -123,33 +127,5 @@ class FlavorsExtraSpecsTestBase(object):
             self.fail(msg)
 
 
-class FlavorsExtraSpecsTestXML(base.BaseComputeAdminTestXML,
-                               base.BaseComputeTestXML,
-                               FlavorsExtraSpecsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(FlavorsExtraSpecsTestXML, cls).setUpClass()
-        base.BaseComputeTestXML.setUpClass()
-        FlavorsExtraSpecsTestBase.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        FlavorsExtraSpecsTestBase.tearDownClass(cls)
-        super(FlavorsExtraSpecsTestXML, cls).tearDownClass()
-
-
-class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTestJSON,
-                                base.BaseComputeTestJSON,
-                                FlavorsExtraSpecsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(FlavorsExtraSpecsTestJSON, cls).setUpClass()
-        base.BaseComputeTestJSON.setUpClass()
-        FlavorsExtraSpecsTestBase.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        FlavorsExtraSpecsTestBase.tearDownClass(cls)
-        super(FlavorsExtraSpecsTestJSON, cls).tearDownClass()
+class FlavorsExtraSpecsTestXML(FlavorsExtraSpecsTestJSON):
+    _interface = 'xml'

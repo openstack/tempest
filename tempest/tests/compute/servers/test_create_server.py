@@ -29,12 +29,15 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class ServersTest(object):
-
+@attr(type='smoke')
+class ServersTestJSON(base.BaseComputeTest):
+    _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
+    disk_config = None
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
+        super(ServersTestJSON, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -56,9 +59,10 @@ class ServersTest(object):
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
 
-    @staticmethod
+    @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.server_initial['id'])
+        super(ServersTestJSON, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_create_server_response(self):
@@ -121,66 +125,28 @@ class ServersTest(object):
 
 
 @attr(type='positive')
-class ServersTestAutoDisk(base.BaseComputeTestJSON,
-                          ServersTest):
+class ServersTestAutoDisk(ServersTestJSON):
+    disk_config = 'AUTO'
+
     @classmethod
     def setUpClass(cls):
         if not compute.DISK_CONFIG_ENABLED:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
         super(ServersTestAutoDisk, cls).setUpClass()
-        cls.disk_config = 'AUTO'
-        ServersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
-        super(ServersTestAutoDisk, cls).tearDownClass()
 
 
 @attr(type='positive')
-class ServersTestManualDisk(base.BaseComputeTestJSON,
-                            ServersTest):
+class ServersTestManualDisk(ServersTestJSON):
+    disk_config = 'MANUAL'
+
     @classmethod
     def setUpClass(cls):
         if not compute.DISK_CONFIG_ENABLED:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
         super(ServersTestManualDisk, cls).setUpClass()
-        cls.disk_config = 'MANUAL'
-        ServersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
-        super(ServersTestManualDisk, cls).tearDownClass()
 
 
-@attr(type='smoke')
-class ServersTestJSON(base.BaseComputeTestJSON,
-                      ServersTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ServersTestJSON, cls).setUpClass()
-        cls.disk_config = None
-        ServersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
-        super(ServersTestJSON, cls).tearDownClass()
-
-
-@attr(type='smoke')
-class ServersTestXML(base.BaseComputeTestXML,
-                     ServersTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ServersTestXML, cls).setUpClass()
-        cls.disk_config = None
-        ServersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        ServersTest.tearDownClass(cls)
-        super(ServersTestXML, cls).tearDownClass()
+class ServersTestXML(ServersTestJSON):
+    _interface = 'xml'

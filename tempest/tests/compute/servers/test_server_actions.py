@@ -29,10 +29,25 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class ServerActionsTestBase(object):
-
+class ServerActionsTestJSON(base.BaseComputeTest):
+    _interface = 'json'
     resize_available = tempest.config.TempestConfig().compute.resize_available
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
+
+    def setUp(self):
+        super(ServerActionsTestJSON, self).setUp()
+        # Check if the server is in a clean state after test
+        try:
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except exceptions:
+            # Rebuild server if something happened to it during a test
+            self.rebuild_servers()
+
+    @classmethod
+    def setUpClass(cls):
+        super(ServerActionsTestJSON, cls).setUpClass()
+        cls.client = cls.servers_client
+        cls.rebuild_servers()
 
     @attr(type='smoke')
     @testtools.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
@@ -219,37 +234,5 @@ class ServerActionsTestBase(object):
         cls.client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
 
-class ServerActionsTestXML(base.BaseComputeTestXML,
-                           ServerActionsTestBase):
-    def setUp(self):
-        super(ServerActionsTestXML, self).setUp()
-        # Check if the server is in a clean state after test
-        try:
-            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-        except exceptions:
-            # Rebuild server if something happened to it during a test
-            self.rebuild_servers()
-
-    @classmethod
-    def setUpClass(cls):
-        super(ServerActionsTestXML, cls).setUpClass()
-        cls.client = cls.servers_client
-        cls.rebuild_servers()
-
-
-class ServerActionsTestJSON(base.BaseComputeTestJSON,
-                            ServerActionsTestBase):
-    def setUp(self):
-        super(ServerActionsTestJSON, self).setUp()
-        # Check if the server is in a clean state after test
-        try:
-            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-        except exceptions:
-            # Rebuild server if something happened to it during a test
-            self.rebuild_servers()
-
-    @classmethod
-    def setUpClass(cls):
-        super(ServerActionsTestJSON, cls).setUpClass()
-        cls.client = cls.servers_client
-        cls.rebuild_servers()
+class ServerActionsTestXML(ServerActionsTestJSON):
+    _interface = 'xml'

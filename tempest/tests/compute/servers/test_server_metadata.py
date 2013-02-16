@@ -18,10 +18,11 @@
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ServerMetadataTest(BaseComputeTest):
+class ServerMetadataTest(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -23,10 +23,12 @@ from tempest.tests.compute import base
 from tempest.tests import utils
 
 
-class ListServerFiltersTest(object):
+class ListServerFiltersTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
+        super(ListServerFiltersTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...
@@ -77,11 +79,12 @@ class ListServerFiltersTest(object):
         cls.s2_min = cls._convert_to_min_details(cls.s2)
         cls.s3_min = cls._convert_to_min_details(cls.s3)
 
-    @staticmethod
+    @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.s1['id'])
         cls.client.delete_server(cls.s2['id'])
         cls.client.delete_server(cls.s3['id'])
+        super(ListServerFiltersTestJSON, cls).tearDownClass()
 
     def _server_id_in_results(self, server_id, results):
         ids = [row['id'] for row in results]
@@ -200,27 +203,5 @@ class ListServerFiltersTest(object):
         return min_detail
 
 
-class ListServerFiltersTestJSON(base.BaseComputeTestJSON,
-                                ListServerFiltersTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ListServerFiltersTestJSON, cls).setUpClass()
-        ListServerFiltersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        super(ListServerFiltersTestJSON, cls).tearDownClass()
-        ListServerFiltersTest.tearDownClass(cls)
-
-
-class ListServerFiltersTestXML(base.BaseComputeTestXML,
-                               ListServerFiltersTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ListServerFiltersTestXML, cls).setUpClass()
-        ListServerFiltersTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        super(ListServerFiltersTestXML, cls).tearDownClass()
-        ListServerFiltersTest.tearDownClass(cls)
+class ListServerFiltersTestXML(ListServerFiltersTestJSON):
+    _interface = 'xml'

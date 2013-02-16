@@ -20,10 +20,12 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class QuotasAdminTestBase(object):
+class QuotasAdminTestJSON(base.BaseComputeAdminTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
+        super(QuotasAdminTestJSON, cls).setUpClass()
         cls.auth_url = cls.config.identity.uri
         cls.client = cls.os.quotas_client
         cls.adm_client = cls.os_adm.quotas_client
@@ -54,6 +56,7 @@ class QuotasAdminTestBase(object):
                 cls.servers_client.delete_server(server['id'])
             except exceptions.NotFound:
                 continue
+        super(QuotasAdminTestJSON, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_get_default_quotas(self):
@@ -150,31 +153,5 @@ class QuotasAdminTestBase(object):
 #TODO(afazekas): Add test that tried to update the quota_set as a regular user
 
 
-class QuotasAdminTestJSON(QuotasAdminTestBase, base.BaseComputeAdminTestJSON,
-                          base.BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        base.BaseComputeAdminTestJSON.setUpClass()
-        base.BaseComputeTest.setUpClass()
-        super(QuotasAdminTestJSON, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        super(QuotasAdminTestJSON, cls).tearDownClass()
-        base.BaseComputeTest.tearDownClass()
-
-
-class QuotasAdminTestXML(QuotasAdminTestBase, base.BaseComputeAdminTestXML,
-                         base.BaseComputeTest):
-
-    @classmethod
-    def setUpClass(cls):
-        base.BaseComputeAdminTestXML.setUpClass()
-        base.BaseComputeTest.setUpClass()
-        super(QuotasAdminTestXML, cls).setUpClass()
-
-    @classmethod
-    def tearDownClass(cls):
-        super(QuotasAdminTestXML, cls).tearDownClass()
-        base.BaseComputeTest.tearDownClass()
+class QuotasAdminTestXML(QuotasAdminTestJSON):
+    _interface = 'xml'

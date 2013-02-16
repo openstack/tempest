@@ -23,10 +23,14 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ConsoleOutputTest(object):
+#TODO(afazekas): move these to the server actions test
+@attr(type='smoke')
+class ConsoleOutputTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
-    def setUpClass(self, cls):
+    def setUpClass(cls):
+        super(ConsoleOutputTestJSON, cls).setUpClass()
         cls.name = rand_name('server')
         resp, server = cls.servers_client.create_server(cls.name,
                                                         cls.image_ref,
@@ -36,8 +40,9 @@ class ConsoleOutputTest(object):
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
     @classmethod
-    def tearDownClass(self, cls):
+    def tearDownClass(cls):
         cls.servers_client.delete_server(cls.server_id)
+        super(ConsoleOutputTestJSON, cls).tearDownClass()
 
     @attr(type='positive')
     def test_get_console_output(self):
@@ -87,28 +92,5 @@ class ConsoleOutputTest(object):
 
 
 @attr(type='smoke')
-class ConsoleOutputTestJSON(base.BaseComputeTestJSON,
-                            ConsoleOutputTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ConsoleOutputTestJSON, cls).setUpClass()
-        ConsoleOutputTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        ConsoleOutputTest.tearDownClass(cls)
-        super(ConsoleOutputTestJSON, cls).tearDownClass()
-
-
-@attr(type='smoke')
-class ConsoleOutputTestXML(base.BaseComputeTestXML,
-                           ConsoleOutputTest):
-    @classmethod
-    def setUpClass(cls):
-        super(ConsoleOutputTestXML, cls).setUpClass()
-        ConsoleOutputTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        ConsoleOutputTest.tearDownClass(cls)
-        super(ConsoleOutputTestXML, cls).tearDownClass()
+class ConsoleOutputTestXML(ConsoleOutputTestJSON):
+    _interface = 'xml'

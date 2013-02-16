@@ -27,15 +27,13 @@ from tempest import config
 from tempest import exceptions
 from tempest.tests import compute
 
-__all__ = ['BaseComputeTest', 'BaseComputeTestJSON', 'BaseComputeTestXML',
-           'BaseComputeAdminTestJSON', 'BaseComputeAdminTestXML']
 
 LOG = logging.getLogger(__name__)
 
 
-class BaseCompTest(testtools.testcase.WithAttributes,
-                   testtools.TestCase,
-                   testresources.ResourcedTestCase):
+class BaseComputeTest(testtools.testcase.WithAttributes,
+                      testtools.TestCase,
+                      testresources.ResourcedTestCase):
     """Base test case class for all Compute API tests."""
 
     conclusion = compute.generic_setup_package()
@@ -230,24 +228,7 @@ class BaseCompTest(testtools.testcase.WithAttributes,
             time.sleep(self.build_interval)
 
 
-class BaseComputeTestJSON(BaseCompTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(BaseComputeTestJSON, cls).setUpClass()
-
-# NOTE(danms): For transition, keep the old name active as JSON
-BaseComputeTest = BaseComputeTestJSON
-
-
-class BaseComputeTestXML(BaseCompTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(BaseComputeTestXML, cls).setUpClass()
-
-
-class BaseComputeAdminTest(BaseCompTest):
+class BaseComputeAdminTest(BaseComputeTest):
 
     """Base test case class for all Compute Admin API tests."""
 
@@ -264,17 +245,3 @@ class BaseComputeAdminTest(BaseCompTest):
             raise cls.skipException(msg)
 
         cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
-
-
-class BaseComputeAdminTestJSON(BaseComputeAdminTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(BaseComputeAdminTestJSON, cls).setUpClass()
-
-
-class BaseComputeAdminTestXML(BaseComputeAdminTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(BaseComputeAdminTestXML, cls).setUpClass()

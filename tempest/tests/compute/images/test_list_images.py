@@ -16,10 +16,11 @@
 #    under the License.
 
 from tempest.test import attr
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ListImagesTest(BaseComputeTest):
+class ListImagesTest(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
