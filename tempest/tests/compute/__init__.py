@@ -21,7 +21,6 @@ import logging
 from tempest import clients
 from tempest import config
 from tempest.exceptions import InvalidConfiguration
-from testresources import TestResourceManager
 
 LOG = logging.getLogger(__name__)
 
@@ -79,8 +78,3 @@ def generic_setup_package():
                        "tenant or password: alt_tenant_name=%s alt_password=%s"
                        % (user2_tenant_name, user2_password))
                 raise InvalidConfiguration(msg)
-
-
-class ComputeResource(TestResourceManager):
-    def make(self, dependency_resources=None):
-        return generic_setup_package()

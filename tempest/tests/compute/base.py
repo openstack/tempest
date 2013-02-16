@@ -38,7 +38,7 @@ class BaseCompTest(testtools.testcase.WithAttributes,
                    testresources.ResourcedTestCase):
     """Base test case class for all Compute API tests."""
 
-    resources = [('compute_init', compute.ComputeResource())]
+    conclusion = compute.generic_setup_package()
 
     @classmethod
     def setUpClass(cls):
