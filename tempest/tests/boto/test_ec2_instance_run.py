@@ -98,20 +98,16 @@ class InstanceRunTest(BotoTestCase):
                                     instance_type=self.instance_type)
         rcuk = self.addResourceCleanUp(self.destroy_reservation, reservation)
 
-        def _state():
-            instance.update(validate=True)
-            return instance.state
-
         for instance in reservation.instances:
             LOG.info("state: %s", instance.state)
             if instance.state != "running":
-                self.assertInstanceStateWait(_state, "running")
+                self.assertInstanceStateWait(instance, "running")
 
         for instance in reservation.instances:
             instance.stop()
             LOG.info("state: %s", instance.state)
             if instance.state != "stopped":
-                self.assertInstanceStateWait(_state, "stopped")
+                self.assertInstanceStateWait(instance, "stopped")
 
         for instance in reservation.instances:
             instance.terminate()
@@ -174,18 +170,9 @@ class InstanceRunTest(BotoTestCase):
         volume = self.ec2_client.create_volume(1, self.zone)
         self.addResourceCleanUp(self.destroy_volume_wait, volume)
         instance = reservation.instances[0]
-
-        def _instance_state():
-            instance.update(validate=True)
-            return instance.state
-
-        def _volume_state():
-            volume.update(validate=True)
-            return volume.status
-
         LOG.info("state: %s", instance.state)
         if instance.state != "running":
-            self.assertInstanceStateWait(_instance_state, "running")
+            self.assertInstanceStateWait(instance, "running")
 
         address = self.ec2_client.allocate_address()
         rcuk_a = self.addResourceCleanUp(address.delete)
@@ -194,7 +181,7 @@ class InstanceRunTest(BotoTestCase):
         rcuk_da = self.addResourceCleanUp(address.disassociate)
         #TODO(afazekas): ping test. dependecy/permission ?
 
-        self.assertVolumeStatusWait(_volume_state, "available")
+        self.assertVolumeStatusWait(volume, "available")
         #NOTE(afazekas): it may be reports availble before it is available
 
         ssh = RemoteClient(address.public_ip,
@@ -212,6 +199,10 @@ class InstanceRunTest(BotoTestCase):
         part_lines = ssh.get_partitions().split('\n')
         # "attaching" invalid EC2 state ! #1074901
         volume.attach(instance.id, "/dev/vdh")
+
+        def _volume_state():
+            volume.update(validate=True)
+            return volume.status
 
         #self.assertVolumeStatusWait(_volume_state, "in-use")  # #1074901
         re_search_wait(_volume_state, "in-use")
@@ -251,7 +242,7 @@ class InstanceRunTest(BotoTestCase):
 
         LOG.info("state: %s", instance.state)
         if instance.state != "stopped":
-            self.assertInstanceStateWait(_instance_state, "stopped")
+            self.assertInstanceStateWait(instance, "stopped")
         #TODO(afazekas): move steps from teardown to the test case
 
 
