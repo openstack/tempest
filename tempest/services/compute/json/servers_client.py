@@ -498,3 +498,11 @@ class ServersClientJSON(RestClient):
         resp, body = self.post(url, post_body, self.headers)
         body = json.loads(body)
         return resp, body['output']
+
+    def list_virtual_interfaces(self, server_id):
+        """
+        List the virtual interfaces used in an instance.
+        """
+        resp, body = self.get('/'.join(['servers', server_id,
+                              'os-virtual-interfaces']))
+        return resp, json.loads(body)
