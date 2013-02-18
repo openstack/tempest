@@ -24,9 +24,10 @@ from state import ClusterState
 from state import FloatingIpState
 from state import KeyPairState
 from state import VolumeState
-from test_case import *
+import stress.utils
+from test_case import logging
+
 from tempest.common.utils.data_utils import rand_name
-import utils.util
 
 # setup logging to file
 logging.basicConfig(
@@ -73,7 +74,7 @@ def _get_compute_nodes(keypath, user, controller):
     if keypath is None or user is None:
         return nodes
     cmd = "nova-manage service list | grep ^nova-compute"
-    lines = utils.util.ssh(keypath, user, controller, cmd).split('\n')
+    lines = stress.utils.ssh(keypath, user, controller, cmd).split('\n')
     # For example: nova-compute xg11eth0 nova enabled :-) 2011-10-31 18:57:46
     # This is fragile but there is, at present, no other way to get this info.
     for line in lines:
@@ -89,7 +90,7 @@ def _error_in_logs(keypath, logdir, user, nodes):
     """
     grep = 'egrep "ERROR\|TRACE" %s/*.log' % logdir
     for node in nodes:
-        errors = utils.util.ssh(keypath, user, node, grep, check=False)
+        errors = stress.utils.ssh(keypath, user, node, grep, check=False)
         if len(errors) > 0:
             logging.error('%s: %s' % (node, errors))
             return True
@@ -173,8 +174,8 @@ def bash_openstack(manager,
     user = stress_config.host_admin_user
     logdir = stress_config.nova_logdir
     computes = _get_compute_nodes(keypath, user, manager.config.identity.host)
-    utils.util.execute_on_all(keypath, user, computes,
-                              "rm -f %s/*.log" % logdir)
+    stress.utils.execute_on_all(keypath, user, computes,
+                                "rm -f %s/*.log" % logdir)
     random.seed(seed)
     cases = _create_cases(choice_spec)
     state = ClusterState(max_vms=max_vms)

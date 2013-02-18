@@ -14,10 +14,12 @@
 """Sample stress test that creates a few virtual machines and then
 destroys them"""
 
+import datetime
 
-from stress.test_servers import *
 from stress.basher import BasherAction
-from stress.driver import *
+from stress.driver import bash_openstack
+from stress.test_servers import TestCreateVM
+from stress.test_servers import TestKillActiveVM
 from tempest import clients
 
 choice_spec = [

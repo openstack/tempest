@@ -13,11 +13,13 @@
 #    limitations under the License.
 """Test that reboots random instances in a Nova cluster."""
 
+import datetime
+import time
 
-from stress.test_servers import *
-from stress.test_server_actions import *
 from stress.basher import BasherAction
-from stress.driver import *
+from stress.driver import bash_openstack
+from stress.test_server_actions import TestRebootVM
+from stress.test_servers import TestCreateVM
 from tempest import clients
 
 choice_spec = [

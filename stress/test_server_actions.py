@@ -18,12 +18,11 @@ sub-class will have a corresponding PendingServerAction. These pending
 actions veriy that the API call was successful or not."""
 
 import random
-import time
 
 import pending_action
+import stress.utils
 from tempest.exceptions import Duplicate
 import test_case
-from utils.util import *
 
 
 class TestRebootVM(test_case.StressTestCase):
@@ -81,7 +80,7 @@ class TestRebootVM(test_case.StressTestCase):
 
 class VerifyRebootVM(pending_action.PendingServerAction):
     """Class to verify that the reboot completed."""
-    States = enum('REBOOT_CHECK', 'ACTIVE_CHECK')
+    States = stress.utils.enum('REBOOT_CHECK', 'ACTIVE_CHECK')
 
     def __init__(self, manager, state, target_server,
                  reboot_state=None,

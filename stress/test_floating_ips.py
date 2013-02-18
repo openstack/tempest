@@ -14,7 +14,6 @@
 
 import random
 import telnetlib
-import time
 
 import pending_action
 import test_case

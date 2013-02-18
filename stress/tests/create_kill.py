@@ -14,9 +14,13 @@
 """More aggressive test that creates and destroys VMs with shorter
 sleep times"""
 
-from stress.test_servers import *
+import datetime
+import time
+
 from stress.basher import BasherAction
-from stress.driver import *
+from stress.driver import bash_openstack
+from stress.test_servers import TestCreateVM
+from stress.test_servers import TestKillActiveVM
 from tempest import clients
 
 choice_spec = [
