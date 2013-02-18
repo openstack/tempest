@@ -393,3 +393,12 @@ class ServersClientXML(RestClientXML):
                                body=str(Document(post_body)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def list_virtual_interfaces(self, server_id):
+        """
+        List the virtual interfaces used in an instance.
+        """
+        resp, body = self.get('/'.join(['servers', server_id,
+                              'os-virtual-interfaces']), self.headers)
+        server = self._parse_server(etree.fromstring(body))
+        return resp, server
