@@ -16,7 +16,8 @@
 class ClusterState(object):
     """A class to store the state of various persistent objects in the Nova
     cluster, e.g. instances, volumes.  Use methods to query to state which than
-    can be compared to the current state of the objects in Nova"""
+    can be compared to the current state of the objects in Nova.
+    """
 
     def __init__(self, **kwargs):
         self._max_vms = kwargs.get('max_vms', 32)
@@ -84,7 +85,8 @@ class ClusterState(object):
 
 class ServerAssociatedState(object):
     """Class that tracks resources that are associated with a particular server
-    such as a volume or floating ip"""
+    such as a volume or floating ip.
+    """
 
     def __init__(self, resource_id):
         # The id of the server.

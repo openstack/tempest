@@ -55,7 +55,7 @@ def _translate_addresses_xml_to_json(xml_addresses):
 
 
 def _translate_server_xml_to_json(xml_dom):
-    """ Convert server XML to server JSON.
+    """Convert server XML to server JSON.
 
     The addresses collection does not convert well by the dumb xml_to_json.
     This method does some pre and post-processing to deal with that.

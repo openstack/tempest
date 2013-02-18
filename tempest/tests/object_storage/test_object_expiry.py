@@ -39,7 +39,8 @@ class ObjectExpiryTest(base.BaseObjectTest):
         """The test script fails in tear down class
         as the container contains expired objects (LP bug 1069849).
         But delete action for the expired object is raising
-        NotFound exception and also non empty container cannot be deleted."""
+        NotFound exception and also non empty container cannot be deleted.
+        """
 
         #Get list of all object in the container
         objlist = \

@@ -80,7 +80,7 @@ class RestClient(object):
     def clear_auth(self):
         """
         Can be called to clear the token and base_url so that the next request
-        will fetch a new token and base_url
+        will fetch a new token and base_url.
         """
 
         self.token = None
@@ -88,7 +88,8 @@ class RestClient(object):
 
     def get_auth(self):
         """Returns the token of the current request or sets the token if
-        none"""
+        none.
+        """
 
         if not self.token:
             self._set_auth()
@@ -97,7 +98,7 @@ class RestClient(object):
 
     def basic_auth(self, user, password, auth_url):
         """
-        Provides authentication for the target API
+        Provides authentication for the target API.
         """
 
         params = {}
@@ -114,7 +115,7 @@ class RestClient(object):
 
     def keystone_auth(self, user, password, auth_url, service, tenant_name):
         """
-        Provides authentication via Keystone
+        Provides authentication via Keystone.
         """
 
         # Normalize URI to ensure /tokens is in it.
