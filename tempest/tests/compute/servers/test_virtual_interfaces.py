@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
+
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
@@ -45,18 +47,22 @@ class VirtualInterfacesTest(object):
         resp, output = self.client.list_virtual_interfaces(self.server_id)
         self.assertEqual(200, resp.status)
         self.assertNotEqual(output, None)
-        virtual_interfaces = output
-        self.assertNotEqual(0, len(virtual_interfaces),
-                            'Expected virtual interfaces, got zero.')
+        virt_ifaces = output
+        self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),
+                            'Expected virtual interfaces, got 0 interfaces.')
+        for virt_iface in virt_ifaces['virtual_interfaces']:
+            mac_address = virt_iface['mac_address']
+            self.assertTrue(netaddr.valid_mac(mac_address),
+                            "Invalid mac address detected.")
 
     @attr(type='negative')
     def test_list_virtual_interfaces_invalid_server_id(self):
         # Negative test: Should not be able to GET virtual interfaces
         # for an invalid server_id
-        try:
-            resp, output = self.client.list_virtual_interfaces('!@#$%^&*()')
-        except exceptions.NotFound:
-            pass
+        invalid_server_id = rand_name('!@#$%^&*()')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.list_virtual_interfaces,
+                          invalid_server_id)
 
 
 @attr(type='smoke')
