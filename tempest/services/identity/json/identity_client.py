@@ -44,7 +44,7 @@ class IdentityClientJSON(RestClient):
         post_body = {
             'name': name,
             'description': kwargs.get('description', ''),
-            'enabled': kwargs.get('enabled', 'true'),
+            'enabled': kwargs.get('enabled', True),
         }
         post_body = json.dumps({'tenant': post_body})
         resp, body = self.post('tenants', post_body, self.headers)
