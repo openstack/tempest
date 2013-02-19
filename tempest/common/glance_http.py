@@ -16,9 +16,11 @@
 # Originally copied from python-glanceclient
 
 import copy
+import hashlib
 import httplib
 import logging
 import posixpath
+import re
 import socket
 import StringIO
 import struct
@@ -42,6 +44,7 @@ from tempest import exceptions as exc
 LOG = logging.getLogger(__name__)
 USER_AGENT = 'tempest'
 CHUNKSIZE = 1024 * 64  # 64kB
+TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
 
 class HTTPClient(object):
@@ -92,42 +95,6 @@ class HTTPClient(object):
         except httplib.InvalidURL:
             raise exc.EndpointNotFound
 
-    def log_curl_request(self, method, url, kwargs):
-        curl = ['curl -i -X %s' % method]
-
-        for (key, value) in kwargs['headers'].items():
-            header = '-H \'%s: %s\'' % (key, value)
-            curl.append(header)
-
-        conn_params_fmt = [
-            ('key_file', '--key %s'),
-            ('cert_file', '--cert %s'),
-            ('cacert', '--cacert %s'),
-        ]
-        for (key, fmt) in conn_params_fmt:
-            value = self.connection_kwargs.get(key)
-            if value:
-                curl.append(fmt % value)
-
-        if self.connection_kwargs.get('insecure'):
-            curl.append('-k')
-
-        if 'body' in kwargs:
-            curl.append('-d \'%s\'' % kwargs['body'])
-
-        curl.append('%s%s' % (self.endpoint, url))
-        LOG.debug(' '.join(curl))
-
-    @staticmethod
-    def log_http_response(resp, body=None):
-        status = (resp.version / 10.0, resp.status, resp.reason)
-        dump = ['\nHTTP/%.1f %s %s' % status]
-        dump.extend(['%s: %s' % (k, v) for k, v in resp.getheaders()])
-        dump.append('')
-        if body:
-            dump.extend([body, ''])
-        LOG.debug('\n'.join(dump))
-
     def _http_request(self, url, method, **kwargs):
         """Send an http request with the specified characteristics.
 
@@ -140,7 +107,8 @@ class HTTPClient(object):
         if self.auth_token:
             kwargs['headers'].setdefault('X-Auth-Token', self.auth_token)
 
-        self.log_curl_request(method, url, kwargs)
+        self._log_request(method, url, kwargs['headers'])
+
         conn = self.get_connection()
 
         try:
@@ -172,12 +140,36 @@ class HTTPClient(object):
         # Read body into string if it isn't obviously image data
         if resp.getheader('content-type', None) != 'application/octet-stream':
             body_str = ''.join([chunk for chunk in body_iter])
-            self.log_http_response(resp, body_str)
             body_iter = StringIO.StringIO(body_str)
+            self._log_response(resp, None)
         else:
-            self.log_http_response(resp)
+            self._log_response(resp, body_iter)
 
         return resp, body_iter
+
+    def _log_request(self, method, url, headers):
+        LOG.info('Request: ' + method + ' ' + url)
+        if headers:
+            headers_out = headers
+            if 'X-Auth-Token' in headers and headers['X-Auth-Token']:
+                token = headers['X-Auth-Token']
+                if len(token) > 64 and TOKEN_CHARS_RE.match(token):
+                    headers_out = headers.copy()
+                    headers_out['X-Auth-Token'] = "<Token omitted>"
+                LOG.info('Request Headers: ' + str(headers_out))
+
+    def _log_response(self, resp, body):
+        status = str(resp.status)
+        LOG.info("Response Status: " + status)
+        if resp.getheaders():
+            LOG.info('Response Headers: ' + str(resp.getheaders()))
+        if body:
+            str_body = str(body)
+            length = len(body)
+            LOG.info('Response Body: ' + str_body[:2048])
+            if length >= 2048:
+                self.LOG.debug("Large body (%d) md5 summary: %s", length,
+                               hashlib.md5(str_body).hexdigest())
 
     def json_request(self, method, url, **kwargs):
         kwargs.setdefault('headers', {})
