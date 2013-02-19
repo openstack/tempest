@@ -66,9 +66,13 @@ from tempest.services.identity.v3.json.endpoints_client import \
     EndPointClientJSON
 from tempest.services.identity.v3.json.identity_client import \
     IdentityV3ClientJSON
+from tempest.services.identity.v3.json.service_client import \
+    ServiceClientJSON
 from tempest.services.identity.v3.xml.endpoints_client import EndPointClientXML
 from tempest.services.identity.v3.xml.identity_client import \
     IdentityV3ClientXML
+from tempest.services.identity.v3.xml.service_client import \
+    ServiceClientXML
 from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.v1.json.image_client import ImageClientJSON
@@ -192,6 +196,11 @@ AVAILABILITY_ZONE_CLIENT = {
     "xml": AvailabilityZoneClientXML,
 }
 
+SERVICE_CLIENT = {
+    "json": ServiceClientJSON,
+    "xml": ServiceClientXML,
+}
+
 
 class Manager(object):
 
@@ -260,6 +269,7 @@ class Manager(object):
             self.fixed_ips_client = FIXED_IPS_CLIENT[interface](*client_args)
             self.availability_zone_client = \
                 AVAILABILITY_ZONE_CLIENT[interface](*client_args)
+            self.service_client = SERVICE_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
