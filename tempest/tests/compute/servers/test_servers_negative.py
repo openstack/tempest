@@ -287,3 +287,9 @@ class ServersNegativeTest(BaseComputeTest):
             pass
         else:
             self.fail('Server was created with nonexistent security group')
+
+    @attr(type='negative')
+    def test_get_non_existent_server(self):
+        # Get a non existent server details
+        self.assertRaises(exceptions.NotFound, self.client.get_server,
+                          '999erra43')
