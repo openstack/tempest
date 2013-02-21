@@ -56,12 +56,13 @@ class ServicesTestBase(object):
             self.assertEqual(fetched_service['description'],
                              service_data['description'])
         finally:
-            #Deleting the service created in this method
-            resp, _ = self.client.delete_service(service_data['id'])
-            self.assertTrue(resp['status'].startswith('2'))
-            #Checking whether service is deleted successfully
-            self.assertRaises(exceptions.NotFound, self.client.get_service,
-                              service_data['id'])
+            if 'service_data' in locals():
+                # Deleting the service created in this method
+                resp, _ = self.client.delete_service(service_data['id'])
+                self.assertEqual(resp['status'], '204')
+                # Checking whether service is deleted successfully
+                self.assertRaises(exceptions.NotFound, self.client.get_service,
+                                  service_data['id'])
 
     def test_list_services(self):
         # Create, List, Verify and Delete Services
