@@ -162,6 +162,21 @@ class ServerMetadataTest(BaseComputeTest):
                       'not succeed')
 
     @attr(type='negative')
+    def test_set_server_metadata_item_incorrect_uri_key(self):
+        #Raise BadRequest if key in uri does not match
+        #the key passed in body.
+
+        meta = {'testkey': 'testvalue'}
+        try:
+            resp, metadata = self.client.set_server_metadata_item(
+                                        self.server_id, 'key', meta)
+        except exceptions.BadRequest:
+            pass
+        else:
+            self.fail('Should raise BadRequest if URI key does not match key'
+                      'passed in the body')
+
+    @attr(type='negative')
     def test_set_nonexistant_server_metadata(self):
         # Negative test: Set metadata on a non existant server should not
         # succeed
