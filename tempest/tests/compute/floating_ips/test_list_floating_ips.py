@@ -21,10 +21,12 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class FloatingIPDetailsTestBase(object):
+class FloatingIPDetailsTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
+        super(FloatingIPDetailsTestJSON, cls).setUpClass()
         cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
@@ -34,10 +36,11 @@ class FloatingIPDetailsTestBase(object):
             cls.floating_ip.append(body)
             cls.floating_ip_id.append(body['id'])
 
-    @staticmethod
+    @classmethod
     def tearDownClass(cls):
         for i in range(3):
             cls.client.delete_floating_ip(cls.floating_ip_id[i])
+        super(FloatingIPDetailsTestJSON, cls).tearDownClass()
 
     @attr(type='positive')
     def test_list_floating_ips(self):
@@ -97,27 +100,5 @@ class FloatingIPDetailsTestBase(object):
                       'nonexistant floating IP')
 
 
-class FloatingIPDetailsTestJSON(base.BaseComputeTestJSON,
-                                FloatingIPDetailsTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(FloatingIPDetailsTestJSON, cls).setUpClass()
-        FloatingIPDetailsTestBase.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        FloatingIPDetailsTestBase.tearDownClass(cls)
-        super(FloatingIPDetailsTestJSON, cls).tearDownClass()
-
-
-class FloatingIPDetailsTestXML(base.BaseComputeTestXML,
-                               FloatingIPDetailsTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(FloatingIPDetailsTestXML, cls).setUpClass()
-        FloatingIPDetailsTestBase.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        FloatingIPDetailsTestBase.tearDownClass(cls)
-        super(FloatingIPDetailsTestXML, cls).tearDownClass()
+class FloatingIPDetailsTestXML(FloatingIPDetailsTestJSON):
+    _interface = 'xml'

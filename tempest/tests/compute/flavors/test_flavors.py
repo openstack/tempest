@@ -20,7 +20,13 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class FlavorsTestBase(object):
+class FlavorsTestJSON(base.BaseComputeTest):
+    _interface = 'json'
+
+    @classmethod
+    def setUpClass(cls):
+        super(FlavorsTestJSON, cls).setUpClass()
+        cls.client = cls.flavors_client
 
     @attr(type='smoke')
     def test_list_flavors(self):
@@ -149,19 +155,5 @@ class FlavorsTestBase(object):
                           9999)
 
 
-class FlavorsTestXML(base.BaseComputeTestXML,
-                     FlavorsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(FlavorsTestXML, cls).setUpClass()
-        cls.client = cls.flavors_client
-
-
-class FlavorsTestJSON(base.BaseComputeTestJSON,
-                      FlavorsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(FlavorsTestJSON, cls).setUpClass()
-        cls.client = cls.flavors_client
+class FlavorsTestXML(FlavorsTestJSON):
+    _interface = 'xml'

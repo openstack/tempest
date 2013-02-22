@@ -21,10 +21,12 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class SecurityGroupsTest(object):
+class SecurityGroupsTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
+        super(SecurityGroupsTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
 
     @attr(type='positive')
@@ -297,17 +299,5 @@ class SecurityGroupsTest(object):
         self.assertEqual(202, resp.status)
 
 
-class SecurityGroupsTestJSON(base.BaseComputeTestJSON,
-                             SecurityGroupsTest):
-    @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupsTestJSON, cls).setUpClass()
-        SecurityGroupsTest.setUpClass(cls)
-
-
-class SecurityGroupsTestXML(base.BaseComputeTestXML,
-                            SecurityGroupsTest):
-    @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupsTestXML, cls).setUpClass()
-        SecurityGroupsTest.setUpClass(cls)
+class SecurityGroupsTestXML(SecurityGroupsTestJSON):
+    _interface = 'xml'

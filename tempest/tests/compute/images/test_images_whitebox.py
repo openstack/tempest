@@ -24,6 +24,7 @@ from tempest import whitebox
 
 @attr(type='whitebox')
 class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

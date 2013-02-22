@@ -23,7 +23,14 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ServerPersonalityTestBase(object):
+class ServerPersonalityTestJSON(base.BaseComputeTest):
+    _interface = 'json'
+
+    @classmethod
+    def setUpClass(cls):
+        super(ServerPersonalityTestJSON, cls).setUpClass()
+        cls.client = cls.servers_client
+        cls.user_client = cls.limits_client
 
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
@@ -74,21 +81,5 @@ class ServerPersonalityTestBase(object):
             self.client.delete_server(server['id'])
 
 
-class ServerPersonalityTestXML(base.BaseComputeTestXML,
-                               ServerPersonalityTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(ServerPersonalityTestXML, cls).setUpClass()
-        cls.client = cls.servers_client
-        cls.user_client = cls.limits_client
-
-
-class ServerPersonalityTestJSON(base.BaseComputeTestJSON,
-                                ServerPersonalityTestBase):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(ServerPersonalityTestJSON, cls).setUpClass()
-        cls.client = cls.servers_client
-        cls.user_client = cls.limits_client
+class ServerPersonalityTestXML(ServerPersonalityTestJSON):
+    _interface = "xml"

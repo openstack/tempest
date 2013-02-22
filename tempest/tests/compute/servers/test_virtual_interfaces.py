@@ -21,10 +21,13 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class VirtualInterfacesTest(object):
+@attr(type='smoke')
+class VirtualInterfacesTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
-    def setUpClass(self, cls):
+    def setUpClass(cls):
+        super(VirtualInterfacesTestJSON, cls).setUpClass()
         cls.name = rand_name('server')
         cls.client = cls.servers_client
         resp, server = cls.servers_client.create_server(cls.name,
@@ -35,8 +38,9 @@ class VirtualInterfacesTest(object):
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
     @classmethod
-    def tearDownClass(self, cls):
+    def tearDownClass(cls):
         cls.servers_client.delete_server(cls.server_id)
+        super(VirtualInterfacesTestJSON, cls).tearDownClass()
 
     @attr(type='positive')
     def test_list_virtual_interfaces(self):
@@ -60,28 +64,5 @@ class VirtualInterfacesTest(object):
 
 
 @attr(type='smoke')
-class VirtualInterfacesTestJSON(base.BaseComputeTestJSON,
-                                VirtualInterfacesTest):
-    @classmethod
-    def setUpClass(cls):
-        super(VirtualInterfacesTestJSON, cls).setUpClass()
-        VirtualInterfacesTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        VirtualInterfacesTest.tearDownClass(cls)
-        super(VirtualInterfacesTestJSON, cls).tearDownClass()
-
-
-@attr(type='smoke')
-class VirtualInterfacesTestXML(base.BaseComputeTestXML,
-                               VirtualInterfacesTest):
-    @classmethod
-    def setUpClass(cls):
-        super(VirtualInterfacesTestXML, cls).setUpClass()
-        VirtualInterfacesTest.setUpClass(cls)
-
-    @classmethod
-    def tearDownClass(cls):
-        VirtualInterfacesTest.tearDownClass(cls)
-        super(VirtualInterfacesTestXML, cls).tearDownClass()
+class VirtualInterfacesTestXML(VirtualInterfacesTestJSON):
+    _interface = 'xml'

@@ -21,10 +21,12 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class SecurityGroupRulesTest(object):
+class SecurityGroupRulesTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
+        super(SecurityGroupRulesTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
 
     @attr(type='positive')
@@ -243,17 +245,5 @@ class SecurityGroupRulesTest(object):
                       'with nonexistant rule id')
 
 
-class SecurityGroupRulesTestJSON(base.BaseComputeTestJSON,
-                                 SecurityGroupRulesTest):
-    @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupRulesTestJSON, cls).setUpClass()
-        SecurityGroupRulesTest.setUpClass(cls)
-
-
-class SecurityGroupRulesTestXML(base.BaseComputeTestXML,
-                                SecurityGroupRulesTest):
-    @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupRulesTestXML, cls).setUpClass()
-        SecurityGroupRulesTest.setUpClass(cls)
+class SecurityGroupRulesTestXML(SecurityGroupRulesTestJSON):
+    _interface = 'xml'

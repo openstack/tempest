@@ -26,12 +26,36 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class ImagesOneServerTestBase(object):
+class ImagesOneServerTestJSON(base.BaseComputeTest):
+    _interface = 'json'
+
     def tearDown(self):
         """Terminate test instances created after a test is executed."""
         for image_id in self.image_ids:
             self.client.delete_image(image_id)
             self.image_ids.remove(image_id)
+        super(ImagesOneServerTestJSON, self).tearDown()
+
+    @classmethod
+    def setUpClass(cls):
+        super(ImagesOneServerTestJSON, cls).setUpClass()
+        cls.client = cls.images_client
+        cls.servers_client = cls.servers_client
+        cls.server = cls.create_server()
+
+        cls.image_ids = []
+
+        if compute.MULTI_USER:
+            if cls.config.compute.allow_tenant_isolation:
+                creds = cls._get_isolated_creds()
+                username, tenant_name, password = creds
+                cls.alt_manager = clients.Manager(username=username,
+                                                  password=password,
+                                                  tenant_name=tenant_name)
+            else:
+                # Use the alt_XXX credentials in the config file
+                cls.alt_manager = clients.AltManager()
+            cls.alt_client = cls.alt_manager.images_client
 
     @attr(type='negative')
     @testtools.skip("Until Bug 1006725 is fixed")
@@ -178,59 +202,5 @@ class ImagesOneServerTestBase(object):
         self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
 
 
-class ImagesOneServerTestJSON(base.BaseComputeTestJSON,
-                              ImagesOneServerTestBase):
-
-    def tearDown(self):
-        ImagesOneServerTestBase.tearDown(self)
-        base.BaseComputeTestJSON.tearDown(self)
-
-    @classmethod
-    def setUpClass(cls):
-        super(ImagesOneServerTestJSON, cls).setUpClass()
-        cls.client = cls.images_client
-        cls.servers_client = cls.servers_client
-        cls.server = cls.create_server()
-
-        cls.image_ids = []
-
-        if compute.MULTI_USER:
-            if cls.config.compute.allow_tenant_isolation:
-                creds = cls._get_isolated_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.images_client
-
-
-class ImagesOneServerTestXML(base.BaseComputeTestXML,
-                             ImagesOneServerTestBase):
-
-    def tearDown(self):
-        ImagesOneServerTestBase.tearDown(self)
-        base.BaseComputeTestXML.tearDown(self)
-
-    @classmethod
-    def setUpClass(cls):
-        super(ImagesOneServerTestXML, cls).setUpClass()
-        cls.client = cls.images_client
-        cls.servers_client = cls.servers_client
-        cls.server = cls.create_server()
-
-        cls.image_ids = []
-
-        if compute.MULTI_USER:
-            if cls.config.compute.allow_tenant_isolation:
-                creds = cls._get_isolated_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.images_client
+class ImagesOneServerTestXML(ImagesOneServerTestJSON):
+    _interface = 'xml'

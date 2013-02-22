@@ -19,10 +19,11 @@ from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ListImageFiltersTest(BaseComputeTest):
+class ListImageFiltersTest(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -23,11 +23,13 @@ from tempest import whitebox
 
 @attr(type='whitebox')
 class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
         raise cls.skipException("Until Bug 1034129 is fixed")
         super(ServersWhiteboxTest, cls).setUpClass()
+        #NOTE(afazekas): Strange relationship
         BaseIdentityAdminTest.setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client

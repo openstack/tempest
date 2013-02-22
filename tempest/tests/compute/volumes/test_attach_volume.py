@@ -24,12 +24,13 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class AttachVolumeTest(object):
-
+class AttachVolumeTestJSON(base.BaseComputeTest):
+    _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
+        super(AttachVolumeTestJSON, cls).setUpClass()
         cls.device = 'vdb'
 
     def _detach(self, server_id, volume_id):
@@ -106,17 +107,5 @@ class AttachVolumeTest(object):
             self._delete(server['id'], volume['id'])
 
 
-class TestAttachVolumeJSON(base.BaseComputeTestJSON,
-                           AttachVolumeTest):
-    @classmethod
-    def setUpClass(cls):
-        super(TestAttachVolumeJSON, cls).setUpClass()
-        AttachVolumeTest.setUpClass(cls)
-
-
-class TestAttachVolumeXML(base.BaseComputeTestXML,
-                          AttachVolumeTest):
-    @classmethod
-    def setUpClass(cls):
-        super(TestAttachVolumeXML, cls).setUpClass()
-        AttachVolumeTest.setUpClass(cls)
+class AttachVolumeTestXML(AttachVolumeTestJSON):
+    _interface = 'xml'

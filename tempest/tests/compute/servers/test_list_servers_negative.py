@@ -19,10 +19,11 @@
 from tempest import clients
 from tempest import exceptions
 from tempest.tests import compute
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ListServersNegativeTest(BaseComputeTest):
+class ListServersNegativeTest(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

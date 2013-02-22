@@ -20,27 +20,16 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ExtensionsTestBase(object):
+class ExtensionsTestJSON(base.BaseComputeTest):
+    _interface = 'json'
 
     @attr(type='positive')
     def test_list_extensions(self):
         # List of all extensions
-        resp, extensions = self.client.list_extensions()
+        resp, extensions = self.extensions_client.list_extensions()
         self.assertTrue("extensions" in extensions)
         self.assertEqual(200, resp.status)
 
 
-class ExtensionsTestJSON(base.BaseComputeTest, ExtensionsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ExtensionsTestJSON, cls).setUpClass()
-        cls.client = cls.extensions_client
-
-
-class ExtensionsTestXML(base.BaseComputeTestXML, ExtensionsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(ExtensionsTestXML, cls).setUpClass()
-        cls.client = cls.extensions_client
+class ExtensionsTestXML(ExtensionsTestJSON):
+    _interface = 'xml'

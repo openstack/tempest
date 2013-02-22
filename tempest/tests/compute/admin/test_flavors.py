@@ -23,14 +23,17 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class FlavorsAdminTestBase(object):
+class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
 
     """
     Tests Flavors API Create and Delete that require admin privileges
     """
 
+    _interface = 'json'
+
     @classmethod
-    def setUpClass(self, cls):
+    def setUpClass(cls):
+        super(FlavorsAdminTestJSON, cls).setUpClass()
         if not compute.FLAVOR_EXTRA_DATA_ENABLED:
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
@@ -315,23 +318,5 @@ class FlavorsAdminTestBase(object):
 #TODO(afazekas): Negative tests with regular user
 
 
-class FlavorsAdminTestXML(base.BaseComputeAdminTestXML,
-                          base.BaseComputeTestXML,
-                          FlavorsAdminTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(FlavorsAdminTestXML, cls).setUpClass()
-        base.BaseComputeTestXML.setUpClass()
-        FlavorsAdminTestBase.setUpClass(cls)
-
-
-class FlavorsAdminTestJSON(base.BaseComputeAdminTestJSON,
-                           base.BaseComputeTestJSON,
-                           FlavorsAdminTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(FlavorsAdminTestJSON, cls).setUpClass()
-        base.BaseComputeTestJSON.setUpClass()
-        FlavorsAdminTestBase.setUpClass(cls)
+class FlavorsAdminTestXML(FlavorsAdminTestJSON):
+    _interface = 'xml'
