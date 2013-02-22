@@ -229,7 +229,7 @@ class TenantsTestBase(object):
         t_desc2 = rand_name('desc2-')
         resp, body = self.client.update_tenant(t_id, description=t_desc2)
         st2 = resp['status']
-        resp2_desc = body['extra']['description']
+        resp2_desc = body['description']
         self.assertTrue(st2.startswith('2'))
         self.assertNotEqual(resp1_desc, resp2_desc)
 
@@ -257,7 +257,7 @@ class TenantsTestBase(object):
         t_en2 = True
         resp, body = self.client.update_tenant(t_id, enabled=t_en2)
         st2 = resp['status']
-        resp2_en = body['extra']['enabled']
+        resp2_en = body['enabled']
         self.assertTrue(st2.startswith('2'))
         self.assertNotEqual(resp1_en, resp2_en)
 
