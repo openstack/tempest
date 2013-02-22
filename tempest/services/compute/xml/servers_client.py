@@ -309,34 +309,38 @@ class ServersClientXML(RestClientXML):
 
         return resp, network
 
+    def action(self, server_id, action_name, response_key, **kwargs):
+        if 'xmlns' not in kwargs:
+            kwargs['xmlns'] = XMLNS_11
+        doc = Document((Element(action_name, **kwargs)))
+        resp, body = self.post("servers/%s/action" % server_id,
+                               str(doc), self.headers)
+        if response_key is not None:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
     def change_password(self, server_id, password):
-        cpw = Element("changePassword",
-                      xmlns=XMLNS_11,
-                      adminPass=password)
-        return self.post("servers/%s/action" % server_id,
-                         str(Document(cpw)), self.headers)
+        return self.action(server_id, "changePassword", None,
+                           adminPass=password)
 
     def reboot(self, server_id, reboot_type):
-        reboot = Element("reboot",
-                         xmlns=XMLNS_11,
-                         type=reboot_type)
-        return self.post("servers/%s/action" % server_id,
-                         str(Document(reboot)), self.headers)
+        return self.action(server_id, "reboot", None, type=reboot_type)
 
-    def rebuild(self, server_id, image_ref, name=None, meta=None,
-                personality=None, adminPass=None, disk_config=None):
+    def rebuild(self, server_id, image_ref, **kwargs):
+        kwargs['imageRef'] = image_ref
+        if 'xmlns' not in kwargs:
+            kwargs['xmlns'] = XMLNS_11
+
+        attrs = kwargs.copy()
+        if 'metadata' in attrs:
+            del attrs['metadata']
         rebuild = Element("rebuild",
-                          xmlns=XMLNS_11,
-                          imageRef=image_ref)
+                          **attrs)
 
-        if name:
-            rebuild.add_attr("name", name)
-        if adminPass:
-            rebuild.add_attr("adminPass", adminPass)
-        if meta:
+        if 'metadata' in kwargs:
             metadata = Element("metadata")
             rebuild.append(metadata)
-            for k, v in meta.items():
+            for k, v in kwargs['metadata'].items():
                 meta = Element("meta", key=k)
                 meta.append(Text(v))
                 metadata.append(meta)
@@ -346,53 +350,31 @@ class ServersClientXML(RestClientXML):
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
-    def resize(self, server_id, flavor_ref, disk_config=None):
-        resize = Element("resize",
-                         xmlns=XMLNS_11,
-                         flavorRef=flavor_ref)
+    def resize(self, server_id, flavor_ref, **kwargs):
+        if 'disk_config' in kwargs:
+            raise NotImplementedError("Sorry, disk_config not "
+                                      "supported via XML yet")
+        kwargs['flavorRef'] = flavor_ref
+        return self.action(server_id, 'resize', None, **kwargs)
 
-        if disk_config is not None:
-            raise Exception("Sorry, disk_config not supported via XML yet")
+    def confirm_resize(self, server_id, **kwargs):
+        return self.action(server_id, 'confirmResize', None, **kwargs)
 
-        return self.post('servers/%s/action' % server_id,
-                         str(Document(resize)), self.headers)
+    def revert_resize(self, server_id, **kwargs):
+        return self.action(server_id, 'revertResize', None, **kwargs)
 
-    def confirm_resize(self, server_id):
-        conf = Element('confirmResize')
-        return self.post('servers/%s/action' % server_id,
-                         str(Document(conf)), self.headers)
+    def create_image(self, server_id, name):
+        return self.action(server_id, 'createImage', None, name=name)
 
-    def revert_resize(self, server_id):
-        revert = Element('revertResize')
-        return self.post('servers/%s/action' % server_id,
-                         str(Document(revert)), self.headers)
+    def add_security_group(self, server_id, name):
+        return self.action(server_id, 'addSecurityGroup', None, name=name)
 
-    def create_image(self, server_id, image_name):
-        metadata = Element('metadata')
-        image = Element('createImage',
-                        metadata,
-                        xmlns=XMLNS_11,
-                        name=image_name)
-        return self.post('servers/%s/action' % server_id,
-                         str(Document(image)), self.headers)
-
-    def add_security_group(self, server_id, security_group_name):
-        secgrp = Element('addSecurityGroup', name=security_group_name)
-        return self.post('servers/%s/action' % server_id,
-                         str(Document(secgrp)), self.headers)
-
-    def remove_security_group(self, server_id, security_group_name):
-        secgrp = Element('removeSecurityGroup', name=security_group_name)
-        return self.post('servers/%s/action' % server_id,
-                         str(Document(secgrp)), self.headers)
+    def remove_security_group(self, server_id, name):
+        return self.action(server_id, 'removeSecurityGroup', None, name=name)
 
     def get_console_output(self, server_id, length):
-        post_body = Element("os-getConsoleOutput", length=length)
-        resp, body = self.post("/servers/%s/action" % server_id,
-                               headers=self.headers,
-                               body=str(Document(post_body)))
-        body = xml_to_json(etree.fromstring(body))
-        return resp, body
+        return self.action(server_id, 'os-getConsoleOutput', 'output',
+                           length=length)
 
     def list_virtual_interfaces(self, server_id):
         """
