@@ -233,3 +233,12 @@ class ServerMetadataTest(base.BaseComputeTest):
         self.assertRaises(exceptions.OverLimit,
                           self.client.update_server_metadata,
                           self.server_id, req_metadata)
+
+    @attr(type='negative')
+    def test_update_all_metadata_field_error(self):
+        # Raise a bad request error for blank key.
+        # set_server_metadata will replace all metadata with new value
+        meta = {'': 'data1'}
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.set_server_metadata,
+                          self.server_id, meta=meta)
