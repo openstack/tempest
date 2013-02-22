@@ -130,6 +130,7 @@ class UsersTestBase(object):
         resp, user = self.client.create_user('user_1234', self.alt_password,
                                              self.data.tenant['id'],
                                              self.alt_email)
+        self.assertEquals('200', resp['status'])
         resp, body = self.client.delete_user(user['id'])
         self.assertEquals('204', resp['status'])
 
@@ -255,16 +256,18 @@ class UsersTestBase(object):
         resp, user1 = self.client.create_user('tenant_user1', 'password1',
                                               self.data.tenant['id'],
                                               'user1@123')
+        self.assertEquals('200', resp['status'])
         user_ids.append(user1['id'])
         self.data.users.append(user1)
         resp, user2 = self.client.create_user('tenant_user2', 'password2',
                                               self.data.tenant['id'],
                                               'user2@123')
+        self.assertEquals('200', resp['status'])
         user_ids.append(user2['id'])
         self.data.users.append(user2)
         #List of users for the respective tenant ID
         resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertTrue(resp['status'] in ('200', '203'))
         for i in body:
             fetched_user_ids.append(i['id'])
         #verifying the user Id in the list
@@ -286,17 +289,22 @@ class UsersTestBase(object):
         user_ids = list()
         fetched_user_ids = list()
         user_ids.append(user['id'])
-        self.client.assign_user_role(tenant['id'], user['id'], role['id'])
+        resp, role = self.client.assign_user_role(tenant['id'], user['id'],
+                                                  role['id'])
+        self.assertEquals('200', resp['status'])
         resp, second_user = self.client.create_user('second_user', 'password1',
                                                     self.data.tenant['id'],
                                                     'user1@123')
+        self.assertEquals('200', resp['status'])
         user_ids.append(second_user['id'])
         self.data.users.append(second_user)
-        self.client.assign_user_role(tenant['id'], second_user['id'],
-                                     role['id'])
+        resp, role = self.client.assign_user_role(tenant['id'],
+                                                  second_user['id'],
+                                                  role['id'])
+        self.assertEquals('200', resp['status'])
         #List of users with roles for the respective tenant ID
         resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEquals('200', resp['status'])
         for i in body:
             fetched_user_ids.append(i['id'])
         #verifying the user Id in the list
