@@ -15,14 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
+import tempest.test
 
 
-class BaseIdAdminTest(testtools.testcase.WithAttributes,
-                      testtools.TestCase):
+class BaseIdAdminTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):

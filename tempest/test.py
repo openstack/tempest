@@ -19,8 +19,10 @@ import logging
 import time
 
 import nose.plugins.attrib
+import testresources
 import testtools
 
+from tempest import config
 from tempest import manager
 
 LOG = logging.getLogger(__name__)
@@ -46,7 +48,16 @@ def attr(*args, **kwargs):
     return decorator
 
 
-class TestCase(testtools.TestCase):
+class BaseTestCase(testtools.TestCase,
+                   testtools.testcase.WithAttributes,
+                   testresources.ResourcedTestCase):
+    def __init__(self, *args, **kwargs):
+        super(BaseTestCase, self).__init__(*args, **kwargs)
+        #NOTE(afazekas): inspection workaround
+        BaseTestCase.config = config.TempestConfig()
+
+
+class TestCase(BaseTestCase):
 
     """
     Base test case class for all Tempest tests
@@ -58,7 +69,6 @@ class TestCase(testtools.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.manager = cls.manager_class()
-        cls.config = cls.manager.config
         for attr_name in cls.manager.client_attr_names:
             # Ensure that pre-existing class attributes won't be
             # accidentally overriden.
@@ -66,20 +76,20 @@ class TestCase(testtools.TestCase):
             client = getattr(cls.manager, attr_name)
             setattr(cls, attr_name, client)
         cls.resource_keys = {}
-        cls.resources = []
+        cls.os_resources = []
 
     def set_resource(self, key, thing):
         LOG.debug("Adding %r to shared resources of %s" %
                   (thing, self.__class__.__name__))
         self.resource_keys[key] = thing
-        self.resources.append(thing)
+        self.os_resources.append(thing)
 
     def get_resource(self, key):
         return self.resource_keys[key]
 
     def remove_resource(self, key):
         thing = self.resource_keys[key]
-        self.resources.remove(thing)
+        self.os_resources.remove(thing)
         del self.resource_keys[key]
 
 

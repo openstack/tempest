@@ -40,7 +40,7 @@ class S3ImagesTest(BotoTestCase):
         cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.images_client = cls.os.ec2api_client
-        config = cls.os.config
+        config = cls.config
         cls.materials_path = config.boto.s3_materials_path
         cls.ami_manifest = config.boto.ami_manifest
         cls.aki_manifest = config.boto.aki_manifest

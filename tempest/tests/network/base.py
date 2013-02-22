@@ -15,28 +15,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+import tempest.test
 
 
-class BaseNetworkTest(testtools.testcase.WithAttributes,
-                      testtools.TestCase):
+class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
         os = clients.Manager()
         client = os.network_client
-        enabled = True
 
         # Validate that there is even an endpoint configured
         # for networks, and mark the attr for skipping if not
         try:
             client.list_networks()
         except exceptions.EndpointNotFound:
-            enabled = False
             skip_msg = "No OpenStack Network API endpoint"
             raise cls.skipException(skip_msg)
 

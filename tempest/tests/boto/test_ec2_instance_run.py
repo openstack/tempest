@@ -45,8 +45,8 @@ class InstanceRunTest(BotoTestCase):
         cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.ec2_client = cls.os.ec2api_client
-        config = cls.os.config
         cls.zone = cls.ec2_client.get_good_zone()
+        config = cls.config
         cls.materials_path = config.boto.s3_materials_path
         ami_manifest = config.boto.ami_manifest
         aki_manifest = config.boto.aki_manifest

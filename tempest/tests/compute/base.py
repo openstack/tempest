@@ -18,29 +18,23 @@
 import logging
 import time
 
-import testresources
-import testtools
-
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
-from tempest import config
 from tempest import exceptions
+import tempest.test
 from tempest.tests import compute
 
 
 LOG = logging.getLogger(__name__)
 
 
-class BaseComputeTest(testtools.testcase.WithAttributes,
-                      testtools.TestCase,
-                      testresources.ResourcedTestCase):
+class BaseComputeTest(tempest.test.BaseTestCase):
     """Base test case class for all Compute API tests."""
 
     conclusion = compute.generic_setup_package()
 
     @classmethod
     def setUpClass(cls):
-        cls.config = config.TempestConfig()
         cls.isolated_creds = []
 
         if cls.config.compute.allow_tenant_isolation:
@@ -229,7 +223,6 @@ class BaseComputeTest(testtools.testcase.WithAttributes,
 
 
 class BaseComputeAdminTest(BaseComputeTest):
-
     """Base test case class for all Compute Admin API tests."""
 
     @classmethod

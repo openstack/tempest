@@ -18,7 +18,7 @@
 import cStringIO as StringIO
 import random
 
-import testtools
+import tempest.test
 
 from tempest.test import attr
 
@@ -27,8 +27,7 @@ from tempest import clients
 from tempest import exceptions
 
 
-class CreateRegisterImagesTest(testtools.testcase.WithAttributes,
-                               testtools.TestCase):
+class CreateRegisterImagesTest(tempest.test.BaseTestCase):
 
     """
     Here we test the registration and creation of images
@@ -108,8 +107,7 @@ class CreateRegisterImagesTest(testtools.testcase.WithAttributes,
         self.assertEqual('active', body.get('status'))
 
 
-class ListImagesTest(testtools.testcase.WithAttributes,
-                     testtools.TestCase):
+class ListImagesTest(tempest.test.BaseTestCase):
 
     """
     Here we test the listing of image information
