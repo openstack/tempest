@@ -21,10 +21,11 @@ from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
-from tempest.tests.compute.base import BaseComputeTest
+from tempest.tests.compute import base
 
 
-class ServersNegativeTest(BaseComputeTest):
+class ServersNegativeTest(base.BaseComputeTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
@@ -38,86 +39,63 @@ class ServersNegativeTest(BaseComputeTest):
     @attr(type='negative')
     def test_server_name_blank(self):
         # Create a server with name parameter empty
-        try:
-                resp, server = self.create_server_with_extras('',
-                                                              self.image_ref,
-                                                              self.flavor_ref)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Server name cannot be blank')
+
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
+                          '', self.image_ref, self.flavor_ref)
 
     @attr(type='negative')
     def test_personality_file_contents_not_encoded(self):
         # Use an unencoded file when creating a server with personality
+
         file_contents = 'This is a test file.'
         person = [{'path': '/etc/testfile.txt',
                    'contents': file_contents}]
 
-        try:
-            resp, server = self.create_server_with_extras('test',
-                                                          self.image_ref,
-                                                          self.flavor_ref,
-                                                          personality=person)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Unencoded file contents should not be accepted')
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
+                          'fail', self.image_ref, self.flavor_ref,
+                          personality=person)
 
     @attr(type='negative')
     def test_create_with_invalid_image(self):
         # Create a server with an unknown image
-        try:
-            resp, server = self.create_server_with_extras('fail', -1,
-                                                          self.flavor_ref)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Cannot create a server with an invalid image')
+
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
+                          'fail', -1, self.flavor_ref)
 
     @attr(type='negative')
     def test_create_with_invalid_flavor(self):
         # Create a server with an unknown flavor
-        try:
-            self.create_server_with_extras('fail', self.image_ref, -1)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Cannot create a server with an invalid flavor')
+
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras,
+                          'fail', self.image_ref, -1)
 
     @attr(type='negative')
     def test_invalid_access_ip_v4_address(self):
         # An access IPv4 address must match a valid address pattern
+
         IPv4 = '1.1.1.1.1.1'
-        name = rand_name('server')
-        try:
-            resp, server = self.create_server_with_extras(name,
-                                                          self.image_ref,
-                                                          self.flavor_ref,
-                                                          accessIPv4=IPv4)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Access IPv4 address must match the correct format')
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras, "fail",
+                          self.image_ref, self.flavor_ref, accessIPv4=IPv4)
 
     @attr(type='negative')
     def test_invalid_ip_v6_address(self):
         # An access IPv6 address must match a valid address pattern
+
         IPv6 = 'notvalid'
-        name = rand_name('server')
-        try:
-            resp, server = self.create_server_with_extras(name,
-                                                          self.image_ref,
-                                                          self.flavor_ref,
-                                                          accessIPv6=IPv6)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Access IPv6 address must match the correct format')
+
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras, "fail",
+                          self.image_ref, self.flavor_ref, accessIPv6=IPv6)
 
     @attr(type='negative')
     def test_reboot_deleted_server(self):
         # Reboot a deleted server
+
         self.name = rand_name('server')
         resp, create_server = self.create_server_with_extras(self.name,
                                                              self.image_ref,
@@ -125,16 +103,13 @@ class ServersNegativeTest(BaseComputeTest):
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
-        try:
-            resp1, reboot_server = self.client.reboot(self.server_id, 'SOFT')
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to reboot a deleted server')
+        self.assertRaises(exceptions.NotFound, self.client.reboot,
+                          self.server_id, 'SOFT')
 
     @attr(type='negative')
     def test_rebuild_deleted_server(self):
         # Rebuild a deleted server
+
         self.name = rand_name('server')
         resp, create_server = self.create_server_with_extras(self.name,
                                                              self.image_ref,
@@ -142,13 +117,10 @@ class ServersNegativeTest(BaseComputeTest):
         self.server_id = create_server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
-        try:
-            resp1, rebuild_server = self.client.rebuild(self.server_id,
-                                                        self.image_ref_alt)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to rebuild a deleted server')
+
+        self.assertRaises(exceptions.NotFound,
+                          self.client.rebuild,
+                          self.server_id, self.image_ref_alt)
 
     @attr(type='negative')
     def test_create_numeric_server_name(self):
@@ -277,19 +249,16 @@ class ServersNegativeTest(BaseComputeTest):
     @attr(type='negative')
     def test_create_with_nonexistent_security_group(self):
         # Create a server with a nonexistent security group
-        try:
-            security_groups = [{'name': 'does_not_exist'}]
-            self.create_server_with_extras('fail',
-                                           self.image_ref,
-                                           self.flavor_ref,
-                                           security_groups=security_groups)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Server was created with nonexistent security group')
+
+        security_groups = [{'name': 'does_not_exist'}]
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_server_with_extras, 'fail',
+                          self.image_ref, self.flavor_ref,
+                          security_groups=security_groups)
 
     @attr(type='negative')
     def test_get_non_existent_server(self):
         # Get a non existent server details
+
         self.assertRaises(exceptions.NotFound, self.client.get_server,
                           '999erra43')
