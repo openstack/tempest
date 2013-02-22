@@ -17,7 +17,6 @@
 
 import ConfigParser
 import contextlib
-import re
 import types
 import urlparse
 

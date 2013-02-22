@@ -23,7 +23,6 @@ from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 from tempest.testboto import BotoTestCase
-import tempest.tests.boto
 from tempest.tests.boto.utils.s3 import s3_upload_dir
 from tempest.tests.boto.utils.wait import state_wait
 
@@ -34,7 +33,7 @@ class S3ImagesTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(S3ImagesTest, cls).setUpClass()
-        if not tempest.tests.boto.A_I_IMAGES_READY:
+        if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
         cls.os = clients.Manager()
