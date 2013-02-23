@@ -131,6 +131,17 @@ class ServersClientXML(RestClientXML):
                 self._parse_links(body, json[sub])
         return json
 
+    def _parse_xml_virtual_interfaces(self, xml_dom):
+        """
+        Return server's virtual interfaces XML as JSON.
+        """
+        data = {"virtual_interfaces": []}
+        for iface in xml_dom.getchildren():
+            data["virtual_interfaces"].append(
+                {"id": iface.get("id"),
+                 "mac_address": iface.get("mac_address")})
+        return data
+
     def get_server(self, server_id):
         """Returns the details of an existing server."""
         resp, body = self.get("servers/%s" % str(server_id), self.headers)
@@ -382,5 +393,5 @@ class ServersClientXML(RestClientXML):
         """
         resp, body = self.get('/'.join(['servers', server_id,
                               'os-virtual-interfaces']), self.headers)
-        server = self._parse_server(etree.fromstring(body))
-        return resp, server
+        virt_int = self._parse_xml_virtual_interfaces(etree.fromstring(body))
+        return resp, virt_int
