@@ -21,7 +21,8 @@ from tempest.test import attr
 from tempest.tests.identity import base
 
 
-class TenantsTestBase(object):
+class TenantsTestJSON(base.BaseIdentityAdminTest):
+    _interface = 'json'
 
     def test_list_tenants_by_unauthorized_user(self):
         # Non-admin user should not be able to list tenants
@@ -272,16 +273,5 @@ class TenantsTestBase(object):
         self.data.tenants.remove(tenant)
 
 
-class TenantsTestJSON(base.BaseIdentityAdminTestJSON,
-                      TenantsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(TenantsTestJSON, cls).setUpClass()
-
-
-class TenantsTestXML(base.BaseIdentityAdminTestXML, TenantsTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(TenantsTestXML, cls).setUpClass()
+class TenantsTestXML(TenantsTestJSON):
+    _interface = 'xml'
