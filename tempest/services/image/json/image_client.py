@@ -176,11 +176,21 @@ class ImageClientJSON(RestClient):
             url = '/' + url
             self.http.raw_request('DELETE', url)
 
-    def image_list(self, params=None):
+    def image_list(self, **kwargs):
         url = 'v1/images'
 
-        if params:
-            url += '?%s' % urllib.urlencode(params)
+        if len(kwargs) > 0:
+            url += '?%s' % urllib.urlencode(kwargs)
+
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['images']
+
+    def image_list_detail(self, **kwargs):
+        url = 'v1/images/detail'
+
+        if len(kwargs) > 0:
+            url += '?%s' % urllib.urlencode(kwargs)
 
         resp, body = self.get(url)
         body = json.loads(body)
