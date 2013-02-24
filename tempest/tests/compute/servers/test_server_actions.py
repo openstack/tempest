@@ -35,6 +35,8 @@ class ServerActionsTestJSON(base.BaseComputeTest):
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
     def setUp(self):
+        #NOTE(afazekas): Normally we use the same server with all test cases,
+        # but if it has an issue, we build a new one
         super(ServerActionsTestJSON, self).setUp()
         # Check if the server is in a clean state after test
         try:
@@ -208,18 +210,48 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         file_contents = 'Test server rebuild.'
         personality = [{'path': '/etc/rebuild.txt',
                         'contents': base64.b64encode(file_contents)}]
-        try:
-            resp, rebuilt_server = self.client.rebuild(999,
-                                                       self.image_ref_alt,
-                                                       name=new_name,
-                                                       meta=meta,
-                                                       personality=personality,
-                                                       adminPass='rebuild')
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('The server rebuild for a non existing server should not'
-                      ' be allowed')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.rebuild,
+                          999, self.image_ref_alt,
+                          name=new_name, meta=meta,
+                          personality=personality,
+                          adminPass='rebuild')
+
+    @attr(type='positive')
+    def test_get_console_output(self):
+        # Positive test:Should be able to GET the console output
+        # for a given server_id and number of lines
+        def get_output():
+            resp, output = self.servers_client.get_console_output(
+                self.server_id, 10)
+            self.assertEqual(200, resp.status)
+            self.assertNotEqual(output, None)
+            lines = len(output.split('\n'))
+            self.assertEqual(lines, 10)
+        self.wait_for(get_output)
+
+    @attr(type='negative')
+    def test_get_console_output_invalid_server_id(self):
+        # Negative test: Should not be able to get the console output
+        # for an invalid server_id
+        self.assertRaises(exceptions.NotFound,
+                          self.servers_client.get_console_output,
+                          '!@#$%^&*()', 10)
+
+    @attr(type='positive')
+    @testtools.skip('Until tempest bug 1014683 is fixed.')
+    def test_get_console_output_server_id_in_reboot_status(self):
+        # Positive test:Should be able to GET the console output
+        # for a given server_id in reboot status
+        resp, output = self.servers_client.reboot(self.server_id, 'SOFT')
+        self.servers_client.wait_for_server_status(self.server_id,
+                                                   'REBOOT')
+        resp, output = self.servers_client.get_console_output(self.server_id,
+                                                              10)
+        self.assertEqual(200, resp.status)
+        self.assertNotEqual(output, None)
+        lines = len(output.split('\n'))
+        self.assertEqual(lines, 10)
 
     @classmethod
     def rebuild_servers(cls):
