@@ -22,14 +22,12 @@ import testtools
 
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.json.hosts_client import HostsClientJSON
-from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.test import attr
 from tempest.tests.compute import base
 
 
 @attr(category='live-migration')
-class LiveBlockMigrationTest(base.BaseComputeTest):
+class LiveBlockMigrationTest(base.BaseComputeAdminTest):
     _interface = 'json'
 
     live_migration_available = (
@@ -42,12 +40,8 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
     def setUpClass(cls):
         super(LiveBlockMigrationTest, cls).setUpClass()
 
-        tenant_name = cls.config.compute_admin.tenant_name
-        cls.admin_hosts_client = HostsClientJSON(
-            *cls._get_client_args(), tenant_name=tenant_name)
-
-        cls.admin_servers_client = ServersClientJSON(
-            *cls._get_client_args(), tenant_name=tenant_name)
+        cls.admin_hosts_client = cls.os_adm.hosts_client
+        cls.admin_servers_client = cls.os_adm.servers_client
 
         cls.created_server_ids = []
 
@@ -102,7 +96,7 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
     @attr(type='positive')
     @testtools.skipIf(not live_migration_available,
                       'Block Live migration not available')
-    def test_001_live_block_migration(self):
+    def test_live_block_migration(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
             raise self.skipTest(
@@ -114,11 +108,10 @@ class LiveBlockMigrationTest(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         self.assertEquals(target_host, self._get_host_for_server(server_id))
 
-    @attr(type='positive', bug='lp1051881')
     @testtools.skip('Until bug 1051881 is dealt with.')
     @testtools.skipIf(not live_migration_available,
                       'Block Live migration not available')
-    def test_002_invalid_host_for_migration(self):
+    def test_invalid_host_for_migration(self):
         # Migrating to an invalid host should not change the status
 
         server_id = self._get_an_active_server()
