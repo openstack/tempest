@@ -21,18 +21,10 @@ virtual environments.
 Synced in from openstack-common
 """
 
+import argparse
 import os
 import subprocess
 import sys
-
-
-possible_topdir = os.getcwd()
-if os.path.exists(os.path.join(possible_topdir, "tempest",
-                               "__init__.py")):
-    sys.path.insert(0, possible_topdir)
-
-
-from tempest.openstack.common import cfg
 
 
 class InstallVenv(object):
@@ -139,17 +131,12 @@ class InstallVenv(object):
 
     def parse_args(self, argv):
         """Parses command-line arguments."""
-        cli_opts = [
-            cfg.BoolOpt('no-site-packages',
-                        default=False,
-                        short='n',
-                        help="Do not inherit packages from global Python"
-                             "install"),
-        ]
-        CLI = cfg.ConfigOpts()
-        CLI.register_cli_opts(cli_opts)
-        CLI(argv[1:])
-        return CLI
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-n', '--no-site-packages',
+                            action='store_true',
+                            help="Do not inherit packages from global Python "
+                                 "install")
+        return parser.parse_args(argv[1:])
 
 
 class Distro(InstallVenv):
