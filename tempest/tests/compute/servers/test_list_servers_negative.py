@@ -78,10 +78,10 @@ class ListServersNegativeTest(base.BaseComputeTest):
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
         for x in xrange(2):
-            srv = cls.create_server()
+            resp, srv = cls.create_server()
             cls.existing_fixtures.append(srv)
 
-        srv = cls.create_server()
+        resp, srv = cls.create_server()
         cls.client.delete_server(srv['id'])
         # We ignore errors on termination because the server may
         # be put into ERROR status on a quick spawn, then delete,

@@ -225,13 +225,9 @@ class ServerActionsTestJSON(base.BaseComputeTest):
     def rebuild_servers(cls):
         # Destroy any existing server and creates a new one
         cls.clear_servers()
-        cls.name = rand_name('server')
-        resp, server = cls.create_server_with_extras(cls.name,
-                                                     cls.image_ref,
-                                                     cls.flavor_ref)
+        resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         cls.password = server['adminPass']
-        cls.client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
 
 class ServerActionsTestXML(ServerActionsTestJSON):

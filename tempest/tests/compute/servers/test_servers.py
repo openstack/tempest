@@ -35,11 +35,7 @@ class ServersTestJSON(base.BaseComputeTest):
 
         try:
             server = None
-            name = rand_name('server')
-            resp, server = self.create_server_with_extras(name, self.image_ref,
-                                                          self.flavor_ref,
-                                                          adminPass='test'
-                                                          'password')
+            resp, server = self.create_server(adminPass='testpassword')
 
             #Verify the password is set correctly in the response
             self.assertEqual('testpassword', server['adminPass'])
@@ -52,19 +48,16 @@ class ServersTestJSON(base.BaseComputeTest):
     def test_create_with_existing_server_name(self):
         # Creating a server with a name that already exists is allowed
 
+        # TODO(sdague): clear out try, we do cleanup one layer up
         try:
             id1 = None
             id2 = None
             server_name = rand_name('server')
-            resp, server = self.create_server_with_extras(server_name,
-                                                          self.image_ref,
-                                                          self.flavor_ref)
-            self.client.wait_for_server_status(server['id'], 'ACTIVE')
+            resp, server = self.create_server(name=server_name,
+                                              wait_until='ACTIVE')
             id1 = server['id']
-            resp, server = self.create_server_with_extras(server_name,
-                                                          self.image_ref,
-                                                          self.flavor_ref)
-            self.client.wait_for_server_status(server['id'], 'ACTIVE')
+            resp, server = self.create_server(name=server_name,
+                                              wait_until='ACTIVE')
             id2 = server['id']
             self.assertNotEqual(id1, id2, "Did not create a new server")
             resp, server = self.client.get_server(id1)
@@ -86,11 +79,7 @@ class ServersTestJSON(base.BaseComputeTest):
             key_name = rand_name('key')
             resp, keypair = self.keypairs_client.create_keypair(key_name)
             resp, body = self.keypairs_client.list_keypairs()
-            server_name = rand_name('server')
-            resp, server = self.create_server_with_extras(server_name,
-                                                          self.image_ref,
-                                                          self.flavor_ref,
-                                                          key_name=key_name)
+            resp, server = self.create_server(key_name=key_name)
             self.assertEqual('202', resp['status'])
             self.client.wait_for_server_status(server['id'], 'ACTIVE')
             resp, server = self.client.get_server(server['id'])
@@ -104,10 +93,7 @@ class ServersTestJSON(base.BaseComputeTest):
         # The server name should be changed to the the provided value
         try:
             server = None
-            name = rand_name('server')
-            resp, server = self.create_server_with_extras(name, self.image_ref,
-                                                          self.flavor_ref)
-            self.client.wait_for_server_status(server['id'], 'ACTIVE')
+            resp, server = self.create_server(wait_until='ACTIVE')
 
             #Update the server with a new name
             resp, server = self.client.update_server(server['id'],
@@ -129,10 +115,7 @@ class ServersTestJSON(base.BaseComputeTest):
         # The server's access addresses should reflect the provided values
         try:
             server = None
-            name = rand_name('server')
-            resp, server = self.create_server_with_extras(name, self.image_ref,
-                                                          self.flavor_ref)
-            self.client.wait_for_server_status(server['id'], 'ACTIVE')
+            resp, server = self.create_server(wait_until='ACTIVE')
 
             #Update the IPv4 and IPv6 access addresses
             resp, body = self.client.update_server(server['id'],
@@ -153,10 +136,7 @@ class ServersTestJSON(base.BaseComputeTest):
 
     def test_delete_server_while_in_building_state(self):
         # Delete a server while it's VM state is Building
-        name = rand_name('server')
-        resp, server = self.create_server_with_extras(name, self.image_ref,
-                                                      self.flavor_ref)
-        self.client.wait_for_server_status(server['id'], 'BUILD')
+        resp, server = self.create_server(wait_until='BUILD')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
 

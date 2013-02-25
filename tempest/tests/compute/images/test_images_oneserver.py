@@ -41,7 +41,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         super(ImagesOneServerTestJSON, cls).setUpClass()
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
-        cls.server = cls.create_server()
+        resp, cls.server = cls.create_server(wait_until='ACTIVE')
 
         cls.image_ids = []
 

@@ -51,12 +51,6 @@ class ImagesTestJSON(base.BaseComputeTest):
 
     def tearDown(self):
         """Terminate test instances created after a test is executed."""
-        for server in self.servers:
-            resp, body = self.servers_client.delete_server(server['id'])
-            if resp['status'] == '204':
-                self.servers.remove(server)
-                self.servers_client.wait_for_server_termination(server['id'])
-
         for image_id in self.image_ids:
             self.client.delete_image(image_id)
             self.image_ids.remove(image_id)
@@ -65,11 +59,7 @@ class ImagesTestJSON(base.BaseComputeTest):
     @attr(type='negative')
     def test_create_image_from_deleted_server(self):
         # An image should not be created if the server instance is removed
-        server_name = rand_name('server')
-        resp, server = self.servers_client.create_server(server_name,
-                                                         self.image_ref,
-                                                         self.flavor_ref)
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_server(wait_until='ACTIVE')
 
         # Delete server before trying to create server
         self.servers_client.delete_server(server['id'])
@@ -114,7 +104,7 @@ class ImagesTestJSON(base.BaseComputeTest):
     @attr(type='negative')
     def test_create_image_when_server_is_terminating(self):
         # Return an error when creating image of server that is terminating
-        server = self.create_server()
+        resp, server = self.create_server(wait_until='ACTIVE')
         self.servers_client.delete_server(server['id'])
 
         snapshot_name = rand_name('test-snap-')
@@ -124,11 +114,7 @@ class ImagesTestJSON(base.BaseComputeTest):
     @attr(type='negative')
     def test_create_image_when_server_is_building(self):
         # Return error when creating an image of a server that is building
-        server_name = rand_name('test-vm-')
-        resp, server = self.servers_client.create_server(server_name,
-                                                         self.image_ref,
-                                                         self.flavor_ref)
-        self.servers.append(server)
+        resp, server = self.create_server(wait_until='BUILD')
         snapshot_name = rand_name('test-snap-')
         self.assertRaises(exceptions.Duplicate, self.client.create_image,
                           server['id'], snapshot_name)
@@ -137,7 +123,7 @@ class ImagesTestJSON(base.BaseComputeTest):
     @attr(type='negative')
     def test_create_image_when_server_is_rebooting(self):
         # Return error when creating an image of server that is rebooting
-        server = self.create_server()
+        resp, server = self.create_server()
         self.servers_client.reboot(server['id'], 'HARD')
 
         snapshot_name = rand_name('test-snap-')
