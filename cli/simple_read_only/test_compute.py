@@ -16,14 +16,12 @@
 #    under the License.
 
 import logging
-import shlex
 import subprocess
 
 import testtools
 
 import cli
 
-from tempest import config
 from tempest.openstack.common import cfg
 
 
@@ -33,7 +31,7 @@ CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyNovaCLientTest(testtools.TestCase):
+class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
 
     """
     This is a first pass at a simple read only python-novaclient test. This
@@ -46,33 +44,6 @@ class SimpleReadOnlyNovaCLientTest(testtools.TestCase):
     * initially just check return codes, and later test command outputs
 
     """
-
-    @classmethod
-    def setUpClass(cls):
-        if not CONF.cli.enabled:
-            msg = "cli testing disabled"
-            raise cls.skipException(msg)
-        cls.identity = config.TempestConfig().identity
-        super(SimpleReadOnlyNovaCLientTest, cls).setUpClass()
-
-    #NOTE(jogo): This should eventually be moved into a base class
-    def nova(self, action, flags='', params='', admin=True, fail_ok=False):
-        """Executes nova command for the given action."""
-        #TODO(jogo) make admin=False work
-        creds = ('--os-username %s --os-tenant-name %s --os-password %s '
-                 '--os-auth-url %s ' % (self.identity.admin_username,
-                 self.identity.admin_tenant_name, self.identity.admin_password,
-                 self.identity.uri))
-        flags = creds + ' ' + flags
-        cmd = ' '.join([CONF.cli.cli_dir + 'nova', flags, action, params])
-        LOG.info("running: '%s'" % cmd)
-        cmd = shlex.split(cmd)
-        try:
-            result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-        except subprocess.CalledProcessError, e:
-            LOG.error("command output:\n%s" % e.output)
-            raise
-        return result
 
     def test_admin_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,

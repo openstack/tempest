@@ -58,12 +58,11 @@ class BaseTestCase(testtools.TestCase,
 
 
 class TestCase(BaseTestCase):
-
-    """
-    Base test case class for all Tempest tests
+    """Base test case class for all Tempest tests
 
     Contains basic setup and convenience methods
     """
+
     manager_class = None
 
     @classmethod
