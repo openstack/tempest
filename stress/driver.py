@@ -18,6 +18,7 @@ to the bash_openstack function call"""
 import datetime
 import random
 import time
+from urlparse import urlparse
 
 from config import StressConfig
 from state import ClusterState
@@ -162,7 +163,7 @@ def bash_openstack(manager,
                                    (default: 32)
                     `seed`       = random seed (default: None)
     """
-    stress_config = StressConfig(manager.config._conf)
+    stress_config = StressConfig(manager.config)
     # get keyword arguments
     duration = kwargs.get('duration', datetime.timedelta(seconds=10))
     seed = kwargs.get('seed', None)
@@ -173,7 +174,8 @@ def bash_openstack(manager,
     keypath = stress_config.host_private_key_path
     user = stress_config.host_admin_user
     logdir = stress_config.nova_logdir
-    computes = _get_compute_nodes(keypath, user, manager.config.identity.host)
+    host = urlparse(manager.config.identity.uri).hostname
+    computes = _get_compute_nodes(keypath, user, host)
     stress.utils.execute_on_all(keypath, user, computes,
                                 "rm -f %s/*.log" % logdir)
     random.seed(seed)
