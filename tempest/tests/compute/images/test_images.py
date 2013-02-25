@@ -133,40 +133,24 @@ class ImagesTestJSON(base.BaseComputeTest):
     @attr(type='negative')
     def test_create_image_specify_uuid_35_characters_or_less(self):
         # Return an error if Image ID passed is 35 characters or less
-        try:
-            snapshot_name = rand_name('test-snap-')
-            test_uuid = ('a' * 35)
-            self.assertRaises(exceptions.NotFound, self.client.create_image,
-                              test_uuid, snapshot_name)
-        except Exception:
-            self.fail("Should return 404 Not Found if server uuid is 35"
-                      " characters or less")
+        snapshot_name = rand_name('test-snap-')
+        test_uuid = ('a' * 35)
+        self.assertRaises(exceptions.NotFound, self.client.create_image,
+                          test_uuid, snapshot_name)
 
     @attr(type='negative')
     def test_create_image_specify_uuid_37_characters_or_more(self):
         # Return an error if Image ID passed is 37 characters or more
-        try:
-            snapshot_name = rand_name('test-snap-')
-            test_uuid = ('a' * 37)
-            self.assertRaises(exceptions.NotFound, self.client.create_image,
-                              test_uuid, snapshot_name)
-        except Exception:
-            self.fail("Should return 404 Not Found if server uuid is 37"
-                      " characters or more")
+        snapshot_name = rand_name('test-snap-')
+        test_uuid = ('a' * 37)
+        self.assertRaises(exceptions.NotFound, self.client.create_image,
+                          test_uuid, snapshot_name)
 
     @attr(type='negative')
     def test_delete_image_with_invalid_image_id(self):
         # An image should not be deleted with invalid image id
-        try:
-            # Delete an image with invalid image id
-            resp, _ = self.client.delete_image('!@$%^&*()')
-
-        except exceptions.NotFound:
-            pass
-
-        else:
-            self.fail("DELETE image request should rasie NotFound exception "
-                      "when requested with invalid image")
+        self.assertRaises(exceptions.NotFound, self.client.delete_image,
+                          '!@$%^&*()')
 
     @attr(type='negative')
     def test_delete_non_existent_image(self):
@@ -179,44 +163,25 @@ class ImagesTestJSON(base.BaseComputeTest):
     @attr(type='negative')
     def test_delete_image_blank_id(self):
         # Return an error while trying to delete an image with blank Id
-
-        try:
-            self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                              '')
-        except Exception:
-            self.fail("Did not return HTTP 404 NotFound for blank image id")
+        self.assertRaises(exceptions.NotFound, self.client.delete_image, '')
 
     @attr(type='negative')
     def test_delete_image_non_hex_string_id(self):
         # Return an error while trying to delete an image with non hex id
-
         image_id = '11a22b9-120q-5555-cc11-00ab112223gj'
-        try:
-            self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                              image_id)
-        except Exception:
-            self.fail("Did not return HTTP 404 NotFound for non hex image")
+        self.assertRaises(exceptions.NotFound, self.client.delete_image,
+                          image_id)
 
     @attr(type='negative')
     def test_delete_image_negative_image_id(self):
         # Return an error while trying to delete an image with negative id
-
-        try:
-            self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                              -1)
-        except Exception:
-            self.fail("Did not return HTTP 404 NotFound for negative image id")
+        self.assertRaises(exceptions.NotFound, self.client.delete_image, -1)
 
     @attr(type='negative')
     def test_delete_image_id_is_over_35_character_limit(self):
         # Return an error while trying to delete image with id over limit
-
-        try:
-            self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                              '11a22b9-120q-5555-cc11-00ab112223gj-3fac')
-        except Exception:
-            self.fail("Did not return HTTP 404 NotFound for image id that "
-                      "exceeds 35 character ID length limit")
+        self.assertRaises(exceptions.NotFound, self.client.delete_image,
+                          '11a22b9-120q-5555-cc11-00ab112223gj-3fac')
 
 
 class ImagesTestXML(ImagesTestJSON):

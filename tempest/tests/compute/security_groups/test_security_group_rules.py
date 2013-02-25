@@ -135,21 +135,14 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     def test_security_group_rules_create_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid Parent group id
-        #Adding rules to the invalid Security Group id
+        # Adding rules to the invalid Security Group id
         parent_group_id = rand_name('999')
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
-        try:
-            resp, rule =\
-            self.client.create_security_group_rule(parent_group_id,
-                                                   ip_protocol,
-                                                   from_port, to_port)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Security Group rule should not be created '
-                      'with invalid parent group id')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.create_security_group_rule,
+                          parent_group_id, ip_protocol, from_port, to_port)
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_ip_protocol(self):
@@ -165,18 +158,11 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         ip_protocol = rand_name('999')
         from_port = 22
         to_port = 22
-        try:
-            resp, rule =\
-            self.client.create_security_group_rule(parent_group_id,
-                                                   ip_protocol,
-                                                   from_port, to_port)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group rule should not be created '
-                      'with invalid ip_protocol')
-        #Deleting the Security Group created in this method
-        resp, _ = self.client.delete_security_group(securitygroup['id'])
+
+        self.addCleanup(self.client.delete_security_group, securitygroup['id'])
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group_rule,
+                          parent_group_id, ip_protocol, from_port, to_port)
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_from_port(self):
@@ -192,18 +178,10 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         ip_protocol = 'tcp'
         from_port = rand_name('999')
         to_port = 22
-        try:
-            resp, rule =\
-            self.client.create_security_group_rule(parent_group_id,
-                                                   ip_protocol,
-                                                   from_port, to_port)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group rule should not be created'
-                      'with invalid from_port')
-        #Deleting the Security Group created in this method
-        resp, _ = self.client.delete_security_group(securitygroup['id'])
+        self.addCleanup(self.client.delete_security_group, securitygroup['id'])
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group_rule,
+                          parent_group_id, ip_protocol, from_port, to_port)
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_to_port(self):
@@ -219,30 +197,18 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         ip_protocol = 'tcp'
         from_port = 22
         to_port = rand_name('999')
-        try:
-            resp, rule =\
-            self.client.create_security_group_rule(parent_group_id,
-                                                   ip_protocol,
-                                                   from_port, to_port)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group rule should not be created'
-                      'with invalid from_port')
-        #Deleting the Security Group created in this method
-        resp, _ = self.client.delete_security_group(securitygroup['id'])
+        self.addCleanup(self.client.delete_security_group, securitygroup['id'])
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group_rule,
+                          parent_group_id, ip_protocol, from_port, to_port)
 
     @attr(type='negative')
     def test_security_group_rules_delete_with_invalid_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with invalid rule id
-        try:
-            self.client.delete_security_group_rule(rand_name('999'))
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Security Group Rule should not be deleted '
-                      'with nonexistant rule id')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_security_group_rule,
+                          rand_name('999'))
 
 
 class SecurityGroupRulesTestXML(SecurityGroupRulesTestJSON):

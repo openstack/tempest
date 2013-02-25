@@ -114,42 +114,26 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         # Negative test:Deletion of a nonexistent floating IP
         # from project should fail
 
-        #Deleting the non existent floating IP
-        try:
-            resp, body = self.client.delete_floating_ip(self.non_exist_id)
-        except Exception:
-            pass
-        else:
-            self.fail('Should not be able to delete a nonexistent floating IP')
+        # Deleting the non existent floating IP
+        self.assertRaises(exceptions.NotFound, self.client.delete_floating_ip,
+                          self.non_exist_id)
 
     @attr(type='negative')
     def test_associate_nonexistant_floating_ip(self):
         # Negative test:Association of a non existent floating IP
         # to specific server should fail
-        #Associating non existent floating IP
-        try:
-            resp, body = \
-            self.client.associate_floating_ip_to_server("0.0.0.0",
-                                                        self.server_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to associate'
-                      ' a nonexistent floating IP')
+        # Associating non existent floating IP
+        self.assertRaises(exceptions.NotFound,
+                          self.client.associate_floating_ip_to_server,
+                          "0.0.0.0", self.server_id)
 
     @attr(type='negative')
     def test_dissociate_nonexistant_floating_ip(self):
         # Negative test:Dissociation of a non existent floating IP should fail
-        #Dissociating non existent floating IP
-        try:
-            resp, body = \
-            self.client.disassociate_floating_ip_from_server("0.0.0.0",
-                                                             self.server_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to dissociate'
-                      ' a nonexistent floating IP')
+        # Dissociating non existent floating IP
+        self.assertRaises(exceptions.NotFound,
+                          self.client.disassociate_floating_ip_from_server,
+                          "0.0.0.0", self.server_id)
 
     @attr(type='positive')
     def test_associate_already_associated_floating_ip(self):
@@ -171,38 +155,24 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         self.client.associate_floating_ip_to_server(self.floating_ip,
                                                     self.new_server_id)
 
-        #Make sure no longer associated with old server
-        try:
-            self.client.disassociate_floating_ip_from_server(
-                self.floating_ip,
-                self.server_id)
-        except (exceptions.NotFound, exceptions.BadRequest):
-            pass
-        else:
-            self.fail('The floating IP should be associated to the second '
-                      'server')
+        self.addCleanup(self.servers_client.delete_server, self.new_server_id)
         if (resp['status'] is not None):
-            #Dissociation of the floating IP associated in this method
-            resp, _ = \
-            self.client.disassociate_floating_ip_from_server(
-                self.floating_ip,
-                self.new_server_id)
-        #Deletion of server created in this method
-        resp, body = self.servers_client.delete_server(self.new_server_id)
+            self.addCleanup(self.client.disassociate_floating_ip_from_server,
+                            self.floating_ip,
+                            self.new_server_id)
+
+        # Make sure no longer associated with old server
+        self.assertRaises((exceptions.NotFound, exceptions.BadRequest),
+                          self.client.disassociate_floating_ip_from_server,
+                          self.floating_ip, self.server_id)
 
     @attr(type='negative')
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         # Negative test:Association of empty floating IP to specific server
         # should raise NotFound exception
-        try:
-            resp, body =\
-            self.client.associate_floating_ip_to_server('',
-                                                        self.server_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Association of floating IP to specific server'
-                      ' with out passing floating IP  should raise BadRequest')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.associate_floating_ip_to_server,
+                          '', self.server_id)
 
 
 class FloatingIPsTestXML(FloatingIPsTestJSON):

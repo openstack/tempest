@@ -134,48 +134,32 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         # Keypair should not be created with a non RSA public key
         k_name = rand_name('keypair-')
         pub_key = "ssh-rsa JUNK nova@ubuntu"
-        try:
-            resp, _ = self.client.create_keypair(k_name, pub_key)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Expected BadRequest for invalid public key')
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_keypair, k_name, pub_key)
 
     @attr(type='negative')
     @testtools.skip("Skipped until the Bug #1086980 is resolved")
     def test_keypair_delete_nonexistant_key(self):
         # Non-existant key deletion should throw a proper error
         k_name = rand_name("keypair-non-existant-")
-        try:
-            resp, _ = self.client.delete_keypair(k_name)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('nonexistent key')
+        self.assertRaises(exceptions.NotFound, self.client.delete_keypair,
+                          k_name)
 
     @attr(type='negative')
     def test_create_keypair_with_empty_public_key(self):
         # Keypair should not be created with an empty public key
         k_name = rand_name("keypair-")
         pub_key = ' '
-        try:
-            resp, _ = self.client.create_keypair(k_name, pub_key)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Expected BadRequest for empty public key')
+        self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
+                          k_name, pub_key)
 
     @attr(type='negative')
     def test_create_keypair_when_public_key_bits_exceeds_maximum(self):
         # Keypair should not be created when public key bits are too long
         k_name = rand_name("keypair-")
         pub_key = 'ssh-rsa ' + 'A' * 2048 + ' openstack@ubuntu'
-        try:
-            resp, _ = self.client.create_keypair(k_name, pub_key)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Expected BadRequest for too long public key')
+        self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
+                          k_name, pub_key)
 
     @attr(type='negative')
     def test_create_keypair_with_duplicate_name(self):
@@ -184,47 +168,30 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         resp, _ = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
         #Now try the same keyname to ceate another key
-        try:
-            resp, _ = self.client.create_keypair(k_name)
-            #Expect a HTTP 409 Conflict Error
-        except exceptions.Duplicate:
-            pass
-        else:
-            self.fail('duplicate name')
+        self.assertRaises(exceptions.Duplicate, self.client.create_keypair,
+                          k_name)
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 
     @attr(type='negative')
     def test_create_keypair_with_empty_name_string(self):
         # Keypairs with name being an empty string should not be created
-        try:
-            resp, _ = self.client.create_keypair('')
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('empty string')
+        self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
+                          '')
 
     @attr(type='negative')
     def test_create_keypair_with_long_keynames(self):
         # Keypairs with name longer than 255 chars should not be created
         k_name = 'keypair-'.ljust(260, '0')
-        try:
-            resp, _ = self.client.create_keypair(k_name)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('too long')
+        self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
+                          k_name)
 
     @attr(type='negative')
     def test_create_keypair_invalid_name(self):
         # Keypairs with name being an invalid name should not be created
         k_name = 'key_/.\@:'
-        try:
-            resp, _ = self.client.create_keypair(k_name)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('invalid name')
+        self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
+                          k_name)
 
 
 class KeyPairsTestXML(KeyPairsTestJSON):

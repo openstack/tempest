@@ -151,14 +151,10 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.data.tenants.append(tenant)
         tenant1_id = body.get('id')
 
-        try:
-            resp, body = self.client.create_tenant(tenant_name)
-            # this should have raised an exception
-            self.fail('Should not be able to create a duplicate tenant name')
-        except exceptions.Duplicate:
-            pass
-        self.client.delete_tenant(tenant1_id)
-        self.data.tenants.remove(tenant)
+        self.addCleanup(self.client.delete_tenant, tenant1_id)
+        self.addCleanup(self.data.tenants.remove, tenant)
+        self.assertRaises(exceptions.Duplicate, self.client.create_tenant,
+                          tenant_name)
 
     @attr(type='negative')
     def test_create_tenant_by_unauthorized_user(self):

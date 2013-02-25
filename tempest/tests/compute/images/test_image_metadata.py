@@ -111,68 +111,41 @@ class ImagesMetadataTest(base.BaseComputeTest):
     def test_list_nonexistant_image_metadata(self):
         # Negative test: List on nonexistant image
         # metadata should not happen
-        try:
-            resp, resp_metadata = self.client.list_image_metadata(999)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('List on nonexistant image metadata should'
-                      'not happen')
+        self.assertRaises(exceptions.NotFound, self.client.list_image_metadata,
+                          999)
 
     @attr(type='negative')
     def test_update_nonexistant_image_metadata(self):
         # Negative test:An update should not happen for a nonexistant image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
-        try:
-            resp, metadata = self.client.update_image_metadata(999, meta)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('An update shouldnt happen for nonexistant image')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.update_image_metadata, 999, meta)
 
     @attr(type='negative')
     def test_get_nonexistant_image_metadata_item(self):
         # Negative test: Get on nonexistant image should not happen
-        try:
-            resp, metadata = self.client.get_image_metadata_item(999, 'key2')
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Get on nonexistant image should not happen')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_image_metadata_item, 999, 'key2')
 
     @attr(type='negative')
     def test_set_nonexistant_image_metadata(self):
         # Negative test: Metadata should not be set to a nonexistant image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
-        try:
-            resp, meta = self.client.set_image_metadata(999, meta)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Metadata should not be set to a nonexistant image')
+        self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
+                          999, meta)
 
     @attr(type='negative')
     def test_set_nonexistant_image_metadata_item(self):
         # Negative test: Metadata item should not be set to a
         # nonexistant image
         meta = {'key1': 'alt'}
-        try:
-            resp, body = self.client.set_image_metadata_item(999, 'key1', meta)
-            resp, metadata = self.client.list_image_metadata(999)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Metadata item should not be set to a nonexistant image')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.set_image_metadata_item, 999, 'key1',
+                          meta)
 
     @attr(type='negative')
     def test_delete_nonexistant_image_metadata_item(self):
         # Negative test: Shouldnt be able to delete metadata
-                          # item from nonexistant image
-        try:
-            resp, body = self.client.delete_image_metadata_item(999, 'key1')
-            resp, metadata = self.client.list_image_metadata(999)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to delete metadata item from a'
-                      'nonexistant image')
+        # item from nonexistant image
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_image_metadata_item, 999, 'key1')

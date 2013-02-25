@@ -39,18 +39,13 @@ class VolumesNegativeTest(base.BaseComputeTest):
             non_exist_id = rand_name('999')
             if non_exist_id not in volume_id_list:
                 break
-        #Trying to GET a non existant volume
-        try:
-            resp, body = self.client.get_volume(non_exist_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to GET the details from a '
-                      'nonexistant volume')
+        # Trying to GET a non existant volume
+        self.assertRaises(exceptions.NotFound, self.client.get_volume,
+                          non_exist_id)
 
     def test_volume_delete_nonexistant_volume_id(self):
         # Negative: Should not be able to delete nonexistant Volume
-        #Creating nonexistant volume id
+        # Creating nonexistant volume id
         volume_id_list = list()
         resp, body = self.client.list_volumes()
         for i in range(len(body)):
@@ -59,13 +54,9 @@ class VolumesNegativeTest(base.BaseComputeTest):
             non_exist_id = rand_name('999')
             if non_exist_id not in volume_id_list:
                 break
-        #Trying to DELETE a non existant volume
-        try:
-            resp, body = self.client.delete_volume(non_exist_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to DELETE a nonexistant volume')
+        # Trying to DELETE a non existant volume
+        self.assertRaises(exceptions.NotFound, self.client.delete_volume,
+                          non_exist_id)
 
     def test_create_volume_with_invalid_size(self):
         # Negative: Should not be able to create volume with invalid size
