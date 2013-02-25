@@ -19,8 +19,10 @@ import logging
 import shlex
 import subprocess
 
-from tempest.openstack.common import cfg
+from oslo.config import cfg
+
 import tempest.test
+
 
 LOG = logging.getLogger(__name__)
 

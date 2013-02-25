@@ -19,8 +19,9 @@ import logging
 import os
 import sys
 
+from oslo.config import cfg
+
 from tempest.common.utils.misc import singleton
-from tempest.openstack.common import cfg
 
 LOG = logging.getLogger(__name__)
 

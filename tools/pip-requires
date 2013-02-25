@@ -13,3 +13,5 @@ python-quantumclient>=2.1
 testresources
 keyring
 testrepository
+
+http://tarballs.openstack.org/oslo-config/oslo.config-1.1.0b1.tar.gz#egg=oslo.config
