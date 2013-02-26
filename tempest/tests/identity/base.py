@@ -21,7 +21,7 @@ from tempest.common.utils.data_utils import rand_name
 import tempest.test
 
 
-class BaseIdAdminTest(tempest.test.BaseTestCase):
+class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -66,22 +66,6 @@ class BaseIdAdminTest(tempest.test.BaseTestCase):
         role = [r for r in roles if r['name'] == name]
         if len(role) > 0:
             return role[0]
-
-
-class BaseIdentityAdminTestJSON(BaseIdAdminTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "json"
-        super(BaseIdentityAdminTestJSON, cls).setUpClass()
-
-BaseIdentityAdminTest = BaseIdentityAdminTestJSON
-
-
-class BaseIdentityAdminTestXML(BaseIdAdminTest):
-    @classmethod
-    def setUpClass(cls):
-        cls._interface = "xml"
-        super(BaseIdentityAdminTestXML, cls).setUpClass()
 
 
 class DataGenerator(object):

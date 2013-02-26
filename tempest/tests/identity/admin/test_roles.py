@@ -20,11 +20,12 @@ from tempest import exceptions
 from tempest.tests.identity import base
 
 
-class RolesTestBase(object):
+class RolesTestJSON(base.BaseIdentityAdminTest):
+    _interface = 'json'
 
-    @staticmethod
+    @classmethod
     def setUpClass(cls):
-
+        super(RolesTestJSON, cls).setUpClass()
         for _ in xrange(5):
             resp, role = cls.client.create_role(rand_name('role-'))
             cls.data.roles.append(role)
@@ -36,6 +37,13 @@ class RolesTestBase(object):
         tenant = self.get_tenant_by_name(self.data.test_tenant)
         role = self.get_role_by_name(self.data.test_role)
         return (user, tenant, role)
+
+    def assert_role_in_role_list(self, role, roles):
+        found = False
+        for user_role in roles:
+            if user_role['id'] == role['id']:
+                found = True
+        self.assertTrue(found, "assigned role was not in list")
 
     def test_list_roles(self):
         # Return a list of all roles
@@ -96,34 +104,6 @@ class RolesTestBase(object):
         except exceptions.Duplicate:
             pass
         self.client.delete_role(role1_id)
-
-
-class RolesTestJSON(base.BaseIdentityAdminTestJSON,
-                    RolesTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(RolesTestJSON, cls).setUpClass()
-        RolesTestBase.setUpClass(cls)
-
-
-class RolesTestXML(base.BaseIdentityAdminTestXML,
-                   RolesTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(RolesTestXML, cls).setUpClass()
-        RolesTestBase.setUpClass(cls)
-
-
-class UserRolesTestBase(RolesTestBase):
-
-    def assert_role_in_role_list(self, role, roles):
-        found = False
-        for user_role in roles:
-            if user_role['id'] == role['id']:
-                found = True
-        self.assertTrue(found, "assigned role was not in list")
 
     def test_assign_user_role(self):
         # Assign a role to a user on a tenant
@@ -267,17 +247,5 @@ class UserRolesTestBase(RolesTestBase):
                           tenant['id'], 'junk-role-aabbcc11')
 
 
-class UserRolesTestJSON(RolesTestJSON,
-                        UserRolesTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(UserRolesTestJSON, cls).setUpClass()
-
-
-class UserRolesTestXML(RolesTestXML,
-                       UserRolesTestBase):
-
-    @classmethod
-    def setUpClass(cls):
-        super(UserRolesTestXML, cls).setUpClass()
+class RolesTestXML(RolesTestJSON):
+    _interface = 'xml'

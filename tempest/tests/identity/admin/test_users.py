@@ -23,7 +23,8 @@ import testtools
 from testtools.matchers._basic import Contains
 
 
-class UsersTestBase(object):
+class UsersTestJSON(base.BaseIdentityAdminTest):
+    _interface = 'json'
 
     alt_user = rand_name('test_user_')
     alt_password = rand_name('pass_')
@@ -338,14 +339,5 @@ class UsersTestBase(object):
                       'tenant ids %s' % fail)
 
 
-class UsersTestJSON(base.BaseIdentityAdminTestJSON,
-                    UsersTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(UsersTestJSON, cls).setUpClass()
-
-
-class UsersTestXML(base.BaseIdentityAdminTestXML, UsersTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(UsersTestXML, cls).setUpClass()
+class UsersTestXML(UsersTestJSON):
+    _interface = 'xml'

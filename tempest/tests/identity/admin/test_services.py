@@ -21,7 +21,8 @@ from tempest import exceptions
 from tempest.tests.identity import base
 
 
-class ServicesTestBase(object):
+class ServicesTestJSON(base.BaseIdentityAdminTest):
+    _interface = 'json'
 
     def test_create_get_delete_service(self):
         # GET Service
@@ -91,14 +92,5 @@ class ServicesTestBase(object):
         self.assertFalse(any(found), 'Services failed to delete')
 
 
-class ServicesTestJSON(base.BaseIdentityAdminTestJSON, ServicesTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(ServicesTestJSON, cls).setUpClass()
-
-
-class ServicesTestXML(base.BaseIdentityAdminTestXML,
-                      ServicesTestBase):
-    @classmethod
-    def setUpClass(cls):
-        super(ServicesTestXML, cls).setUpClass()
+class ServicesTestXML(ServicesTestJSON):
+    _interface = 'xml'
