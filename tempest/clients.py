@@ -25,6 +25,7 @@ from tempest.services.compute.json.extensions_client import \
 from tempest.services.compute.json.flavors_client import FlavorsClientJSON
 from tempest.services.compute.json.floating_ips_client import \
     FloatingIPsClientJSON
+from tempest.services.compute.json.hosts_client import HostsClientJSON
 from tempest.services.compute.json.images_client import ImagesClientJSON
 from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.limits_client import LimitsClientJSON
@@ -211,6 +212,7 @@ class Manager(object):
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
         self.network_client = NetworkClient(*client_args)
+        self.hosts_client = HostsClientJSON(*client_args)
         self.account_client = AccountClient(*client_args)
         self.image_client = ImageClientJSON(*client_args)
         self.container_client = ContainerClient(*client_args)
