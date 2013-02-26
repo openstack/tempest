@@ -382,6 +382,26 @@ def register_boto_opts(conf):
     for opt in BotoConfig:
         conf.register_opt(opt, group='boto')
 
+stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
+
+StressGroup = [
+    cfg.StrOpt('nova_logdir',
+               default=None,
+               help='Directory containing log files on the compute nodes'),
+    cfg.IntOpt('max_instances',
+               default=16,
+               help='Maximum number of instances to create during test.'),
+    cfg.StrOpt('controller',
+               default=None,
+               help='Controller host.')
+]
+
+
+def register_stress_opts(conf):
+    conf.register_group(stress_group)
+    for opt in StressGroup:
+        conf.register_opt(opt, group='stress')
+
 
 @singleton
 class TempestConfig:
@@ -426,6 +446,7 @@ class TempestConfig:
         register_object_storage_opts(cfg.CONF)
         register_boto_opts(cfg.CONF)
         register_compute_admin_opts(cfg.CONF)
+        register_stress_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
         self.whitebox = cfg.CONF.whitebox
         self.identity = cfg.CONF.identity
@@ -435,6 +456,7 @@ class TempestConfig:
         self.object_storage = cfg.CONF['object-storage']
         self.boto = cfg.CONF.boto
         self.compute_admin = cfg.CONF['compute-admin']
+        self.stress = cfg.CONF.stress
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password

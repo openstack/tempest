@@ -12,8 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import ConfigParser
-
 
 class StressConfig(object):
     """Provides configuration information for whitebox stress tests."""
@@ -21,33 +19,27 @@ class StressConfig(object):
     def __init__(self, conf):
         self.conf = conf
 
-    def get(self, item_name, default_value=None):
-        try:
-            return self.conf.get("stress", item_name)
-        except (ConfigParser.NoSectionError, ConfigParser.NoOptionError):
-            return default_value
-
     @property
     def host_private_key_path(self):
         """Path to ssh key for logging into compute nodes."""
-        return self.get("host_private_key_path", None)
+        return self.conf.compute.path_to_private_key
 
     @property
     def host_admin_user(self):
         """Username for logging into compute nodes."""
-        return self.get("host_admin_user", None)
+        return self.conf.compute.ssh_user
 
     @property
     def nova_logdir(self):
         """Directory containing log files on the compute nodes."""
-        return self.get("nova_logdir", None)
+        return self.conf.stress.nova_logdir
 
     @property
     def controller(self):
         """Controller host."""
-        return self.get("controller", None)
+        return self.conf.stress.controller
 
     @property
     def max_instances(self):
         """Maximum number of instances to create during test."""
-        return self.get("max_instances", 16)
+        return self.conf.stress.max_instances
