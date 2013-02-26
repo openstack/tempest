@@ -280,6 +280,9 @@ NetworkGroup = [
                default="",
                help="Id of the public router that provides external "
                     "connectivity"),
+    cfg.BoolOpt('quantum_available',
+                default=False,
+                help="Whether or not quantum is expected to be available"),
 ]
 
 

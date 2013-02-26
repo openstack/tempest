@@ -18,7 +18,6 @@
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 import tempest.test
 
 
@@ -27,15 +26,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         os = clients.Manager()
-        client = os.network_client
 
-        # Validate that there is even an endpoint configured
-        # for networks, and mark the attr for skipping if not
-        try:
-            client.list_networks()
-        except exceptions.EndpointNotFound:
-            skip_msg = "No OpenStack Network API endpoint"
-            raise cls.skipException(skip_msg)
+        if not os.config.network.quantum_available:
+            raise cls.skipException("Quantum support is required")
 
     @classmethod
     def tearDownClass(cls):

@@ -193,6 +193,9 @@ public_network_id = {$PUBLIC_NETWORK_ID}
 # for each tenant to have their own router.
 public_router_id = {$PUBLIC_ROUTER_ID}
 
+# Whether or not quantum is expected to be available
+quantum_available = false
+
 [volume]
 # This section contains the configuration options used when executing tests
 # against the OpenStack Block Storage API service
