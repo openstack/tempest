@@ -69,6 +69,10 @@ from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
 from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
+from tempest.services.compute.json.interfaces_client import \
+    InterfacesClientJSON
+from tempest.services.compute.xml.interfaces_client import \
+    InterfacesClientXML
 
 LOG = logging.getLogger(__name__)
 
@@ -147,6 +151,11 @@ SECURITY_GROUPS_CLIENT = {
     "xml": SecurityGroupsClientXML,
 }
 
+INTERFACES_CLIENT = {
+    "json": InterfacesClientJSON,
+    "xml": InterfacesClientXML,
+}
+
 
 class Manager(object):
 
@@ -208,6 +217,7 @@ class Manager(object):
             self.token_client = TOKEN_CLIENT[interface](self.config)
             self.security_groups_client = \
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
+            self.interfaces_client = INTERFACES_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
