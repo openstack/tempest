@@ -176,7 +176,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
             self.client.disassociate_floating_ip_from_server(
                 self.floating_ip,
                 self.server_id)
-        except exceptions.NotFound:
+        except (exceptions.NotFound, exceptions.BadRequest):
             pass
         else:
             self.fail('The floating IP should be associated to the second '
