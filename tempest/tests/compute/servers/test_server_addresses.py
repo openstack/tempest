@@ -43,26 +43,15 @@ class ServerAddressesTest(base.BaseComputeTest):
     @attr(type='negative', category='server-addresses')
     def test_list_server_addresses_invalid_server_id(self):
         # List addresses request should fail if server id not in system
-
-        try:
-            self.client.list_addresses('999')
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('The server rebuild for a non existing server should not'
-                      ' be allowed')
+        self.assertRaises(exceptions.NotFound, self.client.list_addresses,
+                          '999')
 
     @attr(type='negative', category='server-addresses')
     def test_list_server_addresses_by_network_neg(self):
         # List addresses by network should fail if network name not valid
-
-        try:
-            self.client.list_addresses_by_network(self.server['id'], 'invalid')
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('The server rebuild for a non existing server should not'
-                      ' be allowed')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.list_addresses_by_network,
+                          self.server['id'], 'invalid')
 
     @attr(type='smoke', category='server-addresses')
     def test_list_server_addresses(self):

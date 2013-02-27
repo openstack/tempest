@@ -47,21 +47,13 @@ class CreateRegisterImagesTest(tempest.test.BaseTestCase):
     @attr(type='negative')
     def test_register_with_invalid_container_format(self):
         # Negative tests for invalid data supplied to POST /images
-        try:
-            resp, body = self.client.create_image('test', 'wrong', 'vhd')
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Invalid container format should not be accepted')
+        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+                          'test', 'wrong', 'vhd')
 
     @attr(type='negative')
     def test_register_with_invalid_disk_format(self):
-        try:
-            resp, body = self.client.create_image('test', 'bare', 'wrong')
-        except exceptions.BadRequest:
-                pass
-        else:
-            self.fail("Invalid disk format should not be accepted")
+        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+                          'test', 'bare', 'wrong')
 
     @attr(type='image')
     def test_register_then_upload(self):

@@ -90,14 +90,8 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTest):
             non_exist_id = rand_name('999')
             if non_exist_id not in floating_ip_id:
                 break
-        try:
-            resp, body = \
-            self.client.get_floating_ip_details(non_exist_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to GET the details from a'
-                      'nonexistant floating IP')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_floating_ip_details, non_exist_id)
 
 
 class FloatingIPDetailsTestXML(FloatingIPDetailsTestJSON):

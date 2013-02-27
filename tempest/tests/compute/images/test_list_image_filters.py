@@ -225,9 +225,4 @@ class ListImageFiltersTest(base.BaseComputeTest):
     @attr(type='negative')
     def test_get_nonexistant_image(self):
         # Negative test: GET on non existant image should fail
-        try:
-            resp, image = self.client.get_image(999)
-        except Exception:
-            pass
-        else:
-            self.fail('GET on non existant image should fail')
+        self.assertRaises(exceptions.NotFound, self.client.get_image, 999)

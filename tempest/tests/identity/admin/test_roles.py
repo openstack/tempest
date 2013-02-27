@@ -95,15 +95,9 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         role1_id = body.get('id')
         self.assertTrue('status' in resp)
         self.assertTrue(resp['status'].startswith('2'))
-
-        try:
-            resp, body = self.client.create_role(role_name)
-            # this should raise an exception
-            self.fail('Should not be able to create a duplicate role name.'
-                      ' %s' % role_name)
-        except exceptions.Duplicate:
-            pass
-        self.client.delete_role(role1_id)
+        self.addCleanup(self.client.delete_role, role1_id)
+        self.assertRaises(exceptions.Duplicate, self.client.create_role,
+                          role_name)
 
     def test_assign_user_role(self):
         # Assign a role to a user on a tenant

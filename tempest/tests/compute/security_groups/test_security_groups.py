@@ -116,100 +116,60 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             non_exist_id = rand_name('999')
             if non_exist_id not in security_group_id:
                 break
-        try:
-            resp, body = \
-            self.client.get_security_group(non_exist_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to GET the details from a '
-                      'nonexistant Security Group')
+        self.assertRaises(exceptions.NotFound, self.client.get_security_group,
+                          non_exist_id)
 
     @attr(type='negative')
     def test_security_group_create_with_invalid_group_name(self):
         # Negative test: Security Group should not be created with group name
         # as an empty string/with white spaces/chars more than 255
         s_description = rand_name('description-')
-        #Create Security Group with empty string as group name
-        try:
-            resp, _ = self.client.create_security_group("", s_description)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group should not be created '
-                      'with EMPTY Name')
-        #Create Security Group with white space in group name
-        try:
-            resp, _ = self.client.create_security_group(" ", s_description)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group should not be created '
-                      'with WHITE SPACE in Name')
-        #Create Security Group with group name longer than 255 chars
+        # Create Security Group with empty string as group name
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group, "", s_description)
+        # Create Security Group with white space in group name
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group, " ",
+                          s_description)
+        # Create Security Group with group name longer than 255 chars
         s_name = 'securitygroup-'.ljust(260, '0')
-        try:
-            resp, _ = self.client.create_security_group(s_name, s_description)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group should not be created '
-                      'with more than 255 chars in Name')
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group, s_name,
+                          s_description)
 
     @attr(type='negative')
     def test_security_group_create_with_invalid_group_description(self):
         # Negative test:Security Group should not be created with description
         # as an empty string/with white spaces/chars more than 255
         s_name = rand_name('securitygroup-')
-        #Create Security Group with empty string as description
-        try:
-            resp, _ = self.client.create_security_group(s_name, "")
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group should not be created '
-                      'with EMPTY Description')
-        #Create Security Group with white space in description
-        try:
-            resp, _ = self.client.create_security_group(s_name, " ")
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group should not be created '
-                      'with WHITE SPACE in Description')
-        #Create Security Group with group description longer than 255 chars
+        # Create Security Group with empty string as description
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group, s_name, "")
+        # Create Security Group with white space in description
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group, s_name, " ")
+        # Create Security Group with group description longer than 255 chars
         s_description = 'description-'.ljust(260, '0')
-        try:
-            resp, _ = self.client.create_security_group(s_name, s_description)
-        except exceptions.BadRequest:
-            pass
-        else:
-            self.fail('Security Group should not be created '
-                      'with more than 255 chars in Description')
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group, s_name,
+                          s_description)
 
     @attr(type='negative')
     def test_security_group_create_with_duplicate_name(self):
         # Negative test:Security Group with duplicate name should not
         # be created
-        try:
-            s_name = rand_name('securitygroup-')
-            s_description = rand_name('description-')
-            resp, security_group =\
+        s_name = rand_name('securitygroup-')
+        s_description = rand_name('description-')
+        resp, security_group =\
             self.client.create_security_group(s_name, s_description)
-            self.assertEqual(200, resp.status)
-            #Now try the Security Group with the same 'Name'
-            try:
-                resp, _ =\
-                self.client.create_security_group(s_name, s_description)
-            except exceptions.BadRequest:
-                pass
-            else:
-                self.fail('Security Group should not be created '
-                          'with duplicate Group Name')
-        finally:
-            #Delete the Security Group created in this method
-            resp, _ = self.client.delete_security_group(security_group['id'])
-            self.assertEqual(202, resp.status)
+        self.assertEqual(200, resp.status)
+
+        self.addCleanup(self.client.delete_security_group,
+                        security_group['id'])
+        # Now try the Security Group with the same 'Name'
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_security_group, s_name,
+                          s_description)
 
     @attr(type='negative')
     def test_delete_nonexistant_security_group(self):
@@ -223,25 +183,15 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             non_exist_id = rand_name('999')
             if non_exist_id not in security_group_id:
                 break
-        try:
-            resp, body = self.client.delete_security_group(non_exist_id)
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to delete a nonexistant '
-                      'Security Group')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_security_group, non_exist_id)
 
     @attr(type='negative')
     def test_delete_security_group_without_passing_id(self):
         # Negative test:Deletion of a Security Group with out passing ID
         # should Fail
-        try:
-            resp, body = self.client.delete_security_group('')
-        except exceptions.NotFound:
-            pass
-        else:
-            self.fail('Should not be able to delete a Security Group'
-                      'with out passing ID')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_security_group, '')
 
     def test_server_security_groups(self):
         # Checks that security groups may be added and linked to a server

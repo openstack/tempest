@@ -61,40 +61,28 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
     @testtools.skip("Until Bug 1006725 is fixed")
     def test_create_image_specify_multibyte_character_image_name(self):
         # Return an error if the image name has multi-byte characters
-        try:
-            snapshot_name = rand_name('\xef\xbb\xbf')
-            self.assertRaises(exceptions.BadRequest,
-                              self.client.create_image, self.server['id'],
-                              snapshot_name)
-        except Exception:
-            self.fail("Should return 400 Bad Request if multi byte characters"
-                      " are used for image name")
+        snapshot_name = rand_name('\xef\xbb\xbf')
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_image, self.server['id'],
+                          snapshot_name)
 
     @attr(type='negative')
     @testtools.skip("Until Bug 1005423 is fixed")
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
-        try:
-            snapshot_name = rand_name('test-snap-')
-            meta = {'': ''}
-            self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                              self.server['id'], snapshot_name, meta)
-
-        except Exception:
-            self.fail("Should raise 400 Bad Request if meta data is invalid")
+        snapshot_name = rand_name('test-snap-')
+        meta = {'': ''}
+        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+                          self.server['id'], snapshot_name, meta)
 
     @attr(type='negative')
     @testtools.skip("Until Bug 1005423 is fixed")
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
-        try:
-            snapshot_name = rand_name('test-snap-')
-            meta = {'a' * 260: 'b' * 260}
-            self.assertRaises(exceptions.OverLimit, self.client.create_image,
-                              self.server['id'], snapshot_name, meta)
-
-        except Exception:
-            self.fail("Should raise 413 Over Limit if meta data was too long")
+        snapshot_name = rand_name('test-snap-')
+        meta = {'a' * 260: 'b' * 260}
+        self.assertRaises(exceptions.OverLimit, self.client.create_image,
+                          self.server['id'], snapshot_name, meta)
 
     @attr(type='negative')
     @testtools.skipUnless(compute.MULTI_USER,
@@ -151,38 +139,28 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
 
-        try:
-            # Create first snapshot
-            snapshot_name = rand_name('test-snap-')
-            resp, body = self.client.create_image(self.server['id'],
-                                                  snapshot_name)
-            self.assertEqual(202, resp.status)
-            image_id = parse_image_id(resp['location'])
-            self.image_ids.append(image_id)
+        # Create first snapshot
+        snapshot_name = rand_name('test-snap-')
+        resp, body = self.client.create_image(self.server['id'],
+                                              snapshot_name)
+        self.assertEqual(202, resp.status)
+        image_id = parse_image_id(resp['location'])
+        self.image_ids.append(image_id)
 
-            # Create second snapshot
-            alt_snapshot_name = rand_name('test-snap-')
-            self.client.create_image(self.server['id'],
-                                     alt_snapshot_name)
-        except exceptions.Duplicate:
-            self.client.wait_for_image_status(image_id, 'ACTIVE')
-
-        else:
-            self.fail("Should not allow creating an image when another image "
-                      "of the server is still being saved")
+        # Create second snapshot
+        alt_snapshot_name = rand_name('test-snap-')
+        self.assertRaises(exceptions.Duplicate, self.client.create_image,
+                          self.server['id'], alt_snapshot_name)
+        self.client.wait_for_image_status(image_id, 'ACTIVE')
 
     @attr(type='negative')
     @testtools.skip("Until Bug 1004564 is fixed")
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
-        try:
-            snapshot_name = rand_name('a' * 260)
-            self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                              self.server['id'], snapshot_name)
-        except Exception:
-            self.fail("Should return 400 Bad Request if image name is over 256"
-                      " characters")
+        snapshot_name = rand_name('a' * 260)
+        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+                          self.server['id'], snapshot_name)
 
     @attr(type='negative')
     def test_delete_image_that_is_not_yet_active(self):
