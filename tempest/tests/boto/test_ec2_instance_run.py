@@ -150,16 +150,18 @@ class InstanceRunTest(BotoTestCase):
                                                                group_desc)
         self.addResourceCleanUp(self.destroy_security_group_wait,
                                 security_group)
-        self.ec2_client.authorize_security_group(sec_group_name,
-                                                 ip_protocol="icmp",
-                                                 cidr_ip="0.0.0.0/0",
-                                                 from_port=-1,
-                                                 to_port=-1)
-        self.ec2_client.authorize_security_group(sec_group_name,
-                                                 ip_protocol="tcp",
-                                                 cidr_ip="0.0.0.0/0",
-                                                 from_port=22,
-                                                 to_port=22)
+        self.assertTrue(self.ec2_client.authorize_security_group(
+                sec_group_name,
+                ip_protocol="icmp",
+                cidr_ip="0.0.0.0/0",
+                from_port=-1,
+                to_port=-1))
+        self.assertTrue(self.ec2_client.authorize_security_group(
+                sec_group_name,
+                ip_protocol="tcp",
+                cidr_ip="0.0.0.0/0",
+                from_port=22,
+                to_port=22))
         reservation = image_ami.run(kernel_id=self.images["aki"]["image_id"],
                                     ramdisk_id=self.images["ari"]["image_id"],
                                     instance_type=self.instance_type,
@@ -176,7 +178,7 @@ class InstanceRunTest(BotoTestCase):
 
         address = self.ec2_client.allocate_address()
         rcuk_a = self.addResourceCleanUp(address.delete)
-        address.associate(instance.id)
+        self.assertTrue(address.associate(instance.id))
 
         rcuk_da = self.addResourceCleanUp(address.disassociate)
         #TODO(afazekas): ping test. dependecy/permission ?
