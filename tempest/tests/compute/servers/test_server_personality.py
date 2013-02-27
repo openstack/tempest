@@ -35,7 +35,6 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
         # number of files are injected into the server.
-        name = rand_name('server')
         file_contents = 'This is a test file.'
         personality = []
         max_file_limit = \
@@ -45,9 +44,7 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
             personality.append({'path': path,
                                 'contents': base64.b64encode(file_contents)})
         try:
-            self.create_server_with_extras(name, self.image_ref,
-                                           self.flavor_ref,
-                                           personality=personality)
+            self.create_server(personality=personality)
         except exceptions.OverLimit:
             pass
         else:
@@ -58,7 +55,6 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.
         try:
-            name = rand_name('server')
             file_contents = 'This is a test file.'
 
             max_file_limit = \
@@ -71,9 +67,7 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
                     'path': path,
                     'contents': base64.b64encode(file_contents),
                 })
-            resp, server = self.create_server_with_extras(name, self.image_ref,
-                                                          self.flavor_ref,
-                                                          personality=person)
+            resp, server = self.create_server(personality=person)
             self.assertEqual('202', resp['status'])
 
         #Teardown

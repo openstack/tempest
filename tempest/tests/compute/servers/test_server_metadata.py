@@ -83,11 +83,9 @@ class ServerMetadataTest(base.BaseComputeTest):
         for sz in [256, 257, 511, 1023]:
             key = "k" * sz
             meta = {key: 'data1'}
-            name = rand_name('server')
             self.assertRaises(exceptions.OverLimit,
-                              self.create_server_with_extras,
-                              name, self.image_ref,
-                              self.flavor_ref, meta=meta)
+                              self.create_server,
+                              meta=meta)
 
         # no teardown - all creates should fail
 
@@ -95,11 +93,9 @@ class ServerMetadataTest(base.BaseComputeTest):
     def test_create_metadata_key_error(self):
         # Blank key should trigger an error.
         meta = {'': 'data1'}
-        name = rand_name('server')
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server_with_extras,
-                          name, self.image_ref,
-                          self.flavor_ref, meta=meta)
+                          self.create_server,
+                          meta=meta)
 
     def test_update_server_metadata(self):
         # The server's metadata values should be updated to the

@@ -37,14 +37,8 @@ class TestServerDiskConfig(base.BaseComputeTest):
     @attr(type='positive')
     def test_rebuild_server_with_manual_disk_config(self):
         # A server should be rebuilt using the manual disk config option
-        name = rand_name('server')
-        resp, server = self.create_server_with_extras(name,
-                                                      self.image_ref,
-                                                      self.flavor_ref,
-                                                      disk_config='AUTO')
-
-        #Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_server(disk_config='AUTO',
+                                          wait_until='ACTIVE')
 
         #Verify the specified attributes are set correctly
         resp, server = self.client.get_server(server['id'])
@@ -67,14 +61,8 @@ class TestServerDiskConfig(base.BaseComputeTest):
     @attr(type='positive')
     def test_rebuild_server_with_auto_disk_config(self):
         # A server should be rebuilt using the auto disk config option
-        name = rand_name('server')
-        resp, server = self.create_server_with_extras(name,
-                                                      self.image_ref,
-                                                      self.flavor_ref,
-                                                      disk_config='MANUAL')
-
-        #Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_server(disk_config='MANUAL',
+                                          wait_until='ACTIVE')
 
         #Verify the specified attributes are set correctly
         resp, server = self.client.get_server(server['id'])
@@ -98,14 +86,8 @@ class TestServerDiskConfig(base.BaseComputeTest):
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     def test_resize_server_from_manual_to_auto(self):
         # A server should be resized from manual to auto disk config
-        name = rand_name('server')
-        resp, server = self.create_server_with_extras(name,
-                                                      self.image_ref,
-                                                      self.flavor_ref,
-                                                      disk_config='MANUAL')
-
-        #Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_server(disk_config='MANUAL',
+                                          wait_until='ACTIVE')
 
         #Resize with auto option
         self.client.resize(server['id'], self.flavor_ref_alt,
@@ -124,14 +106,8 @@ class TestServerDiskConfig(base.BaseComputeTest):
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     def test_resize_server_from_auto_to_manual(self):
         # A server should be resized from auto to manual disk config
-        name = rand_name('server')
-        resp, server = self.create_server_with_extras(name,
-                                                      self.image_ref,
-                                                      self.flavor_ref,
-                                                      disk_config='AUTO')
-
-        #Wait for the server to become active
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_server(disk_config='AUTO',
+                                          wait_until='ACTIVE')
 
         #Resize with manual option
         self.client.resize(server['id'], self.flavor_ref_alt,

@@ -173,36 +173,21 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.clear_isolated_creds()
 
     @classmethod
-    def create_server(cls, image_id=None, flavor=None):
+    def create_server(cls, **kwargs):
         """Wrapper utility that returns a test server."""
-        server_name = rand_name(cls.__name__ + "-instance")
-
-        if not flavor:
-            flavor = cls.flavor_ref
-        if not image_id:
-            image_id = cls.image_ref
+        name = rand_name(cls.__name__ + "-instance")
+        if 'name' in kwargs:
+            name = kwargs.pop('name')
+        flavor = kwargs.get('flavor', cls.flavor_ref)
+        image_id = kwargs.get('image_id', cls.image_ref)
 
         resp, server = cls.servers_client.create_server(
-                                                server_name, image_id, flavor)
-        cls.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
-        cls.servers.append(server)
-        return server
+            name, image_id, flavor, **kwargs)
 
-    @classmethod
-    def create_server_with_extras(cls, name, image_id=None,
-                                  flavor=None, **kwargs):
-        # TODO(sdague) transitional function because many
-        # server tests were using extra args and resp so can't
-        # easily be ported to create_server. Will be merged
-        # later
-        if not flavor:
-            flavor = cls.flavor_ref
-        if not image_id:
-            image_id = cls.image_ref
+        if 'wait_until' in kwargs:
+            cls.servers_client.wait_for_server_status(
+                server['id'], kwargs['wait_until'])
 
-        resp, server = cls.servers_client.create_server(name,
-                                                        image_id, flavor,
-                                                        **kwargs)
         cls.servers.append(server)
         return resp, server
 

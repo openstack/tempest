@@ -30,16 +30,10 @@ class ListImageFiltersTest(base.BaseComputeTest):
         super(ListImageFiltersTest, cls).setUpClass()
         cls.client = cls.images_client
 
-        name = rand_name('server')
-        resp, cls.server1 = cls.servers_client.create_server(name,
-                                                             cls.image_ref,
-                                                             cls.flavor_ref)
-        name = rand_name('server')
-        resp, cls.server2 = cls.servers_client.create_server(name,
-                                                             cls.image_ref,
-                                                             cls.flavor_ref)
+        resp, cls.server1 = cls.create_server()
+        resp, cls.server2 = cls.create_server(wait_until='ACTIVE')
+        # NOTE(sdague) this is faster than doing the sync wait_util on both
         cls.servers_client.wait_for_server_status(cls.server1['id'], 'ACTIVE')
-        cls.servers_client.wait_for_server_status(cls.server2['id'], 'ACTIVE')
 
         # Create images to be used in the filter tests
         image1_name = rand_name('image')
@@ -71,8 +65,6 @@ class ListImageFiltersTest(base.BaseComputeTest):
         cls.client.delete_image(cls.image1_id)
         cls.client.delete_image(cls.image2_id)
         cls.client.delete_image(cls.image3_id)
-        cls.servers_client.delete_server(cls.server1['id'])
-        cls.servers_client.delete_server(cls.server2['id'])
         super(ListImageFiltersTest, cls).tearDownClass()
 
     @attr(type='negative')
