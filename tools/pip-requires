@@ -1,7 +1,7 @@
 anyjson
 nose
 httplib2>=0.7.0
-testtools
+testtools>=0.9.29
 lxml
 boto>=2.2.1
 paramiko
