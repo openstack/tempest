@@ -29,7 +29,6 @@ class ServersNegativeTest(base.BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        raise cls.skipException("Until Bug 1046870 is fixed")
         super(ServersNegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client
@@ -115,6 +114,8 @@ class ServersNegativeTest(base.BaseComputeTest):
     @attr(type='negative')
     def test_create_numeric_server_name(self):
         # Create a server with a numeric name
+        if self.__class__._interface == "xml":
+            raise self.skipException("Not testable in XML")
 
         server_name = 12345
         self.assertRaises(exceptions.BadRequest,
@@ -182,7 +183,7 @@ class ServersNegativeTest(base.BaseComputeTest):
     def test_update_server_of_another_tenant(self):
         # Update name of a server that belongs to another tenant
 
-        server = self.create_server()
+        resp, server = self.create_server(wait_until='ACTIVE')
         new_name = server['id'] + '_new'
         self.assertRaises(exceptions.NotFound,
                           self.alt_client.update_server, server['id'],
@@ -192,7 +193,7 @@ class ServersNegativeTest(base.BaseComputeTest):
     def test_update_server_name_length_exceeds_256(self):
         # Update name of server exceed the name length limit
 
-        server = self.create_server()
+        resp, server = self.create_server(wait_until='ACTIVE')
         new_name = 'a' * 256
         self.assertRaises(exceptions.BadRequest,
                           self.client.update_server,
@@ -210,7 +211,7 @@ class ServersNegativeTest(base.BaseComputeTest):
     def test_delete_a_server_of_another_tenant(self):
         # Delete a server that belongs to another tenant
         try:
-            server = self.create_server()
+            resp, server = self.create_server(wait_until='ACTIVE')
             self.assertRaises(exceptions.NotFound,
                               self.alt_client.delete_server,
                               server['id'])
@@ -245,3 +246,7 @@ class ServersNegativeTest(base.BaseComputeTest):
 
         self.assertRaises(exceptions.NotFound, self.client.get_server,
                           '999erra43')
+
+
+class ServersNegativeTestXML(ServersNegativeTest):
+    _interface = 'xml'

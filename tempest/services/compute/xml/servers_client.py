@@ -182,13 +182,13 @@ class ServersClientXML(RestClientXML):
         server = Element("server")
         doc.append(server)
 
-        if name:
+        if name is not None:
             server.add_attr("name", name)
-        if accessIPv4:
+        if accessIPv4 is not None:
             server.add_attr("accessIPv4", accessIPv4)
-        if accessIPv6:
+        if accessIPv6 is not None:
             server.add_attr("accessIPv6", accessIPv6)
-        if meta:
+        if meta is not None:
             metadata = Element("metadata")
             server.append(metadata)
             for k, v in meta:
@@ -228,9 +228,25 @@ class ServersClientXML(RestClientXML):
                          flavorRef=flavor_ref,
                          name=name)
 
-        for attr in ["adminPass", "accessIPv4", "accessIPv6", "key_name"]:
+        for attr in ["adminPass", "accessIPv4", "accessIPv6", "key_name",
+                     "user_data", "availability_zone"]:
             if attr in kwargs:
                 server.add_attr(attr, kwargs[attr])
+
+        if 'security_groups' in kwargs:
+            secgroups = Element("security_groups")
+            server.append(secgroups)
+            for secgroup in kwargs['security_groups']:
+                s = Element("security_group", name=secgroup['name'])
+                secgroups.append(s)
+
+        if 'networks' in kwargs:
+            networks = Element("networks")
+            server.append(networks)
+            for network in kwargs['networks']:
+                s = Element("network", uuid=network['uuid'],
+                            fixed_ip=network['fixed_ip'])
+                networks.append(s)
 
         if 'meta' in kwargs:
             metadata = Element("metadata")
