@@ -15,6 +15,7 @@ class RemoteClient():
         ssh_timeout = TempestConfig().compute.ssh_timeout
         network = TempestConfig().compute.network_for_ssh
         ip_version = TempestConfig().compute.ip_version_for_ssh
+        ssh_channel_timeout = TempestConfig().compute.ssh_channel_timeout
         if isinstance(server, basestring):
             ip_address = server
         else:
@@ -27,7 +28,8 @@ class RemoteClient():
                 raise ServerUnreachable()
 
         self.ssh_client = Client(ip_address, username, password, ssh_timeout,
-                                 pkey=pkey)
+                                 pkey=pkey,
+                                 channel_timeout=ssh_channel_timeout)
         if not self.ssh_client.test_connection_auth():
             raise SSHTimeout()
 
