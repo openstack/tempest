@@ -152,6 +152,19 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
 #TODO(afazekas): Add test that tried to update the quota_set as a regular user
 
+    @attr(type='negative')
+    def test_create_server_when_instances_quota_is_full(self):
+        #Once instances quota limit is reached, disallow server creation
+        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
+        default_instances_quota = quota_set['instances']
+        instances_quota = 0  # Set quota to zero to disallow server creation
+
+        self.adm_client.update_quota_set(self.demo_tenant_id,
+                                         instances=instances_quota)
+        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
+                        instances=default_instances_quota)
+        self.assertRaises(exceptions.OverLimit, self.create_server)
+
 
 class QuotasAdminTestXML(QuotasAdminTestJSON):
     _interface = 'xml'
