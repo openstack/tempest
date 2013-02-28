@@ -338,6 +338,11 @@ class RestClient(object):
             return self.check_over_limit(resp_body, method, url, headers, body,
                                          depth, wait)
 
+        if resp.status == 422:
+            if parse_resp:
+                resp_body = self._parse_resp(resp_body)
+            raise exceptions.UnprocessableEntity(resp_body)
+
         if resp.status in (500, 501):
             message = resp_body
             if parse_resp:

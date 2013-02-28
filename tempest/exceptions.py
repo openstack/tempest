@@ -94,6 +94,10 @@ class BadRequest(RestClientException):
     message = "Bad request"
 
 
+class UnprocessableEntity(RestClientException):
+    message = "Unprocessable entity"
+
+
 class AuthenticationFailure(RestClientException):
     message = ("Authentication with user %(user)s and password "
                "%(password)s failed")
