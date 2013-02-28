@@ -25,7 +25,6 @@ import urllib
 from tempest.common import glance_http
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
-from tempest import manager
 
 
 class ImageClientJSON(RestClient):
@@ -97,11 +96,11 @@ class ImageClientJSON(RestClient):
             return None
 
     def _get_http(self):
-        temp_manager = manager.DefaultClientManager()
-        keystone = temp_manager._get_identity_client()
-        token = keystone.auth_token
-        endpoint = keystone.service_catalog.url_for(service_type='image',
-                                                    endpoint_type='publicURL')
+        token, endpoint = self.keystone_auth(self.user,
+                                             self.password,
+                                             self.auth_url,
+                                             self.service,
+                                             self.tenant_name)
         dscv = self.config.identity.disable_ssl_certificate_validation
         return glance_http.HTTPClient(endpoint=endpoint, token=token,
                                       insecure=dscv)
@@ -170,11 +169,7 @@ class ImageClientJSON(RestClient):
 
     def delete_image(self, image_id):
         url = 'v1/images/%s' % image_id
-        try:
-            self.delete(url)
-        except exceptions.Unauthorized:
-            url = '/' + url
-            self.http.raw_request('DELETE', url)
+        self.delete(url)
 
     def image_list(self, **kwargs):
         url = 'v1/images'
