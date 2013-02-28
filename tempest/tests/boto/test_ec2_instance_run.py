@@ -17,15 +17,15 @@
 
 import logging
 
-from boto.exception import EC2ResponseError
+from boto import exception
 import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest import exceptions
 from tempest.test import attr
 from tempest.testboto import BotoTestCase
-import tempest.tests.boto
 from tempest.tests.boto.utils.s3 import s3_upload_dir
 from tempest.tests.boto.utils.wait import re_search_wait
 from tempest.tests.boto.utils.wait import state_wait
@@ -39,7 +39,7 @@ class InstanceRunTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(InstanceRunTest, cls).setUpClass()
-        if not tempest.tests.boto.A_I_IMAGES_READY:
+        if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
         cls.os = clients.Manager()
@@ -86,7 +86,8 @@ class InstanceRunTest(BotoTestCase):
             if state != "available":
                 for _image in cls.images.itervalues():
                     cls.ec2_client.deregister_image(_image["image_id"])
-                raise EC2RegisterImageException(image_id=image["image_id"])
+                raise exceptions.EC2RegisterImageException(image_id=
+                                                           image["image_id"])
 
     @attr(type='smoke')
     def test_run_stop_terminate_instance(self):
@@ -129,7 +130,7 @@ class InstanceRunTest(BotoTestCase):
             instance.update(validate=True)
         except ValueError:
             pass
-        except EC2ResponseError as exc:
+        except exception.EC2ResponseError as exc:
             if self.ec2_error_code.\
                 client.InvalidInstanceID.NotFound.match(exc):
                 pass
