@@ -52,7 +52,7 @@ from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
-from tempest.services.image.json.image_client import ImageClientJSON
+from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.account_client import \
