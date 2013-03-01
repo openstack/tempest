@@ -53,6 +53,7 @@ from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.v1.json.image_client import ImageClientJSON
+from tempest.services.image.v2.json.image_client import ImageClientV2JSON
 from tempest.services.network.json.network_client import NetworkClient
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.account_client import \
@@ -215,6 +216,7 @@ class Manager(object):
         self.hosts_client = HostsClientJSON(*client_args)
         self.account_client = AccountClient(*client_args)
         self.image_client = ImageClientJSON(*client_args)
+        self.image_client_v2 = ImageClientV2JSON(*client_args)
         self.container_client = ContainerClient(*client_args)
         self.object_client = ObjectClient(*client_args)
         self.ec2api_client = botoclients.APIClientEC2(*client_args)
