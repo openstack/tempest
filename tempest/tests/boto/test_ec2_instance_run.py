@@ -142,6 +142,7 @@ class InstanceRunTest(BotoTestCase):
     #NOTE(afazekas): doctored test case,
     # with normal validation it would fail
     @attr("slow", type='smoke')
+    @testtools.skip("Skipped until the Bug #1117555 is resolved")
     def test_integration_1(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])
