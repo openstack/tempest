@@ -88,6 +88,9 @@ ip_version_for_ssh = 4
 # Number of seconds to wait to authenticate to an instance
 ssh_timeout = 300
 
+# Number of seconds to wait for output from ssh channel
+ssh_channel_timeout = 60
+
 # The type of endpoint for a Compute API service. Unless you have a
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "compute"
@@ -238,20 +241,20 @@ aws_secret =
 
 #Image materials for S3 upload
 # ALL content of the specified directory will be uploaded to S3
-s3_materials_path = /opt/stack/devstack/files/images/s3-materials/cirros-0.3.0
+s3_materials_path = /opt/stack/devstack/files/images/s3-materials/cirros-0.3.1
 
 # The manifest.xml files, must be in the s3_materials_path directory
 # Subdirectories not allowed!
 # The filenames will be used as a Keys in the S3 Buckets
 
 #ARI Ramdisk manifest. Must be in the above s3_materials_path
-ari_manifest = cirros-0.3.0-x86_64-initrd.manifest.xml
+ari_manifest = cirros-0.3.1-x86_64-initrd.manifest.xml
 
 #AMI Machine Image manifest. Must be in the above s3_materials_path
-ami_manifest = cirros-0.3.0-x86_64-blank.img.manifest.xml
+ami_manifest = cirros-0.3.1-x86_64-blank.img.manifest.xml
 
 #AKI Kernel Image manifest, Must be in the above s3_materials_path
-aki_manifest = cirros-0.3.0-x86_64-vmlinuz.manifest.xml
+aki_manifest = cirros-0.3.1-x86_64-vmlinuz.manifest.xml
 
 #Instance type
 instance_type = m1.tiny

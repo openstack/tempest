@@ -149,8 +149,12 @@ ComputeGroup = [
                help="User name used to authenticate to an instance."),
     cfg.IntOpt('ssh_timeout',
                default=300,
-               help="Timeout in seconds to wait for authentcation to "
+               help="Timeout in seconds to wait for authentication to "
                     "succeed."),
+    cfg.IntOpt('ssh_channel_timeout',
+               default=60,
+               help="Timeout in seconds to wait for output from ssh "
+                    "channel."),
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections."),
