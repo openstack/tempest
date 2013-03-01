@@ -86,7 +86,7 @@ class LiveBlockMigrationTest(base.BaseComputeAdminTest):
             if 'ACTIVE' == self._get_server_status(server_id):
                 return server_id
         else:
-            server = self.create_server()
+            _, server = self.create_server(wait_until="ACTIVE")
             server_id = server['id']
             self.password = server['adminPass']
             self.password = 'password'
