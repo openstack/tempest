@@ -19,7 +19,6 @@ import copy
 import errno
 import json
 import os
-import time
 import urllib
 
 from tempest.common import glance_http
