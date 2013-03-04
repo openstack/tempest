@@ -88,3 +88,7 @@ class ServerAddressesTest(base.BaseComputeTest):
             addr = addr[addr_type]
             for address in addresses[addr_type]:
                 self.assertTrue(any([a for a in addr if a == address]))
+
+
+class ServerAddressesTestXML(ServerAddressesTest):
+    _interface = 'xml'
