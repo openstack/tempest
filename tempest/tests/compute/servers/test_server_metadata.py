@@ -15,28 +15,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ServerMetadataTest(base.BaseComputeTest):
+class ServerMetadataTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServerMetadataTest, cls).setUpClass()
+        super(ServerMetadataTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
         resp, tenants = cls.admin_client.list_tenants()
         cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
                          cls.client.tenant_name][0]
-        #Create a server to be used for all read only tests
-        name = rand_name('server')
-        resp, server = cls.client.create_server(name, cls.image_ref,
-                                                cls.flavor_ref, meta={})
+        resp, server = cls.create_server(meta={})
+
         cls.server_id = server['id']
 
         #Wait for the server to become active
@@ -45,10 +42,10 @@ class ServerMetadataTest(base.BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.server_id)
-        super(ServerMetadataTest, cls).tearDownClass()
+        super(ServerMetadataTestJSON, cls).tearDownClass()
 
     def setUp(self):
-        super(ServerMetadataTest, self).setUp()
+        super(ServerMetadataTestJSON, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
         resp, _ = self.client.set_server_metadata(self.server_id, meta)
         self.assertEqual(resp.status, 200)
@@ -238,3 +235,7 @@ class ServerMetadataTest(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.client.set_server_metadata,
                           self.server_id, meta=meta)
+
+
+class ServerMetadataTestXML(ServerMetadataTestJSON):
+    _interface = 'xml'
