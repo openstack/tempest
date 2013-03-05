@@ -108,7 +108,6 @@ class LiveBlockMigrationTest(base.BaseComputeAdminTest):
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         self.assertEquals(target_host, self._get_host_for_server(server_id))
 
-    @testtools.skip('Until bug 1051881 is dealt with.')
     @testtools.skipIf(not live_migration_available,
                       'Block Live migration not available')
     def test_invalid_host_for_migration(self):
