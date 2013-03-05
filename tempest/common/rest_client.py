@@ -177,8 +177,8 @@ class RestClient(object):
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)
 
-    def get(self, url, headers=None, wait=None):
-        return self.request('GET', url, headers, wait=wait)
+    def get(self, url, headers=None):
+        return self.request('GET', url, headers)
 
     def delete(self, url, headers=None):
         return self.request('DELETE', url, headers)
@@ -257,7 +257,7 @@ class RestClient(object):
             self.LOG.warning("status >= 400 response with empty body")
 
     def request(self, method, url,
-                headers=None, body=None, depth=0, wait=None):
+                headers=None, body=None, depth=0):
         """A simple HTTP request interface."""
 
         if (self.token is None) or (self.base_url is None):
@@ -276,13 +276,12 @@ class RestClient(object):
         self._log_response(resp, resp_body)
         self.response_checker(method, url, headers, body, resp, resp_body)
 
-        self._error_checker(method, url, headers, body, resp, resp_body, depth,
-                            wait)
+        self._error_checker(method, url, headers, body, resp, resp_body, depth)
 
         return resp, resp_body
 
     def _error_checker(self, method, url,
-                       headers, body, resp, resp_body, depth=0, wait=None):
+                       headers, body, resp, resp_body, depth=0):
 
         # NOTE(mtreinish): Check for httplib response from glance_http. The
         # object can't be used here because importing httplib breaks httplib2.
@@ -336,7 +335,7 @@ class RestClient(object):
                 resp_body = self._parse_resp(resp_body)
             #Checking whether Absolute/Rate limit
             return self.check_over_limit(resp_body, method, url, headers, body,
-                                         depth, wait)
+                                         depth)
 
         if resp.status == 422:
             if parse_resp:
@@ -367,11 +366,11 @@ class RestClient(object):
             raise exceptions.RestClientException(str(resp.status))
 
     def check_over_limit(self, resp_body, method, url,
-                         headers, body, depth, wait):
+                         headers, body, depth):
         self.is_absolute_limit(resp_body['overLimit'])
         return self.is_rate_limit_retry_max_recursion_depth(
             resp_body['overLimit'], method, url, headers,
-            body, depth, wait)
+            body, depth)
 
     def is_absolute_limit(self, resp_body):
         if 'exceeded' in resp_body['message']:
@@ -380,15 +379,14 @@ class RestClient(object):
             return
 
     def is_rate_limit_retry_max_recursion_depth(self, resp_body, method,
-                                                url, headers, body, depth,
-                                                wait):
+                                                url, headers, body, depth):
         if 'retryAfter' in resp_body:
             if depth < MAX_RECURSION_DEPTH:
                 delay = resp_body['retryAfter']
                 time.sleep(int(delay))
                 return self.request(method, url, headers=headers,
                                     body=body,
-                                    depth=depth + 1, wait=wait)
+                                    depth=depth + 1)
             else:
                 raise exceptions.RateLimitExceeded(
                     message=resp_body['overLimitFault']['message'],
@@ -422,8 +420,8 @@ class RestClientXML(RestClient):
         return xml_to_json(etree.fromstring(body))
 
     def check_over_limit(self, resp_body, method, url,
-                         headers, body, depth, wait):
+                         headers, body, depth):
         self.is_absolute_limit(resp_body)
         return self.is_rate_limit_retry_max_recursion_depth(
             resp_body, method, url, headers,
-            body, depth, wait)
+            body, depth)

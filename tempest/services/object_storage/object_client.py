@@ -156,7 +156,7 @@ class ObjectClientCustomizedHeader(RestClient):
         self.service = self.config.object_storage.catalog_type
         self.format = 'json'
 
-    def request(self, method, url, headers=None, body=None, wait=None):
+    def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
         dscv = self.config.identity.disable_ssl_certificate_validation
         self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)

@@ -103,7 +103,7 @@ class AccountClientCustomizedHeader(RestClient):
         self.service = self.config.object_storage.catalog_type
         self.format = 'json'
 
-    def request(self, method, url, headers=None, body=None, wait=None):
+    def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
         self.http_obj = httplib2.Http()
         if headers is None:
