@@ -52,6 +52,7 @@ class ServersClientJSON(RestClient):
         min_count: Count of minimum number of instances to launch.
         max_count: Count of maximum number of instances to launch.
         disk_config: Determines if user or admin controls disk configuration.
+        return_reservation_id: Enable/Disable the return of reservation id
         """
         post_body = {
             'name': name,
@@ -63,7 +64,8 @@ class ServersClientJSON(RestClient):
                        'security_groups', 'networks', 'user_data',
                        'availability_zone', 'accessIPv4', 'accessIPv6',
                        'min_count', 'max_count', ('metadata', 'meta'),
-                       ('OS-DCF:diskConfig', 'disk_config')]:
+                       ('OS-DCF:diskConfig', 'disk_config'),
+                       'return_reservation_id']:
             if isinstance(option, tuple):
                 post_param = option[0]
                 key = option[1]
@@ -77,6 +79,10 @@ class ServersClientJSON(RestClient):
         resp, body = self.post('servers', post_body, self.headers)
 
         body = json.loads(body)
+        # NOTE(maurosr): this deals with the case of multiple server create
+        # with return reservation id set True
+        if 'reservation_id' in body:
+            return resp, body
         return resp, body['server']
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,

@@ -235,7 +235,8 @@ class ServersClientXML(RestClientXML):
                          name=name)
 
         for attr in ["adminPass", "accessIPv4", "accessIPv6", "key_name",
-                     "user_data", "availability_zone"]:
+                     "user_data", "availability_zone", "min_count",
+                     "max_count", "return_reservation_id"]:
             if attr in kwargs:
                 server.add_attr(attr, kwargs[attr])
 
