@@ -38,8 +38,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             for i in range(3):
                 s_name = rand_name('securitygroup-')
                 s_description = rand_name('description-')
-                resp, securitygroup =\
-                self.client.create_security_group(s_name, s_description)
+                resp, securitygroup = \
+                    self.client.create_security_group(s_name, s_description)
                 self.assertEqual(200, resp.status)
                 security_group_list.append(securitygroup)
             #Fetch all Security Groups and verify the list
@@ -47,8 +47,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             resp, fetched_list = self.client.list_security_groups()
             self.assertEqual(200, resp.status)
             #Now check if all the created Security Groups are in fetched list
-            missing_sgs =\
-            [sg for sg in security_group_list if sg not in fetched_list]
+            missing_sgs = \
+                [sg for sg in security_group_list if sg not in fetched_list]
             self.assertFalse(missing_sgs,
                              "Failed to find Security Group %s in fetched "
                              "list" % ', '.join(m_group['name']
@@ -56,8 +56,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         finally:
             #Delete all the Security Groups created in this method
             for securitygroup in security_group_list:
-                resp, _ =\
-                self.client.delete_security_group(securitygroup['id'])
+                resp, _ = \
+                    self.client.delete_security_group(securitygroup['id'])
                 self.assertEqual(202, resp.status)
 
     @attr(type='positive')
@@ -67,7 +67,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             s_name = rand_name('securitygroup-')
             s_description = rand_name('description-')
             resp, securitygroup = \
-            self.client.create_security_group(s_name, s_description)
+                self.client.create_security_group(s_name, s_description)
             self.assertEqual(200, resp.status)
             self.assertTrue('id' in securitygroup)
             securitygroup_id = securitygroup['id']
@@ -88,12 +88,12 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         try:
             s_name = rand_name('securitygroup-')
             s_description = rand_name('description-')
-            resp, securitygroup =\
-            self.client.create_security_group(s_name, s_description)
+            resp, securitygroup = \
+                self.client.create_security_group(s_name, s_description)
             self.assertEqual(200, resp.status)
             #Now fetch the created Security Group by its 'id'
-            resp, fetched_group =\
-            self.client.get_security_group(securitygroup['id'])
+            resp, fetched_group = \
+                self.client.get_security_group(securitygroup['id'])
             self.assertEqual(200, resp.status)
             self.assertEqual(securitygroup, fetched_group,
                              "The fetched Security Group is different "
@@ -170,6 +170,20 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group, s_name,
                           s_description)
+
+    @attr(type='negative')
+    def test_delete_the_default_security_group(self):
+        # Negative test:Deletion of the "default" Security Group should Fail
+        default_security_group_id = None
+        resp, body = self.client.list_security_groups()
+        for i in range(len(body)):
+            if body[i]['name'] == 'default':
+                default_security_group_id = body[i]['id']
+                break
+        #Deleting the "default" Security Group
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.delete_security_group,
+                          default_security_group_id)
 
     @attr(type='negative')
     def test_delete_nonexistant_security_group(self):
