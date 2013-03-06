@@ -93,6 +93,11 @@ def _translate_server_xml_to_json(xml_dom):
         json['addresses'] = json_addresses
     else:
         json = xml_to_json(xml_dom)
+    diskConfig = '{http://docs.openstack.org/compute/ext/disk_config/api/v1.1'\
+                 '}diskConfig'
+    if diskConfig in json:
+        json['OS-DCF:diskConfig'] = json[diskConfig]
+        del json[diskConfig]
     return json
 
 
@@ -233,6 +238,11 @@ class ServersClientXML(RestClientXML):
             if attr in kwargs:
                 server.add_attr(attr, kwargs[attr])
 
+        if 'disk_config' in kwargs:
+            server.add_attr('xmlns:OS-DCF', "http://docs.openstack.org/"
+                            "compute/ext/disk_config/api/v1.1")
+            server.add_attr('OS-DCF:diskConfig', kwargs['disk_config'])
+
         if 'security_groups' in kwargs:
             secgroups = Element("security_groups")
             server.append(secgroups)
@@ -355,6 +365,12 @@ class ServersClientXML(RestClientXML):
 
     def rebuild(self, server_id, image_ref, **kwargs):
         kwargs['imageRef'] = image_ref
+        if 'disk_config' in kwargs:
+            kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
+            del kwargs['disk_config']
+            kwargs['xmlns:OS-DCF'] = "http://docs.openstack.org/"\
+                                     "compute/ext/disk_config/api/v1.1"
+            kwargs['xmlns:atom'] = "http://www.w3.org/2005/Atom"
         if 'xmlns' not in kwargs:
             kwargs['xmlns'] = XMLNS_11
 
@@ -379,8 +395,11 @@ class ServersClientXML(RestClientXML):
 
     def resize(self, server_id, flavor_ref, **kwargs):
         if 'disk_config' in kwargs:
-            raise NotImplementedError("Sorry, disk_config not "
-                                      "supported via XML yet")
+            kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
+            del kwargs['disk_config']
+            kwargs['xmlns:OS-DCF'] = "http://docs.openstack.org/"\
+                                     "compute/ext/disk_config/api/v1.1"
+            kwargs['xmlns:atom'] = "http://www.w3.org/2005/Atom"
         kwargs['flavorRef'] = flavor_ref
         return self.action(server_id, 'resize', None, **kwargs)
 
