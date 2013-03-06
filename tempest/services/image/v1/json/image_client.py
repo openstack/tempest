@@ -202,3 +202,35 @@ class ImageClientJSON(RestClient):
         except exceptions.NotFound:
             return True
         return False
+
+    def get_image_membership(self, image_id):
+        url = 'v1/images/%s/members' % image_id
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body
+
+    def get_shared_images(self, member_id):
+        url = 'v1/shared-images/%s' % member_id
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body
+
+    def add_member(self, member_id, image_id, can_share=False):
+        url = 'v1/images/%s/members/%s' % (image_id, member_id)
+        body = None
+        if can_share:
+            body = json.dumps({'member': {'can_share': True}})
+        resp, __ = self.put(url, body, self.headers)
+        return resp
+
+    def delete_member(self, member_id, image_id):
+        url = 'v1/images/%s/members/%s' % (image_id, member_id)
+        resp, __ = self.delete(url)
+        return resp
+
+    def replace_membership_list(self, image_id, member_list):
+        url = 'v1/images/%s/members' % image_id
+        body = json.dumps({'membership': member_list})
+        resp, data = self.put(url, body, self.headers)
+        data = json.loads(data)
+        return resp, data
