@@ -18,6 +18,7 @@
 import copy
 import hashlib
 import httplib
+import json
 import logging
 import posixpath
 import re
@@ -26,10 +27,6 @@ import StringIO
 import struct
 import urlparse
 
-try:
-    import json
-except ImportError:
-    import simplejson as json
 
 # Python 2.5 compat fix
 if not hasattr(urlparse, 'parse_qsl'):
@@ -129,11 +126,11 @@ class HTTPClient(object):
             resp = conn.getresponse()
         except socket.gaierror as e:
             message = "Error finding address for %(url)s: %(e)s" % locals()
-            raise exc.EndpointNotFound
+            raise exc.EndpointNotFound(message)
         except (socket.error, socket.timeout) as e:
             endpoint = self.endpoint
             message = "Error communicating with %(endpoint)s %(e)s" % locals()
-            raise exc.TimeoutException
+            raise exc.TimeoutException(message)
 
         body_iter = ResponseBodyIterator(resp)
 

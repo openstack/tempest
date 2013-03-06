@@ -97,7 +97,6 @@ class ContainerClient(RestClient):
         #TODO(dwalleck):  Rewite using json format to avoid newlines at end of
         #obj names. Set limit to API limit - 1 (max returned items = 9999)
         limit = 9999
-        marker = None
         if params is not None:
             if 'limit' in params:
                 limit = params['limit']

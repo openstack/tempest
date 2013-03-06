@@ -17,7 +17,6 @@
 
 import testtools
 
-from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 from tempest.tests import compute
 from tempest.tests.compute import base
