@@ -18,11 +18,11 @@
 import logging
 import subprocess
 
+from oslo.config import cfg
 import testtools
 
 import cli
-
-from tempest.openstack.common import cfg
+from tempest import config
 
 
 CONF = cfg.CONF
