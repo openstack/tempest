@@ -232,6 +232,49 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.delete_security_group_rule,
                           rand_name('999'))
 
+    @attr(type='positive')
+    def test_security_group_rules_list(self):
+        # Positive test: Created Security Group rules should be
+        # in the list of all rules
+        # Creating a Security Group to add rules to it
+        s_name = rand_name('securitygroup-')
+        s_description = rand_name('description-')
+        resp, securitygroup = \
+            self.client.create_security_group(s_name, s_description)
+        securitygroup_id = securitygroup['id']
+        # Delete the Security Group at the end of this method
+        self.addCleanup(self.client.delete_security_group, securitygroup_id)
+
+        # Add a first rule to the created Security Group
+        ip_protocol1 = 'tcp'
+        from_port1 = 22
+        to_port1 = 22
+        resp, rule = \
+            self.client.create_security_group_rule(securitygroup_id,
+                                                   ip_protocol1,
+                                                   from_port1, to_port1)
+        rule1_id = rule['id']
+        # Delete the Security Group rule1 at the end of this method
+        self.addCleanup(self.client.delete_security_group_rule, rule1_id)
+
+        # Add a second rule to the created Security Group
+        ip_protocol2 = 'icmp'
+        from_port2 = -1
+        to_port2 = -1
+        resp, rule = \
+            self.client.create_security_group_rule(securitygroup_id,
+                                                   ip_protocol2,
+                                                   from_port2, to_port2)
+        rule2_id = rule['id']
+        # Delete the Security Group rule2 at the end of this method
+        self.addCleanup(self.client.delete_security_group_rule, rule2_id)
+
+        # Get rules of the created Security Group
+        resp, rules = \
+            self.client.list_security_group_rules(securitygroup_id)
+        self.assertTrue(any([i for i in rules if i['id'] == rule1_id]))
+        self.assertTrue(any([i for i in rules if i['id'] == rule2_id]))
+
 
 class SecurityGroupRulesTestXML(SecurityGroupRulesTestJSON):
     _interface = 'xml'
