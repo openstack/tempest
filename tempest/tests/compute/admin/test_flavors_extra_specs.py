@@ -16,9 +16,9 @@
 #    under the License.
 
 from tempest import exceptions
+from tempest.test import attr
 from tempest.tests import compute
 from tempest.tests.compute import base
-import testtools
 
 
 class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
@@ -80,51 +80,35 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key1")
         self.assertEqual(unset_resp.status, 200)
 
-    @testtools.skip('Until bug 1094142 is resolved.')
-    def test_flavor_non_admin_set_get_unset_keys(self):
-        #Test to SET, GET UNSET flavor extra spec as a user
-        #with out admin privileges.
-        self.nonadmin_client = self.flavors_client
-        #Assigning extra specs values that are to be set
+    @attr('negative')
+    def test_flavor_non_admin_set_keys(self):
+        #Test to SET flavor extra spec as a user without admin privileges.
         specs = {"key1": "value1", "key2": "value2"}
-        msg = None
+        self.assertRaises(exceptions.Unauthorized,
+                          self.flavors_client.set_flavor_extra_spec,
+                          self.flavor['id'],
+                          specs)
 
-        #Verify if able to SET flavor extraspec with non-admin user
-        try:
-            set_resp, set_body = \
-                self.nonadmin_client.set_flavor_extra_spec(
-                    self.flavor['id'], specs)
-        except exceptions.Unauthorized:
-            pass
-        else:
-            msg = "Flavor extra specs is being SET"
-            msg += " by unauthorized non-admin user.\n"
-        #SET flavor extra specs with admin user
-        #so as to check GET/UNSET flavor extra specs with non-admin
-        set_resp, set_body =\
-            self.client.set_flavor_extra_spec(self.flavor['id'], specs)
-        #Verify if able to GET flavor extraspec with non-admin user
-        try:
-            get_resp, get_body = \
-                self.nonadmin_client.get_flavor_extra_spec('')
-            self.assertEqual(get_resp.status, 200)
-        except Exception as e:
-            msg += "Got an exception when GET Flavor extra specs"
-            msg += " by non-admin user. Exception is: %s\n" % e
-        #Verify if able to UNSET flavor extraspec with non-admin user
-        try:
-            unset_resp, _ = \
-                self.nonadmin_client.unset_flavor_extra_spec(self.flavor['id'],
-                                                             "key1")
-        except exceptions.Unauthorized:
-            pass
-        else:
-            msg += "Flavor extra specs is being UNSET"
-            msg += " by unauthorized non-admin user.\n"
-        #Verification to check if actions failed.
-        #msg variable  would contain the message according to the failures.
-        if msg is not None:
-            self.fail(msg)
+    def test_flavor_non_admin_get_keys(self):
+        specs = {"key1": "value1", "key2": "value2"}
+        set_resp, set_body = self.client.set_flavor_extra_spec(
+                                                self.flavor['id'], specs)
+        resp, body = self.flavors_client.get_flavor_extra_spec(
+                                                            self.flavor['id'])
+        self.assertEqual(resp.status, 200)
+        for key in specs:
+            self.assertEquals(body[key], specs[key])
+
+    @attr('negative')
+    def test_flavor_non_admin_unset_keys(self):
+        specs = {"key1": "value1", "key2": "value2"}
+        set_resp, set_body = self.client.set_flavor_extra_spec(
+                                                self.flavor['id'], specs)
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.flavors_client.unset_flavor_extra_spec,
+                          self.flavor['id'],
+                          'key1')
 
 
 class FlavorsExtraSpecsTestXML(FlavorsExtraSpecsTestJSON):
