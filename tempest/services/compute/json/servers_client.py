@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2012 OpenStack, LLC
+# Copyright 2013 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -375,3 +376,11 @@ class ServersClientJSON(RestClient):
         resp, body = self.get('/'.join(['servers', server_id,
                               'os-virtual-interfaces']))
         return resp, json.loads(body)
+
+    def rescue_server(self, server_id, adminPass=None):
+        """Rescue the provided server."""
+        return self.action(server_id, 'rescue', None, adminPass=adminPass)
+
+    def unrescue_server(self, server_id):
+        """Unrescue the provided server."""
+        return self.action(server_id, 'unrescue', None)

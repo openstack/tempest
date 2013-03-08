@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 #
 # Copyright 2012 IBM
+# Copyright 2013 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -464,3 +465,25 @@ class ServersClientXML(RestClientXML):
                               'os-virtual-interfaces']), self.headers)
         virt_int = self._parse_xml_virtual_interfaces(etree.fromstring(body))
         return resp, virt_int
+
+    def rescue_server(self, server_id, adminPass=None):
+        """Rescue the provided server."""
+        return self.action(server_id, 'rescue', None, adminPass=adminPass)
+
+    def unrescue_server(self, server_id):
+        """Unrescue the provided server."""
+        return self.action(server_id, 'unrescue', None)
+
+    def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
+        post_body = Element("volumeAttachment", volumeId=volume_id,
+                            device=device)
+        resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
+                               str(Document(post_body)), self.headers)
+        return resp, body
+
+    def detach_volume(self, server_id, volume_id):
+        headers = {'Content-Type': 'application/xml',
+                   'Accept': 'application/xml'}
+        resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
+                                 (server_id, volume_id), headers)
+        return resp, body
