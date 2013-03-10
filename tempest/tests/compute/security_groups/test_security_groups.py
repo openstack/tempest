@@ -29,79 +29,80 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         super(SecurityGroupsTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
 
+    def _delete_security_group(self, securitygroup_id):
+        resp, _ = self.client.delete_security_group(securitygroup_id)
+        self.assertEqual(202, resp.status)
+
     @attr(type='positive')
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
-        try:
-            #Create 3 Security Groups
-            security_group_list = list()
-            for i in range(3):
-                s_name = rand_name('securitygroup-')
-                s_description = rand_name('description-')
-                resp, securitygroup = \
-                    self.client.create_security_group(s_name, s_description)
-                self.assertEqual(200, resp.status)
-                security_group_list.append(securitygroup)
-            #Fetch all Security Groups and verify the list
-            #has all created Security Groups
-            resp, fetched_list = self.client.list_security_groups()
-            self.assertEqual(200, resp.status)
-            #Now check if all the created Security Groups are in fetched list
-            missing_sgs = \
-                [sg for sg in security_group_list if sg not in fetched_list]
-            self.assertFalse(missing_sgs,
-                             "Failed to find Security Group %s in fetched "
-                             "list" % ', '.join(m_group['name']
-                                                for m_group in missing_sgs))
-        finally:
-            #Delete all the Security Groups created in this method
-            for securitygroup in security_group_list:
-                resp, _ = \
-                    self.client.delete_security_group(securitygroup['id'])
-                self.assertEqual(202, resp.status)
-
-    @attr(type='positive')
-    def test_security_group_create_delete(self):
-        # Security Group should be created, verified and deleted
-        try:
+        #Create 3 Security Groups
+        security_group_list = list()
+        for i in range(3):
             s_name = rand_name('securitygroup-')
             s_description = rand_name('description-')
             resp, securitygroup = \
                 self.client.create_security_group(s_name, s_description)
             self.assertEqual(200, resp.status)
-            self.assertTrue('id' in securitygroup)
-            securitygroup_id = securitygroup['id']
-            self.assertFalse(securitygroup_id is None)
-            self.assertTrue('name' in securitygroup)
-            securitygroup_name = securitygroup['name']
-            self.assertEqual(securitygroup_name, s_name,
-                             "The created Security Group name is "
-                             "not equal to the requested name")
-        finally:
-            #Delete Security Group created in this method
-            resp, _ = self.client.delete_security_group(securitygroup['id'])
-            self.assertEqual(202, resp.status)
+            self.addCleanup(self._delete_security_group,
+                            securitygroup['id'])
+            security_group_list.append(securitygroup)
+        #Fetch all Security Groups and verify the list
+        #has all created Security Groups
+        resp, fetched_list = self.client.list_security_groups()
+        self.assertEqual(200, resp.status)
+        #Now check if all the created Security Groups are in fetched list
+        missing_sgs = \
+            [sg for sg in security_group_list if sg not in fetched_list]
+        self.assertFalse(missing_sgs,
+                         "Failed to find Security Group %s in fetched "
+                         "list" % ', '.join(m_group['name']
+                                            for m_group in missing_sgs))
+
+    #TODO(afazekas): scheduled for delete,
+    #test_security_group_create_get_delete covers it
+    @attr(type='positive')
+    def test_security_group_create_delete(self):
+        # Security Group should be created, verified and deleted
+        s_name = rand_name('securitygroup-')
+        s_description = rand_name('description-')
+        resp, securitygroup = \
+            self.client.create_security_group(s_name, s_description)
+        self.assertTrue('id' in securitygroup)
+        securitygroup_id = securitygroup['id']
+        self.addCleanup(self._delete_security_group,
+                        securitygroup_id)
+        self.assertEqual(200, resp.status)
+        self.assertFalse(securitygroup_id is None)
+        self.assertTrue('name' in securitygroup)
+        securitygroup_name = securitygroup['name']
+        self.assertEqual(securitygroup_name, s_name,
+                         "The created Security Group name is "
+                         "not equal to the requested name")
 
     @attr(type='positive')
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
-        try:
-            s_name = rand_name('securitygroup-')
-            s_description = rand_name('description-')
-            resp, securitygroup = \
-                self.client.create_security_group(s_name, s_description)
-            self.assertEqual(200, resp.status)
-            #Now fetch the created Security Group by its 'id'
-            resp, fetched_group = \
-                self.client.get_security_group(securitygroup['id'])
-            self.assertEqual(200, resp.status)
-            self.assertEqual(securitygroup, fetched_group,
-                             "The fetched Security Group is different "
-                             "from the created Group")
-        finally:
-            #Delete the Security Group created in this method
-            resp, _ = self.client.delete_security_group(securitygroup['id'])
-            self.assertEqual(202, resp.status)
+        s_name = rand_name('securitygroup-')
+        s_description = rand_name('description-')
+        resp, securitygroup = \
+            self.client.create_security_group(s_name, s_description)
+        self.addCleanup(self._delete_security_group,
+                        securitygroup['id'])
+
+        self.assertEqual(200, resp.status)
+        self.assertTrue('name' in securitygroup)
+        securitygroup_name = securitygroup['name']
+        self.assertEqual(securitygroup_name, s_name,
+                         "The created Security Group name is "
+                         "not equal to the requested name")
+        #Now fetch the created Security Group by its 'id'
+        resp, fetched_group = \
+            self.client.get_security_group(securitygroup['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(securitygroup, fetched_group,
+                         "The fetched Security Group is different "
+                         "from the created Group")
 
     @attr(type='negative')
     def test_security_group_get_nonexistant_group(self):
