@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
 import hashlib
 import httplib2
 import json
@@ -60,6 +61,8 @@ class RestClient(object):
                                        'location', 'proxy-authenticate',
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
+        dscv = self.config.identity.disable_ssl_certificate_validation
+        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
 
     def _set_auth(self):
         """
@@ -105,8 +108,6 @@ class RestClient(object):
         params['headers'] = {'User-Agent': 'Test-Client', 'X-Auth-User': user,
                              'X-Auth-Key': password}
 
-        dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         resp, body = self.http_obj.request(auth_url, 'GET', **params)
         try:
             return resp['x-auth-token'], resp['x-server-management-url']
@@ -132,8 +133,6 @@ class RestClient(object):
             }
         }
 
-        dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         headers = {'Content-Type': 'application/json'}
         body = json.dumps(creds)
         resp, body = self.http_obj.request(auth_url, 'POST',
@@ -252,22 +251,13 @@ class RestClient(object):
         # Usually RFC2616 says error responses SHOULD contain an explanation.
         # The warning is normal for SHOULD/SHOULD NOT case
 
-        # Likely it will cause error
-        if not body and resp.status >= 400:
+        # Likely it will cause an error
+        if not resp_body and resp.status >= 400:
             self.LOG.warning("status >= 400 response with empty body")
 
-    def request(self, method, url,
-                headers=None, body=None, depth=0):
+    def _request(self, method, url,
+                 headers=None, body=None):
         """A simple HTTP request interface."""
-
-        if (self.token is None) or (self.base_url is None):
-            self._set_auth()
-
-        dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
-        if headers is None:
-            headers = {}
-        headers['X-Auth-Token'] = self.token
 
         req_url = "%s/%s" % (self.base_url, url)
         self._log_request(method, req_url, headers, body)
@@ -276,12 +266,37 @@ class RestClient(object):
         self._log_response(resp, resp_body)
         self.response_checker(method, url, headers, body, resp, resp_body)
 
-        self._error_checker(method, url, headers, body, resp, resp_body, depth)
+        return resp, resp_body
 
+    def request(self, method, url,
+                headers=None, body=None):
+        retry = 0
+        if (self.token is None) or (self.base_url is None):
+            self._set_auth()
+
+        if headers is None:
+            headers = {}
+        headers['X-Auth-Token'] = self.token
+
+        resp, resp_body = self._request(method, url,
+                                        headers=headers, body=body)
+
+        while (resp.status == 413 and
+               'retry-after' in resp and
+                not self.is_absolute_limit(
+                    resp, self._parse_resp(resp_body)) and
+                retry < MAX_RECURSION_DEPTH):
+            retry += 1
+            delay = int(resp['retry-after'])
+            time.sleep(delay)
+            resp, resp_body = self._request(method, url,
+                                            headers=headers, body=body)
+        self._error_checker(method, url, headers, body,
+                            resp, resp_body)
         return resp, resp_body
 
     def _error_checker(self, method, url,
-                       headers, body, resp, resp_body, depth=0):
+                       headers, body, resp, resp_body):
 
         # NOTE(mtreinish): Check for httplib response from glance_http. The
         # object can't be used here because importing httplib breaks httplib2.
@@ -333,9 +348,10 @@ class RestClient(object):
         if resp.status == 413:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            #Checking whether Absolute/Rate limit
-            return self.check_over_limit(resp_body, method, url, headers, body,
-                                         depth)
+            if self.is_absolute_limit(resp, resp_body):
+                raise exceptions.OverLimit(resp_body)
+            else:
+                raise exceptions.RateLimitExceeded(resp_body)
 
         if resp.status == 422:
             if parse_resp:
@@ -365,34 +381,14 @@ class RestClient(object):
                 resp_body = self._parse_resp(resp_body)
             raise exceptions.RestClientException(str(resp.status))
 
-    def check_over_limit(self, resp_body, method, url,
-                         headers, body, depth):
-        self.is_absolute_limit(resp_body['overLimit'])
-        return self.is_rate_limit_retry_max_recursion_depth(
-            resp_body['overLimit'], method, url, headers,
-            body, depth)
-
-    def is_absolute_limit(self, resp_body):
-        if 'exceeded' in resp_body['message']:
-            raise exceptions.OverLimit(resp_body['message'])
-        else:
-            return
-
-    def is_rate_limit_retry_max_recursion_depth(self, resp_body, method,
-                                                url, headers, body, depth):
-        if 'retryAfter' in resp_body:
-            if depth < MAX_RECURSION_DEPTH:
-                delay = resp_body['retryAfter']
-                time.sleep(int(delay))
-                return self.request(method, url, headers=headers,
-                                    body=body,
-                                    depth=depth + 1)
-            else:
-                raise exceptions.RateLimitExceeded(
-                    message=resp_body['overLimitFault']['message'],
-                    details=resp_body['overLimitFault']['details'])
-        else:
-            raise exceptions.OverLimit(resp_body['message'])
+    def is_absolute_limit(self, resp, resp_body):
+        if (not isinstance(resp_body, collections.Mapping) or
+            'retry-after' not in resp):
+            return True
+        over_limit = resp_body.get('overLimit', None)
+        if not over_limit:
+            return True
+        return 'exceed' in over_limit.get('message', 'blabla')
 
     def wait_for_resource_deletion(self, id):
         """Waits for a resource to be deleted."""
@@ -419,9 +415,8 @@ class RestClientXML(RestClient):
     def _parse_resp(self, body):
         return xml_to_json(etree.fromstring(body))
 
-    def check_over_limit(self, resp_body, method, url,
-                         headers, body, depth):
-        self.is_absolute_limit(resp_body)
-        return self.is_rate_limit_retry_max_recursion_depth(
-            resp_body, method, url, headers,
-            body, depth)
+    def is_absolute_limit(self, resp, resp_body):
+        if (not isinstance(resp_body, collections.Mapping) or
+            'retry-after' not in resp):
+            return True
+        return 'exceed' in resp_body.get('message', 'blabla')
