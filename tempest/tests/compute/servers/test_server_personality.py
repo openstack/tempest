@@ -42,36 +42,26 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
                                 'contents': base64.b64encode(file_contents)})
-        try:
-            self.create_server(personality=personality)
-        except exceptions.OverLimit:
-            pass
-        else:
-            self.fail('This request did not fail as expected')
+        self.assertRaises(exceptions.OverLimit, self.create_server,
+                          personality=personality)
 
     @attr(type='positive')
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.
-        try:
-            file_contents = 'This is a test file.'
-
-            max_file_limit = \
-                self.user_client.get_specific_absolute_limit("maxPersonality")
-
-            person = []
-            for i in range(0, int(max_file_limit)):
-                path = 'etc/test' + str(i) + '.txt'
-                person.append({
-                    'path': path,
-                    'contents': base64.b64encode(file_contents),
-                })
-            resp, server = self.create_server(personality=person)
-            self.assertEqual('202', resp['status'])
-
-        #Teardown
-        finally:
-            self.client.delete_server(server['id'])
+        file_contents = 'This is a test file.'
+        max_file_limit = \
+            self.user_client.get_specific_absolute_limit("maxPersonality")
+        person = []
+        for i in range(0, int(max_file_limit)):
+            path = 'etc/test' + str(i) + '.txt'
+            person.append({
+                'path': path,
+                'contents': base64.b64encode(file_contents),
+            })
+        resp, server = self.create_server(personality=person)
+        self.addCleanup(self.client.delete_server, server['id'])
+        self.assertEqual('202', resp['status'])
 
 
 class ServerPersonalityTestXML(ServerPersonalityTestJSON):
