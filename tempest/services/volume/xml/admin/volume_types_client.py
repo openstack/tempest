@@ -177,11 +177,14 @@ class VolumeTypesClientXML(RestClientXML):
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
         extra_specs = Element("extra_specs", xmlns=XMLNS_11)
-        for key, value in extra_spec.items():
-            spec = Element('extra_spec')
-            spec.add_attr('key', key)
-            spec.append(Text(value))
-            extra_specs.append(spec)
+
+        if extra_spec is not None:
+            for key, value in extra_spec.items():
+                spec = Element('extra_spec')
+                spec.add_attr('key', key)
+                spec.append(Text(value))
+                extra_specs.append(spec)
+
         resp, body = self.put(url, str(Document(extra_specs)),
                               self.headers)
         body = xml_to_json(etree.fromstring(body))

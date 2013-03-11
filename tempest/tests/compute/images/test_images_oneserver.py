@@ -154,7 +154,6 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
     @attr(type='negative')
-    @testtools.skip("Until Bug 1004564 is fixed")
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 

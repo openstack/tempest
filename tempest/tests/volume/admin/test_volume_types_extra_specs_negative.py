@@ -40,7 +40,6 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
         super(ExtraSpecsNegativeTest, cls).tearDownClass()
         cls.client.delete_volume_type(cls.volume_type['id'])
 
-    @testtools.skip('Until bug 1090320 is fixed')
     def test_update_no_body(self):
         # Should not update volume type extra specs with no body
         extra_spec = {"spec1": "val2"}
