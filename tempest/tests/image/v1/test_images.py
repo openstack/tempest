@@ -19,26 +19,12 @@ import cStringIO as StringIO
 
 from tempest import clients
 from tempest import exceptions
-import tempest.test
 from tempest.test import attr
+from tempest.tests.image import base
 
 
-class CreateRegisterImagesTest(tempest.test.BaseTestCase):
-
-    """
-    Here we test the registration and creation of images
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        cls.os = clients.Manager()
-        cls.client = cls.os.image_client
-        cls.created_images = []
-
-    @classmethod
-    def tearDownClass(cls):
-        for image_id in cls.created_images:
-            cls.client.delete(image_id)
+class CreateRegisterImagesTest(base.BaseV1ImageTest):
+    """Here we test the registration and creation of images."""
 
     @attr(type='negative')
     def test_register_with_invalid_container_format(self):
@@ -55,9 +41,11 @@ class CreateRegisterImagesTest(tempest.test.BaseTestCase):
     def test_register_then_upload(self):
         # Register, then upload an image
         properties = {'prop1': 'val1'}
-        resp, body = self.client.create_image('New Name', 'bare', 'raw',
-                                              is_public=True,
-                                              properties=properties)
+        resp, body = self.create_image(name='New Name',
+                                       container_format='bare',
+                                       disk_format='raw',
+                                       is_public=True,
+                                       properties=properties)
         self.assertTrue('id' in body)
         image_id = body.get('id')
         self.created_images.append(image_id)
@@ -80,10 +68,11 @@ class CreateRegisterImagesTest(tempest.test.BaseTestCase):
     @attr(type='image')
     def test_register_remote_image(self):
         # Register a new remote image
-        resp, body = self.client.create_image('New Remote Image', 'bare',
-                                              'raw', is_public=True,
-                                              location='http://example.com'
-                                                       '/someimage.iso')
+        resp, body = self.create_image(name='New Remote Image',
+                                       container_format='bare',
+                                       disk_format='raw', is_public=True,
+                                       location='http://example.com'
+                                                '/someimage.iso')
         self.assertTrue('id' in body)
         image_id = body.get('id')
         self.created_images.append(image_id)
@@ -95,7 +84,7 @@ class CreateRegisterImagesTest(tempest.test.BaseTestCase):
         self.assertEqual('active', body.get('status'))
 
 
-class ListImagesTest(tempest.test.BaseTestCase):
+class ListImagesTest(base.BaseV1ImageTest):
 
     """
     Here we test the listing of image information
@@ -103,9 +92,7 @@ class ListImagesTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = clients.Manager()
-        cls.client = cls.os.image_client
-        cls.created_images = []
+        super(ListImagesTest, cls).setUpClass()
 
         # We add a few images here to test the listing functionality of
         # the images API
@@ -132,12 +119,6 @@ class ListImagesTest(tempest.test.BaseTestCase):
         cls.dup_set = set((img3, img4))
 
     @classmethod
-    def tearDownClass(cls):
-        for image_id in cls.created_images:
-            cls.client.delete_image(image_id)
-            cls.client.wait_for_resource_deletion(image_id)
-
-    @classmethod
     def _create_remote_image(cls, name, container_format, disk_format):
         """
         Create a new remote image and return the ID of the newly-registered
@@ -145,12 +126,12 @@ class ListImagesTest(tempest.test.BaseTestCase):
         """
         name = 'New Remote Image %s' % name
         location = 'http://example.com/someimage_%s.iso' % name
-        resp, image = cls.client.create_image(name,
-                                              container_format, disk_format,
-                                              is_public=True,
-                                              location=location)
+        resp, image = cls.create_image(name=name,
+                                       container_format=container_format,
+                                       disk_format=disk_format,
+                                       is_public=True,
+                                       location=location)
         image_id = image['id']
-        cls.created_images.append(image_id)
         return image_id
 
     @classmethod
@@ -163,11 +144,11 @@ class ListImagesTest(tempest.test.BaseTestCase):
         """
         image_file = StringIO.StringIO('*' * size)
         name = 'New Standard Image %s' % name
-        resp, image = cls.client.create_image(name,
-                                              container_format, disk_format,
-                                              is_public=True, data=image_file)
+        resp, image = cls.create_image(name=name,
+                                       container_format=container_format,
+                                       disk_format=disk_format,
+                                       is_public=True, data=image_file)
         image_id = image['id']
-        cls.created_images.append(image_id)
         return image_id
 
     @attr(type='image')

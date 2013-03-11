@@ -63,17 +63,20 @@ class ImageClientV2JSON(rest_client.RestClient):
 
         jsonschema.validate(body, schema)
 
-    def create_image(self, name, container_format, disk_format, is_public=True,
-                     properties=None):
+    def create_image(self, name, container_format, disk_format, **kwargs):
         params = {
             "name": name,
             "container_format": container_format,
             "disk_format": disk_format,
         }
-        if is_public:
-            params["visibility"] = "public"
-        else:
-            params["visibility"] = "private"
+
+        for option in ['visibility']:
+            if option in kwargs:
+                value = kwargs.get(option)
+                if isinstance(value, dict) or isinstance(value, tuple):
+                    params.update(value)
+                else:
+                    params[option] = value
 
         data = json.dumps(params)
         self._validate_schema(data)
