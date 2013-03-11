@@ -89,6 +89,7 @@ if __name__ == '__main__':
     results = find_skips()
     unique_bugs = sorted(set([bug for (method, bug) in results]))
     unskips = []
+    duplicates = []
     info("Total bug skips found: %d", len(results))
     info("Total unique bugs causing skips: %d", len(unique_bugs))
     lp = launchpad.Launchpad.login_anonymously('grabbing bugs',
@@ -96,12 +97,26 @@ if __name__ == '__main__':
                                                LPCACHEDIR)
     for bug_no in unique_bugs:
         bug = lp.bugs[bug_no]
+        duplicate = bug.duplicate_of_link
+        if duplicate is not None:
+            dup_id = duplicate.split('/')[-1]
+            duplicates.append((bug_no, dup_id))
         for task in bug.bug_tasks:
             info("Bug #%7s (%12s - %12s)", bug_no,
                  task.importance, task.status)
             if task.status in ('Fix Released', 'Fix Committed'):
                 unskips.append(bug_no)
 
+    for bug_id, dup_id in duplicates:
+        if bug_id not in unskips:
+            dup_bug = lp.bugs[dup_id]
+            for task in dup_bug.bug_tasks:
+                info("Bug #%7s is a duplicate of Bug#%7s (%12s - %12s)",
+                     bug_id, dup_id, task.importance, task.status)
+                if task.status in ('Fix Released', 'Fix Committed'):
+                    unskips.append(bug_id)
+
+    unskips = sorted(set(unskips))
     if unskips:
         print "The following bugs have been fixed and the corresponding skips"
         print "should be removed from the test cases:"
