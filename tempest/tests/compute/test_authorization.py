@@ -57,10 +57,7 @@ class AuthorizationTest(base.BaseComputeTest):
         cls.alt_security_client = cls.alt_manager.security_groups_client
 
         cls.alt_security_client._set_auth()
-        name = rand_name('server')
-        resp, server = cls.client.create_server(name, cls.image_ref,
-                                                cls.flavor_ref)
-        cls.client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = cls.create_server(wait_until='ACTIVE')
         resp, cls.server = cls.client.get_server(server['id'])
 
         name = rand_name('image')
@@ -92,7 +89,6 @@ class AuthorizationTest(base.BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         if compute.MULTI_USER:
-            cls.client.delete_server(cls.server['id'])
             cls.images_client.delete_image(cls.image['id'])
             cls.keypairs_client.delete_keypair(cls.keypairname)
             cls.security_client.delete_security_group(cls.security_group['id'])

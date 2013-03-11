@@ -29,16 +29,7 @@ class ServerAddressesTest(base.BaseComputeTest):
         super(ServerAddressesTest, cls).setUpClass()
         cls.client = cls.servers_client
 
-        cls.name = rand_name('server')
-        resp, cls.server = cls.client.create_server(cls.name,
-                                                    cls.image_ref,
-                                                    cls.flavor_ref)
-        cls.client.wait_for_server_status(cls.server['id'], 'ACTIVE')
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.client.delete_server(cls.server['id'])
-        super(ServerAddressesTest, cls).tearDownClass()
+        resp, cls.server = cls.create_server(wait_until='ACTIVE')
 
     @attr(type='negative', category='server-addresses')
     def test_list_server_addresses_invalid_server_id(self):
