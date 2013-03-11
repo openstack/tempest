@@ -192,6 +192,13 @@ class RestClient(object):
     def copy(self, url, headers=None):
         return self.request('COPY', url, headers)
 
+    def get_versions(self):
+        resp, body = self.get('')
+        body = self._parse_resp(body)
+        body = body['versions']
+        versions = map(lambda x: x['id'], body)
+        return resp, versions
+
     def _log_request(self, method, req_url, headers, body):
         self.LOG.info('Request: ' + method + ' ' + req_url)
         if headers:

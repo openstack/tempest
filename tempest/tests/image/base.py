@@ -60,6 +60,17 @@ class BaseImageTest(tempest.test.BaseTestCase):
         cls.created_images.append(image['id'])
         return resp, image
 
+    @classmethod
+    def _check_version(cls, version):
+        __, versions = cls.client.get_versions()
+        if version == 'v2.0':
+            if 'v2.0' in versions:
+                return True
+        elif version == 'v1.0':
+            if 'v1.1' in versions or 'v1.0' in versions:
+                return True
+        return False
+
 
 class BaseV1ImageTest(BaseImageTest):
 
@@ -67,6 +78,9 @@ class BaseV1ImageTest(BaseImageTest):
     def setUpClass(cls):
         super(BaseV1ImageTest, cls).setUpClass()
         cls.client = cls.os.image_client
+        if not cls._check_version('v1.0'):
+            msg = "Glance API v1 not supported"
+            raise cls.skipException(msg)
 
 
 class BaseV2ImageTest(BaseImageTest):
@@ -75,3 +89,6 @@ class BaseV2ImageTest(BaseImageTest):
     def setUpClass(cls):
         super(BaseV2ImageTest, cls).setUpClass()
         cls.client = cls.os.image_client_v2
+        if not cls._check_version('v2.0'):
+            msg = "Glance API v2 not supported"
+            raise cls.skipException(msg)
