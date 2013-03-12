@@ -15,8 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
@@ -82,7 +80,6 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         self.assertEqual(202, resp.status)
 
     @attr(type='positive')
-    @testtools.skip("Skipped until the Bug #980688 is resolved")
     def test_get_keypair_detail(self):
         # Keypair should be created, Got details by name and deleted
         k_name = rand_name('keypair-')
@@ -138,7 +135,6 @@ class KeyPairsTestJSON(base.BaseComputeTest):
                           self.client.create_keypair, k_name, pub_key)
 
     @attr(type='negative')
-    @testtools.skip("Skipped until the Bug #1086980 is resolved")
     def test_keypair_delete_nonexistant_key(self):
         # Non-existant key deletion should throw a proper error
         k_name = rand_name("keypair-non-existant-")
