@@ -123,7 +123,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='negative')
-    @testtools.skip("Skipped until BUG:1126163 is resolved")
+    @testtools.skip("Skipped until Bug:1126163 is resolved")
     def test_rescued_vm_reboot(self):
         self.assertRaises(exceptions.BadRequest, self.servers_client.reboot,
                           self.rescue_id, 'HARD')
@@ -136,7 +136,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                           self.image_ref_alt)
 
     @attr(type='positive')
-    @testtools.skip("Skipped due to BUG:1126187")
+    @testtools.skip("Skipped due to Bug:1126187")
     def test_rescued_vm_attach_volume(self):
         client = self.volumes_extensions_client
 
@@ -165,7 +165,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='positive')
-    @testtools.skip("Skipped until BUG:1126187 is resolved")
+    @testtools.skip("Skipped until Bug:1126187 is resolved")
     def test_rescued_vm_detach_volume(self):
         # Attach the volume to the server
         self.servers_client.attach_volume(self.server_id,
@@ -217,7 +217,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='positive')
-    @testtools.skip("Skipped until BUG: 1126257 is resolved")
+    @testtools.skip("Skipped until Bug: 1126257 is resolved")
     def test_rescued_vm_add_remove_security_group(self):
         #Add Security group
         resp, body = self.servers_client.add_security_group(self.server_id,
