@@ -49,13 +49,9 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertTrue('id' in body)
         image_id = body.get('id')
         self.created_images.append(image_id)
-        self.assertTrue('name' in body)
         self.assertEqual('New Name', body.get('name'))
-        self.assertTrue('is_public' in body)
         self.assertTrue(body.get('is_public'))
-        self.assertTrue('status' in body)
         self.assertEqual('queued', body.get('status'))
-        self.assertTrue('properties' in body)
         for key, val in properties.items():
             self.assertEqual(val, body.get('properties')[key])
 
@@ -76,11 +72,8 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertTrue('id' in body)
         image_id = body.get('id')
         self.created_images.append(image_id)
-        self.assertTrue('name' in body)
         self.assertEqual('New Remote Image', body.get('name'))
-        self.assertTrue('is_public' in body)
         self.assertTrue(body.get('is_public'))
-        self.assertTrue('status' in body)
         self.assertEqual('active', body.get('status'))
 
 
