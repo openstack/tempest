@@ -17,25 +17,17 @@
 import cStringIO as StringIO
 
 from tempest import clients
-import tempest.test
+from tempest.tests.image import base
 
 
-class ImageMembersTests(tempest.test.BaseTestCase):
+class ImageMembersTests(base.BaseV1ImageTest):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = clients.Manager()
-        cls.client = cls.os.image_client
+        super(ImageMembersTests, cls).setUpClass()
         admin = clients.AdminManager(interface='json')
         cls.admin_client = admin.identity_client
-        cls.created_images = []
         cls.tenants = cls._get_tenants()
-
-    @classmethod
-    def tearDownClass(cls):
-        for image_id in cls.created_images:
-            cls.client.delete_image(image_id)
-            cls.client.wait_for_resource_deletion(image_id)
 
     @classmethod
     def _get_tenants(cls):
@@ -43,16 +35,14 @@ class ImageMembersTests(tempest.test.BaseTestCase):
         tenants = map(lambda x: x['id'], tenants)
         return tenants
 
-    def _create_image(self, name=None):
+    def _create_image(self):
         image_file = StringIO.StringIO('*' * 1024)
-        if name is not None:
-            name = 'New Standard Image with Members'
-        resp, image = self.client.create_image(name,
-                                               'bare', 'raw',
-                                               is_public=True, data=image_file)
+        resp, image = self.create_image(container_format='bare',
+                                        disk_format='raw',
+                                        is_public=True,
+                                        data=image_file)
         self.assertEquals(201, resp.status)
         image_id = image['id']
-        self.created_images.append(image_id)
         return image_id
 
     def test_add_image_member(self):
@@ -69,8 +59,7 @@ class ImageMembersTests(tempest.test.BaseTestCase):
         image = self._create_image()
         resp = self.client.add_member(self.tenants[0], image)
         self.assertEquals(204, resp.status)
-        name = 'Shared Image'
-        share_image = self._create_image(name=name)
+        share_image = self._create_image()
         resp = self.client.add_member(self.tenants[0], share_image)
         self.assertEquals(204, resp.status)
         resp, body = self.client.get_shared_images(self.tenants[0])
@@ -81,8 +70,7 @@ class ImageMembersTests(tempest.test.BaseTestCase):
         self.assertIn(image, images)
 
     def test_remove_member(self):
-        name = 'Shared Image for Delete Test'
-        image_id = self._create_image(name=name)
+        image_id = self._create_image()
         resp = self.client.add_member(self.tenants[0], image_id)
         self.assertEquals(204, resp.status)
         resp = self.client.delete_member(self.tenants[0], image_id)

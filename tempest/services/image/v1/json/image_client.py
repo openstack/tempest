@@ -121,28 +121,25 @@ class ImageClientJSON(RestClient):
         body = json.loads(''.join([c for c in body_iter]))
         return resp, body['image']
 
-    def create_image(self, name, container_format, disk_format, is_public=True,
-                     location=None, properties=None, data=None):
+    def create_image(self, name, container_format, disk_format, **kwargs):
         params = {
             "name": name,
             "container_format": container_format,
             "disk_format": disk_format,
-            "is_public": is_public,
         }
+
         headers = {}
 
-        if location is not None:
-            params['location'] = location
-
-        if properties is not None:
-            params['properties'] = properties
+        for option in ['is_public', 'location', 'properties']:
+            if option in kwargs:
+                params[option] = kwargs.get(option)
 
         headers.update(self._image_meta_to_headers(params))
 
-        if data is not None:
-            return self._create_with_data(headers, data)
+        if 'data' in kwargs:
+            return self._create_with_data(headers, kwargs.get('data'))
 
-        resp, body = self.post('v1/images', data, headers)
+        resp, body = self.post('v1/images', None, headers)
         body = json.loads(body)
         return resp, body['image']
 

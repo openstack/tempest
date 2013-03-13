@@ -21,26 +21,15 @@ import random
 
 from tempest import clients
 from tempest import exceptions
-import tempest.test
 from tempest.test import attr
+from tempest.tests.image import base
 
 
-class CreateRegisterImagesTest(tempest.test.BaseTestCase):
+class CreateRegisterImagesTest(base.BaseV2ImageTest):
 
     """
     Here we test the registration and creation of images
     """
-
-    @classmethod
-    def setUpClass(cls):
-        cls.os = clients.Manager()
-        cls.client = cls.os.image_client_v2
-        cls.created_images = []
-
-    @classmethod
-    def tearDownClass(cls):
-        for image_id in cls.created_images:
-            cls.client.delete(image_id)
 
     @attr(type='negative')
     def test_register_with_invalid_container_format(self):
@@ -56,8 +45,10 @@ class CreateRegisterImagesTest(tempest.test.BaseTestCase):
     @attr(type='image')
     def test_register_then_upload(self):
         # Register, then upload an image
-        resp, body = self.client.create_image('New Name', 'bare', 'raw',
-                                              is_public=True)
+        resp, body = self.create_image(name='New Name',
+                                       container_format='bare',
+                                       disk_format='raw',
+                                       visibility='public')
         self.assertTrue('id' in body)
         image_id = body.get('id')
         self.created_images.append(image_id)
@@ -77,7 +68,7 @@ class CreateRegisterImagesTest(tempest.test.BaseTestCase):
         self.assertEqual(1024, body.get('size'))
 
 
-class ListImagesTest(tempest.test.BaseTestCase):
+class ListImagesTest(base.BaseV2ImageTest):
 
     """
     Here we test the listing of image information
@@ -85,20 +76,11 @@ class ListImagesTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = clients.Manager()
-        cls.client = cls.os.image_client_v2
-        cls.created_images = []
-
+        super(ListImagesTest, cls).setUpClass()
         # We add a few images here to test the listing functionality of
         # the images API
         for x in xrange(0, 10):
             cls.created_images.append(cls._create_standard_image(x))
-
-    @classmethod
-    def tearDownClass(cls):
-        for image_id in cls.created_images:
-            cls.client.delete_image(image_id)
-            cls.client.wait_for_resource_deletion(image_id)
 
     @classmethod
     def _create_standard_image(cls, number):
@@ -109,8 +91,9 @@ class ListImagesTest(tempest.test.BaseTestCase):
         """
         image_file = StringIO.StringIO('*' * random.randint(1024, 4096))
         name = 'New Standard Image %s' % number
-        resp, body = cls.client.create_image(name, 'bare', 'raw',
-                                             is_public=True)
+        resp, body = cls.create_image(name=name, container_format='bare',
+                                      disk_format='raw',
+                                      visibility='public')
         image_id = body['id']
         resp, body = cls.client.store_image(image_id, data=image_file)
 
