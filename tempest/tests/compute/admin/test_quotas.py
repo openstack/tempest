@@ -122,15 +122,10 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
         resp, quota_set = self.adm_client.update_quota_set(self.demo_tenant_id,
                                                            cores=vcpu_quota)
-        try:
-            self.create_server()
-        except exceptions.OverLimit:
-            pass
-        else:
-            self.fail("Could create servers over the VCPU quota limit")
-        finally:
-            self.adm_client.update_quota_set(self.demo_tenant_id,
-                                             cores=default_vcpu_quota)
+
+        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
+                        cores=default_vcpu_quota)
+        self.assertRaises(exceptions.OverLimit, self.create_server)
 
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
