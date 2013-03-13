@@ -136,6 +136,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                           self.image_ref_alt)
 
     @attr(type='positive')
+    @testtools.skip("Skipped due to BUG:1126187")
     def test_rescued_vm_attach_volume(self):
         client = self.volumes_extensions_client
 
