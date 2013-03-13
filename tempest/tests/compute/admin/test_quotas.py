@@ -135,15 +135,10 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
         self.adm_client.update_quota_set(self.demo_tenant_id,
                                          ram=mem_quota)
-        try:
-            self.create_server()
-        except exceptions.OverLimit:
-            pass
-        else:
-            self.fail("Could create servers over the memory quota limit")
-        finally:
-            self.adm_client.update_quota_set(self.demo_tenant_id,
-                                             ram=default_mem_quota)
+
+        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
+                        ram=default_mem_quota)
+        self.assertRaises(exceptions.OverLimit, self.create_server)
 
 #TODO(afazekas): Add test that tried to update the quota_set as a regular user
 
