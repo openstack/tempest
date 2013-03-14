@@ -73,22 +73,12 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         cls.client.wait_for_server_status(cls.s3['id'], 'ACTIVE')
         resp, cls.s3 = cls.client.get_server(cls.s3['id'])
 
-        # The list server call returns minimal results, so we need
-        # a less detailed version of each server also
-        cls.s1_min = cls._convert_to_min_details(cls.s1)
-        cls.s2_min = cls._convert_to_min_details(cls.s2)
-        cls.s3_min = cls._convert_to_min_details(cls.s3)
-
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.s1['id'])
         cls.client.delete_server(cls.s2['id'])
         cls.client.delete_server(cls.s3['id'])
         super(ListServerFiltersTestJSON, cls).tearDownClass()
-
-    def _server_id_in_results(self, server_id, results):
-        ids = [row['id'] for row in results]
-        return server_id in ids
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='positive')
@@ -98,9 +88,9 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
+        self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_filter_by_flavor(self):
@@ -109,9 +99,9 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertFalse(self._server_id_in_results(self.s1['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
+        self.assertNotIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_filter_by_server_name(self):
@@ -120,9 +110,9 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s3['id'], servers))
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @attr(type='positive')
     def test_list_servers_filter_by_server_status(self):
@@ -131,12 +121,12 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
-        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s2['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
+        self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
     @attr(type='positive')
-    def test_list_servers_limit_results(self):
+    def test_list_servers_detailed_filter_by_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
@@ -150,9 +140,9 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
+        self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_flavor(self):
@@ -161,9 +151,9 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertFalse(self._server_id_in_results(self.s1['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
+        self.assertNotIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_name(self):
@@ -172,9 +162,9 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s2['id'], servers))
-        self.assertFalse(self._server_id_in_results(self.s3['id'], servers))
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_filter_by_server_status(self):
@@ -183,9 +173,10 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
 
-        self.assertTrue(self._server_id_in_results(self.s1['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s2['id'], servers))
-        self.assertTrue(self._server_id_in_results(self.s3['id'], servers))
+        self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
+        self.assertEqual(['ACTIVE'] * 3, [x['status'] for x in servers])
 
     @attr(type='positive')
     def test_list_servers_detailed_limit_results(self):
@@ -193,14 +184,6 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))
-
-    @classmethod
-    def _convert_to_min_details(self, server):
-        min_detail = {}
-        min_detail['name'] = server['name']
-        min_detail['links'] = server['links']
-        min_detail['id'] = server['id']
-        return min_detail
 
 
 class ListServerFiltersTestXML(ListServerFiltersTestJSON):

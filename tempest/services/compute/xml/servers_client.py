@@ -160,7 +160,7 @@ class ServersClientXML(RestClientXML):
         return array
 
     def list_servers(self, params=None):
-        url = 'servers/detail'
+        url = 'servers'
         if params:
             url += '?%s' % urllib.urlencode(params)
 
