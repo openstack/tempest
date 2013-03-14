@@ -316,15 +316,11 @@ class AuthorizationTest(base.BaseComputeTest):
         # A get metadata for another user's server should fail
         req_metadata = {'meta1': 'data1'}
         self.client.set_server_metadata(self.server['id'], req_metadata)
-        try:
-            resp, meta = \
-            self.alt_client.get_server_metadata_item(self.server['id'],
-                                                     'meta1')
-        except exceptions.NotFound:
-            pass
-        finally:
-            resp, body = \
-            self.client.delete_server_metadata_item(self.server['id'], 'meta1')
+        self.addCleanup(self.client.delete_server_metadata_item,
+                        self.server['id'], 'meta1')
+        self.assertRaises(exceptions.NotFound,
+                          self.alt_client.get_server_metadata_item,
+                          self.server['id'], 'meta1')
 
     def test_get_metadata_of_alt_account_image_fails(self):
         # A get metadata for another user's image should fail
