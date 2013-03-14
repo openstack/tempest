@@ -23,6 +23,7 @@ from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml.common import XMLNS_11
 
 
 class SecurityGroupsClientXML(RestClientXML):
@@ -128,3 +129,16 @@ class SecurityGroupsClientXML(RestClientXML):
         """Deletes the provided Security Group rule."""
         return self.delete('os-security-group-rules/%s' %
                            str(group_rule_id), self.headers)
+
+    def list_security_group_rules(self, security_group_id):
+        """List all rules for a security group."""
+        url = "os-security-groups"
+        resp, body = self.get(url, self.headers)
+        body = etree.fromstring(body)
+        secgroups = body.getchildren()
+        for secgroup in secgroups:
+            if secgroup.get('id') == security_group_id:
+                node = secgroup.find('{%s}rules' % XMLNS_11)
+                rules = [xml_to_json(x) for x in node.getchildren()]
+                return resp, rules
+        raise exceptions.NotFound('No such Security Group')
