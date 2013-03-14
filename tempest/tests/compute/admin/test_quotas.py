@@ -44,7 +44,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         cls.default_quota_set = {'injected_file_content_bytes': 10240,
                                  'metadata_items': 128, 'injected_files': 5,
                                  'ram': 51200, 'floating_ips': 10,
-                                 'key_pairs': 100,
+                                 'fixed_ips': 10, 'key_pairs': 100,
                                  'injected_file_path_bytes': 255,
                                  'instances': 10, 'security_group_rules': 20,
                                  'cores': 20, 'security_groups': 10}
@@ -60,6 +60,9 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='smoke')
     def test_get_default_quotas(self):
+        # Tempest two step
+        self.skipTest('Skipped until the Bug 1125468 is resolved')
+
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set.copy()
         expected_quota_set['id'] = self.demo_tenant_id
@@ -71,13 +74,16 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
             self.fail("Admin could not get the default quota set for a tenant")
 
     def test_update_all_quota_resources_for_tenant(self):
+        # Tempest two step
+        self.skipTest('Skipped until the Bug 1125468 is resolved')
+
         # Admin can update all the resource quota limits for a tenant
         new_quota_set = {'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,
-                         'ram': 10240, 'floating_ips': 20, 'key_pairs': 200,
-                         'injected_file_path_bytes': 512, 'instances': 20,
-                         'security_group_rules': 20, 'cores': 2,
-                         'security_groups': 20}
+                         'ram': 10240, 'floating_ips': 20, 'fixed_ips': 10,
+                         'key_pairs': 200, 'injected_file_path_bytes': 512,
+                         'instances': 20, 'security_group_rules': 20,
+                         'cores': 2, 'security_groups': 20}
         try:
             # Update limits for all quota resources
             resp, quota_set = self.adm_client.update_quota_set(
@@ -97,6 +103,9 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
     #TODO(afazekas): merge these test cases
     def test_get_updated_quotas(self):
+        # Tempest two step
+        self.skipTest('Skipped until the Bug 1125468 is resolved')
+
         # Verify that GET shows the updated quota set
         self.adm_client.update_quota_set(self.demo_tenant_id,
                                          ram='5120')

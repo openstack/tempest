@@ -33,11 +33,14 @@ class QuotasTestJSON(base.BaseComputeTest):
 
     @attr(type='smoke')
     def test_get_default_quotas(self):
+        # Tempest two step
+        self.skipTest('Skipped until the Bug 1125468 is resolved')
+
         # User can get the default quota set for it's tenant
         expected_quota_set = {'injected_file_content_bytes': 10240,
                               'metadata_items': 128, 'injected_files': 5,
                               'ram': 51200, 'floating_ips': 10,
-                              'key_pairs': 100,
+                              'fixed_ips': 10, 'key_pairs': 100,
                               'injected_file_path_bytes': 255, 'instances': 10,
                               'security_group_rules': 20, 'cores': 20,
                               'id': self.tenant_id, 'security_groups': 10}
