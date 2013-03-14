@@ -41,7 +41,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         # Check if the server is in a clean state after test
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-        except exceptions:
+        except Exception:
             # Rebuild server if something happened to it during a test
             self.rebuild_servers()
 
