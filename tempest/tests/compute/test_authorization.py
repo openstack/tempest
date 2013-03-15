@@ -325,47 +325,34 @@ class AuthorizationTest(base.BaseComputeTest):
     def test_get_metadata_of_alt_account_image_fails(self):
         # A get metadata for another user's image should fail
         req_metadata = {'meta1': 'value1'}
+        self.addCleanup(self.images_client.delete_image_metadata_item,
+                        self.image['id'], 'meta1')
         self.images_client.set_image_metadata(self.image['id'],
                                               req_metadata)
-        try:
-            resp, meta = \
-            self.alt_images_client.get_image_metadata_item(self.image['id'],
-                                                           'meta1')
-        except exceptions.NotFound:
-            pass
-        finally:
-            resp, body = self.images_client.delete_image_metadata_item(
-                                self.image['id'], 'meta1')
+        self.assertRaises(exceptions.NotFound,
+                          self.alt_images_client.get_image_metadata_item,
+                          self.image['id'], 'meta1')
 
     def test_delete_metadata_of_alt_account_server_fails(self):
         # A delete metadata for another user's server should fail
         req_metadata = {'meta1': 'data1'}
+        self.addCleanup(self.client.delete_server_metadata_item,
+                        self.server['id'], 'meta1')
         self.client.set_server_metadata(self.server['id'], req_metadata)
-        try:
-            resp, body = \
-            self.alt_client.delete_server_metadata_item(self.server['id'],
-                                                        'meta1')
-        except exceptions.NotFound:
-            pass
-        finally:
-            resp, body = \
-            self.client.delete_server_metadata_item(self.server['id'], 'meta1')
+        self.assertRaises(exceptions.NotFound,
+                          self.alt_client.delete_server_metadata_item,
+                          self.server['id'], 'meta1')
 
     def test_delete_metadata_of_alt_account_image_fails(self):
         # A delete metadata for another user's image should fail
         req_metadata = {'meta1': 'data1'}
+        self.addCleanup(self.images_client.delete_image_metadata_item,
+                        self.image['id'], 'meta1')
         self.images_client.set_image_metadata(self.image['id'],
                                               req_metadata)
-        try:
-            resp, body = \
-            self.alt_images_client.delete_image_metadata_item(self.image['id'],
-                                                              'meta1')
-        except exceptions.NotFound:
-            pass
-        finally:
-            resp, body = \
-            self.images_client.delete_image_metadata_item(self.image['id'],
-                                                          'meta1')
+        self.assertRaises(exceptions.NotFound,
+                          self.alt_images_client.delete_image_metadata_item,
+                          self.image['id'], 'meta1')
 
     def test_get_console_output_of_alt_account_server_fails(self):
         # A Get Console Output for another user's server should fail
