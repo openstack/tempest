@@ -58,6 +58,11 @@ class ClientTestBase(tempest.test.BaseTestCase):
         return self.cmd_with_auth(
             'nova', action, flags, params, admin, fail_ok)
 
+    def nova_manage(self, action, flags='', params='', fail_ok=False):
+        """Executes nova-manage command for the given action."""
+        return self.cmd(
+            'nova-manage', action, flags, params, fail_ok)
+
     def cmd_with_auth(self, cmd, action, flags='', params='',
                       admin=True, fail_ok=False):
         """Executes given command with auth attributes appended."""

@@ -56,12 +56,13 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
 
     def test_admin_absolute_limites(self):
         self.nova('absolute-limits')
+        self.nova('absolute-limits', params='--reserved')
 
     def test_admin_aggregate_list(self):
         self.nova('aggregate-list')
 
     def test_admin_availability_zone_list(self):
-        self.nova('availability-zone-list')
+        self.assertIn("internal", self.nova('availability-zone-list'))
 
     def test_admin_cloudpipe_list(self):
         self.nova('cloudpipe-list')
@@ -90,7 +91,7 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
                           params='--flavor m1.tiny')
 
     def test_admin_flavor_list(self):
-        self.nova('flavor-list')
+        self.assertIn("Memory_MB", self.nova('flavor-list'))
 
     def test_admin_floating_ip_bulk_list(self):
         self.nova('floating-ip-bulk-list')
