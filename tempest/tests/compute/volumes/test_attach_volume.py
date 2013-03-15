@@ -43,24 +43,15 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         self.servers_client.detach_volume(server_id, volume_id)
         self.volumes_client.wait_for_volume_status(volume_id, 'available')
 
-    def _delete(self, server, volume):
+    def _delete(self, volume):
         if self.volume:
             self.volumes_client.delete_volume(self.volume['id'])
             self.volume = None
-        if self.server:
-            self.servers_client.delete_server(self.server['id'])
-            self.server = None
 
     def _create_and_attach(self):
-        name = rand_name('server')
-
         # Start a server and wait for it to become ready
-        resp, server = self.servers_client.create_server(name,
-                                                         self.image_ref,
-                                                         self.flavor_ref,
-                                                         adminPass='password')
-        self.server = server
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_server(wait_until='ACTIVE',
+                                          adminPass='password')
 
         # Record addresses so that we can ssh later
         resp, server['addresses'] = \
@@ -118,7 +109,9 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         finally:
             if self.attached:
                 self._detach(server['id'], volume['id'])
-            self._delete(self.server, self.volume)
+            # NOTE(maurosr): here we do the cleanup for volume, servers are
+            # dealt on BaseComputeTest.tearDownClass
+            self._delete(self.volume)
 
 
 class AttachVolumeTestXML(AttachVolumeTestJSON):

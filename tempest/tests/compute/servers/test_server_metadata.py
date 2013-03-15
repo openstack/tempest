@@ -32,17 +32,9 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
         resp, tenants = cls.admin_client.list_tenants()
         cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
                          cls.client.tenant_name][0]
-        resp, server = cls.create_server(meta={})
+        resp, server = cls.create_server(meta={}, wait_until='ACTIVE')
 
         cls.server_id = server['id']
-
-        #Wait for the server to become active
-        cls.client.wait_for_server_status(cls.server_id, 'ACTIVE')
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.client.delete_server(cls.server_id)
-        super(ServerMetadataTestJSON, cls).tearDownClass()
 
     def setUp(self):
         super(ServerMetadataTestJSON, self).setUp()

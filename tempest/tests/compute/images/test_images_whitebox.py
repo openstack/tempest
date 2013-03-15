@@ -36,15 +36,8 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        """Terminate test instances created after a test is executed."""
-
-        for server in cls.servers:
-            cls.update_state(server['id'], "active", None)
-            resp, body = cls.servers_client.delete_server(server['id'])
-            if resp['status'] == '204':
-                cls.servers.remove(server)
-                cls.servers_client.wait_for_server_termination(server['id'])
-
+        """Delete images after a test is executed."""
+        super(ImagesWhiteboxTest, cls).tearDownClass()
         for image_id in cls.image_ids:
             cls.client.delete_image(image_id)
             cls.image_ids.remove(image_id)

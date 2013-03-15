@@ -30,19 +30,9 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         super(VirtualInterfacesTestJSON, cls).setUpClass()
-        cls.name = rand_name('server')
         cls.client = cls.servers_client
-        resp, server = cls.servers_client.create_server(cls.name,
-                                                        cls.image_ref,
-                                                        cls.flavor_ref)
+        resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
-
-        cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.servers_client.delete_server(cls.server_id)
-        super(VirtualInterfacesTestJSON, cls).tearDownClass()
 
     @attr(type='positive')
     def test_list_virtual_interfaces(self):

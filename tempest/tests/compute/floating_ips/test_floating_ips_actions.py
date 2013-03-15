@@ -33,10 +33,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         cls.servers_client = cls.servers_client
 
         #Server creation
-        resp, server = cls.servers_client.create_server('floating-server',
-                                                        cls.image_ref,
-                                                        cls.flavor_ref)
-        cls.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         resp, body = cls.servers_client.get_server(server['id'])
         #Floating IP creation
@@ -55,10 +52,8 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        super(FloatingIPsTestJSON, cls).tearDownClass()
-        #Deleting the server which is created in this method
-        resp, body = cls.servers_client.delete_server(cls.server_id)
         #Deleting the floating IP which is created in this method
+        super(FloatingIPsTestJSON, cls).tearDownClass()
         resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
 
     @attr(type='positive')

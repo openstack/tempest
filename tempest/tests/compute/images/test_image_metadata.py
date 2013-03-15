@@ -30,13 +30,8 @@ class ImagesMetadataTest(base.BaseComputeTest):
         cls.servers_client = cls.servers_client
         cls.client = cls.images_client
 
-        name = rand_name('server')
-        resp, server = cls.servers_client.create_server(name, cls.image_ref,
-                                                        cls.flavor_ref)
+        resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
-
-        #Wait for the server to become active
-        cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
         # Snapshot the server once to save time
         name = rand_name('image')
@@ -49,7 +44,6 @@ class ImagesMetadataTest(base.BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_image(cls.image_id)
-        cls.servers_client.delete_server(cls.server_id)
         super(ImagesMetadataTest, cls).tearDownClass()
 
     def setUp(self):
