@@ -56,6 +56,14 @@ class ImagesTestJSON(base.BaseComputeTest):
             self.image_ids.remove(image_id)
         super(ImagesTestJSON, self).tearDown()
 
+    def __create_image__(self, server_id, name, meta=None):
+        resp, body = self.client.create_image(server_id, name, meta)
+        image_id = parse_image_id(resp['location'])
+        self.client.wait_for_image_resp_code(image_id, 200)
+        self.client.wait_for_image_status(image_id, 'ACTIVE')
+        self.image_ids.append(image_id)
+        return resp, body
+
     @attr(type='negative')
     def test_create_image_from_deleted_server(self):
         # An image should not be created if the server instance is removed
@@ -63,43 +71,24 @@ class ImagesTestJSON(base.BaseComputeTest):
 
         # Delete server before trying to create server
         self.servers_client.delete_server(server['id'])
-
-        try:
-            # Create a new image after server is deleted
-            name = rand_name('image')
-            meta = {'image_type': 'test'}
-            resp, body = self.client.create_image(server['id'], name, meta)
-
-        except Exception:
-            pass
-
-        else:
-            image_id = parse_image_id(resp['location'])
-            self.client.wait_for_image_resp_code(image_id, 200)
-            self.client.wait_for_image_status(image_id, 'ACTIVE')
-            self.client.delete_image(image_id)
-            self.fail("Should not create snapshot from deleted instance!")
+        self.servers_client.wait_for_server_termination(server['id'])
+        # Create a new image after server is deleted
+        name = rand_name('image')
+        meta = {'image_type': 'test'}
+        self.assertRaises(exceptions.NotFound,
+                          self.__create_image__,
+                          server['id'], name, meta)
 
     @attr(type='negative')
     def test_create_image_from_invalid_server(self):
         # An image should not be created with invalid server id
-        try:
-            # Create a new image with invalid server id
-            name = rand_name('image')
-            meta = {'image_type': 'test'}
-            resp = {}
-            resp['status'] = None
-            resp, body = self.client.create_image('!@#$%^&*()', name, meta)
-
-        except exceptions.NotFound:
-            pass
-
-        finally:
-            if (resp['status'] is not None):
-                image_id = parse_image_id(resp['location'])
-                resp, _ = self.client.delete_image(image_id)
-                self.fail("An image should not be created "
-                          "with invalid server id")
+        # Create a new image with invalid server id
+        name = rand_name('image')
+        meta = {'image_type': 'test'}
+        resp = {}
+        resp['status'] = None
+        self.assertRaises(exceptions.NotFound, self.__create_image__,
+                          '!@#$%^&*()', name, meta)
 
     @attr(type='negative')
     def test_create_image_when_server_is_terminating(self):
