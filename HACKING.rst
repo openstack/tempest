@@ -153,6 +153,19 @@ Rather than constructing parameters inline, it is better to break things up::
                              kwarg2=dict_of_numbers)
 
 
+Test Skips
+----------
+If a test is broken because of a bug it is appropriate to skip the test until
+bug has been fixed. However, the skip message should be formatted so that
+Tempest's skip tracking tool can watch the bug status. The skip message should
+contain the string 'Bug' immediately followed by a space. Then the bug number
+should be included in the message '#' in front of the number.
+
+Example::
+
+  @testtools.skip("Skipped until the Bug #980688 is resolved")
+
+
 openstack-common
 ----------------
 

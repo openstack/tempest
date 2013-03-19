@@ -323,6 +323,30 @@ def tempest_no_test_docstring(physical_line, previous_logical, filename):
                 return (pos, "T404: test functions must "
                         "not have doc strings")
 
+SKIP_DECORATOR = '@testtools.skip('
+
+
+def tempest_skip_bugs(physical_line):
+    """Check skip lines for proper bug entries
+
+    T601: Bug not in skip line
+    T602: Bug in message formatted incorrectly
+    """
+
+    pos = physical_line.find(SKIP_DECORATOR)
+
+    skip_re = re.compile(r'^\s*@testtools.skip.*')
+
+    if pos != -1 and skip_re.match(physical_line):
+        bug = re.compile(r'^.*\bbug\b.*', re.IGNORECASE)
+        if bug.match(physical_line) is None:
+            return (pos, 'T601: skips must have an associated bug')
+
+        bug_re = re.compile(r'.*skip\(.*Bug\s\#\d+', re.IGNORECASE)
+
+        if bug_re.match(physical_line) is None:
+            return (pos, 'T602: Bug number formatted incorrectly')
+
 
 FORMAT_RE = re.compile("%(?:"
                        "%|"           # Ignore plain percents
