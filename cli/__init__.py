@@ -21,6 +21,7 @@ import subprocess
 
 from oslo.config import cfg
 
+import cli.output_parser
 import tempest.test
 
 
@@ -51,6 +52,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
         super(ClientTestBase, cls).setUpClass()
 
     def __init__(self, *args, **kwargs):
+        self.parser = cli.output_parser
         super(ClientTestBase, self).__init__(*args, **kwargs)
 
     def nova(self, action, flags='', params='', admin=True, fail_ok=False):
@@ -62,6 +64,11 @@ class ClientTestBase(tempest.test.BaseTestCase):
         """Executes nova-manage command for the given action."""
         return self.cmd(
             'nova-manage', action, flags, params, fail_ok)
+
+    def keystone(self, action, flags='', params='', admin=True, fail_ok=False):
+        """Executes keystone command for the given action."""
+        return self.cmd_with_auth(
+            'keystone', action, flags, params, admin, fail_ok)
 
     def cmd_with_auth(self, cmd, action, flags='', params='',
                       admin=True, fail_ok=False):
@@ -86,3 +93,9 @@ class ClientTestBase(tempest.test.BaseTestCase):
             LOG.error("command output:\n%s" % e.output)
             raise
         return result
+
+    def assertTableStruct(self, items, field_names):
+        """Verify that all items has keys listed in field_names."""
+        for item in items:
+            for field in field_names:
+                self.assertIn(field, item)
