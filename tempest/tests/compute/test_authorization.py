@@ -203,7 +203,6 @@ class AuthorizationTest(base.BaseComputeTest):
                           self.alt_keypairs_client.get_keypair,
                           self.keypairname)
 
-    @testtools.skip("Skipped until the Bug #1086980 is resolved")
     def test_delete_keypair_of_alt_account_fails(self):
         # A DELETE request for another user's keypair should fail
         self.assertRaises(exceptions.NotFound,

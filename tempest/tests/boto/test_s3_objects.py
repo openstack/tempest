@@ -35,7 +35,6 @@ class S3BucketsTest(BotoTestCase):
         cls.os = clients.Manager()
         cls.client = cls.os.s3_client
 
-    @testtools.skip("Skipped until the Bug #1076534 is resolved")
     @attr(type='smoke')
     def test_create_get_delete_object(self):
         # S3 Create, get and delete object

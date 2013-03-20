@@ -326,7 +326,6 @@ class ObjectTest(base.BaseObjectTest):
                 self.assertIn('x-container-read', resp)
                 self.assertEqual(resp['x-container-read'], 'x')
 
-    @testtools.skip('Until Bug 1091669  is resolved.')
     @attr(type='smoke')
     def test_access_public_object_with_another_user_creds(self):
         #Make container public-readable, and access the object
