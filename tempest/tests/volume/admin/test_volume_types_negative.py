@@ -32,7 +32,6 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
                           display_name=str(uuid.uuid4()),
                           volume_type=str(uuid.uuid4()))
 
-    @testtools.skip('Until bug 1090356 is fixed')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
         self.assertRaises(exceptions.BadRequest,

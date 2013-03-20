@@ -79,14 +79,12 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
                           self.client.create_volume_type_extra_specs,
                           str(uuid.uuid4()), extra_specs)
 
-    @testtools.skip('Until bug 1090322 is fixed')
     def test_create_none_body(self):
         # Should not create volume type extra spec for none POST body.
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_volume_type_extra_specs,
                           self.volume_type['id'], None)
 
-    @testtools.skip('Until bug 1090322 is fixed')
     def test_create_invalid_body(self):
         # Should not create volume type extra spec for invalid POST body.
         self.assertRaises(exceptions.BadRequest,
