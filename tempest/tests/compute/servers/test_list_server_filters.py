@@ -126,11 +126,12 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
     @attr(type='positive')
-    def test_list_servers_detailed_filter_by_limit(self):
+    def test_list_servers_filter_by_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 1}
-        resp, servers = self.client.list_servers_with_detail(params)
-        self.assertEqual(1, len(servers['servers']))
+        resp, servers = self.client.list_servers(params)
+        #when _interface='xml', one element for servers_links in servers
+        self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='positive')
