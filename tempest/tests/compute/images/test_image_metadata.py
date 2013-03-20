@@ -21,12 +21,12 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ImagesMetadataTest(base.BaseComputeTest):
+class ImagesMetadataTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesMetadataTest, cls).setUpClass()
+        super(ImagesMetadataTestJSON, cls).setUpClass()
         cls.servers_client = cls.servers_client
         cls.client = cls.images_client
 
@@ -44,10 +44,10 @@ class ImagesMetadataTest(base.BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_image(cls.image_id)
-        super(ImagesMetadataTest, cls).tearDownClass()
+        super(ImagesMetadataTestJSON, cls).tearDownClass()
 
     def setUp(self):
-        super(ImagesMetadataTest, self).setUp()
+        super(ImagesMetadataTestJSON, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
         resp, _ = self.client.set_image_metadata(self.image_id, meta)
         self.assertEqual(resp.status, 200)
@@ -143,3 +143,7 @@ class ImagesMetadataTest(base.BaseComputeTest):
         # item from nonexistant image
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_image_metadata_item, 999, 'key1')
+
+
+class ImagesMetadataTestXML(ImagesMetadataTestJSON):
+    _interface = 'xml'
