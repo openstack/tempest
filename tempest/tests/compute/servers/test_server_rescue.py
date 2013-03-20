@@ -112,6 +112,11 @@ class ServerRescueTestJSON(base.BaseComputeTest):
     def _delete(self, volume_id):
         self.volumes_extensions_client.delete_volume(volume_id)
 
+    def _unrescue(self, server_id):
+        resp, body = self.servers_client.unrescue_server(server_id)
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+
     @attr(type='smoke')
     def test_rescue_unrescue_instance(self):
         resp, body = self.servers_client.rescue_server(
@@ -123,9 +128,8 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='negative')
-    @testtools.skip("Skipped until Bug #1126163 is resolved")
     def test_rescued_vm_reboot(self):
-        self.assertRaises(exceptions.BadRequest, self.servers_client.reboot,
+        self.assertRaises(exceptions.Duplicate, self.servers_client.reboot,
                           self.rescue_id, 'HARD')
 
     @attr(type='negative')
@@ -135,37 +139,23 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                           self.rescue_id,
                           self.image_ref_alt)
 
-    @attr(type='positive')
-    @testtools.skip("Skipped due to Bug #1126187")
+    @attr(type='negative')
     def test_rescued_vm_attach_volume(self):
         client = self.volumes_extensions_client
 
         # Rescue the server
         self.servers_client.rescue_server(self.server_id, self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        self.addCleanup(self._unrescue, self.server_id)
 
         # Attach the volume to the server
-        resp, body = \
-        self.servers_client.attach_volume(self.server_id,
-                                          self.volume_to_attach['id'],
-                                          device='/dev/%s' % self.device)
-        self.assertEqual(200, resp.status)
-        client.wait_for_volume_status(self.volume_to_attach['id'], 'in-use')
+        self.assertRaises(exceptions.Duplicate,
+                          self.servers_client.attach_volume,
+                          self.server_id,
+                          self.volume_to_attach['id'],
+                          device='/dev/%s' % self.device)
 
-        # Detach the volume to the server
-        resp, body = \
-        self.servers_client.detach_volume(self.server_id,
-                                          self.volume_to_attach['id'])
-        self.assertEqual(202, resp.status)
-        client.wait_for_volume_status(self.volume_to_attach['id'], 'available')
-
-        # Unrescue the server
-        resp, body = self.servers_client.unrescue_server(self.server_id)
-        self.assertEqual(202, resp.status)
-        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
-
-    @attr(type='positive')
-    @testtools.skip("Skipped until Bug #1126187 is resolved")
+    @attr(type='negative')
     def test_rescued_vm_detach_volume(self):
         # Attach the volume to the server
         self.servers_client.attach_volume(self.server_id,
@@ -177,19 +167,13 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         # Rescue the server
         self.servers_client.rescue_server(self.server_id, self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        self.addCleanup(self._unrescue, self.server_id)
 
-        # Detach the volume to the server
-        resp, body = \
-        self.servers_client.detach_volume(self.server_id,
-                                          self.volume_to_detach['id'])
-        self.assertEqual(202, resp.status)
-        client = self.volumes_extensions_client
-        client.wait_for_volume_status(self.volume_to_detach['id'], 'available')
-
-        # Unrescue the server
-        resp, body = self.servers_client.unrescue_server(self.server_id)
-        self.assertEqual(202, resp.status)
-        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+        # Detach the volume from the server expecting failure
+        self.assertRaises(exceptions.Duplicate,
+                          self.servers_client.detach_volume,
+                          self.server_id,
+                          self.volume_to_detach['id'])
 
     @attr(type='positive')
     def test_rescued_vm_associate_dissociate_floating_ip(self):
