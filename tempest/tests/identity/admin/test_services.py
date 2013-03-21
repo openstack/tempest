@@ -77,19 +77,16 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
             services.append(service)
         service_ids = map(lambda x: x['id'], services)
 
+        def delete_services():
+            for service_id in service_ids:
+                self.client.delete_service(service_id)
+
+        self.addCleanup(delete_services)
         # List and Verify Services
         resp, body = self.client.list_services()
         self.assertTrue(resp['status'].startswith('2'))
         found = [service for service in body if service['id'] in service_ids]
         self.assertEqual(len(found), len(services), 'Services not found')
-
-        # Delete Services
-        for service in services:
-            resp, body = self.client.delete_service(service['id'])
-            self.assertTrue(resp['status'].startswith('2'))
-        resp, body = self.client.list_services()
-        found = [service for service in body if service['id'] in service_ids]
-        self.assertFalse(any(found), 'Services failed to delete')
 
 
 class ServicesTestXML(ServicesTestJSON):
