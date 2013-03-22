@@ -49,9 +49,18 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
     def test_help_flag(self):
         self.nova_manage('', '-h')
 
-    @testtools.skip("version is empty, bug 1138844")
     def test_version_flag(self):
         self.assertNotEqual("", self.nova_manage('', '--version'))
+        self.assertEqual(self.nova_manage('version'),
+                         self.nova_manage('', '--version'))
+
+    def test_debug_flag(self):
+        self.assertNotEqual("", self.nova_manage('instance_type list',
+                            '--debug'))
+
+    def test_verbose_flag(self):
+        self.assertNotEqual("", self.nova_manage('instance_type list',
+                            '--verbose'))
 
     # test actions
     def test_version(self):
@@ -59,3 +68,16 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
 
     def test_flavor_list(self):
         self.assertNotEqual("", self.nova_manage('flavor list'))
+        self.assertNotEqual(self.nova_manage('instance_type list'),
+                            self.nova_manage('flavor list'))
+
+    def test_db_archive_deleted_rows(self):
+        # make sure command doesn't error out
+        self.nova_manage('db archive_deleted_rows 50')
+
+    def test_db_sync(self):
+        # make sure command doesn't error out
+        self.nova_manage('db sync')
+
+    def test_db_version(self):
+        self.assertNotEqual("", self.nova_manage('db version'))
