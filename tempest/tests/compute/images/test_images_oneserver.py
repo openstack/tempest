@@ -58,7 +58,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
             cls.alt_client = cls.alt_manager.images_client
 
     @attr(type='negative')
-    @testtools.skip("Until Bug 1006725 is fixed")
+    @testtools.skip("Until Bug #1006725 is fixed")
     def test_create_image_specify_multibyte_character_image_name(self):
         # Return an error if the image name has multi-byte characters
         snapshot_name = rand_name('\xef\xbb\xbf')
@@ -67,7 +67,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                           snapshot_name)
 
     @attr(type='negative')
-    @testtools.skip("Until Bug 1005423 is fixed")
+    @testtools.skip("Until Bug #1005423 is fixed")
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
         snapshot_name = rand_name('test-snap-')
@@ -76,7 +76,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                           self.server['id'], snapshot_name, meta)
 
     @attr(type='negative')
-    @testtools.skip("Until Bug 1005423 is fixed")
+    @testtools.skip("Until Bug #1005423 is fixed")
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
         snapshot_name = rand_name('test-snap-')

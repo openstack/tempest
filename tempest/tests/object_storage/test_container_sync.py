@@ -61,7 +61,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             #Attempt to delete the container
             resp, _ = client[0].delete_container(cont_name)
 
-    @testtools.skip('Until Bug 1093743 is resolved.')
+    @testtools.skip('Until Bug #1093743 is resolved.')
     @attr(type='positive')
     def test_container_synchronization(self):
         #Container to container synchronization

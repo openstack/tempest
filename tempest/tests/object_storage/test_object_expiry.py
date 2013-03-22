@@ -55,7 +55,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         #Attempt to delete the container
         resp, _ = cls.container_client.delete_container(cls.container_name)
 
-    @testtools.skip('Until bug 1069849 is resolved.')
+    @testtools.skip('Until Bug #1069849 is resolved.')
     @attr(type='regression')
     def test_get_object_after_expiry_time(self):
         # GET object after expiry time

@@ -77,7 +77,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.data.tenant['id'], self.data.test_email)
 
     @attr(type='negative')
-    @testtools.skip("Until Bug 999084 is fixed")
+    @testtools.skip("Until Bug #999084 is fixed")
     def test_create_user_with_empty_password(self):
         # User with an empty password should not be created
         self.data.setup_test_tenant()
@@ -86,7 +86,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_email)
 
     @attr(type='nagative')
-    @testtools.skip("Until Bug 999084 is fixed")
+    @testtools.skip("Until Bug #999084 is fixed")
     def test_create_user_with_long_password(self):
         # User having password exceeding max length should not be created
         self.data.setup_test_tenant()
@@ -95,7 +95,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_email)
 
     @attr(type='negative')
-    @testtools.skip("Until Bug 999084 is fixed")
+    @testtools.skip("Until Bug #999084 is fixed")
     def test_create_user_with_invalid_email_format(self):
         # Email format should be validated while creating a user
         self.data.setup_test_tenant()

@@ -590,7 +590,7 @@ class ObjectTest(base.BaseObjectTest):
                           self.container_name, object_name,
                           metadata=self.custom_headers)
 
-    @testtools.skip('Until bug 1097137 is resolved.')
+    @testtools.skip('Until Bug #1097137 is resolved.')
     @attr(type='positive')
     def test_get_object_using_temp_url(self):
         #Access object using temp url within expiry time

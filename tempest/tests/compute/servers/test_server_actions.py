@@ -87,7 +87,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             self.assertGreater(new_boot_time, boot_time)
 
     @attr(type='smoke')
-    @testtools.skip('Until bug 1014647 is dealt with.')
+    @testtools.skip('Until Bug #1014647 is dealt with.')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
         if self.run_ssh:
@@ -239,7 +239,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                           '!@#$%^&*()', 10)
 
     @attr(type='positive')
-    @testtools.skip('Until tempest bug 1014683 is fixed.')
+    @testtools.skip('Until tempest Bug #1014683 is fixed.')
     def test_get_console_output_server_id_in_reboot_status(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id in reboot status
