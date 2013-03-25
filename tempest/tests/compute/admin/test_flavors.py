@@ -39,6 +39,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
             raise cls.skipException(msg)
 
         cls.client = cls.os_adm.flavors_client
+        cls.user_client = cls.os.flavors_client
         cls.flavor_name_prefix = 'test_flavor_'
         cls.ram = 512
         cls.vcpus = 1
@@ -315,7 +316,22 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                           self.client.list_flavors_with_detail,
                           {'is_public': 'invalid'})
 
-#TODO(afazekas): Negative tests with regular user
+    @attr(type='negative')
+    def test_create_flavor_as_user(self):
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.user_client.create_flavor,
+                          flavor_name, self.ram, self.vcpus, self.disk,
+                          new_flavor_id, ephemeral=self.ephemeral,
+                          swap=self.swap, rxtx=self.rxtx)
+
+    @attr(type='negative')
+    def test_delete_flavor_as_user(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.user_client.delete_flavor,
+                          self.flavor_ref_alt)
 
 
 class FlavorsAdminTestXML(FlavorsAdminTestJSON):
