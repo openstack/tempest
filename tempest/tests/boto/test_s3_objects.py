@@ -18,7 +18,6 @@
 from contextlib import closing
 
 from boto.s3.key import Key
-import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name

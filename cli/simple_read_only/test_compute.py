@@ -22,7 +22,6 @@ from oslo.config import cfg
 import testtools
 
 import cli
-from tempest import config
 
 
 CONF = cfg.CONF

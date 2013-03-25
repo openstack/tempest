@@ -21,7 +21,6 @@
 built on top of pep8.py
 """
 
-import fnmatch
 import inspect
 import logging
 import os

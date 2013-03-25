@@ -18,8 +18,6 @@
 import logging
 import subprocess
 
-import testtools
-
 import cli
 
 

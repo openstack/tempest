@@ -15,17 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
-import time
-
 import testtools
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
 from tempest import exceptions
 from tempest.test import attr
-from tempest.tests import compute
 from tempest.tests.compute import base
 
 
