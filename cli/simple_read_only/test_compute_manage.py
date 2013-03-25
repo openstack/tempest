@@ -50,6 +50,7 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
         self.nova_manage('', '-h')
 
     def test_version_flag(self):
+        # Bug 1159957: nova-manage --version writes to stderr
         self.assertNotEqual("", self.nova_manage('', '--version'))
         self.assertEqual(self.nova_manage('version'),
                          self.nova_manage('', '--version'))
@@ -68,8 +69,9 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
 
     def test_flavor_list(self):
         self.assertNotEqual("", self.nova_manage('flavor list'))
-        self.assertNotEqual(self.nova_manage('instance_type list'),
-                            self.nova_manage('flavor list'))
+        self.assertEqual(self.nova_manage('instance_type list',
+                                          merge_stderr=False),
+                         self.nova_manage('flavor list', merge_stderr=False))
 
     def test_db_archive_deleted_rows(self):
         # make sure command doesn't error out
