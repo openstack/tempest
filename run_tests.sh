@@ -95,14 +95,7 @@ function run_tests {
 
 function run_pep8 {
   echo "Running pep8 ..."
-  srcfiles="`find tempest -type f -name "*.py"`"
-  srcfiles+=" `find tools -type f -name "*.py"`"
-  srcfiles+=" `find stress -type f -name "*.py"`"
-  srcfiles+=" setup.py"
-
-  ignore='--ignore=E121,E122,E125,E126'
-
-    ${wrapper} python tools/hacking.py ${ignore} ${srcfiles}
+  ${wrapper} tools/check_source.sh
 }
 
 function run_coverage_start {

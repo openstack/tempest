@@ -16,9 +16,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from quantumclient.common import exceptions as exc
 from tempest.common.utils.data_utils import rand_name
-from tempest import test
 from tempest.tests.network.common import DeletableRouter
 from tempest.tests.network.common import TestNetworkSmokeCommon
 
