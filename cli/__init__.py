@@ -61,7 +61,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
             'nova', action, flags, params, admin, fail_ok)
 
     def nova_manage(self, action, flags='', params='', fail_ok=False,
-                    merge_stderr=True):
+                    merge_stderr=False):
         """Executes nova-manage command for the given action."""
         return self.cmd(
             'nova-manage', action, flags, params, fail_ok, merge_stderr)
@@ -83,8 +83,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
         return self.cmd(cmd, action, flags, params, fail_ok)
 
     def cmd(self, cmd, action, flags='', params='', fail_ok=False,
-            merge_stderr=True):
-        #TODO(jogo): make merge_stderr default to False.
+            merge_stderr=False):
         """Executes specified command for the given action."""
         cmd = ' '.join([CONF.cli.cli_dir + cmd,
                         flags, action, params])
@@ -94,7 +93,8 @@ class ClientTestBase(tempest.test.BaseTestCase):
             if merge_stderr:
                 result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
             else:
-                result = subprocess.check_output(cmd)
+                devnull = open('/dev/null', 'w')
+                result = subprocess.check_output(cmd, stderr=devnull)
         except subprocess.CalledProcessError, e:
             LOG.error("command output:\n%s" % e.output)
             raise
