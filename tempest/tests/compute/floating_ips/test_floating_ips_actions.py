@@ -73,6 +73,14 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
             #Deleting the floating IP which is created in this method
             self.client.delete_floating_ip(floating_ip_id_allocated)
 
+    @attr(type='negative')
+    def test_allocate_floating_ip_from_nonexistent_pool(self):
+        # Positive test:Allocation of a new floating IP from a nonexistent_pool
+        #to a project should fail
+        self.assertRaises(exceptions.NotFound,
+                          self.client.create_floating_ip,
+                          "non_exist_pool")
+
     @attr(type='positive')
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project

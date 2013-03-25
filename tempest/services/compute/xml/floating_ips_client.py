@@ -22,6 +22,7 @@ from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
+from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 
 
@@ -60,10 +61,17 @@ class FloatingIPsClientXML(RestClientXML):
             raise exceptions.NotFound(body)
         return resp, body
 
-    def create_floating_ip(self):
+    def create_floating_ip(self, pool_name=None):
         """Allocate a floating IP to the project."""
         url = 'os-floating-ips'
-        resp, body = self.post(url, None, self.headers)
+        if pool_name:
+            doc = Document()
+            pool = Element("pool")
+            pool.append(Text(pool_name))
+            doc.append(pool)
+            resp, body = self.post(url, str(doc), self.headers)
+        else:
+            resp, body = self.post(url, None, self.headers)
         body = self._parse_floating_ip(etree.fromstring(body))
         return resp, body
 
