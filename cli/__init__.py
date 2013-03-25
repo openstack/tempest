@@ -60,10 +60,11 @@ class ClientTestBase(tempest.test.BaseTestCase):
         return self.cmd_with_auth(
             'nova', action, flags, params, admin, fail_ok)
 
-    def nova_manage(self, action, flags='', params='', fail_ok=False):
+    def nova_manage(self, action, flags='', params='', fail_ok=False,
+                    merge_stderr=True):
         """Executes nova-manage command for the given action."""
         return self.cmd(
-            'nova-manage', action, flags, params, fail_ok)
+            'nova-manage', action, flags, params, fail_ok, merge_stderr)
 
     def keystone(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes keystone command for the given action."""
@@ -81,14 +82,19 @@ class ClientTestBase(tempest.test.BaseTestCase):
         flags = creds + ' ' + flags
         return self.cmd(cmd, action, flags, params, fail_ok)
 
-    def cmd(self, cmd, action, flags='', params='', fail_ok=False):
+    def cmd(self, cmd, action, flags='', params='', fail_ok=False,
+            merge_stderr=True):
+        #TODO(jogo): make merge_stderr default to False.
         """Executes specified command for the given action."""
         cmd = ' '.join([CONF.cli.cli_dir + cmd,
                         flags, action, params])
         LOG.info("running: '%s'" % cmd)
         cmd = shlex.split(cmd)
         try:
-            result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            if merge_stderr:
+                result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+            else:
+                result = subprocess.check_output(cmd)
         except subprocess.CalledProcessError, e:
             LOG.error("command output:\n%s" % e.output)
             raise
