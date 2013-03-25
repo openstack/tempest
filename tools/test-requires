@@ -1,6 +1,4 @@
 pep8==1.3.3
 pylint==0.19
-# Needed for whitebox testing
-sqlalchemy
-MySQL-python
+#TODO(afazekas): ensure pg_config installed
 psycopg2
