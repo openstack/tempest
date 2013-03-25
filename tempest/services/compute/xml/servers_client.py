@@ -401,6 +401,19 @@ class ServersClientXML(RestClientXML):
     def remove_security_group(self, server_id, name):
         return self.action(server_id, 'removeSecurityGroup', None, name=name)
 
+    def live_migrate_server(self, server_id, dest_host, use_block_migration):
+        """This should be called with administrator privileges ."""
+
+        req_body = Element("os-migrateLive",
+                           xmlns=XMLNS_11,
+                           disk_over_commit=False,
+                           block_migration=use_block_migration,
+                           host=dest_host)
+
+        resp, body = self.post("servers/%s/action" % str(server_id),
+                               str(Document(req_body)), self.headers)
+        return resp, body
+
     def list_server_metadata(self, server_id):
         resp, body = self.get("servers/%s/metadata" % str(server_id),
                               self.headers)

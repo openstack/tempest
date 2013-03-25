@@ -27,7 +27,7 @@ from tempest.tests.compute import base
 
 
 @attr(category='live-migration')
-class LiveBlockMigrationTest(base.BaseComputeAdminTest):
+class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
     _interface = 'json'
 
     live_migration_available = (
@@ -38,7 +38,7 @@ class LiveBlockMigrationTest(base.BaseComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(LiveBlockMigrationTest, cls).setUpClass()
+        super(LiveBlockMigrationTestJSON, cls).setUpClass()
 
         cls.admin_hosts_client = cls.os_adm.hosts_client
         cls.admin_servers_client = cls.os_adm.servers_client
@@ -125,4 +125,8 @@ class LiveBlockMigrationTest(base.BaseComputeAdminTest):
         for server_id in cls.created_server_ids:
             cls.servers_client.delete_server(server_id)
 
-        super(LiveBlockMigrationTest, cls).tearDownClass()
+        super(LiveBlockMigrationTestJSON, cls).tearDownClass()
+
+
+class LiveBlockMigrationTestXML(LiveBlockMigrationTestJSON):
+    _interface = 'xml'
