@@ -19,6 +19,7 @@ import json
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest import exceptions
 
 
 class SecurityGroupsClientJSON(RestClient):
