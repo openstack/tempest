@@ -136,8 +136,6 @@ class ServerRescueTestJSON(base.BaseComputeTest):
 
     @attr(type='negative')
     def test_rescued_vm_attach_volume(self):
-        client = self.volumes_extensions_client
-
         # Rescue the server
         self.servers_client.rescue_server(self.server_id, self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
