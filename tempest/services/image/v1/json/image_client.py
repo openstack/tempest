@@ -18,12 +18,16 @@
 import copy
 import errno
 import json
+import logging
 import os
+import time
 import urllib
 
 from tempest.common import glance_http
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
+
+LOG = logging.getLogger(__name__)
 
 
 class ImageClientJSON(RestClient):
@@ -59,8 +63,13 @@ class ImageClientJSON(RestClient):
     def _image_meta_to_headers(self, fields):
         headers = {}
         fields_copy = copy.deepcopy(fields)
+        copy_from = fields_copy.pop('copy_from', None)
+        if copy_from is not None:
+            headers['x-glance-api-copy-from'] = copy_from
         for key, value in fields_copy.pop('properties', {}).iteritems():
             headers['x-image-meta-property-%s' % key] = str(value)
+        for key, value in fields_copy.pop('api', {}).iteritems():
+            headers['x-glance-api-property-%s' % key] = str(value)
         for key, value in fields_copy.iteritems():
             headers['x-image-meta-%s' % key] = str(value)
         return headers
@@ -130,7 +139,7 @@ class ImageClientJSON(RestClient):
 
         headers = {}
 
-        for option in ['is_public', 'location', 'properties']:
+        for option in ['is_public', 'location', 'properties', 'copy_from']:
             if option in kwargs:
                 params[option] = kwargs.get(option)
 
@@ -187,10 +196,15 @@ class ImageClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['images']
 
+    def get_image_meta(self, image_id):
+        url = 'v1/images/%s' % image_id
+        resp, __ = self.head(url)
+        body = self._image_meta_from_headers(resp)
+        return resp, body
+
     def get_image(self, image_id):
         url = 'v1/images/%s' % image_id
-        resp, __ = self.get(url)
-        body = self._image_meta_from_headers(resp)
+        resp, body = self.get(url)
         return resp, body
 
     def is_resource_deleted(self, id):
@@ -231,3 +245,34 @@ class ImageClientJSON(RestClient):
         resp, data = self.put(url, body, self.headers)
         data = json.loads(data)
         return resp, data
+
+    #NOTE(afazekas): just for the wait function
+    def _get_image_status(self, image_id):
+        resp, meta = self.get_image_meta(image_id)
+        status = meta['status']
+        return status
+
+    #NOTE(afazkas): Wait reinvented again. It is not in the correct layer
+    def wait_for_image_status(self, image_id, status):
+        """Waits for a Image to reach a given status."""
+        start_time = time.time()
+        old_value = value = self._get_image_status(image_id)
+        while True:
+            dtime = time.time() - start_time
+            time.sleep(self.build_interval)
+            if value != old_value:
+                LOG.info('Value transition from "%s" to "%s"'
+                         'in %d second(s).', old_value,
+                         value, dtime)
+            if (value == status):
+                return value
+
+            if dtime > self.build_timeout:
+                message = ('Time Limit Exceeded! (%ds)'
+                           'while waiting for %s, '
+                           'but we got %s.' %
+                           (self.build_timeout, status, value))
+                raise exceptions.TimeoutException(message)
+            time.sleep(self.build_interval)
+            old_value = value
+            value = self._get_image_status(image_id)
