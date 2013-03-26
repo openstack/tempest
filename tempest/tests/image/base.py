@@ -15,7 +15,6 @@
 #    under the License.
 
 import logging
-import time
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name

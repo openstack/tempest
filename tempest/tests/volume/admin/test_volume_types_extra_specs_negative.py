@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 import uuid
 
 from tempest.common.utils.data_utils import rand_name

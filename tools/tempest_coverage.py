@@ -16,7 +16,6 @@
 
 import json
 import os
-import re
 import shutil
 import sys
 
@@ -24,7 +23,6 @@ from oslo.config import cfg
 
 from tempest.common.rest_client import RestClient
 from tempest import config
-from tempest.tests.compute import base
 
 CONF = config.TempestConfig()
 

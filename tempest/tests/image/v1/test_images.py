@@ -17,7 +17,6 @@
 
 import cStringIO as StringIO
 
-from tempest import clients
 from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.image import base
