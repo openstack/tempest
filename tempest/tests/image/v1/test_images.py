@@ -67,13 +67,18 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                        container_format='bare',
                                        disk_format='raw', is_public=True,
                                        location='http://example.com'
-                                                '/someimage.iso')
+                                                '/someimage.iso',
+                                       properties={'key1': 'value1',
+                                                   'key2': 'value2'})
         self.assertTrue('id' in body)
         image_id = body.get('id')
         self.created_images.append(image_id)
         self.assertEqual('New Remote Image', body.get('name'))
         self.assertTrue(body.get('is_public'))
         self.assertEqual('active', body.get('status'))
+        properties = body.get('properties')
+        self.assertEqual(properties['key1'], 'value1')
+        self.assertEqual(properties['key2'], 'value2')
 
 
 class ListImagesTest(base.BaseV1ImageTest):
