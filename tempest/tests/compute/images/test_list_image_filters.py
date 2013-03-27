@@ -22,12 +22,12 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ListImageFiltersTest(base.BaseComputeTest):
+class ListImageFiltersTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ListImageFiltersTest, cls).setUpClass()
+        super(ListImageFiltersTestJSON, cls).setUpClass()
         cls.client = cls.images_client
 
         resp, cls.server1 = cls.create_server()
@@ -65,7 +65,7 @@ class ListImageFiltersTest(base.BaseComputeTest):
         cls.client.delete_image(cls.image1_id)
         cls.client.delete_image(cls.image2_id)
         cls.client.delete_image(cls.image3_id)
-        super(ListImageFiltersTest, cls).tearDownClass()
+        super(ListImageFiltersTestJSON, cls).tearDownClass()
 
     @attr(type='negative')
     def test_get_image_not_existing(self):
@@ -140,7 +140,9 @@ class ListImageFiltersTest(base.BaseComputeTest):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
         resp, images = self.client.list_images(params)
-        self.assertEqual(1, len(images))
+        #when _interface='xml', one element for images_links in images
+        #ref: Question #224349
+        self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @attr(type='positive')
     def test_list_images_filter_by_changes_since(self):
@@ -226,3 +228,7 @@ class ListImageFiltersTest(base.BaseComputeTest):
     def test_get_nonexistant_image(self):
         # Negative test: GET on non existant image should fail
         self.assertRaises(exceptions.NotFound, self.client.get_image, 999)
+
+
+class ListImageFiltersTestXML(ListImageFiltersTestJSON):
+    _interface = 'xml'

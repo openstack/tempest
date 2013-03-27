@@ -77,6 +77,19 @@ class ImagesClientXML(RestClientXML):
             data['images'].append(self._parse_image(image))
         return data
 
+    def _parse_key_value(self, node):
+        """Parse <foo key='key'>value</foo> data into {'key': 'value'}."""
+        data = {}
+        for node in node.getchildren():
+            data[node.get('key')] = node.text
+        return data
+
+    def _parse_metadata(self, node):
+        """Parse the response body without children."""
+        data = {}
+        data[node.get('key')] = node.text
+        return data
+
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""
         post_body = Element('createImage', name=name)
@@ -153,51 +166,53 @@ class ImagesClientXML(RestClientXML):
             if int(time.time()) - start >= self.build_timeout:
                 raise exceptions.TimeoutException
 
+    def _metadata_body(self, meta):
+        post_body = Element('metadata')
+        for k, v in meta.items():
+            data = Element('meta', key=k)
+            data.append(Text(v))
+            post_body.append(data)
+        return post_body
+
     def list_image_metadata(self, image_id):
         """Lists all metadata items for an image."""
         resp, body = self.get("images/%s/metadata" % str(image_id),
                               self.headers)
-        body = xml_to_json(etree.fromstring(body))
-        return resp, body['metadata']
-
-    def _metadata_body(image_id, meta):
-        post_body = Document('metadata')
-        for k, v in meta:
-            text = Text(v)
-            metadata = Element('meta', text, key=k)
-            post_body.append(metadata)
-        return post_body
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
 
     def set_image_metadata(self, image_id, meta):
         """Sets the metadata for an image."""
-        post_body = self._metadata_body(image_id, meta)
-        resp, body = self.put('images/%s/metadata' % str(image_id),
-                              post_body, self.headers)
-        body = xml_to_json(etree.fromstring(body))
-        return resp, body['metadata']
+        post_body = self._metadata_body(meta)
+        resp, body = self.put('images/%s/metadata' % image_id,
+                              str(Document(post_body)), self.headers)
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
 
     def update_image_metadata(self, image_id, meta):
         """Updates the metadata for an image."""
-        post_body = self._metadata_body(image_id, meta)
+        post_body = self._metadata_body(meta)
         resp, body = self.post('images/%s/metadata' % str(image_id),
-                               post_body, self.headers)
-        body = xml_to_json(etree.fromstring(body))
-        return resp, body['metadata']
+                               str(Document(post_body)), self.headers)
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
 
     def get_image_metadata_item(self, image_id, key):
         """Returns the value for a specific image metadata key."""
         resp, body = self.get("images/%s/metadata/%s.xml" %
                               (str(image_id), key), self.headers)
-        body = xml_to_json(etree.fromstring(body))
-        return resp, body['meta']
+        body = self._parse_metadata(etree.fromstring(body))
+        return resp, body
 
     def set_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key."""
-        post_body = Document('meta', Text(meta), key=key)
-        resp, body = self.post('images/%s/metadata/%s' % (str(image_id), key),
-                               post_body, self.headers)
+        for k, v in meta.items():
+            post_body = Element('meta', key=key)
+            post_body.append(Text(v))
+        resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
+                              str(Document(post_body)), self.headers)
         body = xml_to_json(etree.fromstring(body))
-        return resp, body['meta']
+        return resp, body
 
     def update_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key."""
@@ -209,6 +224,5 @@ class ImagesClientXML(RestClientXML):
 
     def delete_image_metadata_item(self, image_id, key):
         """Deletes a single image metadata key/value pair."""
-        resp, body = self.delete("images/%s/metadata/%s" % (str(image_id), key,
-                                 self.headers))
-        return resp, body
+        return self.delete("images/%s/metadata/%s" % (str(image_id), key),
+                           self.headers)

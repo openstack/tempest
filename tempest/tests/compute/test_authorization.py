@@ -23,7 +23,7 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class AuthorizationTest(base.BaseComputeTest):
+class AuthorizationTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
@@ -32,7 +32,7 @@ class AuthorizationTest(base.BaseComputeTest):
             msg = "Need >1 user"
             raise cls.skipException(msg)
 
-        super(AuthorizationTest, cls).setUpClass()
+        super(AuthorizationTestJSON, cls).setUpClass()
 
         cls.client = cls.os.servers_client
         cls.images_client = cls.os.images_client
@@ -71,18 +71,15 @@ class AuthorizationTest(base.BaseComputeTest):
 
         name = rand_name('security')
         description = rand_name('description')
-        resp, cls.security_group = \
-        cls.security_client.create_security_group(name, description)
+        resp, cls.security_group = cls.security_client.create_security_group(
+            name, description)
 
         parent_group_id = cls.security_group['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
-        resp, cls.rule =\
-        cls.security_client.create_security_group_rule(
-                                        parent_group_id,
-                                        ip_protocol, from_port,
-                                        to_port)
+        resp, cls.rule = cls.security_client.create_security_group_rule(
+            parent_group_id, ip_protocol, from_port, to_port)
 
     @classmethod
     def tearDownClass(cls):
@@ -90,7 +87,7 @@ class AuthorizationTest(base.BaseComputeTest):
             cls.images_client.delete_image(cls.image['id'])
             cls.keypairs_client.delete_keypair(cls.keypairname)
             cls.security_client.delete_security_group(cls.security_group['id'])
-        super(AuthorizationTest, cls).tearDownClass()
+        super(AuthorizationTestJSON, cls).tearDownClass()
 
     def test_get_server_for_alt_account_fails(self):
         # A GET request for a server on another user's account should fail
@@ -278,7 +275,7 @@ class AuthorizationTest(base.BaseComputeTest):
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] is not None:
                 self.alt_security_client.delete_security_group_rule(
-                                        body['id'])  # BUG
+                    body['id'])  # BUG
                 self.fail("Create security group rule request should not "
                           "happen if the tenant id does not match the"
                           " current user")
@@ -352,3 +349,7 @@ class AuthorizationTest(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.alt_client.get_console_output,
                           self.server['id'], 10)
+
+
+class AuthorizationTestXML(AuthorizationTestJSON):
+    _interface = 'xml'

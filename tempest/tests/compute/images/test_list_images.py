@@ -19,17 +19,17 @@ from tempest.test import attr
 from tempest.tests.compute import base
 
 
-class ListImagesTest(base.BaseComputeTest):
+class ListImagesTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ListImagesTest, cls).setUpClass()
+        super(ListImagesTestJSON, cls).setUpClass()
         cls.client = cls.images_client
 
     @classmethod
     def tearDownClass(cls):
-        super(ListImagesTest, cls).tearDownClass()
+        super(ListImagesTestJSON, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_get_image(self):
@@ -50,3 +50,7 @@ class ListImagesTest(base.BaseComputeTest):
         resp, images = self.client.list_images_with_detail()
         found = any([i for i in images if i['id'] == self.image_ref])
         self.assertTrue(found)
+
+
+class ListImagesTestXML(ListImagesTestJSON):
+    _interface = 'xml'
