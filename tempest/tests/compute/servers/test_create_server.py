@@ -33,7 +33,7 @@ from tempest.tests.compute import base
 class ServersTestJSON(base.BaseComputeTest):
     _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
-    disk_config = None
+    disk_config = 'AUTO'
 
     @classmethod
     def setUpClass(cls):
@@ -115,18 +115,6 @@ class ServersTestJSON(base.BaseComputeTest):
         # Verify the instance host name is the same as the server name
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
-
-
-@attr(type='positive')
-class ServersTestAutoDisk(ServersTestJSON):
-    disk_config = 'AUTO'
-
-    @classmethod
-    def setUpClass(cls):
-        if not compute.DISK_CONFIG_ENABLED:
-            msg = "DiskConfig extension not enabled."
-            raise cls.skipException(msg)
-        super(ServersTestAutoDisk, cls).setUpClass()
 
 
 @attr(type='positive')

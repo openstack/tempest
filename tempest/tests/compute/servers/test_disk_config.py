@@ -22,7 +22,7 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class TestServerDiskConfig(base.BaseComputeTest):
+class ServerDiskConfigTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
@@ -30,7 +30,7 @@ class TestServerDiskConfig(base.BaseComputeTest):
         if not compute.DISK_CONFIG_ENABLED:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
-        super(TestServerDiskConfig, cls).setUpClass()
+        super(ServerDiskConfigTestJSON, cls).setUpClass()
         cls.client = cls.os.servers_client
 
     @attr(type='positive')
@@ -120,3 +120,7 @@ class TestServerDiskConfig(base.BaseComputeTest):
 
         #Delete the server
         resp, body = self.client.delete_server(server['id'])
+
+
+class ServerDiskConfigTestXML(ServerDiskConfigTestJSON):
+    _interface = 'xml'
