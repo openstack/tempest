@@ -320,6 +320,10 @@ class RestClient(object):
             except KeyError:
                 ctype = 'application/json'
 
+        # It is not an error response
+        if resp.status < 400:
+            return
+
         JSON_ENC = ['application/json; charset=UTF-8', 'application/json',
                     'application/json; charset=utf-8']
         # NOTE(mtreinish): This is for compatibility with Glance and swift
