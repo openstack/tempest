@@ -24,10 +24,10 @@ from tempest import exceptions
 
 
 def rand_name(name='test'):
-    return name + str(random.randint(1, 999999))
+    return name + str(random.randint(1, 0x7fffffff))
 
 
-def rand_int_id(start=0, end=999999):
+def rand_int_id(start=0, end=0x7fffffff):
     return random.randint(start, end)
 
 
