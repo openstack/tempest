@@ -22,12 +22,12 @@ from tempest.tests import compute
 from tempest.tests.compute import base
 
 
-class ListServersNegativeTest(base.BaseComputeTest):
+class ListServersNegativeTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ListServersNegativeTest, cls).setUpClass()
+        super(ListServersNegativeTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.servers = []
 
@@ -138,7 +138,8 @@ class ListServersNegativeTest(base.BaseComputeTest):
         # List servers by specifying limits
         resp, body = self.client.list_servers({'limit': 1})
         self.assertEqual('200', resp['status'])
-        self.assertEqual(1, len(body['servers']))
+        #when _interface='xml', one element for servers_links in servers
+        self.assertEqual(1, len([x for x in body['servers'] if 'id' in x]))
 
     def test_list_servers_by_limits_greater_than_actual_count(self):
         # List servers by specifying a greater value for limit
@@ -187,3 +188,7 @@ class ListServersNegativeTest(base.BaseComputeTest):
                   if srv['id'] in deleted_ids]
         self.assertEqual('200', resp['status'])
         self.assertEqual([], actual)
+
+
+class ListServersNegativeTestXML(ListServersNegativeTestJSON):
+    _interface = 'xml'
