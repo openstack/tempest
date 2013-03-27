@@ -91,7 +91,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
             self.assertTrue(self.device in partitions)
 
             self._detach(server['id'], volume['id'])
-            attached = False
+            self.attached = False
 
             self.servers_client.stop(server['id'])
             self.servers_client.wait_for_server_status(server['id'], 'SHUTOFF')
