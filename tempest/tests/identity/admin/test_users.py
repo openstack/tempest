@@ -326,17 +326,9 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         invalid_id.append(rand_name("dddd@#%%^$"))
         invalid_id.append('!@#()$%^&*?<>{}[]')
         #List the users with invalid tenant id
-        fail = list()
         for invalid in invalid_id:
-            try:
-                resp, body = self.client.list_users_for_tenant(invalid)
-            except exceptions.NotFound:
-                pass
-            else:
-                fail.append(invalid)
-        if len(fail) != 0:
-            self.fail('Should raise Not Found when list users with invalid'
-                      'tenant ids %s' % fail)
+            self.assertRaises(exceptions.NotFound,
+                              self.client.list_users_for_tenant, invalid)
 
 
 class UsersTestXML(UsersTestJSON):
