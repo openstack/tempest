@@ -37,7 +37,7 @@ class QuotasClientJSON(RestClient):
 
     def update_quota_set(self, tenant_id, injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
-                         key_pairs=None, instances=None,
+                         fixed_ips=None, key_pairs=None, instances=None,
                          security_group_rules=None, injected_files=None,
                          cores=None, injected_file_path_bytes=None,
                          security_groups=None):
@@ -58,6 +58,9 @@ class QuotasClientJSON(RestClient):
 
         if floating_ips is not None:
             post_body['floating_ips'] = floating_ips
+
+        if fixed_ips is not None:
+            post_body['fixed_ips'] = fixed_ips
 
         if key_pairs is not None:
             post_body['key_pairs'] = key_pairs
