@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2012 OpenStack, LLC
+# Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -36,12 +37,14 @@ class RestClient(object):
     TYPE = "json"
     LOG = logging.getLogger(__name__)
 
-    def __init__(self, config, user, password, auth_url, tenant_name=None):
+    def __init__(self, config, user, password, auth_url, tenant_name=None,
+                 auth_version='v2'):
         self.config = config
         self.user = user
         self.password = password
         self.auth_url = auth_url
         self.tenant_name = tenant_name
+        self.auth_version = auth_version
 
         self.service = None
         self.token = None
@@ -70,11 +73,16 @@ class RestClient(object):
         """
 
         if self.strategy == 'keystone':
-            self.token, self.base_url = self.keystone_auth(self.user,
-                                                           self.password,
-                                                           self.auth_url,
-                                                           self.service,
-                                                           self.tenant_name)
+
+            if self.auth_version == 'v3':
+                auth_func = self.identity_auth_v3
+            else:
+                auth_func = self.keystone_auth
+
+            self.token, self.base_url = (
+                auth_func(self.user, self.password, self.auth_url,
+                          self.service, self.tenant_name))
+
         else:
             self.token, self.base_url = self.basic_auth(self.user,
                                                         self.password,
@@ -116,7 +124,7 @@ class RestClient(object):
 
     def keystone_auth(self, user, password, auth_url, service, tenant_name):
         """
-        Provides authentication via Keystone.
+        Provides authentication via Keystone using v2 identity API.
         """
 
         # Normalize URI to ensure /tokens is in it.
@@ -169,6 +177,90 @@ class RestClient(object):
                                                    password=password)
         raise exceptions.IdentityError('Unexpected status code {0}'.format(
             resp.status))
+
+    def identity_auth_v3(self, user, password, auth_url, service,
+                         project_name, domain_id='default'):
+        """Provides authentication using Identity API v3."""
+
+        req_url = auth_url.rstrip('/') + '/auth/tokens'
+
+        creds = {
+            "auth": {
+                "identity": {
+                    "methods": ["password"],
+                    "password": {
+                        "user": {
+                            "name": user, "password": password,
+                            "domain": {"id": domain_id}
+                        }
+                    }
+                },
+                "scope": {
+                    "project": {
+                        "domain": {"id": domain_id},
+                        "name": project_name
+                    }
+                }
+            }
+        }
+
+        headers = {'Content-Type': 'application/json'}
+        body = json.dumps(creds)
+        resp, body = self.http_obj.request(req_url, 'POST',
+                                           headers=headers, body=body)
+
+        if resp.status == 201:
+            try:
+                token = resp['x-subject-token']
+            except Exception:
+                self.LOG.exception("Failed to obtain token using V3"
+                                   " authentication (auth URL is '%s')" %
+                                   req_url)
+                raise
+
+            catalog = json.loads(body)['token']['catalog']
+
+            mgmt_url = None
+            for service_info in catalog:
+                if service_info['type'] != service:
+                    continue  # this isn't the entry for us.
+
+                endpoints = service_info['endpoints']
+
+                # Look for an endpoint in the region if configured.
+                if service in self.region:
+                    region = self.region[service]
+
+                    for ep in endpoints:
+                        if ep['region'] != region:
+                            continue
+
+                        mgmt_url = ep['url']
+                        # FIXME(blk-u): this isn't handling endpoint type
+                        # (public, internal, admin).
+                        break
+
+                if not mgmt_url:
+                    # Didn't find endpoint for region, use the first.
+
+                    ep = endpoints[0]
+                    mgmt_url = ep['url']
+                    # FIXME(blk-u): this isn't handling endpoint type
+                    # (public, internal, admin).
+
+                break
+
+            return token, mgmt_url
+
+        elif resp.status == 401:
+            raise exceptions.AuthenticationFailure(user=user,
+                                                   password=password)
+        else:
+            self.LOG.error("Failed to obtain token using V3 authentication"
+                           " (auth URL is '%s'), the response status is %s" %
+                           (req_url, resp.status))
+            raise exceptions.AuthenticationFailure(user=user,
+                                                   password=password)
 
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)
