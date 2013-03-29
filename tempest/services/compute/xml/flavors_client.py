@@ -147,3 +147,28 @@ class FlavorsClientXML(RestClientXML):
         """Unsets an extra spec based on the mentioned flavor and key."""
         return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
                            key))
+
+    def _parse_array_access(self, node):
+        return [xml_to_json(x) for x in node]
+
+    def add_flavor_access(self, flavor_id, tenant_id):
+        """Add flavor access for the specified tenant."""
+        doc = Document()
+        server = Element("addTenantAccess")
+        doc.append(server)
+        server.add_attr("tenant", tenant_id)
+        resp, body = self.post('flavors/%s/action' % str(flavor_id),
+                               str(doc), self.headers)
+        body = self._parse_array_access(etree.fromstring(body))
+        return resp, body
+
+    def remove_flavor_access(self, flavor_id, tenant_id):
+        """Remove flavor access from the specified tenant."""
+        doc = Document()
+        server = Element("removeTenantAccess")
+        doc.append(server)
+        server.add_attr("tenant", tenant_id)
+        resp, body = self.post('flavors/%s/action' % str(flavor_id),
+                               str(doc), self.headers)
+        body = self._parse_array_access(etree.fromstring(body))
+        return resp, body
