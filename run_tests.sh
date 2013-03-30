@@ -33,7 +33,7 @@ nova_coverage=0
 config_file=""
 update=0
 
-if ! options=$(getopt -o VNnfuswcphdsC: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,nova-coverage,pep8,help,debug,stdout,config: -- "$@")
+if ! options=$(getopt -o VNnfuswcphdSC: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,nova-coverage,pep8,help,debug,stdout,config: -- "$@")
 then
     # parse error
     usage
