@@ -25,7 +25,7 @@ requires = common_setup.parse_requirements()
 depend_links = common_setup.parse_dependency_links()
 
 setuptools.setup(name='tempest',
-                 version="2012.2",
+                 version=common_setup.get_version('tempest', "2013.2"),
                  description='Integration test tools',
                  author='OpenStack',
                  author_email='openstack-qa@lists.launchpad.net',
