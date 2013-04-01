@@ -42,6 +42,13 @@ def _translate_ip_xml_json(ip):
     version = ip.get('version')
     if version:
         ip['version'] = int(version)
+    # NOTE(maurosr): just a fast way to avoid the xml version with the
+    # expanded xml namespace.
+    type_ns_prefix = ('{http://docs.openstack.org/compute/ext/extended_ips/'
+                      'api/v1.1}type')
+    if type_ns_prefix in ip:
+        ip['OS-EXT-IPS:type'] = ip[type_ns_prefix]
+        ip.pop(type_ns_prefix)
     return ip
 
 
