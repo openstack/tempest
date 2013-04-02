@@ -30,35 +30,46 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
         super(ListImageFiltersTestJSON, cls).setUpClass()
         cls.client = cls.images_client
 
-        resp, cls.server1 = cls.create_server()
-        resp, cls.server2 = cls.create_server(wait_until='ACTIVE')
-        # NOTE(sdague) this is faster than doing the sync wait_util on both
-        cls.servers_client.wait_for_server_status(cls.server1['id'], 'ACTIVE')
+        try:
+            resp, cls.server1 = cls.create_server()
+            resp, cls.server2 = cls.create_server(wait_until='ACTIVE')
+            # NOTE(sdague) this is faster than doing the sync wait_util on both
+            cls.servers_client.wait_for_server_status(cls.server1['id'],
+                                                      'ACTIVE')
 
-        # Create images to be used in the filter tests
-        image1_name = rand_name('image')
-        resp, body = cls.client.create_image(cls.server1['id'], image1_name)
-        cls.image1_id = parse_image_id(resp['location'])
-        cls.client.wait_for_image_resp_code(cls.image1_id, 200)
-        cls.client.wait_for_image_status(cls.image1_id, 'ACTIVE')
-        resp, cls.image1 = cls.client.get_image(cls.image1_id)
+            # Create images to be used in the filter tests
+            image1_name = rand_name('image')
+            resp, body = cls.client.create_image(cls.server1['id'],
+                                                 image1_name)
+            cls.image1_id = parse_image_id(resp['location'])
+            cls.client.wait_for_image_resp_code(cls.image1_id, 200)
+            cls.client.wait_for_image_status(cls.image1_id, 'ACTIVE')
+            resp, cls.image1 = cls.client.get_image(cls.image1_id)
 
-        # Servers have a hidden property for when they are being imaged
-        # Performing back-to-back create image calls on a single
-        # server will sometimes cause failures
-        image3_name = rand_name('image')
-        resp, body = cls.client.create_image(cls.server2['id'], image3_name)
-        cls.image3_id = parse_image_id(resp['location'])
-        cls.client.wait_for_image_resp_code(cls.image3_id, 200)
-        cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
-        resp, cls.image3 = cls.client.get_image(cls.image3_id)
+            # Servers have a hidden property for when they are being imaged
+            # Performing back-to-back create image calls on a single
+            # server will sometimes cause failures
+            image3_name = rand_name('image')
+            resp, body = cls.client.create_image(cls.server2['id'],
+                                                 image3_name)
+            cls.image3_id = parse_image_id(resp['location'])
+            cls.client.wait_for_image_resp_code(cls.image3_id, 200)
+            cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
+            resp, cls.image3 = cls.client.get_image(cls.image3_id)
 
-        image2_name = rand_name('image')
-        resp, body = cls.client.create_image(cls.server1['id'], image2_name)
-        cls.image2_id = parse_image_id(resp['location'])
-        cls.client.wait_for_image_resp_code(cls.image2_id, 200)
-        cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
-        resp, cls.image2 = cls.client.get_image(cls.image2_id)
+            image2_name = rand_name('image')
+            resp, body = cls.client.create_image(cls.server1['id'],
+                                                 image2_name)
+            cls.image2_id = parse_image_id(resp['location'])
+            cls.client.wait_for_image_resp_code(cls.image2_id, 200)
+            cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
+            resp, cls.image2 = cls.client.get_image(cls.image2_id)
+        except Exception:
+            cls.clear_servers()
+            cls.client.delete_image(cls.image1_id)
+            cls.client.delete_image(cls.image2_id)
+            cls.client.delete_image(cls.image3_id)
+            raise
 
     @classmethod
     def tearDownClass(cls):

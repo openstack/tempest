@@ -182,12 +182,12 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
         resp, server = cls.servers_client.create_server(
             name, image_id, flavor, **kwargs)
+        cls.servers.append(server)
 
         if 'wait_until' in kwargs:
             cls.servers_client.wait_for_server_status(
                 server['id'], kwargs['wait_until'])
 
-        cls.servers.append(server)
         return resp, server
 
     def wait_for(self, condition):
