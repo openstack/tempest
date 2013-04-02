@@ -15,31 +15,73 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 import tempest.test
 
 
 class BaseNetworkTest(tempest.test.BaseTestCase):
 
+    """
+    Base class for the Quantum tests that use the Tempest Quantum REST client
+
+    Per the Quantum API Guide, API v1.x was removed from the source code tree
+    (docs.openstack.org/api/openstack-network/2.0/content/Overview-d1e71.html)
+    Therefore, v2.x of the Quantum API is assumed. It is also assumed that the
+    following options are defined in the [network] section of etc/tempest.conf:
+
+        tenant_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for tenant networks
+
+        tenant_network_mask_bits with the mask bits to be used to partition the
+        block defined by tenant-network_cidr
+    """
+
     @classmethod
     def setUpClass(cls):
         os = clients.Manager()
-
-        if not os.config.network.quantum_available:
+        cls.network_cfg = os.config.network
+        if not cls.network_cfg.quantum_available:
             raise cls.skipException("Quantum support is required")
+        cls.client = os.network_client
+        cls.networks = []
+        cls.subnets = []
 
     @classmethod
     def tearDownClass(cls):
+        for subnet in cls.subnets:
+            cls.client.delete_subnet(subnet['id'])
         for network in cls.networks:
             cls.client.delete_network(network['id'])
 
-    def create_network(self, network_name=None):
+    @classmethod
+    def create_network(cls, network_name=None):
         """Wrapper utility that returns a test network."""
-        network_name = network_name or rand_name('test-network')
+        network_name = network_name or rand_name('test-network-')
 
-        resp, body = self.client.create_network(network_name)
+        resp, body = cls.client.create_network(network_name)
         network = body['network']
-        self.networks.append(network)
+        cls.networks.append(network)
         return network
+
+    @classmethod
+    def create_subnet(cls, network):
+        """Wrapper utility that returns a test subnet."""
+        cidr = netaddr.IPNetwork(cls.network_cfg.tenant_network_cidr)
+        mask_bits = cls.network_cfg.tenant_network_mask_bits
+        # Find a cidr that is not in use yet and create a subnet with it
+        for subnet_cidr in cidr.subnet(mask_bits):
+            try:
+                resp, body = cls.client.create_subnet(network['id'],
+                                                      str(subnet_cidr))
+                break
+            except exceptions.BadRequest as e:
+                is_overlapping_cidr = 'overlaps with another subnet' in str(e)
+                if not is_overlapping_cidr:
+                    raise
+        subnet = body['subnet']
+        cls.subnets.append(subnet)
+        return subnet
