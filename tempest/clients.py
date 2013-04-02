@@ -20,6 +20,8 @@ import logging
 from tempest import config
 from tempest import exceptions
 from tempest.services import botoclients
+from tempest.services.compute.json.aggregates_client import \
+    AggregatesClientJSON
 from tempest.services.compute.json.extensions_client import \
     ExtensionsClientJSON
 from tempest.services.compute.json.flavors_client import FlavorsClientJSON
@@ -243,6 +245,7 @@ class Manager(object):
         self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
         self.custom_account_client = \
             AccountClientCustomizedHeader(*client_args)
+        self.aggregates_client = AggregatesClientJSON(*client_args)
 
 
 class AltManager(Manager):
