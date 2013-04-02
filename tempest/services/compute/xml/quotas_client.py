@@ -57,7 +57,7 @@ class QuotasClientXML(RestClientXML):
 
     def update_quota_set(self, tenant_id, injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
-                         key_pairs=None, instances=None,
+                         fixed_ips=None, key_pairs=None, instances=None,
                          security_group_rules=None, injected_files=None,
                          cores=None, injected_file_path_bytes=None,
                          security_groups=None):
@@ -79,6 +79,9 @@ class QuotasClientXML(RestClientXML):
 
         if floating_ips is not None:
             post_body.add_attr('floating_ips', floating_ips)
+
+        if fixed_ips is not None:
+            post_body.add_attr('fixed_ips', fixed_ips)
 
         if key_pairs is not None:
             post_body.add_attr('key_pairs', key_pairs)
