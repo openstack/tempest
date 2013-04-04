@@ -37,10 +37,6 @@ class VolumeTypesTest(BaseVolumeTest):
                                                                auth_url,
                                                                adm_tenant)
 
-    @classmethod
-    def tearDownClass(cls):
-        super(VolumeTypesTest, cls).tearDownClass()
-
     def test_volume_type_list(self):
         # List Volume types.
         try:

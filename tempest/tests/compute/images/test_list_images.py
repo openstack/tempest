@@ -27,10 +27,6 @@ class ListImagesTestJSON(base.BaseComputeTest):
         super(ListImagesTestJSON, cls).setUpClass()
         cls.client = cls.images_client
 
-    @classmethod
-    def tearDownClass(cls):
-        super(ListImagesTestJSON, cls).tearDownClass()
-
     @attr(type='smoke')
     def test_get_image(self):
         # Returns the correct details for a single image
