@@ -52,16 +52,16 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         cls.volumes_extensions_client.create_volume(1,
                                                     display_name=
                                                     'test_attach')
-        cls.volumes_extensions_client.wait_for_volume_status
-        (cls.volume_to_attach['id'], 'available')
+        cls.volumes_extensions_client.wait_for_volume_status(
+                cls.volume_to_attach['id'], 'available')
 
         # Create a volume and wait for it to become ready for attach
         resp, cls.volume_to_detach = \
         cls.volumes_extensions_client.create_volume(1,
                                                     display_name=
                                                     'test_detach')
-        cls.volumes_extensions_client.wait_for_volume_status
-        (cls.volume_to_detach['id'], 'available')
+        cls.volumes_extensions_client.wait_for_volume_status(
+                cls.volume_to_detach['id'], 'available')
 
         # Server for positive tests
         resp, server = cls.create_server(image_id=cls.image_ref,
@@ -154,12 +154,15 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.servers_client.attach_volume(self.server_id,
                                           self.volume_to_detach['id'],
                                           device='/dev/%s' % self.device)
-        self.volumes_extensions_client.wait_for_volume_status
-        (self.volume_to_detach['id'], 'in-use')
+        self.volumes_extensions_client.wait_for_volume_status(
+                self.volume_to_detach['id'], 'in-use')
 
         # Rescue the server
         self.servers_client.rescue_server(self.server_id, self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        #addCleanup is a LIFO queue
+        self.addCleanup(self._detach, self.server_id,
+                        self.volume_to_detach['id'])
         self.addCleanup(self._unrescue, self.server_id)
 
         # Detach the volume from the server expecting failure
@@ -174,6 +177,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.servers_client.rescue_server(
             self.server_id, self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        self.addCleanup(self._unrescue, self.server_id)
 
         #Association of floating IP to a rescued vm
         client = self.floating_ips_client
@@ -187,11 +191,6 @@ class ServerRescueTestJSON(base.BaseComputeTest):
             client.disassociate_floating_ip_from_server(self.floating_ip,
                                                         self.server_id)
         self.assertEqual(202, resp.status)
-
-        # Unrescue the server
-        resp, body = self.servers_client.unrescue_server(self.server_id)
-        self.assertEqual(202, resp.status)
-        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='positive')
     @testtools.skip("Skipped until Bug #1126257 is resolved")
