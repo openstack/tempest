@@ -35,9 +35,9 @@ alt_tenant_name = alt_demo
 
 # This should be the username of a user WITH administrative privileges
 admin_username = admin
-# The above non-administrative user's password
+# The above administrative user's password
 admin_password = secret
-# The above non-administrative user's tenant name
+# The above administrative user's tenant name
 admin_tenant_name = admin
 
 [compute]
