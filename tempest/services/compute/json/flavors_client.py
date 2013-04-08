@@ -106,3 +106,29 @@ class FlavorsClientJSON(RestClient):
         """Unsets extra Specs from the mentioned flavor."""
         return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
                            key))
+
+    def add_flavor_access(self, flavor_id, tenant_id):
+        """Add flavor access for the specified tenant."""
+        post_body = {
+            'addTenantAccess': {
+                'tenant': tenant_id
+            }
+        }
+        post_body = json.dumps(post_body)
+        resp, body = self.post('flavors/%s/action' % flavor_id,
+                               post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['flavor_access']
+
+    def remove_flavor_access(self, flavor_id, tenant_id):
+        """Remove flavor access from the specified tenant."""
+        post_body = {
+            'removeTenantAccess': {
+                'tenant': tenant_id
+            }
+        }
+        post_body = json.dumps(post_body)
+        resp, body = self.post('flavors/%s/action' % flavor_id,
+                               post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['flavor_access']
