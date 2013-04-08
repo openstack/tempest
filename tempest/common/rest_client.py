@@ -135,12 +135,14 @@ class RestClient(object):
 
         headers = {'Content-Type': 'application/json'}
         body = json.dumps(creds)
-        resp, body = self.http_obj.request(auth_url, 'POST',
-                                           headers=headers, body=body)
+        self._log_request('POST', auth_url, headers, body)
+        resp, resp_body = self.http_obj.request(auth_url, 'POST',
+                                                headers=headers, body=body)
+        self._log_response(resp, resp_body)
 
         if resp.status == 200:
             try:
-                auth_data = json.loads(body)['access']
+                auth_data = json.loads(resp_body)['access']
                 token = auth_data['token']['id']
             except Exception, e:
                 print "Failed to obtain token for user: %s" % e
@@ -155,7 +157,6 @@ class RestClient(object):
                             mgmt_url = _ep[self.endpoint_url]
                     if not mgmt_url:
                         mgmt_url = ep['endpoints'][0][self.endpoint_url]
-                    tenant_id = auth_data['token']['tenant']['id']
                     break
 
             if mgmt_url is None:
@@ -166,6 +167,8 @@ class RestClient(object):
         elif resp.status == 401:
             raise exceptions.AuthenticationFailure(user=user,
                                                    password=password)
+        raise exceptions.IdentityError('Unexpected status code {0}'.format(
+            resp.status))
 
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)
@@ -230,7 +233,7 @@ class RestClient(object):
 
     def response_checker(self, method, url, headers, body, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
-            method.upper() == 'HEAD') and resp_body:
+                method.upper() == 'HEAD') and resp_body:
             raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
         #NOTE(afazekas):
         # If the HTTP Status Code is 205
@@ -388,7 +391,7 @@ class RestClient(object):
 
     def is_absolute_limit(self, resp, resp_body):
         if (not isinstance(resp_body, collections.Mapping) or
-            'retry-after' not in resp):
+                'retry-after' not in resp):
             return True
         over_limit = resp_body.get('overLimit', None)
         if not over_limit:
@@ -422,6 +425,6 @@ class RestClientXML(RestClient):
 
     def is_absolute_limit(self, resp, resp_body):
         if (not isinstance(resp_body, collections.Mapping) or
-            'retry-after' not in resp):
+                'retry-after' not in resp):
             return True
         return 'exceed' in resp_body.get('message', 'blabla')
