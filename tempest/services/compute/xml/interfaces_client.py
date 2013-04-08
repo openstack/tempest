@@ -13,9 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import exceptions
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
@@ -79,4 +82,24 @@ class InterfacesClientXML(RestClientXML):
     def delete_interface(self, server, port_id):
         resp, body = self.delete('servers/%s/os-interface/%s' % (server,
                                                                  port_id))
+        return resp, body
+
+    def wait_for_interface_status(self, server, port_id, status):
+        """Waits for a interface to reach a given status."""
+        resp, body = self.show_interface(server, port_id)
+        interface_status = body['port_state']
+        start = int(time.time())
+
+        while(interface_status != status):
+            time.sleep(self.build_interval)
+            resp, body = self.show_interface(server, port_id)
+            interface_status = body['port_state']
+
+            timed_out = int(time.time()) - start >= self.build_timeout
+
+            if interface_status != status and timed_out:
+                message = ('Interface %s failed to reach %s status within '
+                           'the required time (%s s).' %
+                           (port_id, status, self.build_timeout))
+                raise exceptions.TimeoutException(message)
         return resp, body
