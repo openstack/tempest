@@ -17,6 +17,7 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
+from tempest.test import attr
 import tempest.tests.network.common as net_common
 
 
@@ -148,14 +149,17 @@ class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
         self.set_resource(name, router)
         return router
 
+    @attr(type='smoke')
     def test_001_create_keypairs(self):
         self.keypairs[self.tenant_id] = self._create_keypair(
             self.compute_client)
 
+    @attr(type='smoke')
     def test_002_create_security_groups(self):
         self.security_groups[self.tenant_id] = self._create_security_group(
             self.compute_client)
 
+    @attr(type='smoke')
     def test_003_create_networks(self):
         network = self._create_network(self.tenant_id)
         router = self._get_router(self.tenant_id)
@@ -165,6 +169,7 @@ class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
         self.subnets.append(subnet)
         self.routers.append(router)
 
+    @attr(type='smoke')
     def test_004_check_networks(self):
         #Checks that we see the newly created network/subnet/router via
         #checking the result of list_[networks,routers,subnets]
@@ -188,6 +193,7 @@ class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
             self.assertIn(myrouter.name, seen_router_names)
             self.assertIn(myrouter.id, seen_router_ids)
 
+    @attr(type='smoke')
     def test_005_create_servers(self):
         if not (self.keypairs or self.security_groups or self.networks):
             raise self.skipTest('Necessary resources have not been defined')
@@ -200,6 +206,7 @@ class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
                                          name, keypair_name, security_groups)
             self.servers.append(server)
 
+    @attr(type='smoke')
     def test_006_check_tenant_network_connectivity(self):
         if not self.config.network.tenant_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
@@ -213,6 +220,7 @@ class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
                                     "Timed out waiting for %s's ip to become "
                                     "reachable" % server.name)
 
+    @attr(type='smoke')
     def test_007_assign_floating_ips(self):
         public_network_id = self.config.network.public_network_id
         if not public_network_id:
@@ -224,6 +232,7 @@ class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
             self.floating_ips.setdefault(server, [])
             self.floating_ips[server].append(floating_ip)
 
+    @attr(type='smoke')
     def test_008_check_public_network_connectivity(self):
         if not self.floating_ips:
             raise self.skipTest('No floating ips have been allocated.')
