@@ -28,6 +28,7 @@ from tempest.tests.compute import base
 
 @attr(category='live-migration')
 class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
+    _host_key = 'OS-EXT-SRV-ATTR:host'
     _interface = 'json'
 
     live_migration_available = (
@@ -58,7 +59,7 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
         return body
 
     def _get_host_for_server(self, server_id):
-        return self._get_server_details(server_id)['OS-EXT-SRV-ATTR:host']
+        return self._get_server_details(server_id)[self._host_key]
 
     def _migrate_server_to(self, server_id, dest_host):
         _resp, body = self.admin_servers_client.live_migrate_server(
@@ -129,4 +130,6 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
 
 
 class LiveBlockMigrationTestXML(LiveBlockMigrationTestJSON):
+    _host_key = (
+        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
     _interface = 'xml'
