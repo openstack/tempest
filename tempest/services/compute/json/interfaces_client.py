@@ -14,8 +14,10 @@
 #    under the License.
 
 import json
+import time
 
 from tempest.common.rest_client import RestClient
+from tempest import exceptions
 
 
 class InterfacesClientJSON(RestClient):
@@ -54,4 +56,25 @@ class InterfacesClientJSON(RestClient):
     def delete_interface(self, server, port_id):
         resp, body = self.delete('servers/%s/os-interface/%s' % (server,
                                                                  port_id))
+        return resp, body
+
+    def wait_for_interface_status(self, server, port_id, status):
+        """Waits for a interface to reach a given status."""
+        resp, body = self.show_interface(server, port_id)
+        interface_status = body['port_state']
+        start = int(time.time())
+
+        while(interface_status != status):
+            time.sleep(self.build_interval)
+            resp, body = self.show_interface(server, port_id)
+            interface_status = body['port_state']
+
+            timed_out = int(time.time()) - start >= self.build_timeout
+
+            if interface_status != status and timed_out:
+                message = ('Interface %s failed to reach %s status within '
+                           'the required time (%s s).' %
+                           (port_id, status, self.build_timeout))
+                raise exceptions.TimeoutException(message)
+
         return resp, body
