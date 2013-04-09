@@ -114,6 +114,10 @@ live_migration_available = false
 # performed, which requires XenServer pools in case of using XS)
 use_block_migration_for_live_migration = false
 
+# Supports iSCSI block migration - depends on a XAPI supporting
+# relax-xsm-sr-check
+block_migrate_supports_cinder_iscsi = false
+
 # By default, rely on the status of the diskConfig extension to
 # decide if to execute disk config tests. When set to false, tests
 # are forced to skip, regardless of the extension status
