@@ -17,11 +17,10 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.tests.network.common import DeletableRouter
-from tempest.tests.network.common import TestNetworkSmokeCommon
+import tempest.tests.network.common as net_common
 
 
-class TestNetworkBasicOps(TestNetworkSmokeCommon):
+class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
 
     """
     This smoke test suite assumes that Nova has been configured to
@@ -124,7 +123,7 @@ class TestNetworkBasicOps(TestNetworkSmokeCommon):
         network_id = self.config.network.public_network_id
         if router_id:
             result = self.network_client.show_router(router_id)
-            return AttributeDict(**result['router'])
+            return net_common.AttributeDict(**result['router'])
         elif network_id:
             router = self._create_router(tenant_id)
             router.add_gateway(network_id)
@@ -143,8 +142,8 @@ class TestNetworkBasicOps(TestNetworkSmokeCommon):
             ),
         )
         result = self.network_client.create_router(body=body)
-        router = DeletableRouter(client=self.network_client,
-                                 **result['router'])
+        router = net_common.DeletableRouter(client=self.network_client,
+                                            **result['router'])
         self.assertEqual(router.name, name)
         self.set_resource(name, router)
         return router
