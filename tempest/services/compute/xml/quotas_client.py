@@ -55,6 +55,15 @@ class QuotasClientXML(RestClientXML):
         body = self._format_quota(body)
         return resp, body
 
+    def get_default_quota_set(self, tenant_id):
+        """List the default quota set for a tenant."""
+
+        url = 'os-quota-sets/%s/defaults' % str(tenant_id)
+        resp, body = self.get(url, self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        body = self._format_quota(body)
+        return resp, body
+
     def update_quota_set(self, tenant_id, injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
                          fixed_ips=None, key_pairs=None, instances=None,
