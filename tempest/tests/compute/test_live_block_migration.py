@@ -31,11 +31,7 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
     _interface = 'json'
 
-    live_migration_available = (
-        config.TempestConfig().compute.live_migration_available)
-    use_block_migration_for_live_migration = (
-        config.TempestConfig().compute.use_block_migration_for_live_migration)
-    run_ssh = config.TempestConfig().compute.run_ssh
+    CONF = config.TempestConfig()
 
     @classmethod
     def setUpClass(cls):
@@ -63,7 +59,8 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
 
     def _migrate_server_to(self, server_id, dest_host):
         _resp, body = self.admin_servers_client.live_migrate_server(
-            server_id, dest_host, self.use_block_migration_for_live_migration)
+            server_id, dest_host,
+            self.config.compute.use_block_migration_for_live_migration)
         return body
 
     def _get_host_other_than(self, host):
@@ -95,8 +92,8 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
             return server_id
 
     @attr(type='positive')
-    @testtools.skipIf(not live_migration_available,
-                      'Block Live migration not available')
+    @testtools.skipIf(not CONF.compute.live_migration_available,
+                      'Live migration not available')
     def test_live_block_migration(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
@@ -109,11 +106,10 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         self.assertEquals(target_host, self._get_host_for_server(server_id))
 
-    @testtools.skipIf(not live_migration_available,
-                      'Block Live migration not available')
+    @testtools.skipIf(not CONF.compute.live_migration_available,
+                      'Live migration not available')
     def test_invalid_host_for_migration(self):
         # Migrating to an invalid host should not change the status
-
         server_id = self._get_an_active_server()
         target_host = self._get_non_existing_host_name()
 
