@@ -51,10 +51,8 @@ def attr(*args, **kwargs):
 class BaseTestCase(testtools.TestCase,
                    testtools.testcase.WithAttributes,
                    testresources.ResourcedTestCase):
-    def __init__(self, *args, **kwargs):
-        super(BaseTestCase, self).__init__(*args, **kwargs)
-        #NOTE(afazekas): inspection workaround
-        BaseTestCase.config = config.TempestConfig()
+
+    config = config.TempestConfig()
 
     @classmethod
     def setUpClass(cls):
