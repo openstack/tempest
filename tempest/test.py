@@ -115,42 +115,91 @@ def call_until_true(func, duration, sleep_for):
     return False
 
 
-class DefaultClientTest(TestCase):
+def status_timeout(things, thing_id, expected_status):
+    """
+    Given a thing and an expected status, do a loop, sleeping
+    for a configurable amount of time, checking for the
+    expected status to show. At any time, if the returned
+    status of the thing is ERROR, fail out.
+    """
+    def check_status():
+        # python-novaclient has resources available to its client
+        # that all implement a get() method taking an identifier
+        # for the singular resource to retrieve.
+        thing = things.get(thing_id)
+        new_status = thing.status
+        if new_status == 'ERROR':
+            self.fail("%s failed to get to expected status."
+                      "In ERROR state."
+                      % thing)
+        elif new_status == expected_status:
+            return True  # All good.
+        LOG.debug("Waiting for %s to get to %s status. "
+                  "Currently in %s status",
+                  thing, expected_status, new_status)
+    conf = config.TempestConfig()
+    if not call_until_true(check_status,
+                           conf.compute.build_timeout,
+                           conf.compute.build_interval):
+        self.fail("Timed out waiting for thing %s to become %s"
+                  % (thing_id, expected_status))
+
+
+class DefaultClientSmokeTest(TestCase):
 
     """
-    Base test case class that provides the default clients to access
-    the various OpenStack APIs.
+    Base smoke test case class that provides the default clients to
+    access the various OpenStack APIs.
+
+    Smoke tests are tests that have the following characteristics:
+
+     * Test basic operations of an API, typically in an order that
+       a regular user would perform those operations
+     * Test only the correct inputs and action paths -- no fuzz or
+       random input data is sent, only valid inputs.
+     * Use only the default client tool for calling an API
     """
 
     manager_class = manager.DefaultClientManager
 
-    def status_timeout(self, things, thing_id, expected_status):
-        """
-        Given a thing and an expected status, do a loop, sleeping
-        for a configurable amount of time, checking for the
-        expected status to show. At any time, if the returned
-        status of the thing is ERROR, fail out.
-        """
-        def check_status():
-            # python-novaclient has resources available to its client
-            # that all implement a get() method taking an identifier
-            # for the singular resource to retrieve.
-            thing = things.get(thing_id)
-            new_status = thing.status
-            if new_status == 'ERROR':
-                self.fail("%s failed to get to expected status."
-                          "In ERROR state."
-                          % thing)
-            elif new_status == expected_status:
-                return True  # All good.
-            LOG.debug("Waiting for %s to get to %s status. "
-                      "Currently in %s status",
-                      thing, expected_status, new_status)
-        if not call_until_true(check_status,
-                               self.config.compute.build_timeout,
-                               self.config.compute.build_interval):
-            self.fail("Timed out waiting for thing %s to become %s"
-                      % (thing_id, expected_status))
+    @classmethod
+    def tearDownClass(cls):
+        # NOTE(jaypipes): Because smoke tests are typically run in a specific
+        # order, and because test methods in smoke tests generally create
+        # resources in a particular order, we destroy resources in the reverse
+        # order in which resources are added to the smoke test class object
+        while cls.os_resources:
+            thing = cls.os_resources.pop()
+            LOG.debug("Deleting %r from shared resources of %s" %
+                      (thing, cls.__name__))
+
+            try:
+                # OpenStack resources are assumed to have a delete()
+                # method which destroys the resource...
+                thing.delete()
+            except Exception as e:
+                # If the resource is already missing, mission accomplished.
+                if e.__class__.__name__ == 'NotFound':
+                    continue
+                raise
+
+            def is_deletion_complete():
+                # Deletion testing is only required for objects whose
+                # existence cannot be checked via retrieval.
+                if isinstance(thing, dict):
+                    return True
+                try:
+                    thing.get()
+                except Exception as e:
+                    # Clients are expected to return an exception
+                    # called 'NotFound' if retrieval fails.
+                    if e.__class__.__name__ == 'NotFound':
+                        return True
+                    raise
+                return False
+
+            # Block until resource deletion has completed or timed-out
+            call_until_true(is_deletion_complete, 10, 1)
 
 
 class ComputeFuzzClientTest(TestCase):
@@ -161,46 +210,3 @@ class ComputeFuzzClientTest(TestCase):
     """
 
     manager_class = manager.ComputeFuzzClientManager
-
-    def status_timeout(self, client_get_method, thing_id, expected_status):
-        """
-        Given a method to get a resource and an expected status, do a loop,
-        sleeping for a configurable amount of time, checking for the
-        expected status to show. At any time, if the returned
-        status of the thing is ERROR, fail out.
-
-        :param client_get_method: The callable that will retrieve the thing
-                                  with ID :param:thing_id
-        :param thing_id: The ID of the thing to get
-        :param expected_status: String value of the expected status of the
-                                thing that we are looking for.
-
-        :code ..
-
-            Usage:
-
-            def test_some_server_action(self):
-                client = self.servers_client
-                resp, server = client.create_server('random_server')
-                self.status_timeout(client.get_server, server['id'], 'ACTIVE')
-        """
-        def check_status():
-            # Tempest REST client has resources available to its client
-            # that all implement a various get_$resource() methods taking
-            # an identifier for the singular resource to retrieve.
-            thing = client_get_method(thing_id)
-            new_status = thing['status']
-            if new_status == 'ERROR':
-                self.fail("%s failed to get to expected status."
-                          "In ERROR state."
-                          % thing)
-            elif new_status == expected_status:
-                return True  # All good.
-            LOG.debug("Waiting for %s to get to %s status. "
-                      "Currently in %s status",
-                      thing, expected_status, new_status)
-        if not call_until_true(check_status,
-                               self.config.compute.build_timeout,
-                               self.config.compute.build_interval):
-            self.fail("Timed out waiting for thing %s to become %s"
-                      % (thing_id, expected_status))
