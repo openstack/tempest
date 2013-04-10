@@ -282,9 +282,10 @@ class BotoTestCase(tempest.test.BaseTestCase):
 
     @classmethod
     def get_lfunction_gone(cls, obj):
-        """ If the object is instance of a well know type returns back with
+        """If the object is instance of a well know type returns back with
             with the correspoding function otherwise it assumes the obj itself
-            is the function"""
+            is the function.
+            """
         ec = cls.ec2_error_code
         if isinstance(obj, ec2.instance.Instance):
             colusure_matcher = ec.client.InvalidInstanceID.NotFound
