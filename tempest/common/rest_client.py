@@ -179,6 +179,9 @@ class RestClient(object):
     def delete(self, url, headers=None):
         return self.request('DELETE', url, headers)
 
+    def patch(self, url, body, headers):
+        return self.request('PATCH', url, headers, body)
+
     def put(self, url, body, headers):
         return self.request('PUT', url, headers, body)
 
