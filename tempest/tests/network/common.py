@@ -21,7 +21,6 @@ import netaddr
 
 from quantumclient.common import exceptions as exc
 from tempest.common.utils.data_utils import rand_name
-from tempest import smoke
 from tempest import test
 
 
@@ -103,7 +102,7 @@ class DeletablePort(DeletableResource):
         self.client.delete_port(self.id)
 
 
-class TestNetworkSmokeCommon(smoke.DefaultClientSmokeTest):
+class TestNetworkSmokeCommon(test.DefaultClientSmokeTest):
     """
     Base class for network smoke tests
     """
@@ -274,7 +273,7 @@ class TestNetworkSmokeCommon(smoke.DefaultClientSmokeTest):
             self.set_resource(name, server)
         except AttributeError:
             self.fail("Server not successfully created.")
-        self.status_timeout(client.servers, server.id, 'ACTIVE')
+        test.status_timeout(client.servers, server.id, 'ACTIVE')
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.

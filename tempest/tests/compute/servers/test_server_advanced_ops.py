@@ -24,7 +24,7 @@ from tempest import test
 LOG = logging.getLogger(__name__)
 
 
-class TestServerAdvancedOps(test.DefaultClientTest):
+class TestServerAdvancedOps(test.DefaultClientSmokeTest):
 
     """
     This test case stresses some advanced server instance operations:
@@ -66,16 +66,16 @@ class TestServerAdvancedOps(test.DefaultClientTest):
 
         self.assertEqual(self.instance.status, 'BUILD')
         instance_id = self.get_resource('instance').id
-        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
         instance = self.get_resource('instance')
         instance_id = instance.id
         resize_flavor = self.config.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
                   instance.id, instance.flavor, resize_flavor)
         instance.resize(resize_flavor)
-        self.status_timeout(self.compute_client.servers, instance_id,
+        test.status_timeout(self.compute_client.servers, instance_id,
                             'VERIFY_RESIZE')
 
         LOG.debug("Confirming resize of instance %s", instance_id)
         instance.confirm_resize()
-        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')

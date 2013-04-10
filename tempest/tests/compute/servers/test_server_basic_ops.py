@@ -18,12 +18,12 @@
 import logging
 
 from tempest.common.utils.data_utils import rand_name
-from tempest import smoke
+from tempest import test
 
 LOG = logging.getLogger(__name__)
 
 
-class TestServerBasicOps(smoke.DefaultClientSmokeTest):
+class TestServerBasicOps(test.DefaultClientSmokeTest):
 
     """
     This smoke test case follows this basic set of operations:
@@ -101,7 +101,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
 
     def wait_on_active(self):
         instance_id = self.get_resource('instance').id
-        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
     def pause_server(self):
         instance = self.get_resource('instance')
@@ -109,7 +109,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         LOG.debug("Pausing instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.pause()
-        self.status_timeout(self.compute_client.servers, instance_id, 'PAUSED')
+        test.status_timeout(self.compute_client.servers, instance_id, 'PAUSED')
 
     def unpause_server(self):
         instance = self.get_resource('instance')
@@ -117,7 +117,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         LOG.debug("Unpausing instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.unpause()
-        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
     def suspend_server(self):
         instance = self.get_resource('instance')
@@ -125,7 +125,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         LOG.debug("Suspending instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.suspend()
-        self.status_timeout(self.compute_client.servers,
+        test.status_timeout(self.compute_client.servers,
                             instance_id, 'SUSPENDED')
 
     def resume_server(self):
@@ -134,7 +134,7 @@ class TestServerBasicOps(smoke.DefaultClientSmokeTest):
         LOG.debug("Resuming instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.resume()
-        self.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
 
     def terminate_instance(self):
         instance = self.get_resource('instance')
