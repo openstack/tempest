@@ -33,30 +33,24 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     def test_security_group_rules_create(self):
         # Positive test: Creation of Security Group rule
         # should be successfull
-        try:
-            #Creating a Security Group to add rules to it
-            s_name = rand_name('securitygroup-')
-            s_description = rand_name('description-')
-            resp, securitygroup = \
-                self.client.create_security_group(s_name, s_description)
-            securitygroup_id = securitygroup['id']
-            #Adding rules to the created Security Group
-            parent_group_id = securitygroup['id']
-            ip_protocol = 'tcp'
-            from_port = 22
-            to_port = 22
-            resp, rule = \
-                self.client.create_security_group_rule(parent_group_id,
-                                                       ip_protocol,
-                                                       from_port,
-                                                       to_port)
-            self.assertEqual(200, resp.status)
-        finally:
-            #Deleting the Security Group rule, created in this method
-            group_rule_id = rule['id']
-            self.client.delete_security_group_rule(group_rule_id)
-            #Deleting the Security Group created in this method
-            resp, _ = self.client.delete_security_group(securitygroup_id)
+        #Creating a Security Group to add rules to it
+        s_name = rand_name('securitygroup-')
+        s_description = rand_name('description-')
+        resp, securitygroup = \
+            self.client.create_security_group(s_name, s_description)
+        securitygroup_id = securitygroup['id']
+        self.addCleanup(self.client.delete_security_group, securitygroup_id)
+        #Adding rules to the created Security Group
+        ip_protocol = 'tcp'
+        from_port = 22
+        to_port = 22
+        resp, rule = \
+            self.client.create_security_group_rule(securitygroup_id,
+                                                   ip_protocol,
+                                                   from_port,
+                                                   to_port)
+        self.addCleanup(self.client.delete_security_group_rule, rule['id'])
+        self.assertEqual(200, resp.status)
 
     @attr(type='positive')
     def test_security_group_rules_create_with_optional_arguments(self):
@@ -64,75 +58,38 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         # with optional arguments
         # should be successfull
 
-        rule_id = None
         secgroup1 = None
         secgroup2 = None
-        try:
-            #Creating a Security Group to add rules to it
-            s_name = rand_name('securitygroup-')
-            s_description = rand_name('description-')
-            resp, securitygroup = \
-                self.client.create_security_group(s_name, s_description)
-            secgroup1 = securitygroup['id']
-            #Creating a Security Group so as to assign group_id to the rule
-            s_name2 = rand_name('securitygroup-')
-            s_description2 = rand_name('description-')
-            resp, securitygroup = \
-                self.client.create_security_group(s_name2, s_description2)
-            secgroup2 = securitygroup['id']
-            #Adding rules to the created Security Group with optional arguments
-            parent_group_id = secgroup1
-            ip_protocol = 'tcp'
-            from_port = 22
-            to_port = 22
-            cidr = '10.2.3.124/24'
-            group_id = secgroup2
-            resp, rule = \
-                self.client.create_security_group_rule(parent_group_id,
-                                                       ip_protocol,
-                                                       from_port,
-                                                       to_port,
-                                                       cidr=cidr,
-                                                       group_id=group_id)
-            rule_id = rule['id']
-            self.assertEqual(200, resp.status)
-        finally:
-            #Deleting the Security Group rule, created in this method
-            if rule_id:
-                self.client.delete_security_group_rule(rule_id)
-            #Deleting the Security Groups created in this method
-            if secgroup1:
-                self.client.delete_security_group(secgroup1)
-            if secgroup2:
-                self.client.delete_security_group(secgroup2)
-
-    @attr(type='positive')
-    def test_security_group_rules_create_delete(self):
-        # Positive test: Deletion of Security Group rule
-        # should be successfull
-        try:
-            #Creating a Security Group to add rule to it
-            s_name = rand_name('securitygroup-')
-            s_description = rand_name('description-')
-            resp, securitygroup = \
-                self.client.create_security_group(s_name, s_description)
-            securitygroup_id = securitygroup['id']
-            #Adding rules to the created Security Group
-            parent_group_id = securitygroup['id']
-            ip_protocol = 'tcp'
-            from_port = 22
-            to_port = 22
-            resp, rule = \
-                self.client.create_security_group_rule(parent_group_id,
-                                                       ip_protocol,
-                                                       from_port,
-                                                       to_port)
-        finally:
-            #Deleting the Security Group rule, created in this method
-            group_rule_id = rule['id']
-            self.client.delete_security_group_rule(group_rule_id)
-            #Deleting the Security Group created in this method
-            resp, _ = self.client.delete_security_group(securitygroup_id)
+        #Creating a Security Group to add rules to it
+        s_name = rand_name('securitygroup-')
+        s_description = rand_name('description-')
+        resp, securitygroup = \
+            self.client.create_security_group(s_name, s_description)
+        secgroup1 = securitygroup['id']
+        self.addCleanup(self.client.delete_security_group, secgroup1)
+        #Creating a Security Group so as to assign group_id to the rule
+        s_name2 = rand_name('securitygroup-')
+        s_description2 = rand_name('description-')
+        resp, securitygroup = \
+            self.client.create_security_group(s_name2, s_description2)
+        secgroup2 = securitygroup['id']
+        self.addCleanup(self.client.delete_security_group, secgroup2)
+        #Adding rules to the created Security Group with optional arguments
+        parent_group_id = secgroup1
+        ip_protocol = 'tcp'
+        from_port = 22
+        to_port = 22
+        cidr = '10.2.3.124/24'
+        group_id = secgroup2
+        resp, rule = \
+            self.client.create_security_group_rule(parent_group_id,
+                                                   ip_protocol,
+                                                   from_port,
+                                                   to_port,
+                                                   cidr=cidr,
+                                                   group_id=group_id)
+        self.addCleanup(self.client.delete_security_group_rule, rule['id'])
+        self.assertEqual(200, resp.status)
 
     @attr(type='negative')
     def test_security_group_rules_create_with_invalid_id(self):
