@@ -29,17 +29,22 @@ class VolumesGetTest(base.BaseVolumeTest):
         super(VolumesGetTest, cls).setUpClass()
         cls.client = cls.volumes_client
 
-    @attr(type='smoke')
-    def test_volume_create_get_delete(self):
+    def _volume_create_get_delete(self, image_ref=None):
         # Create a volume, Get it's details and Delete the volume
         try:
             volume = {}
             v_name = rand_name('Volume-')
             metadata = {'Type': 'work'}
             #Create a volume
-            resp, volume = self.client.create_volume(size=1,
-                                                     display_name=v_name,
-                                                     metadata=metadata)
+            if not image_ref:
+                resp, volume = self.client.create_volume(size=1,
+                                                         display_name=v_name,
+                                                         metadata=metadata)
+            else:
+                resp, volume = self.client.create_volume(size=1,
+                                                         display_name=v_name,
+                                                         metadata=metadata,
+                                                         imageRef=image_ref)
             self.assertEqual(200, resp.status)
             self.assertTrue('id' in volume)
             self.assertTrue('display_name' in volume)
@@ -99,6 +104,14 @@ class VolumesGetTest(base.BaseVolumeTest):
                 resp, _ = self.client.delete_volume(volume['id'])
                 self.assertEqual(202, resp.status)
                 self.client.wait_for_resource_deletion(volume['id'])
+
+    @attr(type='smoke')
+    def test_volume_create_get_delete(self):
+        self._volume_create_get_delete(image_ref=None)
+
+    @attr(type='smoke')
+    def test_volume_from_image(self):
+        self._volume_create_get_delete(image_ref=self.config.compute.image_ref)
 
 
 class VolumesGetTestXML(VolumesGetTest):

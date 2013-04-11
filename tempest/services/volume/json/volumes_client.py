@@ -72,6 +72,7 @@ class VolumesClientJSON(RestClient):
         metadata: A dictionary of values to be used as metadata.
         volume_type: Optional Name of volume_type for the volume
         snapshot_id: When specified the volume is created from this snapshot
+        imageRef: When specified the volume is created from this image
         """
         post_body = {'size': size}
         post_body.update(kwargs)
