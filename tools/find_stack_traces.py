@@ -22,6 +22,46 @@ import StringIO
 import sys
 import urllib2
 
+import pprint
+pp = pprint.PrettyPrinter()
+
+NOVA_TIMESTAMP = r"\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d"
+
+NOVA_REGEX = r"(?P<timestamp>%s) (?P<pid>\d+ )?(?P<level>(ERROR|TRACE)) " \
+    "(?P<module>[\w\.]+) (?P<msg>.*)" % (NOVA_TIMESTAMP)
+
+
+class StackTrace(object):
+    timestamp = None
+    pid = None
+    level = ""
+    module = ""
+    msg = ""
+
+    def __init__(self, timestamp=None, pid=None, level="", module="",
+                 msg=""):
+        self.timestamp = timestamp
+        self.pid = pid
+        self.level = level
+        self.module = module
+        self.msg = msg
+
+    def append(self, msg):
+        self.msg = self.msg + msg
+
+    def is_same(self, data):
+        return (data['timestamp'] == self.timestamp and
+                data['level'] == self.level)
+
+    def not_none(self):
+        return self.timestamp is not None
+
+    def __str__(self):
+        buff = "<%s %s %s>\n" % (self.timestamp, self.level, self.module)
+        for line in self.msg.splitlines():
+            buff = buff + line + "\n"
+        return buff
+
 
 def hunt_for_stacktrace(url):
     """Return TRACE or ERROR lines out of logs."""
@@ -29,11 +69,33 @@ def hunt_for_stacktrace(url):
     buf = StringIO.StringIO(page.read())
     f = gzip.GzipFile(fileobj=buf)
     content = f.read()
-    traces = re.findall('^(.*? (TRACE|ERROR) .*?)$', content, re.MULTILINE)
-    tracelist = map(lambda x: x[0], traces)
-    # filter out log definitions as false possitives
-    return filter(lambda x: not re.search('logging_exception_prefix', x),
-                  tracelist)
+
+    traces = []
+    trace = StackTrace()
+    for line in content.splitlines():
+        m = re.match(NOVA_REGEX, line)
+        if m:
+            data = m.groupdict()
+            if trace.not_none() and trace.is_same(data):
+                trace.append(data['msg'] + "\n")
+            else:
+                trace = StackTrace(
+                    timestamp=data.get('timestamp'),
+                    pid=data.get('pid'),
+                    level=data.get('level'),
+                    module=data.get('module'),
+                    msg=data.get('msg'))
+
+        else:
+            if trace.not_none():
+                traces.append(trace)
+                trace = StackTrace()
+
+    # once more at the end to pick up any stragglers
+    if trace.not_none():
+        traces.append(trace)
+
+    return traces
 
 
 def log_url(url, log):
@@ -60,6 +122,18 @@ they are found.
     sys.exit(0)
 
 
+def print_stats(items, fname, verbose=False):
+    errors = len(filter(lambda x: x.level == "ERROR", items))
+    traces = len(filter(lambda x: x.level == "TRACE", items))
+    print "%d ERRORS found in %s" % (errors, fname)
+    print "%d TRACES found in %s" % (traces, fname)
+
+    if verbose:
+        for item in items:
+            print item
+        print "\n\n"
+
+
 def main():
     if len(sys.argv) == 2:
         url = sys.argv[1]
@@ -72,10 +146,10 @@ def main():
         for log in loglist:
             logurl = log_url(url, log)
             traces = hunt_for_stacktrace(logurl)
+
             if traces:
-                print "\n\nTRACES found in %s\n" % log
-                for line in traces:
-                    print line
+                print_stats(traces, log, verbose=True)
+
     else:
         usage()
 
