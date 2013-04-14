@@ -89,9 +89,9 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.addCleanup(container_client.delete_container, container_name)
         cont_headers = {'X-Container-Read': '.r:*'}
         resp, _ = container_client.update_container_metadata(
-                    container_name,
-                    metadata=cont_headers,
-                    metadata_prefix='')
+            container_name,
+            metadata=cont_headers,
+            metadata_prefix='')
         self.assertEqual(resp['status'], '204')
 
         data = "TESTIMAGE"
@@ -270,7 +270,7 @@ class ListImagesTest(base.BaseV1ImageTest):
     @attr(type='image')
     def test_index_name(self):
         resp, images_list = self.client.image_list_detail(
-                                                name='New Remote Image dup')
+            name='New Remote Image dup')
         self.assertEqual(resp['status'], '200')
         result_set = set(map(lambda x: x['id'], images_list))
         for image in images_list:

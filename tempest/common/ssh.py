@@ -117,8 +117,8 @@ class Client(object):
             ready = select.select(*select_params)
             if not any(ready):
                 raise exceptions.TimeoutException(
-                        "Command: '{0}' executed on host '{1}'.".format(
-                            cmd, self.host))
+                    "Command: '{0}' executed on host '{1}'.".format(
+                        cmd, self.host))
             if not ready[0]:        # If there is nothing to read.
                 continue
             out_chunk = err_chunk = None
@@ -133,8 +133,8 @@ class Client(object):
         exit_status = channel.recv_exit_status()
         if 0 != exit_status:
             raise exceptions.SSHExecCommandFailed(
-                    command=cmd, exit_status=exit_status,
-                    strerror=''.join(err_data))
+                command=cmd, exit_status=exit_status,
+                strerror=''.join(err_data))
         return ''.join(out_data)
 
     def test_connection_auth(self):

@@ -102,14 +102,14 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         # to a specific server should be successful
 
         #Association of floating IP to fixed IP address
-        resp, body =\
-        self.client.associate_floating_ip_to_server(self.floating_ip,
-                                                    self.server_id)
+        resp, body = self.client.associate_floating_ip_to_server(
+            self.floating_ip,
+            self.server_id)
         self.assertEqual(202, resp.status)
         #Disassociation of floating IP that was associated in this method
-        resp, body = \
-            self.client.disassociate_floating_ip_from_server(self.floating_ip,
-                                                             self.server_id)
+        resp, body = self.client.disassociate_floating_ip_from_server(
+            self.floating_ip,
+            self.server_id)
         self.assertEqual(202, resp.status)
 
     @attr(type='negative')
@@ -150,13 +150,13 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         self.new_server_id = body['id']
 
         #Associating floating IP for the first time
-        resp, _ = \
-        self.client.associate_floating_ip_to_server(self.floating_ip,
-                                                    self.server_id)
+        resp, _ = self.client.associate_floating_ip_to_server(
+            self.floating_ip,
+            self.server_id)
         #Associating floating IP for the second time
-        resp, body = \
-        self.client.associate_floating_ip_to_server(self.floating_ip,
-                                                    self.new_server_id)
+        resp, body = self.client.associate_floating_ip_to_server(
+            self.floating_ip,
+            self.new_server_id)
 
         self.addCleanup(self.servers_client.delete_server, self.new_server_id)
         if (resp['status'] is not None):

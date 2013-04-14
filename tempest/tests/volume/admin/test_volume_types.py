@@ -55,15 +55,15 @@ class VolumeTypesTest(BaseVolumeTest):
             extra_specs = {"storage_protocol": "iSCSI",
                            "vendor_name": "Open Source"}
             body = {}
-            resp, body = self.client.create_volume_type(vol_type_name,
-                                                        extra_specs=
-                                                        extra_specs)
+            resp, body = self.client.create_volume_type(
+                vol_type_name,
+                extra_specs=extra_specs)
             self.assertEqual(200, resp.status)
             self.assertTrue('id' in body)
             self.assertTrue('name' in body)
-            resp, volume = self.volumes_client.\
-            create_volume(size=1, display_name=vol_name,
-                          volume_type=vol_type_name)
+            resp, volume = self.volumes_client.create_volume(
+                size=1, display_name=vol_name,
+                volume_type=vol_type_name)
             self.assertEqual(200, resp.status)
             self.assertTrue('id' in volume)
             self.assertTrue('display_name' in volume)
@@ -74,8 +74,7 @@ class VolumeTypesTest(BaseVolumeTest):
                             "Field volume id is empty or not found.")
             self.volumes_client.wait_for_volume_status(volume['id'],
                                                        'available')
-            resp, fetched_volume = self.volumes_client.\
-            get_volume(volume['id'])
+            resp, fetched_volume = self.volumes_client.get_volume(volume['id'])
             self.assertEqual(200, resp.status)
             self.assertEqual(vol_name, fetched_volume['display_name'],
                              'The fetched Volume is different '
@@ -104,8 +103,9 @@ class VolumeTypesTest(BaseVolumeTest):
             name = rand_name("volume-type-")
             extra_specs = {"storage_protocol": "iSCSI",
                            "vendor_name": "Open Source"}
-            resp, body = self.client.\
-            create_volume_type(name, extra_specs=extra_specs)
+            resp, body = self.client.create_volume_type(
+                name,
+                extra_specs=extra_specs)
             self.assertEqual(200, resp.status)
             self.assertTrue('id' in body)
             self.assertTrue('name' in body)
@@ -114,8 +114,7 @@ class VolumeTypesTest(BaseVolumeTest):
                              "to the requested name")
             self.assertTrue(body['id'] is not None,
                             "Field volume_type id is empty or not found.")
-            resp, fetched_volume_type = self.client.\
-            delete_volume_type(body['id'])
+            resp, _ = self.client.delete_volume_type(body['id'])
             self.assertEqual(202, resp.status)
         except Exception:
             self.fail("Could not create a volume_type")
@@ -127,8 +126,9 @@ class VolumeTypesTest(BaseVolumeTest):
             name = rand_name("volume-type-")
             extra_specs = {"storage_protocol": "iSCSI",
                            "vendor_name": "Open Source"}
-            resp, body = self.client.\
-            create_volume_type(name, extra_specs=extra_specs)
+            resp, body = self.client.create_volume_type(
+                name,
+                extra_specs=extra_specs)
             self.assertEqual(200, resp.status)
             self.assertTrue('id' in body)
             self.assertTrue('name' in body)

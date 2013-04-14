@@ -96,7 +96,7 @@ class BotoClientBase(object):
                     ec2_cred.secret
             else:
                 raise exceptions.InvalidConfiguration(
-                                    "Unable to get access and secret keys")
+                    "Unable to get access and secret keys")
         return self.connect_method(**self.connection_data)
 
 

@@ -63,12 +63,12 @@ class S3ImagesTest(BotoTestCase):
                  "location": self.bucket_name + "/" + self.ami_manifest,
                  "type": "ami"}
         image["image_id"] = self.images_client.register_image(
-                            name=image["name"],
-                            image_location=image["location"])
+            name=image["name"],
+            image_location=image["location"])
         #Note(afazekas): delete_snapshot=True might trigger boto lib? bug
         image["cleanUp"] = self.addResourceCleanUp(
-                                self.images_client.deregister_image,
-                                image["image_id"])
+            self.images_client.deregister_image,
+            image["image_id"])
         self.assertEqual(image["image_id"][0:3], image["type"])
         retrieved_image = self.images_client.get_image(image["image_id"])
         self.assertTrue(retrieved_image.name == image["name"])
@@ -90,11 +90,11 @@ class S3ImagesTest(BotoTestCase):
                  "location": self.bucket_name + "/" + self.ari_manifest,
                  "type": "aki"}
         image["image_id"] = self.images_client.register_image(
-                            name=image["name"],
-                            image_location=image["location"])
+            name=image["name"],
+            image_location=image["location"])
         image["cleanUp"] = self.addResourceCleanUp(
-                                self.images_client.deregister_image,
-                                image["image_id"])
+            self.images_client.deregister_image,
+            image["image_id"])
         self.assertEqual(image["image_id"][0:3], image["type"])
         retrieved_image = self.images_client.get_image(image["image_id"])
         self.assertTrue(retrieved_image.name == image["name"])
@@ -115,11 +115,11 @@ class S3ImagesTest(BotoTestCase):
                  "location": "/" + self.bucket_name + "/" + self.ari_manifest,
                  "type": "ari"}
         image["image_id"] = self.images_client.register_image(
-                            name=image["name"],
-                            image_location=image["location"])
+            name=image["name"],
+            image_location=image["location"])
         image["cleanUp"] = self.addResourceCleanUp(
-                                self.images_client.deregister_image,
-                                image["image_id"])
+            self.images_client.deregister_image,
+            image["image_id"])
         self.assertEqual(image["image_id"][0:3], image["type"])
         retrieved_image = self.images_client.get_image(image["image_id"])
         self.assertIn(retrieved_image.state, self.valid_image_state)

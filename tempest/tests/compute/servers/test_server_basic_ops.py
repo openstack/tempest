@@ -78,7 +78,7 @@ class TestServerBasicOps(test.DefaultClientSmokeTest):
         for ruleset in rulesets:
             try:
                 self.compute_client.security_group_rules.create(
-                        self.secgroup.id, **ruleset)
+                    self.secgroup.id, **ruleset)
             except Exception:
                 self.fail("Failed to create rule in security group.")
 
@@ -90,7 +90,7 @@ class TestServerBasicOps(test.DefaultClientSmokeTest):
             'key_name': self.get_resource('keypair').id
         }
         self.instance = self.compute_client.servers.create(
-                i_name, base_image_id, flavor_id, **create_kwargs)
+            i_name, base_image_id, flavor_id, **create_kwargs)
         try:
             self.assertEqual(self.instance.name, i_name)
             self.set_resource('instance', self.instance)

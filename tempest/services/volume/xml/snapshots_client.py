@@ -93,7 +93,7 @@ class SnapshotsClientXML(RestClientXML):
         # state in a "normal" lifecycle
         if (status == 'error'):
             raise exceptions.SnapshotBuildErrorException(
-                    snapshot_id=snapshot_id)
+                snapshot_id=snapshot_id)
 
         return status
 

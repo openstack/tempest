@@ -59,7 +59,7 @@ class ContainerTest(base.BaseObjectTest):
         # Create a containers
         vers_container_name = rand_name(name='TestVersionContainer')
         resp, body = self.container_client.create_container(
-                                                        vers_container_name)
+            vers_container_name)
         self.containers.append(vers_container_name)
         self.assertIn(resp['status'], ('202', '201'))
         self.assertContainer(vers_container_name, '0', '0',
@@ -68,9 +68,9 @@ class ContainerTest(base.BaseObjectTest):
         base_container_name = rand_name(name='TestBaseContainer')
         headers = {'X-versions-Location': vers_container_name}
         resp, body = self.container_client.create_container(
-                                                        base_container_name,
-                                                        metadata=headers,
-                                                        metadata_prefix='')
+            base_container_name,
+            metadata=headers,
+            metadata_prefix='')
         self.containers.append(base_container_name)
         self.assertIn(resp['status'], ('202', '201'))
         self.assertContainer(base_container_name, '0', '0',

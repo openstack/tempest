@@ -92,9 +92,9 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
     def test_flavor_non_admin_get_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
         set_resp, set_body = self.client.set_flavor_extra_spec(
-                                                self.flavor['id'], specs)
+            self.flavor['id'], specs)
         resp, body = self.flavors_client.get_flavor_extra_spec(
-                                                            self.flavor['id'])
+            self.flavor['id'])
         self.assertEqual(resp.status, 200)
         for key in specs:
             self.assertEquals(body[key], specs[key])
@@ -103,7 +103,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
     def test_flavor_non_admin_unset_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
         set_resp, set_body = self.client.set_flavor_extra_spec(
-                                                self.flavor['id'], specs)
+            self.flavor['id'], specs)
 
         self.assertRaises(exceptions.Unauthorized,
                           self.flavors_client.unset_flavor_extra_spec,

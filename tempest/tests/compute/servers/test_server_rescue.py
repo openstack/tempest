@@ -43,25 +43,25 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         cls.sg_name = rand_name('sg')
         cls.sg_desc = rand_name('sg-desc')
         resp, cls.sg = \
-        cls.security_groups_client.create_security_group(cls.sg_name,
-                                                         cls.sg_desc)
+            cls.security_groups_client.create_security_group(cls.sg_name,
+                                                             cls.sg_desc)
         cls.sg_id = cls.sg['id']
 
         # Create a volume and wait for it to become ready for attach
         resp, cls.volume_to_attach = \
-        cls.volumes_extensions_client.create_volume(1,
-                                                    display_name=
-                                                    'test_attach')
+            cls.volumes_extensions_client.create_volume(1,
+                                                        display_name=
+                                                        'test_attach')
         cls.volumes_extensions_client.wait_for_volume_status(
-                cls.volume_to_attach['id'], 'available')
+            cls.volume_to_attach['id'], 'available')
 
         # Create a volume and wait for it to become ready for attach
         resp, cls.volume_to_detach = \
-        cls.volumes_extensions_client.create_volume(1,
-                                                    display_name=
-                                                    'test_detach')
+            cls.volumes_extensions_client.create_volume(1,
+                                                        display_name=
+                                                        'test_detach')
         cls.volumes_extensions_client.wait_for_volume_status(
-                cls.volume_to_detach['id'], 'available')
+            cls.volume_to_detach['id'], 'available')
 
         # Server for positive tests
         resp, server = cls.create_server(image_id=cls.image_ref,
@@ -93,8 +93,8 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         client = cls.volumes_extensions_client
         client.delete_volume(str(cls.volume_to_attach['id']).strip())
         client.delete_volume(str(cls.volume_to_detach['id']).strip())
-        resp, cls.sg = \
-        cls.security_groups_client.delete_security_group(cls.sg_id)
+        resp, cls.sg = cls.security_groups_client.delete_security_group(
+            cls.sg_id)
 
     def tearDown(self):
         super(ServerRescueTestJSON, self).tearDown()
@@ -155,7 +155,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                                           self.volume_to_detach['id'],
                                           device='/dev/%s' % self.device)
         self.volumes_extensions_client.wait_for_volume_status(
-                self.volume_to_detach['id'], 'in-use')
+            self.volume_to_detach['id'], 'in-use')
 
         # Rescue the server
         self.servers_client.rescue_server(self.server_id, self.password)
@@ -181,9 +181,8 @@ class ServerRescueTestJSON(base.BaseComputeTest):
 
         #Association of floating IP to a rescued vm
         client = self.floating_ips_client
-        resp, body =\
-        client.associate_floating_ip_to_server(self.floating_ip,
-                                               self.server_id)
+        resp, body = client.associate_floating_ip_to_server(self.floating_ip,
+                                                            self.server_id)
         self.assertEqual(202, resp.status)
 
         #Disassociation of floating IP that was associated in this method

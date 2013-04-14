@@ -124,7 +124,7 @@ class ContainerTest(base.BaseObjectTest):
 
         # List container metadata
         resp, _ = self.container_client.list_container_metadata(
-                                                            container_name)
+            container_name)
         self.assertEqual(resp['status'], '204')
         self.assertIn('x-container-meta-name', resp)
         self.assertIn('x-container-meta-description', resp)
@@ -132,10 +132,9 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-description'], 'Travel')
 
         # Delete container metadata
-        resp, _ = \
-            self.container_client.delete_container_metadata(
-                                                    container_name,
-                                                    metadata=metadata.keys())
+        resp, _ = self.container_client.delete_container_metadata(
+            container_name,
+            metadata=metadata.keys())
         self.assertEqual(resp['status'], '204')
 
         resp, _ = self.container_client.list_container_metadata(container_name)

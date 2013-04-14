@@ -55,9 +55,9 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
     def test_create_server_vcpu_quota_full(self):
         # Disallow server creation when tenant's vcpu quota is full
         quotas = self.meta.tables['quotas']
-        stmt = quotas.select().where(
-            quotas.c.project_id == self.tenant_id).where(
-            quotas.c.resource == 'cores')
+        stmt = (quotas.select().
+                where(quotas.c.project_id == self.tenant_id).
+                where(quotas.c.resource == 'cores'))
         result = self.connection.execute(stmt).first()
 
         # Set vcpu quota for tenant if not already set
@@ -87,9 +87,9 @@ class ServersWhiteboxTest(whitebox.ComputeWhiteboxTest):
     def test_create_server_memory_quota_full(self):
         # Disallow server creation when tenant's memory quota is full
         quotas = self.meta.tables['quotas']
-        stmt = quotas.select().where(
-            quotas.c.project_id == self.tenant_id).where(
-            quotas.c.resource == 'ram')
+        stmt = (quotas.select().
+                where(quotas.c.project_id == self.tenant_id).
+                where(quotas.c.resource == 'ram'))
         result = self.connection.execute(stmt).first()
 
         # Set memory quota for tenant if not already set
