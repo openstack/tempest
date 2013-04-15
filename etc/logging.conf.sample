@@ -1,0 +1,30 @@
+[loggers]
+keys=root
+
+[formatters]
+keys=normal,debug
+
+[handlers]
+keys=file,devel
+
+[logger_root]
+level=NOTSET
+handlers=file
+
+[handler_file]
+class=FileHandler
+level=DEBUG
+formatter=normal
+args=('tempest.log', 'w')
+
+[handler_devel]
+class=StreamHandler
+level=DEBUG
+formatter=debug
+args=(sys.stdout,)
+
+[formatter_normal]
+format=%(asctime)s %(levelname)s %(message)s
+
+[formatter_debug]
+format=%(asctime)s %(levelname)s %(module)s %(funcName)s %(message)s

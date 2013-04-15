@@ -17,6 +17,8 @@ function usage {
   echo "  -h, --help               Print this usage message"
   echo "  -d, --debug              Debug this script -- set -o xtrace"
   echo "  -S, --stdout             Don't capture stdout"
+  echo "  -l, --logging            Enable logging"
+  echo "  -L, --logging-config     Logging config file location.  Default is etc/logging.conf"
   echo "  -- [NOSEOPTIONS]         After the first '--' you can pass arbitrary arguments to nosetests "
 }
 
@@ -32,8 +34,10 @@ wrapper=""
 nova_coverage=0
 config_file=""
 update=0
+logging=0
+logging_config=etc/logging.conf
 
-if ! options=$(getopt -o VNnfuswcphdSC: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,nova-coverage,pep8,help,debug,stdout,config: -- "$@")
+if ! options=$(getopt -o VNnfuswcphdSC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,nova-coverage,pep8,help,debug,stdout,config:,logging,logging-config: -- "$@")
 then
     # parse error
     usage
@@ -57,6 +61,8 @@ while [ $# -gt 0 ]; do
     -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
     -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
     -S|--stdout) noseargs="$noseargs -s";;
+    -l|--logging) logging=1;;
+    -L|--logging-config) logging_config=$2; shift;;
     --) [ "yes" == "$first_uu" ] || noseargs="$noseargs $1"; first_uu=no  ;;
     *) noseargs="$noseargs $1"
   esac
@@ -77,6 +83,14 @@ export NOSE_OPENSTACK_RED=15.00
 export NOSE_OPENSTACK_YELLOW=3.00
 export NOSE_OPENSTACK_SHOW_ELAPSED=1
 export NOSE_OPENSTACK_STDOUT=1
+
+if [ $logging -eq 1 ]; then
+    if [ ! -f "$logging_config" ]; then
+        echo "No such logging config file: $logging_config"
+        exit
+    fi
+    noseargs="$noseargs --logging-config=$logging_config"
+fi
 
 if [ $no_site_packages -eq 1 ]; then
   installvenvopts="--no-site-packages"
