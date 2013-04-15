@@ -60,6 +60,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.volumes_extensions_client = os.volumes_extensions_client
         cls.volumes_client = os.volumes_client
         cls.interfaces_client = os.interfaces_client
+        cls.fixed_ips_client = os.fixed_ips_client
         cls.build_interval = cls.config.compute.build_interval
         cls.build_timeout = cls.config.compute.build_timeout
         cls.ssh_user = cls.config.compute.ssh_user

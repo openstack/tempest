@@ -77,6 +77,8 @@ from tempest.services.compute.json.interfaces_client import \
     InterfacesClientJSON
 from tempest.services.compute.xml.interfaces_client import \
     InterfacesClientXML
+from tempest.services.compute.json.fixed_ips_client import FixedIPsClientJSON
+from tempest.services.compute.xml.fixed_ips_client import FixedIPsClientXML
 
 LOG = logging.getLogger(__name__)
 
@@ -165,6 +167,11 @@ ENDPOINT_CLIENT = {
     "xml": EndPointClientXML,
 }
 
+FIXED_IPS_CLIENT = {
+    "json": FixedIPsClientJSON,
+    "xml": FixedIPsClientXML
+}
+
 
 class Manager(object):
 
@@ -228,6 +235,7 @@ class Manager(object):
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
             self.interfaces_client = INTERFACES_CLIENT[interface](*client_args)
             self.endpoints_client = ENDPOINT_CLIENT[interface](*client_args)
+            self.fixed_ips_client = FIXED_IPS_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
