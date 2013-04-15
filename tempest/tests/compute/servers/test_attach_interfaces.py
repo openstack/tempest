@@ -25,7 +25,7 @@ class AttachInterfacesTestJSON(base.BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         super(AttachInterfacesTestJSON, cls).setUpClass()
-        os = clients.Manager()
+        os = clients.Manager(interface=cls._interface)
         if not os.config.network.quantum_available:
             raise cls.skipException("Quantum is required")
         cls.client = os.interfaces_client
@@ -41,13 +41,18 @@ class AttachInterfacesTestJSON(base.BaseComputeTest):
             self.assertEqual(iface['fixed_ips'][0]['ip_address'], fixed_ip)
 
     def _create_server_get_interfaces(self):
-        server = self.create_server()
+        resp, server = self.create_server()
         self.os.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         resp, ifs = self.client.list_interfaces(server['id'])
+        resp, body = self.client.wait_for_interface_status(
+            server['id'], ifs[0]['port_id'], 'ACTIVE')
+        ifs[0]['port_state'] = body['port_state']
         return server, ifs
 
     def _test_create_interface(self, server):
         resp, iface = self.client.create_interface(server['id'])
+        resp, iface = self.client.wait_for_interface_status(
+            server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface)
         return iface
 
@@ -55,6 +60,8 @@ class AttachInterfacesTestJSON(base.BaseComputeTest):
         network_id = ifs[0]['net_id']
         resp, iface = self.client.create_interface(server['id'],
                                                    network_id=network_id)
+        resp, iface = self.client.wait_for_interface_status(
+            server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, network_id=network_id)
         return iface
 
