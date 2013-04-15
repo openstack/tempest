@@ -63,12 +63,10 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set.copy()
         expected_quota_set['id'] = self.demo_tenant_id
-        try:
-            resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-            self.assertEqual(200, resp.status)
-            self.assertEqual(expected_quota_set, quota_set)
-        except Exception:
-            self.fail("Admin could not get the default quota set for a tenant")
+        resp, quota_set = self.client.get_default_quota_set(
+            self.demo_tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(expected_quota_set, quota_set)
 
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
