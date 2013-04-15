@@ -117,6 +117,26 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(resp['status'], '200')
         self.assertEqual(body, data)
 
+    @attr(type='image')
+    def test_register_image_with_min_ram(self):
+        # Register an image with min ram
+        properties = {'prop1': 'val1'}
+        resp, body = self.create_image(name='New_image_with_min_ram',
+                                       container_format='bare',
+                                       disk_format='raw',
+                                       is_public=True,
+                                       min_ram=40,
+                                       properties=properties)
+        self.assertTrue('id' in body)
+        image_id = body.get('id')
+        self.created_images.append(image_id)
+        self.assertEqual('New_image_with_min_ram', body.get('name'))
+        self.assertTrue(body.get('is_public'))
+        self.assertEqual('queued', body.get('status'))
+        self.assertEqual(40, body.get('min_ram'))
+        for key, val in properties.items():
+            self.assertEqual(val, body.get('properties')[key])
+
 
 class ListImagesTest(base.BaseV1ImageTest):
 

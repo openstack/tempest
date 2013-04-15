@@ -139,7 +139,8 @@ class ImageClientJSON(RestClient):
 
         headers = {}
 
-        for option in ['is_public', 'location', 'properties', 'copy_from']:
+        for option in ['is_public', 'location', 'properties',
+                       'copy_from', 'min_ram']:
             if option in kwargs:
                 params[option] = kwargs.get(option)
 
