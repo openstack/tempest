@@ -20,6 +20,8 @@ import logging
 from tempest import config
 from tempest import exceptions
 from tempest.services import botoclients
+from tempest.services.compute.json.availability_zone_client import \
+    AvailabilityZoneClientJSON
 from tempest.services.compute.json.extensions_client import \
     ExtensionsClientJSON
 from tempest.services.compute.json.flavors_client import FlavorsClientJSON
@@ -35,6 +37,8 @@ from tempest.services.compute.json.security_groups_client import \
 from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
+from tempest.services.compute.xml.availability_zone_client import \
+    AvailabilityZoneClientXML
 from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
 from tempest.services.compute.xml.flavors_client import FlavorsClientXML
 from tempest.services.compute.xml.floating_ips_client import \
@@ -157,6 +161,11 @@ INTERFACES_CLIENT = {
     "xml": InterfacesClientXML,
 }
 
+AVAILABILITY_ZONE_CLIENT = {
+    "json": AvailabilityZoneClientJSON,
+    "xml": AvailabilityZoneClientXML,
+}
+
 
 class Manager(object):
 
@@ -219,6 +228,8 @@ class Manager(object):
             self.security_groups_client = \
                 SECURITY_GROUPS_CLIENT[interface](*client_args)
             self.interfaces_client = INTERFACES_CLIENT[interface](*client_args)
+            self.availability_zone_client = \
+                AVAILABILITY_ZONE_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
