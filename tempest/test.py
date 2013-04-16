@@ -56,6 +56,11 @@ class BaseTestCase(testtools.TestCase,
         #NOTE(afazekas): inspection workaround
         BaseTestCase.config = config.TempestConfig()
 
+    @classmethod
+    def setUpClass(cls):
+        if hasattr(super(BaseTestCase, cls), 'setUpClass'):
+            super(BaseTestCase, cls).setUpClass()
+
 
 class TestCase(BaseTestCase):
     """Base test case class for all Tempest tests
