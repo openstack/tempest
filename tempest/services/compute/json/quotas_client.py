@@ -43,7 +43,8 @@ class QuotasClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['quota_set']
 
-    def update_quota_set(self, tenant_id, injected_file_content_bytes=None,
+    def update_quota_set(self, tenant_id, force=None,
+                         injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
                          fixed_ips=None, key_pairs=None, instances=None,
                          security_group_rules=None, injected_files=None,
@@ -53,6 +54,9 @@ class QuotasClientJSON(RestClient):
         Updates the tenant's quota limits for one or more resources
         """
         post_body = {}
+
+        if force is not None:
+            post_body['force'] = force
 
         if injected_file_content_bytes is not None:
             post_body['injected_file_content_bytes'] = \

@@ -69,8 +69,13 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(expected_quota_set, quota_set)
 
     def test_update_all_quota_resources_for_tenant(self):
+        self.skipTest("This test require the change in nova component "
+                      "https://review.openstack.org/#/c/25887/, the related "
+                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
+                      "once the change is merged I will enable this testcase")
         # Admin can update all the resource quota limits for a tenant
-        new_quota_set = {'injected_file_content_bytes': 20480,
+        new_quota_set = {'force': True,
+                         'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,
                          'ram': 10240, 'floating_ips': 20, 'fixed_ips': 10,
                          'key_pairs': 200, 'injected_file_path_bytes': 512,
@@ -117,12 +122,17 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                              "defaults")
 
     def test_create_server_when_cpu_quota_is_full(self):
+        self.skipTest("This test require the change in nova component "
+                      "https://review.openstack.org/#/c/25887/, the related "
+                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
+                      "once the change is merged I will enable this testcase")
         # Disallow server creation when tenant's vcpu quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_vcpu_quota = quota_set['cores']
         vcpu_quota = 0  # Set the quota to zero to conserve resources
 
         resp, quota_set = self.adm_client.update_quota_set(self.demo_tenant_id,
+                                                           force=True,
                                                            cores=vcpu_quota)
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
@@ -130,12 +140,17 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
     def test_create_server_when_memory_quota_is_full(self):
+        self.skipTest("This test require the change in nova component "
+                      "https://review.openstack.org/#/c/25887/, the related "
+                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
+                      "once the change is merged I will enable this testcase")
         # Disallow server creation when tenant's memory quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_mem_quota = quota_set['ram']
         mem_quota = 0  # Set the quota to zero to conserve resources
 
         self.adm_client.update_quota_set(self.demo_tenant_id,
+                                         force=True,
                                          ram=mem_quota)
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
@@ -146,12 +161,17 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='negative')
     def test_create_server_when_instances_quota_is_full(self):
+        self.skipTest("This test require the change in nova component "
+                      "https://review.openstack.org/#/c/25887/, the related "
+                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
+                      "once the change is merged I will enable this testcase")
         #Once instances quota limit is reached, disallow server creation
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_instances_quota = quota_set['instances']
         instances_quota = 0  # Set quota to zero to disallow server creation
 
         self.adm_client.update_quota_set(self.demo_tenant_id,
+                                         force=True,
                                          instances=instances_quota)
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
