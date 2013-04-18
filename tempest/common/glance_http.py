@@ -19,7 +19,6 @@ import copy
 import hashlib
 import httplib
 import json
-import logging
 import posixpath
 import re
 import socket
@@ -35,6 +34,7 @@ if not hasattr(urlparse, 'parse_qsl'):
 
 import OpenSSL
 
+from tempest.common import log as logging
 from tempest import exceptions as exc
 
 

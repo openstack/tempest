@@ -75,6 +75,16 @@ if [ -n "$config_file" ]; then
     export TEMPEST_CONFIG=`basename "$config_file"`
 fi
 
+if [ $logging -eq 1 ]; then
+    if [ ! -f "$logging_config" ]; then
+        echo "No such logging config file: $logging_config"
+        exit 1
+    fi
+    logging_config=`readlink -f "$logging_config"`
+    export TEMPEST_LOG_CONFIG_DIR=`dirname "$logging_config"`
+    export TEMPEST_LOG_CONFIG=`basename "$logging_config"`
+fi
+
 cd `dirname "$0"`
 
 export NOSE_WITH_OPENSTACK=1
@@ -83,14 +93,6 @@ export NOSE_OPENSTACK_RED=15.00
 export NOSE_OPENSTACK_YELLOW=3.00
 export NOSE_OPENSTACK_SHOW_ELAPSED=1
 export NOSE_OPENSTACK_STDOUT=1
-
-if [ $logging -eq 1 ]; then
-    if [ ! -f "$logging_config" ]; then
-        echo "No such logging config file: $logging_config"
-        exit
-    fi
-    noseargs="$noseargs --logging-config=$logging_config"
-fi
 
 if [ $no_site_packages -eq 1 ]; then
   installvenvopts="--no-site-packages"

@@ -15,11 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import time
 
 from tempest.api import compute
 from tempest import clients
+from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 import tempest.test

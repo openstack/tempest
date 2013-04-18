@@ -15,13 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import re
 import time
 
 import boto.exception
 from testtools import TestCase
 
+from tempest.common import log as logging
 import tempest.config
 
 LOG = logging.getLogger(__name__)

@@ -12,12 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import time
 import urllib
 
 from lxml import etree
 
+from tempest.common import log as logging
 from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
