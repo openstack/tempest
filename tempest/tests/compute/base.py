@@ -63,6 +63,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.fixed_ips_client = os.fixed_ips_client
         cls.availability_zone_client = os.availability_zone_client
         cls.aggregates_client = os.aggregates_client
+        cls.services_client = os.services_client
         cls.build_interval = cls.config.compute.build_interval
         cls.build_timeout = cls.config.compute.build_timeout
         cls.ssh_user = cls.config.compute.ssh_user

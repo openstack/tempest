@@ -40,6 +40,7 @@ from tempest.services.compute.json.quotas_client import QuotasClientJSON
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
+from tempest.services.compute.json.services_client import ServicesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
 from tempest.services.compute.xml.aggregates_client import AggregatesClientXML
@@ -59,6 +60,7 @@ from tempest.services.compute.xml.quotas_client import QuotasClientXML
 from tempest.services.compute.xml.security_groups_client \
     import SecurityGroupsClientXML
 from tempest.services.compute.xml.servers_client import ServersClientXML
+from tempest.services.compute.xml.services_client import ServicesClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
 from tempest.services.identity.json.identity_client import IdentityClientJSON
@@ -209,6 +211,11 @@ AGGREGATES_CLIENT = {
     "xml": AggregatesClientXML,
 }
 
+SERVICES_CLIENT = {
+    "json": ServicesClientJSON,
+    "xml": ServicesClientXML,
+}
+
 
 class Manager(object):
 
@@ -279,6 +286,7 @@ class Manager(object):
                 AVAILABILITY_ZONE_CLIENT[interface](*client_args)
             self.service_client = SERVICE_CLIENT[interface](*client_args)
             self.aggregates_client = AGGREGATES_CLIENT[interface](*client_args)
+            self.services_client = SERVICES_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
