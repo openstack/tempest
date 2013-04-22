@@ -24,11 +24,14 @@ from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
 from tempest.services.compute.json.extensions_client import \
     ExtensionsClientJSON
+from tempest.services.compute.json.fixed_ips_client import FixedIPsClientJSON
 from tempest.services.compute.json.flavors_client import FlavorsClientJSON
 from tempest.services.compute.json.floating_ips_client import \
     FloatingIPsClientJSON
 from tempest.services.compute.json.hosts_client import HostsClientJSON
 from tempest.services.compute.json.images_client import ImagesClientJSON
+from tempest.services.compute.json.interfaces_client import \
+    InterfacesClientJSON
 from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.limits_client import LimitsClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClientJSON
@@ -38,10 +41,13 @@ from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
 from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
+from tempest.services.compute.xml.fixed_ips_client import FixedIPsClientXML
 from tempest.services.compute.xml.flavors_client import FlavorsClientXML
 from tempest.services.compute.xml.floating_ips_client import \
     FloatingIPsClientXML
 from tempest.services.compute.xml.images_client import ImagesClientXML
+from tempest.services.compute.xml.interfaces_client import \
+    InterfacesClientXML
 from tempest.services.compute.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.compute.xml.limits_client import LimitsClientXML
 from tempest.services.compute.xml.quotas_client import QuotasClientXML
@@ -50,10 +56,10 @@ from tempest.services.compute.xml.security_groups_client \
 from tempest.services.compute.xml.servers_client import ServersClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
-from tempest.services.identity.v3.json.endpoints_client import \
-    EndPointClientJSON
 from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
+from tempest.services.identity.v3.json.endpoints_client import \
+    EndPointClientJSON
 from tempest.services.identity.v3.xml.endpoints_client import EndPointClientXML
 from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
@@ -75,12 +81,6 @@ from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
 from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
-from tempest.services.compute.json.interfaces_client import \
-    InterfacesClientJSON
-from tempest.services.compute.xml.interfaces_client import \
-    InterfacesClientXML
-from tempest.services.compute.json.fixed_ips_client import FixedIPsClientJSON
-from tempest.services.compute.xml.fixed_ips_client import FixedIPsClientXML
 
 LOG = logging.getLogger(__name__)
 

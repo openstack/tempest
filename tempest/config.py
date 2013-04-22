@@ -420,6 +420,9 @@ class TempestConfig:
 
     def __init__(self):
         """Initialize a configuration from a conf directory and conf file."""
+        config_files = []
+
+        failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
 
         # Environment variables override defaults...
         conf_dir = os.environ.get('TEMPEST_CONFIG_DIR',
@@ -431,16 +434,17 @@ class TempestConfig:
         if not (os.path.isfile(path) or
                 'TEMPEST_CONFIG_DIR' in os.environ or
                 'TEMPEST_CONFIG' in os.environ):
-            path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
+            path = failsafe_path
 
         LOG.info("Using tempest config file %s" % path)
 
         if not os.path.exists(path):
             msg = "Config file %(path)s not found" % locals()
             print >> sys.stderr, RuntimeError(msg)
-            sys.exit(os.EX_NOINPUT)
+        else:
+            config_files.append(path)
 
-        cfg.CONF([], project='tempest', default_config_files=[path])
+        cfg.CONF([], project='tempest', default_config_files=config_files)
 
         register_compute_opts(cfg.CONF)
         register_identity_opts(cfg.CONF)

@@ -1,5 +1,4 @@
-pep8==1.3.3
-pylint==0.19
+flake8
+hacking
 #TODO(afazekas): ensure pg_config installed
 psycopg2
-pyflakes
