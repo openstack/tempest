@@ -27,13 +27,14 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
     Tests Aggregates API that require admin privileges
     """
 
+    _host_key = 'OS-EXT-SRV-ATTR:host'
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
         super(AggregatesAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.aggregates_client
-        cls.user_client = cls.os.aggregates_client
+        cls.user_client = cls.aggregates_client
         cls.aggregate_name_prefix = 'test_aggregate_'
         cls.az_name_prefix = 'test_az_'
 
@@ -212,7 +213,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                                           availability_zone=az_name)
         servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         resp, body = admin_servers_client.get_server(server['id'])
-        self.assertEqual(self.host, body['OS-EXT-SRV-ATTR:host'])
+        self.assertEqual(self.host, body[self._host_key])
 
     @attr(type='negative')
     def test_aggregate_add_non_exist_host(self):
@@ -254,3 +255,9 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertRaises(exceptions.Unauthorized,
                           self.user_client.remove_host,
                           aggregate['id'], self.host)
+
+
+class AggregatesAdminTestXML(AggregatesAdminTestJSON):
+    _host_key = (
+        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
+    _interface = 'xml'
