@@ -390,3 +390,17 @@ class ServersClientJSON(RestClient):
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
         return self.action(server_id, 'unrescue', None)
+
+    def list_instance_actions(self, server_id):
+        """List the provided server action."""
+        resp, body = self.get("servers/%s/os-instance-actions" %
+                              str(server_id))
+        body = json.loads(body)
+        return resp, body['instanceActions']
+
+    def get_instance_action(self, server_id, request_id):
+        """Returns the action details of the provided server."""
+        resp, body = self.get("servers/%s/os-instance-actions/%s" %
+                              (str(server_id), str(request_id)))
+        body = json.loads(body)
+        return resp, body['instanceAction']
