@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-flake8 --ignore=E122,E125,E126,H302,H304,H404,F --show-source --exclude=.git,.venv,.tox,dist,doc,openstack,*egg .
+flake8 --ignore=E125,H302,H304,H404,F --show-source --exclude=.git,.venv,.tox,dist,doc,openstack,*egg .
 pep8_ret=$?
 
 pyflakes tempest stress setup.py tools cli bin | grep "imported but unused"

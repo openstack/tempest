@@ -57,7 +57,7 @@ class TestServerAdvancedOps(test.DefaultClientSmokeTest):
         flavor_id = self.config.compute.flavor_ref
         base_image_id = self.config.compute.image_ref
         self.instance = self.compute_client.servers.create(
-                i_name, base_image_id, flavor_id)
+            i_name, base_image_id, flavor_id)
         try:
             self.assertEqual(self.instance.name, i_name)
             self.set_resource('instance', self.instance)

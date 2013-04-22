@@ -165,7 +165,7 @@ def main(argv):
             resp, body = coverage_client.report_coverage_xml(file=CLI.filename)
         elif CLI.html:
             resp, body = coverage_client.report_coverage_html(
-                                                            file=CLI.filename)
+                file=CLI.filename)
         else:
             resp, body = coverage_client.report_coverage(file=CLI.filename)
         if not resp['status'] == '200':

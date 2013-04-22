@@ -261,7 +261,7 @@ def bash_openstack(manager,
         state.delete_instance_state(kill_id)
     for floating_ip_state in state.get_floating_ips():
         manager.floating_ips_client.delete_floating_ip(
-                                            floating_ip_state.resource_id)
+            floating_ip_state.resource_id)
     for keypair_state in state.get_keypairs():
         manager.keypairs_client.delete_keypair(keypair_state.name)
     for volume_state in state.get_volumes():

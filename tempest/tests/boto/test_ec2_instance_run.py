@@ -73,8 +73,8 @@ class InstanceRunTest(BotoTestCase):
                        "location": cls.bucket_name + "/" + ari_manifest}}
         for image in cls.images.itervalues():
             image["image_id"] = cls.ec2_client.register_image(
-                                name=image["name"],
-                                image_location=image["location"])
+                name=image["name"],
+                image_location=image["location"])
             cls.addResourceCleanUp(cls.ec2_client.deregister_image,
                                    image["image_id"])
 
@@ -151,13 +151,15 @@ class InstanceRunTest(BotoTestCase):
                                                                group_desc)
         self.addResourceCleanUp(self.destroy_security_group_wait,
                                 security_group)
-        self.assertTrue(self.ec2_client.authorize_security_group(
+        self.assertTrue(
+            self.ec2_client.authorize_security_group(
                 sec_group_name,
                 ip_protocol="icmp",
                 cidr_ip="0.0.0.0/0",
                 from_port=-1,
                 to_port=-1))
-        self.assertTrue(self.ec2_client.authorize_security_group(
+        self.assertTrue(
+            self.ec2_client.authorize_security_group(
                 sec_group_name,
                 ip_protocol="tcp",
                 cidr_ip="0.0.0.0/0",

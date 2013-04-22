@@ -31,8 +31,8 @@ class SecurityGroupsClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
         super(SecurityGroupsClientXML, self).__init__(
-                                        config, username, password,
-                                        auth_url, tenant_name)
+            config, username, password,
+            auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
     def _parse_array(self, node):

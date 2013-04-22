@@ -111,7 +111,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
             image_id = cls.image_ref
 
         resp, server = cls.servers_client.create_server(
-                                                server_name, image_id, flavor)
+            server_name, image_id, flavor)
         cls.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         cls.servers.append(server)
         return server

@@ -443,7 +443,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 return "_GONE"
             except exception.EC2ResponseError as exc:
                 if cls.ec2_error_code.\
-                client.InvalidInstanceID.NotFound.match(exc):
+                        client.InvalidInstanceID.NotFound.match(exc):
                     return "_GONE"
                 #NOTE(afazekas): incorrect code,
                 # but the resource must be destoreyd

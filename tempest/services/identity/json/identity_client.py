@@ -152,7 +152,7 @@ class IdentityClientJSON(RestClient):
     def enable_disable_user(self, user_id, enabled):
         """Enables or disables a user."""
         put_body = {
-                'enabled': enabled
+            'enabled': enabled
         }
         put_body = json.dumps({'user': put_body})
         resp, body = self.put('users/%s/enabled' % user_id,
