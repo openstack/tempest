@@ -130,6 +130,11 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertEqual(original_image['minRam'], image['minRam'])
         self.assertEqual(original_image['minDisk'], image['minDisk'])
 
+        # Verify the image was deleted correctly
+        resp, body = self.client.delete_image(image_id)
+        self.assertEqual('204', resp['status'])
+        self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
+
     @attr(type='negative')
     @testtools.skipUnless(compute.MULTI_USER,
                           'Need multiple users for this test.')
