@@ -72,7 +72,6 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                           snapshot_name)
 
     @attr(type='negative')
-    @testtools.skip("Until Bug #1005423 is fixed")
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
         snapshot_name = rand_name('test-snap-')
@@ -81,12 +80,11 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                           self.server['id'], snapshot_name, meta)
 
     @attr(type='negative')
-    @testtools.skip("Until Bug #1005423 is fixed")
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
         snapshot_name = rand_name('test-snap-')
         meta = {'a' * 260: 'b' * 260}
-        self.assertRaises(exceptions.OverLimit, self.client.create_image,
+        self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server['id'], snapshot_name, meta)
 
     @attr(type='negative')
