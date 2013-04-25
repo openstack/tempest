@@ -87,6 +87,15 @@ class ClientTestBase(tempest.test.BaseTestCase):
         flags = creds + ' ' + flags
         return self.cmd(cmd, action, flags, params, fail_ok)
 
+    def check_output(self, cmd, **kwargs):
+        # substitutes subprocess.check_output which is not in python2.6
+        kwargs['stdout'] = subprocess.PIPE
+        proc = subprocess.Popen(cmd, **kwargs)
+        output = proc.communicate()[0]
+        if proc.returncode != 0:
+            raise CommandFailed(proc.returncode, cmd, output)
+        return output
+
     def cmd(self, cmd, action, flags='', params='', fail_ok=False,
             merge_stderr=False):
         """Executes specified command for the given action."""
@@ -96,10 +105,10 @@ class ClientTestBase(tempest.test.BaseTestCase):
         cmd = shlex.split(cmd)
         try:
             if merge_stderr:
-                result = subprocess.check_output(cmd, stderr=subprocess.STDOUT)
+                result = self.check_output(cmd, stderr=subprocess.STDOUT)
             else:
-                devnull = open('/dev/null', 'w')
-                result = subprocess.check_output(cmd, stderr=devnull)
+                with open('/dev/null', 'w') as devnull:
+                    result = self.check_output(cmd, stderr=devnull)
         except subprocess.CalledProcessError, e:
             LOG.error("command output:\n%s" % e.output)
             raise
@@ -110,3 +119,10 @@ class ClientTestBase(tempest.test.BaseTestCase):
         for item in items:
             for field in field_names:
                 self.assertIn(field, item)
+
+
+class CommandFailed(subprocess.CalledProcessError):
+    # adds output attribute for python2.6
+    def __init__(self, returncode, cmd, output):
+        super(CommandFailed, self).__init__(returncode, cmd)
+        self.output = output
