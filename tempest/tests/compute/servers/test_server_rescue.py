@@ -15,8 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.common.utils.data_utils import rand_name
 import tempest.config
 from tempest import exceptions
@@ -192,8 +190,12 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.assertEqual(202, resp.status)
 
     @attr(type='positive')
-    @testtools.skip("Skipped until Bug #1126257 is resolved")
     def test_rescued_vm_add_remove_security_group(self):
+        # Rescue the server
+        self.servers_client.rescue_server(
+            self.server_id, self.password)
+        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+
         #Add Security group
         resp, body = self.servers_client.add_security_group(self.server_id,
                                                             self.sg_name)
@@ -201,7 +203,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
 
         #Delete Security group
         resp, body = self.servers_client.remove_security_group(self.server_id,
-                                                               self.sg_id)
+                                                               self.sg_name)
         self.assertEqual(202, resp.status)
 
         # Unrescue the server
