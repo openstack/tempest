@@ -48,7 +48,7 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
         created_servers = self._get_created_servers(kwargs['name'])
         # NOTE(maurosr): append it to cls.servers list from base.BaseCompute
         # class.
-        self.servers.append(created_servers)
+        self.servers.extend(created_servers)
         # NOTE(maurosr): get a server list, check status of the ones with names
         # that match and wait for them become active. At a first look, since
         # they are building in parallel, wait inside the for doesn't seem be
