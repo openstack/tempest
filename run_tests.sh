@@ -109,7 +109,7 @@ function run_tests {
 
 function run_pep8 {
   echo "Running pep8 ..."
-  ${wrapper} tools/check_source.sh
+  ${wrapper} flake8
 }
 
 function run_coverage_start {

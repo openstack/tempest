@@ -15,24 +15,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from contextlib import closing
+import contextlib
 import logging
 import os
 import re
 
 import boto
-from boto.s3.key import Key
+import boto.s3.key
 
 LOG = logging.getLogger(__name__)
 
 
 def s3_upload_dir(bucket, path, prefix="", connection_data=None):
     if isinstance(bucket, basestring):
-        with closing(boto.connect_s3(**connection_data)) as conn:
+        with contextlib.closing(boto.connect_s3(**connection_data)) as conn:
             bucket = conn.lookup(bucket)
     for root, dirs, files in os.walk(path):
         for fil in files:
-            with closing(Key(bucket)) as key:
+            with contextlib.closing(boto.s3.key.Key(bucket)) as key:
                 source = root + os.sep + fil
                 target = re.sub("^" + re.escape(path) + "?/", prefix, source)
                 if os.sep != '/':

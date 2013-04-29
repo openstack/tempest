@@ -16,7 +16,7 @@
 #    under the License.
 
 
-from cStringIO import StringIO
+import cStringIO
 import select
 import socket
 import time
@@ -28,7 +28,6 @@ from tempest import exceptions
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import paramiko
-    from paramiko import RSAKey
 
 
 class Client(object):
@@ -39,7 +38,8 @@ class Client(object):
         self.username = username
         self.password = password
         if isinstance(pkey, basestring):
-            pkey = RSAKey.from_private_key(StringIO(str(pkey)))
+            pkey = paramiko.RSAKey.from_private_key(
+                cStringIO.StringIO(str(pkey)))
         self.pkey = pkey
         self.look_for_keys = look_for_keys
         self.key_filename = key_filename

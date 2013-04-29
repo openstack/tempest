@@ -19,10 +19,10 @@ actions veriy that the API call was successful or not."""
 
 import random
 
-import pending_action
+from stress import pending_action
+from stress import test_case
 import stress.utils
 from tempest.exceptions import Duplicate
-import test_case
 
 
 class TestRebootVM(test_case.StressTestCase):

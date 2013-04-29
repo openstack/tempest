@@ -125,7 +125,6 @@ class TestNetworkSmokeCommon(test.DefaultClientSmokeTest):
     @classmethod
     def setUpClass(cls):
         super(TestNetworkSmokeCommon, cls).setUpClass()
-        cfg = cls.config.network
         cls.tenant_id = cls.manager._get_identity_client(
             cls.config.identity.username,
             cls.config.identity.password,
@@ -246,10 +245,7 @@ class TestNetworkSmokeCommon(test.DefaultClientSmokeTest):
             port=dict(name=name,
                       network_id=network.id,
                       tenant_id=network.tenant_id))
-        try:
-            result = self.network_client.create_port(body=body)
-        except Exception as e:
-            raise
+        result = self.network_client.create_port(body=body)
         self.assertIsNotNone(result, 'Unable to allocate port')
         port = DeletablePort(client=self.network_client,
                              **result['port'])

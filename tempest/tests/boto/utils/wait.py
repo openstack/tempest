@@ -19,7 +19,7 @@ import logging
 import re
 import time
 
-from boto.exception import BotoServerError
+import boto.exception
 from testtools import TestCase
 
 import tempest.config
@@ -87,7 +87,7 @@ def wait_no_exception(lfunction, exc_class=None, exc_matcher=None):
     """Stops waiting on success."""
     start_time = time.time()
     if exc_matcher is not None:
-        exc_class = BotoServerError
+        exc_class = boto.exception.BotoServerError
 
     if exc_class is None:
         exc_class = BaseException

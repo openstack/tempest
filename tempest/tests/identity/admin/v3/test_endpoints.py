@@ -126,7 +126,6 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
                                                 description=s_description)
         self.service_ids.append(self.service2['id'])
         #Updating endpoint with new values
-        service_id = self.service2['id']
         region2 = rand_name('region')
         url2 = rand_name('url')
         interface2 = 'internal'

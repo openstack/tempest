@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from contextlib import closing
+import contextlib
 import logging
 import os
 import re
@@ -413,7 +413,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
         """Destroys the bucket and its content, just for teardown."""
         exc_num = 0
         try:
-            with closing(boto.connect_s3(**connection_data)) as conn:
+            with contextlib.closing(
+                    boto.connect_s3(**connection_data)) as conn:
                 if isinstance(bucket, basestring):
                     bucket = conn.lookup(bucket)
                     assert isinstance(bucket, s3.bucket.Bucket)

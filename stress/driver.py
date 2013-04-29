@@ -18,7 +18,7 @@ to the bash_openstack function call"""
 import datetime
 import random
 import time
-from urlparse import urlparse
+import urlparse
 
 from config import StressConfig
 from state import ClusterState
@@ -174,7 +174,7 @@ def bash_openstack(manager,
     keypath = stress_config.host_private_key_path
     user = stress_config.host_admin_user
     logdir = stress_config.nova_logdir
-    host = urlparse(manager.config.identity.uri).hostname
+    host = urlparse.urlparse(manager.config.identity.uri).hostname
     computes = _get_compute_nodes(keypath, user, host)
     stress.utils.execute_on_all(keypath, user, computes,
                                 "rm -f %s/*.log" % logdir)

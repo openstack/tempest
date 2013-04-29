@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.object_storage import base
 import testtools
-from time import time
+import time
 
 
 class ObjectTest(base.BaseObjectTest):
@@ -617,7 +617,7 @@ class ObjectTest(base.BaseObjectTest):
             self.object_client.create_object(self.container_name,
                                              object_name, data)
 
-            expires = int(time() + 10)
+            expires = int(time.time() + 10)
 
             #Trying to GET object using temp URL with in expiry time
             _, body = self.object_client.get_object_using_temp_url(

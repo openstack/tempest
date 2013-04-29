@@ -15,9 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from contextlib import closing
+import contextlib
 
-from boto.s3.key import Key
+import boto.s3.key
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -46,7 +46,7 @@ class S3BucketsTest(BotoTestCase):
                                 bucket_name)
 
         self.assertTrue(bucket.name == bucket_name)
-        with closing(Key(bucket)) as key:
+        with contextlib.closing(boto.s3.key.Key(bucket)) as key:
             key.key = object_name
             key.set_contents_from_string(content)
             readback = key.get_contents_as_string()

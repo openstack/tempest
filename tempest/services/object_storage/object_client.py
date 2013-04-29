@@ -15,10 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from hashlib import sha1
+import hashlib
 import hmac
 import httplib2
-from urlparse import urlparse
+import urlparse
 
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
@@ -127,10 +127,10 @@ class ObjectClient(RestClient):
 
         self._set_auth()
         method = 'GET'
-        path = "%s/%s/%s" % (urlparse(self.base_url).path, container,
+        path = "%s/%s/%s" % (urlparse.urlparse(self.base_url).path, container,
                              object_name)
         hmac_body = '%s\n%s\n%s' % (method, expires, path)
-        sig = hmac.new(key, hmac_body, sha1).hexdigest()
+        sig = hmac.new(key, hmac_body, hashlib.sha1).hexdigest()
 
         url = "%s/%s?temp_url_sig=%s&temp_url_expires=%s" % (container,
                                                              object_name,

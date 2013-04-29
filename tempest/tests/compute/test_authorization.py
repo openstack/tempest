@@ -234,8 +234,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
             # Reset the base_url...
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] is not None:
-                #TODO(afazekas): body not defined
-                self.alt_security_client.delete_security_group(body['id'])
+                self.alt_security_client.delete_security_group(resp['id'])
                 self.fail("Create Security Group request should not happen if"
                           "the tenant id does not match the current user")
 
@@ -274,8 +273,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
             # Reset the base_url...
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] is not None:
-                self.alt_security_client.delete_security_group_rule(
-                    body['id'])  # BUG
+                self.alt_security_client.delete_security_group_rule(resp['id'])
                 self.fail("Create security group rule request should not "
                           "happen if the tenant id does not match the"
                           " current user")

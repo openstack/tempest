@@ -19,8 +19,8 @@ actions veriy that the API call was successful or not."""
 
 import random
 
-import pending_action
-import test_case
+from stress import pending_action
+from stress import test_case
 
 
 class TestCreateVM(test_case.StressTestCase):

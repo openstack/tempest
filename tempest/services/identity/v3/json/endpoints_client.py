@@ -16,7 +16,7 @@
 #    under the License.
 
 import json
-from urlparse import urlparse
+import urlparse
 
 from tempest.common.rest_client import RestClient
 
@@ -33,8 +33,8 @@ class EndPointClientJSON(RestClient):
     def request(self, method, url, headers=None, body=None, wait=None):
         """Overriding the existing HTTP request in super class rest_client."""
         self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
+        self.base_url = self.base_url.replace(
+            urlparse.urlparse(self.base_url).path, "/v3")
         return super(EndPointClientJSON, self).request(method, url,
                                                        headers=headers,
                                                        body=body)

@@ -15,8 +15,8 @@
 import random
 import telnetlib
 
-import pending_action
-import test_case
+from stress import pending_action
+from stress import test_case
 
 
 class TestChangeFloatingIp(test_case.StressTestCase):

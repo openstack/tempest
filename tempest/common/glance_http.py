@@ -136,7 +136,7 @@ class HTTPClient(object):
 
         # Read body into string if it isn't obviously image data
         if resp.getheader('content-type', None) != 'application/octet-stream':
-            body_str = ''.join([chunk for chunk in body_iter])
+            body_str = ''.join([body_chunk for body_chunk in body_iter])
             body_iter = StringIO.StringIO(body_str)
             self._log_response(resp, None)
         else:

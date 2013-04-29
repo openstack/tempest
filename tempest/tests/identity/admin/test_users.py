@@ -309,8 +309,8 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         for i in body:
             fetched_user_ids.append(i['id'])
         #verifying the user Id in the list
-        missing_users =\
-            [user for user in user_ids if user not in fetched_user_ids]
+        missing_users = [missing_user for missing_user in user_ids
+                         if missing_user not in fetched_user_ids]
         self.assertEqual(0, len(missing_users),
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))

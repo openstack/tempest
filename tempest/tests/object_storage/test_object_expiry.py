@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.object_storage import base
 import testtools
-from time import sleep
+import time
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
@@ -88,7 +88,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         # Check data
         self.assertEqual(body, data)
         # Sleep for over 5 seconds, so that object is expired
-        sleep(5)
+        time.sleep(5)
         # Verification of raised exception after object gets expired
         self.assertRaises(exceptions.NotFound, self.object_client.get_object,
                           self.container_name, object_name)

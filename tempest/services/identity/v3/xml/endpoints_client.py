@@ -14,7 +14,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from urlparse import urlparse
+import urlparse
 
 import httplib2
 from lxml import etree
@@ -52,8 +52,8 @@ class EndPointClientXML(RestClientXML):
         dscv = self.config.identity.disable_ssl_certificate_validation
         self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
         self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
+        self.base_url = self.base_url.replace(
+            urlparse.urlparse(self.base_url).path, "/v3")
         return super(EndPointClientXML, self).request(method, url,
                                                       headers=headers,
                                                       body=body)
