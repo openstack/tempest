@@ -2,6 +2,7 @@ AUTHORS
 ChangeLog
 *.pyc
 etc/tempest.conf
+etc/logging.conf
 include/swift_objects/swift_small
 include/swift_objects/swift_medium
 include/swift_objects/swift_large
