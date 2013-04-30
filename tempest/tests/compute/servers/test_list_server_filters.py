@@ -22,6 +22,8 @@ from tempest.test import attr
 from tempest.tests.compute import base
 from tempest.tests import utils
 
+import testtools
+
 
 class ListServerFiltersTestJSON(base.BaseComputeTest):
     _interface = 'json'
@@ -178,6 +180,56 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
         self.assertEqual(['ACTIVE'] * 3, [x['status'] for x in servers])
+
+    @attr(type='positive')
+    def test_list_servers_filtered_by_name_wildcard(self):
+        # List all servers that contains 'server' in name
+        params = {'name': 'server'}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+        self.assertIn(self.s2_name, map(lambda x: x['name'], servers))
+        self.assertIn(self.s3_name, map(lambda x: x['name'], servers))
+
+        # Let's take random part of name and try to search it
+        part_name = self.s1_name[6:-1]
+
+        params = {'name': part_name}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
+
+    @testtools.skip('Until Bug #1170718 is resolved.')
+    @attr(type='positive', bug='lp1170718')
+    def test_list_servers_filtered_by_ip(self):
+        # Filter servers by ip
+        # Here should be listed 1 server
+        ip = self.s1['addresses']['private'][0]['addr']
+        params = {'ip': ip}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
+
+    @attr(type='positive')
+    def test_list_servers_filtered_by_ip_regex(self):
+        # Filter servers by regex ip
+        # List all servers filtered by part of ip address.
+        # Here should be listed all servers
+        ip = self.s1['addresses']['private'][0]['addr'][0:-3]
+        params = {'ip': ip}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+        self.assertIn(self.s2_name, map(lambda x: x['name'], servers))
+        self.assertIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @attr(type='positive')
     def test_list_servers_detailed_limit_results(self):
