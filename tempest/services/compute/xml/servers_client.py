@@ -527,3 +527,17 @@ class ServersClientXML(RestClientXML):
         resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
                                  (server_id, volume_id), headers)
         return resp, body
+
+    def list_instance_actions(self, server_id):
+        """List the provided server action."""
+        resp, body = self.get("servers/%s/os-instance-actions" % server_id,
+                              self.headers)
+        body = self._parse_array(etree.fromstring(body))
+        return resp, body
+
+    def get_instance_action(self, server_id, request_id):
+        """Returns the action details of the provided server."""
+        resp, body = self.get("servers/%s/os-instance-actions/%s" %
+                              (server_id, request_id), self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
