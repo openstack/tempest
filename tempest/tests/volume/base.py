@@ -149,13 +149,13 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def clear_volumes(cls):
         for volume in cls.volumes:
             try:
-                cls.volume_client.delete_volume(volume['id'])
+                cls.volumes_client.delete_volume(volume['id'])
             except Exception:
                 pass
 
         for volume in cls.volumes:
             try:
-                cls.servers_client.wait_for_resource_deletion(volume['id'])
+                cls.volumes_client.wait_for_resource_deletion(volume['id'])
             except Exception:
                 pass
 
