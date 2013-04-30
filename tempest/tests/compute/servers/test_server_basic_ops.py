@@ -101,7 +101,8 @@ class TestServerBasicOps(test.DefaultClientSmokeTest):
 
     def wait_on_active(self):
         instance_id = self.get_resource('instance').id
-        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(
+            self, self.compute_client.servers, instance_id, 'ACTIVE')
 
     def pause_server(self):
         instance = self.get_resource('instance')
@@ -109,7 +110,8 @@ class TestServerBasicOps(test.DefaultClientSmokeTest):
         LOG.debug("Pausing instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.pause()
-        test.status_timeout(self.compute_client.servers, instance_id, 'PAUSED')
+        test.status_timeout(
+            self, self.compute_client.servers, instance_id, 'PAUSED')
 
     def unpause_server(self):
         instance = self.get_resource('instance')
@@ -117,7 +119,8 @@ class TestServerBasicOps(test.DefaultClientSmokeTest):
         LOG.debug("Unpausing instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.unpause()
-        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(
+            self, self.compute_client.servers, instance_id, 'ACTIVE')
 
     def suspend_server(self):
         instance = self.get_resource('instance')
@@ -125,7 +128,7 @@ class TestServerBasicOps(test.DefaultClientSmokeTest):
         LOG.debug("Suspending instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.suspend()
-        test.status_timeout(self.compute_client.servers,
+        test.status_timeout(self, self.compute_client.servers,
                             instance_id, 'SUSPENDED')
 
     def resume_server(self):
@@ -134,7 +137,8 @@ class TestServerBasicOps(test.DefaultClientSmokeTest):
         LOG.debug("Resuming instance %s. Current status: %s",
                   instance_id, instance.status)
         instance.resume()
-        test.status_timeout(self.compute_client.servers, instance_id, 'ACTIVE')
+        test.status_timeout(
+            self, self.compute_client.servers, instance_id, 'ACTIVE')
 
     def terminate_instance(self):
         instance = self.get_resource('instance')

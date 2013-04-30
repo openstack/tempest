@@ -120,7 +120,7 @@ def call_until_true(func, duration, sleep_for):
     return False
 
 
-def status_timeout(things, thing_id, expected_status):
+def status_timeout(testcase, things, thing_id, expected_status):
     """
     Given a thing and an expected status, do a loop, sleeping
     for a configurable amount of time, checking for the
@@ -134,9 +134,9 @@ def status_timeout(things, thing_id, expected_status):
         thing = things.get(thing_id)
         new_status = thing.status
         if new_status == 'ERROR':
-            self.fail("%s failed to get to expected status."
-                      "In ERROR state."
-                      % thing)
+            testcase.fail("%s failed to get to expected status."
+                          "In ERROR state."
+                          % thing)
         elif new_status == expected_status:
             return True  # All good.
         LOG.debug("Waiting for %s to get to %s status. "
@@ -146,8 +146,8 @@ def status_timeout(things, thing_id, expected_status):
     if not call_until_true(check_status,
                            conf.compute.build_timeout,
                            conf.compute.build_interval):
-        self.fail("Timed out waiting for thing %s to become %s"
-                  % (thing_id, expected_status))
+        testcase.fail("Timed out waiting for thing %s to become %s"
+                      % (thing_id, expected_status))
 
 
 class DefaultClientSmokeTest(TestCase):
