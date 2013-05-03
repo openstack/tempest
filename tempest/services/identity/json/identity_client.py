@@ -138,6 +138,12 @@ class IdentityClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['user']
 
+    def get_user(self, user_id):
+        """GET a user."""
+        resp, body = self.get("users/%s" % user_id)
+        body = json.loads(body)
+        return resp, body['user']
+
     def delete_user(self, user_id):
         """Delete a user."""
         resp, body = self.delete("users/%s" % user_id)

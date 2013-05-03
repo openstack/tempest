@@ -172,6 +172,12 @@ class IdentityClientXML(RestClientXML):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def get_user(self, user_id):
+        """GET a user."""
+        resp, body = self.get("users/%s" % user_id, self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
     def delete_user(self, user_id):
         """Delete a user."""
         resp, body = self.delete("users/%s" % user_id, self.headers)
