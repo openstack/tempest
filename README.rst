@@ -33,11 +33,6 @@ and reference data to be used in testing.
     devstack uploaded and set the image_ref value in the [environment]
     section in the tempest.conf to that image UUID.
 
-    In addition, the ``<devstack-repo>/tools/configure_tempest.sh`` script can
-    also be used to generate a tempest.conf based on your devstack's rc files.
-    TEMPEST_DIR variable points to location /opt/stack/temptest. Update this
-    variable if the location is different..
-
 Tempest is not tied to any single test runner, but Nose been the most commonly
 used tool. After setting up your configuration file, you can execute
 the set of Tempest tests by using ``nosetests`` ::
