@@ -12,27 +12,54 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.test import attr
 from tempest.tests.volume import base
 
 
 class VolumesSnapshotTest(base.BaseVolumeTest):
     _interface = "json"
 
-    def test_volume_from_snapshot(self):
-        volume_origin = self.create_volume(size=1)
-        snapshot = self.create_snapshot(volume_origin['id'])
-        volume_snap = self.create_volume(size=1,
-                                         snapshot_id=
-                                         snapshot['id'])
+    @classmethod
+    def setUpClass(cls):
+        super(VolumesSnapshotTest, cls).setUpClass()
+        try:
+            cls.volume_origin = cls.create_volume()
+        except Exception:
+            cls.tearDownClass()
+            raise
+
+    @classmethod
+    def tearDownClass(cls):
+        super(VolumesSnapshotTest, cls).tearDownClass()
+        cls.clear_volumes()
+
+    @attr(type='smoke')
+    def test_snapshot_create_get_delete(self):
+        # Create a snapshot, get some of the details and then deletes it
+        resp, snapshot = self.snapshots_client.create_snapshot(
+            self.volume_origin['id'])
+        self.assertEqual(200, resp.status)
+        self.snapshots_client.wait_for_snapshot_status(snapshot['id'],
+                                                       'available')
+        errmsg = "Referred volume origin ID mismatch"
+        self.assertEqual(self.volume_origin['id'],
+                         snapshot['volume_id'],
+                         errmsg)
         self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.volumes_client.delete_volume(volume_snap['id'])
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
-        self.snapshots.remove(snapshot)
-        self.volumes_client.delete_volume(volume_origin['id'])
-        self.volumes_client.wait_for_resource_deletion(volume_snap['id'])
-        self.volumes.remove(volume_snap)
-        self.volumes_client.wait_for_resource_deletion(volume_origin['id'])
-        self.volumes.remove(volume_origin)
+
+    def test_volume_from_snapshot(self):
+        # Test if creation of snap based volumes succeeds
+        snapshot = self.create_snapshot(self.volume_origin['id'])
+        # NOTE: size is required also when passing snapshot_id
+        resp, volume = self.volumes_client.create_volume(
+            size=1,
+            snapshot_id=snapshot['id'])
+        self.assertEqual(200, resp.status)
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        self.volumes_client.delete_volume(volume['id'])
+        self.volumes_client.wait_for_resource_deletion(volume['id'])
+        self.clear_snapshots()
 
 
 class VolumesSnapshotTestXML(VolumesSnapshotTest):
