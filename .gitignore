@@ -14,3 +14,4 @@ include/swift_objects/swift_large
 .venv
 dist
 build
+.testrepository
