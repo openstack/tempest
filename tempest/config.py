@@ -351,6 +351,48 @@ def register_object_storage_opts(conf):
     for opt in ObjectStoreConfig:
         conf.register_opt(opt, group='object-storage')
 
+
+orchestration_group = cfg.OptGroup(name='orchestration',
+                                   title='Orchestration Service Options')
+
+OrchestrationGroup = [
+    cfg.StrOpt('catalog_type',
+               default='orchestration',
+               help="Catalog type of the Orchestration service."),
+    cfg.BoolOpt('allow_tenant_isolation',
+                default=False,
+                help="Allows test cases to create/destroy tenants and "
+                     "users. This option enables isolated test cases and "
+                     "better parallel execution, but also requires that "
+                     "OpenStack Identity API admin credentials are known."),
+    cfg.IntOpt('build_interval',
+               default=1,
+               help="Time in seconds between build status checks."),
+    cfg.IntOpt('build_timeout',
+               default=300,
+               help="Timeout in seconds to wait for a stack to build."),
+    cfg.BoolOpt('heat_available',
+                default=False,
+                help="Whether or not Heat is expected to be available"),
+    cfg.StrOpt('instance_type',
+               default='m1.tiny',
+               help="Instance type for tests. Needs to be big enough for a "
+                    "full OS plus the test workload"),
+    cfg.StrOpt('image_ref',
+               default=None,
+               help="Name of heat-cfntools enabled image to use when "
+                    "launching test instances."),
+    cfg.StrOpt('keypair_name',
+               default=None,
+               help="Name of existing keypair to launch servers with."),
+]
+
+
+def register_orchestration_opts(conf):
+    conf.register_group(orchestration_group)
+    for opt in OrchestrationGroup:
+        conf.register_opt(opt, group='orchestration')
+
 boto_group = cfg.OptGroup(name='boto',
                           title='EC2/S3 options')
 BotoConfig = [
@@ -485,6 +527,7 @@ class TempestConfig:
         register_network_opts(cfg.CONF)
         register_volume_opts(cfg.CONF)
         register_object_storage_opts(cfg.CONF)
+        register_orchestration_opts(cfg.CONF)
         register_boto_opts(cfg.CONF)
         register_compute_admin_opts(cfg.CONF)
         register_stress_opts(cfg.CONF)
@@ -495,6 +538,7 @@ class TempestConfig:
         self.network = cfg.CONF.network
         self.volume = cfg.CONF.volume
         self.object_storage = cfg.CONF['object-storage']
+        self.orchestration = cfg.CONF.orchestration
         self.boto = cfg.CONF.boto
         self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
