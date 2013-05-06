@@ -164,6 +164,9 @@ catalog_type = image
 # The version of the OpenStack Images API to use
 api_version = 1
 
+# HTTP image to use for glance http image testing
+http_image = http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
+
 [network]
 # This section contains configuration options used when executing tests
 # against the OpenStack Network API.

@@ -81,32 +81,10 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(properties['key2'], 'value2')
 
     def test_register_http_image(self):
-        container_client = self.os.container_client
-        object_client = self.os.object_client
-        container_name = "image_container"
-        object_name = "test_image.img"
-        container_client.create_container(container_name)
-        self.addCleanup(container_client.delete_container, container_name)
-        cont_headers = {'X-Container-Read': '.r:*'}
-        resp, _ = container_client.update_container_metadata(
-            container_name,
-            metadata=cont_headers,
-            metadata_prefix='')
-        self.assertEqual(resp['status'], '204')
-
-        data = "TESTIMAGE"
-        resp, _ = object_client.create_object(container_name,
-                                              object_name, data)
-        self.addCleanup(object_client.delete_object, container_name,
-                        object_name)
-        self.assertEqual(resp['status'], '201')
-        object_url = '/'.join((object_client.base_url,
-                               container_name,
-                               object_name))
         resp, body = self.create_image(name='New Http Image',
                                        container_format='bare',
                                        disk_format='raw', is_public=True,
-                                       copy_from=object_url)
+                                       copy_from=self.config.images.http_image)
         self.assertTrue('id' in body)
         image_id = body.get('id')
         self.created_images.append(image_id)
@@ -115,7 +93,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.client.wait_for_image_status(image_id, 'active')
         resp, body = self.client.get_image(image_id)
         self.assertEqual(resp['status'], '200')
-        self.assertEqual(body, data)
 
     @attr(type='image')
     def test_register_image_with_min_ram(self):
