@@ -12,8 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+
 from tempest.test import attr
 from tempest.tests.volume import base
+
+LOG = logging.getLogger(__name__)
 
 
 class VolumesSnapshotTest(base.BaseVolumeTest):
@@ -25,13 +29,13 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
         try:
             cls.volume_origin = cls.create_volume()
         except Exception:
+            LOG.exception("setup failed")
             cls.tearDownClass()
             raise
 
     @classmethod
     def tearDownClass(cls):
         super(VolumesSnapshotTest, cls).tearDownClass()
-        cls.clear_volumes()
 
     @attr(type='smoke')
     def test_snapshot_create_get_delete(self):
@@ -49,7 +53,8 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
 
     def test_volume_from_snapshot(self):
-        # Test if creation of snap based volumes succeeds
+        # Create a temporary snap using wrapper method from base, then
+        # create a snap based volume, check resp code and deletes it
         snapshot = self.create_snapshot(self.volume_origin['id'])
         # NOTE: size is required also when passing snapshot_id
         resp, volume = self.volumes_client.create_volume(
