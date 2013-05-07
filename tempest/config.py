@@ -303,6 +303,15 @@ VolumeGroup = [
     cfg.StrOpt('catalog_type',
                default='Volume',
                help="Catalog type of the Volume Service"),
+    cfg.BoolOpt('multi_backend_enabled',
+                default=False,
+                help="Runs Cinder multi-backend test (requires 2 backend)"),
+    cfg.StrOpt('backend1_name',
+               default='LVM_iSCSI',
+               help="Name of the backend1 (must be declared in cinder.conf)"),
+    cfg.StrOpt('backend2_name',
+               default='LVM_iSCSI_1',
+               help="Name of the backend2 (must be declared in cinder.conf)"),
 ]
 
 
