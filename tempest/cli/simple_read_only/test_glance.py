@@ -19,13 +19,13 @@ import logging
 import re
 import subprocess
 
-import cli
+import tempest.cli
 
 
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyGlanceClientTest(cli.ClientTestBase):
+class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
     """Basic, read-only tests for Glance CLI client.
 
     Checks return values and output of read-only commands.

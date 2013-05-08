@@ -18,13 +18,13 @@
 import logging
 import subprocess
 
-import cli
+import tempest.cli
 
 
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
+class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
 
     """
     This is a first pass at a simple read only nova-manage test. This

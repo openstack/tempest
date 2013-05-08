@@ -21,7 +21,7 @@ import subprocess
 
 from oslo.config import cfg
 
-import cli.output_parser
+import tempest.cli.output_parser
 import tempest.test
 
 
@@ -52,7 +52,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
         super(ClientTestBase, cls).setUpClass()
 
     def __init__(self, *args, **kwargs):
-        self.parser = cli.output_parser
+        self.parser = tempest.cli.output_parser
         super(ClientTestBase, self).__init__(*args, **kwargs)
 
     def nova(self, action, flags='', params='', admin=True, fail_ok=False):

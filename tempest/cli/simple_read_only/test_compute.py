@@ -21,7 +21,7 @@ import subprocess
 from oslo.config import cfg
 import testtools
 
-import cli
+import tempest.cli
 
 
 CONF = cfg.CONF
@@ -30,7 +30,7 @@ CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
+class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
 
     """
     This is a first pass at a simple read only python-novaclient test. This
