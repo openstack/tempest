@@ -41,6 +41,8 @@ from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.services_client import ServicesClientJSON
+from tempest.services.compute.json.tenant_usages_client import \
+    TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
 from tempest.services.compute.xml.aggregates_client import AggregatesClientXML
@@ -61,6 +63,8 @@ from tempest.services.compute.xml.security_groups_client \
     import SecurityGroupsClientXML
 from tempest.services.compute.xml.servers_client import ServersClientXML
 from tempest.services.compute.xml.services_client import ServicesClientXML
+from tempest.services.compute.xml.tenant_usages_client import \
+    TenantUsagesClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
 from tempest.services.identity.json.identity_client import IdentityClientJSON
@@ -216,6 +220,11 @@ SERVICES_CLIENT = {
     "xml": ServicesClientXML,
 }
 
+TENANT_USAGES_CLIENT = {
+    "json": TenantUsagesClientJSON,
+    "xml": TenantUsagesClientXML,
+}
+
 
 class Manager(object):
 
@@ -287,6 +296,8 @@ class Manager(object):
             self.service_client = SERVICE_CLIENT[interface](*client_args)
             self.aggregates_client = AGGREGATES_CLIENT[interface](*client_args)
             self.services_client = SERVICES_CLIENT[interface](*client_args)
+            self.tenant_usages_client = \
+                TENANT_USAGES_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
