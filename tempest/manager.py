@@ -17,15 +17,6 @@
 
 import logging
 
-# Default client libs
-import glanceclient
-import keystoneclient.v2_0.client
-import novaclient.client
-try:
-    import quantumclient.v2_0.client
-except ImportError:
-    pass
-
 import tempest.config
 from tempest import exceptions
 # Tempest REST Fuzz testing client libs
@@ -84,121 +75,6 @@ class FuzzClientManager(Manager):
     from the endpoint.
     """
     pass
-
-
-class DefaultClientManager(Manager):
-
-    """
-    Manager that provides the default clients to access the various
-    OpenStack APIs.
-    """
-
-    NOVACLIENT_VERSION = '2'
-
-    def __init__(self):
-        super(DefaultClientManager, self).__init__()
-        self.compute_client = self._get_compute_client()
-        self.image_client = self._get_image_client()
-        self.identity_client = self._get_identity_client()
-        self.network_client = self._get_network_client()
-        self.client_attr_names = [
-            'compute_client',
-            'image_client',
-            'identity_client',
-            'network_client',
-        ]
-
-    def _get_compute_client(self, username=None, password=None,
-                            tenant_name=None):
-        # Novaclient will not execute operations for anyone but the
-        # identified user, so a new client needs to be created for
-        # each user that operations need to be performed for.
-        if not username:
-            username = self.config.identity.username
-        if not password:
-            password = self.config.identity.password
-        if not tenant_name:
-            tenant_name = self.config.identity.tenant_name
-
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials for compute client. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
-
-        auth_url = self.config.identity.uri
-        dscv = self.config.identity.disable_ssl_certificate_validation
-
-        client_args = (username, password, tenant_name, auth_url)
-
-        # Create our default Nova client to use in testing
-        service_type = self.config.compute.catalog_type
-        return novaclient.client.Client(self.NOVACLIENT_VERSION,
-                                        *client_args,
-                                        service_type=service_type,
-                                        no_cache=True,
-                                        insecure=dscv)
-
-    def _get_image_client(self):
-        keystone = self._get_identity_client()
-        token = keystone.auth_token
-        endpoint = keystone.service_catalog.url_for(service_type='image',
-                                                    endpoint_type='publicURL')
-        dscv = self.config.identity.disable_ssl_certificate_validation
-        return glanceclient.Client('1', endpoint=endpoint, token=token,
-                                   insecure=dscv)
-
-    def _get_identity_client(self, username=None, password=None,
-                             tenant_name=None):
-        # This identity client is not intended to check the security
-        # of the identity service, so use admin credentials by default.
-        if not username:
-            username = self.config.identity.admin_username
-        if not password:
-            password = self.config.identity.admin_password
-        if not tenant_name:
-            tenant_name = self.config.identity.admin_tenant_name
-
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials for identity client. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
-
-        auth_url = self.config.identity.uri
-        dscv = self.config.identity.disable_ssl_certificate_validation
-
-        return keystoneclient.v2_0.client.Client(username=username,
-                                                 password=password,
-                                                 tenant_name=tenant_name,
-                                                 auth_url=auth_url,
-                                                 insecure=dscv)
-
-    def _get_network_client(self):
-        # The intended configuration is for the network client to have
-        # admin privileges and indicate for whom resources are being
-        # created via a 'tenant_id' parameter.  This will often be
-        # preferable to authenticating as a specific user because
-        # working with certain resources (public routers and networks)
-        # often requires admin privileges anyway.
-        username = self.config.identity.admin_username
-        password = self.config.identity.admin_password
-        tenant_name = self.config.identity.admin_tenant_name
-
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials for network client. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
-
-        auth_url = self.config.identity.uri
-        dscv = self.config.identity.disable_ssl_certificate_validation
-
-        return quantumclient.v2_0.client.Client(username=username,
-                                                password=password,
-                                                tenant_name=tenant_name,
-                                                auth_url=auth_url,
-                                                insecure=dscv)
 
 
 class ComputeFuzzClientManager(FuzzClientManager):

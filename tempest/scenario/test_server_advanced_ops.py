@@ -19,12 +19,12 @@ import logging
 
 
 from tempest.common.utils.data_utils import rand_name
-from tempest import test
+from tempest.scenario import manager
 
 LOG = logging.getLogger(__name__)
 
 
-class TestServerAdvancedOps(test.DefaultClientSmokeTest):
+class TestServerAdvancedOps(manager.OfficialClientTest):
 
     """
     This test case stresses some advanced server instance operations:

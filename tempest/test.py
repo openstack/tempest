@@ -146,63 +146,6 @@ class TestCase(BaseTestCase):
                       % (thing_id, expected_status))
 
 
-class DefaultClientSmokeTest(TestCase):
-
-    """
-    Base smoke test case class that provides the default clients to
-    access the various OpenStack APIs.
-
-    Smoke tests are tests that have the following characteristics:
-
-     * Test basic operations of an API, typically in an order that
-       a regular user would perform those operations
-     * Test only the correct inputs and action paths -- no fuzz or
-       random input data is sent, only valid inputs.
-     * Use only the default client tool for calling an API
-    """
-
-    manager_class = manager.DefaultClientManager
-
-    @classmethod
-    def tearDownClass(cls):
-        # NOTE(jaypipes): Because smoke tests are typically run in a specific
-        # order, and because test methods in smoke tests generally create
-        # resources in a particular order, we destroy resources in the reverse
-        # order in which resources are added to the smoke test class object
-        while cls.os_resources:
-            thing = cls.os_resources.pop()
-            LOG.debug("Deleting %r from shared resources of %s" %
-                      (thing, cls.__name__))
-
-            try:
-                # OpenStack resources are assumed to have a delete()
-                # method which destroys the resource...
-                thing.delete()
-            except Exception as e:
-                # If the resource is already missing, mission accomplished.
-                if e.__class__.__name__ == 'NotFound':
-                    continue
-                raise
-
-            def is_deletion_complete():
-                # Deletion testing is only required for objects whose
-                # existence cannot be checked via retrieval.
-                if isinstance(thing, dict):
-                    return True
-                try:
-                    thing.get()
-                except Exception as e:
-                    # Clients are expected to return an exception
-                    # called 'NotFound' if retrieval fails.
-                    if e.__class__.__name__ == 'NotFound':
-                        return True
-                    raise
-                return False
-
-            # Block until resource deletion has completed or timed-out
-            call_until_true(is_deletion_complete, 10, 1)
-
-
 class ComputeFuzzClientTest(TestCase):
 
     """

@@ -17,11 +17,12 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
+from tempest.scenario import manager
 from tempest.test import attr
-import tempest.tests.network.common as net_common
+from tempest.tests.network import common as net_common
 
 
-class TestNetworkBasicOps(net_common.TestNetworkSmokeCommon):
+class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     """
     This smoke test suite assumes that Nova has been configured to

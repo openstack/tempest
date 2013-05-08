@@ -16,12 +16,12 @@
 #    under the License.
 
 from quantumclient.common import exceptions as exc
-from tempest.tests.network.common import TestNetworkSmokeCommon
+from tempest.scenario.manager import NetworkScenarioTest
 
 MAX_REASONABLE_ITERATIONS = 51  # more than enough. Default for port is 50.
 
 
-class TestNetworkQuotaBasic(TestNetworkSmokeCommon):
+class TestNetworkQuotaBasic(NetworkScenarioTest):
     """
     This test suite contains tests that each loop trying to grab a
     particular resource until a quota limit is hit.

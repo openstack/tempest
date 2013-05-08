@@ -18,12 +18,12 @@
 import logging
 
 from tempest.common.utils.data_utils import rand_name
-from tempest import test
+from tempest.scenario import manager
 
 LOG = logging.getLogger(__name__)
 
 
-class TestServerBasicOps(test.DefaultClientSmokeTest):
+class TestServerBasicOps(manager.OfficialClientTest):
 
     """
     This smoke test case follows this basic set of operations:
