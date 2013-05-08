@@ -75,6 +75,8 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         cls.client.wait_for_server_status(cls.s3['id'], 'ACTIVE')
         resp, cls.s3 = cls.client.get_server(cls.s3['id'])
 
+        cls.fixed_network_name = cls.config.compute.fixed_network_name
+
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_server(cls.s1['id'])
@@ -208,7 +210,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
-        ip = self.s1['addresses']['private'][0]['addr']
+        ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)
         servers = body['servers']
@@ -222,7 +224,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
         # Here should be listed all servers
-        ip = self.s1['addresses']['private'][0]['addr'][0:-3]
+        ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)
         servers = body['servers']

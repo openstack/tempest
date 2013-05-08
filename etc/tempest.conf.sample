@@ -79,6 +79,9 @@ run_ssh = false
 # Name of a user used to authenticated to an instance
 ssh_user = cirros
 
+# Visible fixed network name
+fixed_network_name = private
+
 # Network id used for SSH (public, private, etc)
 network_for_ssh = private
 
