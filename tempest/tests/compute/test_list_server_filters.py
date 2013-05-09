@@ -213,8 +213,8 @@ class ListServerFiltersTestJSON(base.BaseComputeTestJSON,
 
     @classmethod
     def tearDownClass(cls):
-        super(ListServerFiltersTestJSON, cls).tearDownClass()
         ListServerFiltersTest.tearDownClass(cls)
+        super(ListServerFiltersTestJSON, cls).tearDownClass()
 
 
 class ListServerFiltersTestXML(base.BaseComputeTestXML,
@@ -227,5 +227,5 @@ class ListServerFiltersTestXML(base.BaseComputeTestXML,
 
     @classmethod
     def tearDownClass(cls):
-        super(ListServerFiltersTestXML, cls).tearDownClass()
         ListServerFiltersTest.tearDownClass(cls)
+        super(ListServerFiltersTestXML, cls).tearDownClass()
