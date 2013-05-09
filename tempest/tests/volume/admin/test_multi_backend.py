@@ -97,8 +97,6 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def tearDownClass(cls):
-        super(VolumeMultiBackendTest, cls).tearDownClass()
-
         ## volumes deletion
         for volume_id in cls.volume_id_list:
             cls.client.delete_volume(volume_id)
@@ -107,6 +105,8 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
         ## volume types deletion
         for volume_type in cls.volume_type_list:
             cls.client2.delete_volume_type(volume_type)
+
+        super(VolumeMultiBackendTest, cls).tearDownClass()
 
     def test_multi_backend_enabled(self):
         # this test checks that multi backend is enabled for at least the

@@ -53,8 +53,8 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         #Deleting the floating IP which is created in this method
-        super(FloatingIPsTestJSON, cls).tearDownClass()
         resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
+        super(FloatingIPsTestJSON, cls).tearDownClass()
 
     @attr(type='positive')
     def test_allocate_floating_ip(self):

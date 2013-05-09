@@ -85,7 +85,6 @@ class ServerRescueTestJSON(base.BaseComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        super(ServerRescueTestJSON, cls).tearDownClass()
         #Deleting the floating IP which is created in this method
         cls.floating_ips_client.delete_floating_ip(cls.floating_ip_id)
         client = cls.volumes_extensions_client
@@ -93,6 +92,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         client.delete_volume(str(cls.volume_to_detach['id']).strip())
         resp, cls.sg = cls.security_groups_client.delete_security_group(
             cls.sg_id)
+        super(ServerRescueTestJSON, cls).tearDownClass()
 
     def tearDown(self):
         super(ServerRescueTestJSON, self).tearDown()

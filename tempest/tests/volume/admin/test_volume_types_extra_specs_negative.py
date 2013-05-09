@@ -36,8 +36,8 @@ class ExtraSpecsNegativeTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def tearDownClass(cls):
-        super(ExtraSpecsNegativeTest, cls).tearDownClass()
         cls.client.delete_volume_type(cls.volume_type['id'])
+        super(ExtraSpecsNegativeTest, cls).tearDownClass()
 
     def test_update_no_body(self):
         # Should not update volume type extra specs with no body
