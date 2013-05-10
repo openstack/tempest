@@ -62,6 +62,29 @@ class BaseTestCase(testtools.TestCase,
             super(BaseTestCase, cls).setUpClass()
 
 
+def call_until_true(func, duration, sleep_for):
+    """
+    Call the given function until it returns True (and return True) or
+    until the specified duration (in seconds) elapses (and return
+    False).
+
+    :param func: A zero argument callable that returns True on success.
+    :param duration: The number of seconds for which to attempt a
+        successful call of the function.
+    :param sleep_for: The number of seconds to sleep after an unsuccessful
+                      invocation of the function.
+    """
+    now = time.time()
+    timeout = now + duration
+    while now < timeout:
+        if func():
+            return True
+        LOG.debug("Sleeping for %d seconds", sleep_for)
+        time.sleep(sleep_for)
+        now = time.time()
+    return False
+
+
 class TestCase(BaseTestCase):
     """Base test case class for all Tempest tests
 
@@ -96,57 +119,33 @@ class TestCase(BaseTestCase):
         self.os_resources.remove(thing)
         del self.resource_keys[key]
 
-
-def call_until_true(func, duration, sleep_for):
-    """
-    Call the given function until it returns True (and return True) or
-    until the specified duration (in seconds) elapses (and return
-    False).
-
-    :param func: A zero argument callable that returns True on success.
-    :param duration: The number of seconds for which to attempt a successful
-                     call of the function.
-    :param sleep_for: The number of seconds to sleep after an unsuccessful
-                      invocation of the function.
-    """
-    now = time.time()
-    timeout = now + duration
-    while now < timeout:
-        if func():
-            return True
-        LOG.debug("Sleeping for %d seconds", sleep_for)
-        time.sleep(sleep_for)
-        now = time.time()
-    return False
-
-
-def status_timeout(testcase, things, thing_id, expected_status):
-    """
-    Given a thing and an expected status, do a loop, sleeping
-    for a configurable amount of time, checking for the
-    expected status to show. At any time, if the returned
-    status of the thing is ERROR, fail out.
-    """
-    def check_status():
-        # python-novaclient has resources available to its client
-        # that all implement a get() method taking an identifier
-        # for the singular resource to retrieve.
-        thing = things.get(thing_id)
-        new_status = thing.status
-        if new_status == 'ERROR':
-            testcase.fail("%s failed to get to expected status."
+    def status_timeout(self, things, thing_id, expected_status):
+        """
+        Given a thing and an expected status, do a loop, sleeping
+        for a configurable amount of time, checking for the
+        expected status to show. At any time, if the returned
+        status of the thing is ERROR, fail out.
+        """
+        def check_status():
+            # python-novaclient has resources available to its client
+            # that all implement a get() method taking an identifier
+            # for the singular resource to retrieve.
+            thing = things.get(thing_id)
+            new_status = thing.status
+            if new_status == 'ERROR':
+                self.fail("%s failed to get to expected status."
                           "In ERROR state."
                           % thing)
-        elif new_status == expected_status:
-            return True  # All good.
-        LOG.debug("Waiting for %s to get to %s status. "
-                  "Currently in %s status",
-                  thing, expected_status, new_status)
-    conf = config.TempestConfig()
-    if not call_until_true(check_status,
-                           conf.compute.build_timeout,
-                           conf.compute.build_interval):
-        testcase.fail("Timed out waiting for thing %s to become %s"
+            elif new_status == expected_status:
+                return True  # All good.
+            LOG.debug("Waiting for %s to get to %s status. "
+                      "Currently in %s status",
+                      thing, expected_status, new_status)
+        conf = config.TempestConfig()
+        if not call_until_true(check_status,
+                               conf.compute.build_timeout,
+                               conf.compute.build_interval):
+            self.fail("Timed out waiting for thing %s to become %s"
                       % (thing_id, expected_status))
 
 

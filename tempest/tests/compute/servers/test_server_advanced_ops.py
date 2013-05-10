@@ -66,18 +66,18 @@ class TestServerAdvancedOps(test.DefaultClientSmokeTest):
 
         self.assertEqual(self.instance.status, 'BUILD')
         instance_id = self.get_resource('instance').id
-        test.status_timeout(
-            self, self.compute_client.servers, instance_id, 'ACTIVE')
+        self.status_timeout(
+            self.compute_client.servers, instance_id, 'ACTIVE')
         instance = self.get_resource('instance')
         instance_id = instance.id
         resize_flavor = self.config.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
                   instance.id, instance.flavor, resize_flavor)
         instance.resize(resize_flavor)
-        test.status_timeout(self, self.compute_client.servers, instance_id,
+        self.status_timeout(self.compute_client.servers, instance_id,
                             'VERIFY_RESIZE')
 
         LOG.debug("Confirming resize of instance %s", instance_id)
         instance.confirm_resize()
-        test.status_timeout(
-            self, self.compute_client.servers, instance_id, 'ACTIVE')
+        self.status_timeout(
+            self.compute_client.servers, instance_id, 'ACTIVE')

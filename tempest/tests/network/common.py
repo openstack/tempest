@@ -269,7 +269,7 @@ class TestNetworkSmokeCommon(test.DefaultClientSmokeTest):
             self.set_resource(name, server)
         except AttributeError:
             self.fail("Server not successfully created.")
-        test.status_timeout(self, client.servers, server.id, 'ACTIVE')
+        self.status_timeout(client.servers, server.id, 'ACTIVE')
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
