@@ -202,14 +202,13 @@ class InstanceRunTest(BotoTestCase):
 
         re_search_wait(_output, text)
         part_lines = ssh.get_partitions().split('\n')
-        # "attaching" invalid EC2 state ! #1074901
         volume.attach(instance.id, "/dev/vdh")
 
         def _volume_state():
             volume.update(validate=True)
             return volume.status
 
-        #self.assertVolumeStatusWait(_volume_state, "in-use")  # #1074901
+        self.assertVolumeStatusWait(_volume_state, "in-use")
         re_search_wait(_volume_state, "in-use")
 
         #NOTE(afazekas):  Different Hypervisor backends names
@@ -229,9 +228,9 @@ class InstanceRunTest(BotoTestCase):
 
         #TODO(afazekas): Resource compare to the flavor settings
 
-        volume.detach()  # "detaching" invalid EC2 status #1074901
+        volume.detach()
 
-        #self.assertVolumeStatusWait(_volume_state, "available")
+        self.assertVolumeStatusWait(_volume_state, "available")
         re_search_wait(_volume_state, "available")
         LOG.info("Volume %s state: %s", volume.id, volume.status)
 

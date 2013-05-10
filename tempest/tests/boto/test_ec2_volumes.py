@@ -39,7 +39,6 @@ class EC2VolumesTest(BotoTestCase):
         cls.client = cls.os.ec2api_client
         cls.zone = cls.client.get_good_zone()
 
-#NOTE(afazekas): as admin it can trigger the Bug #1074901
     @attr(type='smoke')
     def test_create_get_delete(self):
         # EC2 Create, get, delete Volume
