@@ -37,10 +37,10 @@ class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         """Delete images after a test is executed."""
-        super(ImagesWhiteboxTest, cls).tearDownClass()
         for image_id in cls.image_ids:
             cls.client.delete_image(image_id)
             cls.image_ids.remove(image_id)
+        super(ImagesWhiteboxTest, cls).tearDownClass()
 
     @classmethod
     def update_state(self, server_id, vm_state, task_state, deleted=0):

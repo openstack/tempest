@@ -30,8 +30,8 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def tearDownClass(cls):
-        super(VolumeTypesExtraSpecsTest, cls).tearDownClass()
         cls.client.delete_volume_type(cls.volume_type['id'])
+        super(VolumeTypesExtraSpecsTest, cls).tearDownClass()
 
     def test_volume_type_extra_specs_list(self):
         # List Volume types extra specs.
