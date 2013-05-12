@@ -42,6 +42,7 @@ from tempest.services.compute.json.security_groups_client import \
 from tempest.services.compute.json.servers_client import ServersClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
+from tempest.services.compute.xml.aggregates_client import AggregatesClientXML
 from tempest.services.compute.xml.availability_zone_client import \
     AvailabilityZoneClientXML
 from tempest.services.compute.xml.extensions_client import ExtensionsClientXML
@@ -201,6 +202,11 @@ SERVICE_CLIENT = {
     "xml": ServiceClientXML,
 }
 
+AGGREGATES_CLIENT = {
+    "json": AggregatesClientJSON,
+    "xml": AggregatesClientXML,
+}
+
 
 class Manager(object):
 
@@ -270,6 +276,7 @@ class Manager(object):
             self.availability_zone_client = \
                 AVAILABILITY_ZONE_CLIENT[interface](*client_args)
             self.service_client = SERVICE_CLIENT[interface](*client_args)
+            self.aggregates_client = AGGREGATES_CLIENT[interface](*client_args)
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
@@ -285,7 +292,6 @@ class Manager(object):
         self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
         self.custom_account_client = \
             AccountClientCustomizedHeader(*client_args)
-        self.aggregates_client = AggregatesClientJSON(*client_args)
 
 
 class AltManager(Manager):
