@@ -52,7 +52,7 @@ class VolumesActionsTest(BaseVolumeTest):
 
         super(VolumesActionsTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
         try:
@@ -70,6 +70,7 @@ class VolumesActionsTest(BaseVolumeTest):
             self.assertEqual(202, resp.status)
             self.client.wait_for_volume_status(self.volume['id'], 'available')
 
+    @attr(type='gate')
     def test_get_volume_attachment(self):
         # Verify that a volume's attachment information is retrieved
         mountpoint = '/dev/vdc'

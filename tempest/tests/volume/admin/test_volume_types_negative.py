@@ -18,12 +18,14 @@
 import uuid
 
 from tempest import exceptions
+from tempest.test import attr
 from tempest.tests.volume import base
 
 
 class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
     _interface = 'json'
 
+    @attr(type='gate')
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
         self.assertRaises(exceptions.NotFound,
@@ -31,16 +33,19 @@ class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
                           display_name=str(uuid.uuid4()),
                           volume_type=str(uuid.uuid4()))
 
+    @attr(type='gate')
     def test_create_with_empty_name(self):
         # Should not be able to create volume type with an empty name.
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_volume_type, '')
 
+    @attr(type='gate')
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
         self.assertRaises(exceptions.NotFound, self.client.get_volume_type,
                           str(uuid.uuid4()))
 
+    @attr(type='gate')
     def test_delete_nonexistent_type_id(self):
         # Should not be able to delete volume type with nonexistent type id.
         self.assertRaises(exceptions.NotFound, self.client.delete_volume_type,

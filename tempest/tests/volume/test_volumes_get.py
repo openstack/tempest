@@ -78,7 +78,7 @@ class VolumesGetTest(base.BaseVolumeTest):
                 self.assertEqual(202, resp.status)
                 self.client.wait_for_resource_deletion(volume['id'])
 
-    @attr(type='positive')
+    @attr(type='gate')
     def test_volume_get_metadata_none(self):
         # Create a volume without passing metadata, get details, and delete
         try:
@@ -105,11 +105,11 @@ class VolumesGetTest(base.BaseVolumeTest):
                 self.assertEqual(202, resp.status)
                 self.client.wait_for_resource_deletion(volume['id'])
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_volume_create_get_delete(self):
         self._volume_create_get_delete(image_ref=None)
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_volume_from_image(self):
         self._volume_create_get_delete(image_ref=self.config.compute.image_ref)
 

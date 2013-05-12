@@ -37,7 +37,7 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
     def tearDownClass(cls):
         super(VolumesSnapshotTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_snapshot_create_get_delete(self):
         # Create a snapshot, get some of the details and then deletes it
         resp, snapshot = self.snapshots_client.create_snapshot(
@@ -52,6 +52,7 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
         self.snapshots_client.delete_snapshot(snapshot['id'])
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
 
+    @attr(type=['smoke', 'gate'])
     def test_volume_from_snapshot(self):
         # Create a temporary snap using wrapper method from base, then
         # create a snap based volume, check resp code and deletes it

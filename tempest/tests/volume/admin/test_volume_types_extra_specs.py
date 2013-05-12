@@ -16,6 +16,7 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
+from tempest.test import attr
 from tempest.tests.volume import base
 
 
@@ -33,6 +34,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
         cls.client.delete_volume_type(cls.volume_type['id'])
         super(VolumeTypesExtraSpecsTest, cls).tearDownClass()
 
+    @attr(type=['smoke', 'gate'])
     def test_volume_type_extra_specs_list(self):
         # List Volume types extra specs.
         try:
@@ -51,6 +53,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
         except Exception:
             self.fail("Could not list volume types extra specs")
 
+    @attr(type=['gate'])
     def test_volume_type_extra_specs_update(self):
         # Update volume type extra specs
         try:
@@ -74,6 +77,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
         except Exception:
             self.fail("Couldnt update volume type extra spec")
 
+    @attr(type=['smoke', 'gate'])
     def test_volume_type_extra_spec_create_get_delete(self):
         # Create/Get/Delete volume type extra spec.
         try:
