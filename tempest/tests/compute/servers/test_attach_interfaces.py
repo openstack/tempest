@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
 from tempest.tests.compute import base
 
 import time
@@ -24,11 +23,10 @@ class AttachInterfacesTestJSON(base.BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(AttachInterfacesTestJSON, cls).setUpClass()
-        os = clients.Manager(interface=cls._interface)
-        if not os.config.network.quantum_available:
+        if not cls.config.network.quantum_available:
             raise cls.skipException("Quantum is required")
-        cls.client = os.interfaces_client
+        super(AttachInterfacesTestJSON, cls).setUpClass()
+        cls.client = cls.os.interfaces_client
 
     def _check_interface(self, iface, port_id=None, network_id=None,
                          fixed_ip=None):
