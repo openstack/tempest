@@ -74,6 +74,8 @@ class UsersV3TestJSON(base.BaseIdentityAdminTest):
         fetched_project_ids = list()
         _, u_project = self.v3_client.create_project(
             rand_name('project-'), description=rand_name('project-desc-'))
+        # Delete the Project at the end of this method
+        self.addCleanup(self.v3_client.delete_project, u_project['id'])
         #Create a user.
         u_name = rand_name('user-')
         u_desc = u_name + 'description'
