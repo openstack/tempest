@@ -19,7 +19,7 @@ import logging
 
 from tempest import clients
 from tempest.test import attr
-from tempest.testboto import BotoTestCase
+from tempest.thirdparty.boto.test import BotoTestCase
 
 LOG = logging.getLogger(__name__)
 

@@ -22,7 +22,7 @@ import boto.s3.key
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
-from tempest.testboto import BotoTestCase
+from tempest.thirdparty.boto.test import BotoTestCase
 
 
 @attr("S3")

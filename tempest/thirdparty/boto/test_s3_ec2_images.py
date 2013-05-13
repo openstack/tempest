@@ -22,9 +22,9 @@ import testtools
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
-from tempest.testboto import BotoTestCase
-from tempest.tests.boto.utils.s3 import s3_upload_dir
-from tempest.tests.boto.utils.wait import state_wait
+from tempest.thirdparty.boto.test import BotoTestCase
+from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
+from tempest.thirdparty.boto.utils.wait import state_wait
 
 
 @attr("S3", "EC2")

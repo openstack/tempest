@@ -32,9 +32,9 @@ from tempest.common.utils.file_utils import have_effective_read_access
 import tempest.config
 from tempest import exceptions
 import tempest.test
-from tempest.tests.boto.utils.wait import re_search_wait
-from tempest.tests.boto.utils.wait import state_wait
-from tempest.tests.boto.utils.wait import wait_exception
+from tempest.thirdparty.boto.utils.wait import re_search_wait
+from tempest.thirdparty.boto.utils.wait import state_wait
+from tempest.thirdparty.boto.utils.wait import wait_exception
 
 LOG = logging.getLogger(__name__)
 

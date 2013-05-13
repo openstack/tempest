@@ -25,10 +25,10 @@ from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
 from tempest.test import attr
-from tempest.testboto import BotoTestCase
-from tempest.tests.boto.utils.s3 import s3_upload_dir
-from tempest.tests.boto.utils.wait import re_search_wait
-from tempest.tests.boto.utils.wait import state_wait
+from tempest.thirdparty.boto.test import BotoTestCase
+from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
+from tempest.thirdparty.boto.utils.wait import re_search_wait
+from tempest.thirdparty.boto.utils.wait import state_wait
 
 LOG = logging.getLogger(__name__)
 

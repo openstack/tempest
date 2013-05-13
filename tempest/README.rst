@@ -12,27 +12,16 @@ and guidelines. Below is the proposed Havana restructuring for Tempest
 to make this clear.
 
 tempest/
-   3rdparty/ - 3rd party api tests
    api/ - API tests
    cli/ - CLI tests
    scenario/ - complex scenario tests
    stress/ - stress tests
+   thirdparty/ - 3rd party api tests
    whitebox/ - white box testing
 
 Each of these directories contains different types of tests. What
 belongs in each directory, the rules and examples for good tests, are
 documented in a README.rst file in the directory.
-
-
-3rdparty
-------------
-
-Many openstack components include 3rdparty API support. It is
-completely legitmate for Tempest to include tests of 3rdparty APIs,
-but those should be kept seperate from the normal OpenStack
-validation.
-
-TODO: tempest/tests/boto should become tempest/3rdparty/boto
 
 
 api
@@ -86,6 +75,17 @@ be provided to help detect breaks (stack traces in the logs).
 
 TODO: old stress tests deleted, new_stress that david is working on
 moves into here.
+
+
+thirdparty
+------------
+
+Many openstack components include 3rdparty API support. It is
+completely legitmate for Tempest to include tests of 3rdparty APIs,
+but those should be kept seperate from the normal OpenStack
+validation.
+
+TODO: tempest/tests/boto should become tempest/3rdparty/boto
 
 
 whitebox
