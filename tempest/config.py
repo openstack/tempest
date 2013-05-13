@@ -156,6 +156,9 @@ ComputeGroup = [
                default=60,
                help="Timeout in seconds to wait for output from ssh "
                     "channel."),
+    cfg.StrOpt('fixed_network_name',
+               default='private',
+               help="Visible fixed network name "),
     cfg.StrOpt('network_for_ssh',
                default='public',
                help="Network used for SSH connections."),
