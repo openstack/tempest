@@ -1,0 +1,7 @@
+[{"action": "tempest.stress.actions.create_destroy_server.create_destroy",
+  "threads": 8,
+  "use_admin": false,
+  "use_isolated_tenants": false,
+  "kwargs": {}
+  }
+]

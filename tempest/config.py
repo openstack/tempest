@@ -414,7 +414,23 @@ StressGroup = [
                help='Maximum number of instances to create during test.'),
     cfg.StrOpt('controller',
                default=None,
-               help='Controller host.')
+               help='Controller host.'),
+    # new stress options
+    cfg.StrOpt('target_controller',
+               default=None,
+               help='Controller host.'),
+    cfg.StrOpt('target_ssh_user',
+               default=None,
+               help='ssh user.'),
+    cfg.StrOpt('target_private_key_path',
+               default=None,
+               help='Path to private key.'),
+    cfg.StrOpt('target_logfiles',
+               default=None,
+               help='regexp for list of log files.'),
+    cfg.StrOpt('log_check_interval',
+               default=60,
+               help='time between log file error checks.')
 ]
 
 
