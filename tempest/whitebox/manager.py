@@ -27,7 +27,6 @@ from tempest.common.ssh import Client
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest import test
-from tempest.tests import compute
 
 LOG = logging.getLogger(__name__)
 
@@ -56,11 +55,10 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
 
     @classmethod
     def setUpClass(cls):
-        if not compute.WHITEBOX_ENABLED:
+        super(ComputeWhiteboxTest, cls).setUpClass()
+        if not cls.config.whitebox.whitebox_enabled:
             msg = "Whitebox testing disabled"
             raise cls.skipException(msg)
-
-        super(ComputeWhiteboxTest, cls).setUpClass()
 
         # Add some convenience attributes that tests use...
         cls.nova_dir = cls.config.whitebox.source_dir

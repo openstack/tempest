@@ -19,11 +19,11 @@ from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.compute import base
-from tempest import whitebox
+from tempest.whitebox import manager
 
 
 @attr(type='whitebox')
-class ImagesWhiteboxTest(whitebox.ComputeWhiteboxTest, base.BaseComputeTest):
+class ImagesWhiteboxTest(manager.ComputeWhiteboxTest, base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
