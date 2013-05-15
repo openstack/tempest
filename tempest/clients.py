@@ -86,6 +86,8 @@ from tempest.services.object_storage.container_client import ContainerClient
 from tempest.services.object_storage.object_client import ObjectClient
 from tempest.services.object_storage.object_client import \
     ObjectClientCustomizedHeader
+from tempest.services.orchestration.json.orchestration_client import \
+    OrchestrationClient
 from tempest.services.volume.json.admin.volume_types_client import \
     VolumeTypesClientJSON
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
@@ -287,6 +289,7 @@ class Manager(object):
         self.image_client_v2 = ImageClientV2JSON(*client_args)
         self.container_client = ContainerClient(*client_args)
         self.object_client = ObjectClient(*client_args)
+        self.orchestration_client = OrchestrationClient(*client_args)
         self.ec2api_client = botoclients.APIClientEC2(*client_args)
         self.s3_client = botoclients.ObjectClientS3(*client_args)
         self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
@@ -336,4 +339,18 @@ class ComputeAdminManager(Manager):
         base.__init__(conf.compute_admin.username,
                       conf.compute_admin.password,
                       conf.compute_admin.tenant_name,
+                      interface=interface)
+
+
+class OrchestrationManager(Manager):
+    """
+    Manager object that uses the admin credentials for its
+    so that heat templates can create users
+    """
+    def __init__(self, interface='json'):
+        conf = config.TempestConfig()
+        base = super(OrchestrationManager, self)
+        base.__init__(conf.identity.admin_username,
+                      conf.identity.admin_password,
+                      conf.identity.admin_tenant_name,
                       interface=interface)

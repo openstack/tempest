@@ -285,3 +285,26 @@ build_timeout = 120
 
 # Status change wait interval
 build_interval = 1
+
+[orchestration]
+# Status change wait interval
+build_interval = 1
+
+# Status change wait timout. This may vary across environments as some some
+# tests spawn full VMs, which could be slow if the test is already in a VM.
+build_timeout = 300
+
+# Whether or not Heat is expected to be available
+heat_available = false
+
+# Instance type for tests. Needs to be big enough for a
+# full OS plus the test workload
+instance_type = m1.tiny
+
+# Name of heat-cfntools enabled image to use when launching test instances
+# If not specified, tests that spawn instances will not run
+#image_ref = ubuntu-vm-heat-cfntools
+
+# Name of existing keypair to launch servers with. The default is not to specify
+# any key, which will generate a keypair for each test class
+#keypair_name = heat_key
