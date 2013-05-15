@@ -23,7 +23,7 @@ from tempest.tests.identity import base
 class UsersV3TestJSON(base.BaseIdentityAdminTest):
     _interface = 'json'
 
-    @attr('smoke')
+    @attr(type='gate')
     def test_user_update(self):
         # Test case to check if updating of user attributes is successful.
         #Creating first user
@@ -67,7 +67,7 @@ class UsersV3TestJSON(base.BaseIdentityAdminTest):
         self.assertEqual(u_email2, new_user_get['email'])
         self.assertEqual('false', str(new_user_get['enabled']).lower())
 
-    @attr('smoke')
+    @attr(type='gate')
     def test_list_user_projects(self):
         #List the projects that a user has access upon
         assigned_project_ids = list()

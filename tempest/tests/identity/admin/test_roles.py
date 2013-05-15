@@ -17,6 +17,7 @@
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.test import attr
 from tempest.tests.identity import base
 
 
@@ -45,6 +46,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                 found = True
         self.assertTrue(found, "assigned role was not in list")
 
+    @attr(type='gate')
     def test_list_roles(self):
         # Return a list of all roles
         resp, body = self.client.list_roles()
@@ -52,11 +54,13 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertTrue(any(found))
         self.assertEqual(len(found), len(self.data.roles))
 
+    @attr(type='gate')
     def test_list_roles_by_unauthorized_user(self):
         # Non admin user should not be able to list roles
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.list_roles)
 
+    @attr(type='gate')
     def test_list_roles_request_without_token(self):
         # Request to list roles without a valid token should fail
         token = self.client.get_auth()
@@ -64,6 +68,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.Unauthorized, self.client.list_roles)
         self.client.clear_auth()
 
+    @attr(type='gate')
     def test_role_create_delete(self):
         # Role should be created, verified, and deleted
         role_name = rand_name('role-test-')
@@ -84,10 +89,12 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         found = [role for role in body if role['name'] == role_name]
         self.assertFalse(any(found))
 
+    @attr(type='gate')
     def test_role_create_blank_name(self):
         # Should not be able to create a role with a blank name
         self.assertRaises(exceptions.BadRequest, self.client.create_role, '')
 
+    @attr(type='gate')
     def test_role_create_duplicate(self):
         # Role names should be unique
         role_name = rand_name('role-dup-')
@@ -99,6 +106,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.Duplicate, self.client.create_role,
                           role_name)
 
+    @attr(type='gate')
     def test_assign_user_role(self):
         # Assign a role to a user on a tenant
         (user, tenant, role) = self._get_role_params()
@@ -106,6 +114,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         resp, roles = self.client.list_user_roles(tenant['id'], user['id'])
         self.assert_role_in_role_list(role, roles)
 
+    @attr(type='gate')
     def test_assign_user_role_by_unauthorized_user(self):
         # Non admin user should not be authorized to assign a role to user
         (user, tenant, role) = self._get_role_params()
@@ -113,6 +122,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                           self.non_admin_client.assign_user_role,
                           tenant['id'], user['id'], role['id'])
 
+    @attr(type='gate')
     def test_assign_user_role_request_without_token(self):
         # Request to assign a role to a user without a valid token
         (user, tenant, role) = self._get_role_params()
@@ -123,24 +133,28 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                           user['id'], role['id'])
         self.client.clear_auth()
 
+    @attr(type='gate')
     def test_assign_user_role_for_non_existent_user(self):
         # Attempt to assign a role to a non existent user should fail
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
                           tenant['id'], 'junk-user-id-999', role['id'])
 
+    @attr(type='gate')
     def test_assign_user_role_for_non_existent_role(self):
         # Attempt to assign a non existent role to user should fail
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
                           tenant['id'], user['id'], 'junk-role-id-12345')
 
+    @attr(type='gate')
     def test_assign_user_role_for_non_existent_tenant(self):
         # Attempt to assign a role on a non existent tenant should fail
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
                           'junk-tenant-1234', user['id'], role['id'])
 
+    @attr(type='gate')
     def test_assign_duplicate_user_role(self):
         # Duplicate user role should not get assigned
         (user, tenant, role) = self._get_role_params()
@@ -148,6 +162,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.Duplicate, self.client.assign_user_role,
                           tenant['id'], user['id'], role['id'])
 
+    @attr(type='gate')
     def test_remove_user_role(self):
         # Remove a role assigned to a user on a tenant
         (user, tenant, role) = self._get_role_params()
@@ -157,6 +172,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                                                   user_role['id'])
         self.assertEquals(resp['status'], '204')
 
+    @attr(type='gate')
     def test_remove_user_role_by_unauthorized_user(self):
         # Non admin user should not be authorized to remove a user's role
         (user, tenant, role) = self._get_role_params()
@@ -167,6 +183,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                           self.non_admin_client.remove_user_role,
                           tenant['id'], user['id'], role['id'])
 
+    @attr(type='gate')
     def test_remove_user_role_request_without_token(self):
         # Request to remove a user's role without a valid token
         (user, tenant, role) = self._get_role_params()
@@ -180,6 +197,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                           user['id'], role['id'])
         self.client.clear_auth()
 
+    @attr(type='gate')
     def test_remove_user_role_non_existant_user(self):
         # Attempt to remove a role from a non existent user should fail
         (user, tenant, role) = self._get_role_params()
@@ -189,6 +207,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
                           tenant['id'], 'junk-user-id-123', role['id'])
 
+    @attr(type='gate')
     def test_remove_user_role_non_existant_role(self):
         # Attempt to delete a non existent role from a user should fail
         (user, tenant, role) = self._get_role_params()
@@ -198,6 +217,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
                           tenant['id'], user['id'], 'junk-user-role-123')
 
+    @attr(type='gate')
     def test_remove_user_role_non_existant_tenant(self):
         # Attempt to remove a role from a non existent tenant should fail
         (user, tenant, role) = self._get_role_params()
@@ -207,6 +227,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
                           'junk-tenant-id-123', user['id'], role['id'])
 
+    @attr(type='gate')
     def test_list_user_roles(self):
         # List roles assigned to a user on tenant
         (user, tenant, role) = self._get_role_params()
@@ -214,6 +235,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         resp, roles = self.client.list_user_roles(tenant['id'], user['id'])
         self.assert_role_in_role_list(role, roles)
 
+    @attr(type='gate')
     def test_list_user_roles_by_unauthorized_user(self):
         # Non admin user should not be authorized to list a user's roles
         (user, tenant, role) = self._get_role_params()
@@ -222,6 +244,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                           self.non_admin_client.list_user_roles, tenant['id'],
                           user['id'])
 
+    @attr(type='gate')
     def test_list_user_roles_request_without_token(self):
         # Request to list user's roles without a valid token should fail
         (user, tenant, role) = self._get_role_params()
@@ -234,6 +257,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         finally:
             self.client.clear_auth()
 
+    @attr(type='gate')
     def test_list_user_roles_for_non_existent_user(self):
         # Attempt to list roles of a non existent user should fail
         (user, tenant, role) = self._get_role_params()

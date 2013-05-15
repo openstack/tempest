@@ -17,12 +17,14 @@
 
 
 from tempest.common.utils.data_utils import rand_name
+from tempest.test import attr
 from tempest.tests.identity import base
 
 
 class ServicesTestJSON(base.BaseIdentityAdminTest):
     _interface = 'json'
 
+    @attr(type='gate')
     def test_update_service(self):
         # Update description attribute of service
         name = rand_name('service-')
