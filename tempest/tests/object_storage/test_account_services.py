@@ -22,12 +22,9 @@ from tempest.tests.object_storage import base
 
 
 class AccountTest(base.BaseObjectTest):
-
     @classmethod
     def setUpClass(cls):
         super(AccountTest, cls).setUpClass()
-
-        #Create a container
         cls.container_name = rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
 
@@ -37,8 +34,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_list_containers(self):
-        # List of all containers should not be empty
-
+        # list of all containers should not be empty
         params = {'format': 'json'}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
@@ -49,8 +45,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_list_account_metadata(self):
-        # List all account metadata
-
+        # list all account metadata
         resp, metadata = self.account_client.list_account_metadata()
         self.assertEqual(resp['status'], '204')
         self.assertIn('x-account-object-count', resp)
@@ -59,8 +54,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_create_account_metadata(self):
-        # Add metadata to account
-
+        # add metadata to account
         metadata = {'test-account-meta': 'Meta!'}
         resp, _ = \
             self.account_client.create_account_metadata(metadata=metadata)
@@ -72,8 +66,7 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_delete_account_metadata(self):
-        # Delete metadata from account
-
+        # delete metadata from account
         metadata = ['test-account-meta']
         resp, _ = \
             self.account_client.delete_account_metadata(metadata=metadata)
@@ -84,11 +77,10 @@ class AccountTest(base.BaseObjectTest):
 
     @attr(type='negative')
     def test_list_containers_with_non_authorized_user(self):
-        #Listing containers with using non authorized user
+        # list containers using non-authorized user
 
-        # Randomly creating user
+        # create user
         self.data.setup_test_user()
-
         resp, body = \
             self.token_client.auth(self.data.test_user,
                                    self.data.test_password,
@@ -97,14 +89,11 @@ class AccountTest(base.BaseObjectTest):
             self.token_client.get_token(self.data.test_user,
                                         self.data.test_password,
                                         self.data.test_tenant)
-
         custom_headers = {'X-Auth-Token': new_token}
-
         params = {'format': 'json'}
-        # Trying to list containers with non authorized user token
+        # list containers with non-authorized user token
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_account_client.list_account_containers,
                           params=params, metadata=custom_headers)
-
-        #Attempt to the delete the user setup created
+        # delete the user which was created
         self.data.teardown_all()

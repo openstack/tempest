@@ -22,7 +22,6 @@ from tempest.tests.object_storage import base
 
 
 class ContainerTest(base.BaseObjectTest):
-
     @classmethod
     def setUpClass(cls):
         super(ContainerTest, cls).setUpClass()
@@ -31,73 +30,58 @@ class ContainerTest(base.BaseObjectTest):
     @classmethod
     def tearDownClass(cls):
         for container in cls.containers:
-            #Get list of all object in the container
             objlist = \
                 cls.container_client.list_all_container_objects(container)
-
-            #Attempt to delete every object in the container
+            # delete every object in the container
             for obj in objlist:
                 resp, _ = \
                     cls.object_client.delete_object(container, obj['name'])
-
-            #Attempt to delete the container
+            # delete the container
             resp, _ = cls.container_client.delete_container(container)
 
     @attr(type='smoke')
     def test_create_container(self):
-        # Create a container, test responses
-
-        #Create a container
         container_name = rand_name(name='TestContainer')
         resp, body = self.container_client.create_container(container_name)
         self.containers.append(container_name)
-
         self.assertTrue(resp['status'] in ('202', '201'))
 
     @attr(type='smoke')
     def test_delete_container(self):
-        # Create and Delete a container, test responses
-
-        #Create a container
+        # create a container
         container_name = rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
         self.containers.append(container_name)
-
-        #Delete Container
+        # delete container
         resp, _ = self.container_client.delete_container(container_name)
         self.assertEqual(resp['status'], '204')
         self.containers.remove(container_name)
 
     @attr(type='smoke')
     def test_list_container_contents_json(self):
-        # Add metadata to object
+        # add metadata to an object
 
-        #Create a container
+        # create a container
         container_name = rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
         self.containers.append(container_name)
-
-        #Create Object
+        # create object
         object_name = rand_name(name='TestObject')
         data = arbitrary_string()
         resp, _ = self.object_client.create_object(container_name,
                                                    object_name, data)
-
-        #Set Object Metadata
+        # set object metadata
         meta_key = rand_name(name='Meta-Test-')
         meta_value = rand_name(name='MetaValue-')
         orig_metadata = {meta_key: meta_value}
-
         resp, _ = self.object_client.update_object_metadata(container_name,
                                                             object_name,
                                                             orig_metadata)
-
-        #Get Container contents list json format
+        # get container contents list
         params = {'format': 'json'}
         resp, object_list = \
             self.container_client.\
             list_container_contents(container_name, params=params)
-
         self.assertEqual(resp['status'], '200')
         self.assertIsNotNone(object_list)
 
@@ -106,14 +90,13 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_container_metadata(self):
-        # Update/Retrieve/Delete Container Metadata
+        # update/retrieve/delete container metadata
 
-        # Create a container
+        # create a container
         container_name = rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
         self.containers.append(container_name)
-
-        # Update container metadata
+        # update container metadata
         metadata = {'name': 'Pictures',
                     'description': 'Travel'
                     }
@@ -122,7 +105,7 @@ class ContainerTest(base.BaseObjectTest):
                                                             metadata=metadata)
         self.assertEqual(resp['status'], '204')
 
-        # List container metadata
+        # list container metadata
         resp, _ = self.container_client.list_container_metadata(
             container_name)
         self.assertEqual(resp['status'], '204')
@@ -131,18 +114,19 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-name'], 'Pictures')
         self.assertEqual(resp['x-container-meta-description'], 'Travel')
 
-        # Delete container metadata
+        # delete container metadata
         resp, _ = self.container_client.delete_container_metadata(
             container_name,
             metadata=metadata.keys())
         self.assertEqual(resp['status'], '204')
 
+        # check if the metadata are no longer there
         resp, _ = self.container_client.list_container_metadata(container_name)
         self.assertEqual(resp['status'], '204')
         self.assertNotIn('x-container-meta-name', resp)
         self.assertNotIn('x-container-meta-description', resp)
 
-        # Delete Container
+        # delete container
         resp, _ = self.container_client.delete_container(container_name)
         self.assertEqual(resp['status'], '204')
         self.containers.remove(container_name)
