@@ -47,9 +47,10 @@ class Client(object):
         self.channel_timeout = float(channel_timeout)
         self.buf_size = 1024
 
-    def _get_ssh_connection(self):
+    def _get_ssh_connection(self, sleep=1.5, backoff=1.01):
         """Returns an ssh connection to the specified host."""
         _timeout = True
+        bsleep = sleep
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(
             paramiko.AutoAddPolicy())
@@ -64,10 +65,10 @@ class Client(object):
                             timeout=self.timeout, pkey=self.pkey)
                 _timeout = False
                 break
-            except socket.error:
-                continue
-            except paramiko.AuthenticationException:
-                time.sleep(5)
+            except (socket.error,
+                    paramiko.AuthenticationException):
+                time.sleep(bsleep)
+                bsleep *= backoff
                 continue
         if _timeout:
             raise exceptions.SSHTimeout(host=self.host,
