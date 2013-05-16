@@ -100,14 +100,6 @@ class ImagesTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.Duplicate, self.client.create_image,
                           server['id'], snapshot_name)
 
-    @attr(type='negative')
-    def test_create_image_when_server_is_building(self):
-        # Return error when creating an image of a server that is building
-        resp, server = self.create_server(wait_until='BUILD')
-        snapshot_name = rand_name('test-snap-')
-        self.assertRaises(exceptions.Duplicate, self.client.create_image,
-                          server['id'], snapshot_name)
-
     @testtools.skip("Until Bug #1039739 is fixed")
     @attr(type='negative')
     def test_create_image_when_server_is_rebooting(self):
