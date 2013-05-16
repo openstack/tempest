@@ -186,15 +186,24 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         flavor = kwargs.get('flavor', cls.flavor_ref)
         image_id = kwargs.get('image_id', cls.image_ref)
 
-        resp, server = cls.servers_client.create_server(
+        resp, body = cls.servers_client.create_server(
             name, image_id, flavor, **kwargs)
-        cls.servers.append(server)
+
+        # handle the case of multiple servers
+        servers = [body]
+        if 'min_count' in kwargs or 'max_count' in kwargs:
+            # Get servers created which name match with name param.
+            r, b = cls.servers_client.list_servers()
+            servers = [s for s in b['servers'] if s['name'].startswith(name)]
+
+        cls.servers.extend(servers)
 
         if 'wait_until' in kwargs:
-            cls.servers_client.wait_for_server_status(
-                server['id'], kwargs['wait_until'])
+            for server in servers:
+                cls.servers_client.wait_for_server_status(
+                    server['id'], kwargs['wait_until'])
 
-        return resp, server
+        return resp, body
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""

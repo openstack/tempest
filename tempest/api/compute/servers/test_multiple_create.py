@@ -25,16 +25,6 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
     _interface = 'json'
     _name = 'multiple-create-test'
 
-    def _get_created_servers(self, name):
-        """Get servers created which name match with name param."""
-        resp, body = self.servers_client.list_servers()
-        servers = body['servers']
-        servers_created = []
-        for server in servers:
-            if server['name'].startswith(name):
-                servers_created.append(server)
-        return servers_created
-
     def _generate_name(self):
         return rand_name(self._name)
 
@@ -45,18 +35,6 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
         """
         kwargs['name'] = kwargs.get('name', self._generate_name())
         resp, body = self.create_server(**kwargs)
-        created_servers = self._get_created_servers(kwargs['name'])
-        # NOTE(maurosr): append it to cls.servers list from base.BaseCompute
-        # class.
-        self.servers.extend(created_servers)
-        # NOTE(maurosr): get a server list, check status of the ones with names
-        # that match and wait for them become active. At a first look, since
-        # they are building in parallel, wait inside the for doesn't seem be
-        # harmful to the performance
-        if wait_until is not None:
-            for server in created_servers:
-                self.servers_client.wait_for_server_status(server['id'],
-                                                           wait_until)
 
         return resp, body
 
