@@ -22,6 +22,7 @@ from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest.services.volume.json.admin import volume_types_client
 from tempest.services.volume.json import volumes_client
+from tempest.test import attr
 from tempest.tests.volume import base
 
 LOG = logging.getLogger(__name__)
@@ -108,6 +109,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
         super(VolumeMultiBackendTest, cls).tearDownClass()
 
+    @attr(type=['smoke', 'gate'])
     def test_multi_backend_enabled(self):
         # this test checks that multi backend is enabled for at least the
         # computes where the volumes created in setUp were made
@@ -131,6 +133,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
                "%(volume_host2)s") % locals()
         self.assertTrue(len(volume_host2.split("@")) > 1, msg)
 
+    @attr(type='gate')
     def test_backend_name_distinction(self):
         # this test checks that the two volumes created at setUp doesn't
         # belong to the same backend (if they are in the same backend, that

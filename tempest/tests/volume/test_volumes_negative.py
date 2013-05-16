@@ -17,6 +17,7 @@
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.test import attr
 from tempest.tests.volume import base
 
 
@@ -28,6 +29,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         super(VolumesNegativeTest, cls).setUpClass()
         cls.client = cls.volumes_client
 
+    @attr(type='gate')
     def test_volume_get_nonexistant_volume_id(self):
         # Should not be able to get a nonexistant volume
         #Creating a nonexistant volume id
@@ -43,6 +45,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           non_exist_id)
 
+    @attr(type='gate')
     def test_volume_delete_nonexistant_volume_id(self):
         # Should not be able to delete a nonexistant Volume
         # Creating nonexistant volume id
@@ -58,6 +61,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           non_exist_id)
 
+    @attr(type='gate')
     def test_create_volume_with_invalid_size(self):
         # Should not be able to create volume with invalid size
         # in request
@@ -66,6 +70,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
 
+    @attr(type='gate')
     def test_create_volume_with_out_passing_size(self):
         # Should not be able to create volume without passing size
         # in request
@@ -74,6 +79,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
 
+    @attr(type='gate')
     def test_create_volume_with_size_zero(self):
         # Should not be able to create volume with size zero
         v_name = rand_name('Volume-')
@@ -81,20 +87,24 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
 
+    @attr(type='gate')
     def test_get_invalid_volume_id(self):
         # Should not be able to get volume with invalid id
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           '#$%%&^&^')
 
+    @attr(type='gate')
     def test_get_volume_without_passing_volume_id(self):
         # Should not be able to get volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.get_volume, '')
 
+    @attr(type='gate')
     def test_delete_invalid_volume_id(self):
         # Should not be able to delete volume when invalid ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           '!@#$%^&*()')
 
+    @attr(type='gate')
     def test_delete_volume_without_passing_volume_id(self):
         # Should not be able to delete volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
