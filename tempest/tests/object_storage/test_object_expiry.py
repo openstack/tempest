@@ -25,12 +25,9 @@ import time
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
-
     @classmethod
     def setUpClass(cls):
         super(ObjectExpiryTest, cls).setUpClass()
-
-        #Create a container
         cls.container_name = rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
 
@@ -41,54 +38,45 @@ class ObjectExpiryTest(base.BaseObjectTest):
         But delete action for the expired object is raising
         NotFound exception and also non empty container cannot be deleted.
         """
-
-        #Get list of all object in the container
         objlist = \
             cls.container_client.list_all_container_objects(cls.container_name)
-
-        #Attempt to delete every object in the container
+        # delete every object in the container
         if objlist:
             for obj in objlist:
                 resp, _ = cls.object_client.delete_object(cls.container_name,
                                                           obj['name'])
-
-        #Attempt to delete the container
+        # delete the container
         resp, _ = cls.container_client.delete_container(cls.container_name)
 
     @testtools.skip('Until Bug #1069849 is resolved.')
     @attr(type='regression')
     def test_get_object_after_expiry_time(self):
-        # GET object after expiry time
-        #TODO(harika-vakadi): Similar test case has to be created for
+        #TODO(harika-vakadi): similar test case has to be created for
         # "X-Delete-At", after this test case works.
 
-        #Create Object
+        # create object
         object_name = rand_name(name='TestObject')
         data = arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
-
-        #Update object metadata with expiry time of 3 seconds
+        # update object metadata with expiry time of 3 seconds
         metadata = {'X-Delete-After': '3'}
         resp, _ = \
             self.object_client.update_object_metadata(self.container_name,
                                                       object_name, metadata,
                                                       metadata_prefix='')
-
         resp, _ = \
             self.object_client.list_object_metadata(self.container_name,
                                                     object_name)
-
         self.assertEqual(resp['status'], '200')
         self.assertIn('x-delete-at', resp)
-
         resp, body = self.object_client.get_object(self.container_name,
                                                    object_name)
         self.assertEqual(resp['status'], '200')
-        # Check data
+        # check data
         self.assertEqual(body, data)
-        # Sleep for over 5 seconds, so that object is expired
+        # sleep for over 5 seconds, so that object expires
         time.sleep(5)
-        # Verification of raised exception after object gets expired
+        # object should not be there anymore
         self.assertRaises(exceptions.NotFound, self.object_client.get_object,
                           self.container_name, object_name)

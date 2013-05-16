@@ -21,7 +21,6 @@ from tempest.tests.object_storage import base
 
 
 class ContainerTest(base.BaseObjectTest):
-
     @classmethod
     def setUpClass(cls):
         super(ContainerTest, cls).setUpClass()
@@ -30,16 +29,13 @@ class ContainerTest(base.BaseObjectTest):
     @classmethod
     def tearDownClass(cls):
         for container in cls.containers:
-            #Get list of all object in the container
             objlist = \
                 cls.container_client.list_all_container_objects(container)
-
-            #Attempt to delete every object in the container
+            # delete every object in the container
             for obj in objlist:
                 resp, _ = \
                     cls.object_client.delete_object(container, obj['name'])
-
-            #Attempt to delete the container
+            # delete the container
             resp, _ = cls.container_client.delete_container(container)
 
     def assertContainer(self, container, count, byte, versioned):
@@ -54,16 +50,13 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_versioned_container(self):
-        # Versioned container responses tests
-
-        # Create a containers
+        # create container
         vers_container_name = rand_name(name='TestVersionContainer')
         resp, body = self.container_client.create_container(
             vers_container_name)
         self.containers.append(vers_container_name)
         self.assertIn(resp['status'], ('202', '201'))
-        self.assertContainer(vers_container_name, '0', '0',
-                             'Missing Header')
+        self.assertContainer(vers_container_name, '0', '0', 'Missing Header')
 
         base_container_name = rand_name(name='TestBaseContainer')
         headers = {'X-versions-Location': vers_container_name}
@@ -75,18 +68,17 @@ class ContainerTest(base.BaseObjectTest):
         self.assertIn(resp['status'], ('202', '201'))
         self.assertContainer(base_container_name, '0', '0',
                              vers_container_name)
-        # Create Object
         object_name = rand_name(name='TestObject')
+        # create object
         resp, _ = self.object_client.create_object(base_container_name,
                                                    object_name, '1')
-
+        # create 2nd version of object
         resp, _ = self.object_client.create_object(base_container_name,
                                                    object_name, '2')
-
         resp, body = self.object_client.get_object(base_container_name,
                                                    object_name)
         self.assertEqual(body, '2')
-        # Delete Object version 2
+        # delete object version 2
         resp, _ = self.object_client.delete_object(base_container_name,
                                                    object_name)
         self.assertContainer(base_container_name, '1', '1',
@@ -94,21 +86,18 @@ class ContainerTest(base.BaseObjectTest):
         resp, body = self.object_client.get_object(base_container_name,
                                                    object_name)
         self.assertEqual(body, '1')
-
-        # Delete Object version 1
+        # delete object version 1
         resp, _ = self.object_client.delete_object(base_container_name,
                                                    object_name)
-        # Containers are Empty
+        # containers should be empty
         self.assertContainer(base_container_name, '0', '0',
                              vers_container_name)
         self.assertContainer(vers_container_name, '0', '0',
                              'Missing Header')
-
-        # Delete Containers
+        # delete containers
         resp, _ = self.container_client.delete_container(base_container_name)
         self.assertEqual(resp['status'], '204')
         self.containers.remove(base_container_name)
-
         resp, _ = self.container_client.delete_container(vers_container_name)
         self.assertEqual(resp['status'], '204')
         self.containers.remove(vers_container_name)
