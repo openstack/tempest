@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.compute import base
@@ -30,6 +31,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         cls.client = cls.os.quotas_client
         cls.adm_client = cls.os_adm.quotas_client
         cls.identity_admin_client = cls._get_identity_admin_client()
+        cls.sg_client = cls.security_groups_client
 
         resp, tenants = cls.identity_admin_client.list_tenants()
 
@@ -156,6 +158,60 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
+
+    @attr(type='negative')
+    def test_security_groups_exceed_limit(self):
+        # Negative test: Creation Security Groups over limit should FAIL
+
+        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
+        default_sg_quota = quota_set['security_groups']
+        sg_quota = 0  # Set the quota to zero to conserve resources
+
+        resp, quota_set =\
+            self.adm_client.update_quota_set(self.demo_tenant_id,
+                                             security_groups=sg_quota)
+
+        self.addCleanup(self.adm_client.update_quota_set,
+                        self.demo_tenant_id,
+                        security_groups=default_sg_quota)
+
+        # Check we cannot create anymore
+        self.assertRaises(exceptions.OverLimit,
+                          self.sg_client.create_security_group,
+                          "sg-overlimit", "sg-desc")
+
+    @attr(type='negative')
+    def test_security_groups_rules_exceed_limit(self):
+        # Negative test: Creation of Security Group Rules should FAIL
+        # when we reach limit maxSecurityGroupRules
+
+        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
+        default_sg_rules_quota = quota_set['security_group_rules']
+        sg_rules_quota = 0  # Set the quota to zero to conserve resources
+
+        resp, quota_set =\
+            self.adm_client.update_quota_set(
+                self.demo_tenant_id,
+                security_group_rules=sg_rules_quota)
+
+        self.addCleanup(self.adm_client.update_quota_set,
+                        self.demo_tenant_id,
+                        security_group_rules=default_sg_rules_quota)
+
+        s_name = rand_name('securitygroup-')
+        s_description = rand_name('description-')
+        resp, securitygroup =\
+            self.sg_client.create_security_group(s_name, s_description)
+        self.addCleanup(self.sg_client.delete_security_group,
+                        securitygroup['id'])
+
+        secgroup_id = securitygroup['id']
+        ip_protocol = 'tcp'
+
+        # Check we cannot create SG rule anymore
+        self.assertRaises(exceptions.OverLimit,
+                          self.sg_client.create_security_group_rule,
+                          secgroup_id, ip_protocol, 1025, 1025)
 
 
 class QuotasAdminTestXML(QuotasAdminTestJSON):
