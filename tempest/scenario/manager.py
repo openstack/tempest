@@ -32,11 +32,11 @@ try:
 except ImportError:
     pass
 
+from tempest.api.network import common as net_common
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 import tempest.manager
 import tempest.test
-from tempest.tests.network import common as net_common
 
 
 LOG = logging.getLogger(__name__)

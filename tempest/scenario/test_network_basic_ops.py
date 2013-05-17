@@ -16,10 +16,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api.network import common as net_common
 from tempest.common.utils.data_utils import rand_name
 from tempest.scenario import manager
 from tempest.test import attr
-from tempest.tests.network import common as net_common
 
 
 class TestNetworkBasicOps(manager.NetworkScenarioTest):
