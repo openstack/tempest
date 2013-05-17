@@ -28,7 +28,6 @@ def compare_key_pairs(a, b):
             a.fingerprint == b.fingerprint)
 
 
-@attr("EC2")
 class EC2KeysTest(BotoTestCase):
 
     @classmethod

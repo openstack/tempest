@@ -56,14 +56,14 @@ class FlavorsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
                           999)
 
-    @attr(type='positive', bug='lp912922')
+    @attr(type='positive')
     def test_list_flavors_limit_results(self):
         # Only the expected number of flavors should be returned
         params = {'limit': 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertEqual(1, len(flavors))
 
-    @attr(type='positive', bug='lp912922')
+    @attr(type='positive')
     def test_list_flavors_detailed_limit_results(self):
         # Only the expected number of flavors (detailed) should be returned
         params = {'limit': 1}

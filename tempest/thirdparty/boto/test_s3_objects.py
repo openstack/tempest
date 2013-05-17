@@ -25,7 +25,6 @@ from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 
 
-@attr("S3")
 class S3BucketsTest(BotoTestCase):
 
     @classmethod

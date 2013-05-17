@@ -29,7 +29,6 @@ def compare_volumes(a, b):
             a.size == b.size)
 
 
-@attr("EC2")
 class EC2VolumesTest(BotoTestCase):
 
     @classmethod

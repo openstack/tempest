@@ -22,7 +22,6 @@ from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 
 
-@attr("EC2")
 class EC2NetworkTest(BotoTestCase):
 
     @classmethod

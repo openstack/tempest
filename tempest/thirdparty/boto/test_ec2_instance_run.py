@@ -33,7 +33,6 @@ from tempest.thirdparty.boto.utils.wait import state_wait
 LOG = logging.getLogger(__name__)
 
 
-@attr("S3", "EC2")
 class InstanceRunTest(BotoTestCase):
 
     @classmethod
@@ -141,7 +140,7 @@ class InstanceRunTest(BotoTestCase):
 
     #NOTE(afazekas): doctored test case,
     # with normal validation it would fail
-    @attr("slow", type='smoke')
+    @attr(type='smoke')
     def test_integration_1(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])

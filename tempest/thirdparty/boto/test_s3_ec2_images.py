@@ -27,7 +27,6 @@ from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
 from tempest.thirdparty.boto.utils.wait import state_wait
 
 
-@attr("S3", "EC2")
 class S3ImagesTest(BotoTestCase):
 
     @classmethod
