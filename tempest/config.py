@@ -129,6 +129,10 @@ ComputeGroup = [
                 default=False,
                 help="Does the test environment use block devices for live "
                      "migration"),
+    cfg.BoolOpt('block_migrate_supports_cinder_iscsi',
+                default=False,
+                help="Does the test environment block migration support "
+                     "cinder iSCSI volumes"),
     cfg.BoolOpt('change_password_available',
                 default=False,
                 help="Does the test environment support changing the admin "

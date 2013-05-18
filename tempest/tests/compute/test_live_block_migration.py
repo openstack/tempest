@@ -91,6 +91,13 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
             self.created_server_ids.append(server_id)
             return server_id
 
+    def _volume_clean_up(self, server_id, volume_id):
+        resp, body = self.volumes_client.get_volume(volume_id)
+        if body['status'] == 'in-use':
+            self.servers_client.detach_volume(server_id, volume_id)
+            self.volumes_client.wait_for_volume_status(volume_id, 'available')
+        self.volumes_client.delete_volume(volume_id)
+
     @attr(type='positive')
     @testtools.skipIf(not CONF.compute.live_migration_available,
                       'Live migration not available')
@@ -116,6 +123,37 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
         self.assertRaises(exceptions.BadRequest, self._migrate_server_to,
                           server_id, target_host)
         self.assertEquals('ACTIVE', self._get_server_status(server_id))
+
+    @attr(type='positive')
+    @testtools.skipIf(not CONF.compute.live_migration_available or
+                      not CONF.compute.use_block_migration_for_live_migration,
+                      'Block Live migration not available')
+    @testtools.skipIf(not CONF.compute.block_migrate_supports_cinder_iscsi,
+                      'Block Live migration not configured for iSCSI')
+    def test_iscsi_volume(self):
+        # Live block migrate an instance to another host
+        if len(self._get_compute_hostnames()) < 2:
+            raise self.skipTest(
+                "Less than 2 compute nodes, skipping migration test.")
+        server_id = self._get_an_active_server()
+        actual_host = self._get_host_for_server(server_id)
+        target_host = self._get_host_other_than(actual_host)
+
+        resp, volume = self.volumes_client.create_volume(1,
+                                                         display_name='test')
+
+        self.volumes_client.wait_for_volume_status(volume['id'],
+                                                   'available')
+        self.addCleanup(self._volume_clean_up, server_id, volume['id'])
+
+        # Attach the volume to the server
+        self.servers_client.attach_volume(server_id, volume['id'],
+                                          device='/dev/xvdb')
+        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+
+        self._migrate_server_to(server_id, target_host)
+        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
+        self.assertEquals(target_host, self._get_host_for_server(server_id))
 
     @classmethod
     def tearDownClass(cls):
