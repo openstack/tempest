@@ -243,206 +243,6 @@ class ObjectTest(base.BaseObjectTest):
             resp, _ = self.container_client.delete_container(
                 dst_container_name)
 
-    @attr(type='smoke')
-    def test_access_public_container_object_without_using_creds(self):
-        # make container public-readable and access an object in it object
-        # anonymously, without using credentials
-        try:
-            resp_meta = None
-            # update container metadata to make it publicly readable
-            cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
-            resp_meta, body = self.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers, metadata_prefix='')
-            self.assertEqual(resp_meta['status'], '204')
-            # create object
-            object_name = rand_name(name='Object')
-            data = arbitrary_string(size=len(object_name),
-                                    base_text=object_name)
-            resp, _ = self.object_client.create_object(self.container_name,
-                                                       object_name, data)
-            self.assertEqual(resp['status'], '201')
-
-            # list container metadata
-            resp_meta, _ = self.container_client.list_container_metadata(
-                self.container_name)
-            self.assertEqual(resp_meta['status'], '204')
-            self.assertIn('x-container-read', resp_meta)
-            self.assertEqual(resp_meta['x-container-read'], '.r:*,.rlistings')
-
-            # trying to get object with empty headers as it is public readable
-            resp, body = self.custom_object_client.get_object(
-                self.container_name, object_name, metadata={})
-            self.assertEqual(body, data)
-        finally:
-            if resp_meta['status'] == '204':
-                # delete updated container metadata, to revert back.
-                resp, body = self.container_client.delete_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
-                resp, _ = self.container_client.list_container_metadata(
-                    self.container_name)
-                self.assertEqual(resp['status'], '204')
-                self.assertIn('x-container-read', resp)
-                self.assertEqual(resp['x-container-read'], 'x')
-
-    @attr(type='smoke')
-    def test_access_public_object_with_another_user_creds(self):
-        # make container public-readable and access an object in it using
-        # another user's credentials
-        try:
-            resp_meta = None
-            cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
-            resp_meta, body = self.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers,
-                metadata_prefix='')
-            self.assertEqual(resp_meta['status'], '204')
-            # create object
-            object_name = rand_name(name='Object')
-            data = arbitrary_string(size=len(object_name) * 1,
-                                    base_text=object_name)
-            resp, _ = self.object_client.create_object(self.container_name,
-                                                       object_name, data)
-            self.assertEqual(resp['status'], '201')
-
-            # list container metadata
-            resp, _ = self.container_client.list_container_metadata(
-                self.container_name)
-            self.assertEqual(resp['status'], '204')
-            self.assertIn('x-container-read', resp)
-            self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
-
-            # get auth token of alternative user
-            token = self.identity_client_alt.get_auth()
-            headers = {'X-Auth-Token': token}
-            # access object using alternate user creds
-            resp, body = self.custom_object_client.get_object(
-                self.container_name, object_name,
-                metadata=headers)
-            self.assertEqual(body, data)
-
-        except Exception as e:
-            self.fail("Failed to get public readable object with another"
-                      " user creds raised exception is %s" % e)
-
-        finally:
-            if resp_meta['status'] == '204':
-                # delete updated container metadata, to revert back.
-                resp, body = self.container_client.delete_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
-                resp, _ = self.container_client.list_container_metadata(
-                    self.container_name)
-                self.assertEqual(resp['status'], '204')
-                self.assertIn('x-container-read', resp)
-                self.assertEqual(resp['x-container-read'], 'x')
-
-    @testtools.skip('Until Bug #1020722 is resolved.')
-    @attr(type='smoke')
-    def test_write_public_object_without_using_creds(self):
-        # make container public-writable, and create object anonymously, e.g.
-        # without using credentials
-        try:
-            resp_meta = None
-            # update container metadata to make publily writable
-            cont_headers = {'X-Container-Write': '-*'}
-            resp_meta, body = self.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers, metadata_prefix='')
-            self.assertEqual(resp_meta['status'], '204')
-            # list container metadata
-            resp, _ = self.container_client.list_container_metadata(
-                self.container_name)
-            self.assertEqual(resp['status'], '204')
-            self.assertIn('x-container-write', resp)
-            self.assertEqual(resp['x-container-write'], '-*')
-
-            object_name = rand_name(name='Object')
-            data = arbitrary_string(size=len(object_name),
-                                    base_text=object_name)
-            headers = {'Content-Type': 'application/json',
-                       'Accept': 'application/json'}
-            # create object as anonymous user
-            resp, body = self.custom_object_client.create_object(
-                self.container_name, object_name, data, metadata=headers)
-            self.assertEqual(resp['status'], '201')
-
-        except Exception as e:
-            self.fail("Failed to create public writable object without using"
-                      " creds raised exception is %s" % e)
-
-        finally:
-            if resp_meta['status'] == '204':
-                # delete updated container metadata, to revert back.
-                resp, body = self.container_client.delete_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
-                resp, _ = self.container_client.list_container_metadata(
-                    self.container_name)
-                self.assertEqual(resp['status'], '204')
-                self.assertIn('x-container-write', resp)
-                self.assertEqual(resp['x-container-write'], 'x')
-
-    @testtools.skip('Until Bug #1020722 is resolved.')
-    @attr(type='smoke')
-    def test_write_public_with_another_user_creds(self):
-        # make container public-writable, and create object with another user's
-        # credentials
-        try:
-            resp_meta = None
-            # update container metadata to make it publicly writable
-            cont_headers = {'X-Container-Write': '-*'}
-            resp_meta, body = self.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers,
-                metadata_prefix='')
-            self.assertEqual(resp_meta['status'], '204')
-            # list container metadata
-            resp, _ = self.container_client.list_container_metadata(
-                self.container_name)
-            self.assertEqual(resp['status'], '204')
-            self.assertIn('x-container-write', resp)
-            self.assertEqual(resp['x-container-write'], '-*')
-
-            # trying to get auth token of alternative user
-            token = self.identity_client_alt.get_auth()
-            headers = {'Content-Type': 'application/json',
-                       'Accept': 'application/json',
-                       'X-Auth-Token': token}
-
-            # trying to create an object with another user's creds
-            object_name = rand_name(name='Object')
-            data = arbitrary_string(size=len(object_name),
-                                    base_text=object_name)
-            resp, body = self.custom_object_client.create_object(
-                self.container_name, object_name, data, metadata=headers)
-            self.assertEqual(resp['status'], '201')
-        except Exception as e:
-            self.fail("Failed to create public writable object with another"
-                      " user creds raised exception is %s" % e)
-        finally:
-            if resp_meta['status'] == '204':
-                # delete updated container metadata, to revert back.
-                resp, body = self.container_client.delete_container_metadata(
-                    self.container_name, metadata=cont_headers,
-                    metadata_prefix='')
-                resp, _ = self.container_client.list_container_metadata(
-                    self.container_name)
-                self.assertEqual(resp['status'], '204')
-                self.assertIn('x-container-write', resp)
-                self.assertEqual(resp['x-container-write'], 'x')
-
-    @attr(type='negative')
-    def test_access_object_without_using_creds(self):
-        # create object
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name),
-                                base_text=object_name)
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   object_name, data)
-        self.assertEqual(resp['status'], '201')
-        # trying to get object with empty headers
-        self.assertRaises(exceptions.Unauthorized,
-                          self.custom_object_client.get_object,
-                          self.container_name, object_name, metadata={})
-
     @attr(type='negative')
     def test_write_object_without_using_creds(self):
         # trying to create object with empty headers
@@ -578,3 +378,157 @@ class ObjectTest(base.BaseObjectTest):
         resp, body = self.object_client.get_object(
             self.container_name, object_name)
         self.assertEqual(data * segments, body)
+
+
+class PublicObjectTest(base.BaseObjectTest):
+    def setUp(self):
+        super(PublicObjectTest, self).setUp()
+        self.container_name = rand_name(name='TestContainer')
+        self.container_client.create_container(self.container_name)
+
+    def tearDown(self):
+        objlist = self.container_client.list_all_container_objects(
+            self.container_name)
+        # delete every object in the container
+        for obj in objlist:
+            resp, _ = self.object_client.delete_object(
+                self.container_name, obj['name'])
+        # delete the container
+        resp, _ = self.container_client.delete_container(self.container_name)
+        super(PublicObjectTest, self).tearDown()
+
+    @attr(type='smoke')
+    def test_access_public_container_object_without_using_creds(self):
+        # make container public-readable and access an object in it object
+        # anonymously, without using credentials
+
+        # update container metadata to make it publicly readable
+        cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
+        resp_meta, body = self.container_client.update_container_metadata(
+            self.container_name, metadata=cont_headers, metadata_prefix='')
+        self.assertEqual(resp_meta['status'], '204')
+        # create object
+        object_name = rand_name(name='Object')
+        data = arbitrary_string(size=len(object_name),
+                                base_text=object_name)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   object_name, data)
+        self.assertEqual(resp['status'], '201')
+
+        # list container metadata
+        resp_meta, _ = self.container_client.list_container_metadata(
+            self.container_name)
+        self.assertEqual(resp_meta['status'], '204')
+        self.assertIn('x-container-read', resp_meta)
+        self.assertEqual(resp_meta['x-container-read'], '.r:*,.rlistings')
+
+        # trying to get object with empty headers as it is public readable
+        resp, body = self.custom_object_client.get_object(
+            self.container_name, object_name, metadata={})
+        self.assertEqual(body, data)
+
+    @attr(type='smoke')
+    def test_access_public_object_with_another_user_creds(self):
+        # make container public-readable and access an object in it using
+        # another user's credentials
+        try:
+            cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
+            resp_meta, body = self.container_client.update_container_metadata(
+                self.container_name, metadata=cont_headers,
+                metadata_prefix='')
+            self.assertEqual(resp_meta['status'], '204')
+            # create object
+            object_name = rand_name(name='Object')
+            data = arbitrary_string(size=len(object_name) * 1,
+                                    base_text=object_name)
+            resp, _ = self.object_client.create_object(self.container_name,
+                                                       object_name, data)
+            self.assertEqual(resp['status'], '201')
+
+            # list container metadata
+            resp, _ = self.container_client.list_container_metadata(
+                self.container_name)
+            self.assertEqual(resp['status'], '204')
+            self.assertIn('x-container-read', resp)
+            self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
+
+            # get auth token of alternative user
+            token = self.identity_client_alt.get_auth()
+            headers = {'X-Auth-Token': token}
+            # access object using alternate user creds
+            resp, body = self.custom_object_client.get_object(
+                self.container_name, object_name,
+                metadata=headers)
+            self.assertEqual(body, data)
+
+        except Exception as e:
+            self.fail("Failed to get public readable object with another"
+                      " user creds raised exception is %s" % e)
+
+    @testtools.skip('Until Bug #1020722 is resolved.')
+    @attr(type='smoke')
+    def test_write_public_object_without_using_creds(self):
+        # make container public-writable, and create object anonymously, e.g.
+        # without using credentials
+        try:
+            # update container metadata to make publicly writable
+            cont_headers = {'X-Container-Write': '-*'}
+            resp_meta, body = self.container_client.update_container_metadata(
+                self.container_name, metadata=cont_headers, metadata_prefix='')
+            self.assertEqual(resp_meta['status'], '204')
+            # list container metadata
+            resp, _ = self.container_client.list_container_metadata(
+                self.container_name)
+            self.assertEqual(resp['status'], '204')
+            self.assertIn('x-container-write', resp)
+            self.assertEqual(resp['x-container-write'], '-*')
+
+            object_name = rand_name(name='Object')
+            data = arbitrary_string(size=len(object_name),
+                                    base_text=object_name)
+            headers = {'Content-Type': 'application/json',
+                       'Accept': 'application/json'}
+            # create object as anonymous user
+            resp, body = self.custom_object_client.create_object(
+                self.container_name, object_name, data, metadata=headers)
+            self.assertEqual(resp['status'], '201')
+
+        except Exception as e:
+            self.fail("Failed to create public writable object without using"
+                      " creds raised exception is %s" % e)
+
+    @testtools.skip('Until Bug #1020722 is resolved.')
+    @attr(type='smoke')
+    def test_write_public_with_another_user_creds(self):
+        # make container public-writable, and create object with another user's
+        # credentials
+        try:
+            # update container metadata to make it publicly writable
+            cont_headers = {'X-Container-Write': '-*'}
+            resp_meta, body = self.container_client.update_container_metadata(
+                self.container_name, metadata=cont_headers,
+                metadata_prefix='')
+            self.assertEqual(resp_meta['status'], '204')
+            # list container metadata
+            resp, _ = self.container_client.list_container_metadata(
+                self.container_name)
+            self.assertEqual(resp['status'], '204')
+            self.assertIn('x-container-write', resp)
+            self.assertEqual(resp['x-container-write'], '-*')
+
+            # trying to get auth token of alternative user
+            token = self.identity_client_alt.get_auth()
+            headers = {'Content-Type': 'application/json',
+                       'Accept': 'application/json',
+                       'X-Auth-Token': token}
+
+            # trying to create an object with another user's creds
+            object_name = rand_name(name='Object')
+            data = arbitrary_string(size=len(object_name),
+                                    base_text=object_name)
+            resp, body = self.custom_object_client.create_object(
+                self.container_name, object_name, data, metadata=headers)
+            self.assertEqual(resp['status'], '201')
+        except Exception as e:
+            self.fail("Failed to create public writable object with another"
+                      " user creds raised exception is %s" % e)
