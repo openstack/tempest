@@ -39,9 +39,13 @@ def attr(*args, **kwargs):
     def decorator(f):
         if 'type' in kwargs and isinstance(kwargs['type'], str):
             f = testtools.testcase.attr(kwargs['type'])(f)
+            if kwargs['type'] == 'smoke':
+                f = testtools.testcase.attr('gate')(f)
         elif 'type' in kwargs and isinstance(kwargs['type'], list):
             for attr in kwargs['type']:
                 f = testtools.testcase.attr(attr)(f)
+                if attr == 'smoke':
+                    f = testtools.testcase.attr('gate')(f)
         return nose.plugins.attrib.attr(*args, **kwargs)(f)
 
     return decorator

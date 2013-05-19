@@ -52,7 +52,7 @@ class VolumesActionsTest(BaseVolumeTest):
 
         super(VolumesActionsTest, cls).tearDownClass()
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
         try:

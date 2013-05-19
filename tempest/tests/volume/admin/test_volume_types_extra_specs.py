@@ -34,7 +34,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
         cls.client.delete_volume_type(cls.volume_type['id'])
         super(VolumeTypesExtraSpecsTest, cls).tearDownClass()
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_volume_type_extra_specs_list(self):
         # List Volume types extra specs.
         try:
@@ -77,7 +77,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
         except Exception:
             self.fail("Couldnt update volume type extra spec")
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_volume_type_extra_spec_create_get_delete(self):
         # Create/Get/Delete volume type extra spec.
         try:

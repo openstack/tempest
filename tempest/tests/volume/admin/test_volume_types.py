@@ -38,7 +38,7 @@ class VolumeTypesTest(BaseVolumeTest):
                                                                auth_url,
                                                                adm_tenant)
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_volume_type_list(self):
         # List Volume types.
         try:
@@ -48,7 +48,7 @@ class VolumeTypesTest(BaseVolumeTest):
         except Exception:
             self.fail("Could not list volume types")
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
         # Create/get/delete volume with volume_type and extra spec.
         try:
@@ -100,7 +100,7 @@ class VolumeTypesTest(BaseVolumeTest):
                 resp, _ = self.client.delete_volume_type(body['id'])
                 self.assertEqual(202, resp.status)
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_volume_type_create_delete(self):
         # Create/Delete volume type.
         try:
@@ -123,7 +123,7 @@ class VolumeTypesTest(BaseVolumeTest):
         except Exception:
             self.fail("Could not create a volume_type")
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_volume_type_create_get(self):
         # Create/get volume type.
         try:

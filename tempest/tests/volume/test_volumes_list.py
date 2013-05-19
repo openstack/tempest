@@ -76,7 +76,7 @@ class VolumesListTest(base.BaseVolumeTest):
             cls.client.wait_for_resource_deletion(volid)
         super(VolumesListTest, cls).tearDownClass()
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_volume_list(self):
         # Get a list of Volumes
         # Fetch all volumes
