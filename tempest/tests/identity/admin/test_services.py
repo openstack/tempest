@@ -18,12 +18,14 @@
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.test import attr
 from tempest.tests.identity import base
 
 
 class ServicesTestJSON(base.BaseIdentityAdminTest):
     _interface = 'json'
 
+    @attr(type='smoke')
     def test_create_get_delete_service(self):
         # GET Service
         try:
@@ -65,6 +67,7 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
                 self.assertRaises(exceptions.NotFound, self.client.get_service,
                                   service_data['id'])
 
+    @attr(type='smoke')
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         services = []

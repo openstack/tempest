@@ -32,7 +32,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     alt_tenant = rand_name('test_tenant_')
     alt_description = rand_name('desc_')
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_create_user(self):
         # Create a user
         self.data.setup_test_tenant()
@@ -43,7 +43,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual(self.alt_user, user['name'])
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_create_user_by_unauthorized_user(self):
         # Non-admin should not be authorized to create a user
         self.data.setup_test_tenant()
@@ -52,7 +52,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_create_user_with_empty_name(self):
         # User with an empty name should not be created
         self.data.setup_test_tenant()
@@ -60,7 +60,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_create_user_with_name_length_over_64(self):
         # Length of user name filed should be restricted to 64 characters
         self.data.setup_test_tenant()
@@ -68,7 +68,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           'a' * 65, self.alt_password,
                           self.data.tenant['id'], self.alt_email)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_create_user_with_duplicate_name(self):
         # Duplicate user should not be created
         self.data.setup_test_user()
@@ -76,7 +76,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.data.test_user, self.data.test_password,
                           self.data.tenant['id'], self.data.test_email)
 
-    @attr(type='negative')
+    @attr(type='gate')
     @testtools.skip("Until Bug #999084 is fixed")
     def test_create_user_with_empty_password(self):
         # User with an empty password should not be created
@@ -85,7 +85,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_user, '', self.data.tenant['id'],
                           self.alt_email)
 
-    @attr(type='nagative')
+    @attr(type='gate')
     @testtools.skip("Until Bug #999084 is fixed")
     def test_create_user_with_long_password(self):
         # User having password exceeding max length should not be created
@@ -94,7 +94,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_user, 'a' * 65, self.data.tenant['id'],
                           self.alt_email)
 
-    @attr(type='negative')
+    @attr(type='gate')
     @testtools.skip("Until Bug #999084 is fixed")
     def test_create_user_with_invalid_email_format(self):
         # Email format should be validated while creating a user
@@ -102,14 +102,14 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
                           self.alt_user, '', self.data.tenant['id'], '12345')
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_create_user_for_non_existant_tenant(self):
         # Attempt to create a user in a non-existent tenant should fail
         self.assertRaises(exceptions.NotFound, self.client.create_user,
                           self.alt_user, self.alt_password, '49ffgg99999',
                           self.alt_email)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_create_user_request_without_a_token(self):
         # Request to create a user without a valid token should fail
         self.data.setup_test_tenant()
@@ -124,7 +124,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         # Unset the token to allow further tests to generate a new token
         self.client.clear_auth()
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_delete_user(self):
         # Delete a user
         self.data.setup_test_tenant()
@@ -135,7 +135,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         resp, body = self.client.delete_user(user['id'])
         self.assertEquals('204', resp['status'])
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_delete_users_by_unauthorized_user(self):
         # Non admin user should not be authorized to delete a user
         self.data.setup_test_user()
@@ -143,13 +143,13 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.non_admin_client.delete_user,
                           self.data.user['id'])
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_delete_non_existant_user(self):
         # Attempt to delete a non-existent user should fail
         self.assertRaises(exceptions.NotFound, self.client.delete_user,
                           'junk12345123')
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_user_authentication(self):
         # Valid user's token is authenticated
         self.data.setup_test_user()
@@ -162,7 +162,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                                             self.data.test_tenant)
         self.assertEqual('200', resp['status'])
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_authentication_for_disabled_user(self):
         # Disabled user's token should not get authenticated
         self.data.setup_test_user()
@@ -172,7 +172,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.data.test_password,
                           self.data.test_tenant)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_authentication_when_tenant_is_disabled(self):
         # User's token for a disabled tenant should not be authenticated
         self.data.setup_test_user()
@@ -182,7 +182,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.data.test_password,
                           self.data.test_tenant)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_authentication_with_invalid_tenant(self):
         # User's token for an invalid tenant should not be authenticated
         self.data.setup_test_user()
@@ -191,7 +191,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.data.test_password,
                           'junktenant1234')
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_authentication_with_invalid_username(self):
         # Non-existent user's token should not get authenticated
         self.data.setup_test_user()
@@ -199,7 +199,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           'junkuser123', self.data.test_password,
                           self.data.test_tenant)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_authentication_with_invalid_password(self):
         # User's token with invalid password should not be authenticated
         self.data.setup_test_user()
@@ -207,7 +207,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.data.test_user, 'junkpass1234',
                           self.data.test_tenant)
 
-    @attr(type='positive')
+    @attr(type='gate')
     def test_authentication_request_without_token(self):
         # Request for token authentication with a valid token in header
         self.data.setup_test_user()
@@ -224,7 +224,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual('200', resp['status'])
         self.client.clear_auth()
 
-    @attr(type='smoke')
+    @attr(type=['smoke', 'gate'])
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()
@@ -233,14 +233,14 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                         Contains(self.data.test_user),
                         "Could not find %s" % self.data.test_user)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_get_users_by_unauthorized_user(self):
         # Non admin user should not be authorized to get user list
         self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.get_users)
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_get_users_request_without_token(self):
         # Request to get list of users without a valid token should fail
         token = self.client.get_auth()
@@ -248,7 +248,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.Unauthorized, self.client.get_users)
         self.client.clear_auth()
 
-    @attr(type='positive')
+    @attr(type='gate')
     def test_list_users_for_tenant(self):
         # Return a list of all users for a tenant
         self.data.setup_test_tenant()
@@ -278,7 +278,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
-    @attr(type='positive')
+    @attr(type='gate')
     def test_list_users_with_roles_for_tenant(self):
         # Return list of users on tenant when roles are assigned to users
         self.data.setup_test_user()
@@ -315,7 +315,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_list_users_with_invalid_tenant(self):
         # Should not be able to return a list of all
         # users for a nonexistant tenant

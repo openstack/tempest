@@ -54,7 +54,7 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         for s in cls.service_ids:
             cls.identity_client.delete_service(s)
 
-    @attr('positive')
+    @attr(type='gate')
     def test_list_endpoints(self):
         # Get a list of endpoints
         resp, fetched_endpoints = self.client.list_endpoints()
@@ -66,7 +66,7 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
 
-    @attr('positive')
+    @attr(type='gate')
     def test_create_delete_endpoint(self):
         region = rand_name('region')
         url = rand_name('url')
@@ -106,7 +106,7 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
                 if matched:
                     self.fail("Delete endpoint is not successful")
 
-    @attr('smoke')
+    @attr(type='smoke')
     def test_update_endpoint(self):
         #Creating an endpoint so as to check update endpoint
         #with new values
