@@ -118,6 +118,13 @@ ComputeGroup = [
     cfg.IntOpt('flavor_ref_alt',
                default=2,
                help='Valid secondary flavor to be used in tests.'),
+    cfg.StrOpt('image_ssh_user',
+               default="root",
+               help="User name used to authenticate to an instance."),
+    cfg.StrOpt('image_alt_ssh_user',
+               default="root",
+               help="User name used to authenticate to an instance using "
+                    "the alternate image."),
     cfg.BoolOpt('resize_available',
                 default=False,
                 help="Does the test environment support resizing?"),
