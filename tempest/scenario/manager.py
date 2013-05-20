@@ -33,6 +33,7 @@ except ImportError:
     pass
 
 from tempest.api.network import common as net_common
+from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 import tempest.manager
@@ -263,6 +264,11 @@ class NetworkScenarioTest(OfficialClientTest):
             self.fail("SecurityGroup object not successfully created.")
 
         # Add rules to the security group
+
+        # These rules are intended to permit inbound ssh and icmp
+        # traffic from all sources, so no group_id is provided.
+        # Setting a group_id would only permit traffic from ports
+        # belonging to the same security group.
         rulesets = [
             {
                 # ssh
@@ -270,7 +276,6 @@ class NetworkScenarioTest(OfficialClientTest):
                 'from_port': 22,
                 'to_port': 22,
                 'cidr': '0.0.0.0/0',
-                'group_id': secgroup.id
             },
             {
                 # ping
@@ -278,7 +283,6 @@ class NetworkScenarioTest(OfficialClientTest):
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '0.0.0.0/0',
-                'group_id': secgroup.id
             }
         ]
         for ruleset in rulesets:
@@ -420,3 +424,22 @@ class NetworkScenarioTest(OfficialClientTest):
 
         # TODO(mnewby) Allow configuration of execution and sleep duration.
         return tempest.test.call_until_true(ping, 20, 1)
+
+    def _is_reachable_via_ssh(self, ip_address, username, private_key,
+                              timeout=120):
+        ssh_client = ssh.Client(ip_address, username,
+                                pkey=private_key,
+                                timeout=timeout)
+        return ssh_client.test_connection_auth()
+
+    def _check_vm_connectivity(self, ip_address, username, private_key,
+                               timeout=120):
+        self.assertTrue(self._ping_ip_address(ip_address),
+                        "Timed out waiting for %s to become "
+                        "reachable" % ip_address)
+        self.assertTrue(self._is_reachable_via_ssh(ip_address,
+                                                   username,
+                                                   private_key,
+                                                   timeout=timeout),
+                        'Auth failure in connecting to %s@%s via ssh' %
+                        (username, ip_address))

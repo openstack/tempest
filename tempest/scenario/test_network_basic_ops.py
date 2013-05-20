@@ -31,9 +31,14 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
      * For a freshly-booted VM with an IP address ("port") on a given network:
 
-       - the Tempest host can ping the IP address.  This implies that
-         the VM has been assigned the correct IP address and has
+       - the Tempest host can ping the IP address.  This implies, but
+         does not guarantee (see the ssh check that follows), that the
+         VM has been assigned the correct IP address and has
          connectivity to the Tempest host.
+
+       - the Tempest host can perform key-based authentication to an
+         ssh server hosted at the IP address.  This check guarantees
+         that the IP address is associated with the target VM.
 
        #TODO(mnewby) - Need to implement the following:
        - the Tempest host can ssh into the VM via the IP address and
@@ -214,12 +219,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             raise self.skipTest(msg)
         if not self.servers:
             raise self.skipTest("No VM's have been created")
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        ssh_login = self.config.compute.image_ssh_user
+        private_key = self.keypairs[self.tenant_id].private_key
         for server in self.servers:
             for net_name, ip_addresses in server.networks.iteritems():
                 for ip_address in ip_addresses:
-                    self.assertTrue(self._ping_ip_address(ip_address),
-                                    "Timed out waiting for %s's ip to become "
-                                    "reachable" % server.name)
+                    self._check_vm_connectivity(ip_address, ssh_login,
+                                                private_key)
 
     @attr(type='smoke')
     def test_007_assign_floating_ips(self):
@@ -237,9 +245,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def test_008_check_public_network_connectivity(self):
         if not self.floating_ips:
             raise self.skipTest('No floating ips have been allocated.')
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        ssh_login = self.config.compute.image_ssh_user
+        private_key = self.keypairs[self.tenant_id].private_key
         for server, floating_ips in self.floating_ips.iteritems():
             for floating_ip in floating_ips:
                 ip_address = floating_ip.floating_ip_address
-                self.assertTrue(self._ping_ip_address(ip_address),
-                                "Timed out waiting for %s's ip to become "
-                                "reachable" % server.name)
+                self._check_vm_connectivity(ip_address, ssh_login, private_key)
