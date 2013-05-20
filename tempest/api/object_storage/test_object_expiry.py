@@ -39,15 +39,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         But delete action for the expired object is raising
         NotFound exception and also non empty container cannot be deleted.
         """
-        objlist = \
-            cls.container_client.list_all_container_objects(cls.container_name)
-        # delete every object in the container
-        if objlist:
-            for obj in objlist:
-                resp, _ = cls.object_client.delete_object(cls.container_name,
-                                                          obj['name'])
-        # delete the container
-        resp, _ = cls.container_client.delete_container(cls.container_name)
+        cls.delete_containers([cls.container_name])
 
     @testtools.skip('Until Bug #1069849 is resolved.')
     def test_get_object_after_expiry_time(self):

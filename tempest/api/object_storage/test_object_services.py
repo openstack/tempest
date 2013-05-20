@@ -32,6 +32,7 @@ class ObjectTest(base.BaseObjectTest):
         super(ObjectTest, cls).setUpClass()
         cls.container_name = rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
+        cls.containers = [cls.container_name]
 
         cls.data.setup_test_user()
         resp, body = cls.token_client.auth(cls.data.test_user,
@@ -44,14 +45,7 @@ class ObjectTest(base.BaseObjectTest):
 
     @classmethod
     def tearDownClass(cls):
-        objlist = cls.container_client.list_all_container_objects(
-            cls.container_name)
-        # delete every object in the container
-        for obj in objlist:
-            resp, _ = cls.object_client.delete_object(cls.container_name,
-                                                      obj['name'])
-        # delete the container
-        resp, _ = cls.container_client.delete_container(cls.container_name)
+        cls.delete_containers(cls.containers)
         # delete the user setup created
         cls.data.teardown_all()
 
@@ -198,9 +192,11 @@ class ObjectTest(base.BaseObjectTest):
         # create a container to use as  asource container
         src_container_name = rand_name(name='TestSourceContainer')
         self.container_client.create_container(src_container_name)
+        self.containers.append(src_container_name)
         # create a container to use as a destination container
         dst_container_name = rand_name(name='TestDestinationContainer')
         self.container_client.create_container(dst_container_name)
+        self.containers.append(dst_container_name)
         # create object in source container
         object_name = rand_name(name='Object')
         data = arbitrary_string(size=len(object_name) * 2,
@@ -233,17 +229,6 @@ class ObjectTest(base.BaseObjectTest):
         except Exception as e:
             self.fail("Got exception :%s ; while copying"
                       " object across containers" % e)
-        finally:
-            # delete objects from respective containers
-            resp, _ = self.object_client.delete_object(dst_container_name,
-                                                       object_name)
-            resp, _ = self.object_client.delete_object(src_container_name,
-                                                       object_name)
-            # delete containers created in this method
-            resp, _ = self.container_client.delete_container(
-                src_container_name)
-            resp, _ = self.container_client.delete_container(
-                dst_container_name)
 
     @attr(type='negative')
     def test_write_object_without_using_creds(self):
@@ -389,14 +374,7 @@ class PublicObjectTest(base.BaseObjectTest):
         self.container_client.create_container(self.container_name)
 
     def tearDown(self):
-        objlist = self.container_client.list_all_container_objects(
-            self.container_name)
-        # delete every object in the container
-        for obj in objlist:
-            resp, _ = self.object_client.delete_object(
-                self.container_name, obj['name'])
-        # delete the container
-        resp, _ = self.container_client.delete_container(self.container_name)
+        self.delete_containers([self.container_name])
         super(PublicObjectTest, self).tearDown()
 
     @attr(type='smoke')

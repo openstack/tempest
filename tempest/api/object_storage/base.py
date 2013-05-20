@@ -47,3 +47,31 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         except exceptions.EndpointNotFound:
             skip_msg = "No OpenStack Object Storage API endpoint"
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def delete_containers(cls, containers, container_client=None,
+                          object_client=None):
+        """Remove given containers and all objects in them.
+
+        The containers should be visible from the container_client given.
+        Will not throw any error if the containers don't exist.
+
+        :param containers: list of container names to remove
+        :param container_client: if None, use cls.container_client, this means
+            that the default testing user will be used (see 'username' in
+            'etc/tempest.conf')
+        :param object_client: if None, use cls.object_client
+        """
+        if container_client is None:
+            container_client = cls.container_client
+        if object_client is None:
+            object_client = cls.object_client
+        for cont in containers:
+            try:
+                objlist = container_client.list_all_container_objects(cont)
+                # delete every object in the container
+                for obj in objlist:
+                    object_client.delete_object(cont, obj['name'])
+                container_client.delete_container(cont)
+            except exceptions.NotFound:
+                pass
