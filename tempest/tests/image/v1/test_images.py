@@ -25,18 +25,18 @@ from tempest.tests.image import base
 class CreateRegisterImagesTest(base.BaseV1ImageTest):
     """Here we test the registration and creation of images."""
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_register_with_invalid_container_format(self):
         # Negative tests for invalid data supplied to POST /images
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           'test', 'wrong', 'vhd')
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_register_with_invalid_disk_format(self):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           'test', 'bare', 'wrong')
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_register_then_upload(self):
         # Register, then upload an image
         properties = {'prop1': 'val1'}
@@ -60,7 +60,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertTrue('size' in body)
         self.assertEqual(1024, body.get('size'))
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_register_remote_image(self):
         # Register a new remote image
         resp, body = self.create_image(name='New Remote Image',
@@ -80,6 +80,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(properties['key1'], 'value1')
         self.assertEqual(properties['key2'], 'value2')
 
+    @attr(type='gate')
     def test_register_http_image(self):
         resp, body = self.create_image(name='New Http Image',
                                        container_format='bare',
@@ -94,7 +95,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         resp, body = self.client.get_image(image_id)
         self.assertEqual(resp['status'], '200')
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_register_image_with_min_ram(self):
         # Register an image with min ram
         properties = {'prop1': 'val1'}
@@ -182,7 +183,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         image_id = image['id']
         return image_id
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
         resp, images_list = self.client.image_list()
@@ -191,7 +192,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         for image_id in self.created_images:
             self.assertTrue(image_id in image_list)
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_disk_format(self):
         resp, images_list = self.client.image_list(disk_format='ami')
         self.assertEqual(resp['status'], '200')
@@ -201,7 +202,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertTrue(self.ami_set <= result_set)
         self.assertFalse(self.created_set - self.ami_set <= result_set)
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_container_format(self):
         resp, images_list = self.client.image_list(container_format='bare')
         self.assertEqual(resp['status'], '200')
@@ -211,7 +212,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertTrue(self.bare_set <= result_set)
         self.assertFalse(self.created_set - self.bare_set <= result_set)
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_max_size(self):
         resp, images_list = self.client.image_list(size_max=42)
         self.assertEqual(resp['status'], '200')
@@ -221,7 +222,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertTrue(self.size42_set <= result_set)
         self.assertFalse(self.created_set - self.size42_set <= result_set)
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_min_size(self):
         resp, images_list = self.client.image_list(size_min=142)
         self.assertEqual(resp['status'], '200')
@@ -231,7 +232,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertTrue(self.size142_set <= result_set)
         self.assertFalse(self.size42_set <= result_set)
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_status_active_detail(self):
         resp, images_list = self.client.image_list_detail(status='active',
                                                           sort_key='size',
@@ -244,7 +245,7 @@ class ListImagesTest(base.BaseV1ImageTest):
             top_size = size
             self.assertEqual(image['status'], 'active')
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_name(self):
         resp, images_list = self.client.image_list_detail(
             name='New Remote Image dup')

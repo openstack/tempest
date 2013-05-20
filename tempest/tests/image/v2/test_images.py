@@ -30,18 +30,18 @@ class CreateRegisterImagesTest(base.BaseV2ImageTest):
     Here we test the registration and creation of images
     """
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_register_with_invalid_container_format(self):
         # Negative tests for invalid data supplied to POST /images
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           'test', 'wrong', 'vhd')
 
-    @attr(type='negative')
+    @attr(type='gate')
     def test_register_with_invalid_disk_format(self):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           'test', 'bare', 'wrong')
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_register_then_upload(self):
         # Register, then upload an image
         resp, body = self.create_image(name='New Name',
@@ -98,7 +98,7 @@ class ListImagesTest(base.BaseV2ImageTest):
 
         return image_id
 
-    @attr(type='image')
+    @attr(type='gate')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
         resp, images_list = self.client.image_list()

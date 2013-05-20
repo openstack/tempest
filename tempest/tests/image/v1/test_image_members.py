@@ -17,6 +17,7 @@
 import cStringIO as StringIO
 
 from tempest import clients
+from tempest.test import attr
 from tempest.tests.image import base
 
 
@@ -45,6 +46,7 @@ class ImageMembersTests(base.BaseV1ImageTest):
         image_id = image['id']
         return image_id
 
+    @attr(type='gate')
     def test_add_image_member(self):
         image = self._create_image()
         resp = self.client.add_member(self.tenants[0], image)
@@ -55,6 +57,7 @@ class ImageMembersTests(base.BaseV1ImageTest):
         members = map(lambda x: x['member_id'], members)
         self.assertIn(self.tenants[0], members)
 
+    @attr(type='gate')
     def test_get_shared_images(self):
         image = self._create_image()
         resp = self.client.add_member(self.tenants[0], image)
@@ -69,6 +72,7 @@ class ImageMembersTests(base.BaseV1ImageTest):
         self.assertIn(share_image, images)
         self.assertIn(image, images)
 
+    @attr(type='gate')
     def test_remove_member(self):
         image_id = self._create_image()
         resp = self.client.add_member(self.tenants[0], image_id)
