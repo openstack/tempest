@@ -13,8 +13,10 @@
 #    under the License.
 
 import logging
+import testtools
 
 from tempest.api.volume import base
+from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 
 LOG = logging.getLogger(__name__)
@@ -37,27 +39,39 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
     def tearDownClass(cls):
         super(VolumesSnapshotTest, cls).tearDownClass()
 
-    @attr(type=['smoke'])
-    def test_snapshot_create_get_delete(self):
-        # Create a snapshot, get some of the details and then deletes it
-        resp, snapshot = self.snapshots_client.create_snapshot(
-            self.volume_origin['id'])
-        self.assertEqual(200, resp.status)
-        self.snapshots_client.wait_for_snapshot_status(snapshot['id'],
-                                                       'available')
-        errmsg = "Referred volume origin ID mismatch"
-        self.assertEqual(self.volume_origin['id'],
-                         snapshot['volume_id'],
-                         errmsg)
-        self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
+    @attr(type='gate')
+    def test_snapshot_create_get_list_delete(self):
+        # Create a snapshot
+        s_name = rand_name('snap')
+        snapshot = self.create_snapshot(self.volume_origin['id'],
+                                        display_name=s_name)
 
-    @attr(type=['smoke'])
+        # Get the snap and check for some of its details
+        resp, snap_get = self.snapshots_client.get_snapshot(snapshot['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(self.volume_origin['id'],
+                         snap_get['volume_id'],
+                         "Referred volume origin mismatch")
+
+        # Compare also with the output from the list action
+        tracking_data = (snapshot['id'], snapshot['display_name'])
+        resp, snaps_list = self.snapshots_client.list_snapshots()
+        self.assertEqual(200, resp.status)
+        snaps_data = [(f['id'], f['display_name']) for f in snaps_list]
+        self.assertIn(tracking_data, snaps_data)
+
+        # Delete the snapshot
+        self.snapshots_client.delete_snapshot(snapshot['id'])
+        self.assertEqual(200, resp.status)
+        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
+        self.snapshots.remove(snapshot)
+
+    @attr(type='gate')
     def test_volume_from_snapshot(self):
         # Create a temporary snap using wrapper method from base, then
         # create a snap based volume, check resp code and deletes it
         snapshot = self.create_snapshot(self.volume_origin['id'])
-        # NOTE: size is required also when passing snapshot_id
+        # NOTE(gfidente): size is required also when passing snapshot_id
         resp, volume = self.volumes_client.create_volume(
             size=1,
             snapshot_id=snapshot['id'])
@@ -68,5 +82,6 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
         self.clear_snapshots()
 
 
+@testtools.skip("Until Bug #1177610 is resolved.")
 class VolumesSnapshotTestXML(VolumesSnapshotTest):
     _interface = "xml"
