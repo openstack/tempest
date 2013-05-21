@@ -3,7 +3,11 @@
 Tempest - The OpenStack Integration Test Suite
 ==============================================
 
-This is a set of integration tests to be run against a live cluster.
+This is a set of integration tests to be run against a live OpenStack
+cluster. Tempest has batteries of tests for OpenStack API validation,
+Scenarios, and other specific tests useful in validating an OpenStack
+deployment.
+
 
 Quickstart
 ----------
@@ -25,13 +29,10 @@ and reference data to be used in testing.
 
 .. note::
 
-    If you have a running devstack environment, look at the
-    environment variables in your ``devstack/localrc`` file.
-    The ADMIN_PASSWORD variable should match the api_key value
-    in the tempest.conf [nova] configuration section. In addition,
-    you will need to get the UUID identifier of the image that
-    devstack uploaded and set the image_ref value in the [environment]
-    section in the tempest.conf to that image UUID.
+    If you have a running devstack environment, tempest will be
+    automatically configured and placed in ``/opt/stack/tempest``. It
+    will have a configuration file already set up to work with your
+    devstack installation.
 
 Tempest is not tied to any single test runner, but Nose been the most commonly
 used tool. After setting up your configuration file, you can execute
@@ -45,14 +46,12 @@ To run one single test  ::
 Configuration
 -------------
 
-At present, there are three sections to be configured: nova, environment,
-and image. The nova section includes information about your Keystone endpoint,
-as well as valid credentials for a user. It also contains logical timeouts
-for certain actions. The environment section contains reference data to be
-used when testing the Compute portion of OpenStack, as well as feature flags
-for tests that may or may not work based on your hypervisor or current
-environment. Lastly, the image section contains credentials and endpoints for
-the Glance image service.
+Detailed configuration of tempest is beyond the scope of this
+document. The etc/tempest.conf.sample attempts to be a self
+documenting version of the configuration.
+
+The most important pieces that are needed are the user ids, openstack
+endpoints, and basic flavors and images needed to run tests.
 
 Common Issues
 -------------
