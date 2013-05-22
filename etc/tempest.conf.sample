@@ -303,7 +303,7 @@ heat_available = false
 
 # Instance type for tests. Needs to be big enough for a
 # full OS plus the test workload
-instance_type = m1.tiny
+instance_type = m1.micro
 
 # Name of heat-cfntools enabled image to use when launching test instances
 # If not specified, tests that spawn instances will not run
