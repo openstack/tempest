@@ -33,7 +33,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         resp, _ = self.client.delete_security_group(securitygroup_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
         #Create 3 Security Groups
@@ -61,7 +61,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
 
     #TODO(afazekas): scheduled for delete,
     #test_security_group_create_get_delete covers it
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_security_group_create_delete(self):
         # Security Group should be created, verified and deleted
         s_name = rand_name('securitygroup-')
@@ -80,7 +80,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                          "The created Security Group name is "
                          "not equal to the requested name")
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
         s_name = rand_name('securitygroup-')
@@ -104,7 +104,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                          "The fetched Security Group is different "
                          "from the created Group")
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_get_nonexistant_group(self):
         # Negative test:Should not be able to GET the details
         # of nonexistant Security Group
@@ -120,7 +120,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.get_security_group,
                           non_exist_id)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_create_with_invalid_group_name(self):
         # Negative test: Security Group should not be created with group name
         # as an empty string/with white spaces/chars more than 255
@@ -138,7 +138,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           self.client.create_security_group, s_name,
                           s_description)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_create_with_invalid_group_description(self):
         # Negative test:Security Group should not be created with description
         # as an empty string/with white spaces/chars more than 255
@@ -155,7 +155,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           self.client.create_security_group, s_name,
                           s_description)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_create_with_duplicate_name(self):
         # Negative test:Security Group with duplicate name should not
         # be created
@@ -172,7 +172,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           self.client.create_security_group, s_name,
                           s_description)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_the_default_security_group(self):
         # Negative test:Deletion of the "default" Security Group should Fail
         default_security_group_id = None
@@ -186,7 +186,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           self.client.delete_security_group,
                           default_security_group_id)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_nonexistant_security_group(self):
         # Negative test:Deletion of a nonexistant Security Group should Fail
         security_group_id = []
@@ -201,13 +201,14 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_security_group, non_exist_id)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_security_group_without_passing_id(self):
         # Negative test:Deletion of a Security Group with out passing ID
         # should Fail
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_security_group, '')
 
+    @attr(type='gate')
     def test_server_security_groups(self):
         # Checks that security groups may be added and linked to a server
         # and not deleted if the server is active.

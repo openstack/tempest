@@ -120,19 +120,19 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_rescued_vm_reboot(self):
         self.assertRaises(exceptions.Duplicate, self.servers_client.reboot,
                           self.rescue_id, 'HARD')
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_rescued_vm_rebuild(self):
         self.assertRaises(exceptions.Duplicate,
                           self.servers_client.rebuild,
                           self.rescue_id,
                           self.image_ref_alt)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_rescued_vm_attach_volume(self):
         # Rescue the server
         self.servers_client.rescue_server(self.server_id, self.password)
@@ -146,7 +146,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                           self.volume_to_attach['id'],
                           device='/dev/%s' % self.device)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_rescued_vm_detach_volume(self):
         # Attach the volume to the server
         self.servers_client.attach_volume(self.server_id,
@@ -169,7 +169,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                           self.server_id,
                           self.volume_to_detach['id'])
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Rescue the server
         self.servers_client.rescue_server(
@@ -189,7 +189,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                                                         self.server_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_rescued_vm_add_remove_security_group(self):
         # Rescue the server
         self.servers_client.rescue_server(

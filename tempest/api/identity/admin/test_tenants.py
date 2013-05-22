@@ -88,6 +88,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_tenant,
                           'junk_tenant_123456abc')
 
+    @attr(type='gate')
     def test_tenant_create_with_description(self):
         # Create tenant with a description
         tenant_name = rand_name('tenant-')
@@ -109,6 +110,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
+    @attr(type='gate')
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
         tenant_name = rand_name('tenant-')
@@ -126,6 +128,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
+    @attr(type='gate')
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
         tenant_name = rand_name('tenant-')
@@ -182,12 +185,14 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
                           name='')
 
+    @attr(type='gate')
     def test_create_tenants_name_length_over_64(self):
         # Tenant name length should not be greater than 64 characters
         tenant_name = 'a' * 65
         self.assertRaises(exceptions.BadRequest, self.client.create_tenant,
                           tenant_name)
 
+    @attr(type='gate')
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
         t_name1 = rand_name('tenant-')
@@ -215,6 +220,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
+    @attr(type='gate')
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
         t_name = rand_name('tenant-')
@@ -243,6 +249,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
+    @attr(type='gate')
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
         t_name = rand_name('tenant-')

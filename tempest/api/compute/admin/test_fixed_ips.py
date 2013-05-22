@@ -51,43 +51,43 @@ class FixedIPsBase(base.BaseComputeAdminTest):
 class FixedIPsTestJson(FixedIPsBase):
     _interface = 'json'
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_fixed_ip_details(self):
         resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)
         self.assertEqual(fixed_ip['address'], self.ip)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_list_fixed_ip_details_with_non_admin_user(self):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.get_fixed_ip_details, self.ip)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_set_reserve(self):
         body = {"reserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)
         self.assertEqual(resp.status, 202)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_set_unreserve(self):
         body = {"unreserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)
         self.assertEqual(resp.status, 202)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_set_reserve_with_non_admin_user(self):
         body = {"reserve": "None"}
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_set_unreserve_with_non_admin_user(self):
         body = {"unreserve": "None"}
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_set_reserve_with_invalid_ip(self):
         # NOTE(maurosr): since this exercises the same code snippet, we do it
         # only for reserve action
@@ -96,7 +96,7 @@ class FixedIPsTestJson(FixedIPsBase):
                           self.client.reserve_fixed_ip,
                           "my.invalid.ip", body)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_fixed_ip_with_invalid_action(self):
         body = {"invalid_action": "None"}
         self.assertRaises(exceptions.BadRequest,

@@ -42,7 +42,7 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTest):
             cls.client.delete_floating_ip(cls.floating_ip_id[i])
         super(FloatingIPDetailsTestJSON, cls).tearDownClass()
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_floating_ips(self):
         # Positive test:Should return the list of floating IPs
         resp, body = self.client.list_floating_ips()
@@ -53,7 +53,7 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTest):
         for i in range(3):
             self.assertTrue(self.floating_ip[i] in floating_ips)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         #Creating a floating IP for which details are to be checked
@@ -77,7 +77,7 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTest):
         finally:
             self.client.delete_floating_ip(floating_ip_id)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_get_nonexistant_floating_ip_details(self):
         # Negative test:Should not be able to GET the details
         # of nonexistant floating IP

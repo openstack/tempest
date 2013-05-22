@@ -17,6 +17,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
+from tempest.test import attr
 
 
 class VolumesTestJSON(base.BaseComputeTest):
@@ -74,6 +75,7 @@ class VolumesTestJSON(base.BaseComputeTest):
             cls.client.wait_for_resource_deletion(volume['id'])
         super(VolumesTestJSON, cls).tearDownClass()
 
+    @attr(type='gate')
     def test_volume_list(self):
         # Should return the list of Volumes
         # Fetch all Volumes
@@ -89,6 +91,7 @@ class VolumesTestJSON(base.BaseComputeTest):
                          ', '.join(m_vol['displayName']
                                    for m_vol in missing_volumes))
 
+    @attr(type='gate')
     def test_volume_list_with_details(self):
         # Should return the list of Volumes with details
         #Fetch all Volumes

@@ -58,7 +58,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             resp, _ = client[0].delete_container(cont_name)
 
     @testtools.skip('Until Bug #1093743 is resolved.')
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_container_synchronization(self):
         # container to container synchronization
         # to allow/accept sync requests to/from other accounts

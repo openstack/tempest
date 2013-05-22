@@ -33,7 +33,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         super(ServerDiskConfigTestJSON, cls).setUpClass()
         cls.client = cls.os.servers_client
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_rebuild_server_with_manual_disk_config(self):
         # A server should be rebuilt using the manual disk config option
         resp, server = self.create_server(disk_config='AUTO',
@@ -57,7 +57,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         #Delete the server
         resp, body = self.client.delete_server(server['id'])
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_rebuild_server_with_auto_disk_config(self):
         # A server should be rebuilt using the auto disk config option
         resp, server = self.create_server(disk_config='MANUAL',
@@ -81,8 +81,8 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         #Delete the server
         resp, body = self.client.delete_server(server['id'])
 
-    @attr(type='positive')
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
+    @attr(type=['positive', 'gate'])
     def test_resize_server_from_manual_to_auto(self):
         # A server should be resized from manual to auto disk config
         resp, server = self.create_server(disk_config='MANUAL',
@@ -101,8 +101,8 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         #Delete the server
         resp, body = self.client.delete_server(server['id'])
 
-    @attr(type='positive')
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
+    @attr(type=['positive', 'gate'])
     def test_resize_server_from_auto_to_manual(self):
         # A server should be resized from auto to manual disk config
         resp, server = self.create_server(disk_config='AUTO',

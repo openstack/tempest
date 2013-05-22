@@ -23,6 +23,7 @@ from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.test import attr
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
@@ -50,6 +51,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         resp, _ = cls.container_client.delete_container(cls.container_name)
 
     @testtools.skip('Until Bug #1069849 is resolved.')
+    @attr(type='gate')
     def test_get_object_after_expiry_time(self):
         #TODO(harika-vakadi): similar test case has to be created for
         # "X-Delete-At", after this test case works.

@@ -52,12 +52,14 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
         resp, _ = self.client.set_image_metadata(self.image_id, meta)
         self.assertEqual(resp.status, 200)
 
+    @attr(type='gate')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key1': 'value1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
+    @attr(type='gate')
     def test_set_image_metadata(self):
         # The metadata for the image should match the new values
         req_metadata = {'meta2': 'value2', 'meta3': 'value3'}
@@ -67,6 +69,7 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
         self.assertEqual(req_metadata, resp_metadata)
 
+    @attr(type='gate')
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key3': 'value3'}
@@ -77,12 +80,14 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
         expected = {'key1': 'alt1', 'key2': 'value2', 'key3': 'value3'}
         self.assertEqual(expected, resp_metadata)
 
+    @attr(type='gate')
     def test_get_image_metadata_item(self):
         # The value for a specific metadata key should be returned
         resp, meta = self.client.get_image_metadata_item(self.image_id,
                                                          'key2')
         self.assertTrue('value2', meta['key2'])
 
+    @attr(type='gate')
     def test_set_image_metadata_item(self):
         # The value provided for the given meta item should be set for
         # the image
@@ -93,6 +98,7 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
         expected = {'key1': 'alt', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
+    @attr(type='gate')
     def test_delete_image_metadata_item(self):
         # The metadata value/key pair should be deleted from the image
         resp, body = self.client.delete_image_metadata_item(self.image_id,
@@ -101,34 +107,34 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_list_nonexistant_image_metadata(self):
         # Negative test: List on nonexistant image
         # metadata should not happen
         self.assertRaises(exceptions.NotFound, self.client.list_image_metadata,
                           999)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_update_nonexistant_image_metadata(self):
         # Negative test:An update should not happen for a nonexistant image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
         self.assertRaises(exceptions.NotFound,
                           self.client.update_image_metadata, 999, meta)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_get_nonexistant_image_metadata_item(self):
         # Negative test: Get on nonexistant image should not happen
         self.assertRaises(exceptions.NotFound,
                           self.client.get_image_metadata_item, 999, 'key2')
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_set_nonexistant_image_metadata(self):
         # Negative test: Metadata should not be set to a nonexistant image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
         self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
                           999, meta)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_set_nonexistant_image_metadata_item(self):
         # Negative test: Metadata item should not be set to a
         # nonexistant image
@@ -137,7 +143,7 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
                           self.client.set_image_metadata_item, 999, 'key1',
                           meta)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_nonexistant_image_metadata_item(self):
         # Negative test: Shouldnt be able to delete metadata
         # item from nonexistant image

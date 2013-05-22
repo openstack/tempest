@@ -60,7 +60,7 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
 
         return resp, body
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_multiple_create(self):
         resp, body = self._create_multiple_servers(wait_until='ACTIVE',
                                                    min_count=1,
@@ -71,31 +71,31 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
         self.assertEqual('202', resp['status'])
         self.assertFalse('reservation_id' in body)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_min_count_less_than_one(self):
         invalid_min_count = 0
         self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
                           min_count=invalid_min_count)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_min_count_non_integer(self):
         invalid_min_count = 2.5
         self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
                           min_count=invalid_min_count)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_max_count_less_than_one(self):
         invalid_max_count = 0
         self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
                           max_count=invalid_max_count)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_max_count_non_integer(self):
         invalid_max_count = 2.5
         self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
                           max_count=invalid_max_count)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_max_count_less_than_min_count(self):
         min_count = 3
         max_count = 2
@@ -103,7 +103,7 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
                           min_count=min_count,
                           max_count=max_count)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_multiple_create_with_reservation_return(self):
         resp, body = self._create_multiple_servers(wait_until='ACTIVE',
                                                    min_count=1,

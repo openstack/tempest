@@ -75,7 +75,7 @@ class AccountTest(base.BaseObjectTest):
         resp, metadata = self.account_client.list_account_metadata()
         self.assertNotIn('x-account-meta-test-account-meta', resp)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_list_containers_with_non_authorized_user(self):
         # list containers using non-authorized user
 
