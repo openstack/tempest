@@ -1,5 +1,5 @@
 Tempest Field Guide
------------
+========
 
 Tempest is designed to be useful for a large number of different
 environments. This includes being useful for gating commits to
