@@ -17,30 +17,42 @@
 import re
 
 
-SKIP_DECORATOR = '@testtools.skip('
+PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'quantum']
+
+SKIP_DECORATOR_RE = re.compile(r'\s*@testtools.skip\((.*)\)')
+SKIP_STR_RE = re.compile(r'.*Bug #\d+.*')
+PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 
 
 def skip_bugs(physical_line):
     """Check skip lines for proper bug entries
 
-    T101: Bug not in skip line
-    T102: Bug in message formatted incorrectly
+    T101: skips must contain "Bug #<bug_number>"
     """
 
-    pos = physical_line.find(SKIP_DECORATOR)
+    res = SKIP_DECORATOR_RE.match(physical_line)
+    if res:
+        content = res.group(1)
+        res = SKIP_STR_RE.match(content)
+        if not res:
+            return (physical_line.find(content),
+                    'T101: skips must contain "Bug #<bug_number>"')
 
-    skip_re = re.compile(r'^\s*@testtools.skip.*')
 
-    if pos != -1 and skip_re.match(physical_line):
-        bug = re.compile(r'^.*\bbug\b.*', re.IGNORECASE)
-        if bug.match(physical_line) is None:
-            return (pos, 'T101: skips must have an associated bug')
+def import_no_clients_in_api(physical_line, filename):
+    """Check for client imports from tempest/api tests
 
-        bug_re = re.compile(r'.*skip\(.*Bug\s\#\d+', re.IGNORECASE)
+    T102: Cannot import OpenStack python clients
+    """
 
-        if bug_re.match(physical_line) is None:
-            return (pos, 'T102: Bug number formatted incorrectly')
+    if "tempest/api" in filename:
+        res = PYTHON_CLIENT_RE.match(physical_line)
+        if res:
+            return (physical_line.find(res.group(1)),
+                    ("T102: python clients import not allowed"
+                     " in tempest/api/* tests"))
 
 
 def factory(register):
     register(skip_bugs)
+    register(import_no_clients_in_api)
