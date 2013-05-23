@@ -63,8 +63,9 @@ class AbsoluteLimitsTestJSON(base.BaseComputeTest):
 
         self.assertRaises(exceptions.OverLimit,
                           self.server_client.create_server,
-                          name='test', meta=meta_data, flavor_ref='84',
-                          image_ref='9e6a2e3b-1601-42a5-985f-c3a2f93a5ec3')
+                          name='test', meta=meta_data,
+                          flavor_ref=self.flavor_ref,
+                          image_ref=self.image_ref)
 
 
 class AbsoluteLimitsTestXML(AbsoluteLimitsTestJSON):
