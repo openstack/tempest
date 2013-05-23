@@ -236,7 +236,11 @@ class ServersNegativeTest(base.BaseComputeTest):
         # Create a server with a nonexistent security group
 
         security_groups = [{'name': 'does_not_exist'}]
-        self.assertRaises(exceptions.BadRequest,
+        if self.config.network.quantum_available:
+            expected_exception = exceptions.NotFound
+        else:
+            expected_exception = exceptions.BadRequest
+        self.assertRaises(expected_exception,
                           self.create_server,
                           security_groups=security_groups)
 
