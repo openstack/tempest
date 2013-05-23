@@ -38,8 +38,6 @@ When it makes sense, API testing should be moved closer to the
 projects themselves, possibly as functional tests in their unit test
 frameworks.
 
-TODO: The bulk of tempest/tests should move to tempest/api
-
 
 cli
 ------------
@@ -50,8 +48,6 @@ server testing, there is no access to server code to
 instantiate. Tempest seems like a logical place for this, as it
 prereqs having a running OpenStack cloud.
 
-TODO: the top level cli directory moves to tempest/cli
-
 
 scenario
 ------------
@@ -61,9 +57,6 @@ functionality. They are typically a series of steps where complicated
 state requiring multiple services is set up exercised, and torn down.
 
 Scenario tests can and should use the OpenStack python clients.
-
-TODO: tests/network/test_network_basic_ops.py,
-tests/compute/servers/*_ops.py should move to tempest/scenario (others)
 
 
 stress
@@ -85,8 +78,6 @@ completely legitmate for Tempest to include tests of 3rdparty APIs,
 but those should be kept seperate from the normal OpenStack
 validation.
 
-TODO: tempest/tests/boto should become tempest/3rdparty/boto
-
 
 whitebox
 ----------
@@ -94,5 +85,3 @@ whitebox
 Whitebox tests are tests which require access to the database of the
 target OpenStack machine to verify internal state after opperations
 are made. White box tests are allowed to use the python clients.
-
-TODO: collect out whitebox tests to this location.
