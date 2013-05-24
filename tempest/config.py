@@ -486,6 +486,34 @@ def register_stress_opts(conf):
         conf.register_opt(opt, group='stress')
 
 
+scenario_group = cfg.OptGroup(name='scenario', title='Scenario Test Options')
+
+ScenarioGroup = [
+    cfg.StrOpt('img_dir',
+               default='/opt/stack/new/devstack/files/images/'
+               'cirros-0.3.1-x86_64-uec',
+               help='Directory containing image files'),
+    cfg.StrOpt('ami_img_file',
+               default='cirros-0.3.1-x86_64-blank.img',
+               help='AMI image file name'),
+    cfg.StrOpt('ari_img_file',
+               default='cirros-0.3.1-x86_64-initrd',
+               help='ARI image file name'),
+    cfg.StrOpt('aki_img_file',
+               default='cirros-0.3.1-x86_64-vmlinuz',
+               help='AKI image file name'),
+    cfg.StrOpt('ssh_user',
+               default='cirros',
+               help='ssh username for the image file')
+]
+
+
+def register_scenario_opts(conf):
+    conf.register_group(scenario_group)
+    for opt in ScenarioGroup:
+        conf.register_opt(opt, group='scenario')
+
+
 @singleton
 class TempestConfig:
     """Provides OpenStack configuration information."""
@@ -535,6 +563,7 @@ class TempestConfig:
         register_boto_opts(cfg.CONF)
         register_compute_admin_opts(cfg.CONF)
         register_stress_opts(cfg.CONF)
+        register_scenario_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
         self.whitebox = cfg.CONF.whitebox
         self.identity = cfg.CONF.identity
@@ -546,6 +575,7 @@ class TempestConfig:
         self.boto = cfg.CONF.boto
         self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
+        self.scenario = cfg.CONF.scenario
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
