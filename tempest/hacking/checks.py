@@ -40,3 +40,7 @@ def skip_bugs(physical_line):
 
         if bug_re.match(physical_line) is None:
             return (pos, 'T102: Bug number formatted incorrectly')
+
+
+def factory(register):
+    register(skip_bugs)
