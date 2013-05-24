@@ -53,27 +53,25 @@ class AccountTest(base.BaseObjectTest):
         self.assertIn('x-account-bytes-used', resp)
 
     @attr(type='smoke')
-    def test_create_account_metadata(self):
+    def test_create_and_delete_account_metadata(self):
+        header = 'test-account-meta'
+        data = 'Meta!'
         # add metadata to account
-        metadata = {'test-account-meta': 'Meta!'}
-        resp, _ = \
-            self.account_client.create_account_metadata(metadata=metadata)
+        resp, _ = self.account_client.create_account_metadata(
+            metadata={header: data})
         self.assertEqual(resp['status'], '204')
 
-        resp, metadata = self.account_client.list_account_metadata()
-        self.assertIn('x-account-meta-test-account-meta', resp)
-        self.assertEqual(resp['x-account-meta-test-account-meta'], 'Meta!')
+        resp, _ = self.account_client.list_account_metadata()
+        self.assertIn('x-account-meta-' + header, resp)
+        self.assertEqual(resp['x-account-meta-' + header], data)
 
-    @attr(type='smoke')
-    def test_delete_account_metadata(self):
         # delete metadata from account
-        metadata = ['test-account-meta']
         resp, _ = \
-            self.account_client.delete_account_metadata(metadata=metadata)
+            self.account_client.delete_account_metadata(metadata=[header])
         self.assertEqual(resp['status'], '204')
 
-        resp, metadata = self.account_client.list_account_metadata()
-        self.assertNotIn('x-account-meta-test-account-meta', resp)
+        resp, _ = self.account_client.list_account_metadata()
+        self.assertNotIn('x-account-meta-' + header, resp)
 
     @attr(type='negative')
     def test_list_containers_with_non_authorized_user(self):
