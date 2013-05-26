@@ -48,14 +48,8 @@ class ContainerSyncTest(base.BaseObjectTest):
 
     @classmethod
     def tearDownClass(cls):
-        for cont_name, client in cls.clients.items():
-            objlist = client[0].list_all_container_objects(cont_name)
-            # delete every object in the container
-            if objlist:
-                for obj in objlist:
-                    resp, _ = client[1].delete_object(cont_name, obj['name'])
-            # delete the container
-            resp, _ = client[0].delete_container(cont_name)
+        for client in cls.clients.values():
+            cls.delete_containers(cls.containers, client[0], client[1])
 
     @testtools.skip('Until Bug #1093743 is resolved.')
     @attr(type=['positive', 'gate'])

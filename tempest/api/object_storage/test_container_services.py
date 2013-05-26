@@ -29,15 +29,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @classmethod
     def tearDownClass(cls):
-        for container in cls.containers:
-            objlist = \
-                cls.container_client.list_all_container_objects(container)
-            # delete every object in the container
-            for obj in objlist:
-                resp, _ = \
-                    cls.object_client.delete_object(container, obj['name'])
-            # delete the container
-            resp, _ = cls.container_client.delete_container(container)
+        cls.delete_containers(cls.containers)
 
     @attr(type='smoke')
     def test_create_container(self):
@@ -125,8 +117,3 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '204')
         self.assertNotIn('x-container-meta-name', resp)
         self.assertNotIn('x-container-meta-description', resp)
-
-        # delete container
-        resp, _ = self.container_client.delete_container(container_name)
-        self.assertEqual(resp['status'], '204')
-        self.containers.remove(container_name)

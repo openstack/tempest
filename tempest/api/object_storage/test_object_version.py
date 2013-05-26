@@ -28,15 +28,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @classmethod
     def tearDownClass(cls):
-        for container in cls.containers:
-            objlist = \
-                cls.container_client.list_all_container_objects(container)
-            # delete every object in the container
-            for obj in objlist:
-                resp, _ = \
-                    cls.object_client.delete_object(container, obj['name'])
-            # delete the container
-            resp, _ = cls.container_client.delete_container(container)
+        cls.delete_containers(cls.containers)
 
     def assertContainer(self, container, count, byte, versioned):
         resp, _ = self.container_client.list_container_metadata(container)
@@ -94,10 +86,3 @@ class ContainerTest(base.BaseObjectTest):
                              vers_container_name)
         self.assertContainer(vers_container_name, '0', '0',
                              'Missing Header')
-        # delete containers
-        resp, _ = self.container_client.delete_container(base_container_name)
-        self.assertEqual(resp['status'], '204')
-        self.containers.remove(base_container_name)
-        resp, _ = self.container_client.delete_container(vers_container_name)
-        self.assertEqual(resp['status'], '204')
-        self.containers.remove(vers_container_name)
