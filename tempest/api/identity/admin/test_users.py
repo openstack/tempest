@@ -33,7 +33,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     alt_tenant = rand_name('test_tenant_')
     alt_description = rand_name('desc_')
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_create_user(self):
         # Create a user
         self.data.setup_test_tenant()
@@ -77,8 +77,8 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.data.test_user, self.data.test_password,
                           self.data.tenant['id'], self.data.test_email)
 
-    @attr(type='gate')
     @testtools.skip("Until Bug #999084 is fixed")
+    @attr(type='gate')
     def test_create_user_with_empty_password(self):
         # User with an empty password should not be created
         self.data.setup_test_tenant()
@@ -86,8 +86,8 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_user, '', self.data.tenant['id'],
                           self.alt_email)
 
-    @attr(type='gate')
     @testtools.skip("Until Bug #999084 is fixed")
+    @attr(type='gate')
     def test_create_user_with_long_password(self):
         # User having password exceeding max length should not be created
         self.data.setup_test_tenant()
@@ -95,8 +95,8 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_user, 'a' * 65, self.data.tenant['id'],
                           self.alt_email)
 
-    @attr(type='gate')
     @testtools.skip("Until Bug #999084 is fixed")
+    @attr(type='gate')
     def test_create_user_with_invalid_email_format(self):
         # Email format should be validated while creating a user
         self.data.setup_test_tenant()
@@ -125,7 +125,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         # Unset the token to allow further tests to generate a new token
         self.client.clear_auth()
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_delete_user(self):
         # Delete a user
         self.data.setup_test_tenant()
@@ -150,7 +150,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_user,
                           'junk12345123')
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_user_authentication(self):
         # Valid user's token is authenticated
         self.data.setup_test_user()
@@ -225,7 +225,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual('200', resp['status'])
         self.client.clear_auth()
 
-    @attr(type=['smoke', 'gate'])
+    @attr(type=['smoke'])
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()

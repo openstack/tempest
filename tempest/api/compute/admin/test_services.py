@@ -34,14 +34,14 @@ class ServicesAdminTestJSON(base.BaseComputeAdminTest):
         cls.client = cls.os_adm.services_client
         cls.non_admin_client = cls.services_client
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_services(self):
         # List Compute services
         resp, services = self.client.list_services()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(services) >= 2)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_list_services_with_non_admin_user(self):
         # List Compute service with non admin user
         self.assertRaises(exceptions.Unauthorized,

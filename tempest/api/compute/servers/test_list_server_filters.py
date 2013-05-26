@@ -84,7 +84,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         super(ListServerFiltersTestJSON, cls).tearDownClass()
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filter_by_image(self):
         # Filter the list of servers by image
         params = {'image': self.image_ref}
@@ -95,7 +95,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filter_by_flavor(self):
         # Filter the list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
@@ -106,7 +106,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filter_by_server_name(self):
         # Filter the list of servers by server name
         params = {'name': self.s1_name}
@@ -117,7 +117,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filter_by_server_status(self):
         # Filter the list of servers by server status
         params = {'status': 'active'}
@@ -128,7 +128,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filter_by_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 1}
@@ -137,7 +137,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_detailed_filter_by_image(self):
         # Filter the detailed list of servers by image
         params = {'image': self.image_ref}
@@ -148,7 +148,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_detailed_filter_by_flavor(self):
         # Filter the detailed list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
@@ -159,7 +159,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_detailed_filter_by_server_name(self):
         # Filter the detailed list of servers by server name
         params = {'name': self.s1_name}
@@ -170,7 +170,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_detailed_filter_by_server_status(self):
         # Filter the detailed list of servers by server status
         params = {'status': 'active'}
@@ -182,7 +182,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
         self.assertEqual(['ACTIVE'] * 3, [x['status'] for x in servers])
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filtered_by_name_wildcard(self):
         # List all servers that contains 'server' in name
         params = {'name': 'server'}
@@ -205,7 +205,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @testtools.skip('Until Bug #1170718 is resolved.')
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
@@ -218,7 +218,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
@@ -232,7 +232,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_servers_detailed_limit_results(self):
         # Verify only the expected number of detailed results are returned
         params = {'limit': 1}

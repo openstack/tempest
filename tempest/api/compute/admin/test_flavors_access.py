@@ -50,7 +50,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
         cls.vcpus = 1
         cls.disk = 10
 
-    @attr('positive')
+    @attr(type=['positive', 'gate'])
     def test_flavor_access_add_remove(self):
         #Test to add and remove flavor access to a given tenant.
         flavor_name = rand_name(self.flavor_name_prefix)
@@ -87,7 +87,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(resp.status, 200)
         self.assertNotIn(new_flavor['id'], map(lambda x: x['id'], flavors))
 
-    @attr('negative')
+    @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_add(self):
         #Test to add flavor access as a user without admin privileges.
         flavor_name = rand_name(self.flavor_name_prefix)
@@ -103,7 +103,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
                           new_flavor['id'],
                           self.tenant_id)
 
-    @attr('negative')
+    @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_remove(self):
         #Test to remove flavor access as a user without admin privileges.
         flavor_name = rand_name(self.flavor_name_prefix)

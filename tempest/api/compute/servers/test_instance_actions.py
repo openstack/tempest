@@ -31,7 +31,7 @@ class InstanceActionsTestJSON(base.BaseComputeTest):
         cls.request_id = resp['x-compute-request-id']
         cls.server_id = server['id']
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_instance_actions(self):
         # List actions of the provided server
         resp, body = self.client.reboot(self.server_id, 'HARD')
@@ -43,7 +43,7 @@ class InstanceActionsTestJSON(base.BaseComputeTest):
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_get_instance_action(self):
         # Get the action details of the provided server
         resp, body = self.client.get_instance_action(self.server_id,
@@ -52,13 +52,13 @@ class InstanceActionsTestJSON(base.BaseComputeTest):
         self.assertEqual(self.server_id, body['instance_uuid'])
         self.assertEqual('create', body['action'])
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_list_instance_actions_invalid_server(self):
         # List actions of the invalid server id
         self.assertRaises(exceptions.NotFound,
                           self.client.list_instance_actions, 'server-999')
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_get_instance_action_invalid_request(self):
         # Get the action details of the provided server with invalid request
         self.assertRaises(exceptions.NotFound, self.client.get_instance_action,

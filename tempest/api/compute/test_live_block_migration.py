@@ -97,9 +97,9 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
             self.volumes_client.wait_for_volume_status(volume_id, 'available')
         self.volumes_client.delete_volume(volume_id)
 
-    @attr(type='positive')
     @testtools.skipIf(not CONF.compute.live_migration_available,
                       'Live migration not available')
+    @attr(type='gate')
     def test_live_block_migration(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
@@ -114,6 +114,7 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
 
     @testtools.skipIf(not CONF.compute.live_migration_available,
                       'Live migration not available')
+    @attr(type='gate')
     def test_invalid_host_for_migration(self):
         # Migrating to an invalid host should not change the status
         server_id = self._get_an_active_server()
@@ -123,12 +124,12 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
                           server_id, target_host)
         self.assertEquals('ACTIVE', self._get_server_status(server_id))
 
-    @attr(type='positive')
     @testtools.skipIf(not CONF.compute.live_migration_available or
                       not CONF.compute.use_block_migration_for_live_migration,
                       'Block Live migration not available')
     @testtools.skipIf(not CONF.compute.block_migrate_supports_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
+    @attr(type='gate')
     def test_iscsi_volume(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:

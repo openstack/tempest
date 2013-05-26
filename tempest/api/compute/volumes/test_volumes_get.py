@@ -75,7 +75,7 @@ class VolumesGetTestJSON(base.BaseComputeTest):
                 #Checking if the deleted Volume still exists
                 self.client.wait_for_resource_deletion(volume['id'])
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_volume_get_metadata_none(self):
         # CREATE, GET empty metadata dict
         try:

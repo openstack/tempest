@@ -70,6 +70,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(expected_quota_set, quota_set)
 
+    @attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         self.skipTest("This test require the change in nova component "
                       "https://review.openstack.org/#/c/25887/, the related "
@@ -103,6 +104,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                              "defaults")
 
     #TODO(afazekas): merge these test cases
+    @attr(type='gate')
     def test_get_updated_quotas(self):
         # Verify that GET shows the updated quota set
         self.adm_client.update_quota_set(self.demo_tenant_id,
@@ -123,6 +125,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
             self.assertEqual(200, resp.status, "Failed to reset quota "
                              "defaults")
 
+    @attr(type='gate')
     def test_create_server_when_cpu_quota_is_full(self):
         self.skipTest("This test require the change in nova component "
                       "https://review.openstack.org/#/c/25887/, the related "
@@ -141,6 +144,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         cores=default_vcpu_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
+    @attr(type='gate')
     def test_create_server_when_memory_quota_is_full(self):
         self.skipTest("This test require the change in nova component "
                       "https://review.openstack.org/#/c/25887/, the related "
@@ -161,7 +165,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
 #TODO(afazekas): Add test that tried to update the quota_set as a regular user
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
         self.skipTest("This test require the change in nova component "
                       "https://review.openstack.org/#/c/25887/, the related "
@@ -179,7 +183,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         instances=default_instances_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
 
@@ -200,7 +204,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
         # when we reach limit maxSecurityGroupRules

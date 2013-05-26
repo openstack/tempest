@@ -29,7 +29,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         super(KeyPairsTestJSON, cls).setUpClass()
         cls.client = cls.keypairs_client
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_keypairs_create_list_delete(self):
         # Keypairs created should be available in the response list
         #Create 3 keypairs
@@ -63,7 +63,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
             resp, _ = self.client.delete_keypair(keypair['name'])
             self.assertEqual(202, resp.status)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_keypair_create_delete(self):
         # Keypair should be created, verified and deleted
         k_name = rand_name('keypair-')
@@ -79,7 +79,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_get_keypair_detail(self):
         # Keypair should be created, Got details by name and deleted
         k_name = rand_name('keypair-')
@@ -102,7 +102,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
             resp, _ = self.client.delete_keypair(k_name)
             self.assertEqual(202, resp.status)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_keypair_create_with_pub_key(self):
         # Keypair should be created with a given public key
         k_name = rand_name('keypair-')
@@ -126,7 +126,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_keypair_create_with_invalid_pub_key(self):
         # Keypair should not be created with a non RSA public key
         k_name = rand_name('keypair-')
@@ -134,14 +134,14 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_keypair, k_name, pub_key)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_keypair_delete_nonexistant_key(self):
         # Non-existant key deletion should throw a proper error
         k_name = rand_name("keypair-non-existant-")
         self.assertRaises(exceptions.NotFound, self.client.delete_keypair,
                           k_name)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_keypair_with_empty_public_key(self):
         # Keypair should not be created with an empty public key
         k_name = rand_name("keypair-")
@@ -149,7 +149,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
                           k_name, pub_key)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_keypair_when_public_key_bits_exceeds_maximum(self):
         # Keypair should not be created when public key bits are too long
         k_name = rand_name("keypair-")
@@ -157,7 +157,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
                           k_name, pub_key)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_keypair_with_duplicate_name(self):
         # Keypairs with duplicate names should not be created
         k_name = rand_name('keypair-')
@@ -169,20 +169,20 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         resp, _ = self.client.delete_keypair(k_name)
         self.assertEqual(202, resp.status)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_keypair_with_empty_name_string(self):
         # Keypairs with name being an empty string should not be created
         self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
                           '')
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_keypair_with_long_keynames(self):
         # Keypairs with name longer than 255 chars should not be created
         k_name = 'keypair-'.ljust(260, '0')
         self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
                           k_name)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_keypair_invalid_name(self):
         # Keypairs with name being an invalid name should not be created
         k_name = 'key_/.\@:'

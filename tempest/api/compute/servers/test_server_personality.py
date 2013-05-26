@@ -31,6 +31,7 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 
+    @attr(type='gate')
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
         # number of files are injected into the server.
@@ -45,7 +46,7 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.OverLimit, self.create_server,
                           personality=personality)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.

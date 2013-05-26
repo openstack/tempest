@@ -29,6 +29,7 @@ class AbsoluteLimitsTestJSON(base.BaseComputeTest):
         cls.client = cls.limits_client
         cls.server_client = cls.servers_client
 
+    @attr(type='gate')
     def test_absLimits_get(self):
         # To check if all limits are present in the response
         resp, absolute_limits = self.client.get_absolute_limits()
@@ -48,7 +49,7 @@ class AbsoluteLimitsTestJSON(base.BaseComputeTest):
                          "Failed to find element %s in absolute limits list"
                          % ', '.join(ele for ele in missing_elements))
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_max_image_meta_exceed_limit(self):
         #We should not create vm with image meta over maxImageMeta limit
         # Get max limit value

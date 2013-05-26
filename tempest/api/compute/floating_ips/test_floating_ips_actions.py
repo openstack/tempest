@@ -56,7 +56,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
         super(FloatingIPsTestJSON, cls).tearDownClass()
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
@@ -73,7 +73,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
             #Deleting the floating IP which is created in this method
             self.client.delete_floating_ip(floating_ip_id_allocated)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_allocate_floating_ip_from_nonexistent_pool(self):
         # Positive test:Allocation of a new floating IP from a nonexistent_pool
         #to a project should fail
@@ -81,7 +81,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
                           self.client.create_floating_ip,
                           "non_exist_pool")
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
@@ -96,7 +96,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         # Check it was really deleted.
         self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_associate_disassociate_floating_ip(self):
         # Positive test:Associate and disassociate the provided floating IP
         # to a specific server should be successful
@@ -112,7 +112,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
             self.server_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_nonexistant_floating_ip(self):
         # Negative test:Deletion of a nonexistent floating IP
         # from project should fail
@@ -121,7 +121,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_floating_ip,
                           self.non_exist_id)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_associate_nonexistant_floating_ip(self):
         # Negative test:Association of a non existent floating IP
         # to specific server should fail
@@ -130,7 +130,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
                           self.client.associate_floating_ip_to_server,
                           "0.0.0.0", self.server_id)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_dissociate_nonexistant_floating_ip(self):
         # Negative test:Dissociation of a non existent floating IP should fail
         # Dissociating non existent floating IP
@@ -138,7 +138,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
                           self.client.disassociate_floating_ip_from_server,
                           "0.0.0.0", self.server_id)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_associate_already_associated_floating_ip(self):
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP
@@ -170,7 +170,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
                           self.client.disassociate_floating_ip_from_server,
                           self.floating_ip, self.server_id)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         # Negative test:Association of empty floating IP to specific server
         # should raise NotFound exception

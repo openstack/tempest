@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.test import attr
 
 import time
 
@@ -92,6 +93,7 @@ class AttachInterfacesTestJSON(base.BaseComputeTest):
 
         self.assertEqual(sorted(list1), sorted(list2))
 
+    @attr(type='gate')
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)

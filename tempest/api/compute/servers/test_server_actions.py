@@ -51,9 +51,9 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         cls.client = cls.servers_client
         cls.rebuild_servers()
 
-    @attr(type='smoke')
     @testtools.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
                           'Change password not available.')
+    @attr(type='gate')
     def test_change_server_password(self):
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
@@ -86,8 +86,8 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             new_boot_time = linux_client.get_boot_time()
             self.assertGreater(new_boot_time, boot_time)
 
-    @attr(type='smoke')
     @testtools.skip('Until Bug #1014647 is dealt with.')
+    @attr(type='smoke')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
         if self.run_ssh:
@@ -147,8 +147,8 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             if int(current_flavor) == self.flavor_ref else self.flavor_ref
         return int(current_flavor), int(new_flavor_ref)
 
-    @attr(type='smoke')
     @testtools.skipIf(not resize_available, 'Resize not available.')
+    @attr(type='smoke')
     def test_resize_server_confirm(self):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
@@ -166,8 +166,8 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(new_flavor_ref, int(server['flavor']['id']))
 
-    @attr(type='positive')
     @testtools.skipIf(not resize_available, 'Resize not available.')
+    @attr(type=['positive', 'gate'])
     def test_resize_server_revert(self):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted
@@ -195,13 +195,13 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                 required time (%s s).' % (self.server_id, self.build_timeout)
                 raise exceptions.TimeoutException(message)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_reboot_nonexistent_server_soft(self):
         # Negative Test: The server reboot on non existent server should return
         # an error
         self.assertRaises(exceptions.NotFound, self.client.reboot, 999, 'SOFT')
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_rebuild_nonexistent_server(self):
         # Negative test: The server rebuild for a non existing server
         # should not be allowed
@@ -217,7 +217,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                           personality=personality,
                           adminPass='rebuild')
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id and number of lines
@@ -230,7 +230,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             self.assertEqual(lines, 10)
         self.wait_for(get_output)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_get_console_output_invalid_server_id(self):
         # Negative test: Should not be able to get the console output
         # for an invalid server_id
@@ -238,8 +238,8 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                           self.servers_client.get_console_output,
                           '!@#$%^&*()', 10)
 
-    @attr(type='positive')
     @testtools.skip('Until tempest Bug #1014683 is fixed.')
+    @attr(type=['positive', 'gate'])
     def test_get_console_output_server_id_in_reboot_status(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id in reboot status

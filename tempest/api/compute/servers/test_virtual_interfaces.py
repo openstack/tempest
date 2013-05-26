@@ -23,7 +23,6 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-@attr(type='smoke')
 class VirtualInterfacesTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
@@ -34,7 +33,7 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
         resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
@@ -49,7 +48,7 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
             self.assertTrue(netaddr.valid_mac(mac_address),
                             "Invalid mac address detected.")
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_list_virtual_interfaces_invalid_server_id(self):
         # Negative test: Should not be able to GET virtual interfaces
         # for an invalid server_id
@@ -59,6 +58,5 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
                           invalid_server_id)
 
 
-@attr(type='smoke')
 class VirtualInterfacesTestXML(VirtualInterfacesTestJSON):
     _interface = 'xml'

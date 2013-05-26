@@ -245,7 +245,7 @@ class ObjectTest(base.BaseObjectTest):
             resp, _ = self.container_client.delete_container(
                 dst_container_name)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_write_object_without_using_creds(self):
         # trying to create object with empty headers
         object_name = rand_name(name='Object')
@@ -258,7 +258,7 @@ class ObjectTest(base.BaseObjectTest):
                           self.container_name, object_name, data,
                           metadata=obj_headers)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_object_without_using_creds(self):
         # create object
         object_name = rand_name(name='Object')
@@ -271,7 +271,7 @@ class ObjectTest(base.BaseObjectTest):
                           self.custom_object_client.delete_object,
                           self.container_name, object_name)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_write_object_with_non_authorized_user(self):
         # attempt to upload another file using non-authorized user
         object_name = rand_name(name='Object')
@@ -284,7 +284,7 @@ class ObjectTest(base.BaseObjectTest):
                           self.container_name, object_name, data,
                           metadata=self.custom_headers)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_read_object_with_non_authorized_user(self):
         object_name = rand_name(name='Object')
         data = arbitrary_string(size=len(object_name) * 5,
@@ -299,7 +299,7 @@ class ObjectTest(base.BaseObjectTest):
                           self.container_name, object_name,
                           metadata=self.custom_headers)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_object_with_non_authorized_user(self):
         object_name = rand_name(name='Object')
         data = arbitrary_string(size=len(object_name) * 5,
@@ -314,7 +314,7 @@ class ObjectTest(base.BaseObjectTest):
                           metadata=self.custom_headers)
 
     @testtools.skip('Until Bug #1097137 is resolved.')
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_get_object_using_temp_url(self):
         # access object using temporary URL within expiration time
 
@@ -352,7 +352,7 @@ class ObjectTest(base.BaseObjectTest):
                 resp, _ = self.account_client.list_account_metadata()
                 self.assertNotIn('x-account-meta-temp-url-key', resp)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_object_upload_in_segments(self):
         # create object
         object_name = rand_name(name='LObject')

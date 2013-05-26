@@ -62,8 +62,8 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                 cls.alt_manager = clients.AltManager()
             cls.alt_client = cls.alt_manager.images_client
 
-    @attr(type='negative')
     @testtools.skip("Until Bug #1006725 is fixed")
+    @attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         # Return an error if the image name has multi-byte characters
         snapshot_name = rand_name('\xef\xbb\xbf')
@@ -71,7 +71,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                           self.client.create_image, self.server['id'],
                           snapshot_name)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
         snapshot_name = rand_name('test-snap-')
@@ -79,7 +79,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server['id'], snapshot_name, meta)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
         snapshot_name = rand_name('test-snap-')
@@ -87,9 +87,9 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server['id'], snapshot_name, meta)
 
-    @attr(type='negative')
     @testtools.skipUnless(compute.MULTI_USER,
                           'Need multiple users for this test.')
+    @attr(type=['negative', 'gate'])
     def test_delete_image_of_another_tenant(self):
         # Return an error while trying to delete another tenant's image
         self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
@@ -104,9 +104,9 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.alt_client.delete_image, image_id)
 
-    @attr(type='smoke')
     @testtools.skipUnless(compute.CREATE_IMAGE_ENABLED,
                           'Environment unable to create images.')
+    @attr(type='smoke')
     def test_create_delete_image(self):
 
         # Create a new image
@@ -133,9 +133,9 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertEqual('204', resp['status'])
         self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
 
-    @attr(type='negative')
     @testtools.skipUnless(compute.MULTI_USER,
                           'Need multiple users for this test.')
+    @attr(type=['negative', 'gate'])
     def test_create_image_for_server_in_another_tenant(self):
         # Creating image of another tenant's server should be return error
 
@@ -143,7 +143,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.alt_client.create_image,
                           self.server['id'], snapshot_name)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
 
@@ -161,7 +161,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                           self.server['id'], alt_snapshot_name)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
@@ -169,7 +169,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server['id'], snapshot_name)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 

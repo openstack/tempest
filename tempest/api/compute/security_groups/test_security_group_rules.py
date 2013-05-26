@@ -29,7 +29,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         super(SecurityGroupRulesTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_security_group_rules_create(self):
         # Positive test: Creation of Security Group rule
         # should be successfull
@@ -52,7 +52,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         self.addCleanup(self.client.delete_security_group_rule, rule['id'])
         self.assertEqual(200, resp.status)
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_security_group_rules_create_with_optional_arguments(self):
         # Positive test: Creation of Security Group rule
         # with optional arguments
@@ -91,7 +91,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         self.addCleanup(self.client.delete_security_group_rule, rule['id'])
         self.assertEqual(200, resp.status)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_rules_create_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid Parent group id
@@ -104,7 +104,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_rules_create_with_invalid_ip_protocol(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid ip_protocol
@@ -124,7 +124,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_rules_create_with_invalid_from_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
@@ -143,7 +143,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_rules_create_with_invalid_to_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
@@ -162,7 +162,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_rules_create_with_invalid_port_range(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid port range.
@@ -181,7 +181,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.create_security_group_rule,
                           secgroup_id, ip_protocol, from_port, to_port)
 
-    @attr(type='negative')
+    @attr(type=['negative', 'gate'])
     def test_security_group_rules_delete_with_invalid_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with invalid rule id
@@ -189,7 +189,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.delete_security_group_rule,
                           rand_name('999'))
 
-    @attr(type='positive')
+    @attr(type=['positive', 'gate'])
     def test_security_group_rules_list(self):
         # Positive test: Created Security Group rules should be
         # in the list of all rules
