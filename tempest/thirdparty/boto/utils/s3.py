@@ -16,12 +16,13 @@
 #    under the License.
 
 import contextlib
-import logging
 import os
 import re
 
 import boto
 import boto.s3.key
+
+from tempest.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

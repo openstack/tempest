@@ -16,7 +16,7 @@
 #    under the License.
 
 import contextlib
-import logging
+import logging as orig_logging
 import os
 import re
 import urlparse
@@ -28,6 +28,7 @@ from boto import s3
 import keystoneclient.exceptions
 
 import tempest.clients
+from tempest.common import log as logging
 from tempest.common.utils.file_utils import have_effective_read_access
 import tempest.config
 from tempest import exceptions
@@ -58,7 +59,7 @@ def decision_maker():
     A_I_IMAGES_READY = all_read(ami_path, aki_path, ari_path)
     boto_logger = logging.getLogger('boto')
     level = boto_logger.level
-    boto_logger.setLevel(logging.CRITICAL)  # suppress logging for these
+    boto_logger.setLevel(orig_logging.CRITICAL)  # suppress logging for these
 
     def _cred_sub_check(connection_data):
         if not id_matcher.match(connection_data["aws_access_key_id"]):

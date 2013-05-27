@@ -19,11 +19,11 @@ import collections
 import hashlib
 import httplib2
 import json
-import logging
 from lxml import etree
 import re
 import time
 
+from tempest.common import log as logging
 from tempest import exceptions
 from tempest.services.compute.xml.common import xml_to_json
 

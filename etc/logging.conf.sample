@@ -1,30 +1,41 @@
 [loggers]
-keys=root
-
-[formatters]
-keys=normal,debug
+keys=root,tempest
 
 [handlers]
-keys=file,devel
+keys=file,syslog,devel
+
+[formatters]
+keys=default,tests
 
 [logger_root]
 level=NOTSET
+handlers=syslog
+
+[logger_tempest]
+level=DEBUG
 handlers=file
+qualname=tempest
 
 [handler_file]
 class=FileHandler
 level=DEBUG
-formatter=normal
+formatter=tests
 args=('tempest.log', 'w')
+
+[handler_syslog]
+class=handlers.SysLogHandler
+level=ERROR
+formatter = default
+args = ('/dev/log', handlers.SysLogHandler.LOG_USER)
 
 [handler_devel]
 class=StreamHandler
 level=DEBUG
-formatter=debug
+formatter=default
 args=(sys.stdout,)
 
-[formatter_normal]
-format=%(asctime)s %(levelname)s %(message)s
+[formatter_default]
+format=%(name)s: %(levelname)s: %(message)s
 
-[formatter_debug]
-format=%(asctime)s %(levelname)s %(module)s %(funcName)s %(message)s
+[formatter_tests]
+class = tempest.common.log.TestsFormatter

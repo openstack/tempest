@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import os
 import shlex
 import subprocess
@@ -23,6 +22,7 @@ import sys
 
 from sqlalchemy import create_engine, MetaData
 
+from tempest.common import log as logging
 from tempest.common.ssh import Client
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions

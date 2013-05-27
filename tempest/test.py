@@ -15,13 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import time
 
 import nose.plugins.attrib
 import testresources
 import testtools
 
+from tempest.common import log as logging
 from tempest import config
 from tempest import manager
 
