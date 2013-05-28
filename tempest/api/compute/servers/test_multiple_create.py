@@ -60,7 +60,7 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
 
         return resp, body
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_multiple_create(self):
         resp, body = self._create_multiple_servers(wait_until='ACTIVE',
                                                    min_count=1,
@@ -103,7 +103,7 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
                           min_count=min_count,
                           max_count=max_count)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_multiple_create_with_reservation_return(self):
         resp, body = self._create_multiple_servers(wait_until='ACTIVE',
                                                    min_count=1,

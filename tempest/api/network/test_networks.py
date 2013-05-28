@@ -54,7 +54,7 @@ class NetworksTest(base.BaseNetworkTest):
         cls.subnet = cls.create_subnet(cls.network)
         cls.cidr = cls.subnet['cidr']
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_create_delete_network_subnet(self):
         # Creates a network
         name = rand_name('network-')
@@ -83,7 +83,7 @@ class NetworksTest(base.BaseNetworkTest):
         resp, body = self.client.delete_network(network['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_show_network(self):
         # Verifies the details of a network
         resp, body = self.client.show_network(self.network['id'])
@@ -92,7 +92,7 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEqual(self.network['id'], network['id'])
         self.assertEqual(self.name, network['name'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
         resp, body = self.client.list_networks()
@@ -100,7 +100,7 @@ class NetworksTest(base.BaseNetworkTest):
         found = any(n for n in networks if n['id'] == self.network['id'])
         self.assertTrue(found)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_show_subnet(self):
         # Verifies the details of a subnet
         resp, body = self.client.show_subnet(self.subnet['id'])
@@ -109,7 +109,7 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEqual(self.subnet['id'], subnet['id'])
         self.assertEqual(self.cidr, subnet['cidr'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
         resp, body = self.client.list_subnets()

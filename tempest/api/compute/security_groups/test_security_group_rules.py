@@ -29,7 +29,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         super(SecurityGroupRulesTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_security_group_rules_create(self):
         # Positive test: Creation of Security Group rule
         # should be successfull
@@ -52,7 +52,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         self.addCleanup(self.client.delete_security_group_rule, rule['id'])
         self.assertEqual(200, resp.status)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_security_group_rules_create_with_optional_arguments(self):
         # Positive test: Creation of Security Group rule
         # with optional arguments
@@ -189,7 +189,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.delete_security_group_rule,
                           rand_name('999'))
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_security_group_rules_list(self):
         # Positive test: Created Security Group rules should be
         # in the list of all rules

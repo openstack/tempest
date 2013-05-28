@@ -70,7 +70,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         self.attached = True
 
     @testtools.skipIf(not run_ssh, 'SSH required for this test')
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.

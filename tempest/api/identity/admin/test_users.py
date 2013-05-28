@@ -33,7 +33,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     alt_tenant = rand_name('test_tenant_')
     alt_description = rand_name('desc_')
 
-    @attr(type=['smoke'])
+    @attr(type='smoke')
     def test_create_user(self):
         # Create a user
         self.data.setup_test_tenant()
@@ -125,7 +125,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         # Unset the token to allow further tests to generate a new token
         self.client.clear_auth()
 
-    @attr(type=['smoke'])
+    @attr(type='smoke')
     def test_delete_user(self):
         # Delete a user
         self.data.setup_test_tenant()
@@ -150,7 +150,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_user,
                           'junk12345123')
 
-    @attr(type=['smoke'])
+    @attr(type='smoke')
     def test_user_authentication(self):
         # Valid user's token is authenticated
         self.data.setup_test_user()
@@ -225,7 +225,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual('200', resp['status'])
         self.client.clear_auth()
 
-    @attr(type=['smoke'])
+    @attr(type='smoke')
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()

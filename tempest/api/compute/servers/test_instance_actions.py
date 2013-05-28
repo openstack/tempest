@@ -31,7 +31,7 @@ class InstanceActionsTestJSON(base.BaseComputeTest):
         cls.request_id = resp['x-compute-request-id']
         cls.server_id = server['id']
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_list_instance_actions(self):
         # List actions of the provided server
         resp, body = self.client.reboot(self.server_id, 'HARD')
@@ -43,7 +43,7 @@ class InstanceActionsTestJSON(base.BaseComputeTest):
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_instance_action(self):
         # Get the action details of the provided server
         resp, body = self.client.get_instance_action(self.server_id,

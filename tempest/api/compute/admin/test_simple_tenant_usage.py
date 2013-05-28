@@ -51,7 +51,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
         # Returns formatted datetime
         return at.strftime('%Y-%m-%dT%H:%M:%S.%f')
 
-    @attr('positive')
+    @attr(type='gate')
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
         params = {'start': self.start,
@@ -61,7 +61,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
-    @attr('positive')
+    @attr(type='gate')
     def test_get_usage_tenant(self):
         # Get usage for a specific tenant
         params = {'start': self.start,
@@ -72,7 +72,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
-    @attr('positive')
+    @attr(type='gate')
     def test_get_usage_tenant_with_non_admin_user(self):
         # Get usage for a specific tenant with non admin user
         params = {'start': self.start,
@@ -83,7 +83,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
-    @attr('negative')
+    @attr(type=['negative', 'gate'])
     def test_get_usage_tenant_with_empty_tenant_id(self):
         # Get usage for a specific tenant empty
         params = {'start': self.start,
@@ -92,7 +92,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
                           self.adm_client.get_tenant_usage,
                           '', params)
 
-    @attr('negative')
+    @attr(type=['negative', 'gate'])
     def test_get_usage_tenant_with_invalid_date(self):
         # Get usage for tenant with invalid date
         params = {'start': self.end,
@@ -101,7 +101,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
                           self.adm_client.get_tenant_usage,
                           self.tenant_id, params)
 
-    @attr('negative')
+    @attr(type=['negative', 'gate'])
     def test_list_usage_all_tenants_with_non_admin_user(self):
         # Get usage for all tenants with non admin user
         params = {'start': self.start,

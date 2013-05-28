@@ -299,7 +299,7 @@ class ObjectTest(base.BaseObjectTest):
                           metadata=self.custom_headers)
 
     @testtools.skip('Until Bug #1097137 is resolved.')
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_object_using_temp_url(self):
         # access object using temporary URL within expiration time
 
@@ -337,7 +337,7 @@ class ObjectTest(base.BaseObjectTest):
                 resp, _ = self.account_client.list_account_metadata()
                 self.assertNotIn('x-account-meta-temp-url-key', resp)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_object_upload_in_segments(self):
         # create object
         object_name = rand_name(name='LObject')

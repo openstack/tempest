@@ -33,7 +33,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         resp, _ = self.client.delete_security_group(securitygroup_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
         #Create 3 Security Groups
@@ -61,7 +61,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
 
     #TODO(afazekas): scheduled for delete,
     #test_security_group_create_get_delete covers it
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_security_group_create_delete(self):
         # Security Group should be created, verified and deleted
         s_name = rand_name('securitygroup-')
@@ -80,7 +80,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                          "The created Security Group name is "
                          "not equal to the requested name")
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
         s_name = rand_name('securitygroup-')

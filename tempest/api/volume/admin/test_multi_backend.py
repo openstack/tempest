@@ -109,7 +109,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
         super(VolumeMultiBackendTest, cls).tearDownClass()
 
-    @attr(type=['smoke'])
+    @attr(type='smoke')
     def test_multi_backend_enabled(self):
         # this test checks that multi backend is enabled for at least the
         # computes where the volumes created in setUp were made

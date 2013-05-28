@@ -169,7 +169,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                           self.server_id,
                           self.volume_to_detach['id'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Rescue the server
         self.servers_client.rescue_server(
@@ -189,7 +189,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                                                         self.server_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_rescued_vm_add_remove_security_group(self):
         # Rescue the server
         self.servers_client.rescue_server(

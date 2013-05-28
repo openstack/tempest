@@ -17,11 +17,9 @@
 
 from tempest.api.identity.base import BaseIdentityAdminTest
 from tempest import exceptions
-from tempest.test import attr
 from tempest.whitebox import manager
 
 
-@attr(type='whitebox')
 class ServersWhiteboxTest(manager.ComputeWhiteboxTest):
     _interface = 'json'
 

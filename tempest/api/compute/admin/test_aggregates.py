@@ -43,7 +43,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                     filter(lambda y: y['service'] == 'compute', hosts_all))
         cls.host = hosts[0]
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_create_delete(self):
         # Create and delete an aggregate.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -56,7 +56,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEquals(200, resp.status)
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_create_delete_with_az(self):
         # Create and delete an aggregate.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -70,7 +70,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEquals(200, resp.status)
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_create_verify_entry_in_list(self):
         # Create an aggregate and ensure it is listed.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -83,7 +83,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                       map(lambda x: (x['id'], x['availability_zone']),
                           aggregates))
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_create_get_details(self):
         # Create an aggregate and ensure its details are returned.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -144,7 +144,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.get_aggregate, -1)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_add_remove_host(self):
         # Add an host to the given aggregate and remove.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -165,7 +165,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                           body['availability_zone'])
         self.assertNotIn(self.host, body['hosts'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_add_host_list(self):
         # Add an host to the given aggregate and list.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -182,7 +182,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEquals(None, agg['availability_zone'])
         self.assertIn(self.host, agg['hosts'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_add_host_get_details(self):
         # Add an host to the given aggregate and get details.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -196,7 +196,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEquals(None, body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_aggregate_add_host_create_server_with_az(self):
         # Add an host to the given aggregate and create a server.
         aggregate_name = rand_name(self.aggregate_name_prefix)

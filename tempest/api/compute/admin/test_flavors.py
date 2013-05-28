@@ -53,7 +53,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(resp.status, 202)
         self.client.wait_for_resource_deletion(flavor_id)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_create_flavor(self):
         # Create a flavor and ensure it is listed
         # This operation requires the user to have 'admin' role
@@ -92,7 +92,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(resp.status, 200)
         self.assertEqual(flavor['name'], flavor_name)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_create_flavor_verify_entry_in_list_details(self):
         # Create a flavor and ensure it's details are listed
         # This operation requires the user to have 'admin' role
@@ -193,7 +193,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_flavor_not_public_verify_entry_not_in_list_details(self):
         #Create a flavor with os-flavor-access:is_public false should not
         #be present in list_details.
@@ -241,7 +241,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_is_public_string_variations(self):
         flavor_id_not_public = rand_int_id(start=1000)
         flavor_name_not_public = rand_name(self.flavor_name_prefix)

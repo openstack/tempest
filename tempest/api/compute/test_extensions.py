@@ -23,7 +23,7 @@ from tempest.test import attr
 class ExtensionsTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_list_extensions(self):
         # List of all extensions
         resp, extensions = self.extensions_client.list_extensions()

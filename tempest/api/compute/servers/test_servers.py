@@ -32,7 +32,7 @@ class ServersTestJSON(base.BaseComputeTest):
         self.clear_servers()
         super(ServersTestJSON, self).tearDown()
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_create_server_with_admin_password(self):
         # If an admin password is provided on server creation, the server's
         # root password should be set to that password.
@@ -60,7 +60,7 @@ class ServersTestJSON(base.BaseComputeTest):
         name2 = server['name']
         self.assertEqual(name1, name2)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_create_specify_keypair(self):
         # Specify a keypair while creating a server
 
@@ -73,7 +73,7 @@ class ServersTestJSON(base.BaseComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual(key_name, server['key_name'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_update_server_name(self):
         # The server name should be changed to the the provided value
         resp, server = self.create_server(wait_until='ACTIVE')
@@ -88,7 +88,7 @@ class ServersTestJSON(base.BaseComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('newname', server['name'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_update_access_server_address(self):
         # The server's access addresses should reflect the provided values
         resp, server = self.create_server(wait_until='ACTIVE')
