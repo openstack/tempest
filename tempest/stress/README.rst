@@ -1,4 +1,4 @@
-Quanta Research Cambridge OpenStack Stress Test System
+Tempest Field Guide to Stress Tests
 ======================================================
 
 Nova is a distributed, asynchronous system that is prone to race condition
@@ -10,7 +10,7 @@ in a more controlled environment.
 
 Environment
 ------------
-This particular framework assumes your working Nova cluster understands Nova 
+This particular framework assumes your working Nova cluster understands Nova
 API 2.0. The stress tests can read the logs from the cluster. To enable this
 you have to provide the hostname to call 'nova-manage' and
 the private key and user name for ssh to the cluster in the

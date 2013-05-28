@@ -3,6 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+===================================
 Tempest Testing Project
 ===================================
 
@@ -14,10 +15,15 @@ Contents:
    overview
 
 
-Field Guide:
+-------------------------------
+Field Guides
+-------------------------------
+Tempest contains tests of many different types, the field guides
+attempt to explain these in a way that makes it easy to understand
+where your test contributions should go.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    field_guide/index
    field_guide/api
@@ -28,6 +34,7 @@ Field Guide:
    field_guide/whitebox
 
 
+==================
 Indices and tables
 ==================
 
