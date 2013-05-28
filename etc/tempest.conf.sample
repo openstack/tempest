@@ -222,12 +222,12 @@ build_interval = 10
 # Number of seconds to time out on waiting for a volume
 # to be available or reach an expected status
 build_timeout = 300
-# Runs Cinder multi-backend tests (requires 2 backend declared in cinder.conf)
+# Runs Cinder multi-backend tests (requires 2 backends declared in cinder.conf)
 # They must have different volume_backend_name (backend1_name and backend2_name
 # have to be different)
 multi_backend_enabled = false
-backend1_name = LVM_iSCSI
-backend2_name = LVM_iSCSI_1
+backend1_name = BACKEND_1
+backend2_name = BACKEND_2
 
 [object-storage]
 # This section contains configuration options used when executing tests
