@@ -44,6 +44,14 @@ class IdentityV3ClientXML(RestClientXML):
                 array.append(xml_to_json(child))
         return array
 
+    def _parse_domains(self, node):
+        array = []
+        for child in node.getchildren():
+            tag_list = child.tag.split('}', 1)
+            if tag_list[1] == "domain":
+                array.append(xml_to_json(child))
+        return array
+
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
@@ -184,4 +192,52 @@ class IdentityV3ClientXML(RestClientXML):
         """Add roles to a user on a tenant."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
                               (project_id, user_id, role_id), '', self.headers)
+        return resp, body
+
+    def create_domain(self, name, **kwargs):
+        """Creates a domain."""
+        description = kwargs.get('description', None)
+        en = kwargs.get('enabled', True)
+        post_body = Element("domain",
+                            xmlns=XMLNS,
+                            name=name,
+                            description=description,
+                            enabled=str(en).lower())
+        resp, body = self.post('domains', str(Document(post_body)),
+                               self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
+    def list_domains(self):
+        """Get the list of domains."""
+        resp, body = self.get("domains", self.headers)
+        body = self._parse_domains(etree.fromstring(body))
+        return resp, body
+
+    def delete_domain(self, domain_id):
+        """Delete a domain."""
+        resp, body = self.delete('domains/%s' % domain_id, self.headers)
+        return resp, body
+
+    def update_domain(self, domain_id, **kwargs):
+        """Updates a domain."""
+        resp, body = self.get_domain(domain_id)
+        description = kwargs.get('description', body['description'])
+        en = kwargs.get('enabled', body['enabled'])
+        name = kwargs.get('name', body['name'])
+        post_body = Element("domain",
+                            xmlns=XMLNS,
+                            name=name,
+                            description=description,
+                            enabled=str(en).lower())
+        resp, body = self.patch('domains/%s' % domain_id,
+                                str(Document(post_body)),
+                                self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
+    def get_domain(self, domain_id):
+        """Get Domain details."""
+        resp, body = self.get('domains/%s' % domain_id, self.headers)
+        body = self._parse_body(etree.fromstring(body))
         return resp, body
