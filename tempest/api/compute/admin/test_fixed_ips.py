@@ -51,7 +51,7 @@ class FixedIPsBase(base.BaseComputeAdminTest):
 class FixedIPsTestJson(FixedIPsBase):
     _interface = 'json'
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_list_fixed_ip_details(self):
         resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)
         self.assertEqual(fixed_ip['address'], self.ip)
@@ -61,13 +61,13 @@ class FixedIPsTestJson(FixedIPsBase):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.get_fixed_ip_details, self.ip)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_set_reserve(self):
         body = {"reserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)
         self.assertEqual(resp.status, 202)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_set_unreserve(self):
         body = {"unreserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)

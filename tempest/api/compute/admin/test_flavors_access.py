@@ -50,7 +50,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
         cls.vcpus = 1
         cls.disk = 10
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_flavor_access_add_remove(self):
         #Test to add and remove flavor access to a given tenant.
         flavor_name = rand_name(self.flavor_name_prefix)

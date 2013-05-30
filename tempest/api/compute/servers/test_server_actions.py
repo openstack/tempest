@@ -167,7 +167,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         self.assertEqual(new_flavor_ref, int(server['flavor']['id']))
 
     @testtools.skipIf(not resize_available, 'Resize not available.')
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_resize_server_revert(self):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted
@@ -217,7 +217,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                           personality=personality,
                           adminPass='rebuild')
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id and number of lines
@@ -239,7 +239,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                           '!@#$%^&*()', 10)
 
     @testtools.skip('Until tempest Bug #1014683 is fixed.')
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_console_output_server_id_in_reboot_status(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id in reboot status

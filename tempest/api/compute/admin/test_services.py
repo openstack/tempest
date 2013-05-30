@@ -34,7 +34,7 @@ class ServicesAdminTestJSON(base.BaseComputeAdminTest):
         cls.client = cls.os_adm.services_client
         cls.non_admin_client = cls.services_client
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_list_services(self):
         # List Compute services
         resp, services = self.client.list_services()

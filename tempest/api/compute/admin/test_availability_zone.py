@@ -34,14 +34,14 @@ class AvailabilityZoneAdminTestJSON(base.BaseComputeAdminTest):
         cls.client = cls.os_adm.availability_zone_client
         cls.non_adm_client = cls.availability_zone_client
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_availability_zone_list(self):
         # List of availability zone
         resp, availability_zone = self.client.get_availability_zone_list()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_availability_zone_list_detail(self):
         # List of availability zones and available services
         resp, availability_zone = \
@@ -49,7 +49,7 @@ class AvailabilityZoneAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_availability_zone_list_with_non_admin_user(self):
         # List of availability zone with non admin user
         resp, availability_zone = \
