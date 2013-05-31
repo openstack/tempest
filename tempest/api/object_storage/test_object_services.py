@@ -340,18 +340,19 @@ class ObjectTest(base.BaseObjectTest):
     def test_object_upload_in_segments(self):
         # create object
         object_name = rand_name(name='LObject')
-        data = arbitrary_string(size=len(object_name),
-                                base_text=object_name)
+        data = arbitrary_string()
         segments = 10
-        self.object_client.create_object(self.container_name,
-                                         object_name, data)
-        # uploading 10 segments
-        for i in range(segments):
+        data_segments = [data + str(i) for i in xrange(segments)]
+        # uploading segments
+        for i in xrange(segments):
             resp, _ = self.object_client.create_object_segments(
-                self.container_name, object_name, i, data)
-        # creating a manifest file (metadata update)
+                self.container_name, object_name, i, data_segments[i])
+            self.assertEqual(resp['status'], '201')
+        # creating a manifest file
         metadata = {'X-Object-Manifest': '%s/%s/'
                     % (self.container_name, object_name)}
+        self.object_client.create_object(self.container_name,
+                                         object_name, data='')
         resp, _ = self.object_client.update_object_metadata(
             self.container_name, object_name, metadata, metadata_prefix='')
         resp, _ = self.object_client.list_object_metadata(
@@ -363,7 +364,7 @@ class ObjectTest(base.BaseObjectTest):
         # downloading the object
         resp, body = self.object_client.get_object(
             self.container_name, object_name)
-        self.assertEqual(data * segments, body)
+        self.assertEqual(''.join(data_segments), body)
 
     @attr(type='gate')
     def test_get_object_if_different(self):
