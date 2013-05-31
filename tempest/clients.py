@@ -264,13 +264,25 @@ class Manager(object):
             raise exceptions.InvalidConfiguration(msg)
 
         self.auth_url = self.config.identity.uri
+        self.auth_url_v3 = self.config.identity.uri_v3
 
         if self.config.identity.strategy == 'keystone':
             client_args = (self.config, self.username, self.password,
                            self.auth_url, self.tenant_name)
+
+            if self.auth_url_v3:
+                auth_version = 'v3'
+                client_args_v3_auth = (self.config, self.username,
+                                       self.password, self.auth_url_v3,
+                                       self.tenant_name, auth_version)
+            else:
+                client_args_v3_auth = None
+
         else:
             client_args = (self.config, self.username, self.password,
                            self.auth_url)
+
+            client_args_v3_auth = None
 
         try:
             self.servers_client = SERVERS_CLIENTS[interface](*client_args)
@@ -305,6 +317,13 @@ class Manager(object):
             self.tenant_usages_client = \
                 TENANT_USAGES_CLIENT[interface](*client_args)
             self.policy_client = POLICY_CLIENT[interface](*client_args)
+
+            if client_args_v3_auth:
+                self.servers_client_v3_auth = SERVERS_CLIENTS[interface](
+                    *client_args_v3_auth)
+            else:
+                self.servers_client_v3_auth = None
+
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)

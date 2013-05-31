@@ -73,6 +73,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
         cls.servers = []
 
+        cls.servers_client_v3_auth = os.servers_client_v3_auth
+
     @classmethod
     def _get_identity_admin_client(cls):
         """

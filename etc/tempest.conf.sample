@@ -12,6 +12,8 @@ catalog_type = identity
 disable_ssl_certificate_validation = False
 # URL for where to find the OpenStack Identity API endpoint (Keystone)
 uri = http://127.0.0.1:5000/v2.0/
+# URL for where to find the OpenStack V3 Identity API endpoint (Keystone)
+uri_v3 = http://127.0.0.1:5000/v3/
 # Should typically be left as keystone unless you have a non-Keystone
 # authentication API service
 strategy = keystone

@@ -37,7 +37,9 @@ IdentityGroup = [
                 help="Set to True if using self-signed SSL certificates."),
     cfg.StrOpt('uri',
                default=None,
-               help="Full URI of the OpenStack Identity API (Keystone)"),
+               help="Full URI of the OpenStack Identity API (Keystone), v2"),
+    cfg.StrOpt('uri_v3',
+               help='Full URI of the OpenStack Identity API (Keystone), v3'),
     cfg.StrOpt('strategy',
                default='keystone',
                help="Which auth method does the environment use? "
