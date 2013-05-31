@@ -65,6 +65,10 @@ image_ref_alt = {$IMAGE_ID_ALT}
 flavor_ref = 1
 flavor_ref_alt = 2
 
+# User names used to authenticate to an instance for a given image.
+image_ssh_user = root
+image_alt_ssh_user = root
+
 # Number of seconds to wait while looping to check the status of an
 # instance that is building.
 build_interval = 10
