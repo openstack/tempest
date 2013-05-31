@@ -20,6 +20,7 @@ import logging
 import subprocess
 
 # Default client libs
+import cinderclient.client
 import glanceclient
 import keystoneclient.v2_0.client
 import netaddr
@@ -49,6 +50,7 @@ class OfficialClientManager(tempest.manager.Manager):
     """
 
     NOVACLIENT_VERSION = '2'
+    CINDERCLIENT_VERSION = '1'
 
     def __init__(self):
         super(OfficialClientManager, self).__init__()
@@ -56,11 +58,13 @@ class OfficialClientManager(tempest.manager.Manager):
         self.image_client = self._get_image_client()
         self.identity_client = self._get_identity_client()
         self.network_client = self._get_network_client()
+        self.volume_client = self._get_volume_client()
         self.client_attr_names = [
             'compute_client',
             'image_client',
             'identity_client',
             'network_client',
+            'volume_client'
         ]
 
     def _get_compute_client(self, username=None, password=None,
@@ -102,6 +106,22 @@ class OfficialClientManager(tempest.manager.Manager):
         dscv = self.config.identity.disable_ssl_certificate_validation
         return glanceclient.Client('1', endpoint=endpoint, token=token,
                                    insecure=dscv)
+
+    def _get_volume_client(self, username=None, password=None,
+                           tenant_name=None):
+        if not username:
+            username = self.config.identity.username
+        if not password:
+            password = self.config.identity.password
+        if not tenant_name:
+            tenant_name = self.config.identity.tenant_name
+
+        auth_url = self.config.identity.uri
+        return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
+                                          username,
+                                          password,
+                                          tenant_name,
+                                          auth_url)
 
     def _get_identity_client(self, username=None, password=None,
                              tenant_name=None):
