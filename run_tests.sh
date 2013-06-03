@@ -166,11 +166,14 @@ if [ $nova_coverage -eq 1 ]; then
 fi
 
 run_tests
+retval=$?
 
 if [ $nova_coverage -eq 1 ]; then
     run_coverage_report
 fi
 
 if [ -z "$noseargs" ]; then
-  run_pep8
+    run_pep8
 fi
+
+exit $retval
