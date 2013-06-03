@@ -160,3 +160,51 @@ class IdentityV3ClientJSON(RestClient):
                               (project_id, user_id, role_id), None,
                               self.headers)
         return resp, body
+
+    def create_domain(self, name, **kwargs):
+        """Creates a domain."""
+        description = kwargs.get('description', None)
+        en = kwargs.get('enabled', True)
+        post_body = {
+            'description': description,
+            'enabled': en,
+            'name': name
+        }
+        post_body = json.dumps({'domain': post_body})
+        resp, body = self.post('domains', post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['domain']
+
+    def delete_domain(self, domain_id):
+        """Delete a domain."""
+        resp, body = self.delete('domains/%s' % str(domain_id))
+        return resp, body
+
+    def list_domains(self):
+        """List Domains."""
+        resp, body = self.get('domains')
+        body = json.loads(body)
+        return resp, body['domains']
+
+    def update_domain(self, domain_id, **kwargs):
+        """Updates a domain."""
+        resp, body = self.get_domain(domain_id)
+        description = kwargs.get('description', body['description'])
+        en = kwargs.get('enabled', body['enabled'])
+        name = kwargs.get('name', body['name'])
+        post_body = {
+            'description': description,
+            'enabled': en,
+            'name': name
+        }
+        post_body = json.dumps({'domain': post_body})
+        resp, body = self.patch('domains/%s' % domain_id, post_body,
+                                self.headers)
+        body = json.loads(body)
+        return resp, body['domain']
+
+    def get_domain(self, domain_id):
+        """Get Domain details."""
+        resp, body = self.get('domains/%s' % domain_id)
+        body = json.loads(body)
+        return resp, body['domain']
