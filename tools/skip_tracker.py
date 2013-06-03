@@ -28,7 +28,7 @@ import re
 from launchpadlib import launchpad
 
 BASEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
-TESTDIR = os.path.join(BASEDIR, 'tempest', 'tests')
+TESTDIR = os.path.join(BASEDIR, 'tempest')
 LPCACHEDIR = os.path.expanduser('~/.launchpadlib/cache')
 
 
