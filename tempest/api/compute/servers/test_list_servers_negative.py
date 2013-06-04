@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import datetime
 
 from tempest.api import compute
 from tempest.api.compute import base
@@ -170,7 +171,8 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_list_servers_by_changes_since(self):
         # Servers are listed by specifying changes-since date
-        changes_since = {'changes-since': '2011-01-01T12:34:00Z'}
+        since = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
+        changes_since = {'changes-since': since.isoformat()}
         resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
         # changes-since returns all instances, including deleted.
