@@ -150,3 +150,10 @@ class ImagesClientJSON(RestClient):
         resp, body = self.delete("images/%s/metadata/%s" %
                                  (str(image_id), key))
         return resp, body
+
+    def is_resource_deleted(self, id):
+        try:
+            self.get_image(id)
+        except exceptions.NotFound:
+            return True
+        return False
