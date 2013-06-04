@@ -50,7 +50,6 @@ class CreateRegisterImagesTest(base.BaseV2ImageTest):
                                        visibility='public')
         self.assertTrue('id' in body)
         image_id = body.get('id')
-        self.created_images.append(image_id)
         self.assertTrue('name' in body)
         self.assertEqual('New Name', body.get('name'))
         self.assertTrue('visibility' in body)
@@ -79,7 +78,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         # We add a few images here to test the listing functionality of
         # the images API
         for x in xrange(0, 10):
-            cls.created_images.append(cls._create_standard_image(x))
+            cls._create_standard_image(x)
 
     @classmethod
     def _create_standard_image(cls, number):

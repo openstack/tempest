@@ -47,7 +47,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                        properties=properties)
         self.assertTrue('id' in body)
         image_id = body.get('id')
-        self.created_images.append(image_id)
         self.assertEqual('New Name', body.get('name'))
         self.assertTrue(body.get('is_public'))
         self.assertEqual('queued', body.get('status'))
@@ -71,8 +70,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                        properties={'key1': 'value1',
                                                    'key2': 'value2'})
         self.assertTrue('id' in body)
-        image_id = body.get('id')
-        self.created_images.append(image_id)
         self.assertEqual('New Remote Image', body.get('name'))
         self.assertTrue(body.get('is_public'))
         self.assertEqual('active', body.get('status'))
@@ -88,7 +85,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                        copy_from=self.config.images.http_image)
         self.assertTrue('id' in body)
         image_id = body.get('id')
-        self.created_images.append(image_id)
         self.assertEqual('New Http Image', body.get('name'))
         self.assertTrue(body.get('is_public'))
         self.client.wait_for_image_status(image_id, 'active')
@@ -106,8 +102,6 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
                                        min_ram=40,
                                        properties=properties)
         self.assertTrue('id' in body)
-        image_id = body.get('id')
-        self.created_images.append(image_id)
         self.assertEqual('New_image_with_min_ram', body.get('name'))
         self.assertTrue(body.get('is_public'))
         self.assertEqual('queued', body.get('status'))
