@@ -72,21 +72,22 @@ class S3ImagesTest(BotoTestCase):
         retrieved_image = self.images_client.get_image(image["image_id"])
         self.assertTrue(retrieved_image.name == image["name"])
         self.assertTrue(retrieved_image.id == image["image_id"])
-        if retrieved_image.state != "available":
+        state = retrieved_image.state
+        if state != "available":
             def _state():
                 retr = self.images_client.get_image(image["image_id"])
                 return retr.state
             state = state_wait(_state, "available")
         self.assertEqual("available", state)
         self.images_client.deregister_image(image["image_id"])
-        #TODO(afazekas): double deregister ?
+        self.assertNotIn(image["image_id"], str(
+            self.images_client.get_all_images()))
         self.cancelResourceCleanUp(image["cleanUp"])
 
-    @testtools.skip("Skipped until the Bug #1074904 is resolved")
     def test_register_get_deregister_aki_image(self):
         # Register and deregister aki image
         image = {"name": rand_name("aki-name-"),
-                 "location": self.bucket_name + "/" + self.ari_manifest,
+                 "location": self.bucket_name + "/" + self.aki_manifest,
                  "type": "aki"}
         image["image_id"] = self.images_client.register_image(
             name=image["name"],
@@ -102,9 +103,8 @@ class S3ImagesTest(BotoTestCase):
         if retrieved_image.state != "available":
             self.assertImageStateWait(retrieved_image, "available")
         self.images_client.deregister_image(image["image_id"])
-        #TODO(afazekas): verify deregister in  a better way
-        retrieved_image = self.images_client.get_image(image["image_id"])
-        self.assertIn(retrieved_image.state, self.valid_image_state)
+        self.assertNotIn(image["image_id"], str(
+            self.images_client.get_all_images()))
         self.cancelResourceCleanUp(image["cleanUp"])
 
     @testtools.skip("Skipped until the Bug #1074908 and #1074904 is resolved")
