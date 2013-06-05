@@ -16,10 +16,13 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import log as logging
 from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+
+
+LOG = logging.getLogger(__name__)
 
 
 class ListImageFiltersTestJSON(base.BaseComputeTest):
@@ -29,6 +32,7 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
     def setUpClass(cls):
         super(ListImageFiltersTestJSON, cls).setUpClass()
         cls.client = cls.images_client
+        cls.image_ids = []
 
         try:
             resp, cls.server1 = cls.create_server()
@@ -38,9 +42,7 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
                                                       'ACTIVE')
 
             # Create images to be used in the filter tests
-            image1_name = rand_name('image')
-            resp, body = cls.client.create_image(cls.server1['id'],
-                                                 image1_name)
+            resp, body = cls.create_image_from_server(cls.server1['id'])
             cls.image1_id = parse_image_id(resp['location'])
             cls.client.wait_for_image_resp_code(cls.image1_id, 200)
             cls.client.wait_for_image_status(cls.image1_id, 'ACTIVE')
@@ -49,34 +51,22 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
             # Servers have a hidden property for when they are being imaged
             # Performing back-to-back create image calls on a single
             # server will sometimes cause failures
-            image3_name = rand_name('image')
-            resp, body = cls.client.create_image(cls.server2['id'],
-                                                 image3_name)
+            resp, body = cls.create_image_from_server(cls.server2['id'])
             cls.image3_id = parse_image_id(resp['location'])
             cls.client.wait_for_image_resp_code(cls.image3_id, 200)
             cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
             resp, cls.image3 = cls.client.get_image(cls.image3_id)
 
-            image2_name = rand_name('image')
-            resp, body = cls.client.create_image(cls.server1['id'],
-                                                 image2_name)
+            resp, body = cls.create_image_from_server(cls.server1['id'])
             cls.image2_id = parse_image_id(resp['location'])
             cls.client.wait_for_image_resp_code(cls.image2_id, 200)
+
             cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
             resp, cls.image2 = cls.client.get_image(cls.image2_id)
-        except Exception:
-            cls.clear_servers()
-            cls.client.delete_image(cls.image1_id)
-            cls.client.delete_image(cls.image2_id)
-            cls.client.delete_image(cls.image3_id)
+        except Exception as exc:
+            LOG.exception(exc)
+            cls.tearDownClass()
             raise
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.client.delete_image(cls.image1_id)
-        cls.client.delete_image(cls.image2_id)
-        cls.client.delete_image(cls.image3_id)
-        super(ListImageFiltersTestJSON, cls).tearDownClass()
 
     @attr(type=['negative', 'gate'])
     def test_get_image_not_existing(self):

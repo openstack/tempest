@@ -20,6 +20,7 @@ import time
 from tempest.api import compute
 from tempest import clients
 from tempest.common import log as logging
+from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 import tempest.test
@@ -72,6 +73,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
         cls.servers = []
+        cls.images = []
 
         cls.servers_client_v3_auth = os.servers_client_v3_auth
 
@@ -173,7 +175,18 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
+    def clear_images(cls):
+        for image_id in cls.images:
+            try:
+                cls.images_client.delete_image(image_id)
+            except Exception as exc:
+                LOG.info('Exception raised deleting image %s', image_id)
+                LOG.exception(exc)
+                pass
+
+    @classmethod
     def tearDownClass(cls):
+        cls.clear_images()
         cls.clear_servers()
         cls.clear_isolated_creds()
 
@@ -195,6 +208,25 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 server['id'], kwargs['wait_until'])
 
         return resp, server
+
+    @classmethod
+    def create_image_from_server(cls, server_id, **kwargs):
+        """Wrapper utility that returns a test server."""
+        name = rand_name(cls.__name__ + "-image")
+        if 'name' in kwargs:
+            name = kwargs.pop('name')
+
+        resp, image = cls.images_client.create_image(
+            server_id, name)
+        image_id = parse_image_id(resp['location'])
+        cls.images.append(image_id)
+
+        if 'wait_until' in kwargs:
+            cls.images_client.wait_for_image_status(image_id,
+                                                    kwargs['wait_until'])
+            resp, image = cls.images_client.get_image(image_id)
+
+        return resp, image
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""
