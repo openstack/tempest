@@ -131,7 +131,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         # Verify the image was deleted correctly
         resp, body = self.client.delete_image(image_id)
         self.assertEqual('204', resp['status'])
-        self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
+        self.client.wait_for_resource_deletion(image_id)
 
     @testtools.skipUnless(compute.MULTI_USER,
                           'Need multiple users for this test.')

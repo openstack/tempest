@@ -226,3 +226,10 @@ class ImagesClientXML(RestClientXML):
         """Deletes a single image metadata key/value pair."""
         return self.delete("images/%s/metadata/%s" % (str(image_id), key),
                            self.headers)
+
+    def is_resource_deleted(self, id):
+        try:
+            self.get_image(id)
+        except exceptions.NotFound:
+            return True
+        return False
