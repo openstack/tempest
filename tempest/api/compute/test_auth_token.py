@@ -15,8 +15,8 @@
 
 import testtools
 
+from tempest.api.compute import base
 import tempest.config as config
-from tempest.tests.compute import base
 
 
 class AuthTokenTestJSON(base.BaseComputeTest):
