@@ -17,8 +17,6 @@
 
 import time
 
-import testtools
-
 from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
@@ -442,72 +440,4 @@ class PublicObjectTest(base.BaseObjectTest):
 
         except Exception as e:
             self.fail("Failed to get public readable object with another"
-                      " user creds raised exception is %s" % e)
-
-    @testtools.skip('Until Bug #1020722 is resolved.')
-    @attr(type='smoke')
-    def test_write_public_object_without_using_creds(self):
-        # make container public-writable, and create object anonymously, e.g.
-        # without using credentials
-        try:
-            # update container metadata to make publicly writable
-            cont_headers = {'X-Container-Write': '-*'}
-            resp_meta, body = self.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers, metadata_prefix='')
-            self.assertEqual(resp_meta['status'], '204')
-            # list container metadata
-            resp, _ = self.container_client.list_container_metadata(
-                self.container_name)
-            self.assertEqual(resp['status'], '204')
-            self.assertIn('x-container-write', resp)
-            self.assertEqual(resp['x-container-write'], '-*')
-
-            object_name = rand_name(name='Object')
-            data = arbitrary_string(size=len(object_name),
-                                    base_text=object_name)
-            headers = {'Content-Type': 'application/json',
-                       'Accept': 'application/json'}
-            # create object as anonymous user
-            resp, body = self.custom_object_client.create_object(
-                self.container_name, object_name, data, metadata=headers)
-            self.assertEqual(resp['status'], '201')
-
-        except Exception as e:
-            self.fail("Failed to create public writable object without using"
-                      " creds raised exception is %s" % e)
-
-    @testtools.skip('Until Bug #1020722 is resolved.')
-    @attr(type='smoke')
-    def test_write_public_with_another_user_creds(self):
-        # make container public-writable, and create object with another user's
-        # credentials
-        try:
-            # update container metadata to make it publicly writable
-            cont_headers = {'X-Container-Write': '-*'}
-            resp_meta, body = self.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers,
-                metadata_prefix='')
-            self.assertEqual(resp_meta['status'], '204')
-            # list container metadata
-            resp, _ = self.container_client.list_container_metadata(
-                self.container_name)
-            self.assertEqual(resp['status'], '204')
-            self.assertIn('x-container-write', resp)
-            self.assertEqual(resp['x-container-write'], '-*')
-
-            # trying to get auth token of alternative user
-            token = self.identity_client_alt.get_auth()
-            headers = {'Content-Type': 'application/json',
-                       'Accept': 'application/json',
-                       'X-Auth-Token': token}
-
-            # trying to create an object with another user's creds
-            object_name = rand_name(name='Object')
-            data = arbitrary_string(size=len(object_name),
-                                    base_text=object_name)
-            resp, body = self.custom_object_client.create_object(
-                self.container_name, object_name, data, metadata=headers)
-            self.assertEqual(resp['status'], '201')
-        except Exception as e:
-            self.fail("Failed to create public writable object with another"
                       " user creds raised exception is %s" % e)
