@@ -45,11 +45,6 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise cls.skipException(msg)
 
-    @classmethod
-    def tearDownClass(cls):
-        for thing in cls.resources:
-            thing.delete()
-
     def test_resize_server_confirm(self):
         # We create an instance for use in this test
         i_name = rand_name('instance')
