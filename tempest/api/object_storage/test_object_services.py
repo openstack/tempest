@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import hashlib
 import time
 
 from tempest.api.object_storage import base
@@ -362,6 +363,30 @@ class ObjectTest(base.BaseObjectTest):
         resp, body = self.object_client.get_object(
             self.container_name, object_name)
         self.assertEqual(data * segments, body)
+
+    @attr(type='gate')
+    def test_get_object_if_different(self):
+        # http://en.wikipedia.org/wiki/HTTP_ETag
+        # Make a conditional request for an object using the If-None-Match
+        # header, it should get downloaded only if the local file is different,
+        # otherwise the response code should be 304 Not Modified
+        object_name = rand_name(name='TestObject')
+        data = arbitrary_string()
+        self.object_client.create_object(self.container_name,
+                                         object_name, data)
+        # local copy is identical, no download
+        md5 = hashlib.md5(data).hexdigest()
+        headers = {'If-None-Match': md5}
+        url = "%s/%s" % (self.container_name, object_name)
+        resp, _ = self.object_client.get(url, headers=headers)
+        self.assertEqual(resp['status'], '304')
+
+        # local copy is different, download
+        local_data = "something different"
+        md5 = hashlib.md5(local_data).hexdigest()
+        headers = {'If-None-Match': md5}
+        resp, body = self.object_client.get(url, headers=headers)
+        self.assertEqual(resp['status'], '200')
 
 
 class PublicObjectTest(base.BaseObjectTest):
