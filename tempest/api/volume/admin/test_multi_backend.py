@@ -1,8 +1,5 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2013 OpenStack Foundation
-# All Rights Reserved.
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -15,12 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.volume import base
 from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
-from tempest import config
 from tempest.services.volume.json.admin import volume_types_client
 from tempest.services.volume.json import volumes_client
 from tempest.test import attr
@@ -31,66 +25,62 @@ LOG = logging.getLogger(__name__)
 class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
     _interface = "json"
 
-    multi_backend_enabled = config.TempestConfig().volume.multi_backend_enabled
-    backend1_name = config.TempestConfig().volume.backend1_name
-    backend2_name = config.TempestConfig().volume.backend2_name
-    backend_names_equal = False
-    if (backend1_name == backend2_name):
-        backend_names_equal = True
-
     @classmethod
-    @testtools.skipIf(not multi_backend_enabled,
-                      "Cinder multi-backend feature is not available")
     def setUpClass(cls):
         super(VolumeMultiBackendTest, cls).setUpClass()
+        if not cls.config.volume.multi_backend_enabled:
+            raise cls.skipException("Cinder multi-backend feature disabled")
+
+        cls.backend1_name = cls.config.volume.backend1_name
+        cls.backend2_name = cls.config.volume.backend2_name
 
         adm_user = cls.config.identity.admin_username
         adm_pass = cls.config.identity.admin_password
         adm_tenant = cls.config.identity.admin_tenant_name
         auth_url = cls.config.identity.uri
 
-        cls.client = volumes_client.VolumesClientJSON(cls.config,
-                                                      adm_user,
-                                                      adm_pass,
-                                                      auth_url,
-                                                      adm_tenant)
-        cls.client2 = volume_types_client.VolumeTypesClientJSON(cls.config,
-                                                                adm_user,
-                                                                adm_pass,
-                                                                auth_url,
-                                                                adm_tenant)
+        cls.volume_client = volumes_client.VolumesClientJSON(cls.config,
+                                                             adm_user,
+                                                             adm_pass,
+                                                             auth_url,
+                                                             adm_tenant)
+        cls.type_client = volume_types_client.VolumeTypesClientJSON(cls.config,
+                                                                    adm_user,
+                                                                    adm_pass,
+                                                                    auth_url,
+                                                                    adm_tenant)
 
-        ## variables initialization
-        type_name1 = rand_name('type-')
-        type_name2 = rand_name('type-')
-        cls.volume_type_list = []
-
-        vol_name1 = rand_name('Volume-')
-        vol_name2 = rand_name('Volume-')
+        cls.volume_type_id_list = []
         cls.volume_id_list = []
-
         try:
-            ## Volume types creation
+            # Volume/Type creation (uses backend1_name)
+            type1_name = rand_name('Type-')
+            vol1_name = rand_name('Volume-')
             extra_specs1 = {"volume_backend_name": cls.backend1_name}
-            resp, cls.body1 = cls.client2.create_volume_type(
-                type_name1, extra_specs=extra_specs1)
-            cls.volume_type_list.append(cls.body1)
+            resp, cls.type1 = cls.type_client.create_volume_type(
+                type1_name, extra_specs=extra_specs1)
+            cls.volume_type_id_list.append(cls.type1['id'])
 
-            extra_specs2 = {"volume_backend_name": cls.backend2_name}
-            resp, cls.body2 = cls.client2.create_volume_type(
-                type_name2, extra_specs=extra_specs2)
-            cls.volume_type_list.append(cls.body2)
-
-            ## Volumes creation
-            resp, cls.volume1 = cls.client.create_volume(
-                size=1, display_name=vol_name1, volume_type=type_name1)
-            cls.client.wait_for_volume_status(cls.volume1['id'], 'available')
+            resp, cls.volume1 = cls.volume_client.create_volume(
+                size=1, display_name=vol1_name, volume_type=type1_name)
             cls.volume_id_list.append(cls.volume1['id'])
+            cls.volume_client.wait_for_volume_status(cls.volume1['id'],
+                                                     'available')
 
-            resp, cls.volume2 = cls.client.create_volume(
-                size=1, display_name=vol_name2, volume_type=type_name2)
-            cls.client.wait_for_volume_status(cls.volume2['id'], 'available')
-            cls.volume_id_list.append(cls.volume2['id'])
+            if cls.backend1_name != cls.backend2_name:
+                # Volume/Type creation (uses backend2_name)
+                type2_name = rand_name('Type-')
+                vol2_name = rand_name('Volume-')
+                extra_specs2 = {"volume_backend_name": cls.backend2_name}
+                resp, cls.type2 = cls.type_client.create_volume_type(
+                    type2_name, extra_specs=extra_specs2)
+                cls.volume_type_id_list.append(cls.type2['id'])
+
+                resp, cls.volume2 = cls.volume_client.create_volume(
+                    size=1, display_name=vol2_name, volume_type=type2_name)
+                cls.volume_id_list.append(cls.volume2['id'])
+                cls.volume_client.wait_for_volume_status(cls.volume2['id'],
+                                                         'available')
         except Exception:
             LOG.exception("setup failed")
             cls.tearDownClass()
@@ -100,60 +90,43 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
     def tearDownClass(cls):
         ## volumes deletion
         for volume_id in cls.volume_id_list:
-            cls.client.delete_volume(volume_id)
-            cls.client.wait_for_resource_deletion(volume_id)
+            cls.volume_client.delete_volume(volume_id)
+            cls.volume_client.wait_for_resource_deletion(volume_id)
 
         ## volume types deletion
-        for volume_type in cls.volume_type_list:
-            cls.client2.delete_volume_type(volume_type)
+        for volume_type_id in cls.volume_type_id_list:
+            cls.type_client.delete_volume_type(volume_type_id)
 
         super(VolumeMultiBackendTest, cls).tearDownClass()
 
     @attr(type='smoke')
-    def test_multi_backend_enabled(self):
-        # this test checks that multi backend is enabled for at least the
-        # computes where the volumes created in setUp were made
+    def test_backend_name_reporting(self):
+        # this test checks if os-vol-attr:host is populated correctly after
+        # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        # this test fails if:
-        # - multi backend is not enabled
-        resp, fetched_volume = self.client.get_volume(self.volume1['id'])
+        resp, volume = self.volume_client.get_volume(self.volume1['id'])
         self.assertEqual(200, resp.status)
 
-        volume_host1 = fetched_volume['os-vol-host-attr:host']
-        msg = ("Multi-backend is not available for at least host "
-               "%(volume_host1)s") % locals()
-        self.assertTrue(len(volume_host1.split("@")) > 1, msg)
-
-        resp, fetched_volume = self.client.get_volume(self.volume2['id'])
-        self.assertEqual(200, resp.status)
-
-        volume_host2 = fetched_volume['os-vol-host-attr:host']
-        msg = ("Multi-backend is not available for at least host "
-               "%(volume_host2)s") % locals()
-        self.assertTrue(len(volume_host2.split("@")) > 1, msg)
+        volume1_host = volume['os-vol-host-attr:host']
+        msg = ("multi-backend reporting incorrect values for volume %s" %
+               self.volume1['id'])
+        self.assertTrue(len(volume1_host.split("@")) > 1, msg)
 
     @attr(type='gate')
     def test_backend_name_distinction(self):
-        # this test checks that the two volumes created at setUp doesn't
-        # belong to the same backend (if they are in the same backend, that
-        # means, volume_backend_name distinction is not working properly)
-        # this test fails if:
-        # - tempest.conf is not well configured
-        # - the two volumes belongs to the same backend
+        # this test checks that the two volumes created at setUp don't
+        # belong to the same backend (if they are, than the
+        # volume backend distinction is not working properly)
+        if self.backend1_name == self.backend2_name:
+            raise self.skipException("backends configured with same name")
 
-        # checks tempest.conf
-        msg = ("tempest.conf is not well configured, "
-               "backend1_name and backend2_name are equal")
-        self.assertEqual(self.backend_names_equal, False, msg)
+        resp, volume = self.volume_client.get_volume(self.volume1['id'])
+        volume1_host = volume['os-vol-host-attr:host']
 
-        # checks the two volumes belongs to different backend
-        resp, fetched_volume = self.client.get_volume(self.volume1['id'])
-        volume_host1 = fetched_volume['os-vol-host-attr:host']
+        resp, volume = self.volume_client.get_volume(self.volume2['id'])
+        volume2_host = volume['os-vol-host-attr:host']
 
-        resp, fetched_volume = self.client.get_volume(self.volume2['id'])
-        volume_host2 = fetched_volume['os-vol-host-attr:host']
-
-        msg = ("volume2 was created in the same backend as volume1: "
-               "%(volume_host2)s.") % locals()
-        self.assertNotEqual(volume_host2, volume_host1, msg)
+        msg = ("volumes %s and %s were created in the same backend" %
+               (self.volume1['id'], self.volume2['id']))
+        self.assertNotEqual(volume1_host, volume2_host, msg)
