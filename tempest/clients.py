@@ -30,6 +30,8 @@ from tempest.services.compute.json.flavors_client import FlavorsClientJSON
 from tempest.services.compute.json.floating_ips_client import \
     FloatingIPsClientJSON
 from tempest.services.compute.json.hosts_client import HostsClientJSON
+from tempest.services.compute.json.hypervisor_client import \
+    HypervisorClientJSON
 from tempest.services.compute.json.images_client import ImagesClientJSON
 from tempest.services.compute.json.interfaces_client import \
     InterfacesClientJSON
@@ -52,6 +54,7 @@ from tempest.services.compute.xml.fixed_ips_client import FixedIPsClientXML
 from tempest.services.compute.xml.flavors_client import FlavorsClientXML
 from tempest.services.compute.xml.floating_ips_client import \
     FloatingIPsClientXML
+from tempest.services.compute.xml.hypervisor_client import HypervisorClientXML
 from tempest.services.compute.xml.images_client import ImagesClientXML
 from tempest.services.compute.xml.interfaces_client import \
     InterfacesClientXML
@@ -231,6 +234,11 @@ POLICY_CLIENT = {
     "xml": PolicyClientXML,
 }
 
+HYPERVISOR_CLIENT = {
+    "json": HypervisorClientJSON,
+    "xml": HypervisorClientXML,
+}
+
 
 class Manager(object):
 
@@ -317,6 +325,7 @@ class Manager(object):
             self.tenant_usages_client = \
                 TENANT_USAGES_CLIENT[interface](*client_args)
             self.policy_client = POLICY_CLIENT[interface](*client_args)
+            self.hypervisor_client = HYPERVISOR_CLIENT[interface](*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = SERVERS_CLIENTS[interface](
