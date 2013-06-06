@@ -107,3 +107,14 @@ class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
 
     def test_admin_bashcompletion(self):
         self.keystone('bash-completion')
+
+    # Optional arguments:
+
+    def test_admin_version(self):
+        self.keystone('', flags='--version')
+
+    def test_admin_debug_list(self):
+        self.keystone('catalog', flags='--debug')
+
+    def test_admin_timeout(self):
+        self.keystone('catalog', flags='--timeout 15')
