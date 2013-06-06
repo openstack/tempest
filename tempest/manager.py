@@ -32,6 +32,7 @@ from tempest import exceptions
 from tempest.services.compute.json import extensions_client
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import floating_ips_client
+from tempest.services.compute.json import hypervisor_client
 from tempest.services.compute.json import images_client
 from tempest.services.compute.json import keypairs_client
 from tempest.services.compute.json import limits_client
@@ -56,6 +57,7 @@ VolumesExtensionsClient = volumes_extensions_client.VolumesExtensionsClientJSON
 VolumesClient = volumes_client.VolumesClientJSON
 SnapshotsClient = snapshots_client.SnapshotsClientJSON
 QuotasClient = quotas_client.QuotasClientJSON
+HypervisorClient = hypervisor_client.HypervisorClientJSON
 
 LOG = logging.getLogger(__name__)
 
@@ -257,6 +259,7 @@ class ComputeFuzzClientManager(FuzzClientManager):
         self.snapshots_client = SnapshotsClient(*client_args)
         self.quotas_client = QuotasClient(*client_args)
         self.network_client = NetworkClient(*client_args)
+        self.hypervisor_client = HypervisorClient(*client_args)
 
 
 class ComputeFuzzClientAltManager(Manager):
