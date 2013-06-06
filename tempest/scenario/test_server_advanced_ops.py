@@ -28,6 +28,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     This test case stresses some advanced server instance operations:
 
      * Resizing an instance
+     * Sequence suspend resume
     """
 
     @classmethod
@@ -56,12 +57,8 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
         base_image_id = self.config.compute.image_ref
         self.instance = self.compute_client.servers.create(
             i_name, base_image_id, flavor_id)
-        try:
-            self.assertEqual(self.instance.name, i_name)
-            self.set_resource('instance', self.instance)
-        except AttributeError:
-            self.fail("Instance not successfully created.")
-
+        self.assertEqual(self.instance.name, i_name)
+        self.set_resource('instance', self.instance)
         self.assertEqual(self.instance.status, 'BUILD')
         instance_id = self.get_resource('instance').id
         self.status_timeout(
@@ -77,5 +74,42 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
 
         LOG.debug("Confirming resize of instance %s", instance_id)
         instance.confirm_resize()
+
         self.status_timeout(
             self.compute_client.servers, instance_id, 'ACTIVE')
+
+    def test_server_sequence_suspend_resume(self):
+        # We create an instance for use in this test
+        i_name = rand_name('instance')
+        flavor_id = self.config.compute.flavor_ref
+        base_image_id = self.config.compute.image_ref
+        self.instance = self.compute_client.servers.create(
+            i_name, base_image_id, flavor_id)
+        self.assertEqual(self.instance.name, i_name)
+        self.set_resource('instance', self.instance)
+        self.assertEqual(self.instance.status, 'BUILD')
+        instance_id = self.get_resource('instance').id
+        self.status_timeout(
+            self.compute_client.servers, instance_id, 'ACTIVE')
+        instance = self.get_resource('instance')
+        instance_id = instance.id
+        LOG.debug("Suspending instance %s. Current status: %s",
+                  instance_id, instance.status)
+        instance.suspend()
+        self.status_timeout(self.compute_client.servers, instance_id,
+                            'SUSPENDED')
+        LOG.debug("Resuming instance %s. Current status: %s",
+                  instance_id, instance.status)
+        instance.resume()
+        self.status_timeout(self.compute_client.servers, instance_id,
+                            'ACTIVE')
+        LOG.debug("Suspending instance %s. Current status: %s",
+                  instance_id, instance.status)
+        instance.suspend()
+        self.status_timeout(self.compute_client.servers, instance_id,
+                            'SUSPENDED')
+        LOG.debug("Resuming instance %s. Current status: %s",
+                  instance_id, instance.status)
+        instance.resume()
+        self.status_timeout(self.compute_client.servers, instance_id,
+                            'ACTIVE')
