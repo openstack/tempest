@@ -388,7 +388,7 @@ OrchestrationGroup = [
                 default=False,
                 help="Whether or not Heat is expected to be available"),
     cfg.StrOpt('instance_type',
-               default='m1.tiny',
+               default='m1.micro',
                help="Instance type for tests. Needs to be big enough for a "
                     "full OS plus the test workload"),
     cfg.StrOpt('image_ref',
