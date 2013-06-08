@@ -3,8 +3,6 @@ pep8==1.4.5
 pyflakes==0.7.2
 flake8==2.0
 hacking>=0.5.3,<0.6
-#
-#TODO(afazekas): ensure pg_config installed
 psycopg2
 # needed for doc build
 sphinx>=1.1.2
