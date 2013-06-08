@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
 from tempest.common import log as logging
 from tempest import config
 from tempest.exceptions import InvalidConfiguration
@@ -26,9 +25,8 @@ CONFIG = config.TempestConfig()
 CREATE_IMAGE_ENABLED = CONFIG.compute.create_image_enabled
 RESIZE_AVAILABLE = CONFIG.compute.resize_available
 CHANGE_PASSWORD_AVAILABLE = CONFIG.compute.change_password_available
-DISK_CONFIG_ENABLED = True
-DISK_CONFIG_ENABLED_OVERRIDE = CONFIG.compute.disk_config_enabled_override
-FLAVOR_EXTRA_DATA_ENABLED = True
+DISK_CONFIG_ENABLED = CONFIG.compute.disk_config_enabled
+FLAVOR_EXTRA_DATA_ENABLED = CONFIG.compute.flavor_extra_enabled
 MULTI_USER = True
 
 
@@ -36,27 +34,7 @@ MULTI_USER = True
 def generic_setup_package():
     LOG.debug("Entering tempest.api.compute.setup_package")
 
-    global MULTI_USER, DISK_CONFIG_ENABLED, FLAVOR_EXTRA_DATA_ENABLED
-    os = clients.Manager()
-    images_client = os.images_client
-    flavors_client = os.flavors_client
-    extensions_client = os.extensions_client
-    DISK_CONFIG_ENABLED = (DISK_CONFIG_ENABLED_OVERRIDE and
-                           extensions_client.is_enabled('DiskConfig'))
-    FLAVOR_EXTRA_DATA_ENABLED = extensions_client.is_enabled('FlavorExtraData')
-
-    # Validate reference data exists
-    # If not, we raise the exception here and prevent
-    # going forward...
-    image_ref = CONFIG.compute.image_ref
-    image_ref_alt = CONFIG.compute.image_ref_alt
-    images_client.get_image(image_ref)
-    images_client.get_image(image_ref_alt)
-
-    flavor_ref = CONFIG.compute.flavor_ref
-    flavor_ref_alt = CONFIG.compute.flavor_ref_alt
-    flavors_client.get_flavor_details(flavor_ref)
-    flavors_client.get_flavor_details(flavor_ref_alt)
+    global MULTI_USER
 
     # Determine if there are two regular users that can be
     # used in testing. If the test cases are allowed to create
