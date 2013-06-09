@@ -20,6 +20,10 @@ from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.whitebox import manager
 
+#TODO(afazekas): The whitebox tests are using complex testclass/manager
+# hierarchy, without a real need. It is difficult to maintain.
+# They could share more code with scenario tests.
+
 
 class ImagesWhiteboxTest(manager.ComputeWhiteboxTest, base.BaseComputeTest):
     _interface = 'json'
@@ -34,7 +38,8 @@ class ImagesWhiteboxTest(manager.ComputeWhiteboxTest, base.BaseComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        """Delete images after a test is executed."""
+        """Delete images and server after a test is executed."""
+        cls.servers_client.delete_server(cls.shared_server['id'])
         for image_id in cls.image_ids:
             cls.client.delete_image(image_id)
             cls.image_ids.remove(image_id)
