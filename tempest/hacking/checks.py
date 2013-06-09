@@ -53,6 +53,16 @@ def import_no_clients_in_api(physical_line, filename):
                      " in tempest/api/* tests"))
 
 
+def import_no_files_in_tests(physical_line, filename):
+    """Check for merges that try to land into tempest/tests
+
+    T103: tempest/tests directory is deprecated
+    """
+
+    if "tempest/tests" in filename:
+        return (0, ("T103: tempest/tests is deprecated"))
+
+
 def factory(register):
     register(skip_bugs)
     register(import_no_clients_in_api)
