@@ -48,7 +48,10 @@ class SnapshotsClientXML(RestClientXML):
 
         resp, body = self.get(url, self.headers)
         body = etree.fromstring(body)
-        return resp, xml_to_json(body)
+        snapshots = []
+        for snap in body:
+            snapshots.append(xml_to_json(snap))
+        return resp, snapshots
 
     def list_snapshots_with_detail(self, params=None):
         """List all the details of snapshot."""
@@ -60,7 +63,9 @@ class SnapshotsClientXML(RestClientXML):
         resp, body = self.get(url, self.headers)
         body = etree.fromstring(body)
         snapshots = []
-        return resp, snapshots(xml_to_json(body))
+        for snap in body:
+            snapshots.append(xml_to_json(snap))
+        return resp, snapshots
 
     def get_snapshot(self, snapshot_id):
         """Returns the details of a single snapshot."""

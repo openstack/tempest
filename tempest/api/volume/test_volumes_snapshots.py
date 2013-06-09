@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.volume import base
 from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
@@ -82,6 +80,5 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
         self.clear_snapshots()
 
 
-@testtools.skip("Until Bug #1177610 is resolved.")
 class VolumesSnapshotTestXML(VolumesSnapshotTest):
     _interface = "xml"
