@@ -19,6 +19,7 @@ from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+import testtools
 
 
 class QuotasAdminTestJSON(base.BaseComputeAdminTest):
@@ -70,12 +71,9 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(expected_quota_set, quota_set)
 
+    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
-        self.skipTest("This test require the change in nova component "
-                      "https://review.openstack.org/#/c/25887/, the related "
-                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
-                      "once the change is merged I will enable this testcase")
         # Admin can update all the resource quota limits for a tenant
         new_quota_set = {'force': True,
                          'injected_file_content_bytes': 20480,
@@ -125,12 +123,9 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
             self.assertEqual(200, resp.status, "Failed to reset quota "
                              "defaults")
 
+    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
     def test_create_server_when_cpu_quota_is_full(self):
-        self.skipTest("This test require the change in nova component "
-                      "https://review.openstack.org/#/c/25887/, the related "
-                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
-                      "once the change is merged I will enable this testcase")
         # Disallow server creation when tenant's vcpu quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_vcpu_quota = quota_set['cores']
@@ -144,12 +139,9 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         cores=default_vcpu_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
+    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
     def test_create_server_when_memory_quota_is_full(self):
-        self.skipTest("This test require the change in nova component "
-                      "https://review.openstack.org/#/c/25887/, the related "
-                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
-                      "once the change is merged I will enable this testcase")
         # Disallow server creation when tenant's memory quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_mem_quota = quota_set['ram']
@@ -165,12 +157,9 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
 #TODO(afazekas): Add test that tried to update the quota_set as a regular user
 
+    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
-        self.skipTest("This test require the change in nova component "
-                      "https://review.openstack.org/#/c/25887/, the related "
-                      "bug is https://bugs.launchpad.net/nova/+bug/1160749 "
-                      "once the change is merged I will enable this testcase")
         #Once instances quota limit is reached, disallow server creation
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_instances_quota = quota_set['instances']
@@ -183,6 +172,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         instances=default_instances_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
+    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type=['negative', 'gate'])
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
@@ -204,6 +194,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
+    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type=['negative', 'gate'])
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
