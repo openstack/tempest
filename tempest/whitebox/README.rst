@@ -1,9 +1,9 @@
 Tempest Guide to Whitebox tests
-========
+===============================
 
 
 What are these tests?
---------
+---------------------
 
 When you hit the OpenStack API, this causes internal state changes in
 the system. This might be database transitions, vm modifications,
@@ -20,7 +20,7 @@ be useful for validating Tempest internals.
 
 
 Why are these tests in tempest?
---------
+-------------------------------
 
 Especially when it comes to something like VM state changing, which is
 a coordination of numerous running daemons, and a functioning VM, it's
@@ -28,7 +28,7 @@ very difficult to get a realistic test like this in unit tests.
 
 
 Scope of these tests
---------
+--------------------
 
 White box tests should be limitted to tests where black box testing
 (using the OpenStack API to verify results) isn't sufficient.
@@ -40,7 +40,7 @@ internals changes in OpenStack projects.
 
 
 Example of a good test
---------
+----------------------
 
 Pushing VMs through a series of state transitions, and ensuring along
 the way the database state transitions match what's expected.

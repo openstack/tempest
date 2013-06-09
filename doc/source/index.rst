@@ -3,9 +3,9 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-===================================
+=======================
 Tempest Testing Project
-===================================
+=======================
 
 Contents:
 
@@ -13,11 +13,11 @@ Contents:
    :maxdepth: 2
 
    overview
+   HACKING
 
-
--------------------------------
+------------
 Field Guides
--------------------------------
+------------
 Tempest contains tests of many different types, the field guides
 attempt to explain these in a way that makes it easy to understand
 where your test contributions should go.
