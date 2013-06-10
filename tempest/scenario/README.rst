@@ -1,9 +1,9 @@
 Tempest Guide to Scenario tests
-========
+===============================
 
 
 What are these tests?
---------
+---------------------
 
 Scenario tests are "through path" tests of OpenStack
 function. Complicated setups where one part might depend on completion
@@ -17,13 +17,13 @@ from that snapshot.
 
 
 Why are these tests in tempest?
---------
+-------------------------------
 This is one of tempests core purposes, testing the integration between
 projects.
 
 
 Scope of these tests
---------
+--------------------
 Scenario tests should always test at least 2 services in
 interaction. They should use the official python client libraries for
 OpenStack, as they provide a more realistic approach in how people
@@ -34,7 +34,7 @@ services they exercise.
 
 
 Example of a good test
---------
+----------------------
 While we are looking for interaction of 2 or more services, be
 specific in your interactions. A giant "this is my data center" smoke
 test is hard to debug when it goes wrong.

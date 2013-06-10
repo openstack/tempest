@@ -1,9 +1,9 @@
 Tempest Guide to API tests
-========
+==========================
 
 
 What are these tests?
---------
+---------------------
 
 One of Tempest's prime function is to ensure that your OpenStack cloud
 works with the OpenStack API as documented. The current largest
@@ -21,7 +21,7 @@ spinning up a server, image, etc, then opperating on it.
 
 
 Why are these tests in tempest?
---------
+-------------------------------
 
 This is one of the core missions for the Tempest project, and where it
 started. Many people use this bit of function in Tempest to ensure
@@ -34,7 +34,7 @@ place to keep things.
 
 
 Scope of these tests
---------
+--------------------
 
 API tests should always use the Tempest implementation of the
 OpenStack API, as we want to ensure that bugs aren't hidden by the
