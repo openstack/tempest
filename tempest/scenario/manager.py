@@ -25,13 +25,9 @@ import glanceclient
 import keystoneclient.v2_0.client
 import netaddr
 import novaclient.client
-try:
-    # TODO(sdague): is there are reason this is still optional
-    from quantumclient.common import exceptions as exc
-    import quantumclient.v2_0.client
+from quantumclient.common import exceptions as exc
+import quantumclient.v2_0.client
 
-except ImportError:
-    pass
 
 from tempest.api.network import common as net_common
 from tempest.common import ssh
