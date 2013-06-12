@@ -16,6 +16,7 @@
 #    under the License.
 
 import json
+import re
 import time
 import urllib
 
@@ -68,24 +69,69 @@ class OrchestrationClient(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['stack']
 
+    def list_resources(self, stack_identifier):
+        """Returns the details of a single resource."""
+        url = "stacks/%s/resources" % stack_identifier
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['resources']
+
+    def get_resource(self, stack_identifier, resource_name):
+        """Returns the details of a single resource."""
+        url = "stacks/%s/resources/%s" % (stack_identifier, resource_name)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['resource']
+
     def delete_stack(self, stack_identifier):
         """Deletes the specified Stack."""
         return self.delete("stacks/%s" % str(stack_identifier))
 
-    def wait_for_stack_status(self, stack_identifier, status, failure_status=(
-            'CREATE_FAILED',
-            'DELETE_FAILED',
-            'UPDATE_FAILED',
-            'ROLLBACK_FAILED')):
-        """Waits for a Volume to reach a given status."""
-        stack_status = None
+    def wait_for_resource_status(self, stack_identifier, resource_name,
+                                 status, failure_pattern='^.*_FAILED$'):
+        """Waits for a Resource to reach a given status."""
         start = int(time.time())
+        fail_regexp = re.compile(failure_pattern)
 
-        while stack_status != status:
+        while True:
+            try:
+                resp, body = self.get_resource(
+                    stack_identifier, resource_name)
+            except exceptions.NotFound:
+                # ignore this, as the resource may not have
+                # been created yet
+                pass
+            else:
+                resource_name = body['logical_resource_id']
+                resource_status = body['resource_status']
+                if resource_status == status:
+                    return
+                if fail_regexp.search(resource_status):
+                    raise exceptions.StackBuildErrorException(
+                        stack_identifier=stack_identifier,
+                        resource_status=resource_status,
+                        resource_status_reason=body['resource_status_reason'])
+
+            if int(time.time()) - start >= self.build_timeout:
+                message = ('Resource %s failed to reach %s status within '
+                           'the required time (%s s).' %
+                           (resource_name, status, self.build_timeout))
+                raise exceptions.TimeoutException(message)
+            time.sleep(self.build_interval)
+
+    def wait_for_stack_status(self, stack_identifier, status,
+                              failure_pattern='^.*_FAILED$'):
+        """Waits for a Stack to reach a given status."""
+        start = int(time.time())
+        fail_regexp = re.compile(failure_pattern)
+
+        while True:
             resp, body = self.get_stack(stack_identifier)
             stack_name = body['stack_name']
             stack_status = body['stack_status']
-            if stack_status in failure_status:
+            if stack_status == status:
+                return
+            if fail_regexp.search(stack_status):
                 raise exceptions.StackBuildErrorException(
                     stack_identifier=stack_identifier,
                     stack_status=stack_status,

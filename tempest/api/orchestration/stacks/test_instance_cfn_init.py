@@ -14,9 +14,12 @@
 
 import json
 import logging
+import testtools
 
 from tempest.api.orchestration import base
 from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils.linux.remote_client import RemoteClient
+import tempest.config
 from tempest.test import attr
 
 
@@ -25,6 +28,8 @@ LOG = logging.getLogger(__name__)
 
 class InstanceCfnInitTestJSON(base.BaseOrchestrationTest):
     _interface = 'json'
+    existing_keypair = (tempest.config.TempestConfig().
+                        orchestration.keypair_name is not None)
 
     template = """
 HeatTemplateFormatVersion: '2012-12-12'
@@ -101,6 +106,10 @@ Outputs:
     Description: Contents of /tmp/smoke-status on SmokeServer
     Value:
       Fn::GetAtt: [WaitCondition, Data]
+  SmokeServerIp:
+    Description: IP address of server
+    Value:
+      Fn::GetAtt: [SmokeServer, PublicIp]
 """
 
     @classmethod
@@ -113,8 +122,11 @@ Outputs:
     def setUp(self):
         super(InstanceCfnInitTestJSON, self).setUp()
         stack_name = rand_name('heat')
-        keypair_name = (self.orchestration_cfg.keypair_name or
-                        self._create_keypair()['name'])
+        if self.orchestration_cfg.keypair_name:
+            keypair_name = self.orchestration_cfg.keypair_name
+        else:
+            self.keypair = self._create_keypair()
+            keypair_name = self.keypair['name']
 
         # create the stack
         self.stack_identifier = self.create_stack(
@@ -125,6 +137,29 @@ Outputs:
                 'InstanceType': self.orchestration_cfg.instance_type,
                 'ImageId': self.orchestration_cfg.image_ref
             })
+
+    @attr(type='gate')
+    @testtools.skipIf(existing_keypair, 'Server ssh tests are disabled.')
+    def test_can_log_into_created_server(self):
+
+        sid = self.stack_identifier
+        rid = 'SmokeServer'
+
+        # wait for server resource create to complete.
+        self.client.wait_for_resource_status(sid, rid, 'CREATE_COMPLETE')
+
+        resp, body = self.client.get_resource(sid, rid)
+        self.assertEqual('CREATE_COMPLETE', body['resource_status'])
+
+        # fetch the ip address from servers client, since we can't get it
+        # from the stack until stack create is complete
+        resp, server = self.servers_client.get_server(
+            body['physical_resource_id'])
+
+        # Check that the user can authenticate with the generated password
+        linux_client = RemoteClient(
+            server, 'ec2-user', pkey=self.keypair['private_key'])
+        self.assertTrue(linux_client.can_authenticate())
 
     @attr(type='gate')
     def test_stack_wait_condition_data(self):
@@ -148,5 +183,6 @@ Outputs:
         # - a user was created and credentials written to the instance
         # - a cfn-signal was built which was signed with provided credentials
         # - the wait condition was fulfilled and the stack has changed state
-        wait_status = json.loads(body['outputs'][0]['output_value'])
+        wait_status = json.loads(
+            self.stack_output(body, 'WaitConditionStatus'))
         self.assertEqual('smoke test complete', wait_status['00000'])

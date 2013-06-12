@@ -36,6 +36,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
         cls.os = os
         cls.orchestration_client = os.orchestration_client
+        cls.servers_client = os.servers_client
         cls.keypairs_client = os.keypairs_client
         cls.stacks = []
 
@@ -108,3 +109,9 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                 condition()
                 return
             time.sleep(self.build_interval)
+
+    @staticmethod
+    def stack_output(stack, output_key):
+        """Return a stack output value for a give key."""
+        return next((o['output_value'] for o in stack['outputs']
+                    if o['output_key'] == output_key), None)
