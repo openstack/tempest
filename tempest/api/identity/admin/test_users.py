@@ -61,12 +61,12 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                           self.alt_password, self.data.tenant['id'],
                           self.alt_email)
 
-    @attr(type='gate')
-    def test_create_user_with_name_length_over_64(self):
-        # Length of user name filed should be restricted to 64 characters
+    @attr(type=['negative', 'gate'])
+    def test_create_user_with_name_length_over_255(self):
+        # Length of user name filed should be restricted to 255 characters
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
-                          'a' * 65, self.alt_password,
+                          'a' * 256, self.alt_password,
                           self.data.tenant['id'], self.alt_email)
 
     @attr(type='gate')
