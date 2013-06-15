@@ -66,3 +66,4 @@ def import_no_files_in_tests(physical_line, filename):
 def factory(register):
     register(skip_bugs)
     register(import_no_clients_in_api)
+    register(import_no_files_in_tests)
