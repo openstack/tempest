@@ -38,6 +38,11 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
         tenant_network_mask_bits with the mask bits to be used to partition the
         block defined by tenant-network_cidr
+
+    Finally, it is assumed that the following option is defined in the
+    [service_available] section of etc/tempest.conf
+
+        neutron as True
     """
 
     @classmethod
