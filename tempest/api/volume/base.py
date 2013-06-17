@@ -128,9 +128,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         resp, snapshot = cls.snapshots_client.create_snapshot(volume_id,
                                                               **kwargs)
         assert 200 == resp.status
+        cls.snapshots.append(snapshot)
         cls.snapshots_client.wait_for_snapshot_status(snapshot['id'],
                                                       'available')
-        cls.snapshots.append(snapshot)
         return snapshot
 
     #NOTE(afazekas): these create_* and clean_* could be defined
@@ -141,8 +141,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         """Wrapper utility that returns a test volume."""
         resp, volume = cls.volumes_client.create_volume(size, **kwargs)
         assert 200 == resp.status
-        cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
         cls.volumes.append(volume)
+        cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
         return volume
 
     @classmethod
