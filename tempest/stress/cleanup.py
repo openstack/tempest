@@ -58,3 +58,16 @@ def cleanup():
     for tenant in tenants:
         if tenant['name'].startswith("stress_tenant"):
             admin_manager.identity_client.delete_tenant(tenant['id'])
+
+    _, vols = admin_manager.volumes_client.list_volumes({"all_tenants": True})
+    for v in vols:
+        try:
+            admin_manager.volumes_client.delete_volume(v['id'])
+        except Exception:
+            pass
+
+    for v in vols:
+        try:
+            admin_manager.volumes_client.wait_for_resource_deletion(v['id'])
+        except Exception:
+            pass
