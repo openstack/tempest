@@ -12,13 +12,13 @@ As such Tempest tests come in many flavors, each with their own rules
 and guidelines. Below is the proposed Havana restructuring for Tempest
 to make this clear.
 
-tempest/
-   api/ - API tests
-   cli/ - CLI tests
-   scenario/ - complex scenario tests
-   stress/ - stress tests
-   thirdparty/ - 3rd party api tests
-   whitebox/ - white box testing
+| tempest/
+|    api/ - API tests
+|    cli/ - CLI tests
+|    scenario/ - complex scenario tests
+|    stress/ - stress tests
+|    thirdparty/ - 3rd party api tests
+|    whitebox/ - white box testing
 
 Each of these directories contains different types of tests. What
 belongs in each directory, the rules and examples for good tests, are
