@@ -21,7 +21,6 @@ from tempest.test import attr
 
 
 class VolumesGetTest(base.BaseVolumeTest):
-
     _interface = "json"
 
     @classmethod
@@ -29,22 +28,17 @@ class VolumesGetTest(base.BaseVolumeTest):
         super(VolumesGetTest, cls).setUpClass()
         cls.client = cls.volumes_client
 
-    def _volume_create_get_delete(self, image_ref=None):
+    def _volume_create_get_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         try:
             volume = {}
-            v_name = rand_name('Volume-')
-            metadata = {'Type': 'work'}
+            v_name = rand_name('Volume')
+            metadata = {'Type': 'Test'}
             #Create a volume
-            if not image_ref:
-                resp, volume = self.client.create_volume(size=1,
-                                                         display_name=v_name,
-                                                         metadata=metadata)
-            else:
-                resp, volume = self.client.create_volume(size=1,
-                                                         display_name=v_name,
-                                                         metadata=metadata,
-                                                         imageRef=image_ref)
+            resp, volume = self.client.create_volume(size=1,
+                                                     display_name=v_name,
+                                                     metadata=metadata,
+                                                     **kwargs)
             self.assertEqual(200, resp.status)
             self.assertTrue('id' in volume)
             self.assertTrue('display_name' in volume)
@@ -107,11 +101,17 @@ class VolumesGetTest(base.BaseVolumeTest):
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):
-        self._volume_create_get_delete(image_ref=None)
+        self._volume_create_get_delete()
 
     @attr(type='smoke')
-    def test_volume_from_image(self):
-        self._volume_create_get_delete(image_ref=self.config.compute.image_ref)
+    def test_volume_create_get_delete_from_image(self):
+        self._volume_create_get_delete(imageRef=self.config.compute.image_ref)
+
+    @attr(type='gate')
+    def test_volume_create_get_delete_as_clone(self):
+        origin = self.create_volume(size=1,
+                                    display_name="Volume Origin")
+        self._volume_create_get_delete(source_volid=origin['id'])
 
 
 class VolumesGetTestXML(VolumesGetTest):
