@@ -19,6 +19,7 @@ from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
+from tempest.test import HTTP_SUCCESS
 
 
 class ContainerTest(base.BaseObjectTest):
@@ -46,7 +47,7 @@ class ContainerTest(base.BaseObjectTest):
         self.containers.append(container_name)
         # delete container
         resp, _ = self.container_client.delete_container(container_name)
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.containers.remove(container_name)
 
     @attr(type='smoke')
@@ -74,7 +75,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = \
             self.container_client.\
             list_container_contents(container_name, params=params)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertIsNotNone(object_list)
 
         object_names = [obj['name'] for obj in object_list]
@@ -95,12 +96,12 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = \
             self.container_client.update_container_metadata(container_name,
                                                             metadata=metadata)
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
         # list container metadata
         resp, _ = self.container_client.list_container_metadata(
             container_name)
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertIn('x-container-meta-name', resp)
         self.assertIn('x-container-meta-description', resp)
         self.assertEqual(resp['x-container-meta-name'], 'Pictures')
@@ -110,10 +111,10 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.delete_container_metadata(
             container_name,
             metadata=metadata.keys())
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
         # check if the metadata are no longer there
         resp, _ = self.container_client.list_container_metadata(container_name)
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertNotIn('x-container-meta-name', resp)
         self.assertNotIn('x-container-meta-description', resp)

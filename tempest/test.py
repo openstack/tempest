@@ -27,6 +27,9 @@ from tempest import manager
 
 LOG = logging.getLogger(__name__)
 
+# All the successful HTTP status codes from RFC 2616
+HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
+
 
 def attr(*args, **kwargs):
     """A decorator which applies the nose and testtools attr decorator
