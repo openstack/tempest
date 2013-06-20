@@ -97,29 +97,18 @@ class SecurityGroupsClientXML(RestClientXML):
         group_id : ID of the Source group
         """
         group_rule = Element("security_group_rule")
-        parent_group = Element("parent_group_id")
-        parent_group.append(Text(content=parent_group_id))
-        ip_protocol = Element("ip_protocol")
-        ip_protocol.append(Text(content=ip_proto))
-        from_port_num = Element("from_port")
-        from_port_num.append(Text(content=str(from_port)))
-        to_port_num = Element("to_port")
-        to_port_num.append(Text(content=str(to_port)))
 
-        cidr = kwargs.get('cidr')
-        if cidr is not None:
-            cidr_num = Element("cidr")
-            cidr_num.append(Text(content=cidr))
+        elements = {k: kwargs.get(k) for k in ('cidr', 'group_id')}
+        elements['parent_group_id'] = parent_group_id
+        elements['ip_protocol'] = ip_proto
+        elements['from_port'] = from_port
+        elements['to_port'] = to_port
 
-        group_id = kwargs.get('group_id')
-        if group_id is not None:
-            group_id_num = Element("group_id")
-            group_id_num.append(Text(content=group_id))
-
-        group_rule.append(parent_group)
-        group_rule.append(ip_protocol)
-        group_rule.append(from_port_num)
-        group_rule.append(to_port_num)
+        for k, v in elements.items():
+            if v is not None:
+                element = Element(k)
+                element.append(Text(content=str(v)))
+                group_rule.append(element)
 
         url = 'os-security-group-rules'
         resp, body = self.post(url, str(Document(group_rule)), self.headers)
