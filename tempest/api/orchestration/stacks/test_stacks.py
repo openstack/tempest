@@ -45,19 +45,19 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
         # count how many stacks to start with
         resp, body = self.client.list_stacks()
-        stack_count = len(body['stacks'])
 
         # create the stack
         stack_identifier = self.create_stack(
             stack_name, self.empty_template)
+        stack_id = stack_identifier.split('/')[1]
 
         # wait for create complete (with no resources it should be instant)
         self.client.wait_for_stack_status(stack_identifier, 'CREATE_COMPLETE')
 
-        # stack count will increment by 1
+        # check for stack in list
         resp, body = self.client.list_stacks()
-        self.assertEqual(stack_count + 1, len(body['stacks']),
-                         'Expected stack count to increment by 1')
+        list_ids = list([stack['id'] for stack in body['stacks']])
+        self.assertIn(stack_id, list_ids)
 
         # fetch the stack
         resp, body = self.client.get_stack(stack_identifier)
@@ -68,7 +68,6 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual('CREATE_COMPLETE', body['stack_status'])
 
         # fetch the stack by id
-        stack_id = stack_identifier.split('/')[1]
         resp, body = self.client.get_stack(stack_id)
         self.assertEqual('CREATE_COMPLETE', body['stack_status'])
 
