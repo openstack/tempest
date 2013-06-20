@@ -34,8 +34,11 @@ class ObjectClient(RestClient):
     def create_object(self, container, object_name, data):
         """Create storage object."""
 
+        headers = dict(self.headers)
+        if not data:
+            headers['content-length'] = '0'
         url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.put(url, data, self.headers)
+        resp, body = self.put(url, data, headers)
         return resp, body
 
     def update_object(self, container, object_name, data):
@@ -194,6 +197,8 @@ class ObjectClientCustomizedHeader(RestClient):
             for key in metadata:
                 headers[str(key)] = metadata[key]
 
+        if not data:
+            headers['content-length'] = '0'
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.put(url, data, headers=headers)
         return resp, body
