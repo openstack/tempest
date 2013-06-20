@@ -332,15 +332,6 @@ class ServersClientJSON(RestClient):
                                req_body, self.headers)
         return resp, body
 
-    def list_servers_for_all_tenants(self):
-
-        url = self.base_url + '/servers?all_tenants=1'
-        resp = self.requests.get(url)
-        resp, body = self.get('servers', self.headers)
-
-        body = json.loads(body)
-        return resp, body['servers']
-
     def migrate_server(self, server_id, **kwargs):
         """Migrates a server to a new host."""
         return self.action(server_id, 'migrate', None, **kwargs)
