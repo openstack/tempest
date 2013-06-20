@@ -115,11 +115,8 @@ class ComputeFuzzClientManager(FuzzClientManager):
         if 'tokens' not in auth_url:
             auth_url = auth_url.rstrip('/') + '/tokens'
 
-        if self.config.identity.strategy == 'keystone':
-            client_args = (self.config, username, password, auth_url,
-                           tenant_name)
-        else:
-            client_args = (self.config, username, password, auth_url)
+        client_args = (self.config, username, password, auth_url,
+                       tenant_name)
 
         self.servers_client = ServersClient(*client_args)
         self.flavors_client = FlavorsClient(*client_args)

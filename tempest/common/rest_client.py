@@ -51,7 +51,6 @@ class RestClient(object):
         self.base_url = None
         self.region = {'compute': self.config.identity.region}
         self.endpoint_url = 'publicURL'
-        self.strategy = self.config.identity.strategy
         self.headers = {'Content-Type': 'application/%s' % self.TYPE,
                         'Accept': 'application/%s' % self.TYPE}
         self.build_interval = config.compute.build_interval
@@ -72,21 +71,14 @@ class RestClient(object):
         Sets the token and base_url used in requests based on the strategy type
         """
 
-        if self.strategy == 'keystone':
-
-            if self.auth_version == 'v3':
-                auth_func = self.identity_auth_v3
-            else:
-                auth_func = self.keystone_auth
-
-            self.token, self.base_url = (
-                auth_func(self.user, self.password, self.auth_url,
-                          self.service, self.tenant_name))
-
+        if self.auth_version == 'v3':
+            auth_func = self.identity_auth_v3
         else:
-            self.token, self.base_url = self.basic_auth(self.user,
-                                                        self.password,
-                                                        self.auth_url)
+            auth_func = self.keystone_auth
+
+        self.token, self.base_url = (
+            auth_func(self.user, self.password, self.auth_url,
+                      self.service, self.tenant_name))
 
     def clear_auth(self):
         """

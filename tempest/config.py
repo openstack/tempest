@@ -40,10 +40,6 @@ IdentityGroup = [
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
     cfg.StrOpt('uri_v3',
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
-    cfg.StrOpt('strategy',
-               default='keystone',
-               help="Which auth method does the environment use? "
-                    "(basic|keystone)"),
     cfg.StrOpt('region',
                default='RegionOne',
                help="The identity region name to use."),

@@ -274,22 +274,15 @@ class Manager(object):
         self.auth_url = self.config.identity.uri
         self.auth_url_v3 = self.config.identity.uri_v3
 
-        if self.config.identity.strategy == 'keystone':
-            client_args = (self.config, self.username, self.password,
-                           self.auth_url, self.tenant_name)
+        client_args = (self.config, self.username, self.password,
+                       self.auth_url, self.tenant_name)
 
-            if self.auth_url_v3:
-                auth_version = 'v3'
-                client_args_v3_auth = (self.config, self.username,
-                                       self.password, self.auth_url_v3,
-                                       self.tenant_name, auth_version)
-            else:
-                client_args_v3_auth = None
-
+        if self.auth_url_v3:
+            auth_version = 'v3'
+            client_args_v3_auth = (self.config, self.username,
+                                   self.password, self.auth_url_v3,
+                                   self.tenant_name, auth_version)
         else:
-            client_args = (self.config, self.username, self.password,
-                           self.auth_url)
-
             client_args_v3_auth = None
 
         try:
