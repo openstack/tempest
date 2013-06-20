@@ -73,6 +73,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cidr = netaddr.IPNetwork(cls.network_cfg.tenant_network_cidr)
         mask_bits = cls.network_cfg.tenant_network_mask_bits
         # Find a cidr that is not in use yet and create a subnet with it
+        body = None
         failure = None
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
