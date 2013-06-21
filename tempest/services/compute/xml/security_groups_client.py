@@ -98,7 +98,9 @@ class SecurityGroupsClientXML(RestClientXML):
         """
         group_rule = Element("security_group_rule")
 
-        elements = {k: kwargs.get(k) for k in ('cidr', 'group_id')}
+        elements = dict()
+        elements['cidr'] = kwargs.get('cidr')
+        elements['group_id'] = kwargs.get('group_id')
         elements['parent_group_id'] = parent_group_id
         elements['ip_protocol'] = ip_proto
         elements['from_port'] = from_port
