@@ -27,7 +27,7 @@ class VolumesActionsTest(BaseVolumeTest):
     def setUpClass(cls):
         super(VolumesActionsTest, cls).setUpClass()
         cls.client = cls.volumes_client
-        cls.servers_client = cls.servers_client
+        cls.image_client = cls.os.image_client
 
         # Create a test shared instance and volume for attach/detach tests
         srv_name = rand_name('Instance-')
@@ -93,3 +93,16 @@ class VolumesActionsTest(BaseVolumeTest):
         finally:
             self.client.detach_volume(self.volume['id'])
             self.client.wait_for_volume_status(self.volume['id'], 'available')
+
+    @attr(type='gate')
+    def test_volume_upload(self):
+        # NOTE(gfidente): the volume uploaded in Glance comes from setUpClass,
+        # it is shared with the other tests. After it is uploaded in Glance,
+        # there is no way to delete it from Cinder, so we delete it from Glance
+        # using the Glance image_client and from Cinder via tearDownClass.
+        image_name = rand_name('Image-')
+        resp, body = self.client.upload_volume(self.volume['id'], image_name)
+        image_id = body["image_id"]
+        self.addCleanup(self.image_client.delete_image, image_id)
+        self.assertEqual(202, resp.status)
+        self.image_client.wait_for_image_status(image_id, 'active')
