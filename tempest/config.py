@@ -181,10 +181,12 @@ ComputeGroup = [
                default=None,
                help="Path to a private key file for SSH access to remote "
                     "hosts"),
-    cfg.BoolOpt('disk_config_enabled_override',
+    cfg.BoolOpt('disk_config_enabled',
                 default=True,
-                help="If false, skip config tests regardless of the "
-                     "extension status"),
+                help="If false, skip disk config tests"),
+    cfg.BoolOpt('flavor_extra_enabled',
+                default=True,
+                help="If false, skip flavor extra data test"),
 ]
 
 

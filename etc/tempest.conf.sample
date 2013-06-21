@@ -124,11 +124,11 @@ use_block_migration_for_live_migration = false
 # relax-xsm-sr-check
 block_migrate_supports_cinder_iscsi = false
 
-# By default, rely on the status of the diskConfig extension to
-# decide if to execute disk config tests. When set to false, tests
-# are forced to skip, regardless of the extension status
-disk_config_enabled_override = true
+# When set to false, disk config tests are forced to skip
+disk_config_enabled = true
 
+# When set to false, flavor extra data tests are forced to skip
+flavor_extra_enabled = true
 
 [whitebox]
 # Whitebox options for compute. Whitebox options enable the
@@ -331,3 +331,9 @@ aki_img_file = cirros-0.3.1-x86_64-vmlinuz
 
 # ssh username for the image file
 ssh_user = cirros
+
+[CLI]
+# Enable cli tests
+enabled = True
+# directory where python client binaries are located
+cli_dir = /usr/local/bin/
