@@ -88,7 +88,7 @@ class ImageClientJSON(RestClient):
                 obj_size = obj.tell()
                 obj.seek(0)
                 return obj_size
-            except IOError, e:
+            except IOError as e:
                 if e.errno == errno.ESPIPE:
                     # Illegal seek. This means the user is trying
                     # to pipe image data to the client, e.g.

@@ -304,14 +304,14 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
         if self.cert_file:
             try:
                 self.context.use_certificate_file(self.cert_file)
-            except Exception, e:
+            except Exception as e:
                 msg = 'Unable to load cert from "%s" %s' % (self.cert_file, e)
                 raise exc.SSLConfigurationError(msg)
             if self.key_file is None:
                 # We support having key and cert in same file
                 try:
                     self.context.use_privatekey_file(self.cert_file)
-                except Exception, e:
+                except Exception as e:
                     msg = ('No key file specified and unable to load key '
                            'from "%s" %s' % (self.cert_file, e))
                     raise exc.SSLConfigurationError(msg)
@@ -319,14 +319,14 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
         if self.key_file:
             try:
                 self.context.use_privatekey_file(self.key_file)
-            except Exception, e:
+            except Exception as e:
                 msg = 'Unable to load key from "%s" %s' % (self.key_file, e)
                 raise exc.SSLConfigurationError(msg)
 
         if self.cacert:
             try:
                 self.context.load_verify_locations(self.cacert)
-            except Exception, e:
+            except Exception as e:
                 msg = 'Unable to load CA from "%s"' % (self.cacert, e)
                 raise exc.SSLConfigurationError(msg)
         else:

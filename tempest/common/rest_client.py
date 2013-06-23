@@ -144,8 +144,8 @@ class RestClient(object):
             try:
                 auth_data = json.loads(resp_body)['access']
                 token = auth_data['token']['id']
-            except Exception, e:
-                print "Failed to obtain token for user: %s" % e
+            except Exception as e:
+                print("Failed to obtain token for user: %s" % e)
                 raise
 
             mgmt_url = None

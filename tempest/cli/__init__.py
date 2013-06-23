@@ -109,7 +109,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
             else:
                 with open('/dev/null', 'w') as devnull:
                     result = self.check_output(cmd, stderr=devnull)
-        except subprocess.CalledProcessError, e:
+        except subprocess.CalledProcessError as e:
             LOG.error("command output:\n%s" % e.output)
             raise
         return result

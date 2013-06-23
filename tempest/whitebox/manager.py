@@ -128,7 +128,7 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
             meta = MetaData()
             meta.reflect(bind=engine)
 
-        except Exception, e:
+        except Exception as e:
             raise exceptions.SQLException(message=e)
 
         return connection, meta

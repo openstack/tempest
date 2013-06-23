@@ -118,8 +118,8 @@ if __name__ == '__main__':
 
     unskips = sorted(set(unskips))
     if unskips:
-        print "The following bugs have been fixed and the corresponding skips"
-        print "should be removed from the test cases:"
-        print
+        print("The following bugs have been fixed and the corresponding skips")
+        print("should be removed from the test cases:")
+        print()
         for bug in unskips:
-            print "  %7s" % bug
+            print("  %7s" % bug)
