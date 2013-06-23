@@ -19,6 +19,7 @@ from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import HTTP_SUCCESS
 
 
 class AccountTest(base.BaseObjectTest):
@@ -47,7 +48,7 @@ class AccountTest(base.BaseObjectTest):
     def test_list_account_metadata(self):
         # list all account metadata
         resp, metadata = self.account_client.list_account_metadata()
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertIn('x-account-object-count', resp)
         self.assertIn('x-account-container-count', resp)
         self.assertIn('x-account-bytes-used', resp)
@@ -59,7 +60,7 @@ class AccountTest(base.BaseObjectTest):
         # add metadata to account
         resp, _ = self.account_client.create_account_metadata(
             metadata={header: data})
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
         resp, _ = self.account_client.list_account_metadata()
         self.assertIn('x-account-meta-' + header, resp)
@@ -68,7 +69,7 @@ class AccountTest(base.BaseObjectTest):
         # delete metadata from account
         resp, _ = \
             self.account_client.delete_account_metadata(metadata=[header])
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
         resp, _ = self.account_client.list_account_metadata()
         self.assertNotIn('x-account-meta-' + header, resp)

@@ -23,6 +23,7 @@ from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import HTTP_SUCCESS
 
 
 class ObjectTest(base.BaseObjectTest):
@@ -72,7 +73,7 @@ class ObjectTest(base.BaseObjectTest):
         # delete object
         resp, _ = self.object_client.delete_object(self.container_name,
                                                    object_name)
-        self.assertEqual(resp['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
     @attr(type='smoke')
     def test_object_metadata(self):
@@ -89,12 +90,12 @@ class ObjectTest(base.BaseObjectTest):
         orig_metadata = {meta_key: meta_value}
         resp, _ = self.object_client.update_object_metadata(
             self.container_name, object_name, orig_metadata)
-        self.assertEqual(resp['status'], '202')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
         # get object metadata
         resp, resp_metadata = self.object_client.list_object_metadata(
             self.container_name, object_name)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         actual_meta_key = 'x-object-meta-' + meta_key
         self.assertTrue(actual_meta_key in resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
@@ -111,7 +112,7 @@ class ObjectTest(base.BaseObjectTest):
         # get object
         resp, body = self.object_client.get_object(self.container_name,
                                                    object_name)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertEqual(body, data)
 
     @attr(type='smoke')
@@ -209,7 +210,7 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.update_object_metadata(src_container_name,
                                                             object_name,
                                                             orig_metadata)
-        self.assertEqual(resp['status'], '202')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         try:
             # copy object from source container to destination container
             resp, _ = self.object_client.copy_object_across_containers(
@@ -309,7 +310,7 @@ class ObjectTest(base.BaseObjectTest):
             metadata = {'Temp-URL-Key': key}
             resp, _ = self.account_client.create_account_metadata(
                 metadata=metadata)
-            self.assertEqual(resp['status'], '204')
+            self.assertIn(int(resp['status']), HTTP_SUCCESS)
             flag = True
             resp, _ = self.account_client.list_account_metadata()
             self.assertIn('x-account-meta-temp-url-key', resp)
@@ -386,7 +387,7 @@ class ObjectTest(base.BaseObjectTest):
         md5 = hashlib.md5(local_data).hexdigest()
         headers = {'If-None-Match': md5}
         resp, body = self.object_client.get(url, headers=headers)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
 
 class PublicObjectTest(base.BaseObjectTest):
@@ -408,7 +409,7 @@ class PublicObjectTest(base.BaseObjectTest):
         cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers, metadata_prefix='')
-        self.assertEqual(resp_meta['status'], '204')
+        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
         # create object
         object_name = rand_name(name='Object')
         data = arbitrary_string(size=len(object_name),
@@ -420,7 +421,7 @@ class PublicObjectTest(base.BaseObjectTest):
         # list container metadata
         resp_meta, _ = self.container_client.list_container_metadata(
             self.container_name)
-        self.assertEqual(resp_meta['status'], '204')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertIn('x-container-read', resp_meta)
         self.assertEqual(resp_meta['x-container-read'], '.r:*,.rlistings')
 
@@ -438,7 +439,7 @@ class PublicObjectTest(base.BaseObjectTest):
             resp_meta, body = self.container_client.update_container_metadata(
                 self.container_name, metadata=cont_headers,
                 metadata_prefix='')
-            self.assertEqual(resp_meta['status'], '204')
+            self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
             # create object
             object_name = rand_name(name='Object')
             data = arbitrary_string(size=len(object_name) * 1,
@@ -450,7 +451,7 @@ class PublicObjectTest(base.BaseObjectTest):
             # list container metadata
             resp, _ = self.container_client.list_container_metadata(
                 self.container_name)
-            self.assertEqual(resp['status'], '204')
+            self.assertIn(int(resp['status']), HTTP_SUCCESS)
             self.assertIn('x-container-read', resp)
             self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
 
