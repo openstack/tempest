@@ -59,7 +59,14 @@ class OrchestrationClient(rest_client.RestClient):
             post_body['template_url'] = template_url
         body = json.dumps(post_body)
         uri = 'stacks'
-        resp, body = self.post(uri, headers=self.headers, body=body)
+
+        # Password must be provided on stack create so that heat
+        # can perform future operations on behalf of the user
+        headers = dict(self.headers)
+        headers['X-Auth-Key'] = self.password
+        headers['X-Auth-User'] = self.user
+
+        resp, body = self.post(uri, headers=headers, body=body)
         return resp, body
 
     def get_stack(self, stack_identifier):
