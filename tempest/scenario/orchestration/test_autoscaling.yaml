@@ -1,0 +1,182 @@
+HeatTemplateFormatVersion: '2012-12-12'
+Description: |
+  Template which tests autoscaling and load balancing
+Parameters:
+  KeyName:
+    Type: String
+  InstanceType:
+    Type: String
+  ImageId:
+    Type: String
+  StackStart:
+    Description: Epoch seconds when the stack was launched
+    Type: Number
+  ConsumeStartSeconds:
+    Description: Seconds after invocation when memory should be consumed
+    Type: Number
+    Default: '60'
+  ConsumeStopSeconds:
+    Description: Seconds after StackStart when memory should be released
+    Type: Number
+    Default: '420'
+  ScaleUpThreshold:
+    Description: Memory percentage threshold to scale up on
+    Type: Number
+    Default: '70'
+  ScaleDownThreshold:
+    Description: Memory percentage threshold to scale down on
+    Type: Number
+    Default: '60'
+  ConsumeMemoryLimit:
+    Description: Memory percentage threshold to consume
+    Type: Number
+    Default: '71'
+Resources:
+  SmokeServerGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      AvailabilityZones: {'Fn::GetAZs': ''}
+      LaunchConfigurationName: {Ref: LaunchConfig}
+      MinSize: '1'
+      MaxSize: '3'
+  SmokeServerScaleUpPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: {Ref: SmokeServerGroup}
+      Cooldown: '60'
+      ScalingAdjustment: '1'
+  SmokeServerScaleDownPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AdjustmentType: ChangeInCapacity
+      AutoScalingGroupName: {Ref: SmokeServerGroup}
+      Cooldown: '60'
+      ScalingAdjustment: '-1'
+  MEMAlarmHigh:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-up if MEM > ScaleUpThreshold% for 10 seconds
+      MetricName: MemoryUtilization
+      Namespace: system/linux
+      Statistic: Average
+      Period: '10'
+      EvaluationPeriods: '1'
+      Threshold: {Ref: ScaleUpThreshold}
+      AlarmActions: [{Ref: SmokeServerScaleUpPolicy}]
+      Dimensions:
+      - Name: AutoScalingGroupName
+        Value: {Ref: SmokeServerGroup}
+      ComparisonOperator: GreaterThanThreshold
+  MEMAlarmLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmDescription: Scale-down if MEM < ScaleDownThreshold% for 10 seconds
+      MetricName: MemoryUtilization
+      Namespace: system/linux
+      Statistic: Average
+      Period: '10'
+      EvaluationPeriods: '1'
+      Threshold: {Ref: ScaleDownThreshold}
+      AlarmActions: [{Ref: SmokeServerScaleDownPolicy}]
+      Dimensions:
+      - Name: AutoScalingGroupName
+        Value: {Ref: SmokeServerGroup}
+      ComparisonOperator: LessThanThreshold
+  CfnUser:
+    Type: AWS::IAM::User
+  SmokeKeys:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: {Ref: CfnUser}
+  SmokeSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Standard firewall rules
+      SecurityGroupIngress:
+      - {IpProtocol: tcp, FromPort: '22', ToPort: '22', CidrIp: 0.0.0.0/0}
+      - {IpProtocol: tcp, FromPort: '80', ToPort: '80', CidrIp: 0.0.0.0/0}
+  LaunchConfig:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      AWS::CloudFormation::Init:
+        config:
+          files:
+            /etc/cfn/cfn-credentials:
+              content:
+                Fn::Replace:
+                - $AWSAccessKeyId: {Ref: SmokeKeys}
+                  $AWSSecretKey: {'Fn::GetAtt': [SmokeKeys, SecretAccessKey]}
+                - |
+                  AWSAccessKeyId=$AWSAccessKeyId
+                  AWSSecretKey=$AWSSecretKey
+              mode: '000400'
+              owner: root
+              group: root
+            /root/watch_loop:
+              content:
+                Fn::Replace:
+                - _hi_: {Ref: MEMAlarmHigh}
+                  _lo_: {Ref: MEMAlarmLow}
+                - |
+                  #!/bin/bash
+                  while :
+                  do
+                    /opt/aws/bin/cfn-push-stats --watch _hi_ --mem-util
+                    /opt/aws/bin/cfn-push-stats --watch _lo_ --mem-util
+                    sleep 4
+                  done
+              mode: '000700'
+              owner: root
+              group: root
+            /root/consume_memory:
+              content:
+                Fn::Replace:
+                - StackStart: {Ref: StackStart}
+                  ConsumeStopSeconds: {Ref: ConsumeStopSeconds}
+                  ConsumeStartSeconds: {Ref: ConsumeStartSeconds}
+                  ConsumeMemoryLimit: {Ref: ConsumeMemoryLimit}
+                - |
+                  #!/usr/bin/env python
+                  import psutil
+                  import time
+                  import datetime
+                  import sys
+                  a = []
+                  sleep_until_consume = ConsumeStartSeconds
+                  stack_start = StackStart
+                  consume_stop_time = stack_start + ConsumeStopSeconds
+                  memory_limit = ConsumeMemoryLimit
+                  if sleep_until_consume > 0:
+                      sys.stdout.flush()
+                      time.sleep(sleep_until_consume)
+                  while psutil.virtual_memory().percent < memory_limit:
+                      sys.stdout.flush()
+                      a.append(' ' * 10**5)
+                      time.sleep(0.1)
+                  sleep_until_exit = consume_stop_time - time.time()
+                  if sleep_until_exit > 0:
+                      time.sleep(sleep_until_exit)
+              mode: '000700'
+              owner: root
+              group: root
+    Properties:
+      ImageId: {Ref: ImageId}
+      InstanceType: {Ref: InstanceType}
+      KeyName: {Ref: KeyName}
+      SecurityGroups: [{Ref: SmokeSecurityGroup}]
+      UserData:
+        Fn::Base64:
+          Fn::Replace:
+          - ConsumeStopSeconds: {Ref: ConsumeStopSeconds}
+            ConsumeStartSeconds: {Ref: ConsumeStartSeconds}
+            ConsumeMemoryLimit: {Ref: ConsumeMemoryLimit}
+          - |
+            #!/bin/bash -v
+            /opt/aws/bin/cfn-init
+            # report on memory consumption every 4 seconds
+            /root/watch_loop &
+            # wait ConsumeStartSeconds then ramp up memory consumption
+            # until it is over ConsumeMemoryLimit%
+            # then exits ConsumeStopSeconds seconds after stack launch
+            /root/consume_memory > /root/consume_memory.log &
