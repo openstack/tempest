@@ -39,6 +39,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.servers_client = os.servers_client
         cls.keypairs_client = os.keypairs_client
         cls.stacks = []
+        cls.keypairs = []
 
     @classmethod
     def _get_identity_admin_client(cls):
@@ -89,11 +90,21 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         kp_name = rand_name(namestart)
         resp, body = self.keypairs_client.create_keypair(kp_name)
         self.assertEqual(body['name'], kp_name)
+        self.keypairs.append(kp_name)
         return body
+
+    @classmethod
+    def clear_keypairs(cls):
+        for kp_name in cls.keypairs:
+            try:
+                cls.keypairs_client.delete_keypair(kp_name)
+            except Exception:
+                pass
 
     @classmethod
     def tearDownClass(cls):
         cls.clear_stacks()
+        cls.clear_keypairs()
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""
