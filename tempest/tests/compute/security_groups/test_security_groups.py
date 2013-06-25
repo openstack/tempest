@@ -162,6 +162,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           s_description)
 
     @attr(type='negative')
+    @testtools.skipIf(config.TempestConfig().network.quantum_available,
+                      "Quantum allows duplicate names for security groups")
     def test_security_group_create_with_duplicate_name(self):
         # Negative test:Security Group with duplicate name should not
         # be created
