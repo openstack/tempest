@@ -55,7 +55,7 @@ def _load_log_config():
     log_config = os.path.join(conf_dir, conf_file)
     try:
         logging.config.fileConfig(log_config)
-    except ConfigParser.Error, exc:
+    except ConfigParser.Error as exc:
         raise cfg.ConfigFileParseError(log_config, str(exc))
     return True
 

@@ -12,7 +12,7 @@
 #    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
-#    under the License
+#    under the License.
 
 import json
 import os
@@ -151,14 +151,14 @@ def main(argv):
     elif CLI.command == 'stop':
         resp, body = coverage_client.stop_coverage()
         if not resp['status'] == '200':
-            print 'coverage stop failed with: %s:' % (resp['status'] + ': '
-                                                      + body)
+            print('coverage stop failed with: %s:' % (resp['status'] + ': '
+                                                      + body))
             exit(int(resp['status']))
         path = body['path']
         if CLI.output:
             shutil.copytree(path, CLI.output)
         else:
-            print "Data files located at: %s" % path
+            print("Data files located at: %s" % path)
 
     elif CLI.command == 'report':
         if CLI.xml:
@@ -169,8 +169,8 @@ def main(argv):
         else:
             resp, body = coverage_client.report_coverage(file=CLI.filename)
         if not resp['status'] == '200':
-            print 'coverage report failed with: %s:' % (resp['status'] + ': '
-                                                        + body)
+            print('coverage report failed with: %s:' % (resp['status'] + ': '
+                                                        + body))
             exit(int(resp['status']))
         path = body['path']
         if CLI.output:
@@ -182,10 +182,10 @@ def main(argv):
         else:
             if not CLI.html:
                 path = os.path.dirname(path)
-            print 'Report files located at: %s' % path
+            print('Report files located at: %s' % path)
 
     else:
-        print 'Invalid command'
+        print('Invalid command')
         exit(1)
 
 
