@@ -330,6 +330,12 @@ VolumeGroup = [
     cfg.StrOpt('backend2_name',
                default='BACKEND_2',
                help="Name of the backend2 (must be declared in cinder.conf)"),
+    cfg.StrOpt('storage_protocol',
+               default='iSCSI',
+               help='Backend protocol to target when creating volume types'),
+    cfg.StrOpt('vendor_name',
+               default='Open Source',
+               help='Backend vendor to target when creating volume types'),
 ]
 
 

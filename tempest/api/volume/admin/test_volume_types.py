@@ -55,8 +55,10 @@ class VolumeTypesTest(BaseVolumeTest):
             volume = {}
             vol_name = rand_name("volume-")
             vol_type_name = rand_name("volume-type-")
-            extra_specs = {"storage_protocol": "iSCSI",
-                           "vendor_name": "Open Source"}
+            proto = self.config.volume.storage_protocol
+            vendor = self.config.volume.vendor_name
+            extra_specs = {"storage_protocol": proto,
+                           "vendor_name": vendor}
             body = {}
             resp, body = self.client.create_volume_type(
                 vol_type_name,

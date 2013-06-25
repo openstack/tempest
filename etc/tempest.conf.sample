@@ -229,6 +229,10 @@ build_timeout = 300
 multi_backend_enabled = false
 backend1_name = BACKEND_1
 backend2_name = BACKEND_2
+# Protocol and vendor of volume backend to target when testing volume-types.
+# You should update to reflect those exported by configured backend driver.
+storage_protocol = iSCSI
+vendor_name = Open Source
 
 [object-storage]
 # This section contains configuration options used when executing tests
