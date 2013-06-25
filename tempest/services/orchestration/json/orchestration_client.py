@@ -46,6 +46,35 @@ class OrchestrationClient(rest_client.RestClient):
 
     def create_stack(self, name, disable_rollback=True, parameters={},
                      timeout_mins=60, template=None, template_url=None):
+        headers, body = self._prepare_update_create(
+            name,
+            disable_rollback,
+            parameters,
+            timeout_mins,
+            template,
+            template_url)
+        uri = 'stacks'
+        resp, body = self.post(uri, headers=headers, body=body)
+        return resp, body
+
+    def update_stack(self, stack_identifier, name, disable_rollback=True,
+                     parameters={}, timeout_mins=60, template=None,
+                     template_url=None):
+        headers, body = self._prepare_update_create(
+            name,
+            disable_rollback,
+            parameters,
+            timeout_mins,
+            template,
+            template_url)
+
+        uri = "stacks/%s" % stack_identifier
+        resp, body = self.put(uri, headers=headers, body=body)
+        return resp, body
+
+    def _prepare_update_create(self, name, disable_rollback=True,
+                               parameters={}, timeout_mins=60,
+                               template=None, template_url=None):
         post_body = {
             "stack_name": name,
             "disable_rollback": disable_rollback,
@@ -58,16 +87,13 @@ class OrchestrationClient(rest_client.RestClient):
         if template_url:
             post_body['template_url'] = template_url
         body = json.dumps(post_body)
-        uri = 'stacks'
 
         # Password must be provided on stack create so that heat
         # can perform future operations on behalf of the user
         headers = dict(self.headers)
         headers['X-Auth-Key'] = self.password
         headers['X-Auth-User'] = self.user
-
-        resp, body = self.post(uri, headers=headers, body=body)
-        return resp, body
+        return headers, body
 
     def get_stack(self, stack_identifier):
         """Returns the details of a single stack."""
