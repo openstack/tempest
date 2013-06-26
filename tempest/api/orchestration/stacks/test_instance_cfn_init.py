@@ -119,23 +119,21 @@ Outputs:
             raise cls.skipException("No image available to test")
         cls.client = cls.orchestration_client
 
-    def setUp(self):
-        super(InstanceCfnInitTestJSON, self).setUp()
         stack_name = rand_name('heat')
-        if self.orchestration_cfg.keypair_name:
-            keypair_name = self.orchestration_cfg.keypair_name
+        if cls.orchestration_cfg.keypair_name:
+            keypair_name = cls.orchestration_cfg.keypair_name
         else:
-            self.keypair = self._create_keypair()
-            keypair_name = self.keypair['name']
+            cls.keypair = cls._create_keypair()
+            keypair_name = cls.keypair['name']
 
         # create the stack
-        self.stack_identifier = self.create_stack(
+        cls.stack_identifier = cls.create_stack(
             stack_name,
-            self.template,
+            cls.template,
             parameters={
                 'KeyName': keypair_name,
-                'InstanceType': self.orchestration_cfg.instance_type,
-                'ImageId': self.orchestration_cfg.image_ref
+                'InstanceType': cls.orchestration_cfg.instance_type,
+                'ImageId': cls.orchestration_cfg.image_ref
             })
 
     @attr(type='gate')

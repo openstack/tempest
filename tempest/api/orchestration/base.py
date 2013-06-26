@@ -62,15 +62,15 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
             cls.config.identity.uri
         )
 
-    def create_stack(self, stack_name, template_data, parameters={}):
-        resp, body = self.client.create_stack(
+    @classmethod
+    def create_stack(cls, stack_name, template_data, parameters={}):
+        resp, body = cls.client.create_stack(
             stack_name,
             template=template_data,
             parameters=parameters)
-        self.assertEqual('201', resp['status'])
         stack_id = resp['location'].split('/')[-1]
         stack_identifier = '%s/%s' % (stack_name, stack_id)
-        self.stacks.append(stack_identifier)
+        cls.stacks.append(stack_identifier)
         return stack_identifier
 
     @classmethod
@@ -88,11 +88,11 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
             except Exception:
                 pass
 
-    def _create_keypair(self, namestart='keypair-heat-'):
+    @classmethod
+    def _create_keypair(cls, namestart='keypair-heat-'):
         kp_name = rand_name(namestart)
-        resp, body = self.keypairs_client.create_keypair(kp_name)
-        self.assertEqual(body['name'], kp_name)
-        self.keypairs.append(kp_name)
+        resp, body = cls.keypairs_client.create_keypair(kp_name)
+        cls.keypairs.append(kp_name)
         return body
 
     @classmethod
