@@ -36,7 +36,7 @@ Tests should not modify the cloud.
 If a test is validating the cli for bad data, it should do it with
 assertRaises.
 
-A reasonable example of an existing test is as follows:
+A reasonable example of an existing test is as follows::
 
     def test_admin_list(self):
         self.nova('list')
