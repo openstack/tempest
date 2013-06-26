@@ -336,8 +336,8 @@ aki_img_file = cirros-0.3.1-x86_64-vmlinuz
 # ssh username for the image file
 ssh_user = cirros
 
-[CLI]
+[cli]
 # Enable cli tests
 enabled = True
 # directory where python client binaries are located
-cli_dir = /usr/local/bin/
+cli_dir = /usr/local/bin
