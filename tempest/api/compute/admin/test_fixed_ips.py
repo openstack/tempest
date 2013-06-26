@@ -15,7 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
@@ -51,6 +54,10 @@ class FixedIPsBase(base.BaseComputeAdminTest):
 class FixedIPsTestJson(FixedIPsBase):
     _interface = 'json'
 
+    CONF = config.TempestConfig()
+
+    @testtools.skipIf(CONF.network.quantum_available, "This feature is not" +
+                      "implemented by Quantum. See bug: #1194569")
     @attr(type='gate')
     def test_list_fixed_ip_details(self):
         resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)
