@@ -33,17 +33,13 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @attr(type='smoke')
     def test_stack_list_responds(self):
-        resp, body = self.client.list_stacks()
-        stacks = body['stacks']
+        resp, stacks = self.client.list_stacks()
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(stacks, list)
 
     @attr(type='smoke')
     def test_stack_crud_no_resources(self):
         stack_name = rand_name('heat')
-
-        # count how many stacks to start with
-        resp, body = self.client.list_stacks()
 
         # create the stack
         stack_identifier = self.create_stack(
@@ -54,21 +50,21 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.client.wait_for_stack_status(stack_identifier, 'CREATE_COMPLETE')
 
         # check for stack in list
-        resp, body = self.client.list_stacks()
-        list_ids = list([stack['id'] for stack in body['stacks']])
+        resp, stacks = self.client.list_stacks()
+        list_ids = list([stack['id'] for stack in stacks])
         self.assertIn(stack_id, list_ids)
 
         # fetch the stack
-        resp, body = self.client.get_stack(stack_identifier)
-        self.assertEqual('CREATE_COMPLETE', body['stack_status'])
+        resp, stack = self.client.get_stack(stack_identifier)
+        self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by name
-        resp, body = self.client.get_stack(stack_name)
-        self.assertEqual('CREATE_COMPLETE', body['stack_status'])
+        resp, stack = self.client.get_stack(stack_name)
+        self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by id
-        resp, body = self.client.get_stack(stack_id)
-        self.assertEqual('CREATE_COMPLETE', body['stack_status'])
+        resp, stack = self.client.get_stack(stack_id)
+        self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # delete the stack
         resp = self.client.delete_stack(stack_identifier)

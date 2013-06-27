@@ -89,8 +89,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
-    def _create_keypair(cls, namestart='keypair-heat-'):
-        kp_name = rand_name(namestart)
+    def _create_keypair(cls, name_start='keypair-heat-'):
+        kp_name = rand_name(name_start)
         resp, body = cls.keypairs_client.create_keypair(kp_name)
         cls.keypairs.append(kp_name)
         return body
