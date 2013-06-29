@@ -15,8 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from __future__ import print_function
+
 import os
 import sys
+
 
 from oslo.config import cfg
 
@@ -559,7 +562,7 @@ class TempestConfig:
 
         if not os.path.exists(path):
             msg = "Config file %(path)s not found" % locals()
-            print >> sys.stderr, RuntimeError(msg)
+            print(RuntimeError(msg), file=sys.stderr)
         else:
             config_files.append(path)
 
