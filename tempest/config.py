@@ -174,6 +174,10 @@ ComputeGroup = [
                default=300,
                help="Timeout in seconds to wait for authentication to "
                     "succeed."),
+    cfg.IntOpt('ready_wait',
+               default=0,
+               help="Additinal wait time for clean state, when there is"
+                    " no OS-EXT-STS extension availiable"),
     cfg.IntOpt('ssh_channel_timeout',
                default=60,
                help="Timeout in seconds to wait for output from ssh "

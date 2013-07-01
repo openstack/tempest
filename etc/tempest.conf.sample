@@ -119,6 +119,10 @@ ping_timeout = 60
 # Number of seconds to wait to authenticate to an instance
 ssh_timeout = 300
 
+# Additinal wait time for clean state, when there is
+# no OS-EXT-STS extension availiable
+ready_wait = 0
+
 # Number of seconds to wait for output from ssh channel
 ssh_channel_timeout = 60
 
