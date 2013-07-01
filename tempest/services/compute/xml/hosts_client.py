@@ -14,17 +14,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from lxml import etree
+from tempest.common.rest_client import RestClientXML
+from tempest.services.compute.xml.common import xml_to_json
 
 
-class HostsClientJSON(RestClient):
+class HostsClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(HostsClientJSON, self).__init__(config, username, password,
-                                              auth_url, tenant_name)
+        super(HostsClientXML, self).__init__(config, username, password,
+                                             auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
     def list_hosts(self, params=None):
@@ -34,6 +35,7 @@ class HostsClientJSON(RestClient):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body['hosts']
+        resp, body = self.get(url, self.headers)
+        node = etree.fromstring(body)
+        body = [xml_to_json(x) for x in node.getchildren()]
+        return resp, body
