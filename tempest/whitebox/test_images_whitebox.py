@@ -15,23 +15,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 from tempest.whitebox import manager
 
-#TODO(afazekas): The whitebox tests are using complex testclass/manager
-# hierarchy, without a real need. It is difficult to maintain.
-# They could share more code with scenario tests.
+from novaclient import exceptions
 
 
-class ImagesWhiteboxTest(manager.ComputeWhiteboxTest, base.BaseComputeTest):
+class ImagesWhiteboxTest(manager.ComputeWhiteboxTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
         super(ImagesWhiteboxTest, cls).setUpClass()
-        cls.client = cls.images_client
+        cls.create_image = cls.compute_client.servers.create_image
         cls.connection, cls.meta = cls.get_db_handle_and_meta()
         cls.shared_server = cls.create_server()
         cls.image_ids = []
@@ -39,7 +35,6 @@ class ImagesWhiteboxTest(manager.ComputeWhiteboxTest, base.BaseComputeTest):
     @classmethod
     def tearDownClass(cls):
         """Delete images and server after a test is executed."""
-        cls.servers_client.delete_server(cls.shared_server['id'])
         for image_id in cls.image_ids:
             cls.client.delete_image(image_id)
             cls.image_ids.remove(image_id)
@@ -62,18 +57,18 @@ class ImagesWhiteboxTest(manager.ComputeWhiteboxTest, base.BaseComputeTest):
     def _test_create_image_409_base(self, vm_state, task_state, deleted=0):
         """Base method for create image tests based on vm and task states."""
         try:
-            self.update_state(self.shared_server['id'], vm_state,
+            self.update_state(self.shared_server.id, vm_state,
                               task_state, deleted)
 
             image_name = rand_name('snap-')
-            self.assertRaises(exceptions.Duplicate,
-                              self.client.create_image,
-                              self.shared_server['id'], image_name)
+            self.assertRaises(exceptions.Conflict,
+                              self.create_image,
+                              self.shared_server.id, image_name)
         except Exception:
             self.fail("Should not allow create image when vm_state=%s and "
                       "task_state=%s" % (vm_state, task_state))
         finally:
-            self.update_state(self.shared_server['id'], 'active', None)
+            self.update_state(self.shared_server.id, 'active', None)
 
     def test_create_image_when_vm_eq_building_task_eq_scheduling(self):
         # 409 error when instance states are building,scheduling

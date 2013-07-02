@@ -27,7 +27,6 @@ from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
-from tempest import manager
 
 LOG = logging.getLogger(__name__)
 
@@ -247,19 +246,22 @@ class TestCase(BaseTestCase):
         cls.resource_keys = {}
         cls.os_resources = []
 
-    def set_resource(self, key, thing):
+    @classmethod
+    def set_resource(cls, key, thing):
         LOG.debug("Adding %r to shared resources of %s" %
-                  (thing, self.__class__.__name__))
-        self.resource_keys[key] = thing
-        self.os_resources.append(thing)
+                  (thing, cls.__name__))
+        cls.resource_keys[key] = thing
+        cls.os_resources.append(thing)
 
-    def get_resource(self, key):
-        return self.resource_keys[key]
+    @classmethod
+    def get_resource(cls, key):
+        return cls.resource_keys[key]
 
-    def remove_resource(self, key):
-        thing = self.resource_keys[key]
-        self.os_resources.remove(thing)
-        del self.resource_keys[key]
+    @classmethod
+    def remove_resource(cls, key):
+        thing = cls.resource_keys[key]
+        cls.os_resources.remove(thing)
+        del cls.resource_keys[key]
 
     def status_timeout(self, things, thing_id, expected_status):
         """
@@ -289,13 +291,3 @@ class TestCase(BaseTestCase):
                                conf.compute.build_interval):
             self.fail("Timed out waiting for thing %s to become %s"
                       % (thing_id, expected_status))
-
-
-class ComputeFuzzClientTest(TestCase):
-
-    """
-    Base test case class for OpenStack Compute API (Nova)
-    that uses the Tempest REST fuzz client libs for calling the API.
-    """
-
-    manager_class = manager.ComputeFuzzClientManager
