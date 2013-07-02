@@ -38,6 +38,4 @@ where your test contributions should go.
 Indices and tables
 ==================
 
-* :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
