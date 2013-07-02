@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 from testtools.matchers._basic import Contains
 
 from tempest.api.identity import base
@@ -76,32 +75,6 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertRaises(exceptions.Duplicate, self.client.create_user,
                           self.data.test_user, self.data.test_password,
                           self.data.tenant['id'], self.data.test_email)
-
-    @testtools.skip("Until Bug #999084 is fixed")
-    @attr(type=['negative', 'gate'])
-    def test_create_user_with_empty_password(self):
-        # User with an empty password should not be created
-        self.data.setup_test_tenant()
-        self.assertRaises(exceptions.BadRequest, self.client.create_user,
-                          self.alt_user, '', self.data.tenant['id'],
-                          self.alt_email)
-
-    @testtools.skip("Until Bug #999084 is fixed")
-    @attr(type=['negative', 'gate'])
-    def test_create_user_with_long_password(self):
-        # User having password exceeding max length should not be created
-        self.data.setup_test_tenant()
-        self.assertRaises(exceptions.BadRequest, self.client.create_user,
-                          self.alt_user, 'a' * 65, self.data.tenant['id'],
-                          self.alt_email)
-
-    @testtools.skip("Until Bug #999084 is fixed")
-    @attr(type=['negative', 'gate'])
-    def test_create_user_with_invalid_email_format(self):
-        # Email format should be validated while creating a user
-        self.data.setup_test_tenant()
-        self.assertRaises(exceptions.BadRequest, self.client.create_user,
-                          self.alt_user, '', self.data.tenant['id'], '12345')
 
     @attr(type=['negative', 'gate'])
     def test_create_user_for_non_existant_tenant(self):
