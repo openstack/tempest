@@ -24,12 +24,12 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServersNegativeTest(base.BaseComputeTest):
+class ServersNegativeTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServersNegativeTest, cls).setUpClass()
+        super(ServersNegativeTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client
         cls.alt_os = clients.AltManager()
@@ -248,5 +248,5 @@ class ServersNegativeTest(base.BaseComputeTest):
                           '999erra43')
 
 
-class ServersNegativeTestXML(ServersNegativeTest):
+class ServersNegativeTestXML(ServersNegativeTestJSON):
     _interface = 'xml'
