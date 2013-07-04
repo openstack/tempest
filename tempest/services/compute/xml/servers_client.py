@@ -163,6 +163,22 @@ class ServersClientXML(RestClientXML):
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
+    def suspend_server(self, server_id, **kwargs):
+        """Suspends the provided server."""
+        return self.action(server_id, 'suspend', None, **kwargs)
+
+    def resume_server(self, server_id, **kwargs):
+        """Un-suspends the provided server."""
+        return self.action(server_id, 'resume', None, **kwargs)
+
+    def pause_server(self, server_id, **kwargs):
+        """Pauses the provided server."""
+        return self.action(server_id, 'pause', None, **kwargs)
+
+    def unpause_server(self, server_id, **kwargs):
+        """Un-pauses the provided server."""
+        return self.action(server_id, 'unpause', None, **kwargs)
+
     def delete_server(self, server_id):
         """Deletes the given server."""
         return self.delete("servers/%s" % str(server_id))
