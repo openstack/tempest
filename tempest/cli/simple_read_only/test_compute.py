@@ -15,13 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import subprocess
 
 from oslo.config import cfg
 import testtools
 
 import tempest.cli
+from tempest.common import log as logging
 
 
 CONF = cfg.CONF
