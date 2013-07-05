@@ -40,7 +40,6 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
     def setUpClass(cls):
         super(ImagesOneServerTestJSON, cls).setUpClass()
         cls.client = cls.images_client
-        cls.servers_client = cls.servers_client
 
         try:
             resp, cls.server = cls.create_server(wait_until='ACTIVE')
@@ -104,6 +103,10 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.alt_client.delete_image, image_id)
 
+    def _get_default_flavor_disk_size(self, flavor_id):
+        resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
+        return flavor['disk']
+
     @testtools.skipUnless(compute.CREATE_IMAGE_ENABLED,
                           'Environment unable to create images.')
     @attr(type='smoke')
@@ -123,10 +126,15 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertEqual(name, image['name'])
         self.assertEqual('test', image['metadata']['image_type'])
 
-        # Verify minRAM and minDisk values are the same as the original image
         resp, original_image = self.client.get_image(self.image_ref)
-        self.assertEqual(original_image['minRam'], image['minRam'])
-        self.assertEqual(original_image['minDisk'], image['minDisk'])
+
+        # Verify minRAM is the same as the original image
+        self.assertEqual(image['minRam'], original_image['minRam'])
+
+        # Verify minDisk is the same as the original image or the flavor size
+        flavor_disk_size = self._get_default_flavor_disk_size(self.flavor_ref)
+        self.assertIn(str(image['minDisk']),
+                      (str(original_image['minDisk']), str(flavor_disk_size)))
 
         # Verify the image was deleted correctly
         resp, body = self.client.delete_image(image_id)
