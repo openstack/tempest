@@ -26,7 +26,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     """
     This smoke test suite assumes that Nova has been configured to
-    boot VM's with Quantum-managed networking, and attempts to
+    boot VM's with Neutron-managed networking, and attempts to
     verify network connectivity as follows:
 
      * For a freshly-booted VM with an IP address ("port") on a given network:

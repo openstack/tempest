@@ -56,8 +56,8 @@ class FixedIPsTestJson(FixedIPsBase):
 
     CONF = config.TempestConfig()
 
-    @testtools.skipIf(CONF.network.quantum_available, "This feature is not" +
-                      "implemented by Quantum. See bug: #1194569")
+    @testtools.skipIf(CONF.network.neutron_available, "This feature is not" +
+                      "implemented by Neutron. See bug: #1194569")
     @attr(type='gate')
     def test_list_fixed_ip_details(self):
         resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)

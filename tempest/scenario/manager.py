@@ -24,9 +24,9 @@ import cinderclient.client
 import glanceclient
 import keystoneclient.v2_0.client
 import netaddr
+from neutronclient.common import exceptions as exc
+import neutronclient.v2_0.client
 import novaclient.client
-from quantumclient.common import exceptions as exc
-import quantumclient.v2_0.client
 
 
 from tempest.api.network import common as net_common
@@ -166,7 +166,7 @@ class OfficialClientManager(tempest.manager.Manager):
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
 
-        return quantumclient.v2_0.client.Client(username=username,
+        return neutronclient.v2_0.client.Client(username=username,
                                                 password=password,
                                                 tenant_name=tenant_name,
                                                 auth_url=auth_url,
@@ -236,9 +236,9 @@ class NetworkScenarioTest(OfficialClientTest):
 
     @classmethod
     def check_preconditions(cls):
-        if (cls.config.network.quantum_available):
+        if (cls.config.network.neutron_available):
             cls.enabled = True
-            #verify that quantum_available is telling the truth
+            #verify that neutron_available is telling the truth
             try:
                 cls.network_client.list_networks()
             except exc.EndpointNotFound:
@@ -246,7 +246,7 @@ class NetworkScenarioTest(OfficialClientTest):
                 raise
         else:
             cls.enabled = False
-            msg = 'Quantum not available'
+            msg = 'Neutron not available'
             raise cls.skipException(msg)
 
     @classmethod
@@ -358,7 +358,7 @@ class NetworkScenarioTest(OfficialClientTest):
             try:
                 result = self.network_client.create_subnet(body=body)
                 break
-            except exc.QuantumClientException as e:
+            except exc.NeutronClientException as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise

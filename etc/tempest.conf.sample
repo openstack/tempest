@@ -181,9 +181,9 @@ http_image = http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.
 # This section contains configuration options used when executing tests
 # against the OpenStack Network API.
 
-# Version of the Quantum API
+# Version of the Neutron API
 api_version = v1.1
-# Catalog type of the Quantum Service
+# Catalog type of the Neutron Service
 catalog_type = network
 
 # A large private cidr block from which to allocate smaller blocks for
@@ -206,8 +206,8 @@ public_network_id = {$PUBLIC_NETWORK_ID}
 # for each tenant to have their own router.
 public_router_id = {$PUBLIC_ROUTER_ID}
 
-# Whether or not quantum is expected to be available
-quantum_available = false
+# Whether or not neutron is expected to be available
+neutron_available = false
 
 [volume]
 # This section contains the configuration options used when executing tests

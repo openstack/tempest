@@ -26,8 +26,8 @@ from tempest.test import attr
 class NetworksTest(base.BaseNetworkTest):
 
     """
-    Tests the following operations in the Quantum API using the REST client for
-    Quantum:
+    Tests the following operations in the Neutron API using the REST client for
+    Neutron:
 
         create a network for a tenant
         list tenant's networks
@@ -36,7 +36,7 @@ class NetworksTest(base.BaseNetworkTest):
         list tenant's subnets
         show a tenant subnet details
 
-    v2.0 of the Quantum API is assumed. It is also assumed that the following
+    v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
 
         tenant_network_cidr with a block of cidr's from which smaller blocks

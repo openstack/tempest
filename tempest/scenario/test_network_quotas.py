@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from quantumclient.common import exceptions as exc
+from neutronclient.common import exceptions as exc
 from tempest.scenario.manager import NetworkScenarioTest
 
 MAX_REASONABLE_ITERATIONS = 51  # more than enough. Default for port is 50.
@@ -48,7 +48,7 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                 self.networks.append(
                     self._create_network(self.tenant_id,
                                          namestart='network-quotatest-'))
-            except exc.QuantumClientException as e:
+            except exc.NeutronClientException as e:
                 if (e.status_code != 409):
                     raise
                 hit_limit = True
@@ -66,7 +66,7 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                 self.subnets.append(
                     self._create_subnet(self.networks[0],
                                         namestart='subnet-quotatest-'))
-            except exc.QuantumClientException as e:
+            except exc.NeutronClientException as e:
                 if (e.status_code != 409):
                     raise
                 hit_limit = True
@@ -84,7 +84,7 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                 self.ports.append(
                     self._create_port(self.networks[0],
                                       namestart='port-quotatest-'))
-            except exc.QuantumClientException as e:
+            except exc.NeutronClientException as e:
                 if (e.status_code != 409):
                     raise
                 hit_limit = True

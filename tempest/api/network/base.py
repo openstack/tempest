@@ -26,11 +26,11 @@ import tempest.test
 class BaseNetworkTest(tempest.test.BaseTestCase):
 
     """
-    Base class for the Quantum tests that use the Tempest Quantum REST client
+    Base class for the Neutron tests that use the Tempest Neutron REST client
 
-    Per the Quantum API Guide, API v1.x was removed from the source code tree
+    Per the Neutron API Guide, API v1.x was removed from the source code tree
     (docs.openstack.org/api/openstack-network/2.0/content/Overview-d1e71.html)
-    Therefore, v2.x of the Quantum API is assumed. It is also assumed that the
+    Therefore, v2.x of the Neutron API is assumed. It is also assumed that the
     following options are defined in the [network] section of etc/tempest.conf:
 
         tenant_network_cidr with a block of cidr's from which smaller blocks
@@ -44,8 +44,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         os = clients.Manager()
         cls.network_cfg = os.config.network
-        if not cls.network_cfg.quantum_available:
-            raise cls.skipException("Quantum support is required")
+        if not cls.network_cfg.neutron_available:
+            raise cls.skipException("Neutron support is required")
         cls.client = os.network_client
         cls.networks = []
         cls.subnets = []

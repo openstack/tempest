@@ -32,7 +32,7 @@ class AttributeDict(dict):
 class DeletableResource(AttributeDict):
 
     """
-    Support deletion of quantum resources (networks, subnets) via a
+    Support deletion of neutron resources (networks, subnets) via a
     delete() method, as is supported by keystone and nova resources.
     """
 

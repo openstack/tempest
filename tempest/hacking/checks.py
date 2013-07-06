@@ -17,7 +17,7 @@
 import re
 
 
-PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'quantum']
+PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron']
 
 SKIP_DECORATOR_RE = re.compile(r'\s*@testtools.skip\((.*)\)')
 SKIP_STR_RE = re.compile(r'.*Bug #\d+.*')

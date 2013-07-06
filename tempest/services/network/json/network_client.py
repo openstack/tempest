@@ -5,10 +5,10 @@ from tempest.common.rest_client import RestClient
 class NetworkClient(RestClient):
 
     """
-    Tempest REST client for Quantum. Uses v2 of the Quantum API, since the
+    Tempest REST client for Neutron. Uses v2 of the Neutron API, since the
     V1 API has been removed from the code base.
 
-    Implements the following operations for each one of the basic Quantum
+    Implements the following operations for each one of the basic Neutron
     abstractions (networks, sub-networks and ports):
 
     create
