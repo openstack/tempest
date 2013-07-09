@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import os
 import shlex
 import subprocess
@@ -23,6 +22,7 @@ import subprocess
 from oslo.config import cfg
 
 import tempest.cli.output_parser
+from tempest.common import log as logging
 import tempest.test
 
 

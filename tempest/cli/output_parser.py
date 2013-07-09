@@ -18,7 +18,8 @@
 """Collection of utilities for parsing CLI clients output."""
 
 
-import logging
+from tempest.common import log as logging
+
 import re
 
 

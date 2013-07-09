@@ -16,7 +16,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import logging
 import subprocess
 
 # Default client libs
@@ -30,6 +29,7 @@ import novaclient.client
 
 
 from tempest.api.network import common as net_common
+from tempest.common import log as logging
 from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions

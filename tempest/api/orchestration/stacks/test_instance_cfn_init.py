@@ -13,7 +13,7 @@
 #    under the License.
 
 import json
-import logging
+from tempest.common import log as logging
 import testtools
 
 from tempest.api.orchestration import base
