@@ -253,6 +253,24 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
 
+    @attr(type='gate')
+    def test_pause_unpause_server(self):
+        resp, server = self.client.pause_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'PAUSED')
+        resp, server = self.client.unpause_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+    @attr(type='gate')
+    def test_suspend_resume_server(self):
+        resp, server = self.client.suspend_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
+        resp, server = self.client.resume_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
     @classmethod
     def rebuild_servers(cls):
         # Destroy any existing server and creates a new one
