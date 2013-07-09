@@ -85,17 +85,21 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         self.addCleanup(self.compute_client.security_group_rules.delete,
                         sg_rule.id)
 
-    def _ssh_to_server(self, server):
+    def _ssh_to_server(self, server_or_ip):
+        if isinstance(server_or_ip, basestring):
+            ip = server_or_ip
+        else:
+            network_name_for_ssh = self.config.compute.network_for_ssh
+            ip = server_or_ip.networks[network_name_for_ssh][0]
         username = self.config.scenario.ssh_user
-        ip = server.networks[self.config.compute.network_for_ssh][0]
         linux_client = RemoteClient(ip,
                                     username,
                                     pkey=self.keypair.private_key)
 
         return linux_client.ssh_client
 
-    def _write_timestamp(self, server):
-        ssh_client = self._ssh_to_server(server)
+    def _write_timestamp(self, server_or_ip):
+        ssh_client = self._ssh_to_server(server_or_ip)
         ssh_client.exec_command('date > /tmp/timestamp; sync')
         self.timestamp = ssh_client.exec_command('cat /tmp/timestamp')
 
@@ -110,10 +114,18 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         self.assertEquals(snapshot_name, snapshot_image.name)
         return image_id
 
-    def _check_timestamp(self, server):
-        ssh_client = self._ssh_to_server(server)
+    def _check_timestamp(self, server_or_ip):
+        ssh_client = self._ssh_to_server(server_or_ip)
         got_timestamp = ssh_client.exec_command('cat /tmp/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
+
+    def _create_floating_ip(self):
+        floating_ip = self.compute_client.floating_ips.create()
+        self.addCleanup(floating_ip.delete)
+        return floating_ip
+
+    def _set_floating_ip_to_server(self, server, floating_ip):
+        server.add_floating_ip(floating_ip)
 
     def test_snapshot_pattern(self):
         # prepare for booting a instance
@@ -122,7 +134,12 @@ class TestSnapshotPattern(manager.OfficialClientTest):
 
         # boot a instance and create a timestamp file in it
         server = self._boot_image(self.config.compute.image_ref)
-        self._write_timestamp(server)
+        if self.config.compute.use_floatingip_for_ssh:
+            fip_for_server = self._create_floating_ip()
+            self._set_floating_ip_to_server(server, fip_for_server)
+            self._write_timestamp(fip_for_server.ip)
+        else:
+            self._write_timestamp(server)
 
         # snapshot the instance
         snapshot_image_id = self._create_image(server)
@@ -131,4 +148,10 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         server_from_snapshot = self._boot_image(snapshot_image_id)
 
         # check the existence of the timestamp file in the second instance
-        self._check_timestamp(server_from_snapshot)
+        if self.config.compute.use_floatingip_for_ssh:
+            fip_for_snapshot = self._create_floating_ip()
+            self._set_floating_ip_to_server(server_from_snapshot,
+                                            fip_for_snapshot)
+            self._check_timestamp(fip_for_snapshot.ip)
+        else:
+            self._check_timestamp(server_from_snapshot)

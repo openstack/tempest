@@ -97,6 +97,9 @@ ssh_timeout = 300
 # Number of seconds to wait for output from ssh channel
 ssh_channel_timeout = 60
 
+# Dose the SSH uses Floating IP?
+use_floatingip_for_ssh = True
+
 # The type of endpoint for a Compute API service. Unless you have a
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "compute"
