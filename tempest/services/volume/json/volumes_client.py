@@ -85,6 +85,17 @@ class VolumesClientJSON(RestClient):
         """Deletes the Specified Volume."""
         return self.delete("volumes/%s" % str(volume_id))
 
+    def upload_volume(self, volume_id, image_name):
+        """Uploads a volume in Glance."""
+        post_body = {
+            'image_name': image_name,
+        }
+        post_body = json.dumps({'os-volume_upload_image': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['os-volume_upload_image']
+
     def attach_volume(self, volume_id, instance_uuid, mountpoint):
         """Attaches a volume to a given instance on a given mountpoint."""
         post_body = {
