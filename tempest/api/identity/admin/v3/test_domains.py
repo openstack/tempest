@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
 from tempest.api.identity import base
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
@@ -48,6 +49,48 @@ class DomainsTestJSON(base.BaseIdentityAdminTest):
             fetched_ids.append(d['id'])
         missing_doms = [d for d in domain_ids if d not in fetched_ids]
         self.assertEqual(0, len(missing_doms))
+
+    @attr(type='smoke')
+    def test_create_update_delete_domain(self):
+        d_name = rand_name('domain-')
+        d_desc = rand_name('domain-desc-')
+        resp_1, domain = self.v3_client.create_domain(
+            d_name, description=d_desc)
+        self.assertEqual(resp_1['status'], '201')
+        self.addCleanup(self._delete_domain, domain['id'])
+        self.assertIn('id', domain)
+        self.assertIn('description', domain)
+        self.assertIn('name', domain)
+        self.assertIn('enabled', domain)
+        self.assertIn('links', domain)
+        self.assertIsNotNone(domain['id'])
+        self.assertEqual(d_name, domain['name'])
+        self.assertEqual(d_desc, domain['description'])
+        if self._interface == "json":
+            self.assertEqual(True, domain['enabled'])
+        else:
+            self.assertEqual('true', str(domain['enabled']).lower())
+        new_desc = rand_name('new-desc-')
+        new_name = rand_name('new-name-')
+
+        resp_2, updated_domain = self.v3_client.update_domain(
+            domain['id'], name=new_name, description=new_desc)
+        self.assertEqual(resp_2['status'], '200')
+        self.assertIn('id', updated_domain)
+        self.assertIn('description', updated_domain)
+        self.assertIn('name', updated_domain)
+        self.assertIn('enabled', updated_domain)
+        self.assertIn('links', updated_domain)
+        self.assertIsNotNone(updated_domain['id'])
+        self.assertEqual(new_name, updated_domain['name'])
+        self.assertEqual(new_desc, updated_domain['description'])
+        self.assertEqual('true', str(updated_domain['enabled']).lower())
+
+        resp_3, fetched_domain = self.v3_client.get_domain(domain['id'])
+        self.assertEqual(resp_3['status'], '200')
+        self.assertEqual(new_name, fetched_domain['name'])
+        self.assertEqual(new_desc, fetched_domain['description'])
+        self.assertEqual('true', str(fetched_domain['enabled']).lower())
 
 
 class DomainsTestXML(DomainsTestJSON):
