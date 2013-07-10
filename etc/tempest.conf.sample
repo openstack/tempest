@@ -336,6 +336,10 @@ aki_img_file = cirros-0.3.1-x86_64-vmlinuz
 # ssh username for the image file
 ssh_user = cirros
 
+# specifies how many resources to request at once. Used for large operations
+# testing."
+large_ops_number = 0
+
 [cli]
 # Enable cli tests
 enabled = True

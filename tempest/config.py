@@ -520,7 +520,12 @@ ScenarioGroup = [
                help='AKI image file name'),
     cfg.StrOpt('ssh_user',
                default='cirros',
-               help='ssh username for the image file')
+               help='ssh username for the image file'),
+    cfg.IntOpt(
+        'large_ops_number',
+        default=0,
+        help="specifies how many resources to request at once. Used "
+        "for large operations testing.")
 ]
 
 

@@ -137,7 +137,7 @@ class TestCase(BaseTestCase):
             thing = things.get(thing_id)
             new_status = thing.status
             if new_status == 'ERROR':
-                self.fail("%s failed to get to expected status."
+                self.fail("%s failed to get to expected status. "
                           "In ERROR state."
                           % thing)
             elif new_status == expected_status:
