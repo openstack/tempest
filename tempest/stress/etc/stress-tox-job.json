@@ -9,5 +9,11 @@
   "use_admin": false,
   "use_isolated_tenants": false,
   "kwargs": {}
+  },
+  {"action": "tempest.stress.actions.volume_attach_delete.VolumeAttachDeleteTest",
+  "threads": 2,
+  "use_admin": false,
+  "use_isolated_tenants": false,
+  "kwargs": {}
   }
 ]
