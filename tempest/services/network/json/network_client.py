@@ -23,8 +23,10 @@ class NetworkClient(RestClient):
     Tempest REST client for Neutron. Uses v2 of the Neutron API, since the
     V1 API has been removed from the code base.
 
-    Implements create, delete, list and show for the basic Neutron
-    abstractions (networks, sub-networks and ports):
+    Implements create, delete, update, list and show for the basic Neutron
+    abstractions (networks, sub-networks, routers and ports):
+
+    Implements add/remove interface to router using subnet ID / port ID
 
     It also implements list, show, update and reset for OpenStack Networking
     quotas
@@ -185,5 +187,91 @@ class NetworkClient(RestClient):
         body = json.dumps(put_body)
         uri = '%s/networks/%s' % (self.uri_prefix, network_id)
         resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def list_routers(self):
+        uri = '%s/routers' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_router(self, name, **kwargs):
+        post_body = {
+            'router': {
+                'name': name,
+            }
+        }
+        post_body['router']['admin_state_up'] = kwargs.get(
+            'admin_state_up', True)
+        post_body['router']['external_gateway_info'] = kwargs.get(
+            'external_gateway_info', None)
+        body = json.dumps(post_body)
+        uri = '%s/routers' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_router(self, router_id):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def show_router(self, router_id):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def update_router(self, router_id, **kwargs):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        update_body = {}
+        update_body['name'] = kwargs.get('name', body['router']['name'])
+        update_body['admin_state_up'] = kwargs.get(
+            'admin_state_up', body['router']['admin_state_up'])
+        # Must uncomment/modify these lines once LP question#233187 is solved
+        #update_body['external_gateway_info'] = kwargs.get(
+        #    'external_gateway_info', body['router']['external_gateway_info'])
+        update_body = dict(router=update_body)
+        update_body = json.dumps(update_body)
+        resp, body = self.put(uri, update_body, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def add_router_interface_with_subnet_id(self, router_id, subnet_id):
+        uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
+              router_id)
+        update_body = {"subnet_id": subnet_id}
+        update_body = json.dumps(update_body)
+        resp, body = self.put(uri, update_body, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def add_router_interface_with_port_id(self, router_id, port_id):
+        uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
+              router_id)
+        update_body = {"port_id": port_id}
+        update_body = json.dumps(update_body)
+        resp, body = self.put(uri, update_body, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def remove_router_interface_with_subnet_id(self, router_id, subnet_id):
+        uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
+              router_id)
+        update_body = {"subnet_id": subnet_id}
+        update_body = json.dumps(update_body)
+        resp, body = self.put(uri, update_body, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def remove_router_interface_with_port_id(self, router_id, port_id):
+        uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
+              router_id)
+        update_body = {"port_id": port_id}
+        update_body = json.dumps(update_body)
+        resp, body = self.put(uri, update_body, self.headers)
         body = json.loads(body)
         return resp, body
