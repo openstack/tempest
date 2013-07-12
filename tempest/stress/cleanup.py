@@ -19,10 +19,11 @@
 from tempest import clients
 
 
-def cleanup():
+def cleanup(logger):
     admin_manager = clients.AdminManager()
 
     _, body = admin_manager.servers_client.list_servers({"all_tenants": True})
+    logger.debug("Cleanup::remove %s servers" % len(body['servers']))
     for s in body['servers']:
         try:
             admin_manager.servers_client.delete_server(s['id'])
@@ -36,6 +37,7 @@ def cleanup():
             pass
 
     _, keypairs = admin_manager.keypairs_client.list_keypairs()
+    logger.debug("Cleanup::remove %s keypairs" % len(keypairs))
     for k in keypairs:
         try:
             admin_manager.keypairs_client.delete_keypair(k['name'])
@@ -43,6 +45,7 @@ def cleanup():
             pass
 
     _, floating_ips = admin_manager.floating_ips_client.list_floating_ips()
+    logger.debug("Cleanup::remove %s floating ips" % len(floating_ips))
     for f in floating_ips:
         try:
             admin_manager.floating_ips_client.delete_floating_ip(f['id'])
@@ -50,18 +53,43 @@ def cleanup():
             pass
 
     _, users = admin_manager.identity_client.get_users()
+    logger.debug("Cleanup::remove %s users" % len(users))
     for user in users:
         if user['name'].startswith("stress_user"):
             admin_manager.identity_client.delete_user(user['id'])
 
     _, tenants = admin_manager.identity_client.list_tenants()
+    logger.debug("Cleanup::remove %s tenants" % len(tenants))
     for tenant in tenants:
         if tenant['name'].startswith("stress_tenant"):
             admin_manager.identity_client.delete_tenant(tenant['id'])
 
+    # We have to delete snapshots first or
+    # volume deletion may block
+
+    _, snaps = admin_manager.snapshots_client.\
+        list_snapshots({"all_tenants": True})
+    logger.debug("Cleanup::remove %s snapshots" % len(snaps))
+    for v in snaps:
+        try:
+            admin_manager.snapshots_client.\
+                wait_for_snapshot_status(v['id'], 'available')
+            admin_manager.snapshots_client.delete_snapshot(v['id'])
+        except Exception:
+            pass
+
+    for v in snaps:
+        try:
+            admin_manager.snapshots_client.wait_for_resource_deletion(v['id'])
+        except Exception:
+            pass
+
     _, vols = admin_manager.volumes_client.list_volumes({"all_tenants": True})
+    logger.debug("Cleanup::remove %s volumes" % len(vols))
     for v in vols:
         try:
+            admin_manager.volumes_client.\
+                wait_for_volume_status(v['id'], 'available')
             admin_manager.volumes_client.delete_volume(v['id'])
         except Exception:
             pass
