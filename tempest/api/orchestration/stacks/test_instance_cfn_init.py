@@ -46,6 +46,13 @@ Parameters:
 Resources:
   CfnUser:
     Type: AWS::IAM::User
+  SmokeSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable only ping and SSH access
+      SecurityGroupIngress:
+      - {CidrIp: 0.0.0.0/0, FromPort: '-1', IpProtocol: icmp, ToPort: '-1'}
+      - {CidrIp: 0.0.0.0/0, FromPort: '22', IpProtocol: tcp, ToPort: '22'}
   SmokeKeys:
     Type: AWS::IAM::AccessKey
     Properties:
@@ -79,6 +86,8 @@ Resources:
       ImageId: {Ref: ImageId}
       InstanceType: {Ref: InstanceType}
       KeyName: {Ref: KeyName}
+      SecurityGroups:
+      - {Ref: SmokeSecurityGroup}
       UserData:
         Fn::Base64:
           Fn::Join:
