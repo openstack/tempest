@@ -285,7 +285,7 @@ NetworkGroup = [
                default="10.100.0.0/16",
                help="The cidr block to allocate tenant networks from"),
     cfg.IntOpt('tenant_network_mask_bits',
-               default=29,
+               default=28,
                help="The mask bits for tenant networks"),
     cfg.BoolOpt('tenant_networks_reachable',
                 default=False,
