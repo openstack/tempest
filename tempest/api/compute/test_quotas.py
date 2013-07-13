@@ -30,31 +30,33 @@ class QuotasTestJSON(base.BaseComputeTest):
         resp, tenants = cls.admin_client.list_tenants()
         cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
                          cls.client.tenant_name][0]
-        cls.default_quota_set = {'injected_file_content_bytes': 10240,
-                                 'metadata_items': 128, 'injected_files': 5,
-                                 'ram': 51200, 'floating_ips': 10,
-                                 'fixed_ips': -1, 'key_pairs': 100,
-                                 'injected_file_path_bytes': 255,
-                                 'instances': 10, 'security_group_rules': 20,
-                                 'cores': 20, 'security_groups': 10}
+        cls.default_quota_set = set(('injected_file_content_bytes',
+                                     'metadata_items', 'injected_files',
+                                     'ram', 'floating_ips',
+                                     'fixed_ips', 'key_pairs',
+                                     'injected_file_path_bytes',
+                                     'instances', 'security_group_rules',
+                                     'cores', 'security_groups'))
 
     @attr(type='smoke')
     def test_get_quotas(self):
         # User can get the quota set for it's tenant
-        expected_quota_set = self.default_quota_set.copy()
-        expected_quota_set['id'] = self.tenant_id
+        expected_quota_set = self.default_quota_set | set(['id'])
         resp, quota_set = self.client.get_quota_set(self.tenant_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(expected_quota_set, quota_set)
+        self.assertEqual(sorted(expected_quota_set),
+                         sorted(quota_set.keys()))
+        self.assertEqual(quota_set['id'], self.tenant_id)
 
     @attr(type='smoke')
     def test_get_default_quotas(self):
         # User can get the default quota set for it's tenant
-        expected_quota_set = self.default_quota_set.copy()
-        expected_quota_set['id'] = self.tenant_id
+        expected_quota_set = self.default_quota_set | set(['id'])
         resp, quota_set = self.client.get_default_quota_set(self.tenant_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(expected_quota_set, quota_set)
+        self.assertEqual(sorted(expected_quota_set),
+                         sorted(quota_set.keys()))
+        self.assertEqual(quota_set['id'], self.tenant_id)
 
 
 class QuotasTestXML(QuotasTestJSON):

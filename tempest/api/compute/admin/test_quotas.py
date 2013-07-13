@@ -44,13 +44,13 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
             cls.demo_tenant_id = [tnt['id'] for tnt in tenants if tnt['name']
                                   == cls.config.identity.tenant_name][0]
 
-        cls.default_quota_set = {'injected_file_content_bytes': 10240,
-                                 'metadata_items': 128, 'injected_files': 5,
-                                 'ram': 51200, 'floating_ips': 10,
-                                 'fixed_ips': -1, 'key_pairs': 100,
-                                 'injected_file_path_bytes': 255,
-                                 'instances': 10, 'security_group_rules': 20,
-                                 'cores': 20, 'security_groups': 10}
+        cls.default_quota_set = set(('injected_file_content_bytes',
+                                     'metadata_items', 'injected_files',
+                                     'ram', 'floating_ips',
+                                     'fixed_ips', 'key_pairs',
+                                     'injected_file_path_bytes',
+                                     'instances', 'security_group_rules',
+                                     'cores', 'security_groups'))
 
     @classmethod
     def tearDownClass(cls):
@@ -64,12 +64,13 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
     @attr(type='smoke')
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
-        expected_quota_set = self.default_quota_set.copy()
-        expected_quota_set['id'] = self.demo_tenant_id
+        expected_quota_set = self.default_quota_set | set(['id'])
         resp, quota_set = self.client.get_default_quota_set(
             self.demo_tenant_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(expected_quota_set, quota_set)
+        self.assertEqual(sorted(expected_quota_set),
+                         sorted(quota_set.keys()))
+        self.assertEqual(quota_set['id'], self.demo_tenant_id)
 
     @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
@@ -105,24 +106,23 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
     @attr(type='gate')
     def test_get_updated_quotas(self):
         # Verify that GET shows the updated quota set
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         ram='5120')
-        self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id, **self.default_quota_set)
-        try:
-            resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-            self.assertEqual(200, resp.status)
-            self.assertEqual(quota_set['ram'], 5120)
-        except Exception:
-            self.fail("Could not get the update quota limit for resource")
-        finally:
-            # Reset quota resource limits to default values
-            resp, quota_set = self.adm_client.update_quota_set(
-                self.demo_tenant_id,
-                **self.default_quota_set)
-            self.assertEqual(200, resp.status, "Failed to reset quota "
-                             "defaults")
+        tenant_name = rand_name('cpu_quota_tenant_')
+        tenant_desc = tenant_name + '-desc'
+        identity_client = self.os_adm.identity_client
+        _, tenant = identity_client.create_tenant(name=tenant_name,
+                                                  description=tenant_desc)
+        tenant_id = tenant['id']
+        self.addCleanup(identity_client.delete_tenant,
+                        tenant_id)
 
+        self.adm_client.update_quota_set(tenant_id,
+                                         ram='5120')
+        resp, quota_set = self.adm_client.get_quota_set(tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(quota_set['ram'], 5120)
+
+    #TODO(afazekas): Add dedicated tenant to the skiped quota tests
+    # it can be moved into the setUpClass as well
     @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
     def test_create_server_when_cpu_quota_is_full(self):
