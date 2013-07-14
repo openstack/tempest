@@ -113,6 +113,53 @@ class InstanceRunTest(BotoTestCase):
         self.cancelResourceCleanUp(rcuk)
 
     @attr(type='smoke')
+    def test_run_stop_terminate_instance_with_tags(self):
+        # EC2 run, stop and terminate instance with tags
+        image_ami = self.ec2_client.get_image(self.images["ami"]
+                                              ["image_id"])
+        reservation = image_ami.run(kernel_id=self.images["aki"]["image_id"],
+                                    ramdisk_id=self.images["ari"]["image_id"],
+                                    instance_type=self.instance_type)
+        rcuk = self.addResourceCleanUp(self.destroy_reservation, reservation)
+
+        for instance in reservation.instances:
+            LOG.info("state: %s", instance.state)
+            if instance.state != "running":
+                self.assertInstanceStateWait(instance, "running")
+            instance.add_tag('key1', value='value1')
+
+        tags = self.ec2_client.get_all_tags()
+        self.assertEquals(tags[0].name, 'key1')
+        self.assertEquals(tags[0].value, 'value1')
+
+        tags = self.ec2_client.get_all_tags(filters={'key': 'key1'})
+        self.assertEquals(tags[0].name, 'key1')
+        self.assertEquals(tags[0].value, 'value1')
+
+        tags = self.ec2_client.get_all_tags(filters={'value': 'value1'})
+        self.assertEquals(tags[0].name, 'key1')
+        self.assertEquals(tags[0].value, 'value1')
+
+        tags = self.ec2_client.get_all_tags(filters={'key': 'value2'})
+        self.assertEquals(len(tags), 0)
+
+        for instance in reservation.instances:
+            instance.remove_tag('key1', value='value1')
+
+        tags = self.ec2_client.get_all_tags()
+        self.assertEquals(len(tags), 0)
+
+        for instance in reservation.instances:
+            instance.stop()
+            LOG.info("state: %s", instance.state)
+            if instance.state != "stopped":
+                self.assertInstanceStateWait(instance, "stopped")
+
+        for instance in reservation.instances:
+            instance.terminate()
+        self.cancelResourceCleanUp(rcuk)
+
+    @attr(type='smoke')
     @testtools.skip("Skipped until the Bug #1098891 is resolved")
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
