@@ -40,7 +40,7 @@ the set of Tempest tests by using ``nosetests`` ::
     $> nosetests tempest
 
 To run one single test  ::
-    $> nosetests -sv tempest.tests.compute.servers.test_server_actions.py:
+    $> nosetests -sv tempest.api.compute.servers.test_server_actions.py:
        ServerActionsTestJSON.test_rebuild_nonexistent_server
 
 Configuration
