@@ -112,7 +112,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         meta = {'rebuild': 'server'}
         new_name = rand_name('server')
         file_contents = 'Test server rebuild.'
-        personality = [{'path': '/etc/rebuild.txt',
+        personality = [{'path': 'rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
         password = 'rebuildPassw0rd'
         resp, rebuilt_server = self.client.rebuild(self.server_id,
