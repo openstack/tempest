@@ -22,8 +22,8 @@ from lxml import etree
 from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
+from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
-
 
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
@@ -241,3 +241,65 @@ class IdentityV3ClientXML(RestClientXML):
         resp, body = self.get('domains/%s' % domain_id, self.headers)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
+
+    def get_token(self, resp_token):
+        """GET a Token Details."""
+        headers = {'Content-Type': 'application/xml',
+                   'Accept': 'application/xml',
+                   'X-Subject-Token': resp_token}
+        resp, body = self.get("auth/tokens", headers=headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
+    def delete_token(self, resp_token):
+        """Delete a Given Token."""
+        headers = {'X-Subject-Token': resp_token}
+        resp, body = self.delete("auth/tokens", headers=headers)
+        return resp, body
+
+
+class V3TokenClientXML(RestClientXML):
+
+    def __init__(self, config, username, password, auth_url, tenant_name=None):
+        super(V3TokenClientXML, self).__init__(config, username, password,
+                                               auth_url, tenant_name)
+        self.service = self.config.identity.catalog_type
+        self.endpoint_url = 'adminURL'
+
+        auth_url = config.identity.uri
+
+        if 'tokens' not in auth_url:
+            auth_url = auth_url.rstrip('/') + '/tokens'
+
+        self.auth_url = auth_url
+        self.config = config
+
+    def auth(self, user_id, password):
+        user = Element('user',
+                       id=user_id,
+                       password=password)
+        password = Element('password')
+        password.append(user)
+
+        method = Element('method')
+        method.append(Text('password'))
+        methods = Element('methods')
+        methods.append(method)
+        identity = Element('identity')
+        identity.append(methods)
+        identity.append(password)
+        auth = Element('auth')
+        auth.append(identity)
+        headers = {'Content-Type': 'application/xml'}
+        resp, body = self.post("auth/tokens", headers=headers,
+                               body=str(Document(auth)))
+        return resp, body
+
+    def request(self, method, url, headers=None, body=None, wait=None):
+        """Overriding the existing HTTP request in super class rest_client."""
+        self._set_auth()
+        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
+                                              "/v3")
+        return super(V3TokenClientXML, self).request(method, url,
+                                                     headers=headers,
+                                                     body=body)

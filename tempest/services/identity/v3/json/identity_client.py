@@ -208,3 +208,61 @@ class IdentityV3ClientJSON(RestClient):
         resp, body = self.get('domains/%s' % domain_id)
         body = json.loads(body)
         return resp, body['domain']
+
+    def get_token(self, resp_token):
+        """Get token details."""
+        headers = {'X-Subject-Token': resp_token}
+        resp, body = self.get("auth/tokens", headers=headers)
+        body = json.loads(body)
+        return resp, body['token']
+
+    def delete_token(self, resp_token):
+        """Deletes token."""
+        headers = {'X-Subject-Token': resp_token}
+        resp, body = self.delete("auth/tokens", headers=headers)
+        return resp, body
+
+
+class V3TokenClientJSON(RestClient):
+
+    def __init__(self, config, username, password, auth_url, tenant_name=None):
+        super(V3TokenClientJSON, self).__init__(config, username, password,
+                                                auth_url, tenant_name)
+        self.service = self.config.identity.catalog_type
+        self.endpoint_url = 'adminURL'
+
+        auth_url = config.identity.uri
+
+        if 'tokens' not in auth_url:
+            auth_url = auth_url.rstrip('/') + '/tokens'
+
+        self.auth_url = auth_url
+        self.config = config
+
+    def auth(self, user_id, password):
+        creds = {
+            'auth': {
+                'identity': {
+                    'methods': ['password'],
+                    'password': {
+                        'user': {
+                            'id': user_id,
+                            'password': password
+                        }
+                    }
+                }
+            }
+        }
+        headers = {'Content-Type': 'application/json'}
+        body = json.dumps(creds)
+        resp, body = self.post("auth/tokens", headers=headers, body=body)
+        return resp, body
+
+    def request(self, method, url, headers=None, body=None, wait=None):
+        """Overriding the existing HTTP request in super class rest_client."""
+        self._set_auth()
+        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
+                                              "/v3")
+        return super(V3TokenClientJSON, self).request(method, url,
+                                                      headers=headers,
+                                                      body=body)
