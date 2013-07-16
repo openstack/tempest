@@ -24,11 +24,17 @@ from tempest.stress import driver
 
 def main(ns):
     tests = json.load(open(ns.tests, 'r'))
-    driver.stress_openstack(tests, ns.duration)
+    if ns.serial:
+        for test in tests:
+            driver.stress_openstack([test], ns.duration)
+    else:
+        driver.stress_openstack(tests, ns.duration)
 
 
 parser = argparse.ArgumentParser(description='Run stress tests. ')
 parser.add_argument('-d', '--duration', default=300, type=int,
-                    help="Duration of test.")
+                    help="Duration of test in secs.")
+parser.add_argument('-s', '--serial', action='store_true',
+                    help="Trigger running tests serially.")
 parser.add_argument('tests', help="Name of the file with test description.")
 main(parser.parse_args())
