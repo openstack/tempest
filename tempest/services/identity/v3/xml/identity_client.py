@@ -52,6 +52,14 @@ class IdentityV3ClientXML(RestClientXML):
                 array.append(xml_to_json(child))
         return array
 
+    def _parse_roles(self, node):
+        array = []
+        for child in node.getchildren():
+            tag_list = child.tag.split('}', 1)
+            if tag_list[1] == "role":
+                array.append(xml_to_json(child))
+        return array
+
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
@@ -95,11 +103,12 @@ class IdentityV3ClientXML(RestClientXML):
 
     def update_user(self, user_id, name, **kwargs):
         """Updates a user."""
-        email = kwargs.get('email', None)
-        en = kwargs.get('enabled', True)
-        project_id = kwargs.get('project_id', None)
-        domain_id = kwargs.get('domain_id', 'default')
-        description = kwargs.get('description', None)
+        resp, body = self.get_user(user_id)
+        email = kwargs.get('email', body['email'])
+        en = kwargs.get('enabled', body['enabled'])
+        project_id = kwargs.get('project_id', body['project_id'])
+        description = kwargs.get('description', body['description'])
+        domain_id = kwargs.get('domain_id', body['domain_id'])
         update_user = Element("user",
                               xmlns=XMLNS,
                               name=name,
@@ -182,6 +191,17 @@ class IdentityV3ClientXML(RestClientXML):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def update_role(self, name, role_id):
+        """Updates a Role."""
+        post_body = Element("role",
+                            xmlns=XMLNS,
+                            name=name)
+        resp, body = self.patch('roles/%s' % str(role_id),
+                                str(Document(post_body)),
+                                self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
     def delete_role(self, role_id):
         """Delete a role."""
         resp, body = self.delete('roles/%s' % str(role_id),
@@ -255,6 +275,107 @@ class IdentityV3ClientXML(RestClientXML):
         """Delete a Given Token."""
         headers = {'X-Subject-Token': resp_token}
         resp, body = self.delete("auth/tokens", headers=headers)
+        return resp, body
+
+    def create_group(self, name, **kwargs):
+        """Creates a group."""
+        description = kwargs.get('description', None)
+        domain_id = kwargs.get('domain_id', 'default')
+        project_id = kwargs.get('project_id', None)
+        post_body = Element("group",
+                            xmlns=XMLNS,
+                            name=name,
+                            description=description,
+                            domain_id=domain_id,
+                            project_id=project_id)
+        resp, body = self.post('groups', str(Document(post_body)),
+                               self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
+    def delete_group(self, group_id):
+        """Delete a group."""
+        resp, body = self.delete('groups/%s' % group_id, self.headers)
+        return resp, body
+
+    def assign_user_role_on_project(self, project_id, user_id, role_id):
+        """Add roles to a user on a project."""
+        resp, body = self.put('projects/%s/users/%s/roles/%s' %
+                              (project_id, user_id, role_id), '',
+                              self.headers)
+        return resp, body
+
+    def assign_user_role_on_domain(self, domain_id, user_id, role_id):
+        """Add roles to a user on a domain."""
+        resp, body = self.put('domains/%s/users/%s/roles/%s' %
+                              (domain_id, user_id, role_id), '',
+                              self.headers)
+        return resp, body
+
+    def list_user_roles_on_project(self, project_id, user_id):
+        """list roles of a user on a project."""
+        resp, body = self.get('projects/%s/users/%s/roles' %
+                              (project_id, user_id), self.headers)
+        body = self._parse_roles(etree.fromstring(body))
+        return resp, body
+
+    def list_user_roles_on_domain(self, domain_id, user_id):
+        """list roles of a user on a domain."""
+        resp, body = self.get('domains/%s/users/%s/roles' %
+                              (domain_id, user_id), self.headers)
+        body = self._parse_roles(etree.fromstring(body))
+        return resp, body
+
+    def revoke_role_from_user_on_project(self, project_id, user_id, role_id):
+        """Delete role of a user on a project."""
+        resp, body = self.delete('projects/%s/users/%s/roles/%s' %
+                                 (project_id, user_id, role_id), self.headers)
+        return resp, body
+
+    def revoke_role_from_user_on_domain(self, domain_id, user_id, role_id):
+        """Delete role of a user on a domain."""
+        resp, body = self.delete('domains/%s/users/%s/roles/%s' %
+                                 (domain_id, user_id, role_id), self.headers)
+        return resp, body
+
+    def assign_group_role_on_project(self, project_id, group_id, role_id):
+        """Add roles to a user on a project."""
+        resp, body = self.put('projects/%s/groups/%s/roles/%s' %
+                              (project_id, group_id, role_id), '',
+                              self.headers)
+        return resp, body
+
+    def assign_group_role_on_domain(self, domain_id, group_id, role_id):
+        """Add roles to a user on a domain."""
+        resp, body = self.put('domains/%s/groups/%s/roles/%s' %
+                              (domain_id, group_id, role_id), '',
+                              self.headers)
+        return resp, body
+
+    def list_group_roles_on_project(self, project_id, group_id):
+        """list roles of a user on a project."""
+        resp, body = self.get('projects/%s/groups/%s/roles' %
+                              (project_id, group_id), self.headers)
+        body = self._parse_roles(etree.fromstring(body))
+        return resp, body
+
+    def list_group_roles_on_domain(self, domain_id, group_id):
+        """list roles of a user on a domain."""
+        resp, body = self.get('domains/%s/groups/%s/roles' %
+                              (domain_id, group_id), self.headers)
+        body = self._parse_roles(etree.fromstring(body))
+        return resp, body
+
+    def revoke_role_from_group_on_project(self, project_id, group_id, role_id):
+        """Delete role of a user on a project."""
+        resp, body = self.delete('projects/%s/groups/%s/roles/%s' %
+                                 (project_id, group_id, role_id), self.headers)
+        return resp, body
+
+    def revoke_role_from_group_on_domain(self, domain_id, group_id, role_id):
+        """Delete role of a user on a domain."""
+        resp, body = self.delete('domains/%s/groups/%s/roles/%s' %
+                                 (domain_id, group_id, role_id), self.headers)
         return resp, body
 
 
