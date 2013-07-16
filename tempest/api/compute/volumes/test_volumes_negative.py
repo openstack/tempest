@@ -28,6 +28,9 @@ class VolumesNegativeTest(base.BaseComputeTest):
     def setUpClass(cls):
         super(VolumesNegativeTest, cls).setUpClass()
         cls.client = cls.volumes_extensions_client
+        if not cls.config.service_available.cinder:
+            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     @attr(type='gate')
     def test_volume_get_nonexistant_volume_id(self):
