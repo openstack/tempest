@@ -34,6 +34,7 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
         cls.service_client = os.service_client
         cls.policy_client = os.policy_client
         cls.v3_token = os.token_v3_client
+        cls.creds_client = os.credentials_client
 
         if not cls.client.has_admin_extensions():
             raise cls.skipException("Admin extensions disabled")
