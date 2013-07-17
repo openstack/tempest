@@ -1,7 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2012 OpenStack, LLC
-# All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -87,6 +86,31 @@ class ImagesTestJSON(base.BaseComputeTest):
         resp['status'] = None
         self.assertRaises(exceptions.NotFound, self.__create_image__,
                           '!@#$%^&*()', name, meta)
+
+    @attr(type=['negative', 'gate'])
+    def test_create_image_from_stopped_server(self):
+        resp, server = self.create_server(wait_until='ACTIVE')
+        self.servers_client.stop(server['id'])
+        self.servers_client.wait_for_server_status(server['id'],
+                                                   'SHUTOFF')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+        snapshot_name = rand_name('test-snap-')
+        resp, image = self.create_image_from_server(server['id'],
+                                                    name=snapshot_name,
+                                                    wait_until='ACTIVE')
+        self.addCleanup(self.client.delete_image, image['id'])
+        self.assertEqual(snapshot_name, image['name'])
+
+    @attr(type='gate')
+    def test_delete_saving_image(self):
+        snapshot_name = rand_name('test-snap-')
+        resp, server = self.create_server(wait_until='ACTIVE')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+        resp, image = self.create_image_from_server(server['id'],
+                                                    name=snapshot_name,
+                                                    wait_until='SAVING')
+        resp, body = self.client.delete_image(image['id'])
+        self.assertEqual('204', resp['status'])
 
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_uuid_35_characters_or_less(self):

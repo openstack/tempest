@@ -437,6 +437,12 @@ class ServersClientXML(RestClientXML):
     def revert_resize(self, server_id, **kwargs):
         return self.action(server_id, 'revertResize', None, **kwargs)
 
+    def stop(self, server_id, **kwargs):
+        return self.action(server_id, 'os-stop', None, **kwargs)
+
+    def start(self, server_id, **kwargs):
+        return self.action(server_id, 'os-start', None, **kwargs)
+
     def create_image(self, server_id, name):
         return self.action(server_id, 'createImage', None, name=name)
 
