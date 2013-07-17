@@ -11,6 +11,7 @@ function usage {
   echo "  -u, --update             Update the virtual environment with any newer package versions"
   echo "  -s, --smoke              Only run smoke tests"
   echo "  -w, --whitebox           Only run whitebox tests"
+  echo "  -t, --with-testr         Run using testr instead of nose"
   echo "  -c, --nova-coverage      Enable Nova coverage collection"
   echo "  -C, --config             Config file location"
   echo "  -p, --pep8               Just run pep8"
@@ -26,6 +27,7 @@ noseargs=""
 just_pep8=0
 venv=.venv
 with_venv=tools/with_venv.sh
+with_testr=0
 always_venv=0
 never_venv=0
 no_site_packages=0
@@ -37,7 +39,7 @@ update=0
 logging=0
 logging_config=etc/logging.conf
 
-if ! options=$(getopt -o VNnfuswcphdSC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,nova-coverage,pep8,help,debug,stdout,config:,logging,logging-config: -- "$@")
+if ! options=$(getopt -o VNnfuswtcphdSC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,with-testr,nova-coverage,pep8,help,debug,stdout,config:,logging,logging-config: -- "$@")
 then
     # parse error
     usage
@@ -60,6 +62,7 @@ while [ $# -gt 0 ]; do
     -p|--pep8) let just_pep8=1;;
     -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
     -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
+    -t|--with-testr) with_testr=1;;
     -S|--stdout) noseargs="$noseargs -s";;
     -l|--logging) logging=1;;
     -L|--logging-config) logging_config=$2; shift;;
@@ -105,8 +108,20 @@ else
   noseargs="$noseargs tempest"
 fi
 
+function testr_init {
+  if [ ! -d .testrepository ]; then
+      ${wrapper} testr init
+  fi
+}
+
 function run_tests {
-  ${wrapper} $NOSETESTS
+  if [ $with_testr -eq 1 ]; then
+      testr_init
+      ${wrapper} find . -type f -name "*.pyc" -delete
+      ${wrapper} testr run --parallel $noseargs
+  else
+      ${wrapper} $NOSETESTS
+  fi
 }
 
 function run_pep8 {
