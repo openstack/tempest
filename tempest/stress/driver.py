@@ -93,9 +93,9 @@ def _error_in_logs(logfiles, nodes):
     return None
 
 
-def get_action_function(path):
-    (module_part, _, function) = path.rpartition('.')
-    return getattr(importlib.import_module(module_part), function)
+def get_action_object(path):
+    (module_part, _, obj_name) = path.rpartition('.')
+    return getattr(importlib.import_module(module_part), obj_name)
 
 
 def stress_openstack(tests, duration):
@@ -130,10 +130,18 @@ def stress_openstack(tests, duration):
                 manager = clients.Manager(username=username,
                                           password="pass",
                                           tenant_name=tenant_name)
-            target = get_action_function(test['action'])
-            p = multiprocessing.Process(target=target,
-                                        args=(manager, logger),
-                                        kwargs=test.get('kwargs', {}))
+
+            test_obj = get_action_object(test['action'])
+            test_run = test_obj(manager, logger)
+
+            kwargs = test.get('kwargs', {})
+            test_run.setUp(**dict(kwargs.iteritems()))
+
+            logger.debug("calling Target Object %s" %
+                         test_run.__class__.__name__)
+            p = multiprocessing.Process(target=test_run.execute,
+                                        args=())
+
             processes.append(p)
             p.start()
     end_time = time.time() + duration
@@ -149,8 +157,11 @@ def stress_openstack(tests, duration):
         if errors:
             had_errors = True
             break
+
     for p in processes:
         p.terminate()
+        p.join()
+
     if not had_errors:
         logger.info("cleaning up")
-        cleanup.cleanup()
+        cleanup.cleanup(logger)

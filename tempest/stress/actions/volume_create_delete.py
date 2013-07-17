@@ -11,20 +11,23 @@
 #    limitations under the License.
 
 from tempest.common.utils.data_utils import rand_name
+import tempest.stress.stressaction as stressaction
 
 
-def create_delete(manager, logger):
-    while True:
+class CreateDeleteTest(stressaction.StressAction):
+
+    def run(self):
         name = rand_name("volume")
-        logger.info("creating %s" % name)
-        resp, volume = manager.volumes_client.create_volume(size=1,
-                                                            display_name=name)
+        self.logger.info("creating %s" % name)
+        resp, volume = self.manager.volumes_client.\
+            create_volume(size=1, display_name=name)
         assert(resp.status == 200)
-        manager.volumes_client.wait_for_volume_status(volume['id'],
-                                                      'available')
-        logger.info("created %s" % volume['id'])
-        logger.info("deleting %s" % name)
-        resp, _ = manager.volumes_client.delete_volume(volume['id'])
+        vol_id = volume['id']
+        status = 'available'
+        self.manager.volumes_client.wait_for_volume_status(vol_id, status)
+        self.logger.info("created %s" % volume['id'])
+        self.logger.info("deleting %s" % name)
+        resp, _ = self.manager.volumes_client.delete_volume(vol_id)
         assert(resp.status == 202)
-        manager.volumes_client.wait_for_resource_deletion(volume['id'])
-        logger.info("deleted %s" % volume['id'])
+        self.manager.volumes_client.wait_for_resource_deletion(vol_id)
+        self.logger.info("deleted %s" % vol_id)

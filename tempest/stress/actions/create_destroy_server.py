@@ -13,22 +13,27 @@
 #    limitations under the License.
 
 from tempest.common.utils.data_utils import rand_name
+import tempest.stress.stressaction as stressaction
 
 
-def create_destroy(manager, logger):
-    image = manager.config.compute.image_ref
-    flavor = manager.config.compute.flavor_ref
-    while True:
+class CreateDestroyServerTest(stressaction.StressAction):
+
+    def setUp(self, **kwargs):
+        self.image = self.manager.config.compute.image_ref
+        self.flavor = self.manager.config.compute.flavor_ref
+
+    def run(self):
         name = rand_name("instance")
-        logger.info("creating %s" % name)
-        resp, server = manager.servers_client.create_server(
-            name, image, flavor)
+        self.logger.info("creating %s" % name)
+        resp, server = self.manager.servers_client.create_server(
+            name, self.image, self.flavor)
         server_id = server['id']
         assert(resp.status == 202)
-        manager.servers_client.wait_for_server_status(server_id, 'ACTIVE')
-        logger.info("created %s" % server_id)
-        logger.info("deleting %s" % name)
-        resp, _ = manager.servers_client.delete_server(server_id)
+        self.manager.servers_client.wait_for_server_status(server_id,
+                                                           'ACTIVE')
+        self.logger.info("created %s" % server_id)
+        self.logger.info("deleting %s" % name)
+        resp, _ = self.manager.servers_client.delete_server(server_id)
         assert(resp.status == 204)
-        manager.servers_client.wait_for_server_termination(server_id)
-        logger.info("deleted %s" % server_id)
+        self.manager.servers_client.wait_for_server_termination(server_id)
+        self.logger.info("deleted %s" % server_id)
