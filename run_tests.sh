@@ -118,7 +118,7 @@ function run_tests {
   if [ $with_testr -eq 1 ]; then
       testr_init
       ${wrapper} find . -type f -name "*.pyc" -delete
-      ${wrapper} testr run --parallel $noseargs
+      ${wrapper} testr run --parallel --subunit $noseargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
   else
       ${wrapper} $NOSETESTS
   fi
