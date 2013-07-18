@@ -25,7 +25,6 @@ class ServersWhiteboxTest(manager.ComputeWhiteboxTest):
 
     @classmethod
     def setUpClass(cls):
-        raise cls.skipException("Until Bug 1034129 is fixed")
         super(ServersWhiteboxTest, cls).setUpClass()
         #NOTE(afazekas): Strange relationship
         BaseIdentityAdminTest.setUpClass()
