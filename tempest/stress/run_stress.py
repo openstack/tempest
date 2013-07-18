@@ -19,10 +19,10 @@
 import argparse
 import json
 
-from tempest.stress import driver
-
 
 def main(ns):
+    #NOTE(kodererm): moved import to make "-h" possible without OpenStack
+    from tempest.stress import driver
     tests = json.load(open(ns.tests, 'r'))
     if ns.serial:
         for test in tests:
