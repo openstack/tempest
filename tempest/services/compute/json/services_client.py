@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2013 NEC Corporation
+# Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -16,6 +17,7 @@
 #    under the License.
 
 import json
+import urllib
 
 from tempest.common.rest_client import RestClient
 
@@ -27,7 +29,33 @@ class ServicesClientJSON(RestClient):
                                                  auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
 
-    def list_services(self):
-        resp, body = self.get("os-services")
+    def list_services(self, params=None):
+        url = 'os-services'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['services']
+
+    def enable_service(self, host_name, binary):
+        """
+        Enable service on a host
+        host_name: Name of host
+        binary: Service binary
+        """
+        post_body = json.dumps({'binary': binary, 'host': host_name})
+        resp, body = self.put('os-services/enable', post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['service']
+
+    def disable_service(self, host_name, binary):
+        """
+        Disable service on a host
+        host_name: Name of host
+        binary: Service binary
+        """
+        post_body = json.dumps({'binary': binary, 'host': host_name})
+        resp, body = self.put('os-services/disable', post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['service']
