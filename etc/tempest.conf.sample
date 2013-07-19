@@ -306,9 +306,6 @@ build_interval = 1
 # tests spawn full VMs, which could be slow if the test is already in a VM.
 build_timeout = 300
 
-# Whether or not Heat is expected to be available
-heat_available = false
-
 # Instance type for tests. Needs to be big enough for a
 # full OS plus the test workload
 instance_type = m1.micro
@@ -358,3 +355,5 @@ glance = True
 swift = True
 # Whether or not nova is expected to be available
 nova = True
+# Whether or not Heat is expected to be available
+heat = false

@@ -31,7 +31,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
         os = clients.OrchestrationManager()
         cls.orchestration_cfg = os.config.orchestration
-        if not cls.orchestration_cfg.heat_available:
+        if not os.config.service_available.heat:
             raise cls.skipException("Heat support is required")
         cls.build_timeout = cls.orchestration_cfg.build_timeout
         cls.build_interval = cls.orchestration_cfg.build_interval

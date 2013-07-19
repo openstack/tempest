@@ -391,9 +391,6 @@ OrchestrationGroup = [
     cfg.IntOpt('build_timeout',
                default=300,
                help="Timeout in seconds to wait for a stack to build."),
-    cfg.BoolOpt('heat_available',
-                default=False,
-                help="Whether or not Heat is expected to be available"),
     cfg.StrOpt('instance_type',
                default='m1.micro',
                help="Instance type for tests. Needs to be big enough for a "
@@ -554,6 +551,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('nova',
                 default=True,
                 help="Whether or not nova is expected to be available"),
+    cfg.BoolOpt('heat',
+                default=False,
+                help="Whether or not Heat is expected to be available"),
 ]
 
 
