@@ -545,6 +545,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('neutron',
                 default=False,
                 help="Whether or not neutron is expected to be available"),
+    cfg.BoolOpt('glance',
+                default=True,
+                help="Whether or not glance is expected to be available"),
 ]
 
 

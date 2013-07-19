@@ -352,3 +352,5 @@ cli_dir = /usr/local/bin
 cinder = True
 # Whether or not neutron is expected to be available
 neutron = false
+# Whether or not glance is expected to be available
+glance = True

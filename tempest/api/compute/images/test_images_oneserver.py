@@ -40,6 +40,9 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
     def setUpClass(cls):
         super(ImagesOneServerTestJSON, cls).setUpClass()
         cls.client = cls.images_client
+        if not cls.config.service_available.glance:
+            skip_msg = ("%s skipped as glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
         try:
             resp, cls.server = cls.create_server(wait_until='ACTIVE')

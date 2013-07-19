@@ -30,6 +30,9 @@ class BaseImageTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         cls.os = clients.Manager()
         cls.created_images = []
+        if not cls.config.service_available.glance:
+            skip_msg = ("%s skipped as glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     @classmethod
     def tearDownClass(cls):

@@ -31,6 +31,9 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         super(ListImageFiltersTestJSON, cls).setUpClass()
+        if not cls.config.service_available.glance:
+            skip_msg = ("%s skipped as glance is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
         cls.client = cls.images_client
         cls.image_ids = []
 
