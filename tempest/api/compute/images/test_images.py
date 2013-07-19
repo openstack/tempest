@@ -89,26 +89,6 @@ class ImagesTestJSON(base.BaseComputeTest):
                           '!@#$%^&*()', name, meta)
 
     @attr(type=['negative', 'gate'])
-    def test_create_image_when_server_is_terminating(self):
-        # Return an error when creating image of server that is terminating
-        resp, server = self.create_server(wait_until='ACTIVE')
-        self.servers_client.delete_server(server['id'])
-
-        snapshot_name = rand_name('test-snap-')
-        self.assertRaises(exceptions.Duplicate, self.client.create_image,
-                          server['id'], snapshot_name)
-
-    @attr(type=['negative', 'gate'])
-    def test_create_image_when_server_is_rebooting(self):
-        # Return error when creating an image of server that is rebooting
-        resp, server = self.create_server(wait_until='ACTIVE')
-        self.servers_client.reboot(server['id'], 'HARD')
-
-        snapshot_name = rand_name('test-snap-')
-        self.assertRaises(exceptions.Duplicate, self.client.create_image,
-                          server['id'], snapshot_name)
-
-    @attr(type=['negative', 'gate'])
     def test_create_image_specify_uuid_35_characters_or_less(self):
         # Return an error if Image ID passed is 35 characters or less
         snapshot_name = rand_name('test-snap-')
