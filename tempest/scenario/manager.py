@@ -223,7 +223,7 @@ class NetworkScenarioTest(OfficialClientTest):
 
     @classmethod
     def check_preconditions(cls):
-        if (cls.config.network.neutron_available):
+        if (cls.config.service_available.neutron):
             cls.enabled = True
             #verify that neutron_available is telling the truth
             try:

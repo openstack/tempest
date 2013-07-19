@@ -158,7 +158,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           self.client.create_security_group, s_name,
                           s_description)
 
-    @testtools.skipIf(config.TempestConfig().network.neutron_available,
+    @testtools.skipIf(config.TempestConfig().service_available.neutron,
                       "Neutron allows duplicate names for security groups")
     @attr(type=['negative', 'gate'])
     def test_security_group_create_with_duplicate_name(self):

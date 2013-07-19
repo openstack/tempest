@@ -37,7 +37,7 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
         resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @testtools.skipIf(CONF.network.neutron_available, "This feature is not " +
+    @testtools.skipIf(CONF.service_available.neutron, "This feature is not " +
                       "implemented by Neutron. See bug: #1183436")
     @attr(type='gate')
     def test_list_virtual_interfaces(self):

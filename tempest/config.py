@@ -302,9 +302,6 @@ NetworkGroup = [
                default="",
                help="Id of the public router that provides external "
                     "connectivity"),
-    cfg.BoolOpt('neutron_available',
-                default=False,
-                help="Whether or not neutron is expected to be available"),
 ]
 
 
@@ -545,6 +542,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('cinder',
                 default=True,
                 help="Whether or not cinder is expected to be available"),
+    cfg.BoolOpt('neutron',
+                default=False,
+                help="Whether or not neutron is expected to be available"),
 ]
 
 

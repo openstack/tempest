@@ -22,7 +22,6 @@ import testtools
 
 import tempest.cli
 from tempest.common import log as logging
-from tempest import config
 
 CONF = cfg.CONF
 
@@ -69,7 +68,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_credentials(self):
         self.nova('credentials')
 
-    @testtools.skipIf(config.TempestConfig().network.neutron_available,
+    @testtools.skipIf(CONF.service_available.neutron,
                       "Neutron does not provide this feature")
     def test_admin_dns_domains(self):
         self.nova('dns-domains')

@@ -24,7 +24,7 @@ class AttachInterfacesTestJSON(base.BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        if not cls.config.network.neutron_available:
+        if not cls.config.service_available.neutron:
             raise cls.skipException("Neutron is required")
         super(AttachInterfacesTestJSON, cls).setUpClass()
         cls.client = cls.os.interfaces_client

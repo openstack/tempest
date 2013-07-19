@@ -209,8 +209,6 @@ public_network_id = {$PUBLIC_NETWORK_ID}
 # for each tenant to have their own router.
 public_router_id = {$PUBLIC_ROUTER_ID}
 
-# Whether or not neutron is expected to be available
-neutron_available = false
 
 [volume]
 # This section contains the configuration options used when executing tests
@@ -352,3 +350,5 @@ cli_dir = /usr/local/bin
 [service_available]
 # Whether or not cinder is expected to be available
 cinder = True
+# Whether or not neutron is expected to be available
+neutron = false
