@@ -59,8 +59,9 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
         if num_servers > 0:
             username = cls.os.username
             tenant_name = cls.os.tenant_name
-            msg = ("User/tenant %(username)s/%(tenant_name)s already have "
-                   "existing server instances. Skipping test.") % locals()
+            msg = ("User/tenant %(u)s/%(t)s already have "
+                   "existing server instances. Skipping test." %
+                   {'u': username, 't': tenant_name})
             raise cls.skipException(msg)
 
         resp, body = cls.alt_client.list_servers()
@@ -69,8 +70,9 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
         if num_servers > 0:
             username = cls.alt_manager.username
             tenant_name = cls.alt_manager.tenant_name
-            msg = ("Alt User/tenant %(username)s/%(tenant_name)s already have "
-                   "existing server instances. Skipping test.") % locals()
+            msg = ("Alt User/tenant %(u)s/%(t)s already have "
+                   "existing server instances. Skipping test." %
+                   {'u': username, 't': tenant_name})
             raise cls.skipException(msg)
 
         # The following servers are created for use

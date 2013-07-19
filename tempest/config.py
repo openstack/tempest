@@ -569,7 +569,7 @@ class TempestConfig:
         LOG.info("Using tempest config file %s" % path)
 
         if not os.path.exists(path):
-            msg = "Config file %(path)s not found" % locals()
+            msg = "Config file %s not found" % path
             print(RuntimeError(msg), file=sys.stderr)
         else:
             config_files.append(path)

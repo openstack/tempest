@@ -65,6 +65,15 @@ class Manager(object):
         self.config = tempest.config.TempestConfig()
         self.client_attr_names = []
 
+    # we do this everywhere, have it be part of the super class
+    def _validate_credentials(self, username, password, tenant_name):
+        if None in (username, password, tenant_name):
+            msg = ("Missing required credentials. "
+                   "username: %(u)s, password: %(p)s, "
+                   "tenant_name: %(t)s" %
+                   {'u': username, 'p': password, 't': tenant_name})
+            raise exceptions.InvalidConfiguration(msg)
+
 
 class FuzzClientManager(Manager):
 
@@ -103,11 +112,7 @@ class ComputeFuzzClientManager(FuzzClientManager):
         password = password or self.config.identity.password
         tenant_name = tenant_name or self.config.identity.tenant_name
 
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
+        self._validate_credentials(username, password, tenant_name)
 
         auth_url = self.config.identity.uri
 

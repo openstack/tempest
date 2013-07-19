@@ -32,7 +32,6 @@ from tempest.api.network import common as net_common
 from tempest.common import log as logging
 from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 import tempest.manager
 import tempest.test
 
@@ -76,11 +75,7 @@ class OfficialClientManager(tempest.manager.Manager):
         if not tenant_name:
             tenant_name = self.config.identity.tenant_name
 
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials for compute client. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
+        self._validate_credentials(username, password, tenant_name)
 
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
@@ -131,11 +126,7 @@ class OfficialClientManager(tempest.manager.Manager):
         if not tenant_name:
             tenant_name = self.config.identity.admin_tenant_name
 
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials for identity client. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
+        self._validate_credentials(username, password, tenant_name)
 
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
@@ -157,11 +148,7 @@ class OfficialClientManager(tempest.manager.Manager):
         password = self.config.identity.admin_password
         tenant_name = self.config.identity.admin_tenant_name
 
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials for network client. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
-            raise exceptions.InvalidConfiguration(msg)
+        self._validate_credentials(username, password, tenant_name)
 
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation

@@ -274,8 +274,9 @@ class Manager(object):
 
         if None in (self.username, self.password, self.tenant_name):
             msg = ("Missing required credentials. "
-                   "username: %(username)s, password: %(password)s, "
-                   "tenant_name: %(tenant_name)s") % locals()
+                   "username: %(u)s, password: %(p)s, "
+                   "tenant_name: %(t)s" %
+                   {'u': username, 'p': password, 't': tenant_name})
             raise exceptions.InvalidConfiguration(msg)
 
         self.auth_url = self.config.identity.uri

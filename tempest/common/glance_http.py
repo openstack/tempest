@@ -125,11 +125,12 @@ class HTTPClient(object):
                 conn.request(method, conn_url, **kwargs)
             resp = conn.getresponse()
         except socket.gaierror as e:
-            message = "Error finding address for %(url)s: %(e)s" % locals()
+            message = ("Error finding address for %(url)s: %(e)s" %
+                       {'url': url, 'e': e})
             raise exc.EndpointNotFound(message)
         except (socket.error, socket.timeout) as e:
-            endpoint = self.endpoint
-            message = "Error communicating with %(endpoint)s %(e)s" % locals()
+            message = ("Error communicating with %(endpoint)s %(e)s" %
+                       {'endpoint': self.endpoint, 'e': e})
             raise exc.TimeoutException(message)
 
         body_iter = ResponseBodyIterator(resp)
