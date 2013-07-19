@@ -356,3 +356,5 @@ neutron = false
 glance = True
 # Whether or not swift is expected to be available
 swift = True
+# Whether or not nova is expected to be available
+nova = True

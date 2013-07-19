@@ -551,6 +551,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('swift',
                 default=True,
                 help="Whether or not swift is expected to be available"),
+    cfg.BoolOpt('nova',
+                default=True,
+                help="Whether or not nova is expected to be available"),
 ]
 
 

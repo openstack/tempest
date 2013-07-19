@@ -36,6 +36,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        if not cls.config.service_available.nova:
+            skip_msg = ("%s skipped as nova is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
         cls.isolated_creds = []
 
         if cls.config.compute.allow_tenant_isolation:
