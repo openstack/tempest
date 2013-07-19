@@ -548,6 +548,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('glance',
                 default=True,
                 help="Whether or not glance is expected to be available"),
+    cfg.BoolOpt('swift',
+                default=True,
+                help="Whether or not swift is expected to be available"),
 ]
 
 

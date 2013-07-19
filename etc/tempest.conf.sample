@@ -354,3 +354,5 @@ cinder = True
 neutron = false
 # Whether or not glance is expected to be available
 glance = True
+# Whether or not swift is expected to be available
+swift = True

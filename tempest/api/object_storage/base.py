@@ -26,6 +26,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        if not cls.config.service_available.swift:
+            skip_msg = ("%s skipped as swift is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
         cls.os = clients.Manager()
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
@@ -41,12 +44,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.identity_client_alt = cls.os_alt.identity_client
 
         cls.data = DataGenerator(cls.identity_admin_client)
-
-        try:
-            cls.account_client.list_account_containers()
-        except exceptions.EndpointNotFound:
-            skip_msg = "No OpenStack Object Storage API endpoint"
-            raise cls.skipException(skip_msg)
 
     @classmethod
     def delete_containers(cls, containers, container_client=None,
