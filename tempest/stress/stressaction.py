@@ -20,10 +20,10 @@ import sys
 
 class StressAction(object):
 
-    def __init__(self, manager, logger):
+    def __init__(self, manager, logger, max_runs=None):
         self.manager = manager
         self.logger = logger
-        self.runs = 0
+        self.max_runs = max_runs
 
     def _shutdown_handler(self, signal, frame):
         self.tearDown()
@@ -45,7 +45,7 @@ class StressAction(object):
         """
         self.logger.debug("tearDown")
 
-    def execute(self):
+    def execute(self, shared_statistic):
         """This is the main execution entry point called
         by the driver.   We register a signal handler to
         allow us to gracefull tearDown, and then exit.
@@ -53,9 +53,16 @@ class StressAction(object):
         """
         signal.signal(signal.SIGHUP, self._shutdown_handler)
         signal.signal(signal.SIGTERM, self._shutdown_handler)
-        while True:
-            self.run()
-            self.runs = self.runs + 1
+
+        while self.max_runs is None or (shared_statistic['runs'] <
+                                        self.max_runs):
+            try:
+                self.run()
+            except Exception:
+                shared_statistic['fails'] += 1
+                self.logger.exception("Failure in run")
+            finally:
+                shared_statistic['runs'] += 1
 
     def run(self):
         """This method is where the stress test code runs."""

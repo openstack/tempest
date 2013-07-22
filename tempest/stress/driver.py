@@ -98,7 +98,7 @@ def get_action_object(path):
     return getattr(importlib.import_module(module_part), obj_name)
 
 
-def stress_openstack(tests, duration):
+def stress_openstack(tests, duration, max_runs=None):
     """
     Workload driver. Executes an action function against a nova-cluster.
 
@@ -116,7 +116,7 @@ def stress_openstack(tests, duration):
             manager = admin_manager
         else:
             manager = clients.Manager()
-        for _ in xrange(test.get('threads', 1)):
+        for p_number in xrange(test.get('threads', 1)):
             if test.get('use_isolated_tenants', False):
                 username = rand_name("stress_user")
                 tenant_name = rand_name("stress_tenant")
@@ -132,24 +132,46 @@ def stress_openstack(tests, duration):
                                           tenant_name=tenant_name)
 
             test_obj = get_action_object(test['action'])
-            test_run = test_obj(manager, logger)
+            test_run = test_obj(manager, logger, max_runs)
 
             kwargs = test.get('kwargs', {})
             test_run.setUp(**dict(kwargs.iteritems()))
 
             logger.debug("calling Target Object %s" %
                          test_run.__class__.__name__)
-            p = multiprocessing.Process(target=test_run.execute,
-                                        args=())
 
-            processes.append(p)
+            mp_manager = multiprocessing.Manager()
+            shared_statistic = mp_manager.dict()
+            shared_statistic['runs'] = 0
+            shared_statistic['fails'] = 0
+
+            p = multiprocessing.Process(target=test_run.execute,
+                                        args=(shared_statistic,))
+
+            process = {'process': p,
+                       'p_number': p_number,
+                       'action': test['action'],
+                       'statistic': shared_statistic}
+
+            processes.append(process)
             p.start()
     end_time = time.time() + duration
     had_errors = False
     while True:
-        remaining = end_time - time.time()
-        if remaining <= 0:
-            break
+        if max_runs is None:
+            remaining = end_time - time.time()
+            if remaining <= 0:
+                break
+        else:
+            remaining = log_check_interval
+            all_proc_term = True
+            for process in processes:
+                if process['process'].is_alive():
+                    all_proc_term = False
+                    break
+            if all_proc_term:
+                break
+
         time.sleep(min(remaining, log_check_interval))
         if not logfiles:
             continue
@@ -158,9 +180,28 @@ def stress_openstack(tests, duration):
             had_errors = True
             break
 
-    for p in processes:
-        p.terminate()
-        p.join()
+    for process in processes:
+        if process['process'].is_alive():
+            process['process'].terminate()
+        process['process'].join()
+
+    sum_fails = 0
+    sum_runs = 0
+
+    logger.info("Statistics (per process):")
+    for process in processes:
+        if process['statistic']['fails'] > 0:
+            had_errors = True
+        sum_runs += process['statistic']['runs']
+        sum_fails += process['statistic']['fails']
+        logger.info(" Process %d (%s): Run %d actions (%d failed)" %
+                    (process['p_number'],
+                     process['action'],
+                     process['statistic']['runs'],
+                     process['statistic']['fails']))
+    logger.info("Summary:")
+    logger.info("Run %d actions (%d failed)" %
+                (sum_runs, sum_fails))
 
     if not had_errors:
         logger.info("cleaning up")

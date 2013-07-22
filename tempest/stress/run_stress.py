@@ -26,9 +26,9 @@ def main(ns):
     tests = json.load(open(ns.tests, 'r'))
     if ns.serial:
         for test in tests:
-            driver.stress_openstack([test], ns.duration)
+            driver.stress_openstack([test], ns.duration, ns.number)
     else:
-        driver.stress_openstack(tests, ns.duration)
+        driver.stress_openstack(tests, ns.duration, ns.number)
 
 
 parser = argparse.ArgumentParser(description='Run stress tests. ')
@@ -36,5 +36,7 @@ parser.add_argument('-d', '--duration', default=300, type=int,
                     help="Duration of test in secs.")
 parser.add_argument('-s', '--serial', action='store_true',
                     help="Trigger running tests serially.")
+parser.add_argument('-n', '--number', type=int,
+                    help="How often an action is executed for each process.")
 parser.add_argument('tests', help="Name of the file with test description.")
 main(parser.parse_args())
