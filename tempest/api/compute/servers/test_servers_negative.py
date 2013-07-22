@@ -99,6 +99,17 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
                           self.server_id, 'SOFT')
 
     @attr(type=['negative', 'gate'])
+    def test_pause_paused_server(self):
+        # Pause a paused server.
+        resp, server = self.create_server(wait_until='ACTIVE')
+        self.server_id = server['id']
+        self.client.pause_server(self.server_id)
+        self.client.wait_for_server_status(self.server_id, 'PAUSED')
+        self.assertRaises(exceptions.Duplicate,
+                          self.client.pause_server,
+                          self.server_id)
+
+    @attr(type=['negative', 'gate'])
     def test_rebuild_deleted_server(self):
         # Rebuild a deleted server
 
