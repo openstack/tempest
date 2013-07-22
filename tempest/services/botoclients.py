@@ -132,6 +132,7 @@ class APIClientEC2(BotoClientBase):
     ALLOWED_METHODS = set(('create_key_pair', 'get_key_pair',
                            'delete_key_pair', 'import_key_pair',
                            'get_all_key_pairs',
+                           'get_all_tags',
                            'create_image', 'get_image',
                            'register_image', 'deregister_image',
                            'get_all_images', 'get_image_attribute',
