@@ -20,7 +20,6 @@ import time
 from tempest import clients
 from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 import tempest.test
 
 LOG = logging.getLogger(__name__)
@@ -33,6 +32,10 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         cls.isolated_creds = []
+
+        if not cls.config.service_available.cinder:
+            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
         if cls.config.compute.allow_tenant_isolation:
             creds = cls._get_isolated_creds()
@@ -55,17 +58,11 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         cls.snapshots = []
         cls.volumes = []
 
-        skip_msg = ("%s skipped as Cinder endpoint is not available" %
-                    cls.__name__)
-        try:
-            cls.volumes_client.keystone_auth(cls.os.username,
-                                             cls.os.password,
-                                             cls.os.auth_url,
-                                             cls.volumes_client.service,
-                                             cls.os.tenant_name)
-        except exceptions.EndpointNotFound:
-            cls.clear_isolated_creds()
-            raise cls.skipException(skip_msg)
+        cls.volumes_client.keystone_auth(cls.os.username,
+                                         cls.os.password,
+                                         cls.os.auth_url,
+                                         cls.volumes_client.service,
+                                         cls.os.tenant_name)
 
     @classmethod
     def _get_identity_admin_client(cls):

@@ -28,6 +28,9 @@ class VolumesGetTestJSON(base.BaseComputeTest):
     def setUpClass(cls):
         super(VolumesGetTestJSON, cls).setUpClass()
         cls.client = cls.volumes_extensions_client
+        if not cls.config.service_available.cinder:
+            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     @attr(type='smoke')
     def test_volume_create_get_delete(self):

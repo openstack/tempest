@@ -37,6 +37,9 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
     def setUpClass(cls):
         super(AttachVolumeTestJSON, cls).setUpClass()
         cls.device = 'vdb'
+        if not cls.config.service_available.cinder:
+            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
 
     def _detach(self, server_id, volume_id):
         self.servers_client.detach_volume(server_id, volume_id)

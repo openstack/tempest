@@ -348,3 +348,7 @@ large_ops_number = 0
 enabled = True
 # directory where python client binaries are located
 cli_dir = /usr/local/bin
+
+[service_available]
+# Whether or not cinder is expected to be available
+cinder = True

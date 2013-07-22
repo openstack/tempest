@@ -538,6 +538,22 @@ def register_scenario_opts(conf):
         conf.register_opt(opt, group='scenario')
 
 
+service_available_group = cfg.OptGroup(name="service_available",
+                                       title="Available OpenStack Services")
+
+ServiceAvailableGroup = [
+    cfg.BoolOpt('cinder',
+                default=True,
+                help="Whether or not cinder is expected to be available"),
+]
+
+
+def register_service_available_opts(conf):
+    conf.register_group(scenario_group)
+    for opt in ServiceAvailableGroup:
+        conf.register_opt(opt, group='service_available')
+
+
 @singleton
 class TempestConfig:
     """Provides OpenStack configuration information."""
@@ -588,6 +604,7 @@ class TempestConfig:
         register_compute_admin_opts(cfg.CONF)
         register_stress_opts(cfg.CONF)
         register_scenario_opts(cfg.CONF)
+        register_service_available_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
         self.whitebox = cfg.CONF.whitebox
         self.identity = cfg.CONF.identity
@@ -600,6 +617,7 @@ class TempestConfig:
         self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
         self.scenario = cfg.CONF.scenario
+        self.service_available = cfg.CONF.service_available
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
