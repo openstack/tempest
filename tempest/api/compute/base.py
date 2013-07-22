@@ -101,7 +101,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         )
 
     @classmethod
-    def _get_isolated_creds(cls):
+    def _get_isolated_creds(cls, admin=False):
         """
         Creates a new set of user/tenant/password credentials for a
         **regular** user of the Compute API so that a test case can
@@ -151,6 +151,18 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         # but return just the username, tenant_name, password tuple
         # that the various clients will use.
         cls.isolated_creds.append((user, tenant))
+
+        # Assign admin role if this is for admin creds
+        if admin:
+            _, roles = admin_client.list_roles()
+            role = None
+            try:
+                _, roles = admin_client.list_roles()
+                role = next(r for r in roles if r['name'] == 'admin')
+            except StopIteration:
+                msg = "No admin role found"
+                raise exceptions.NotFound(msg)
+            admin_client.assign_user_role(tenant['id'], user['id'], role['id'])
 
         return username, tenant_name, password
 
@@ -266,10 +278,16 @@ class BaseComputeAdminTest(BaseComputeTest):
         admin_username = cls.config.compute_admin.username
         admin_password = cls.config.compute_admin.password
         admin_tenant = cls.config.compute_admin.tenant_name
-
         if not (admin_username and admin_password and admin_tenant):
             msg = ("Missing Compute Admin API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
-
-        cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
+        if cls.config.compute.allow_tenant_isolation:
+            creds = cls._get_isolated_creds(admin=True)
+            admin_username, admin_tenant_name, admin_password = creds
+            cls.os_adm = clients.Manager(username=admin_username,
+                                         password=admin_password,
+                                         tenant_name=admin_tenant_name,
+                                         interface=cls._interface)
+        else:
+            cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
