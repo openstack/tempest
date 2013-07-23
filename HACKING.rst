@@ -57,6 +57,10 @@ If you really need to use a ``try`` block, please ensure the original
 exception at least logged.  When the exception is logged you usually need
 to ``raise`` the same or a different exception anyway.
 
+Use of ``self.addCleanup`` is often a good way to avoid having to catch
+exceptions and still ensure resources are correctly cleaned up if the
+test fails part way through.
+
 Use the ``self.assert*`` methods provided by the unit test framework
  the signal failures early.
 
@@ -74,5 +78,10 @@ carried by the exception (exception class, backtrack and exception info).
 This and the service logs are your only guide to find the root cause of flaky
 issue.
 
-
-
+Guidelines
+----------
+- Do not submit changesets with only testcases which are skipped as
+  they will not be merged.
+- Consistently check the status code of responses in testcases. The
+  earlier a problem is detected the easier it is to debug, especially
+  where there is complicated setup required.
