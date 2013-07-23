@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import time
 
 import nose.plugins.attrib
@@ -52,6 +53,42 @@ def attr(*args, **kwargs):
         return nose.plugins.attrib.attr(*args, **kwargs)(f)
 
     return decorator
+
+
+# there is a mis-match between nose and testtools for older pythons.
+# testtools will set skipException to be either
+# unittest.case.SkipTest, unittest2.case.SkipTest or an internal skip
+# exception, depending on what it can find. Python <2.7 doesn't have
+# unittest.case.SkipTest; so if unittest2 is not installed it falls
+# back to the internal class.
+#
+# The current nose skip plugin will decide to raise either
+# unittest.case.SkipTest or its own internal exception; it does not
+# look for unittest2 or the internal unittest exception.  Thus we must
+# monkey-patch testtools.TestCase.skipException to be the exception
+# the nose skip plugin expects.
+#
+# However, with the switch to testr nose may not be available, so we
+# require you to opt-in to this fix with an environment variable.
+#
+# This is temporary until upstream nose starts looking for unittest2
+# as testtools does; we can then remove this and ensure unittest2 is
+# available for older pythons; then nose and testtools will agree
+# unittest2.case.SkipTest is the one-true skip test exception.
+#
+#   https://review.openstack.org/#/c/33056
+#   https://github.com/nose-devs/nose/pull/699
+if 'TEMPEST_PY26_NOSE_COMPAT' in os.environ:
+    try:
+        import unittest.case.SkipTest
+        # convince pep8 we're using the import...
+        if unittest.case.SkipTest:
+            pass
+        raise RuntimeError("You have unittest.case.SkipTest; "
+                           "no need to override")
+    except ImportError:
+        LOG.info("Overriding skipException to nose SkipTest")
+        testtools.TestCase.skipException = nose.plugins.skip.SkipTest
 
 
 class BaseTestCase(testtools.TestCase,
