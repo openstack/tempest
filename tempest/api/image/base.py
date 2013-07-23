@@ -28,11 +28,20 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.os = clients.Manager()
+        cls.isolated_creds = []
         cls.created_images = []
+        cls._interface = 'json'
         if not cls.config.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
+        if cls.config.compute.allow_tenant_isolation:
+            creds = cls._get_isolated_creds()
+            username, tenant_name, password = creds
+            cls.os = clients.Manager(username=username,
+                                     password=password,
+                                     tenant_name=tenant_name)
+        else:
+            cls.os = clients.Manager()
 
     @classmethod
     def tearDownClass(cls):
@@ -44,6 +53,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
         for image_id in cls.created_images:
                 cls.client.wait_for_resource_deletion(image_id)
+        cls._clear_isolated_creds()
 
     @classmethod
     def create_image(cls, **kwargs):
