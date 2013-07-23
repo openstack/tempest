@@ -206,3 +206,7 @@ def stress_openstack(tests, duration, max_runs=None):
     if not had_errors:
         logger.info("cleaning up")
         cleanup.cleanup(logger)
+    if had_errors:
+        return 1
+    else:
+        return 0

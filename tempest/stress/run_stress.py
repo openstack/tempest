@@ -18,17 +18,25 @@
 
 import argparse
 import json
+import sys
 
 
 def main(ns):
     #NOTE(kodererm): moved import to make "-h" possible without OpenStack
     from tempest.stress import driver
+    result = 0
     tests = json.load(open(ns.tests, 'r'))
     if ns.serial:
         for test in tests:
-            driver.stress_openstack([test], ns.duration, ns.number)
+            step_result = driver.stress_openstack([test],
+                                                  ns.duration,
+                                                  ns.number)
+            #NOTE(kodererm): we just save the last result code
+            if (step_result != 0):
+                result = step_result
     else:
         driver.stress_openstack(tests, ns.duration, ns.number)
+    return result
 
 
 parser = argparse.ArgumentParser(description='Run stress tests. ')
@@ -39,4 +47,6 @@ parser.add_argument('-s', '--serial', action='store_true',
 parser.add_argument('-n', '--number', type=int,
                     help="How often an action is executed for each process.")
 parser.add_argument('tests', help="Name of the file with test description.")
-main(parser.parse_args())
+
+if __name__ == "__main__":
+    sys.exit(main(parser.parse_args()))
