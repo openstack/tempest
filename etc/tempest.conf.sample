@@ -318,6 +318,13 @@ instance_type = m1.micro
 # any key, which will generate a keypair for each test class
 #keypair_name = heat_key
 
+[dashboard]
+# URL where to find the dashboard home page
+dashboard_url = 'http://localhost/'
+
+# URL where to submit the login form
+login_url = 'http://localhost/auth/login/'
+
 [scenario]
 # Directory containing image files
 img_dir = /opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
@@ -357,3 +364,5 @@ swift = True
 nova = True
 # Whether or not Heat is expected to be available
 heat = false
+# Whether or not horizon is expected to be available
+horizon = True
