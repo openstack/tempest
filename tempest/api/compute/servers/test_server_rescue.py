@@ -126,6 +126,13 @@ class ServerRescueTestJSON(base.BaseComputeTest):
                           self.rescue_id, 'HARD')
 
     @attr(type=['negative', 'gate'])
+    def test_rescue_non_existent_server(self):
+        # Rescue a non-existing server
+        self.assertRaises(exceptions.NotFound,
+                          self.servers_client.rescue_server,
+                          '999erra43')
+
+    @attr(type=['negative', 'gate'])
     def test_rescued_vm_rebuild(self):
         self.assertRaises(exceptions.Duplicate,
                           self.servers_client.rebuild,
