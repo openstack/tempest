@@ -1,5 +1,3 @@
-::
-
 Tempest - The OpenStack Integration Test Suite
 ==============================================
 
@@ -37,9 +35,11 @@ and reference data to be used in testing.
 Tempest is not tied to any single test runner, but Nose been the most commonly
 used tool. After setting up your configuration file, you can execute
 the set of Tempest tests by using ``nosetests`` ::
+
     $> nosetests tempest
 
 To run one single test  ::
+
     $> nosetests -sv tempest.api.compute.servers.test_server_actions.py:
        ServerActionsTestJSON.test_rebuild_nonexistent_server
 

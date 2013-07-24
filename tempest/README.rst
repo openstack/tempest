@@ -1,6 +1,6 @@
-============
+============================
 Tempest Field Guide Overview
-============
+============================
 
 Tempest is designed to be useful for a large number of different
 environments. This includes being useful for gating commits to
@@ -26,7 +26,7 @@ documented in a README.rst file in the directory.
 
 
 api
-------------
+---
 
 API tests are validation tests for the OpenStack API. They should not
 use the existing python clients for OpenStack, but should instead use
@@ -41,7 +41,7 @@ frameworks.
 
 
 cli
-------------
+---
 
 CLI tests use the openstack CLI to interact with the OpenStack
 cloud. CLI testing in unit tests is somewhat difficult because unlike
@@ -51,7 +51,7 @@ prereqs having a running OpenStack cloud.
 
 
 scenario
-------------
+--------
 
 Scenario tests are complex "through path" tests for OpenStack
 functionality. They are typically a series of steps where complicated
@@ -61,7 +61,7 @@ Scenario tests can and should use the OpenStack python clients.
 
 
 stress
------------
+------
 
 Stress tests are designed to stress an OpenStack environment by
 running a high workload against it and seeing what breaks. Tools may
@@ -72,7 +72,7 @@ moves into here.
 
 
 thirdparty
-------------
+----------
 
 Many openstack components include 3rdparty API support. It is
 completely legitimate for Tempest to include tests of 3rdparty APIs,
@@ -81,7 +81,7 @@ validation.
 
 
 whitebox
-----------
+--------
 
 Whitebox tests are tests which require access to the database of the
 target OpenStack machine to verify internal state after operations

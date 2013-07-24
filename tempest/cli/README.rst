@@ -12,7 +12,7 @@ operations on a cloud that are hard to test via unit tests.
 Why are these tests in tempest?
 -------------------------------
 These tests exist here because it is extremely difficult to build a
-functional enough environment in the python-*client unit tests to
+functional enough environment in the python-\*client unit tests to
 provide this kind of testing. Because we already put up a cloud in the
 gate with devstack + tempest it was decided it was better to have
 these as a side tree in tempest instead of another QA effort which

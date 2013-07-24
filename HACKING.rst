@@ -32,7 +32,7 @@ Test Data/Configuration
 Exception Handling
 ------------------
 According to the ``The Zen of Python`` the
- ``Errors should never pass silently.``
+``Errors should never pass silently.``
 Tempest usually runs in special environment (jenkins gate jobs), in every
 error or failure situation we should provide as much error related
 information as possible, because we usually do not have the chance to

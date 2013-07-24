@@ -1,9 +1,9 @@
 Tempest Guide to Third Party API tests
-========
+======================================
 
 
 What are these tests?
---------
+---------------------
 
 Third party tests are tests for non native OpenStack APIs that are
 part of OpenStack projects. If we ship an API, we're really required
@@ -14,14 +14,14 @@ which should be tested as part of normal process.
 
 
 Why are these tests in tempest?
---------
+-------------------------------
 
 If we ship an API in an OpenStack component, there should be tests in
 tempest to exercise it in some way.
 
 
 Scope of these tests
---------
+--------------------
 
 Third party API testing should be limited to the functional testing of
 third party API compliance. Complex scenarios should be avoided, and
