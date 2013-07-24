@@ -425,24 +425,24 @@ class NetworkScenarioTest(OfficialClientTest):
             if proc.returncode == 0:
                 return True
 
-        # TODO(mnewby) Allow configuration of execution and sleep duration.
-        return tempest.test.call_until_true(ping, 20, 1)
+        return tempest.test.call_until_true(
+            ping, self.config.compute.ping_timeout, 1)
 
     def _is_reachable_via_ssh(self, ip_address, username, private_key,
-                              timeout=120):
+                              timeout):
         ssh_client = ssh.Client(ip_address, username,
                                 pkey=private_key,
                                 timeout=timeout)
         return ssh_client.test_connection_auth()
 
-    def _check_vm_connectivity(self, ip_address, username, private_key,
-                               timeout=120):
+    def _check_vm_connectivity(self, ip_address, username, private_key):
         self.assertTrue(self._ping_ip_address(ip_address),
                         "Timed out waiting for %s to become "
                         "reachable" % ip_address)
-        self.assertTrue(self._is_reachable_via_ssh(ip_address,
-                                                   username,
-                                                   private_key,
-                                                   timeout=timeout),
-                        'Auth failure in connecting to %s@%s via ssh' %
-                        (username, ip_address))
+        self.assertTrue(self._is_reachable_via_ssh(
+            ip_address,
+            username,
+            private_key,
+            timeout=self.config.compute.ssh_timeout),
+            'Auth failure in connecting to %s@%s via ssh' %
+            (username, ip_address))

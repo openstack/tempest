@@ -91,6 +91,9 @@ network_for_ssh = private
 # IP version of the address used for SSH
 ip_version_for_ssh = 4
 
+# Number of seconds to wait to ping to an instance
+ping_timeout = 60
+
 # Number of seconds to wait to authenticate to an instance
 ssh_timeout = 300
 
