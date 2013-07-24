@@ -22,7 +22,6 @@ from tempest import clients
 from tempest.common import log as logging
 from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 import tempest.test
 
 
@@ -82,101 +81,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.servers_client_v3_auth = os.servers_client_v3_auth
 
     @classmethod
-    def _get_identity_admin_client(cls):
-        """
-        Returns an instance of the Identity Admin API client
-        """
-        os = clients.AdminManager(interface=cls._interface)
-        admin_client = os.identity_client
-        return admin_client
-
-    @classmethod
-    def _get_client_args(cls):
-
-        return (
-            cls.config,
-            cls.config.identity.admin_username,
-            cls.config.identity.admin_password,
-            cls.config.identity.uri
-        )
-
-    @classmethod
-    def _get_isolated_creds(cls, admin=False):
-        """
-        Creates a new set of user/tenant/password credentials for a
-        **regular** user of the Compute API so that a test case can
-        operate in an isolated tenant container.
-        """
-        admin_client = cls._get_identity_admin_client()
-        password = "pass"
-
-        while True:
-            try:
-                rand_name_root = rand_name(cls.__name__)
-                if cls.isolated_creds:
-                # Main user already created. Create the alt one...
-                    rand_name_root += '-alt'
-                tenant_name = rand_name_root + "-tenant"
-                tenant_desc = tenant_name + "-desc"
-
-                resp, tenant = admin_client.create_tenant(
-                    name=tenant_name, description=tenant_desc)
-                break
-            except exceptions.Duplicate:
-                if cls.config.compute.allow_tenant_reuse:
-                    tenant = admin_client.get_tenant_by_name(tenant_name)
-                    LOG.info('Re-using existing tenant %s', tenant)
-                    break
-
-        while True:
-            try:
-                rand_name_root = rand_name(cls.__name__)
-                if cls.isolated_creds:
-                # Main user already created. Create the alt one...
-                    rand_name_root += '-alt'
-                username = rand_name_root + "-user"
-                email = rand_name_root + "@example.com"
-                resp, user = admin_client.create_user(username,
-                                                      password,
-                                                      tenant['id'],
-                                                      email)
-                break
-            except exceptions.Duplicate:
-                if cls.config.compute.allow_tenant_reuse:
-                    user = admin_client.get_user_by_username(tenant['id'],
-                                                             username)
-                    LOG.info('Re-using existing user %s', user)
-                    break
-        # Store the complete creds (including UUID ids...) for later
-        # but return just the username, tenant_name, password tuple
-        # that the various clients will use.
-        cls.isolated_creds.append((user, tenant))
-
-        # Assign admin role if this is for admin creds
-        if admin:
-            _, roles = admin_client.list_roles()
-            role = None
-            try:
-                _, roles = admin_client.list_roles()
-                role = next(r for r in roles if r['name'] == 'admin')
-            except StopIteration:
-                msg = "No admin role found"
-                raise exceptions.NotFound(msg)
-            admin_client.assign_user_role(tenant['id'], user['id'], role['id'])
-
-        return username, tenant_name, password
-
-    @classmethod
-    def clear_isolated_creds(cls):
-        if not cls.isolated_creds:
-            return
-        admin_client = cls._get_identity_admin_client()
-
-        for user, tenant in cls.isolated_creds:
-            admin_client.delete_user(user['id'])
-            admin_client.delete_tenant(tenant['id'])
-
-    @classmethod
     def clear_servers(cls):
         for server in cls.servers:
             try:
@@ -204,7 +108,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def tearDownClass(cls):
         cls.clear_images()
         cls.clear_servers()
-        cls.clear_isolated_creds()
+        cls._clear_isolated_creds()
 
     @classmethod
     def create_server(cls, **kwargs):
