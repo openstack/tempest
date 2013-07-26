@@ -17,13 +17,15 @@
 
 import time
 
-from cinderclient import exceptions
+from cinderclient import exceptions as cinder_exceptions
 import testtools
 
 from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest import exceptions
 from tempest.scenario import manager
+import tempest.test
 
 LOG = logging.getLogger(__name__)
 
@@ -110,7 +112,7 @@ class TestStampPattern(manager.OfficialClientTest):
         self.addCleanup(self.compute_client.security_group_rules.delete,
                         sg_rule.id)
 
-    def _ssh_to_server(self, server_or_ip):
+    def _remote_client_to_server(self, server_or_ip):
         if isinstance(server_or_ip, basestring):
             ip = server_or_ip
         else:
@@ -120,7 +122,10 @@ class TestStampPattern(manager.OfficialClientTest):
         linux_client = RemoteClient(ip,
                                     username,
                                     pkey=self.keypair.private_key)
+        return linux_client
 
+    def _ssh_to_server(self, server_or_ip):
+        linux_client = self._remote_client_to_server(server_or_ip)
         return linux_client.ssh_client
 
     def _create_image(self, server):
@@ -145,7 +150,7 @@ class TestStampPattern(manager.OfficialClientTest):
             try:
                 while volume_snapshots.get(snapshot.id):
                     time.sleep(1)
-            except exceptions.NotFound:
+            except cinder_exceptions.NotFound:
                 pass
         self.addCleanup(cleaner)
         self._wait_for_volume_status(volume, 'available')
@@ -186,6 +191,20 @@ class TestStampPattern(manager.OfficialClientTest):
         detach_volume_client(server.id, volume.id)
         self._wait_for_volume_status(volume, 'available')
 
+    def _wait_for_volume_availible_on_the_system(self, server_or_ip):
+        ssh = self._remote_client_to_server(server_or_ip)
+        conf = self.config
+
+        def _func():
+            part = ssh.get_partitions()
+            LOG.debug("Partitions:%s" % part)
+            return 'vdb' in part
+
+        if not tempest.test.call_until_true(_func,
+                                            conf.compute.build_timeout,
+                                            conf.compute.build_interval):
+            raise exceptions.TimeoutException
+
     def _create_timestamp(self, server_or_ip):
         ssh_client = self._ssh_to_server(server_or_ip)
         ssh_client.exec_command('sudo /usr/sbin/mkfs.ext4 /dev/vdb')
@@ -219,6 +238,7 @@ class TestStampPattern(manager.OfficialClientTest):
             ip_for_server = server
 
         self._attach_volume(server, volume)
+        self._wait_for_volume_availible_on_the_system(ip_for_server)
         self._create_timestamp(ip_for_server)
         self._detach_volume(server, volume)
 
@@ -246,6 +266,7 @@ class TestStampPattern(manager.OfficialClientTest):
 
         # attach volume2 to instance2
         self._attach_volume(server_from_snapshot, volume_from_snapshot)
+        self._wait_for_volume_availible_on_the_system(ip_for_snapshot)
 
         # check the existence of the timestamp file in the volume2
         self._check_timestamp(ip_for_snapshot)
