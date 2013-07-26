@@ -17,8 +17,6 @@
 
 import os
 
-import testtools
-
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
@@ -107,7 +105,6 @@ class S3ImagesTest(BotoTestCase):
             self.images_client.get_all_images()))
         self.cancelResourceCleanUp(image["cleanUp"])
 
-    @testtools.skip("Skipped until the Bug #1074908 and #1074904 is resolved")
     def test_register_get_deregister_ari_image(self):
         # Register and deregister ari image
         image = {"name": rand_name("ari-name-"),
