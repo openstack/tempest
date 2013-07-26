@@ -18,6 +18,7 @@
 import os
 import time
 
+import fixtures
 import nose.plugins.attrib
 import testresources
 import testtools
@@ -104,6 +105,25 @@ class BaseTestCase(testtools.TestCase,
     def setUpClass(cls):
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
+
+    def setUp(cls):
+        super(BaseTestCase, cls).setUp()
+        test_timeout = os.environ.get('OS_TEST_TIMEOUT', 0)
+        try:
+            test_timeout = int(test_timeout)
+        except ValueError:
+            test_timeout = 0
+        if test_timeout > 0:
+            cls.useFixture(fixtures.Timeout(test_timeout, gentle=True))
+
+        if (os.environ.get('OS_STDOUT_CAPTURE') == 'True' or
+                os.environ.get('OS_STDOUT_CAPTURE') == '1'):
+            stdout = cls.useFixture(fixtures.StringStream('stdout')).stream
+            cls.useFixture(fixtures.MonkeyPatch('sys.stdout', stdout))
+        if (os.environ.get('OS_STDERR_CAPTURE') == 'True' or
+                os.environ.get('OS_STDERR_CAPTURE') == '1'):
+            stderr = cls.useFixture(fixtures.StringStream('stderr')).stream
+            cls.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
 
     @classmethod
     def _get_identity_admin_client(cls):
