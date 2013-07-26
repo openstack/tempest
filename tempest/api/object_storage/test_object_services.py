@@ -21,7 +21,6 @@ import time
 from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
 
@@ -229,74 +228,6 @@ class ObjectTest(base.BaseObjectTest):
         except Exception as e:
             self.fail("Got exception :%s ; while copying"
                       " object across containers" % e)
-
-    @attr(type=['negative', 'gate'])
-    def test_write_object_without_using_creds(self):
-        # trying to create object with empty headers
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name),
-                                base_text=object_name)
-        obj_headers = {'Content-Type': 'application/json',
-                       'Accept': 'application/json'}
-        self.assertRaises(exceptions.Unauthorized,
-                          self.custom_object_client.create_object,
-                          self.container_name, object_name, data,
-                          metadata=obj_headers)
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_object_without_using_creds(self):
-        # create object
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name),
-                                base_text=object_name)
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   object_name, data)
-        # trying to delete object with empty headers
-        self.assertRaises(exceptions.Unauthorized,
-                          self.custom_object_client.delete_object,
-                          self.container_name, object_name)
-
-    @attr(type=['negative', 'gate'])
-    def test_write_object_with_non_authorized_user(self):
-        # attempt to upload another file using non-authorized user
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name) * 5,
-                                base_text=object_name)
-
-        # trying to create object with non-authorized user
-        self.assertRaises(exceptions.Unauthorized,
-                          self.custom_object_client.create_object,
-                          self.container_name, object_name, data,
-                          metadata=self.custom_headers)
-
-    @attr(type=['negative', 'gate'])
-    def test_read_object_with_non_authorized_user(self):
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name) * 5,
-                                base_text=object_name)
-        resp, body = self.object_client.create_object(
-            self.container_name, object_name, data)
-        self.assertEqual(resp['status'], '201')
-
-        # trying to get object with non authorized user token
-        self.assertRaises(exceptions.Unauthorized,
-                          self.custom_object_client.get_object,
-                          self.container_name, object_name,
-                          metadata=self.custom_headers)
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_object_with_non_authorized_user(self):
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name) * 5,
-                                base_text=object_name)
-        resp, body = self.object_client.create_object(
-            self.container_name, object_name, data)
-        self.assertEqual(resp['status'], '201')
-        # trying to delete object with non-authorized user token
-        self.assertRaises(exceptions.Unauthorized,
-                          self.custom_object_client.delete_object,
-                          self.container_name, object_name,
-                          metadata=self.custom_headers)
 
     @attr(type='gate')
     def test_get_object_using_temp_url(self):
