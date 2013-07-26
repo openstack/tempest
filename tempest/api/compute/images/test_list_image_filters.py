@@ -16,9 +16,9 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common import log as logging
 from tempest.common.utils.data_utils import parse_image_id
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.test import attr
 
 

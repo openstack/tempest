@@ -20,10 +20,10 @@ import time
 from cinderclient import exceptions as cinder_exceptions
 import testtools
 
-from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 import tempest.test
 

@@ -13,8 +13,8 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
+from tempest.openstack.common import log as logging
 from tempest.test import attr
 
 LOG = logging.getLogger(__name__)

@@ -16,9 +16,9 @@ import json
 import time
 import urllib
 
-from tempest.common import log as logging
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

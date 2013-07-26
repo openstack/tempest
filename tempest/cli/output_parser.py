@@ -17,10 +17,9 @@
 
 """Collection of utilities for parsing CLI clients output."""
 
-
-from tempest.common import log as logging
-
 import re
+
+from tempest.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

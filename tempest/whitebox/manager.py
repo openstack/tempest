@@ -21,10 +21,11 @@ import subprocess
 import sys
 
 from sqlalchemy import create_engine, MetaData
-from tempest.common import log as logging
+
 from tempest.common.ssh import Client
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 
 LOG = logging.getLogger(__name__)

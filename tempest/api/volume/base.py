@@ -18,7 +18,7 @@
 import time
 
 from tempest import clients
-from tempest.common import log as logging
+from tempest.openstack.common import log as logging
 import tempest.test
 
 LOG = logging.getLogger(__name__)

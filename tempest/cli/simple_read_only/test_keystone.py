@@ -19,7 +19,7 @@ import re
 import subprocess
 
 import tempest.cli
-from tempest.common import log as logging
+from tempest.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

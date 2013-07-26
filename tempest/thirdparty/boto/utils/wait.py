@@ -21,8 +21,8 @@ import time
 import boto.exception
 from testtools import TestCase
 
-from tempest.common import log as logging
 import tempest.config
+from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

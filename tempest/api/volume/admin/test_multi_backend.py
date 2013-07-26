@@ -13,8 +13,8 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
+from tempest.openstack.common import log as logging
 from tempest.services.volume.json.admin import volume_types_client
 from tempest.services.volume.json import volumes_client
 from tempest.test import attr

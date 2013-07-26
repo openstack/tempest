@@ -23,10 +23,9 @@ import sys
 
 from oslo.config import cfg
 
-from tempest.common import log as logging
 from tempest.common.utils.misc import singleton
+from tempest.openstack.common import log as logging
 
-LOG = logging.getLogger(__name__)
 
 identity_group = cfg.OptGroup(name='identity',
                               title="Keystone Configuration Options")
@@ -603,7 +602,6 @@ class TempestConfig:
     def __init__(self):
         """Initialize a configuration from a conf directory and conf file."""
         config_files = []
-
         failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
 
         # Environment variables override defaults...
@@ -618,8 +616,6 @@ class TempestConfig:
                 'TEMPEST_CONFIG' in os.environ):
             path = failsafe_path
 
-        LOG.info("Using tempest config file %s" % path)
-
         if not os.path.exists(path):
             msg = "Config file %s not found" % path
             print(RuntimeError(msg), file=sys.stderr)
@@ -627,6 +623,9 @@ class TempestConfig:
             config_files.append(path)
 
         cfg.CONF([], project='tempest', default_config_files=config_files)
+        logging.setup('tempest')
+        LOG = logging.getLogger('tempest')
+        LOG.info("Using tempest config file %s" % path)
 
         register_compute_opts(cfg.CONF)
         register_identity_opts(cfg.CONF)

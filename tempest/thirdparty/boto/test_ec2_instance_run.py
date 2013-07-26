@@ -19,10 +19,10 @@ from boto import exception
 import testtools
 
 from tempest import clients
-from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 from tempest.thirdparty.boto.utils.s3 import s3_upload_dir

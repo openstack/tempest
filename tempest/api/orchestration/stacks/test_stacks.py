@@ -12,10 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import log as logging
-
 from tempest.api.orchestration import base
 from tempest.common.utils.data_utils import rand_name
+from tempest.openstack.common import log as logging
 from tempest.test import attr
 
 

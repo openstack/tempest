@@ -15,9 +15,9 @@
 #    under the License.
 
 from tempest import clients
-from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 import tempest.test
 
 LOG = logging.getLogger(__name__)
