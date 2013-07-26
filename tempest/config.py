@@ -414,6 +414,26 @@ def register_orchestration_opts(conf):
     for opt in OrchestrationGroup:
         conf.register_opt(opt, group='orchestration')
 
+
+dashboard_group = cfg.OptGroup(name="dashboard",
+                               title="Dashboard options")
+
+DashboardGroup = [
+    cfg.StrOpt('dashboard_url',
+               default='http://localhost/',
+               help="Where the dashboard can be found"),
+    cfg.StrOpt('login_url',
+               default='http://localhost/auth/login/',
+               help="Login page for the dashboard"),
+]
+
+
+def register_dashboard_opts(conf):
+    conf.register_group(scenario_group)
+    for opt in DashboardGroup:
+        conf.register_opt(opt, group='dashboard')
+
+
 boto_group = cfg.OptGroup(name='boto',
                           title='EC2/S3 options')
 BotoConfig = [
@@ -558,6 +578,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('heat',
                 default=False,
                 help="Whether or not Heat is expected to be available"),
+    cfg.BoolOpt('horizon',
+                default=True,
+                help="Whether or not Horizon is expected to be available"),
 ]
 
 
@@ -613,6 +636,7 @@ class TempestConfig:
         register_volume_opts(cfg.CONF)
         register_object_storage_opts(cfg.CONF)
         register_orchestration_opts(cfg.CONF)
+        register_dashboard_opts(cfg.CONF)
         register_boto_opts(cfg.CONF)
         register_compute_admin_opts(cfg.CONF)
         register_stress_opts(cfg.CONF)
@@ -626,6 +650,7 @@ class TempestConfig:
         self.volume = cfg.CONF.volume
         self.object_storage = cfg.CONF['object-storage']
         self.orchestration = cfg.CONF.orchestration
+        self.dashboard = cfg.CONF.dashboard
         self.boto = cfg.CONF.boto
         self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
