@@ -59,7 +59,6 @@ class ImagesTestJSON(base.BaseComputeTest):
     def __create_image__(self, server_id, name, meta=None):
         resp, body = self.client.create_image(server_id, name, meta)
         image_id = parse_image_id(resp['location'])
-        self.client.wait_for_image_resp_code(image_id, 200)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
         self.image_ids.append(image_id)
         return resp, body

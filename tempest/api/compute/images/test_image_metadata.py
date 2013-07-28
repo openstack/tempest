@@ -42,7 +42,6 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
         resp, _ = cls.client.create_image(cls.server_id, name, {})
         cls.image_id = resp['location'].rsplit('/', 1)[1]
 
-        cls.client.wait_for_image_resp_code(cls.image_id, 200)
         cls.client.wait_for_image_status(cls.image_id, 'ACTIVE')
 
     @classmethod

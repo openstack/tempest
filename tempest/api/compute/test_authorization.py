@@ -65,7 +65,6 @@ class AuthorizationTestJSON(base.BaseComputeTest):
         name = rand_name('image')
         resp, body = cls.client.create_image(server['id'], name)
         image_id = parse_image_id(resp['location'])
-        cls.images_client.wait_for_image_resp_code(image_id, 200)
         cls.images_client.wait_for_image_status(image_id, 'ACTIVE')
         resp, cls.image = cls.images_client.get_image(image_id)
 
