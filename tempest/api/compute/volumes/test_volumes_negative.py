@@ -32,7 +32,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_volume_get_nonexistant_volume_id(self):
         # Negative: Should not be able to get details of nonexistant volume
         #Creating a nonexistant volume id
@@ -48,7 +48,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           non_exist_id)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_volume_delete_nonexistant_volume_id(self):
         # Negative: Should not be able to delete nonexistant Volume
         # Creating nonexistant volume id
@@ -64,7 +64,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           non_exist_id)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_create_volume_with_invalid_size(self):
         # Negative: Should not be able to create volume with invalid size
         # in request
@@ -73,7 +73,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_create_volume_with_out_passing_size(self):
         # Negative: Should not be able to create volume without passing size
         # in request
@@ -82,7 +82,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_create_volume_with_size_zero(self):
         # Negative: Should not be able to create volume with size zero
         v_name = rand_name('Volume-')
@@ -90,25 +90,25 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_get_invalid_volume_id(self):
         # Negative: Should not be able to get volume with invalid id
         self.assertRaises(exceptions.NotFound,
                           self.client.get_volume, '#$%%&^&^')
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_get_volume_without_passing_volume_id(self):
         # Negative: Should not be able to get volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.get_volume, '')
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_delete_invalid_volume_id(self):
         # Negative: Should not be able to delete volume when invalid ID is
         # passed
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_volume, '!@#$%^&*()')
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_delete_volume_without_passing_volume_id(self):
         # Negative: Should not be able to delete volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
