@@ -24,9 +24,7 @@ import testresources
 import testtools
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -142,85 +140,6 @@ class BaseTestCase(testtools.TestCase,
             cls.config.identity.admin_password,
             cls.config.identity.uri
         )
-
-    @classmethod
-    def _get_isolated_creds(cls, admin=False):
-        """
-        Creates a new set of user/tenant/password credentials for a
-        **regular** user of the Compute API so that a test case can
-        operate in an isolated tenant container.
-        """
-        admin_client = cls._get_identity_admin_client()
-        password = "pass"
-
-        while True:
-            try:
-                rand_name_root = rand_name(cls.__name__)
-                if cls.isolated_creds:
-                # Main user already created. Create the alt or admin one...
-                    if admin:
-                        rand_name_root += '-admin'
-                    else:
-                        rand_name_root += '-alt'
-                tenant_name = rand_name_root + "-tenant"
-                tenant_desc = tenant_name + "-desc"
-
-                resp, tenant = admin_client.create_tenant(
-                    name=tenant_name, description=tenant_desc)
-                break
-            except exceptions.Duplicate:
-                if cls.config.compute.allow_tenant_reuse:
-                    tenant = admin_client.get_tenant_by_name(tenant_name)
-                    LOG.info('Re-using existing tenant %s', tenant)
-                    break
-
-        while True:
-            try:
-                rand_name_root = rand_name(cls.__name__)
-                if cls.isolated_creds:
-                # Main user already created. Create the alt one...
-                    rand_name_root += '-alt'
-                username = rand_name_root + "-user"
-                email = rand_name_root + "@example.com"
-                resp, user = admin_client.create_user(username,
-                                                      password,
-                                                      tenant['id'],
-                                                      email)
-                break
-            except exceptions.Duplicate:
-                if cls.config.compute.allow_tenant_reuse:
-                    user = admin_client.get_user_by_username(tenant['id'],
-                                                             username)
-                    LOG.info('Re-using existing user %s', user)
-                    break
-        # Store the complete creds (including UUID ids...) for later
-        # but return just the username, tenant_name, password tuple
-        # that the various clients will use.
-        cls.isolated_creds.append((user, tenant))
-
-        # Assign admin role if this is for admin creds
-        if admin:
-            _, roles = admin_client.list_roles()
-            role = None
-            try:
-                _, roles = admin_client.list_roles()
-                role = next(r for r in roles if r['name'] == 'admin')
-            except StopIteration:
-                msg = "No admin role found"
-                raise exceptions.NotFound(msg)
-            admin_client.assign_user_role(tenant['id'], user['id'], role['id'])
-
-        return username, tenant_name, password
-
-    @classmethod
-    def _clear_isolated_creds(cls):
-        if not cls.isolated_creds:
-            return
-        admin_client = cls._get_identity_admin_client()
-
-        for user, tenant in cls.isolated_creds:
-            admin_client.delete_user(user['id'])
-            admin_client.delete_tenant(tenant['id'])
 
 
 def call_until_true(func, duration, sleep_for):

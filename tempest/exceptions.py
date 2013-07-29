@@ -105,7 +105,7 @@ class UnprocessableEntity(RestClientException):
 
 class AuthenticationFailure(RestClientException):
     message = ("Authentication with user %(user)s and password "
-               "%(password)s failed")
+               "%(password)s failed auth using tenant %(tenant)s.")
 
 
 class EndpointNotFound(TempestException):

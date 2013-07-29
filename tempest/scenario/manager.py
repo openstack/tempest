@@ -29,6 +29,7 @@ import novaclient.client
 
 
 from tempest.api.network import common as net_common
+from tempest.common import isolated_creds
 from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 import tempest.manager
@@ -48,26 +49,24 @@ class OfficialClientManager(tempest.manager.Manager):
     NOVACLIENT_VERSION = '2'
     CINDERCLIENT_VERSION = '1'
 
-    def __init__(self):
+    def __init__(self, username, password, tenant_name):
         super(OfficialClientManager, self).__init__()
-        self.compute_client = self._get_compute_client()
+        self.compute_client = self._get_compute_client(username,
+                                                       password,
+                                                       tenant_name)
+        self.identity_client = self._get_identity_client(username,
+                                                         password,
+                                                         tenant_name)
         self.image_client = self._get_image_client()
-        self.identity_client = self._get_identity_client()
         self.network_client = self._get_network_client()
-        self.volume_client = self._get_volume_client()
+        self.volume_client = self._get_volume_client(username,
+                                                     password,
+                                                     tenant_name)
 
-    def _get_compute_client(self, username=None, password=None,
-                            tenant_name=None):
+    def _get_compute_client(self, username, password, tenant_name):
         # Novaclient will not execute operations for anyone but the
         # identified user, so a new client needs to be created for
         # each user that operations need to be performed for.
-        if not username:
-            username = self.config.identity.username
-        if not password:
-            password = self.config.identity.password
-        if not tenant_name:
-            tenant_name = self.config.identity.tenant_name
-
         self._validate_credentials(username, password, tenant_name)
 
         auth_url = self.config.identity.uri
@@ -84,23 +83,14 @@ class OfficialClientManager(tempest.manager.Manager):
                                         insecure=dscv)
 
     def _get_image_client(self):
-        keystone = self._get_identity_client()
-        token = keystone.auth_token
-        endpoint = keystone.service_catalog.url_for(service_type='image',
-                                                    endpoint_type='publicURL')
+        token = self.identity_client.auth_token
+        endpoint = self.identity_client.service_catalog.url_for(
+            service_type='image', endpoint_type='publicURL')
         dscv = self.config.identity.disable_ssl_certificate_validation
         return glanceclient.Client('1', endpoint=endpoint, token=token,
                                    insecure=dscv)
 
-    def _get_volume_client(self, username=None, password=None,
-                           tenant_name=None):
-        if not username:
-            username = self.config.identity.username
-        if not password:
-            password = self.config.identity.password
-        if not tenant_name:
-            tenant_name = self.config.identity.tenant_name
-
+    def _get_volume_client(self, username, password, tenant_name):
         auth_url = self.config.identity.uri
         return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
                                           username,
@@ -108,17 +98,9 @@ class OfficialClientManager(tempest.manager.Manager):
                                           tenant_name,
                                           auth_url)
 
-    def _get_identity_client(self, username=None, password=None,
-                             tenant_name=None):
+    def _get_identity_client(self, username, password, tenant_name):
         # This identity client is not intended to check the security
         # of the identity service, so use admin credentials by default.
-        if not username:
-            username = self.config.identity.admin_username
-        if not password:
-            password = self.config.identity.admin_password
-        if not tenant_name:
-            tenant_name = self.config.identity.admin_tenant_name
-
         self._validate_credentials(username, password, tenant_name)
 
         auth_url = self.config.identity.uri
@@ -168,7 +150,17 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.manager = OfficialClientManager()
+        cls.isolated_creds = isolated_creds.IsolatedCreds(
+            __name__, tempest_client=False)
+        if cls.config.compute.allow_tenant_isolation:
+            creds = cls.isolated_creds.get_primary_creds()
+            username, tenant_name, password = creds
+        else:
+            username = cls.config.identity.username
+            password = cls.config.identity.password
+            tenant_name = cls.config.identity.tenant_name
+
+        cls.manager = OfficialClientManager(username, password, tenant_name)
         cls.compute_client = cls.manager.compute_client
         cls.image_client = cls.manager.image_client
         cls.identity_client = cls.manager.identity_client
@@ -216,6 +208,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
             # Block until resource deletion has completed or timed-out
             tempest.test.call_until_true(is_deletion_complete, 10, 1)
+        cls.isolated_creds.clear_isolated_creds()
+        super(OfficialClientTest, cls).tearDownClass()
 
     @classmethod
     def set_resource(cls, key, thing):

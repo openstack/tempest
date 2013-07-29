@@ -166,7 +166,8 @@ class RestClient(object):
 
         elif resp.status == 401:
             raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password)
+                                                   password=password,
+                                                   tenant=tenant_name)
         raise exceptions.IdentityError('Unexpected status code {0}'.format(
             resp.status))
 

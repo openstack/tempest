@@ -39,7 +39,8 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
         if cls.config.compute.allow_tenant_isolation:
-            cls.demo_tenant_id = cls.isolated_creds[0][0]['tenantId']
+            cls.demo_tenant_id = cls.isolated_creds.get_primary_user().get(
+                'tenantId')
         else:
             cls.demo_tenant_id = [tnt['id'] for tnt in tenants if tnt['name']
                                   == cls.config.identity.tenant_name][0]

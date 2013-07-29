@@ -18,6 +18,7 @@
 import time
 
 from tempest import clients
+from tempest.common import isolated_creds
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -30,14 +31,14 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.isolated_creds = []
+        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
 
         if not cls.config.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
         if cls.config.compute.allow_tenant_isolation:
-            creds = cls._get_isolated_creds()
+            creds = cls.isolated_creds.get_primary_creds()
             username, tenant_name, password = creds
             os = clients.Manager(username=username,
                                  password=password,
@@ -67,7 +68,8 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def tearDownClass(cls):
         cls.clear_snapshots()
         cls.clear_volumes()
-        cls._clear_isolated_creds()
+        cls.isolated_creds.clear_isolated_creds()
+        super(BaseVolumeTest, cls).tearDownClass()
 
     @classmethod
     def create_snapshot(cls, volume_id=1, **kwargs):
@@ -149,7 +151,7 @@ class BaseVolumeAdminTest(BaseVolumeTest):
                    "in configuration.")
             raise cls.skipException(msg)
         if cls.config.compute.allow_tenant_isolation:
-            creds = cls._get_isolated_creds(admin=True)
+            creds = cls.isolated_creds.get_admin_creds()
             admin_username, admin_tenant_name, admin_password = creds
             cls.os_adm = clients.Manager(username=admin_username,
                                          password=admin_password,

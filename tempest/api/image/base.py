@@ -15,6 +15,7 @@
 #    under the License.
 
 from tempest import clients
+from tempest.common import isolated_creds
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -28,14 +29,14 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.isolated_creds = []
         cls.created_images = []
         cls._interface = 'json'
+        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
         if not cls.config.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
         if cls.config.compute.allow_tenant_isolation:
-            creds = cls._get_isolated_creds()
+            creds = cls.isolated_creds.get_primary_creds()
             username, tenant_name, password = creds
             cls.os = clients.Manager(username=username,
                                      password=password,
@@ -53,7 +54,8 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
         for image_id in cls.created_images:
                 cls.client.wait_for_resource_deletion(image_id)
-        cls._clear_isolated_creds()
+        cls.isolated_creds.clear_isolated_creds()
+        super(BaseImageTest, cls).tearDownClass()
 
     @classmethod
     def create_image(cls, **kwargs):
