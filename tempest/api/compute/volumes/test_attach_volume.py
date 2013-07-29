@@ -91,7 +91,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
             linux_client = RemoteClient(server,
                                         self.ssh_user, server['adminPass'])
             partitions = linux_client.get_partitions()
-            self.assertTrue(self.device in partitions)
+            self.assertIn(self.device, partitions)
 
             self._detach(server['id'], volume['id'])
             self.attached = False
@@ -105,7 +105,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
             linux_client = RemoteClient(server,
                                         self.ssh_user, server['adminPass'])
             partitions = linux_client.get_partitions()
-            self.assertFalse(self.device in partitions)
+            self.assertNotIn(self.device, partitions)
         except Exception:
             self.fail("The test_attach_detach_volume is faild!")
         finally:

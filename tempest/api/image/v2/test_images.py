@@ -48,13 +48,13 @@ class CreateRegisterImagesTest(base.BaseV2ImageTest):
                                        container_format='bare',
                                        disk_format='raw',
                                        visibility='public')
-        self.assertTrue('id' in body)
+        self.assertIn('id', body)
         image_id = body.get('id')
-        self.assertTrue('name' in body)
+        self.assertIn('name', body)
         self.assertEqual('New Name', body.get('name'))
-        self.assertTrue('visibility' in body)
+        self.assertIn('visibility', body)
         self.assertTrue(body.get('visibility') == 'public')
-        self.assertTrue('status' in body)
+        self.assertIn('status', body)
         self.assertEqual('queued', body.get('status'))
 
         # Now try uploading an image file
@@ -62,7 +62,7 @@ class CreateRegisterImagesTest(base.BaseV2ImageTest):
         resp, body = self.client.store_image(image_id, image_file)
         self.assertEqual(resp.status, 204)
         resp, body = self.client.get_image_metadata(image_id)
-        self.assertTrue('size' in body)
+        self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
 
 
@@ -104,4 +104,4 @@ class ListImagesTest(base.BaseV2ImageTest):
         self.assertEqual(resp['status'], '200')
         image_list = map(lambda x: x['id'], images_list)
         for image in self.created_images:
-            self.assertTrue(image in image_list)
+            self.assertIn(image, image_list)

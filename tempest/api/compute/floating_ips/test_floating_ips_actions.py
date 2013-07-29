@@ -68,7 +68,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
                 self.client.get_floating_ip_details(floating_ip_id_allocated)
             #Checking if the details of allocated IP is in list of floating IP
             resp, body = self.client.list_floating_ips()
-            self.assertTrue(floating_ip_details in body)
+            self.assertIn(floating_ip_details, body)
         finally:
             #Deleting the floating IP which is created in this method
             self.client.delete_floating_ip(floating_ip_id_allocated)

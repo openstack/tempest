@@ -73,7 +73,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         # Role should be created, verified, and deleted
         role_name = rand_name('role-test-')
         resp, body = self.client.create_role(role_name)
-        self.assertTrue('status' in resp)
+        self.assertIn('status', resp)
         self.assertTrue(resp['status'].startswith('2'))
         self.assertEqual(role_name, body['name'])
 
@@ -82,7 +82,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertTrue(any(found))
 
         resp, body = self.client.delete_role(found[0]['id'])
-        self.assertTrue('status' in resp)
+        self.assertIn('status', resp)
         self.assertTrue(resp['status'].startswith('2'))
 
         resp, body = self.client.list_roles()
@@ -100,7 +100,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         role_name = rand_name('role-dup-')
         resp, body = self.client.create_role(role_name)
         role1_id = body.get('id')
-        self.assertTrue('status' in resp)
+        self.assertIn('status', resp)
         self.assertTrue(resp['status'].startswith('2'))
         self.addCleanup(self.client.delete_role, role1_id)
         self.assertRaises(exceptions.Duplicate, self.client.create_role,

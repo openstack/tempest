@@ -44,8 +44,8 @@ class VolumesGetTestJSON(base.BaseComputeTest):
                                                  metadata=metadata)
         self.addCleanup(self._delete_volume, volume)
         self.assertEqual(200, resp.status)
-        self.assertTrue('id' in volume)
-        self.assertTrue('displayName' in volume)
+        self.assertIn('id', volume)
+        self.assertIn('displayName', volume)
         self.assertEqual(volume['displayName'], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
@@ -80,8 +80,8 @@ class VolumesGetTestJSON(base.BaseComputeTest):
                                                  metadata={})
         self.addCleanup(self._delete_volume, volume)
         self.assertEqual(200, resp.status)
-        self.assertTrue('id' in volume)
-        self.assertTrue('displayName' in volume)
+        self.assertIn('id', volume)
+        self.assertIn('displayName', volume)
         #Wait for Volume status to become ACTIVE
         self.client.wait_for_volume_status(volume['id'], 'available')
         #GET Volume

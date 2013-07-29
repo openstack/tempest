@@ -104,7 +104,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
     def nova_list(self):
         servers = self.compute_client.servers.list()
         LOG.debug("server_list:%s" % servers)
-        self.assertTrue(self.server in servers)
+        self.assertIn(self.server, servers)
 
     def nova_show(self):
         got_server = self.compute_client.servers.get(self.server)
@@ -124,7 +124,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
 
     def cinder_list(self):
         volumes = self.volume_client.volumes.list()
-        self.assertTrue(self.volume in volumes)
+        self.assertIn(self.volume, volumes)
 
     def cinder_show(self):
         volume = self.volume_client.volumes.get(self.volume.id)

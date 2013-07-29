@@ -27,7 +27,7 @@ class ExtensionsTestJSON(base.BaseComputeTest):
     def test_list_extensions(self):
         # List of all extensions
         resp, extensions = self.extensions_client.list_extensions()
-        self.assertTrue("extensions" in extensions)
+        self.assertIn("extensions", extensions)
         self.assertEqual(200, resp.status)
 
 

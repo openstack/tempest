@@ -51,7 +51,7 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTest):
         self.assertNotEqual(0, len(floating_ips),
                             "Expected floating IPs. Got zero.")
         for i in range(3):
-            self.assertTrue(self.floating_ip[i] in floating_ips)
+            self.assertIn(self.floating_ip[i], floating_ips)
 
     @attr(type='gate')
     def test_get_floating_ip_details(self):

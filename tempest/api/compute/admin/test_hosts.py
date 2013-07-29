@@ -48,7 +48,7 @@ class HostsAdminTestJSON(base.BaseComputeAdminTest):
         resp, hosts = self.client.list_hosts(params)
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hosts) >= 1)
-        self.assertTrue(host in hosts)
+        self.assertIn(host, hosts)
 
     @attr(type='negative')
     def test_list_hosts_with_non_existent_zone(self):

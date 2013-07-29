@@ -87,8 +87,8 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         try:
             resp, keypair_detail = self.client.get_keypair(k_name)
             self.assertEqual(200, resp.status)
-            self.assertTrue('name' in keypair_detail)
-            self.assertTrue('public_key' in keypair_detail)
+            self.assertIn('name', keypair_detail)
+            self.assertIn('public_key', keypair_detail)
             self.assertEqual(keypair_detail['name'], k_name,
                              "The created keypair name is not equal "
                              "to requested name")

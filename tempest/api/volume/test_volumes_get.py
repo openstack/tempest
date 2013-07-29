@@ -40,8 +40,8 @@ class VolumesGetTest(base.BaseVolumeTest):
                                                      metadata=metadata,
                                                      **kwargs)
             self.assertEqual(200, resp.status)
-            self.assertTrue('id' in volume)
-            self.assertTrue('display_name' in volume)
+            self.assertIn('id', volume)
+            self.assertIn('display_name', volume)
             self.assertEqual(volume['display_name'], v_name,
                              "The created volume name is not equal "
                              "to the requested name")
@@ -83,8 +83,8 @@ class VolumesGetTest(base.BaseVolumeTest):
                                                      display_name=v_name,
                                                      metadata={})
             self.assertEqual(200, resp.status)
-            self.assertTrue('id' in volume)
-            self.assertTrue('display_name' in volume)
+            self.assertIn('id', volume)
+            self.assertIn('display_name', volume)
             self.client.wait_for_volume_status(volume['id'], 'available')
             #GET Volume
             resp, fetched_volume = self.client.get_volume(volume['id'])

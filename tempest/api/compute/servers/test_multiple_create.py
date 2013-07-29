@@ -47,7 +47,7 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
         # reservation_id is not in the response body when the request send
         # contains return_reservation_id=False
         self.assertEqual('202', resp['status'])
-        self.assertFalse('reservation_id' in body)
+        self.assertNotIn('reservation_id', body)
 
     @attr(type=['negative', 'gate'])
     def test_min_count_less_than_one(self):
