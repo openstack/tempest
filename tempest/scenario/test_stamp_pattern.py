@@ -15,12 +15,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from cinderclient import exceptions
+import testtools
+
 from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest.scenario import manager
-import time
 
 LOG = logging.getLogger(__name__)
 
@@ -197,6 +200,7 @@ class TestStampPattern(manager.OfficialClientTest):
         got_timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 
+    @testtools.skip("Until Bug #1205344 is fixed")
     def test_stamp_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
