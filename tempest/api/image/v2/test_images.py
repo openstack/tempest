@@ -105,3 +105,8 @@ class ListImagesTest(base.BaseV2ImageTest):
         image_list = map(lambda x: x['id'], images_list)
         for image in self.created_images:
             self.assertIn(image, image_list)
+
+    @attr(type=['negative', 'gate'])
+    def test_get_image_meta_by_null_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_image_metadata, '')
