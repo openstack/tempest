@@ -67,7 +67,7 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
         update_type = rand_name('UpdatedPolicyType-')
         resp, data = self.policy_client.update_policy(
             policy['id'], type=update_type)
-        self.assertTrue('type' in data)
+        self.assertIn('type', data)
         #Assertion for updated value with fetched value
         resp, fetched_policy = self.policy_client.get_policy(policy['id'])
         self.assertIn('id', fetched_policy)

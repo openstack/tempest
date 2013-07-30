@@ -242,7 +242,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.data.users.append(user2)
         #List of users for the respective tenant ID
         resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
-        self.assertTrue(resp['status'] in ('200', '203'))
+        self.assertIn(resp['status'], ('200', '203'))
         for i in body:
             fetched_user_ids.append(i['id'])
         #verifying the user Id in the list

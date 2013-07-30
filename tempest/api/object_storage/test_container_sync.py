@@ -67,9 +67,9 @@ class ContainerSyncTest(base.BaseObjectTest):
                        (cont_client[1].base_url, str(cont[1]))}
             resp, body = \
                 cont_client[0].put(str(cont[0]), body=None, headers=headers)
-            self.assertTrue(resp['status'] in ('202', '201'),
-                            'Error installing X-Container-Sync-To '
-                            'for the container "%s"' % (cont[0]))
+            self.assertIn(resp['status'], ('202', '201'),
+                          'Error installing X-Container-Sync-To '
+                          'for the container "%s"' % (cont[0]))
             # create object in container
             object_name = rand_name(name='TestSyncObject')
             data = object_name[::-1]  # arbitrary_string()

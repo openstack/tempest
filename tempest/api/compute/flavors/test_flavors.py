@@ -35,14 +35,14 @@ class FlavorsTestJSON(base.BaseComputeTest):
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         flavor_min_detail = {'id': flavor['id'], 'links': flavor['links'],
                              'name': flavor['name']}
-        self.assertTrue(flavor_min_detail in flavors)
+        self.assertIn(flavor_min_detail, flavors)
 
     @attr(type='smoke')
     def test_list_flavors_with_detail(self):
         # Detailed list of all flavors should contain the expected flavor
         resp, flavors = self.client.list_flavors_with_detail()
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
-        self.assertTrue(flavor in flavors)
+        self.assertIn(flavor, flavors)
 
     @attr(type='smoke')
     def test_get_flavor(self):

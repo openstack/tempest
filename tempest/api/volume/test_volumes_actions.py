@@ -82,7 +82,7 @@ class VolumesActionsTest(BaseVolumeTest):
         try:
             resp, volume = self.client.get_volume(self.volume['id'])
             self.assertEqual(200, resp.status)
-            self.assertTrue('attachments' in volume)
+            self.assertIn('attachments', volume)
             attachment = volume['attachments'][0]
             self.assertEqual(mountpoint, attachment['device'])
             self.assertEqual(self.server['id'], attachment['server_id'])

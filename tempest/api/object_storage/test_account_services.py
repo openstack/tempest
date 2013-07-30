@@ -42,7 +42,7 @@ class AccountTest(base.BaseObjectTest):
 
         self.assertIsNotNone(container_list)
         container_names = [c['name'] for c in container_list]
-        self.assertTrue(self.container_name in container_names)
+        self.assertIn(self.container_name, container_names)
 
     @attr(type='smoke')
     def test_list_account_metadata(self):

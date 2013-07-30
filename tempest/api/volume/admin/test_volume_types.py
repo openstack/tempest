@@ -64,14 +64,14 @@ class VolumeTypesTest(BaseVolumeTest):
                 vol_type_name,
                 extra_specs=extra_specs)
             self.assertEqual(200, resp.status)
-            self.assertTrue('id' in body)
-            self.assertTrue('name' in body)
+            self.assertIn('id', body)
+            self.assertIn('name', body)
             resp, volume = self.volumes_client.create_volume(
                 size=1, display_name=vol_name,
                 volume_type=vol_type_name)
             self.assertEqual(200, resp.status)
-            self.assertTrue('id' in volume)
-            self.assertTrue('display_name' in volume)
+            self.assertIn('id', volume)
+            self.assertIn('display_name', volume)
             self.assertEqual(volume['display_name'], vol_name,
                              "The created volume name is not equal "
                              "to the requested name")
@@ -113,8 +113,8 @@ class VolumeTypesTest(BaseVolumeTest):
                 name,
                 extra_specs=extra_specs)
             self.assertEqual(200, resp.status)
-            self.assertTrue('id' in body)
-            self.assertTrue('name' in body)
+            self.assertIn('id', body)
+            self.assertIn('name', body)
             self.assertEqual(body['name'], name,
                              "The created volume_type name is not equal "
                              "to the requested name")
@@ -137,8 +137,8 @@ class VolumeTypesTest(BaseVolumeTest):
                 name,
                 extra_specs=extra_specs)
             self.assertEqual(200, resp.status)
-            self.assertTrue('id' in body)
-            self.assertTrue('name' in body)
+            self.assertIn('id', body)
+            self.assertIn('name', body)
             self.assertEqual(body['name'], name,
                              "The created volume_type name is not equal "
                              "to the requested name")

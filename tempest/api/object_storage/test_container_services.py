@@ -37,7 +37,7 @@ class ContainerTest(base.BaseObjectTest):
         container_name = rand_name(name='TestContainer')
         resp, body = self.container_client.create_container(container_name)
         self.containers.append(container_name)
-        self.assertTrue(resp['status'] in ('202', '201'))
+        self.assertIn(resp['status'], ('202', '201'))
 
     @attr(type='smoke')
     def test_delete_container(self):

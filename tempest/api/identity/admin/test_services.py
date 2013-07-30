@@ -37,25 +37,25 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
                 name, type, description=description)
             self.assertTrue(resp['status'].startswith('2'))
             #Verifying response body of create service
-            self.assertTrue('id' in service_data)
+            self.assertIn('id', service_data)
             self.assertFalse(service_data['id'] is None)
-            self.assertTrue('name' in service_data)
+            self.assertIn('name', service_data)
             self.assertEqual(name, service_data['name'])
-            self.assertTrue('type' in service_data)
+            self.assertIn('type', service_data)
             self.assertEqual(type, service_data['type'])
-            self.assertTrue('description' in service_data)
+            self.assertIn('description', service_data)
             self.assertEqual(description, service_data['description'])
             #Get service
             resp, fetched_service = self.client.get_service(service_data['id'])
             self.assertTrue(resp['status'].startswith('2'))
             #verifying the existence of service created
-            self.assertTrue('id' in fetched_service)
+            self.assertIn('id', fetched_service)
             self.assertEquals(fetched_service['id'], service_data['id'])
-            self.assertTrue('name' in fetched_service)
+            self.assertIn('name', fetched_service)
             self.assertEqual(fetched_service['name'], service_data['name'])
-            self.assertTrue('type' in fetched_service)
+            self.assertIn('type', fetched_service)
             self.assertEqual(fetched_service['type'], service_data['type'])
-            self.assertTrue('description' in fetched_service)
+            self.assertIn('description', fetched_service)
             self.assertEqual(fetched_service['description'],
                              service_data['description'])
         finally:
