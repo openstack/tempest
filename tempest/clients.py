@@ -296,7 +296,8 @@ class Manager(object):
         try:
             self.servers_client = SERVERS_CLIENTS[interface](*client_args)
             self.limits_client = LIMITS_CLIENTS[interface](*client_args)
-            self.images_client = IMAGES_CLIENTS[interface](*client_args)
+            if self.config.service_available.glance:
+                self.images_client = IMAGES_CLIENTS[interface](*client_args)
             self.keypairs_client = KEYPAIRS_CLIENTS[interface](*client_args)
             self.quotas_client = QUOTAS_CLIENTS[interface](*client_args)
             self.flavors_client = FLAVORS_CLIENTS[interface](*client_args)
@@ -341,8 +342,9 @@ class Manager(object):
         self.network_client = NetworkClient(*client_args)
         self.hosts_client = HostsClientJSON(*client_args)
         self.account_client = AccountClient(*client_args)
-        self.image_client = ImageClientJSON(*client_args)
-        self.image_client_v2 = ImageClientV2JSON(*client_args)
+        if self.config.service_available.glance:
+            self.image_client = ImageClientJSON(*client_args)
+            self.image_client_v2 = ImageClientV2JSON(*client_args)
         self.container_client = ContainerClient(*client_args)
         self.object_client = ObjectClient(*client_args)
         self.orchestration_client = OrchestrationClient(*client_args)
