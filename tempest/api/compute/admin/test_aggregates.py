@@ -18,6 +18,7 @@
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import lockutils
 from tempest.test import attr
 
 
@@ -197,6 +198,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertIn(self.host, body['hosts'])
 
     @attr(type='gate')
+    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_host_create_server_with_az(self):
         # Add an host to the given aggregate and create a server.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -205,7 +207,6 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
-
         server_name = rand_name('test_server_')
         servers_client = self.servers_client
         admin_servers_client = self.os_adm.servers_client
