@@ -21,12 +21,11 @@ import subprocess
 import sys
 
 from sqlalchemy import create_engine, MetaData
-
 from tempest.common import log as logging
 from tempest.common.ssh import Client
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
-from tempest import test
+from tempest.scenario import manager
 
 LOG = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class WhiteboxTest(object):
     pass
 
 
-class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
+class ComputeWhiteboxTest(manager.OfficialClientTest):
 
     """
     Base smoke test case class for OpenStack Compute API (Nova)
@@ -64,15 +63,6 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         cls.nova_dir = cls.config.whitebox.source_dir
         cls.compute_bin_dir = cls.config.whitebox.bin_dir
         cls.compute_config_path = cls.config.whitebox.config_path
-        cls.servers_client = cls.manager.servers_client
-        cls.images_client = cls.manager.images_client
-        cls.flavors_client = cls.manager.flavors_client
-        cls.extensions_client = cls.manager.extensions_client
-        cls.floating_ips_client = cls.manager.floating_ips_client
-        cls.keypairs_client = cls.manager.keypairs_client
-        cls.security_groups_client = cls.manager.security_groups_client
-        cls.limits_client = cls.manager.limits_client
-        cls.volumes_client = cls.manager.volumes_client
         cls.build_interval = cls.config.compute.build_interval
         cls.build_timeout = cls.config.compute.build_timeout
         cls.ssh_user = cls.config.compute.ssh_user
@@ -80,38 +70,27 @@ class ComputeWhiteboxTest(test.ComputeFuzzClientTest, WhiteboxTest):
         cls.image_ref_alt = cls.config.compute.image_ref_alt
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
-        cls.servers = []
 
+    #NOTE(afazekas): Mimics the helper method used in the api tests
     @classmethod
-    def tearDownClass(cls):
-        # NOTE(jaypipes): Tests often add things in a particular order
-        # so we destroy resources in the reverse order in which resources
-        # are added to the test class object
-        if not cls.os_resources:
-            return
-        thing = cls.os_resources.pop()
-        while True:
-            LOG.debug("Deleting %r from shared resources of %s" %
-                      (thing, cls.__name__))
-            # Resources in novaclient all have a delete() method
-            # which destroys the resource...
-            thing.delete()
-            if not cls.os_resources:
-                return
-            thing = cls.os_resources.pop()
+    def create_server(cls, **kwargs):
+        flavor_ref = cls.config.compute.flavor_ref
+        image_ref = cls.config.compute.image_ref
+        name = rand_name(cls.__name__ + "-instance")
+        if 'name' in kwargs:
+            name = kwargs.pop('name')
+        flavor = kwargs.get('flavor', flavor_ref)
+        image_id = kwargs.get('image_id', image_ref)
 
-    @classmethod
-    def create_server(cls, image_id=None):
-        """Wrapper utility that returns a test server."""
-        server_name = rand_name(cls.__name__ + "-instance")
-        flavor = cls.flavor_ref
-        if not image_id:
-            image_id = cls.image_ref
+        server = cls.compute_client.servers.create(
+            name, image_id, flavor, **kwargs)
 
-        resp, server = cls.servers_client.create_server(
-            server_name, image_id, flavor)
-        cls.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
-        cls.servers.append(server)
+        if 'wait_until' in kwargs:
+            cls.status_timeout(cls.compute_client.servers, server.id,
+                               server['id'], kwargs['wait_until'])
+
+        server = cls.compute_client.servers.get(server.id)
+        cls.set_resource(name, server)
         return server
 
     @classmethod
