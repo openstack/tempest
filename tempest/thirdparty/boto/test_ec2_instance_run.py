@@ -88,6 +88,53 @@ class InstanceRunTest(BotoTestCase):
                                                            image["image_id"])
 
     @attr(type='smoke')
+    def test_run_idempotent_instances(self):
+        # EC2 run instances idempotently
+
+        def _run_instance(client_token):
+            reservation = self.ec2_client.run_instances(
+                image_id=self.images["ami"]["image_id"],
+                kernel_id=self.images["aki"]["image_id"],
+                ramdisk_id=self.images["ari"]["image_id"],
+                instance_type=self.instance_type,
+                client_token=client_token)
+            rcuk = self.addResourceCleanUp(self.destroy_reservation,
+                                           reservation)
+            return (reservation, rcuk)
+
+        def _terminate_reservation(reservation, rcuk):
+            for instance in reservation.instances:
+                instance.terminate()
+            self.cancelResourceCleanUp(rcuk)
+
+        reservation_1, rcuk_1 = _run_instance('token_1')
+        reservation_2, rcuk_2 = _run_instance('token_2')
+        reservation_1a, rcuk_1a = _run_instance('token_1')
+
+        self.assertIsNotNone(reservation_1)
+        self.assertIsNotNone(reservation_2)
+        self.assertIsNotNone(reservation_1a)
+
+        # same reservation for token_1
+        self.assertEqual(reservation_1.id, reservation_1a.id)
+
+        # Cancel cleanup -- since it's a duplicate, it's
+        # handled by rcuk1
+        self.cancelResourceCleanUp(rcuk_1a)
+
+        _terminate_reservation(reservation_1, rcuk_1)
+        _terminate_reservation(reservation_2, rcuk_2)
+
+        reservation_3, rcuk_3 = _run_instance('token_1')
+        self.assertIsNotNone(reservation_3)
+
+        # make sure we don't get the old reservation back
+        self.assertNotEqual(reservation_1.id, reservation_3.id)
+
+        # clean up
+        _terminate_reservation(reservation_3, rcuk_3)
+
+    @attr(type='smoke')
     def test_run_stop_terminate_instance(self):
         # EC2 run, stop and terminate instance
         image_ami = self.ec2_client.get_image(self.images["ami"]
