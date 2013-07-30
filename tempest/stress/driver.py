@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import importlib
 import logging
 import multiprocessing
 import time
@@ -21,6 +20,7 @@ from tempest import clients
 from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import importutils
 from tempest.stress import cleanup
 
 admin_manager = clients.AdminManager()
@@ -93,11 +93,6 @@ def _error_in_logs(logfiles, nodes):
     return None
 
 
-def get_action_object(path):
-    (module_part, _, obj_name) = path.rpartition('.')
-    return getattr(importlib.import_module(module_part), obj_name)
-
-
 def stress_openstack(tests, duration, max_runs=None):
     """
     Workload driver. Executes an action function against a nova-cluster.
@@ -131,7 +126,7 @@ def stress_openstack(tests, duration, max_runs=None):
                                           password="pass",
                                           tenant_name=tenant_name)
 
-            test_obj = get_action_object(test['action'])
+            test_obj = importutils.import_class(test['action'])
             test_run = test_obj(manager, logger, max_runs)
 
             kwargs = test.get('kwargs', {})
