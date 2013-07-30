@@ -82,6 +82,11 @@ class ClientTestBase(tempest.test.BaseTestCase):
         return self.cmd_with_auth(
             'cinder', action, flags, params, admin, fail_ok)
 
+    def neutron(self, action, flags='', params='', admin=True, fail_ok=False):
+        """Executes neutron command for the given action."""
+        return self.cmd_with_auth(
+            'neutron', action, flags, params, admin, fail_ok)
+
     def cmd_with_auth(self, cmd, action, flags='', params='',
                       admin=True, fail_ok=False):
         """Executes given command with auth attributes appended."""
