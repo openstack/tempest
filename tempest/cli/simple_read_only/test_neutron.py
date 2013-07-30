@@ -19,7 +19,6 @@ import re
 import subprocess
 
 from oslo.config import cfg
-import testtools
 
 import tempest.cli
 from tempest.common import log as logging
@@ -36,9 +35,13 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
     These tests do not presume any content, nor do they create
     their own. They only verify the structure of output if present.
     """
-    if (not CONF.service_available.neutron):
-        msg = "Skiping all Neutron cli tests because it is not available"
-        raise testtools.TestCase.skipException(msg)
+
+    @classmethod
+    def setUpClass(cls):
+        if (not CONF.service_available.neutron):
+            msg = "Skiping all Neutron cli tests because it is not available"
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyNeutronClientTest, cls).setUpClass()
 
     def test_neutron_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
