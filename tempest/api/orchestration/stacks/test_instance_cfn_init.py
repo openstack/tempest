@@ -13,13 +13,13 @@
 #    under the License.
 
 import json
-from tempest.common import log as logging
 import testtools
 
 from tempest.api.orchestration import base
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
+from tempest.openstack.common import log as logging
 from tempest.test import attr
 
 

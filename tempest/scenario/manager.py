@@ -29,10 +29,10 @@ import novaclient.client
 
 
 from tempest.api.network import common as net_common
-from tempest.common import log as logging
 from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 import tempest.manager
+from tempest.openstack.common import log as logging
 import tempest.test
 
 

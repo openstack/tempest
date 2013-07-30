@@ -23,10 +23,10 @@ import testresources
 import testtools
 
 from tempest import clients
-from tempest.common import log as logging
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

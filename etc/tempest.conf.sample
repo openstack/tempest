@@ -1,3 +1,6 @@
+[DEFAULT]
+# log_config = /opt/stack/tempest/etc/logging.conf.sample
+
 [identity]
 # This section contains configuration options that a variety of Tempest
 # test clients use when authenticating with different user/tenant

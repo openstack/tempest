@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest import clients
-from tempest.common import log as logging
+from tempest.openstack.common import log as logging
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 

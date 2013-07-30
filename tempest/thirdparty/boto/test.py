@@ -28,10 +28,10 @@ from boto import s3
 import keystoneclient.exceptions
 
 import tempest.clients
-from tempest.common import log as logging
 from tempest.common.utils.file_utils import have_effective_read_access
 import tempest.config
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 import tempest.test
 from tempest.thirdparty.boto.utils.wait import re_search_wait
 from tempest.thirdparty.boto.utils.wait import state_wait
@@ -58,8 +58,9 @@ def decision_maker():
 
     A_I_IMAGES_READY = all_read(ami_path, aki_path, ari_path)
     boto_logger = logging.getLogger('boto')
-    level = boto_logger.level
-    boto_logger.setLevel(orig_logging.CRITICAL)  # suppress logging for these
+    level = boto_logger.logger.level
+    boto_logger.logger.setLevel(orig_logging.CRITICAL)  # suppress logging
+                                                        # for these
 
     def _cred_sub_check(connection_data):
         if not id_matcher.match(connection_data["aws_access_key_id"]):
@@ -99,7 +100,7 @@ def decision_maker():
     except keystoneclient.exceptions.Unauthorized:
         S3_CAN_CONNECT_ERROR = "AWS credentials not set," +\
                                " faild to get them even by keystoneclient"
-    boto_logger.setLevel(level)
+    boto_logger.logger.setLevel(level)
     return {'A_I_IMAGES_READY': A_I_IMAGES_READY,
             'S3_CAN_CONNECT_ERROR': S3_CAN_CONNECT_ERROR,
             'EC2_CAN_CONNECT_ERROR': EC2_CAN_CONNECT_ERROR}

@@ -34,9 +34,8 @@ if not hasattr(urlparse, 'parse_qsl'):
 
 import OpenSSL
 
-from tempest.common import log as logging
 from tempest import exceptions as exc
-
+from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 USER_AGENT = 'tempest'

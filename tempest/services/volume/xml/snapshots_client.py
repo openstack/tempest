@@ -17,9 +17,9 @@ import urllib
 
 from lxml import etree
 
-from tempest.common import log as logging
 from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json

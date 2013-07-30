@@ -21,7 +21,7 @@ import subprocess
 from oslo.config import cfg
 
 import tempest.cli
-from tempest.common import log as logging
+from tempest.openstack.common import log as logging
 
 CONF = cfg.CONF
 

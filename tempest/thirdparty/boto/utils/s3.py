@@ -22,7 +22,7 @@ import re
 import boto
 import boto.s3.key
 
-from tempest.common import log as logging
+from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

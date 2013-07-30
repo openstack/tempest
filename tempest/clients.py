@@ -15,9 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import log as logging
 from tempest import config
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.services import botoclients
 from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
