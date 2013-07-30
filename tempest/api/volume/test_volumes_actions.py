@@ -106,3 +106,4 @@ class VolumesActionsTest(BaseVolumeTest):
         self.addCleanup(self.image_client.delete_image, image_id)
         self.assertEqual(202, resp.status)
         self.image_client.wait_for_image_status(image_id, 'active')
+        self.client.wait_for_volume_status(self.volume['id'], 'available')
