@@ -53,6 +53,7 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
             cls.client.delete_endpoint(e['id'])
         for s in cls.service_ids:
             cls.identity_client.delete_service(s)
+        super(EndPointsTestJSON, cls).tearDownClass()
 
     @attr(type='gate')
     def test_list_endpoints(self):

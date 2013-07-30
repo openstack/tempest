@@ -25,6 +25,7 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BaseIdentityAdminTest, cls).setUpClass()
         os = clients.AdminManager(interface=cls._interface)
         cls.client = os.identity_client
         cls.token_client = os.token_client
@@ -45,6 +46,7 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
     @classmethod
     def tearDownClass(cls):
         cls.data.teardown_all()
+        super(BaseIdentityAdminTest, cls).tearDownClass()
 
     def disable_user(self, user_name):
         user = self.get_user_by_name(user_name)

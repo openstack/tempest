@@ -31,6 +31,7 @@ class ContainerTest(base.BaseObjectTest):
     @classmethod
     def tearDownClass(cls):
         cls.delete_containers(cls.containers)
+        super(ContainerTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_create_container(self):

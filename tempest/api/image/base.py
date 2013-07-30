@@ -29,6 +29,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BaseImageTest, cls).setUpClass()
         cls.created_images = []
         cls._interface = 'json'
         cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)

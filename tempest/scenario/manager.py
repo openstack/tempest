@@ -150,6 +150,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(OfficialClientTest, cls).setUpClass()
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             __name__, tempest_client=False)
         if cls.config.compute.allow_tenant_isolation:
