@@ -69,7 +69,10 @@ class ServicesAdminTestJSON(base.BaseComputeAdminTest):
         # lookups, so only compare binary lists.
         s1 = map(lambda x: x['binary'], services)
         s2 = map(lambda x: x['binary'], services_on_host)
-        self.assertEqual(s1, s2)
+
+        #sort the lists before comparing, to take out dependency
+        #on order.
+        self.assertEqual(sorted(s1), sorted(s2))
 
     @attr(type=['negative', 'gate'])
     def test_get_service_by_invalid_params(self):
