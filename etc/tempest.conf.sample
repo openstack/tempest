@@ -1,5 +1,13 @@
 [DEFAULT]
 # log_config = /opt/stack/tempest/etc/logging.conf.sample
+
+# disable logging to the stderr
+use_stderr = False
+
+# log file
+log_file = tempest.log
+
+# lock/semaphore base directory
 lock_path=/tmp
 
 [identity]
