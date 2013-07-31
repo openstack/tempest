@@ -366,6 +366,9 @@ ObjectStoreConfig = [
                default=5,
                help="Number of seconds to wait while looping to check the"
                     "status of a container to container synchronization"),
+    cfg.BoolOpt('accounts_quotas_available',
+                default=True,
+                help="Set to True if the Account Quota middleware is enabled"),
 ]
 
 

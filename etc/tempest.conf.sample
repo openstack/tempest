@@ -259,6 +259,8 @@ container_sync_timeout = 120
 # Number of seconds to wait while looping to check the status of a
 # container to container synchronization
 container_sync_interval = 5
+# Set to True if the Account Quota middleware is enabled
+accounts_quotas_available = True
 
 [boto]
 # This section contains configuration options used when executing tests
