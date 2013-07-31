@@ -72,19 +72,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
-    def rebuild_server(cls, **kwargs):
-        # Destroy an existing server and creates a new one
-        try:
-            cls.servers_client.delete_server(cls.server_id)
-            cls.servers_client.wait_for_server_termination(cls.server_id)
-        except Exception as exc:
-            LOG.exception(exc)
-            pass
-        resp, server = cls.create_server(wait_until='ACTIVE', **kwargs)
-        cls.server_id = server['id']
-        cls.password = server['adminPass']
-
-    @classmethod
     def clear_images(cls):
         for image_id in cls.images:
             try:
@@ -132,25 +119,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
         return resp, body
 
-    @classmethod
-    def create_image_from_server(cls, server_id, **kwargs):
-        """Wrapper utility that returns an image created from the server."""
-        name = rand_name(cls.__name__ + "-image")
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
-
-        resp, image = cls.images_client.create_image(
-            server_id, name)
-        image_id = parse_image_id(resp['location'])
-        cls.images.append(image_id)
-
-        if 'wait_until' in kwargs:
-            cls.images_client.wait_for_image_status(image_id,
-                                                    kwargs['wait_until'])
-            resp, image = cls.images_client.get_image(image_id)
-
-        return resp, image
-
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""
         start_time = int(time.time())
@@ -191,6 +159,38 @@ class BaseV2ComputeTest(BaseComputeTest):
         cls.hypervisor_client = cls.os.hypervisor_client
         cls.servers_client_v3_auth = cls.os.servers_client_v3_auth
 
+    @classmethod
+    def create_image_from_server(cls, server_id, **kwargs):
+        """Wrapper utility that returns an image created from the server."""
+        name = rand_name(cls.__name__ + "-image")
+        if 'name' in kwargs:
+            name = kwargs.pop('name')
+
+        resp, image = cls.images_client.create_image(
+            server_id, name)
+        image_id = parse_image_id(resp['location'])
+        cls.images.append(image_id)
+
+        if 'wait_until' in kwargs:
+            cls.images_client.wait_for_image_status(image_id,
+                                                    kwargs['wait_until'])
+            resp, image = cls.images_client.get_image(image_id)
+
+        return resp, image
+
+    @classmethod
+    def rebuild_server(cls, **kwargs):
+        # Destroy an existing server and creates a new one
+        try:
+            cls.servers_client.delete_server(cls.server_id)
+            cls.servers_client.wait_for_server_termination(cls.server_id)
+        except Exception as exc:
+            LOG.exception(exc)
+            pass
+        resp, server = cls.create_server(wait_until='ACTIVE', **kwargs)
+        cls.server_id = server['id']
+        cls.password = server['adminPass']
+
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     """Base test case class for Compute Admin V2 API tests."""
@@ -215,3 +215,76 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
                                          interface=cls._interface)
         else:
             cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
+
+
+class BaseV3ComputeTest(BaseComputeTest):
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseV3ComputeTest, cls).setUpClass()
+        if not cls.config.compute_feature_enabled.api_v3:
+            skip_msg = ("%s skipped as nova v3 api is not available" %
+                        cls.__name__)
+            raise cls.skipException(skip_msg)
+
+        cls.servers_client = cls.os.servers_v3_client
+        cls.images_client = cls.os.image_client
+
+    @classmethod
+    def create_image_from_server(cls, server_id, **kwargs):
+        """Wrapper utility that returns an image created from the server."""
+        name = rand_name(cls.__name__ + "-image")
+        if 'name' in kwargs:
+            name = kwargs.pop('name')
+
+        resp, image = cls.servers_client.create_image(
+            server_id, name)
+        image_id = parse_image_id(resp['location'])
+        cls.images.append(image_id)
+
+        if 'wait_until' in kwargs:
+            cls.images_client.wait_for_image_status(image_id,
+                                                    kwargs['wait_until'])
+            resp, image = cls.images_client.get_image_meta(image_id)
+
+        return resp, image
+
+    @classmethod
+    def rebuild_server(cls, **kwargs):
+        # Destroy an existing server and creates a new one
+        try:
+            cls.servers_client.delete_server(cls.server_id)
+            cls.servers_client.wait_for_server_termination(cls.server_id)
+        except Exception as exc:
+            LOG.exception(exc)
+            pass
+        resp, server = cls.create_server(wait_until='ACTIVE', **kwargs)
+        cls.server_id = server['id']
+        cls.password = server['admin_pass']
+
+
+class BaseV3ComputeAdminTest(BaseV3ComputeTest):
+    """Base test case class for all Compute Admin API V3 tests."""
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseV3ComputeAdminTest, cls).setUpClass()
+        admin_username = cls.config.compute_admin.username
+        admin_password = cls.config.compute_admin.password
+        admin_tenant = cls.config.compute_admin.tenant_name
+        if not (admin_username and admin_password and admin_tenant):
+            msg = ("Missing Compute Admin API credentials "
+                   "in configuration.")
+            raise cls.skipException(msg)
+        if cls.config.compute.allow_tenant_isolation:
+            creds = cls.isolated_creds.get_admin_creds()
+            admin_username, admin_tenant_name, admin_password = creds
+            os_adm = clients.Manager(username=admin_username,
+                                     password=admin_password,
+                                     tenant_name=admin_tenant_name,
+                                     interface=cls._interface)
+        else:
+            os_adm = clients.ComputeAdminManager(interface=cls._interface)
+
+        cls.os_adm = os_adm
+        cls.severs_admin_client = cls.os_adm.servers_v3_client

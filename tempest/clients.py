@@ -46,6 +46,9 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
+from tempest.services.compute.v3.json.servers_client import \
+    ServersV3ClientJSON
+from tempest.services.compute.v3.xml.servers_client import ServersV3ClientXML
 from tempest.services.compute.xml.aggregates_client import AggregatesClientXML
 from tempest.services.compute.xml.availability_zone_client import \
     AvailabilityZoneClientXML
@@ -167,6 +170,7 @@ class Manager(object):
 
         if interface == 'xml':
             self.servers_client = ServersClientXML(*client_args)
+            self.servers_v3_client = ServersV3ClientXML(*client_args)
             self.limits_client = LimitsClientXML(*client_args)
             self.images_client = ImagesClientXML(*client_args)
             self.keypairs_client = KeyPairsClientXML(*client_args)
@@ -205,6 +209,7 @@ class Manager(object):
 
         elif interface == 'json':
             self.servers_client = ServersClientJSON(*client_args)
+            self.servers_v3_client = ServersV3ClientJSON(*client_args)
             self.limits_client = LimitsClientJSON(*client_args)
             self.images_client = ImagesClientJSON(*client_args)
             self.keypairs_client = KeyPairsClientJSON(*client_args)

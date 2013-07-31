@@ -186,6 +186,9 @@ ComputeGroup = [
                     "of identity.region is used instead. If no such region "
                     "is found in the service catalog, the first found one is "
                     "used."),
+    cfg.StrOpt('catalog_v3_type',
+               default='computev3',
+               help="Catalog type of the Compute v3 service."),
     cfg.StrOpt('path_to_private_key',
                default=None,
                help="Path to a private key file for SSH access to remote "
@@ -200,6 +203,9 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
                                       title="Enabled Compute Service Features")
 
 ComputeFeaturesGroup = [
+    cfg.BoolOpt('api_v3',
+                default=True,
+                help="If false, skip all nova v3 tests."),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),

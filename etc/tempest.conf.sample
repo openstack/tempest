@@ -138,6 +138,11 @@ use_floatingip_for_ssh = true
 # this value as "compute"
 catalog_type = compute
 
+# The type of endpoint for a Compute v3 API service. Unless you have a
+# custom Keystone service catalog implementation, you probably want to leave
+# this value as "computev3"
+catalog_v3_type = computev3
+
 # The name of a region for compute. If empty or commented-out, the value of
 # identity.region is used instead. If no such region is found in the service
 # catalog, the first found one is used.
@@ -147,6 +152,9 @@ catalog_type = compute
 volume_device_name = vdb
 
 [compute-feature-enabled]
+# Do we run the Nova V3 API tests?
+api_v3 = true
+
 # Does the Compute API support creation of images?
 create_image = true
 

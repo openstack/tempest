@@ -175,7 +175,7 @@ class ImageClientJSON(RestClient):
 
     def delete_image(self, image_id):
         url = 'v1/images/%s' % image_id
-        self.delete(url)
+        return self.delete(url)
 
     def image_list(self, **kwargs):
         url = 'v1/images'

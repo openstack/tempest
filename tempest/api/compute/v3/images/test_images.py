@@ -23,19 +23,17 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ImagesTestJSON(base.BaseV2ComputeTest):
+class ImagesV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesTestJSON, cls).setUpClass()
+        super(ImagesV3TestJSON, cls).setUpClass()
         if not cls.config.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
-
-        cls.image_ids = []
 
         if compute.MULTI_USER:
             if cls.config.compute.allow_tenant_isolation:
@@ -49,18 +47,11 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                 cls.alt_manager = clients.AltManager()
             cls.alt_client = cls.alt_manager.images_client
 
-    def tearDown(self):
-        """Terminate test instances created after a test is executed."""
-        for image_id in self.image_ids:
-            self.client.delete_image(image_id)
-            self.image_ids.remove(image_id)
-        super(ImagesTestJSON, self).tearDown()
-
     def __create_image__(self, server_id, name, meta=None):
-        resp, body = self.client.create_image(server_id, name, meta)
+        resp, body = self.servers_client.create_image(server_id, name, meta)
         image_id = parse_image_id(resp['location'])
+        self.addCleanup(self.client.delete_image, image_id)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
-        self.image_ids.append(image_id)
         return resp, body
 
     @attr(type=['negative', 'gate'])
@@ -99,27 +90,28 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         snapshot_name = rand_name('test-snap-')
         resp, image = self.create_image_from_server(server['id'],
                                                     name=snapshot_name,
-                                                    wait_until='ACTIVE')
+                                                    wait_until='active')
         self.addCleanup(self.client.delete_image, image['id'])
         self.assertEqual(snapshot_name, image['name'])
 
     @attr(type='gate')
-    def test_delete_saving_image(self):
+    def test_delete_queued_image(self):
         snapshot_name = rand_name('test-snap-')
         resp, server = self.create_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         resp, image = self.create_image_from_server(server['id'],
                                                     name=snapshot_name,
-                                                    wait_until='SAVING')
+                                                    wait_until='queued')
         resp, body = self.client.delete_image(image['id'])
-        self.assertEqual('204', resp['status'])
+        self.assertEqual('200', resp['status'])
 
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_uuid_35_characters_or_less(self):
         # Return an error if Image ID passed is 35 characters or less
         snapshot_name = rand_name('test-snap-')
         test_uuid = ('a' * 35)
-        self.assertRaises(exceptions.NotFound, self.client.create_image,
+        self.assertRaises(exceptions.NotFound,
+                          self.servers_client.create_image,
                           test_uuid, snapshot_name)
 
     @attr(type=['negative', 'gate'])
@@ -127,7 +119,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         # Return an error if Image ID passed is 37 characters or more
         snapshot_name = rand_name('test-snap-')
         test_uuid = ('a' * 37)
-        self.assertRaises(exceptions.NotFound, self.client.create_image,
+        self.assertRaises(exceptions.NotFound,
+                          self.servers_client.create_image,
                           test_uuid, snapshot_name)
 
     @attr(type=['negative', 'gate'])
@@ -168,5 +161,5 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
                           '11a22b9-12a9-5555-cc11-00ab112223fa-3fac')
 
 
-class ImagesTestXML(ImagesTestJSON):
+class ImagesV3TestXML(ImagesV3TestJSON):
     _interface = 'xml'

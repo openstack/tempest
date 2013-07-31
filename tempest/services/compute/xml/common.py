@@ -18,6 +18,7 @@
 import collections
 
 XMLNS_11 = "http://docs.openstack.org/compute/api/v1.1"
+XMLNS_V3 = "http://docs.openstack.org/compute/api/v1.1"
 
 
 # NOTE(danms): This is just a silly implementation to help make generating
