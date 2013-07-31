@@ -56,7 +56,8 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
         self.assertTableStruct(ext, ['alias', 'name'])
 
     def test_neutron_dhcp_agent_list_hosting_net(self):
-        self.neutron('dhcp-agent-list-hosting-net', params="private")
+        self.neutron('dhcp-agent-list-hosting-net',
+                     params=CONF.compute.fixed_network_name)
 
     def test_neutron_agent_list(self):
         agents = self.parser.listing(self.neutron('agent-list'))
