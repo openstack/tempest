@@ -22,7 +22,6 @@ from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
-from tempest.thirdparty.boto.utils.wait import state_wait
 
 
 class S3ImagesTest(BotoTestCase):
@@ -51,8 +50,6 @@ class S3ImagesTest(BotoTestCase):
                                cls.bucket_name)
         s3_upload_dir(bucket, cls.materials_path)
 
-    #Note(afazekas): Without the normal status change test!
-    # otherwise I would skip it too
     @attr(type='smoke')
     def test_register_get_deregister_ami_image(self):
         # Register and deregister ami image
@@ -70,13 +67,8 @@ class S3ImagesTest(BotoTestCase):
         retrieved_image = self.images_client.get_image(image["image_id"])
         self.assertTrue(retrieved_image.name == image["name"])
         self.assertTrue(retrieved_image.id == image["image_id"])
-        state = retrieved_image.state
-        if state != "available":
-            def _state():
-                retr = self.images_client.get_image(image["image_id"])
-                return retr.state
-            state = state_wait(_state, "available")
-        self.assertEqual("available", state)
+        if retrieved_image.state != "available":
+            self.assertImageStateWait(retrieved_image, "available")
         self.images_client.deregister_image(image["image_id"])
         self.assertNotIn(image["image_id"], str(
             self.images_client.get_all_images()))
