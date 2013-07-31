@@ -221,13 +221,10 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_delete_a_server_of_another_tenant(self):
         # Delete a server that belongs to another tenant
-        try:
-            resp, server = self.create_server(wait_until='ACTIVE')
-            self.assertRaises(exceptions.NotFound,
-                              self.alt_client.delete_server,
-                              server['id'])
-        finally:
-            self.client.delete_server(server['id'])
+        resp, server = self.create_server(wait_until='ACTIVE')
+        self.assertRaises(exceptions.NotFound,
+                          self.alt_client.delete_server,
+                          server['id'])
 
     @attr(type=['negative', 'gate'])
     def test_delete_server_pass_negative_id(self):
