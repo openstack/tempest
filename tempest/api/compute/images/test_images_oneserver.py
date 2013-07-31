@@ -89,23 +89,6 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server['id'], snapshot_name, meta)
 
-    @testtools.skipUnless(compute.MULTI_USER,
-                          'Need multiple users for this test.')
-    @attr(type=['negative', 'gate'])
-    def test_delete_image_of_another_tenant(self):
-        # Return an error while trying to delete another tenant's image
-        self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
-        snapshot_name = rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server['id'], snapshot_name)
-        image_id = parse_image_id(resp['location'])
-        self.image_ids.append(image_id)
-        self.client.wait_for_image_resp_code(image_id, 200)
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
-
-        # Delete image
-        self.assertRaises(exceptions.NotFound,
-                          self.alt_client.delete_image, image_id)
-
     def _get_default_flavor_disk_size(self, flavor_id):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
@@ -143,16 +126,6 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         resp, body = self.client.delete_image(image_id)
         self.assertEqual('204', resp['status'])
         self.client.wait_for_resource_deletion(image_id)
-
-    @testtools.skipUnless(compute.MULTI_USER,
-                          'Need multiple users for this test.')
-    @attr(type=['negative', 'gate'])
-    def test_create_image_for_server_in_another_tenant(self):
-        # Creating image of another tenant's server should be return error
-
-        snapshot_name = rand_name('test-snap-')
-        self.assertRaises(exceptions.NotFound, self.alt_client.create_image,
-                          self.server['id'], snapshot_name)
 
     @attr(type=['negative', 'gate'])
     def test_create_second_image_when_first_image_is_being_saved(self):
