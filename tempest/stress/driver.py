@@ -14,6 +14,7 @@
 
 import logging
 import multiprocessing
+import signal
 import time
 
 from tempest import clients
@@ -45,6 +46,7 @@ _console.setFormatter(_formatter)
 # add the handler to the root logger
 logger = logging.getLogger('tempest.stress')
 logger.addHandler(_console)
+processes = []
 
 
 def do_ssh(command, host):
@@ -93,10 +95,29 @@ def _error_in_logs(logfiles, nodes):
     return None
 
 
-def stress_openstack(tests, duration, max_runs=None):
+def sigchld_handler(signal, frame):
+    """
+    Signal handler (only active if stop_on_error is True).
+    """
+    terminate_all_processes()
+
+
+def terminate_all_processes():
+    """
+    Goes through the process list and terminates all child processes.
+    """
+    for process in processes:
+        if process['process'].is_alive():
+            try:
+                process['process'].terminate()
+            except Exception:
+                pass
+        process['process'].join()
+
+
+def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
     """
     Workload driver. Executes an action function against a nova-cluster.
-
     """
     logfiles = admin_manager.config.stress.target_logfiles
     log_check_interval = int(admin_manager.config.stress.log_check_interval)
@@ -105,7 +126,6 @@ def stress_openstack(tests, duration, max_runs=None):
         computes = _get_compute_nodes(controller)
         for node in computes:
             do_ssh("rm -f %s" % logfiles, node)
-    processes = []
     for test in tests:
         if test.get('use_admin', False):
             manager = admin_manager
@@ -127,7 +147,7 @@ def stress_openstack(tests, duration, max_runs=None):
                                           tenant_name=tenant_name)
 
             test_obj = importutils.import_class(test['action'])
-            test_run = test_obj(manager, logger, max_runs)
+            test_run = test_obj(manager, logger, max_runs, stop_on_error)
 
             kwargs = test.get('kwargs', {})
             test_run.setUp(**dict(kwargs.iteritems()))
@@ -150,6 +170,9 @@ def stress_openstack(tests, duration, max_runs=None):
 
             processes.append(process)
             p.start()
+    if stop_on_error:
+        # NOTE(mkoderer): only the parent should register the handler
+        signal.signal(signal.SIGCHLD, sigchld_handler)
     end_time = time.time() + duration
     had_errors = False
     while True:
@@ -168,6 +191,11 @@ def stress_openstack(tests, duration, max_runs=None):
                 break
 
         time.sleep(min(remaining, log_check_interval))
+        if stop_on_error:
+            for process in processes:
+                if process['statistic']['fails'] > 0:
+                    break
+
         if not logfiles:
             continue
         errors = _error_in_logs(logfiles, computes)
@@ -175,10 +203,7 @@ def stress_openstack(tests, duration, max_runs=None):
             had_errors = True
             break
 
-    for process in processes:
-        if process['process'].is_alive():
-            process['process'].terminate()
-        process['process'].join()
+    terminate_all_processes()
 
     sum_fails = 0
     sum_runs = 0

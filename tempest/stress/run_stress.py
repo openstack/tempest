@@ -22,7 +22,7 @@ import sys
 
 
 def main(ns):
-    #NOTE(kodererm): moved import to make "-h" possible without OpenStack
+    # NOTE(mkoderer): moved import to make "-h" possible without OpenStack
     from tempest.stress import driver
     result = 0
     tests = json.load(open(ns.tests, 'r'))
@@ -30,12 +30,13 @@ def main(ns):
         for test in tests:
             step_result = driver.stress_openstack([test],
                                                   ns.duration,
-                                                  ns.number)
-            #NOTE(kodererm): we just save the last result code
+                                                  ns.number,
+                                                  ns.stop)
+            # NOTE(mkoderer): we just save the last result code
             if (step_result != 0):
                 result = step_result
     else:
-        driver.stress_openstack(tests, ns.duration, ns.number)
+        driver.stress_openstack(tests, ns.duration, ns.number, ns.stop)
     return result
 
 
@@ -44,6 +45,8 @@ parser.add_argument('-d', '--duration', default=300, type=int,
                     help="Duration of test in secs.")
 parser.add_argument('-s', '--serial', action='store_true',
                     help="Trigger running tests serially.")
+parser.add_argument('-S', '--stop', action='store_true',
+                    default=False, help="Stop on first error.")
 parser.add_argument('-n', '--number', type=int,
                     help="How often an action is executed for each process.")
 parser.add_argument('tests', help="Name of the file with test description.")

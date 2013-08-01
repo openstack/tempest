@@ -20,10 +20,11 @@ import sys
 
 class StressAction(object):
 
-    def __init__(self, manager, logger, max_runs=None):
+    def __init__(self, manager, logger, max_runs=None, stop_on_error=False):
         self.manager = manager
         self.logger = logger
         self.max_runs = max_runs
+        self.stop_on_error = stop_on_error
 
     def _shutdown_handler(self, signal, frame):
         self.tearDown()
@@ -63,6 +64,11 @@ class StressAction(object):
                 self.logger.exception("Failure in run")
             finally:
                 shared_statistic['runs'] += 1
+                if self.stop_on_error and (shared_statistic['fails'] > 1):
+                    self.logger.warn("Stop process due to"
+                                     "\"stop-on-error\" argument")
+                    self.tearDown()
+                    sys.exit(1)
 
     def run(self):
         """This method is where the stress test code runs."""
