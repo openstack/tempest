@@ -16,7 +16,7 @@ from tempest.common.utils.data_utils import rand_name
 import tempest.stress.stressaction as stressaction
 
 
-class CreateDestroyServerTest(stressaction.StressAction):
+class ServerCreateDestroyTest(stressaction.StressAction):
 
     def setUp(self, **kwargs):
         self.image = self.manager.config.compute.image_ref

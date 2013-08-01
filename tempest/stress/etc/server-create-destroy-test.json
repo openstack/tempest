@@ -1,4 +1,4 @@
-[{"action": "tempest.stress.actions.create_destroy_server.CreateDestroyServerTest",
+[{"action": "tempest.stress.actions.server_create_destroy.ServerCreateDestroyTest",
   "threads": 8,
   "use_admin": false,
   "use_isolated_tenants": false,
