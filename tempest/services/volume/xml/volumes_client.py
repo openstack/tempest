@@ -103,7 +103,7 @@ class VolumesClientXML(RestClientXML):
         :param imageRef: When specified the volume is created from this
                          image
         """
-        #NOTE(afazekas): it should use a volume namespace
+        # NOTE(afazekas): it should use a volume namespace
         volume = Element("volume", xmlns=XMLNS_11, size=size)
 
         if 'metadata' in kwargs:

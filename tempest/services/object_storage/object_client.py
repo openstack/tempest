@@ -155,7 +155,7 @@ class ObjectClientCustomizedHeader(RestClient):
         super(ObjectClientCustomizedHeader, self).__init__(config, username,
                                                            password, auth_url,
                                                            tenant_name)
-        #Overwrites json-specific header encoding in RestClient
+        # Overwrites json-specific header encoding in RestClient
         self.service = self.config.object_storage.catalog_type
         self.format = 'json'
 

@@ -247,13 +247,13 @@ class ImageClientJSON(RestClient):
         data = json.loads(data)
         return resp, data
 
-    #NOTE(afazekas): just for the wait function
+    # NOTE(afazekas): just for the wait function
     def _get_image_status(self, image_id):
         resp, meta = self.get_image_meta(image_id)
         status = meta['status']
         return status
 
-    #NOTE(afazkas): Wait reinvented again. It is not in the correct layer
+    # NOTE(afazkas): Wait reinvented again. It is not in the correct layer
     def wait_for_image_status(self, image_id, status):
         """Waits for a Image to reach a given status."""
         start_time = time.time()

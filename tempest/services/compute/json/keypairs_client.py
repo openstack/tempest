@@ -30,11 +30,11 @@ class KeyPairsClientJSON(RestClient):
     def list_keypairs(self):
         resp, body = self.get("os-keypairs")
         body = json.loads(body)
-        #Each returned keypair is embedded within an unnecessary 'keypair'
-        #element which is a deviation from other resources like floating-ips,
-        #servers, etc. A bug?
-        #For now we shall adhere to the spec, but the spec for keypairs
-        #is yet to be found
+        # Each returned keypair is embedded within an unnecessary 'keypair'
+        # element which is a deviation from other resources like floating-ips,
+        # servers, etc. A bug?
+        # For now we shall adhere to the spec, but the spec for keypairs
+        # is yet to be found
         return resp, body['keypairs']
 
     def get_keypair(self, key_name):

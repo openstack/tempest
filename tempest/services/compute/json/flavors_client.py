@@ -79,9 +79,9 @@ class FlavorsClientJSON(RestClient):
         return self.delete("flavors/%s" % str(flavor_id))
 
     def is_resource_deleted(self, id):
-        #Did not use get_flavor_details(id) for verification as it gives
-        #200 ok even for deleted id. LP #981263
-        #we can remove the loop here and use get by ID when bug gets sortedout
+        # Did not use get_flavor_details(id) for verification as it gives
+        # 200 ok even for deleted id. LP #981263
+        # we can remove the loop here and use get by ID when bug gets sortedout
         resp, flavors = self.list_flavors_with_detail()
         for flavor in flavors:
             if flavor['id'] == id:

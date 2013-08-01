@@ -180,7 +180,7 @@ class APIClientEC2(BotoClientBase):
         :return: Returns with the first available zone name
         """
         for zone in self.get_all_zones():
-            #NOTE(afazekas): zone.region_name was None
+            # NOTE(afazekas): zone.region_name was None
             if (zone.state == "available" and
                 zone.region.name == self.connection_data["region"].name):
                 return zone.name
