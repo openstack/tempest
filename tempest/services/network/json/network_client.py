@@ -23,13 +23,11 @@ class NetworkClient(RestClient):
     Tempest REST client for Neutron. Uses v2 of the Neutron API, since the
     V1 API has been removed from the code base.
 
-    Implements the following operations for each one of the basic Neutron
+    Implements create, delete, list and show for the basic Neutron
     abstractions (networks, sub-networks and ports):
 
-    create
-    delete
-    list
-    show
+    It also implements list, show, update and reset for OpenStack Networking
+    quotas
     """
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
@@ -128,3 +126,28 @@ class NetworkClient(RestClient):
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
+
+    def update_quotas(self, tenant_id, **kwargs):
+        put_body = {'quota': kwargs}
+        body = json.dumps(put_body)
+        uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
+        resp, body = self.put(uri, body, self.headers)
+        body = json.loads(body)
+        return resp, body['quota']
+
+    def show_quotas(self, tenant_id):
+        uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body['quota']
+
+    def reset_quotas(self, tenant_id):
+        uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def list_quotas(self):
+        uri = '%s/quotas' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body['quotas']
