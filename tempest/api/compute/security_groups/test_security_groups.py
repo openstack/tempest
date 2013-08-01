@@ -39,7 +39,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
-        #Create 3 Security Groups
+        # Create 3 Security Groups
         security_group_list = list()
         for i in range(3):
             s_name = rand_name('securitygroup-')
@@ -50,11 +50,11 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             self.addCleanup(self._delete_security_group,
                             securitygroup['id'])
             security_group_list.append(securitygroup)
-        #Fetch all Security Groups and verify the list
-        #has all created Security Groups
+        # Fetch all Security Groups and verify the list
+        # has all created Security Groups
         resp, fetched_list = self.client.list_security_groups()
         self.assertEqual(200, resp.status)
-        #Now check if all the created Security Groups are in fetched list
+        # Now check if all the created Security Groups are in fetched list
         missing_sgs = \
             [sg for sg in security_group_list if sg not in fetched_list]
         self.assertFalse(missing_sgs,
@@ -62,8 +62,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                          "list" % ', '.join(m_group['name']
                                             for m_group in missing_sgs))
 
-    #TODO(afazekas): scheduled for delete,
-    #test_security_group_create_get_delete covers it
+    # TODO(afazekas): scheduled for delete,
+    # test_security_group_create_get_delete covers it
     @attr(type='gate')
     def test_security_group_create_delete(self):
         # Security Group should be created, verified and deleted
@@ -99,7 +99,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         self.assertEqual(securitygroup_name, s_name,
                          "The created Security Group name is "
                          "not equal to the requested name")
-        #Now fetch the created Security Group by its 'id'
+        # Now fetch the created Security Group by its 'id'
         resp, fetched_group = \
             self.client.get_security_group(securitygroup['id'])
         self.assertEqual(200, resp.status)
@@ -115,7 +115,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_security_groups()
         for i in range(len(body)):
             security_group_id.append(body[i]['id'])
-        #Creating a nonexistant Security Group id
+        # Creating a nonexistant Security Group id
         while True:
             non_exist_id = rand_name('999')
             if non_exist_id not in security_group_id:
@@ -186,7 +186,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             if body[i]['name'] == 'default':
                 default_security_group_id = body[i]['id']
                 break
-        #Deleting the "default" Security Group
+        # Deleting the "default" Security Group
         self.assertRaises(exceptions.BadRequest,
                           self.client.delete_security_group,
                           default_security_group_id)
@@ -198,7 +198,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         resp, body = self.client.list_security_groups()
         for i in range(len(body)):
             security_group_id.append(body[i]['id'])
-        #Creating Non Existant Security Group
+        # Creating Non Existant Security Group
         while True:
             non_exist_id = rand_name('999')
             if non_exist_id not in security_group_id:

@@ -32,12 +32,12 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         super(ServerRescueTestJSON, cls).setUpClass()
         cls.device = 'vdf'
 
-        #Floating IP creation
+        # Floating IP creation
         resp, body = cls.floating_ips_client.create_floating_ip()
         cls.floating_ip_id = str(body['id']).strip()
         cls.floating_ip = str(body['ip']).strip()
 
-        #Security group creation
+        # Security group creation
         cls.sg_name = rand_name('sg')
         cls.sg_desc = rand_name('sg-desc')
         resp, cls.sg = \
@@ -85,7 +85,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        #Deleting the floating IP which is created in this method
+        # Deleting the floating IP which is created in this method
         cls.floating_ips_client.delete_floating_ip(cls.floating_ip_id)
         client = cls.volumes_extensions_client
         client.delete_volume(str(cls.volume_to_attach['id']).strip())
@@ -127,7 +127,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_rescue_paused_instance(self):
-        #Rescue a paused server
+        # Rescue a paused server
         resp, body = self.servers_client.pause_server(
             self.server_id)
         self.addCleanup(self._unpause, self.server_id)
@@ -182,7 +182,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         # Rescue the server
         self.servers_client.rescue_server(self.server_id, self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
-        #addCleanup is a LIFO queue
+        # addCleanup is a LIFO queue
         self.addCleanup(self._detach, self.server_id,
                         self.volume_to_detach['id'])
         self.addCleanup(self._unrescue, self.server_id)
@@ -201,13 +201,13 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
         self.addCleanup(self._unrescue, self.server_id)
 
-        #Association of floating IP to a rescued vm
+        # Association of floating IP to a rescued vm
         client = self.floating_ips_client
         resp, body = client.associate_floating_ip_to_server(self.floating_ip,
                                                             self.server_id)
         self.assertEqual(202, resp.status)
 
-        #Disassociation of floating IP that was associated in this method
+        # Disassociation of floating IP that was associated in this method
         resp, body = \
             client.disassociate_floating_ip_from_server(self.floating_ip,
                                                         self.server_id)
@@ -220,12 +220,12 @@ class ServerRescueTestJSON(base.BaseComputeTest):
             self.server_id, self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
 
-        #Add Security group
+        # Add Security group
         resp, body = self.servers_client.add_security_group(self.server_id,
                                                             self.sg_name)
         self.assertEqual(202, resp.status)
 
-        #Delete Security group
+        # Delete Security group
         resp, body = self.servers_client.remove_security_group(self.server_id,
                                                                self.sg_name)
         self.assertEqual(202, resp.status)

@@ -144,16 +144,16 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
         resp, images = self.client.list_images(params)
-        #when _interface='xml', one element for images_links in images
-        #ref: Question #224349
+        # when _interface='xml', one element for images_links in images
+        # ref: Question #224349
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @attr(type='gate')
     def test_list_images_filter_by_changes_since(self):
         # Verify only updated images are returned in the detailed list
 
-        #Becoming ACTIVE will modify the updated time
-        #Filter by the image's created time
+        # Becoming ACTIVE will modify the updated time
+        # Filter by the image's created time
         params = {'changes-since': self.image3['created']}
         resp, images = self.client.list_images(params)
         found = any([i for i in images if i['id'] == self.image3_id])
@@ -222,8 +222,8 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
     def test_list_images_with_detail_filter_by_changes_since(self):
         # Verify an update image is returned
 
-        #Becoming ACTIVE will modify the updated time
-        #Filter by the image's created time
+        # Becoming ACTIVE will modify the updated time
+        # Filter by the image's created time
         params = {'changes-since': self.image1['created']}
         resp, images = self.client.list_images_with_detail(params)
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))

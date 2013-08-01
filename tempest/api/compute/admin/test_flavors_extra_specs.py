@@ -47,7 +47,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
         cls.new_flavor_id = 12345
         swap = 1024
         rxtx = 1
-        #Create a flavor so as to set/get/unset extra specs
+        # Create a flavor so as to set/get/unset extra specs
         resp, cls.flavor = cls.client.create_flavor(flavor_name,
                                                     ram, vcpus,
                                                     disk,
@@ -62,28 +62,28 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='gate')
     def test_flavor_set_get_unset_keys(self):
-        #Test to SET, GET UNSET flavor extra spec as a user
-        #with admin privileges.
-        #Assigning extra specs values that are to be set
+        # Test to SET, GET UNSET flavor extra spec as a user
+        # with admin privileges.
+        # Assigning extra specs values that are to be set
         specs = {"key1": "value1", "key2": "value2"}
-        #SET extra specs to the flavor created in setUp
+        # SET extra specs to the flavor created in setUp
         set_resp, set_body = \
             self.client.set_flavor_extra_spec(self.flavor['id'], specs)
         self.assertEqual(set_resp.status, 200)
         self.assertEqual(set_body, specs)
-        #GET extra specs and verify
+        # GET extra specs and verify
         get_resp, get_body = \
             self.client.get_flavor_extra_spec(self.flavor['id'])
         self.assertEqual(get_resp.status, 200)
         self.assertEqual(get_body, specs)
-        #UNSET extra specs that were set in this test
+        # UNSET extra specs that were set in this test
         unset_resp, _ = \
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key1")
         self.assertEqual(unset_resp.status, 200)
 
     @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_set_keys(self):
-        #Test to SET flavor extra spec as a user without admin privileges.
+        # Test to SET flavor extra spec as a user without admin privileges.
         specs = {"key1": "value1", "key2": "value2"}
         self.assertRaises(exceptions.Unauthorized,
                           self.flavors_client.set_flavor_extra_spec,

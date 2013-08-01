@@ -39,7 +39,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         resp, server = self.create_server(disk_config='AUTO',
                                           wait_until='ACTIVE')
 
-        #Verify the specified attributes are set correctly
+        # Verify the specified attributes are set correctly
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
@@ -47,14 +47,14 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
                                            self.image_ref_alt,
                                            disk_config='MANUAL')
 
-        #Wait for the server to become active
+        # Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
-        #Verify the specified attributes are set correctly
+        # Verify the specified attributes are set correctly
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
-        #Delete the server
+        # Delete the server
         resp, body = self.client.delete_server(server['id'])
 
     @attr(type='gate')
@@ -63,7 +63,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         resp, server = self.create_server(disk_config='MANUAL',
                                           wait_until='ACTIVE')
 
-        #Verify the specified attributes are set correctly
+        # Verify the specified attributes are set correctly
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
@@ -71,14 +71,14 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
                                            self.image_ref_alt,
                                            disk_config='AUTO')
 
-        #Wait for the server to become active
+        # Wait for the server to become active
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
-        #Verify the specified attributes are set correctly
+        # Verify the specified attributes are set correctly
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
-        #Delete the server
+        # Delete the server
         resp, body = self.client.delete_server(server['id'])
 
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
@@ -88,7 +88,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         resp, server = self.create_server(disk_config='MANUAL',
                                           wait_until='ACTIVE')
 
-        #Resize with auto option
+        # Resize with auto option
         self.client.resize(server['id'], self.flavor_ref_alt,
                            disk_config='AUTO')
         self.client.wait_for_server_status(server['id'], 'VERIFY_RESIZE')
@@ -98,7 +98,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
-        #Delete the server
+        # Delete the server
         resp, body = self.client.delete_server(server['id'])
 
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
@@ -108,7 +108,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         resp, server = self.create_server(disk_config='AUTO',
                                           wait_until='ACTIVE')
 
-        #Resize with manual option
+        # Resize with manual option
         self.client.resize(server['id'], self.flavor_ref_alt,
                            disk_config='MANUAL')
         self.client.wait_for_server_status(server['id'], 'VERIFY_RESIZE')
@@ -118,7 +118,7 @@ class ServerDiskConfigTestJSON(base.BaseComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
-        #Delete the server
+        # Delete the server
         resp, body = self.client.delete_server(server['id'])
 
 

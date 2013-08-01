@@ -80,7 +80,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                                                       'available')
         return snapshot
 
-    #NOTE(afazekas): these create_* and clean_* could be defined
+    # NOTE(afazekas): these create_* and clean_* could be defined
     # only in a single location in the source, and could be more general.
 
     @classmethod

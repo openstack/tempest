@@ -52,7 +52,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='gate')
     def test_flavor_access_add_remove(self):
-        #Test to add and remove flavor access to a given tenant.
+        # Test to add and remove flavor access to a given tenant.
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
@@ -61,7 +61,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
                                                      new_flavor_id,
                                                      is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        #Add flavor access to a tenant.
+        # Add flavor access to a tenant.
         resp_body = {
             "tenant_id": str(self.tenant_id),
             "flavor_id": str(new_flavor['id']),
@@ -71,25 +71,25 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(add_resp.status, 200)
         self.assertIn(resp_body, add_body)
 
-        #The flavor is present in list.
+        # The flavor is present in list.
         resp, flavors = self.flavors_client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         self.assertIn(new_flavor['id'], map(lambda x: x['id'], flavors))
 
-        #Remove flavor access from a tenant.
+        # Remove flavor access from a tenant.
         remove_resp, remove_body = \
             self.client.remove_flavor_access(new_flavor['id'], self.tenant_id)
         self.assertEqual(remove_resp.status, 200)
         self.assertNotIn(resp_body, remove_body)
 
-        #The flavor is not present in list.
+        # The flavor is not present in list.
         resp, flavors = self.flavors_client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         self.assertNotIn(new_flavor['id'], map(lambda x: x['id'], flavors))
 
     @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_add(self):
-        #Test to add flavor access as a user without admin privileges.
+        # Test to add flavor access as a user without admin privileges.
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
@@ -105,7 +105,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
 
     @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_remove(self):
-        #Test to remove flavor access as a user without admin privileges.
+        # Test to remove flavor access as a user without admin privileges.
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
@@ -114,7 +114,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
                                                      new_flavor_id,
                                                      is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        #Add flavor access to a tenant.
+        # Add flavor access to a tenant.
         self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
         self.addCleanup(self.client.remove_flavor_access,
                         new_flavor['id'], self.tenant_id)

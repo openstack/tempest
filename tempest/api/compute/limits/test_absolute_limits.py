@@ -51,11 +51,11 @@ class AbsoluteLimitsTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_max_image_meta_exceed_limit(self):
-        #We should not create vm with image meta over maxImageMeta limit
+        # We should not create vm with image meta over maxImageMeta limit
         # Get max limit value
         max_meta = self.client.get_specific_absolute_limit('maxImageMeta')
 
-        #Create server should fail, since we are passing > metadata Limit!
+        # Create server should fail, since we are passing > metadata Limit!
         max_meta_data = int(max_meta) + 1
 
         meta_data = {}

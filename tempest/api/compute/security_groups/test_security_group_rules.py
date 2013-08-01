@@ -33,14 +33,14 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     def test_security_group_rules_create(self):
         # Positive test: Creation of Security Group rule
         # should be successfull
-        #Creating a Security Group to add rules to it
+        # Creating a Security Group to add rules to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name, s_description)
         securitygroup_id = securitygroup['id']
         self.addCleanup(self.client.delete_security_group, securitygroup_id)
-        #Adding rules to the created Security Group
+        # Adding rules to the created Security Group
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
@@ -60,21 +60,21 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
 
         secgroup1 = None
         secgroup2 = None
-        #Creating a Security Group to add rules to it
+        # Creating a Security Group to add rules to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name, s_description)
         secgroup1 = securitygroup['id']
         self.addCleanup(self.client.delete_security_group, secgroup1)
-        #Creating a Security Group so as to assign group_id to the rule
+        # Creating a Security Group so as to assign group_id to the rule
         s_name2 = rand_name('securitygroup-')
         s_description2 = rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name2, s_description2)
         secgroup2 = securitygroup['id']
         self.addCleanup(self.client.delete_security_group, secgroup2)
-        #Adding rules to the created Security Group with optional arguments
+        # Adding rules to the created Security Group with optional arguments
         parent_group_id = secgroup1
         ip_protocol = 'tcp'
         from_port = 22
@@ -108,12 +108,12 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     def test_security_group_rules_create_with_invalid_ip_protocol(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid ip_protocol
-        #Creating a Security Group to add rule to it
+        # Creating a Security Group to add rule to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
         resp, securitygroup = self.client.create_security_group(s_name,
                                                                 s_description)
-        #Adding rules to the created Security Group
+        # Adding rules to the created Security Group
         parent_group_id = securitygroup['id']
         ip_protocol = rand_name('999')
         from_port = 22
@@ -128,12 +128,12 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     def test_security_group_rules_create_with_invalid_from_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
-        #Creating a Security Group to add rule to it
+        # Creating a Security Group to add rule to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
         resp, securitygroup = self.client.create_security_group(s_name,
                                                                 s_description)
-        #Adding rules to the created Security Group
+        # Adding rules to the created Security Group
         parent_group_id = securitygroup['id']
         ip_protocol = 'tcp'
         from_port = rand_name('999')
@@ -147,12 +147,12 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     def test_security_group_rules_create_with_invalid_to_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
-        #Creating a Security Group to add rule to it
+        # Creating a Security Group to add rule to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
         resp, securitygroup = self.client.create_security_group(s_name,
                                                                 s_description)
-        #Adding rules to the created Security Group
+        # Adding rules to the created Security Group
         parent_group_id = securitygroup['id']
         ip_protocol = 'tcp'
         from_port = 22

@@ -88,12 +88,12 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
     @classmethod
     def tearDownClass(cls):
-        ## volumes deletion
+        # volumes deletion
         for volume_id in cls.volume_id_list:
             cls.volume_client.delete_volume(volume_id)
             cls.volume_client.wait_for_resource_deletion(volume_id)
 
-        ## volume types deletion
+        # volume types deletion
         for volume_type_id in cls.volume_type_id_list:
             cls.type_client.delete_volume_type(volume_type_id)
 

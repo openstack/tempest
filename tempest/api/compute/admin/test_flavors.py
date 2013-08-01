@@ -60,7 +60,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
 
-        #Create the flavor
+        # Create the flavor
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram, self.vcpus,
                                                  self.disk,
@@ -87,7 +87,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         if self._interface == "json":
             self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
-        #Verify flavor is retrieved
+        # Verify flavor is retrieved
         resp, flavor = self.client.get_flavor_details(new_flavor_id)
         self.assertEqual(resp.status, 200)
         self.assertEqual(flavor['name'], flavor_name)
@@ -99,7 +99,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
 
-        #Create the flavor
+        # Create the flavor
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram, self.vcpus,
                                                  self.disk,
@@ -109,7 +109,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                                                  rxtx=self.rxtx)
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         flag = False
-        #Verify flavor is retrieved
+        # Verify flavor is retrieved
         resp, flavors = self.client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         for flavor in flavors:
@@ -153,12 +153,12 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='gate')
     def test_create_list_flavor_without_extra_data(self):
-        #Create a flavor and ensure it is listed
-        #This operation requires the user to have 'admin' role
+        # Create a flavor and ensure it is listed
+        # This operation requires the user to have 'admin' role
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
 
-        #Create the flavor
+        # Create the flavor
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram, self.vcpus,
                                                  self.disk,
@@ -181,11 +181,11 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         if self._interface == "json":
             self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
-        #Verify flavor is retrieved
+        # Verify flavor is retrieved
         resp, flavor = self.client.get_flavor_details(new_flavor_id)
         self.assertEqual(resp.status, 200)
         self.assertEqual(flavor['name'], flavor_name)
-        #Check if flavor is present in list
+        # Check if flavor is present in list
         resp, flavors = self.client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         for flavor in flavors:
@@ -195,13 +195,13 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='gate')
     def test_flavor_not_public_verify_entry_not_in_list_details(self):
-        #Create a flavor with os-flavor-access:is_public false should not
-        #be present in list_details.
-        #This operation requires the user to have 'admin' role
+        # Create a flavor with os-flavor-access:is_public false should not
+        # be present in list_details.
+        # This operation requires the user to have 'admin' role
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
 
-        #Create the flavor
+        # Create the flavor
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram, self.vcpus,
                                                  self.disk,
@@ -209,7 +209,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                                                  is_public="False")
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         flag = False
-        #Verify flavor is retrieved
+        # Verify flavor is retrieved
         resp, flavors = self.client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         for flavor in flavors:
@@ -219,12 +219,12 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='gate')
     def test_list_public_flavor_with_other_user(self):
-        #Create a Flavor with public access.
-        #Try to List/Get flavor with another user
+        # Create a Flavor with public access.
+        # Try to List/Get flavor with another user
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
 
-            #Create the flavor
+            # Create the flavor
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram, self.vcpus,
                                                  self.disk,
@@ -233,7 +233,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         self.addCleanup(self.flavor_clean_up, flavor['id'])
         flag = False
         self.new_client = self.flavors_client
-        #Verify flavor is retrieved with new user
+        # Verify flavor is retrieved with new user
         resp, flavors = self.new_client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         for flavor in flavors:

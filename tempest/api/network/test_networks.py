@@ -77,7 +77,7 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEqual('201', resp['status'])
         subnet = body['subnet']
         self.assertTrue(subnet['id'] is not None)
-        #Deletes subnet and network
+        # Deletes subnet and network
         resp, body = self.client.delete_subnet(subnet['id'])
         self.assertEqual('204', resp['status'])
         resp, body = self.client.delete_network(network['id'])
