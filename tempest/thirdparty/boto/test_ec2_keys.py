@@ -37,7 +37,7 @@ class EC2KeysTest(BotoTestCase):
         cls.client = cls.os.ec2api_client
         cls.ec = cls.ec2_error_code
 
-#TODO(afazekas): merge create, delete, get test cases
+# TODO(afazekas): merge create, delete, get test cases
     @attr(type='smoke')
     def test_create_ec2_keypair(self):
         # EC2 create KeyPair

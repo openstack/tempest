@@ -30,7 +30,7 @@ class EC2NetworkTest(BotoTestCase):
         cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
 
-#Note(afazekas): these tests for things duable without an instance
+# Note(afazekas): these tests for things duable without an instance
     @testtools.skip("Skipped until the Bug #1080406 is resolved")
     @attr(type='smoke')
     def test_disassociate_not_associated_floating_ip(self):

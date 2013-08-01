@@ -43,7 +43,7 @@ class EC2SecurityGroupTest(BotoTestCase):
         group_get = groups_get[0]
         self.assertEqual(group.name, group_get.name)
         self.assertEqual(group.name, group_get.name)
-        #ping (icmp_echo) and other icmp allowed from everywhere
+        # ping (icmp_echo) and other icmp allowed from everywhere
         # from_port and to_port act as icmp type
         success = self.client.authorize_security_group(group_name,
                                                        ip_protocol="icmp",
@@ -51,17 +51,17 @@ class EC2SecurityGroupTest(BotoTestCase):
                                                        from_port=-1,
                                                        to_port=-1)
         self.assertTrue(success)
-        #allow standard ssh port from anywhere
+        # allow standard ssh port from anywhere
         success = self.client.authorize_security_group(group_name,
                                                        ip_protocol="tcp",
                                                        cidr_ip="0.0.0.0/0",
                                                        from_port=22,
                                                        to_port=22)
         self.assertTrue(success)
-        #TODO(afazekas): Duplicate tests
+        # TODO(afazekas): Duplicate tests
         group_get = self.client.get_all_security_groups(
             groupnames=(group_name,))[0]
-        #remove listed rules
+        # remove listed rules
         for ip_permission in group_get.rules:
             for cidr in ip_permission.grants:
                 self.assertTrue(self.client.revoke_security_group(group_name,
@@ -72,5 +72,5 @@ class EC2SecurityGroupTest(BotoTestCase):
 
         group_get = self.client.get_all_security_groups(
             groupnames=(group_name,))[0]
-        #all rules shuld be removed now
+        # all rules shuld be removed now
         self.assertEqual(0, len(group_get.rules))

@@ -231,7 +231,7 @@ class InstanceRunTest(BotoTestCase):
         else:
             self.assertNotEqual(instance.state, "running")
 
-    #NOTE(afazekas): doctored test case,
+    # NOTE(afazekas): doctored test case,
     # with normal validation it would fail
     @testtools.skip("Until Bug #1182679 is fixed")
     @attr(type='smoke')
@@ -277,10 +277,10 @@ class InstanceRunTest(BotoTestCase):
         self.assertTrue(address.associate(instance.id))
 
         rcuk_da = self.addResourceCleanUp(address.disassociate)
-        #TODO(afazekas): ping test. dependecy/permission ?
+        # TODO(afazekas): ping test. dependecy/permission ?
 
         self.assertVolumeStatusWait(volume, "available")
-        #NOTE(afazekas): it may be reports availble before it is available
+        # NOTE(afazekas): it may be reports availble before it is available
 
         ssh = RemoteClient(address.public_ip,
                            self.os.config.compute.ssh_user,
@@ -304,7 +304,7 @@ class InstanceRunTest(BotoTestCase):
         self.assertVolumeStatusWait(_volume_state, "in-use")
         re_search_wait(_volume_state, "in-use")
 
-        #NOTE(afazekas):  Different Hypervisor backends names
+        # NOTE(afazekas):  Different Hypervisor backends names
         # differently the devices,
         # now we just test is the partition number increased/decrised
 
@@ -319,7 +319,7 @@ class InstanceRunTest(BotoTestCase):
         state_wait(_part_state, 'INCREASE')
         part_lines = ssh.get_partitions().split('\n')
 
-        #TODO(afazekas): Resource compare to the flavor settings
+        # TODO(afazekas): Resource compare to the flavor settings
 
         volume.detach()
 
@@ -340,7 +340,7 @@ class InstanceRunTest(BotoTestCase):
         LOG.info("state: %s", instance.state)
         if instance.state != "stopped":
             self.assertInstanceStateWait(instance, "stopped")
-        #TODO(afazekas): move steps from teardown to the test case
+        # TODO(afazekas): move steps from teardown to the test case
 
 
-#TODO(afazekas): Snapshot/volume read/write test case
+# TODO(afazekas): Snapshot/volume read/write test case
