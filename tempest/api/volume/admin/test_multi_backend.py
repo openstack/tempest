@@ -81,8 +81,8 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
                 cls.volume_id_list.append(cls.volume2['id'])
                 cls.volume_client.wait_for_volume_status(cls.volume2['id'],
                                                          'available')
-        except Exception:
-            LOG.exception("setup failed")
+        except Exception as e:
+            LOG.exception("setup failed: %s" % e)
             cls.tearDownClass()
             raise
 

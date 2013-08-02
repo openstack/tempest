@@ -84,24 +84,14 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                          'key_pairs': 200, 'injected_file_path_bytes': 512,
                          'instances': 20, 'security_group_rules': 20,
                          'cores': 2, 'security_groups': 20}
-        try:
-            # Update limits for all quota resources
-            resp, quota_set = self.adm_client.update_quota_set(
-                self.demo_tenant_id,
-                **new_quota_set)
-            self.addCleanup(self.adm_client.update_quota_set,
-                            self.demo_tenant_id, **self.default_quota_set)
-            self.assertEqual(200, resp.status)
-            self.assertEqual(new_quota_set, quota_set)
-        except Exception:
-            self.fail("Admin could not update quota set for the tenant")
-        finally:
-            # Reset quota resource limits to default values
-            resp, quota_set = self.adm_client.update_quota_set(
-                self.demo_tenant_id,
-                **self.default_quota_set)
-            self.assertEqual(200, resp.status, "Failed to reset quota "
-                             "defaults")
+        # Update limits for all quota resources
+        resp, quota_set = self.adm_client.update_quota_set(
+            self.demo_tenant_id,
+            **new_quota_set)
+        self.addCleanup(self.adm_client.update_quota_set,
+                        self.demo_tenant_id, **self.default_quota_set)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(new_quota_set, quota_set)
 
     # TODO(afazekas): merge these test cases
     @attr(type='gate')

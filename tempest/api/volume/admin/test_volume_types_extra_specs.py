@@ -37,68 +37,59 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
     @attr(type='smoke')
     def test_volume_type_extra_specs_list(self):
         # List Volume types extra specs.
-        try:
-            extra_specs = {"spec1": "val1"}
-            resp, body = self.client.create_volume_type_extra_specs(
-                self.volume_type['id'], extra_specs)
-            self.assertEqual(200, resp.status)
-            self.assertEqual(extra_specs, body,
-                             "Volume type extra spec incorrectly created")
-            resp, body = self.client.list_volume_types_extra_specs(
-                self.volume_type['id'])
-            self.assertEqual(200, resp.status)
-            self.assertTrue(type(body), dict)
-            self.assertTrue('spec1' in body, "Incorrect volume type extra"
-                            " spec returned")
-        except Exception:
-            self.fail("Could not list volume types extra specs")
+        extra_specs = {"spec1": "val1"}
+        resp, body = self.client.create_volume_type_extra_specs(
+            self.volume_type['id'], extra_specs)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(extra_specs, body,
+                         "Volume type extra spec incorrectly created")
+        resp, body = self.client.list_volume_types_extra_specs(
+            self.volume_type['id'])
+        self.assertEqual(200, resp.status)
+        self.assertTrue(type(body), dict)
+        self.assertTrue('spec1' in body, "Incorrect volume type extra"
+                        " spec returned")
 
     @attr(type='gate')
     def test_volume_type_extra_specs_update(self):
         # Update volume type extra specs
-        try:
-            extra_specs = {"spec2": "val1"}
-            resp, body = self.client.create_volume_type_extra_specs(
-                self.volume_type['id'], extra_specs)
-            self.assertEqual(200, resp.status)
-            self.assertEqual(extra_specs, body,
-                             "Volume type extra spec incorrectly created")
+        extra_specs = {"spec2": "val1"}
+        resp, body = self.client.create_volume_type_extra_specs(
+            self.volume_type['id'], extra_specs)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(extra_specs, body,
+                         "Volume type extra spec incorrectly created")
 
-            extra_spec = {"spec2": "val2"}
-            resp, body = self.client.update_volume_type_extra_specs(
-                self.volume_type['id'],
-                extra_spec.keys()[0],
-                extra_spec)
-            self.assertEqual(200, resp.status)
-            self.assertTrue('spec2' in body,
-                            "Volume type extra spec incorrectly updated")
-            self.assertEqual(extra_spec['spec2'], body['spec2'],
-                             "Volume type extra spec incorrectly updated")
-        except Exception:
-            self.fail("Couldnt update volume type extra spec")
+        extra_spec = {"spec2": "val2"}
+        resp, body = self.client.update_volume_type_extra_specs(
+            self.volume_type['id'],
+            extra_spec.keys()[0],
+            extra_spec)
+        self.assertEqual(200, resp.status)
+        self.assertTrue('spec2' in body,
+                        "Volume type extra spec incorrectly updated")
+        self.assertEqual(extra_spec['spec2'], body['spec2'],
+                         "Volume type extra spec incorrectly updated")
 
     @attr(type='smoke')
     def test_volume_type_extra_spec_create_get_delete(self):
         # Create/Get/Delete volume type extra spec.
-        try:
-            extra_specs = {"spec3": "val1"}
-            resp, body = self.client.create_volume_type_extra_specs(
-                self.volume_type['id'],
-                extra_specs)
-            self.assertEqual(200, resp.status)
-            self.assertEqual(extra_specs, body,
-                             "Volume type extra spec incorrectly created")
+        extra_specs = {"spec3": "val1"}
+        resp, body = self.client.create_volume_type_extra_specs(
+            self.volume_type['id'],
+            extra_specs)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(extra_specs, body,
+                         "Volume type extra spec incorrectly created")
 
-            resp, _ = self.client.get_volume_type_extra_specs(
-                self.volume_type['id'],
-                extra_specs.keys()[0])
-            self.assertEqual(200, resp.status)
-            self.assertEqual(extra_specs, body,
-                             "Volume type extra spec incorrectly fetched")
+        resp, _ = self.client.get_volume_type_extra_specs(
+            self.volume_type['id'],
+            extra_specs.keys()[0])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(extra_specs, body,
+                         "Volume type extra spec incorrectly fetched")
 
-            resp, _ = self.client.delete_volume_type_extra_specs(
-                self.volume_type['id'],
-                extra_specs.keys()[0])
-            self.assertEqual(202, resp.status)
-        except Exception:
-            self.fail("Could not create a volume_type extra spec")
+        resp, _ = self.client.delete_volume_type_extra_specs(
+            self.volume_type['id'],
+            extra_specs.keys()[0])
+        self.assertEqual(202, resp.status)

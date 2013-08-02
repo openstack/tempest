@@ -38,126 +38,111 @@ class VolumeTypesTest(BaseVolumeTest):
                                                                auth_url,
                                                                adm_tenant)
 
+    def _delete_volume(self, volume_id):
+        resp, _ = self.volumes_client.delete_volume(volume_id)
+        self.assertEqual(202, resp.status)
+
+    def _delete_volume_type(self, volume_type_id):
+        resp, _ = self.client.delete_volume_type(volume_type_id)
+        self.assertEqual(202, resp.status)
+
     @attr(type='smoke')
     def test_volume_type_list(self):
         # List Volume types.
-        try:
-            resp, body = self.client.list_volume_types()
-            self.assertEqual(200, resp.status)
-            self.assertTrue(type(body), list)
-        except Exception:
-            self.fail("Could not list volume types")
+        resp, body = self.client.list_volume_types()
+        self.assertEqual(200, resp.status)
+        self.assertTrue(type(body), list)
 
     @attr(type='smoke')
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
         # Create/get/delete volume with volume_type and extra spec.
-        try:
-            volume = {}
-            vol_name = rand_name("volume-")
-            vol_type_name = rand_name("volume-type-")
-            proto = self.config.volume.storage_protocol
-            vendor = self.config.volume.vendor_name
-            extra_specs = {"storage_protocol": proto,
-                           "vendor_name": vendor}
-            body = {}
-            resp, body = self.client.create_volume_type(
-                vol_type_name,
-                extra_specs=extra_specs)
-            self.assertEqual(200, resp.status)
-            self.assertIn('id', body)
-            self.assertIn('name', body)
-            resp, volume = self.volumes_client.create_volume(
-                size=1, display_name=vol_name,
-                volume_type=vol_type_name)
-            self.assertEqual(200, resp.status)
-            self.assertIn('id', volume)
-            self.assertIn('display_name', volume)
-            self.assertEqual(volume['display_name'], vol_name,
-                             "The created volume name is not equal "
-                             "to the requested name")
-            self.assertTrue(volume['id'] is not None,
-                            "Field volume id is empty or not found.")
-            self.volumes_client.wait_for_volume_status(volume['id'],
-                                                       'available')
-            resp, fetched_volume = self.volumes_client.get_volume(volume['id'])
-            self.assertEqual(200, resp.status)
-            self.assertEqual(vol_name, fetched_volume['display_name'],
-                             'The fetched Volume is different '
-                             'from the created Volume')
-            self.assertEqual(volume['id'], fetched_volume['id'],
-                             'The fetched Volume is different '
-                             'from the created Volume')
-            self.assertEqual(vol_type_name, fetched_volume['volume_type'],
-                             'The fetched Volume is different '
-                             'from the created Volume')
-        except Exception:
-            self.fail("Could not create correct volume with volume_type")
-        finally:
-            if volume:
-                # Delete the Volume if it was created
-                resp, _ = self.volumes_client.delete_volume(volume['id'])
-                self.assertEqual(202, resp.status)
-
-            if body:
-                resp, _ = self.client.delete_volume_type(body['id'])
-                self.assertEqual(202, resp.status)
+        volume = {}
+        vol_name = rand_name("volume-")
+        vol_type_name = rand_name("volume-type-")
+        proto = self.config.volume.storage_protocol
+        vendor = self.config.volume.vendor_name
+        extra_specs = {"storage_protocol": proto,
+                       "vendor_name": vendor}
+        body = {}
+        resp, body = self.client.create_volume_type(
+            vol_type_name,
+            extra_specs=extra_specs)
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', body)
+        self.addCleanup(self._delete_volume_type, body['id'])
+        self.assertIn('name', body)
+        resp, volume = self.volumes_client.create_volume(
+            size=1, display_name=vol_name,
+            volume_type=vol_type_name)
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', volume)
+        self.addCleanup(self._delete_volume, volume['id'])
+        self.assertIn('display_name', volume)
+        self.assertEqual(volume['display_name'], vol_name,
+                         "The created volume name is not equal "
+                         "to the requested name")
+        self.assertTrue(volume['id'] is not None,
+                        "Field volume id is empty or not found.")
+        self.volumes_client.wait_for_volume_status(volume['id'],
+                                                   'available')
+        resp, fetched_volume = self.volumes_client.get_volume(volume['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(vol_name, fetched_volume['display_name'],
+                         'The fetched Volume is different '
+                         'from the created Volume')
+        self.assertEqual(volume['id'], fetched_volume['id'],
+                         'The fetched Volume is different '
+                         'from the created Volume')
+        self.assertEqual(vol_type_name, fetched_volume['volume_type'],
+                         'The fetched Volume is different '
+                         'from the created Volume')
 
     @attr(type='smoke')
     def test_volume_type_create_delete(self):
         # Create/Delete volume type.
-        try:
-            name = rand_name("volume-type-")
-            extra_specs = {"storage_protocol": "iSCSI",
-                           "vendor_name": "Open Source"}
-            resp, body = self.client.create_volume_type(
-                name,
-                extra_specs=extra_specs)
-            self.assertEqual(200, resp.status)
-            self.assertIn('id', body)
-            self.assertIn('name', body)
-            self.assertEqual(body['name'], name,
-                             "The created volume_type name is not equal "
-                             "to the requested name")
-            self.assertTrue(body['id'] is not None,
-                            "Field volume_type id is empty or not found.")
-            resp, _ = self.client.delete_volume_type(body['id'])
-            self.assertEqual(202, resp.status)
-        except Exception:
-            self.fail("Could not create a volume_type")
+        name = rand_name("volume-type-")
+        extra_specs = {"storage_protocol": "iSCSI",
+                       "vendor_name": "Open Source"}
+        resp, body = self.client.create_volume_type(
+            name,
+            extra_specs=extra_specs)
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', body)
+        self.addCleanup(self._delete_volume_type, body['id'])
+        self.assertIn('name', body)
+        self.assertEqual(body['name'], name,
+                         "The created volume_type name is not equal "
+                         "to the requested name")
+        self.assertTrue(body['id'] is not None,
+                        "Field volume_type id is empty or not found.")
 
     @attr(type='smoke')
     def test_volume_type_create_get(self):
         # Create/get volume type.
-        try:
-            body = {}
-            name = rand_name("volume-type-")
-            extra_specs = {"storage_protocol": "iSCSI",
-                           "vendor_name": "Open Source"}
-            resp, body = self.client.create_volume_type(
-                name,
-                extra_specs=extra_specs)
-            self.assertEqual(200, resp.status)
-            self.assertIn('id', body)
-            self.assertIn('name', body)
-            self.assertEqual(body['name'], name,
-                             "The created volume_type name is not equal "
-                             "to the requested name")
-            self.assertTrue(body['id'] is not None,
-                            "Field volume_type id is empty or not found.")
-            resp, fetched_volume_type = self.client.get_volume_type(body['id'])
-            self.assertEqual(200, resp.status)
-            self.assertEqual(name, fetched_volume_type['name'],
-                             'The fetched Volume_type is different '
-                             'from the created Volume_type')
-            self.assertEqual(str(body['id']), fetched_volume_type['id'],
-                             'The fetched Volume_type is different '
-                             'from the created Volume_type')
-            self.assertEqual(extra_specs, fetched_volume_type['extra_specs'],
-                             'The fetched Volume_type is different '
-                             'from the created Volume_type')
-        except Exception:
-            self.fail("Could not create a volume_type")
-        finally:
-            if body:
-                resp, _ = self.client.delete_volume_type(body['id'])
-                self.assertEqual(202, resp.status)
+        body = {}
+        name = rand_name("volume-type-")
+        extra_specs = {"storage_protocol": "iSCSI",
+                       "vendor_name": "Open Source"}
+        resp, body = self.client.create_volume_type(
+            name,
+            extra_specs=extra_specs)
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', body)
+        self.addCleanup(self._delete_volume_type, body['id'])
+        self.assertIn('name', body)
+        self.assertEqual(body['name'], name,
+                         "The created volume_type name is not equal "
+                         "to the requested name")
+        self.assertTrue(body['id'] is not None,
+                        "Field volume_type id is empty or not found.")
+        resp, fetched_volume_type = self.client.get_volume_type(body['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(name, fetched_volume_type['name'],
+                         'The fetched Volume_type is different '
+                         'from the created Volume_type')
+        self.assertEqual(str(body['id']), fetched_volume_type['id'],
+                         'The fetched Volume_type is different '
+                         'from the created Volume_type')
+        self.assertEqual(extra_specs, fetched_volume_type['extra_specs'],
+                         'The fetched Volume_type is different '
+                         'from the created Volume_type')

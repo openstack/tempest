@@ -1,6 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 IBM Corp.
+# Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -42,10 +42,11 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
             raise cls.skipException(skip_msg)
 
     def _detach(self, server_id, volume_id):
-        self.servers_client.detach_volume(server_id, volume_id)
-        self.volumes_client.wait_for_volume_status(volume_id, 'available')
+        if self.attached:
+            self.servers_client.detach_volume(server_id, volume_id)
+            self.volumes_client.wait_for_volume_status(volume_id, 'available')
 
-    def _delete(self, volume):
+    def _delete_volume(self):
         if self.volume:
             self.volumes_client.delete_volume(self.volume['id'])
             self.volume = None
@@ -63,6 +64,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         resp, volume = self.volumes_client.create_volume(1,
                                                          display_name='test')
         self.volume = volume
+        self.addCleanup(self._delete_volume)
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
 
         # Attach the volume to the server
@@ -71,49 +73,41 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
 
         self.attached = True
+        self.addCleanup(self._detach, server['id'], volume['id'])
 
     @testtools.skipIf(not run_ssh, 'SSH required for this test')
     @attr(type='gate')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
-        try:
-            self._create_and_attach()
-            server = self.server
-            volume = self.volume
+        self._create_and_attach()
+        server = self.server
+        volume = self.volume
 
-            self.servers_client.stop(server['id'])
-            self.servers_client.wait_for_server_status(server['id'], 'SHUTOFF')
+        self.servers_client.stop(server['id'])
+        self.servers_client.wait_for_server_status(server['id'], 'SHUTOFF')
 
-            self.servers_client.start(server['id'])
-            self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        self.servers_client.start(server['id'])
+        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
-            linux_client = RemoteClient(server,
-                                        self.ssh_user, server['adminPass'])
-            partitions = linux_client.get_partitions()
-            self.assertIn(self.device, partitions)
+        linux_client = RemoteClient(server,
+                                    self.ssh_user, server['adminPass'])
+        partitions = linux_client.get_partitions()
+        self.assertIn(self.device, partitions)
 
-            self._detach(server['id'], volume['id'])
-            self.attached = False
+        self._detach(server['id'], volume['id'])
+        self.attached = False
 
-            self.servers_client.stop(server['id'])
-            self.servers_client.wait_for_server_status(server['id'], 'SHUTOFF')
+        self.servers_client.stop(server['id'])
+        self.servers_client.wait_for_server_status(server['id'], 'SHUTOFF')
 
-            self.servers_client.start(server['id'])
-            self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        self.servers_client.start(server['id'])
+        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
-            linux_client = RemoteClient(server,
-                                        self.ssh_user, server['adminPass'])
-            partitions = linux_client.get_partitions()
-            self.assertNotIn(self.device, partitions)
-        except Exception:
-            self.fail("The test_attach_detach_volume is faild!")
-        finally:
-            if self.attached:
-                self._detach(server['id'], volume['id'])
-            # NOTE(maurosr): here we do the cleanup for volume, servers are
-            # dealt on BaseComputeTest.tearDownClass
-            self._delete(self.volume)
+        linux_client = RemoteClient(server,
+                                    self.ssh_user, server['adminPass'])
+        partitions = linux_client.get_partitions()
+        self.assertNotIn(self.device, partitions)
 
 
 class AttachVolumeTestXML(AttachVolumeTestJSON):
