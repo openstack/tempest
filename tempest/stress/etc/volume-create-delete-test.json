@@ -1,4 +1,4 @@
-[{"action": "tempest.stress.actions.volume_create_delete.CreateDeleteTest",
+[{"action": "tempest.stress.actions.volume_create_delete.VolumeCreateDeleteTest",
   "threads": 4,
   "use_admin": false,
   "use_isolated_tenants": false,

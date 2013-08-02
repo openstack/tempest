@@ -1,10 +1,10 @@
-[{"action": "tempest.stress.actions.create_destroy_server.CreateDestroyServerTest",
+[{"action": "tempest.stress.actions.server_create_destroy.ServerCreateDestroyTest",
   "threads": 8,
   "use_admin": false,
   "use_isolated_tenants": false,
   "kwargs": {}
   },
-  {"action": "tempest.stress.actions.volume_create_delete.CreateDeleteTest",
+  {"action": "tempest.stress.actions.volume_create_delete.VolumeCreateDeleteTest",
   "threads": 4,
   "use_admin": false,
   "use_isolated_tenants": false,

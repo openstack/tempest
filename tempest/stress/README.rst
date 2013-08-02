@@ -30,7 +30,7 @@ Running the sample test
 
 To test installation, do the following (from the tempest/stress directory):
 
-	./run_stress.py etc/sample-test.json -d 30
+	./run_stress.py etc/server-create-destroy-test.json -d 30
 
 This sample test tries to create a few VMs and kill a few VMs.
 
