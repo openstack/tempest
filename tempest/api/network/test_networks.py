@@ -116,3 +116,15 @@ class NetworksTest(base.BaseNetworkTest):
         subnets = body['subnets']
         found = any(n for n in subnets if n['id'] == self.subnet['id'])
         self.assertTrue(found)
+
+    @attr(type=['negative', 'gate'])
+    def test_show_non_existent_network(self):
+        non_exist_id = rand_name('network')
+        self.assertRaises(exceptions.NotFound, self.client.show_network,
+                          non_exist_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_show_non_existent_subnet(self):
+        non_exist_id = rand_name('subnet')
+        self.assertRaises(exceptions.NotFound, self.client.show_subnet,
+                          non_exist_id)
