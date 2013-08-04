@@ -36,7 +36,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
         resp, tenants = cls.identity_admin_client.list_tenants()
 
-        #NOTE(afazekas): these test cases should always create and use a new
+        # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
         if cls.config.compute.allow_tenant_isolation:
             cls.demo_tenant_id = cls.isolated_creds[0][0]['tenantId']
@@ -102,7 +102,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
             self.assertEqual(200, resp.status, "Failed to reset quota "
                              "defaults")
 
-    #TODO(afazekas): merge these test cases
+    # TODO(afazekas): merge these test cases
     @attr(type='gate')
     def test_get_updated_quotas(self):
         # Verify that GET shows the updated quota set
@@ -121,7 +121,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(quota_set['ram'], 5120)
 
-    #TODO(afazekas): Add dedicated tenant to the skiped quota tests
+    # TODO(afazekas): Add dedicated tenant to the skiped quota tests
     # it can be moved into the setUpClass as well
     @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
@@ -155,12 +155,12 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         ram=default_mem_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
-#TODO(afazekas): Add test that tried to update the quota_set as a regular user
+# TODO(afazekas): Add test that tried to update the quota_set as a regular user
 
     @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
-        #Once instances quota limit is reached, disallow server creation
+        # Once instances quota limit is reached, disallow server creation
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
         default_instances_quota = quota_set['instances']
         instances_quota = 0  # Set quota to zero to disallow server creation

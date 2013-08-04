@@ -33,7 +33,7 @@ class DomainsTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='smoke')
     def test_list_domains(self):
-        #Test to list domains
+        # Test to list domains
         domain_ids = list()
         fetched_ids = list()
         for _ in range(3):

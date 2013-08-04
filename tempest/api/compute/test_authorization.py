@@ -126,7 +126,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
     def test_list_servers_with_alternate_tenant(self):
         # A list on servers from one tenant should not
         # show on alternate tenant
-        #Listing servers from alternate tenant
+        # Listing servers from alternate tenant
         alt_server_ids = []
         resp, body = self.alt_client.list_servers()
         alt_server_ids = [s['id'] for s in body['servers']]
@@ -188,7 +188,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
     def test_create_keypair_in_analt_user_tenant(self):
         # A create keypair request should fail if the tenant id does not match
         # the current user
-        #POST keypair with other user tenant
+        # POST keypair with other user tenant
         k_name = rand_name('keypair-')
         self.alt_keypairs_client._set_auth()
         self.saved_base_url = self.alt_keypairs_client.base_url
@@ -238,7 +238,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
     def test_create_security_group_in_analt_user_tenant(self):
         # A create security group request should fail if the tenant id does not
         # match the current user
-        #POST security group with other user tenant
+        # POST security group with other user tenant
         s_name = rand_name('security-')
         s_description = rand_name('security')
         self.saved_base_url = self.alt_security_client.base_url
@@ -276,7 +276,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
     def test_create_security_group_rule_in_analt_user_tenant(self):
         # A create security group rule request should fail if the tenant id
         # does not match the current user
-        #POST security group rule with other user tenant
+        # POST security group rule with other user tenant
         parent_group_id = self.security_group['id']
         ip_protocol = 'icmp'
         from_port = -1

@@ -35,7 +35,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
     def setUp(self):
-        #NOTE(afazekas): Normally we use the same server with all test cases,
+        # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
         super(ServerActionsTestJSON, self).setUp()
         # Check if the server is in a clean state after test
@@ -121,13 +121,13 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                                                    personality=personality,
                                                    adminPass=password)
 
-        #Verify the properties in the initial response are correct
+        # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(self.flavor_ref, int(rebuilt_server['flavor']['id']))
 
-        #Verify the server properties after the rebuild completes
+        # Verify the server properties after the rebuild completes
         self.client.wait_for_server_status(rebuilt_server['id'], 'ACTIVE')
         resp, server = self.client.get_server(rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']

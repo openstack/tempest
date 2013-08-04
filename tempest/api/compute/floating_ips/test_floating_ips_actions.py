@@ -32,15 +32,15 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         cls.client = cls.floating_ips_client
         cls.servers_client = cls.servers_client
 
-        #Server creation
+        # Server creation
         resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         resp, body = cls.servers_client.get_server(server['id'])
-        #Floating IP creation
+        # Floating IP creation
         resp, body = cls.client.create_floating_ip()
         cls.floating_ip_id = body['id']
         cls.floating_ip = body['ip']
-        #Generating a nonexistent floatingIP id
+        # Generating a nonexistent floatingIP id
         cls.floating_ip_ids = []
         resp, body = cls.client.list_floating_ips()
         for i in range(len(body)):
@@ -52,7 +52,7 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        #Deleting the floating IP which is created in this method
+        # Deleting the floating IP which is created in this method
         resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
         super(FloatingIPsTestJSON, cls).tearDownClass()
 
@@ -66,17 +66,17 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
             floating_ip_id_allocated = body['id']
             resp, floating_ip_details = \
                 self.client.get_floating_ip_details(floating_ip_id_allocated)
-            #Checking if the details of allocated IP is in list of floating IP
+            # Checking if the details of allocated IP is in list of floating IP
             resp, body = self.client.list_floating_ips()
             self.assertIn(floating_ip_details, body)
         finally:
-            #Deleting the floating IP which is created in this method
+            # Deleting the floating IP which is created in this method
             self.client.delete_floating_ip(floating_ip_id_allocated)
 
     @attr(type=['negative', 'gate'])
     def test_allocate_floating_ip_from_nonexistent_pool(self):
         # Positive test:Allocation of a new floating IP from a nonexistent_pool
-        #to a project should fail
+        # to a project should fail
         self.assertRaises(exceptions.NotFound,
                           self.client.create_floating_ip,
                           "non_exist_pool")
@@ -85,12 +85,12 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
-        #Creating the floating IP that is to be deleted in this method
+        # Creating the floating IP that is to be deleted in this method
         resp, floating_ip_body = self.client.create_floating_ip()
-        #Storing the details of floating IP before deleting it
+        # Storing the details of floating IP before deleting it
         cli_resp = self.client.get_floating_ip_details(floating_ip_body['id'])
         resp, floating_ip_details = cli_resp
-        #Deleting the floating IP from the project
+        # Deleting the floating IP from the project
         resp, body = self.client.delete_floating_ip(floating_ip_body['id'])
         self.assertEqual(202, resp.status)
         # Check it was really deleted.
@@ -101,12 +101,12 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         # Positive test:Associate and disassociate the provided floating IP
         # to a specific server should be successful
 
-        #Association of floating IP to fixed IP address
+        # Association of floating IP to fixed IP address
         resp, body = self.client.associate_floating_ip_to_server(
             self.floating_ip,
             self.server_id)
         self.assertEqual(202, resp.status)
-        #Disassociation of floating IP that was associated in this method
+        # Disassociation of floating IP that was associated in this method
         resp, body = self.client.disassociate_floating_ip_from_server(
             self.floating_ip,
             self.server_id)
@@ -142,18 +142,18 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
     def test_associate_already_associated_floating_ip(self):
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP
-        #Create server so as to use for Multiple association
+        # Create server so as to use for Multiple association
         resp, body = self.servers_client.create_server('floating-server2',
                                                        self.image_ref,
                                                        self.flavor_ref)
         self.servers_client.wait_for_server_status(body['id'], 'ACTIVE')
         self.new_server_id = body['id']
 
-        #Associating floating IP for the first time
+        # Associating floating IP for the first time
         resp, _ = self.client.associate_floating_ip_to_server(
             self.floating_ip,
             self.server_id)
-        #Associating floating IP for the second time
+        # Associating floating IP for the second time
         resp, body = self.client.associate_floating_ip_to_server(
             self.floating_ip,
             self.new_server_id)

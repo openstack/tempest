@@ -240,12 +240,12 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertEquals('200', resp['status'])
         user_ids.append(user2['id'])
         self.data.users.append(user2)
-        #List of users for the respective tenant ID
+        # List of users for the respective tenant ID
         resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
         self.assertIn(resp['status'], ('200', '203'))
         for i in body:
             fetched_user_ids.append(i['id'])
-        #verifying the user Id in the list
+        # verifying the user Id in the list
         missing_users =\
             [user for user in user_ids if user not in fetched_user_ids]
         self.assertEqual(0, len(missing_users),
@@ -260,7 +260,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         user = self.get_user_by_name(self.data.test_user)
         tenant = self.get_tenant_by_name(self.data.test_tenant)
         role = self.get_role_by_name(self.data.test_role)
-        #Assigning roles to two users
+        # Assigning roles to two users
         user_ids = list()
         fetched_user_ids = list()
         user_ids.append(user['id'])
@@ -277,12 +277,12 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                                                   second_user['id'],
                                                   role['id'])
         self.assertEquals('200', resp['status'])
-        #List of users with roles for the respective tenant ID
+        # List of users with roles for the respective tenant ID
         resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
         self.assertEquals('200', resp['status'])
         for i in body:
             fetched_user_ids.append(i['id'])
-        #verifying the user Id in the list
+        # verifying the user Id in the list
         missing_users = [missing_user for missing_user in user_ids
                          if missing_user not in fetched_user_ids]
         self.assertEqual(0, len(missing_users),
@@ -293,13 +293,13 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     def test_list_users_with_invalid_tenant(self):
         # Should not be able to return a list of all
         # users for a nonexistant tenant
-        #Assign invalid tenant ids
+        # Assign invalid tenant ids
         invalid_id = list()
         invalid_id.append(rand_name('999'))
         invalid_id.append('alpha')
         invalid_id.append(rand_name("dddd@#%%^$"))
         invalid_id.append('!@#()$%^&*?<>{}[]')
-        #List the users with invalid tenant id
+        # List the users with invalid tenant id
         for invalid in invalid_id:
             self.assertRaises(exceptions.NotFound,
                               self.client.list_users_for_tenant, invalid)

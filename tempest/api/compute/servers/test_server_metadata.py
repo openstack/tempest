@@ -47,7 +47,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
         # All metadata key/value pairs for a server should be returned
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
 
-        #Verify the expected metadata items are in the list
+        # Verify the expected metadata items are in the list
         self.assertEqual(200, resp.status)
         expected = {'key1': 'value1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
@@ -55,14 +55,14 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_set_server_metadata(self):
         # The server's metadata should be replaced with the provided values
-        #Create a new set of metadata for the server
+        # Create a new set of metadata for the server
         req_metadata = {'meta2': 'data2', 'meta3': 'data3'}
         resp, metadata = self.client.set_server_metadata(self.server_id,
                                                          req_metadata)
         self.assertEqual(200, resp.status)
 
-        #Verify the expected values are correct, and that the
-        #previous values have been removed
+        # Verify the expected values are correct, and that the
+        # previous values have been removed
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         self.assertEqual(resp_metadata, req_metadata)
 
@@ -98,7 +98,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
                                                             meta)
         self.assertEqual(200, resp.status)
 
-        #Verify the values have been updated to the proper values
+        # Verify the values have been updated to the proper values
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         expected = {'key1': 'alt1', 'key2': 'value2', 'key3': 'value3'}
         self.assertEqual(expected, resp_metadata)
@@ -123,13 +123,13 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_set_server_metadata_item(self):
         # The item's value should be updated to the provided value
-        #Update the metadata value
+        # Update the metadata value
         meta = {'nova': 'alt'}
         resp, body = self.client.set_server_metadata_item(self.server_id,
                                                           'nova', meta)
         self.assertEqual(200, resp.status)
 
-        #Verify the meta item's value has been updated
+        # Verify the meta item's value has been updated
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         expected = {'key1': 'value1', 'key2': 'value2', 'nova': 'alt'}
         self.assertEqual(expected, resp_metadata)
@@ -141,7 +141,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
                                                              'key1')
         self.assertEqual(204, resp.status)
 
-        #Verify the metadata item has been removed
+        # Verify the metadata item has been removed
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
@@ -197,7 +197,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
         # Negative test: Should not be able to delete metadata item from a
         #  nonexistant server
 
-        #Delete the metadata item
+        # Delete the metadata item
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_server_metadata_item, 999, 'd')
 

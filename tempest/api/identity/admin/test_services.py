@@ -29,14 +29,14 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
     def test_create_get_delete_service(self):
         # GET Service
         try:
-            #Creating a Service
+            # Creating a Service
             name = rand_name('service-')
             type = rand_name('type--')
             description = rand_name('description-')
             resp, service_data = self.client.create_service(
                 name, type, description=description)
             self.assertTrue(resp['status'].startswith('2'))
-            #Verifying response body of create service
+            # Verifying response body of create service
             self.assertIn('id', service_data)
             self.assertFalse(service_data['id'] is None)
             self.assertIn('name', service_data)
@@ -45,10 +45,10 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
             self.assertEqual(type, service_data['type'])
             self.assertIn('description', service_data)
             self.assertEqual(description, service_data['description'])
-            #Get service
+            # Get service
             resp, fetched_service = self.client.get_service(service_data['id'])
             self.assertTrue(resp['status'].startswith('2'))
-            #verifying the existence of service created
+            # verifying the existence of service created
             self.assertIn('id', fetched_service)
             self.assertEquals(fetched_service['id'], service_data['id'])
             self.assertIn('name', fetched_service)

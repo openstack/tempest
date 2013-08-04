@@ -38,7 +38,7 @@ class VolumesGetTestJSON(base.BaseComputeTest):
         volume = None
         v_name = rand_name('Volume-%s-') % self._interface
         metadata = {'Type': 'work'}
-        #Create volume
+        # Create volume
         resp, volume = self.client.create_volume(size=1,
                                                  display_name=v_name,
                                                  metadata=metadata)
@@ -51,12 +51,12 @@ class VolumesGetTestJSON(base.BaseComputeTest):
                          "to the requested name")
         self.assertTrue(volume['id'] is not None,
                         "Field volume id is empty or not found.")
-        #Wait for Volume status to become ACTIVE
+        # Wait for Volume status to become ACTIVE
         self.client.wait_for_volume_status(volume['id'], 'available')
-        #GET Volume
+        # GET Volume
         resp, fetched_volume = self.client.get_volume(volume['id'])
         self.assertEqual(200, resp.status)
-        #Verfication of details of fetched Volume
+        # Verfication of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],
                          'The fetched Volume is different '
@@ -74,7 +74,7 @@ class VolumesGetTestJSON(base.BaseComputeTest):
     def test_volume_get_metadata_none(self):
         # CREATE, GET empty metadata dict
         v_name = rand_name('Volume-')
-        #Create volume
+        # Create volume
         resp, volume = self.client.create_volume(size=1,
                                                  display_name=v_name,
                                                  metadata={})
@@ -82,19 +82,19 @@ class VolumesGetTestJSON(base.BaseComputeTest):
         self.assertEqual(200, resp.status)
         self.assertIn('id', volume)
         self.assertIn('displayName', volume)
-        #Wait for Volume status to become ACTIVE
+        # Wait for Volume status to become ACTIVE
         self.client.wait_for_volume_status(volume['id'], 'available')
-        #GET Volume
+        # GET Volume
         resp, fetched_volume = self.client.get_volume(volume['id'])
         self.assertEqual(200, resp.status)
         self.assertEqual(fetched_volume['metadata'], {})
 
     def _delete_volume(self, volume):
-        #Delete the Volume created in this method
+        # Delete the Volume created in this method
         try:
             resp, _ = self.client.delete_volume(volume['id'])
             self.assertEqual(202, resp.status)
-            #Checking if the deleted Volume still exists
+            # Checking if the deleted Volume still exists
             self.client.wait_for_resource_deletion(volume['id'])
         except KeyError:
             return

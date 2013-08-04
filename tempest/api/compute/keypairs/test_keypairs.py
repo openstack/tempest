@@ -32,33 +32,33 @@ class KeyPairsTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_keypairs_create_list_delete(self):
         # Keypairs created should be available in the response list
-        #Create 3 keypairs
+        # Create 3 keypairs
         key_list = list()
         for i in range(3):
             k_name = rand_name('keypair-')
             resp, keypair = self.client.create_keypair(k_name)
-            #Need to pop these keys so that our compare doesn't fail later,
-            #as the keypair dicts from list API doesn't have them.
+            # Need to pop these keys so that our compare doesn't fail later,
+            # as the keypair dicts from list API doesn't have them.
             keypair.pop('private_key')
             keypair.pop('user_id')
             self.assertEqual(200, resp.status)
             key_list.append(keypair)
-        #Fetch all keypairs and verify the list
-        #has all created keypairs
+        # Fetch all keypairs and verify the list
+        # has all created keypairs
         resp, fetched_list = self.client.list_keypairs()
         self.assertEqual(200, resp.status)
-        #We need to remove the extra 'keypair' element in the
-        #returned dict. See comment in keypairs_client.list_keypairs()
+        # We need to remove the extra 'keypair' element in the
+        # returned dict. See comment in keypairs_client.list_keypairs()
         new_list = list()
         for keypair in fetched_list:
             new_list.append(keypair['keypair'])
         fetched_list = new_list
-        #Now check if all the created keypairs are in the fetched list
+        # Now check if all the created keypairs are in the fetched list
         missing_kps = [kp for kp in key_list if kp not in fetched_list]
         self.assertFalse(missing_kps,
                          "Failed to find keypairs %s in fetched list"
                          % ', '.join(m_key['name'] for m_key in missing_kps))
-        #Delete all the keypairs created
+        # Delete all the keypairs created
         for keypair in key_list:
             resp, _ = self.client.delete_keypair(keypair['name'])
             self.assertEqual(202, resp.status)
@@ -163,7 +163,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         k_name = rand_name('keypair-')
         resp, _ = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
-        #Now try the same keyname to ceate another key
+        # Now try the same keyname to ceate another key
         self.assertRaises(exceptions.Duplicate, self.client.create_keypair,
                           k_name)
         resp, _ = self.client.delete_keypair(k_name)

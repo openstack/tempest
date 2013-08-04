@@ -1,4 +1,4 @@
-#vim: tabstop=4 shiftwidth=4 softtabstop=4
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
@@ -33,7 +33,7 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
         resp, body = self.client.create_service(
             name, type, description=description)
         self.assertEqual('200', resp['status'])
-        #Deleting the service created in this method
+        # Deleting the service created in this method
         self.addCleanup(self.client.delete_service, body['id'])
 
         s_id = body['id']
@@ -46,7 +46,7 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual('200', resp['status'])
         self.assertNotEqual(resp1_desc, resp2_desc)
 
-        #Get service
+        # Get service
         resp, body = self.client.get_service(s_id)
         resp3_desc = body['description']
 

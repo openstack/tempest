@@ -29,7 +29,7 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='smoke')
     def test_list_policies(self):
-        #Test to list policies
+        # Test to list policies
         policy_ids = list()
         fetched_ids = list()
         for _ in range(3):
@@ -50,7 +50,7 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='smoke')
     def test_create_update_delete_policy(self):
-        #Test to update policy
+        # Test to update policy
         blob = rand_name('BlobName-')
         policy_type = rand_name('PolicyType-')
         resp, policy = self.policy_client.create_policy(blob, policy_type)
@@ -63,12 +63,12 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual(policy_type, policy['type'])
         resp, fetched_policy = self.policy_client.get_policy(policy['id'])
         self.assertEqual(resp['status'], '200')
-        #Update policy
+        # Update policy
         update_type = rand_name('UpdatedPolicyType-')
         resp, data = self.policy_client.update_policy(
             policy['id'], type=update_type)
         self.assertIn('type', data)
-        #Assertion for updated value with fetched value
+        # Assertion for updated value with fetched value
         resp, fetched_policy = self.policy_client.get_policy(policy['id'])
         self.assertIn('id', fetched_policy)
         self.assertIn('blob', fetched_policy)

@@ -34,7 +34,7 @@ class VolumesGetTest(base.BaseVolumeTest):
             volume = {}
             v_name = rand_name('Volume')
             metadata = {'Type': 'Test'}
-            #Create a volume
+            # Create a volume
             resp, volume = self.client.create_volume(size=1,
                                                      display_name=v_name,
                                                      metadata=metadata,
@@ -86,7 +86,7 @@ class VolumesGetTest(base.BaseVolumeTest):
             self.assertIn('id', volume)
             self.assertIn('display_name', volume)
             self.client.wait_for_volume_status(volume['id'], 'available')
-            #GET Volume
+            # GET Volume
             resp, fetched_volume = self.client.get_volume(volume['id'])
             self.assertEqual(200, resp.status)
             self.assertEqual(fetched_volume['metadata'], {})

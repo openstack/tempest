@@ -45,7 +45,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
     @testtools.skip('Until Bug #1069849 is resolved.')
     @attr(type='gate')
     def test_get_object_after_expiry_time(self):
-        #TODO(harika-vakadi): similar test case has to be created for
+        # TODO(harika-vakadi): similar test case has to be created for
         # "X-Delete-At", after this test case works.
 
         # create object

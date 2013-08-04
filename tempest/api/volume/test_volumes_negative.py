@@ -32,7 +32,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @attr(type='gate')
     def test_volume_get_nonexistant_volume_id(self):
         # Should not be able to get a nonexistant volume
-        #Creating a nonexistant volume id
+        # Creating a nonexistant volume id
         volume_id_list = []
         resp, volumes = self.client.list_volumes()
         for i in range(len(volumes)):
@@ -41,7 +41,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
             non_exist_id = rand_name('999')
             if non_exist_id not in volume_id_list:
                 break
-        #Trying to Get a non existant volume
+        # Trying to Get a non existant volume
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           non_exist_id)
 

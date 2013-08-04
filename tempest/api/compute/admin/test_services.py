@@ -70,13 +70,13 @@ class ServicesAdminTestJSON(base.BaseComputeAdminTest):
         s1 = map(lambda x: x['binary'], services)
         s2 = map(lambda x: x['binary'], services_on_host)
 
-        #sort the lists before comparing, to take out dependency
-        #on order.
+        # sort the lists before comparing, to take out dependency
+        # on order.
         self.assertEqual(sorted(s1), sorted(s2))
 
     @attr(type=['negative', 'gate'])
     def test_get_service_by_invalid_params(self):
-        #return all services if send the request with invalid parameter
+        # return all services if send the request with invalid parameter
         resp, services = self.client.list_services()
         params = {'xxx': 'nova-compute'}
         resp, services_xxx = self.client.list_services(params)

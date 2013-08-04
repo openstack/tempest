@@ -35,7 +35,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_volume_get_nonexistant_volume_id(self):
         # Negative: Should not be able to get details of nonexistant volume
-        #Creating a nonexistant volume id
+        # Creating a nonexistant volume id
         volume_id_list = list()
         resp, body = self.client.list_volumes()
         for i in range(len(body)):
