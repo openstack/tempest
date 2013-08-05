@@ -279,6 +279,15 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         cls.server_id = server['id']
         cls.password = server['adminPass']
 
+    @attr(type='gate')
+    def test_stop_start_server(self):
+        resp, server = self.servers_client.stop(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(self.server_id, 'SHUTOFF')
+        resp, server = self.servers_client.start(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+
 
 class ServerActionsTestXML(ServerActionsTestJSON):
     _interface = 'xml'
