@@ -170,7 +170,7 @@ def _add_matcher_class(error_cls, error_data, base=BotoExceptionMatcher):
             add_cls = getattr(add_cls, part)
 
 
-#TODO(afazekas): classmethod handling
+# TODO(afazekas): classmethod handling
 def friendly_function_name_simple(call_able):
     name = ""
     if hasattr(call_able, "im_class"):
@@ -224,7 +224,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         """Cancel Clean up request."""
         del cls._resource_trash_bin[key]
 
-    #TODO(afazekas): Add "with" context handling
+    # TODO(afazekas): Add "with" context handling
     def assertBotoError(self, excMatcher, callableObj,
                         *args, **kwargs):
         """Example usage:
@@ -272,7 +272,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
     s3_error_code.server = ServerError()
     s3_error_code.client = ClientError()
     valid_image_state = set(('available', 'pending', 'failed'))
-    #NOTE(afazekas): 'paused' is not valid status in EC2, but it does not have
+    # NOTE(afazekas): 'paused' is not valid status in EC2, but it does not have
     # a good mapping, because it uses memory, but not really a running machine
     valid_instance_state = set(('pending', 'running', 'shutting-down',
                                 'terminated', 'stopping', 'stopped', 'paused'))
@@ -380,7 +380,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
     def assertAddressReleasedWait(self, address):
 
         def _address_delete():
-            #NOTE(afazekas): the filter gives back IP
+            # NOTE(afazekas): the filter gives back IP
             # even if it is not associated to my tenant
             if (address.public_ip not in map(lambda a: a.public_ip,
                 self.ec2_client.get_all_addresses())):
@@ -448,7 +448,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 if cls.ec2_error_code.\
                         client.InvalidInstanceID.NotFound.match(exc):
                     return "_GONE"
-                #NOTE(afazekas): incorrect code,
+                # NOTE(afazekas): incorrect code,
                 # but the resource must be destoreyd
                 if exc.error_code == "InstanceNotFound":
                     return "_GONE"
@@ -465,7 +465,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         if exc_num:
             raise exceptions.TearDownException(num=exc_num)
 
-    #NOTE(afazekas): The incorrect ErrorCodes makes very, very difficult
+    # NOTE(afazekas): The incorrect ErrorCodes makes very, very difficult
     # to write better teardown
 
     @classmethod
@@ -473,7 +473,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         """Delete group.
            Use just for teardown!
         """
-        #NOTE(afazekas): should wait/try until all related instance terminates
+        # NOTE(afazekas): should wait/try until all related instance terminates
         group.delete()
 
     @classmethod
@@ -487,7 +487,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             LOG.critical("%s Volume has %s snapshot(s)", volume.id,
                          map(snaps.id, snaps))
 
-        #Note(afazekas): detaching/attching not valid EC2 status
+        # NOTE(afazekas): detaching/attching not valid EC2 status
         def _volume_state():
             volume.update(validate=True)
             try:
@@ -495,7 +495,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                     volume.detach(force=True)
             except BaseException as exc:
                 LOG.exception(exc)
-                #exc_num += 1 "nonlocal" not in python2
+                # exc_num += 1 "nonlocal" not in python2
             return volume.status
 
         try:

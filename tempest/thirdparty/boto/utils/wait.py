@@ -34,7 +34,7 @@ default_check_interval = _boto_config.build_interval
 
 
 def state_wait(lfunction, final_set=set(), valid_set=None):
-    #TODO(afazekas): evaluate using ABC here
+    # TODO(afazekas): evaluate using ABC here
     if not isinstance(final_set, set):
         final_set = set((final_set,))
     if not isinstance(valid_set, set) and valid_set is not None:
@@ -112,7 +112,7 @@ def wait_no_exception(lfunction, exc_class=None, exc_matcher=None):
         time.sleep(default_check_interval)
 
 
-#NOTE(afazekas): EC2/boto normally raise exception instead of empty list
+# NOTE(afazekas): EC2/boto normally raise exception instead of empty list
 def wait_exception(lfunction):
     """Returns with the exception or raises one."""
     start_time = time.time()
@@ -129,4 +129,4 @@ def wait_exception(lfunction):
                                             dtime)
         time.sleep(default_check_interval)
 
-#TODO(afazekas): consider strategy design pattern..
+# TODO(afazekas): consider strategy design pattern..

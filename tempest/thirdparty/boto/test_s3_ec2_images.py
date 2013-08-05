@@ -59,7 +59,7 @@ class S3ImagesTest(BotoTestCase):
         image["image_id"] = self.images_client.register_image(
             name=image["name"],
             image_location=image["location"])
-        #Note(afazekas): delete_snapshot=True might trigger boto lib? bug
+        # NOTE(afazekas): delete_snapshot=True might trigger boto lib? bug
         image["cleanUp"] = self.addResourceCleanUp(
             self.images_client.deregister_image,
             image["image_id"])
@@ -119,4 +119,4 @@ class S3ImagesTest(BotoTestCase):
         self.images_client.deregister_image(image["image_id"])
         self.cancelResourceCleanUp(image["cleanUp"])
 
-#TODO(afazekas): less copy-paste style
+# TODO(afazekas): less copy-paste style
