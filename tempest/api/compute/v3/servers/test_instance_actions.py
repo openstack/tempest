@@ -20,12 +20,12 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class InstanceActionsTestJSON(base.BaseV2ComputeTest):
+class InstanceActionsV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(InstanceActionsTestJSON, cls).setUpClass()
+        super(InstanceActionsV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.request_id = resp['x-compute-request-id']
@@ -65,5 +65,5 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
                           self.server_id, '999')
 
 
-class InstanceActionsTestXML(InstanceActionsTestJSON):
+class InstanceActionsV3TestXML(InstanceActionsV3TestJSON):
     _interface = 'xml'
