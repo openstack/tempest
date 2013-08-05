@@ -79,7 +79,7 @@ class ServersWhiteboxTest(manager.ComputeWhiteboxTest):
             stmt = instances.select().where(instances.c.uuid == server['id'])
             result = self.connection.execute(stmt).first()
 
-            self.assertEqual(1, result.deleted)
+            self.assertEqual(True, result.deleted > 0)
             self.assertEqual('deleted', result.vm_state)
             self.assertEqual(None, result.task_state)
         except Exception:
