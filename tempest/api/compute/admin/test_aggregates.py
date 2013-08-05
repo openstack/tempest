@@ -146,6 +146,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                           self.client.get_aggregate, -1)
 
     @attr(type='gate')
+    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_remove_host(self):
         # Add an host to the given aggregate and remove.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -167,6 +168,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertNotIn(self.host, body['hosts'])
 
     @attr(type='gate')
+    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_host_list(self):
         # Add an host to the given aggregate and list.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -184,6 +186,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertIn(self.host, agg['hosts'])
 
     @attr(type='gate')
+    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_host_get_details(self):
         # Add an host to the given aggregate and get details.
         aggregate_name = rand_name(self.aggregate_name_prefix)
@@ -245,6 +248,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                           aggregate['id'], self.host)
 
     @attr(type=['negative', 'gate'])
+    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_remove_host_as_user(self):
         # Regular user is not allowed to remove a host from an aggregate.
         aggregate_name = rand_name(self.aggregate_name_prefix)
