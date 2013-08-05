@@ -35,6 +35,13 @@ class NetworksTest(base.BaseNetworkTest):
         create a subnet for a tenant
         list tenant's subnets
         show a tenant subnet details
+        port create
+        port delete
+        port list
+        port show
+        port update
+        network update
+        subnet update
 
     v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
@@ -53,21 +60,28 @@ class NetworksTest(base.BaseNetworkTest):
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)
         cls.cidr = cls.subnet['cidr']
+        cls.port = cls.create_port(cls.network)
 
     @attr(type='gate')
-    def test_create_delete_network_subnet(self):
+    def test_create_update_delete_network_subnet(self):
         # Creates a network
         name = rand_name('network-')
         resp, body = self.client.create_network(name)
         self.assertEqual('201', resp['status'])
         network = body['network']
-        self.assertTrue(network['id'] is not None)
+        net_id = network['id']
+        # Verification of network update
+        new_name = "New_network"
+        resp, body = self.client.update_network(net_id, new_name)
+        self.assertEqual('200', resp['status'])
+        updated_net = body['network']
+        self.assertEqual(updated_net['name'], new_name)
         # Find a cidr that is not in use yet and create a subnet with it
         cidr = netaddr.IPNetwork(self.network_cfg.tenant_network_cidr)
         mask_bits = self.network_cfg.tenant_network_mask_bits
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
-                resp, body = self.client.create_subnet(network['id'],
+                resp, body = self.client.create_subnet(net_id,
                                                        str(subnet_cidr))
                 break
             except exceptions.BadRequest as e:
@@ -76,11 +90,17 @@ class NetworksTest(base.BaseNetworkTest):
                     raise
         self.assertEqual('201', resp['status'])
         subnet = body['subnet']
-        self.assertTrue(subnet['id'] is not None)
+        subnet_id = subnet['id']
+        # Verification of subnet update
+        new_subnet = "New_subnet"
+        resp, body = self.client.update_subnet(subnet_id, new_subnet)
+        self.assertEqual('200', resp['status'])
+        updated_subnet = body['subnet']
+        self.assertEqual(updated_subnet['name'], new_subnet)
         # Deletes subnet and network
-        resp, body = self.client.delete_subnet(subnet['id'])
+        resp, body = self.client.delete_subnet(subnet_id)
         self.assertEqual('204', resp['status'])
-        resp, body = self.client.delete_network(network['id'])
+        resp, body = self.client.delete_network(net_id)
         self.assertEqual('204', resp['status'])
 
     @attr(type='gate')
@@ -97,8 +117,12 @@ class NetworksTest(base.BaseNetworkTest):
         # Verify the network exists in the list of all networks
         resp, body = self.client.list_networks()
         networks = body['networks']
-        found = any(n for n in networks if n['id'] == self.network['id'])
-        self.assertTrue(found)
+        found = None
+        for n in networks:
+            if (n['id'] == self.network['id']):
+                found = n['id']
+        msg = "Network list doesn't contain created network"
+        self.assertIsNotNone(found, msg)
 
     @attr(type='gate')
     def test_show_subnet(self):
@@ -114,8 +138,48 @@ class NetworksTest(base.BaseNetworkTest):
         # Verify the subnet exists in the list of all subnets
         resp, body = self.client.list_subnets()
         subnets = body['subnets']
-        found = any(n for n in subnets if n['id'] == self.subnet['id'])
-        self.assertTrue(found)
+        found = None
+        for n in subnets:
+            if (n['id'] == self.subnet['id']):
+                found = n['id']
+        msg = "Subnet list doesn't contain created subnet"
+        self.assertIsNotNone(found, msg)
+
+    @attr(type='gate')
+    def test_create_update_delete_port(self):
+        # Verify that successful port creation & deletion
+        resp, body = self.client.create_port(self.network['id'])
+        self.assertEqual('201', resp['status'])
+        port = body['port']
+        # Verification of port update
+        new_port = "New_Port"
+        resp, body = self.client.update_port(port['id'], new_port)
+        self.assertEqual('200', resp['status'])
+        updated_port = body['port']
+        self.assertEqual(updated_port['name'], new_port)
+        # Verification of port delete
+        resp, body = self.client.delete_port(port['id'])
+        self.assertEqual('204', resp['status'])
+
+    @attr(type='gate')
+    def test_show_ports(self):
+        # Verify the details of port
+        resp, body = self.client.show_port(self.port['id'])
+        self.assertEqual('200', resp['status'])
+        port = body['port']
+        self.assertEqual(self.port['id'], port['id'])
+
+    @attr(type='gate')
+    def test_list_ports(self):
+        # Verify the port exists in the list of all ports
+        resp, body = self.client.list_ports()
+        self.assertEqual('200', resp['status'])
+        ports_list = body['ports']
+        found = None
+        for n in ports_list:
+            if (n['id'] == self.port['id']):
+                found = n['id']
+        self.assertIsNotNone(found, "Port list doesn't contain created port")
 
     @attr(type=['negative', 'gate'])
     def test_show_non_existent_network(self):

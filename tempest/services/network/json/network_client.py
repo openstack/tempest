@@ -151,3 +151,39 @@ class NetworkClient(RestClient):
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body['quotas']
+
+    def update_subnet(self, subnet_id, new_name):
+        put_body = {
+            'subnet': {
+                'name': new_name,
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/subnets/%s' % (self.uri_prefix, subnet_id)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def update_port(self, port_id, new_name):
+        put_body = {
+            'port': {
+                'name': new_name,
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/ports/%s' % (self.uri_prefix, port_id)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def update_network(self, network_id, new_name):
+        put_body = {
+            "network": {
+                "name": new_name,
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/networks/%s' % (self.uri_prefix, network_id)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body

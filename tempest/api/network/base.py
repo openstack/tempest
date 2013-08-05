@@ -54,9 +54,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.client = os.network_client
         cls.networks = []
         cls.subnets = []
+        cls.ports = []
 
     @classmethod
     def tearDownClass(cls):
+        for port in cls.ports:
+            cls.client.delete_port(port['id'])
         for subnet in cls.subnets:
             cls.client.delete_subnet(subnet['id'])
         for network in cls.networks:
@@ -98,3 +101,11 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         subnet = body['subnet']
         cls.subnets.append(subnet)
         return subnet
+
+    @classmethod
+    def create_port(cls, network):
+        """Wrapper utility that returns a test port."""
+        resp, body = cls.client.create_port(network['id'])
+        port = body['port']
+        cls.ports.append(port)
+        return port
