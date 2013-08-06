@@ -98,7 +98,7 @@ ssh_user = cirros
 fixed_network_name = private
 
 # Network id used for SSH (public, private, etc)
-network_for_ssh = private
+network_for_ssh = public
 
 # IP version of the address used for SSH
 ip_version_for_ssh = 4
