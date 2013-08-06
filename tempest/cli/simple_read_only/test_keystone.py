@@ -18,8 +18,12 @@
 import re
 import subprocess
 
+from oslo.config import cfg
+
 import tempest.cli
 from tempest.openstack.common import log as logging
+
+CONF = cfg.CONF
 
 
 LOG = logging.getLogger(__name__)
@@ -117,4 +121,4 @@ class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
         self.keystone('catalog', flags='--debug')
 
     def test_admin_timeout(self):
-        self.keystone('catalog', flags='--timeout 15')
+        self.keystone('catalog', flags='--timeout %d' % CONF.cli.timeout)
