@@ -35,6 +35,9 @@ cli_opts = [
     cfg.StrOpt('cli_dir',
                default='/usr/local/bin/',
                help="directory where python client binaries are located"),
+    cfg.IntOpt('timeout',
+               default=15,
+               help="Number of seconds to wait on a CLI timeout"),
 ]
 
 CONF = cfg.CONF

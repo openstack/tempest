@@ -176,7 +176,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
         self.nova('list', flags='--debug')
 
     def test_admin_timeout(self):
-        self.nova('list', flags='--timeout 2')
+        self.nova('list', flags='--timeout %d' % CONF.cli.timeout)
 
     def test_admin_timing(self):
         self.nova('list', flags='--timing')
