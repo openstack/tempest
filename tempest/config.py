@@ -609,6 +609,21 @@ def register_service_available_opts(conf):
     for opt in ServiceAvailableGroup:
         conf.register_opt(opt, group='service_available')
 
+debug_group = cfg.OptGroup(name="debug",
+                           title="Debug System")
+
+DebugGroup = [
+    cfg.BoolOpt('enable',
+                default=True,
+                help="Enable diagnostic commands"),
+]
+
+
+def register_debug_opts(conf):
+    conf.register_group(debug_group)
+    for opt in DebugGroup:
+        conf.register_opt(opt, group='debug')
+
 
 @singleton
 class TempestConfig:

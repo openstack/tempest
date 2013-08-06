@@ -409,3 +409,7 @@ max_instances = 32
 log_check_interval = 60
 # The default number of threads created while stress test
 default_thread_number_per_action=4
+
+[debug]
+# Enable diagnostic commands
+enable = True

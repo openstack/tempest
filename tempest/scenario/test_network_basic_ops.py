@@ -17,6 +17,7 @@
 #    under the License.
 
 from tempest.api.network import common as net_common
+from tempest.common import debug
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -245,10 +246,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # key-based authentication by cloud-init.
         ssh_login = self.config.compute.image_ssh_user
         private_key = self.keypairs[self.tenant_id].private_key
-        for server, floating_ips in self.floating_ips.iteritems():
-            for floating_ip in floating_ips:
-                ip_address = floating_ip.floating_ip_address
-                self._check_vm_connectivity(ip_address, ssh_login, private_key)
+        try:
+            for server, floating_ips in self.floating_ips.iteritems():
+                for floating_ip in floating_ips:
+                    ip_address = floating_ip.floating_ip_address
+                    self._check_vm_connectivity(ip_address,
+                                                ssh_login,
+                                                private_key)
+        except Exception as exc:
+            LOG.exception(exc)
+            debug.log_ip_ns()
+            raise exc
 
     @attr(type='smoke')
     def test_network_basic_ops(self):
