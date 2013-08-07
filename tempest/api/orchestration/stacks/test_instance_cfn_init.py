@@ -145,7 +145,7 @@ Outputs:
                 'ImageId': cls.orchestration_cfg.image_ref
             })
 
-    @attr(type='gate')
+    @attr(type='slow')
     @testtools.skipIf(existing_keypair, 'Server ssh tests are disabled.')
     def test_can_log_into_created_server(self):
 
@@ -168,7 +168,7 @@ Outputs:
             server, 'ec2-user', pkey=self.keypair['private_key'])
         self.assertTrue(linux_client.can_authenticate())
 
-    @attr(type='gate')
+    @attr(type='slow')
     def test_stack_wait_condition_data(self):
 
         sid = self.stack_identifier
