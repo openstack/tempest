@@ -11,23 +11,22 @@ function usage {
   echo "  -u, --update             Update the virtual environment with any newer package versions"
   echo "  -s, --smoke              Only run smoke tests"
   echo "  -w, --whitebox           Only run whitebox tests"
-  echo "  -t, --with-testr         Run using testr instead of nose"
+  echo "  -t, --parallel           Run testr parallel"
   echo "  -c, --nova-coverage      Enable Nova coverage collection"
   echo "  -C, --config             Config file location"
   echo "  -p, --pep8               Just run pep8"
   echo "  -h, --help               Print this usage message"
   echo "  -d, --debug              Debug this script -- set -o xtrace"
-  echo "  -S, --stdout             Don't capture stdout"
   echo "  -l, --logging            Enable logging"
   echo "  -L, --logging-config     Logging config file location.  Default is etc/logging.conf"
-  echo "  -- [NOSEOPTIONS]         After the first '--' you can pass arbitrary arguments to nosetests "
+  echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
 }
 
-noseargs=""
+testrargs=""
 just_pep8=0
 venv=.venv
 with_venv=tools/with_venv.sh
-with_testr=0
+parallel=0
 always_venv=0
 never_venv=0
 no_site_packages=0
@@ -39,7 +38,7 @@ update=0
 logging=0
 logging_config=etc/logging.conf
 
-if ! options=$(getopt -o VNnfuswtcphdSC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,with-testr,nova-coverage,pep8,help,debug,stdout,config:,logging,logging-config: -- "$@")
+if ! options=$(getopt -o VNnfuswtcphdC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,parallel,nova-coverage,pep8,help,debug,config:,logging,logging-config: -- "$@")
 then
     # parse error
     usage
@@ -60,14 +59,13 @@ while [ $# -gt 0 ]; do
     -c|--nova-coverage) let nova_coverage=1;;
     -C|--config) config_file=$2; shift;;
     -p|--pep8) let just_pep8=1;;
-    -s|--smoke) noseargs="$noseargs --attr=type=smoke";;
-    -w|--whitebox) noseargs="$noseargs --attr=type=whitebox";;
-    -t|--with-testr) with_testr=1;;
-    -S|--stdout) noseargs="$noseargs -s";;
+    -s|--smoke) testrargs="$testrargs smoke";;
+    -w|--whitebox) testrargs="$testrargs whitebox";;
+    -t|--parallel) parallel=1;;
     -l|--logging) logging=1;;
     -L|--logging-config) logging_config=$2; shift;;
-    --) [ "yes" == "$first_uu" ] || noseargs="$noseargs $1"; first_uu=no  ;;
-    *) noseargs="$noseargs $1"
+    --) [ "yes" == "$first_uu" ] || testrargs="$testrargs $1"; first_uu=no  ;;
+    *) testrargs="$testrargs $1"
   esac
   shift
 done
@@ -90,22 +88,8 @@ fi
 
 cd `dirname "$0"`
 
-export NOSE_WITH_OPENSTACK=1
-export NOSE_OPENSTACK_COLOR=1
-export NOSE_OPENSTACK_RED=15.00
-export NOSE_OPENSTACK_YELLOW=3.00
-export NOSE_OPENSTACK_SHOW_ELAPSED=1
-export NOSE_OPENSTACK_STDOUT=1
-
 if [ $no_site_packages -eq 1 ]; then
   installvenvopts="--no-site-packages"
-fi
-
-# only add tempest default if we don't specify a test
-if [[ "x$noseargs" =~ "tempest" ]]; then
-  noseargs="$noseargs"
-else
-  noseargs="$noseargs tempest"
 fi
 
 function testr_init {
@@ -115,12 +99,12 @@ function testr_init {
 }
 
 function run_tests {
-  if [ $with_testr -eq 1 ]; then
-      testr_init
-      ${wrapper} find . -type f -name "*.pyc" -delete
-      ${wrapper} testr run --parallel --subunit $noseargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
+  testr_init
+  ${wrapper} find . -type f -name "*.pyc" -delete
+  if [ $parallel -eq 1 ]; then
+      ${wrapper} testr run --parallel --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
   else
-      ${wrapper} $NOSETESTS
+      ${wrapper} testr run --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
   fi
 }
 
@@ -138,8 +122,6 @@ function run_coverage_report {
   echo "Generating nova-coverage report"
   ${wrapper} python tools/tempest_coverage.py -c report
 }
-
-NOSETESTS="nosetests $noseargs"
 
 if [ $never_venv -eq 0 ]
 then
@@ -187,7 +169,7 @@ if [ $nova_coverage -eq 1 ]; then
     run_coverage_report
 fi
 
-if [ -z "$noseargs" ]; then
+if [ -z "$testrargs" ]; then
     run_pep8
 fi
 
