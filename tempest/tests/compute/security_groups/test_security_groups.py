@@ -15,7 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.compute import base
@@ -119,6 +122,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.get_security_group,
                           non_exist_id)
 
+    @testtools.skipIf(config.TempestConfig().network.quantum_available,
+                      "Skipped until the Bug #1161411 is resolved")
     @attr(type='negative')
     def test_security_group_create_with_invalid_group_name(self):
         # Negative test: Security Group should not be created with group name
@@ -138,6 +143,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           s_description)
 
     @attr(type='negative')
+    @testtools.skipIf(config.TempestConfig().network.quantum_available,
+                      "Skipped until the Bug #1161411 is resolved")
     def test_security_group_create_with_invalid_group_description(self):
         # Negative test:Security Group should not be created with description
         # as an empty string/with white spaces/chars more than 255
