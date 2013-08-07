@@ -25,11 +25,11 @@ from tempest import exceptions
 from tempest import test
 
 
-class ServersNegativeTestJSON(base.BaseV2ComputeTest):
+class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     def setUp(self):
-        super(ServersNegativeTestJSON, self).setUp()
+        super(ServersNegativeV3TestJSON, self).setUp()
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except Exception:
@@ -37,10 +37,10 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServersNegativeTestJSON, cls).setUpClass()
+        super(ServersNegativeV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.alt_os = clients.AltManager()
-        cls.alt_client = cls.alt_os.servers_client
+        cls.alt_client = cls.alt_os.servers_v3_client
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
@@ -51,18 +51,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.create_test_server,
                           name='')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_personality_file_contents_not_encoded(self):
-        # Use an unencoded file when creating a server with personality
-
-        file_contents = 'This is a test file.'
-        person = [{'path': '/etc/testfile.txt',
-                   'contents': file_contents}]
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.create_test_server,
-                          personality=person)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_with_invalid_image(self):
@@ -86,7 +74,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         IPv4 = '1.1.1.1.1.1'
         self.assertRaises(exceptions.BadRequest,
-                          self.create_test_server, accessIPv4=IPv4)
+                          self.create_test_server, access_ip_v4=IPv4)
 
     @test.attr(type=['negative', 'gate'])
     def test_invalid_ip_v6_address(self):
@@ -95,7 +83,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         IPv6 = 'notvalid'
 
         self.assertRaises(exceptions.BadRequest,
-                          self.create_test_server, accessIPv6=IPv6)
+                          self.create_test_server, access_ip_v6=IPv6)
 
     @test.attr(type=['negative', 'gate'])
     def test_resize_nonexistent_server(self):
@@ -186,12 +174,12 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.create_test_server,
                           name=server_name)
 
+    @test.skip_because(bug="1208743")
     @test.attr(type=['negative', 'gate'])
     def test_create_with_invalid_network_uuid(self):
         # Pass invalid network uuid while creating a server
 
         networks = [{'fixed_ip': '10.0.1.1', 'uuid': 'a-b-c-d-e-f-g-h-i-j'}]
-
         self.assertRaises(exceptions.BadRequest,
                           self.create_test_server,
                           networks=networks)
@@ -421,8 +409,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         resp, server = self.client.get_server(self.server_id)
         image_name = server['name'] + '-shelved'
-        params = {'name': image_name}
-        resp, images = self.images_client.list_images(params)
+        resp, images = self.images_client.image_list(name=image_name)
         self.assertEqual(1, len(images))
         self.assertEqual(image_name, images[0]['name'])
 
@@ -445,5 +432,5 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.server_id)
 
 
-class ServersNegativeTestXML(ServersNegativeTestJSON):
+class ServersNegativeV3TestXML(ServersNegativeV3TestJSON):
     _interface = 'xml'

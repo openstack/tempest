@@ -29,7 +29,10 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
     """Waits for a server to reach a given status."""
 
     def _get_task_state(body):
-        task_state = body.get('OS-EXT-STS:task_state', None)
+        if client.service == CONF.compute.catalog_v3_type:
+            task_state = body.get("os-extended-status:task_state", None)
+        else:
+            task_state = body.get('OS-EXT-STS:task_state', None)
         return task_state
 
     # NOTE(afazekas): UNKNOWN status possible on ERROR
