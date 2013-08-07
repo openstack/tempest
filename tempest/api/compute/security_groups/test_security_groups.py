@@ -107,6 +107,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                          "The fetched Security Group is different "
                          "from the created Group")
 
+    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+                      "Skipped until the Bug #1182384 is resolved")
     @attr(type=['negative', 'gate'])
     def test_security_group_get_nonexistant_group(self):
         # Negative test:Should not be able to GET the details
@@ -191,6 +193,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           self.client.delete_security_group,
                           default_security_group_id)
 
+    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+                      "Skipped until the Bug #1182384 is resolved")
     @attr(type=['negative', 'gate'])
     def test_delete_nonexistant_security_group(self):
         # Negative test:Deletion of a nonexistant Security Group should Fail
