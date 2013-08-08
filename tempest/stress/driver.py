@@ -12,7 +12,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import logging
 import multiprocessing
 import signal
 import time
@@ -22,30 +21,12 @@ from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.openstack.common import importutils
+from tempest.openstack.common import log as logging
 from tempest.stress import cleanup
 
 admin_manager = clients.AdminManager()
 
-# setup logging to file
-logging.basicConfig(
-    format='%(asctime)s %(process)d %(name)-20s %(levelname)-8s %(message)s',
-    datefmt='%m-%d %H:%M:%S',
-    filename="stress.debug.log",
-    filemode="w",
-    level=logging.DEBUG,
-)
-
-# define a Handler which writes INFO messages or higher to the sys.stdout
-_console = logging.StreamHandler()
-_console.setLevel(logging.INFO)
-# set a format which is simpler for console use
-format_str = '%(asctime)s %(process)d %(name)-20s: %(levelname)-8s %(message)s'
-_formatter = logging.Formatter(format_str)
-# tell the handler to use this format
-_console.setFormatter(_formatter)
-# add the handler to the root logger
-logger = logging.getLogger('tempest.stress')
-logger.addHandler(_console)
+LOG = logging.getLogger(__name__)
 processes = []
 
 
@@ -90,7 +71,7 @@ def _error_in_logs(logfiles, nodes):
         if not errors:
             return None
         if len(errors) > 0:
-            logger.error('%s: %s' % (node, errors))
+            LOG.error('%s: %s' % (node, errors))
             return errors
     return None
 
@@ -147,13 +128,13 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                                           tenant_name=tenant_name)
 
             test_obj = importutils.import_class(test['action'])
-            test_run = test_obj(manager, logger, max_runs, stop_on_error)
+            test_run = test_obj(manager, max_runs, stop_on_error)
 
             kwargs = test.get('kwargs', {})
             test_run.setUp(**dict(kwargs.iteritems()))
 
-            logger.debug("calling Target Object %s" %
-                         test_run.__class__.__name__)
+            LOG.debug("calling Target Object %s" %
+                      test_run.__class__.__name__)
 
             mp_manager = multiprocessing.Manager()
             shared_statistic = mp_manager.dict()
@@ -208,24 +189,24 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
     sum_fails = 0
     sum_runs = 0
 
-    logger.info("Statistics (per process):")
+    LOG.info("Statistics (per process):")
     for process in processes:
         if process['statistic']['fails'] > 0:
             had_errors = True
         sum_runs += process['statistic']['runs']
         sum_fails += process['statistic']['fails']
-        logger.info(" Process %d (%s): Run %d actions (%d failed)" %
-                    (process['p_number'],
-                     process['action'],
-                     process['statistic']['runs'],
+        LOG.info(" Process %d (%s): Run %d actions (%d failed)" %
+                 (process['p_number'],
+                  process['action'],
+                  process['statistic']['runs'],
                      process['statistic']['fails']))
-    logger.info("Summary:")
-    logger.info("Run %d actions (%d failed)" %
-                (sum_runs, sum_fails))
+    LOG.info("Summary:")
+    LOG.info("Run %d actions (%d failed)" %
+             (sum_runs, sum_fails))
 
     if not had_errors:
-        logger.info("cleaning up")
-        cleanup.cleanup(logger)
+        LOG.info("cleaning up")
+        cleanup.cleanup()
     if had_errors:
         return 1
     else:
