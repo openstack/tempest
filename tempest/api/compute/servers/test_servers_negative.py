@@ -255,6 +255,20 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.get_server,
                           '999erra43')
 
+    @attr(type=['negative', 'gate'])
+    def test_stop_non_existent_server(self):
+        # Stop a non existent server
+        non_exist_id = rand_name('non-existent-server')
+        self.assertRaises(exceptions.NotFound, self.servers_client.stop,
+                          non_exist_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_pause_non_existent_server(self):
+        # pause a non existent server
+        non_exist_id = rand_name('non-existent-server')
+        self.assertRaises(exceptions.NotFound, self.client.pause_server,
+                          non_exist_id)
+
 
 class ServersNegativeTestXML(ServersNegativeTestJSON):
     _interface = 'xml'
