@@ -14,15 +14,6 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import logging
-
 from tempest.stress import cleanup
 
-_console = logging.StreamHandler()
-_console.setLevel(logging.DEBUG)
-# add the handler to the root logger
-logger = logging.getLogger('tempest.stress.cleanup')
-logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
-
-cleanup.cleanup(logger)
+cleanup.cleanup()

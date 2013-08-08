@@ -17,12 +17,15 @@
 import signal
 import sys
 
+from tempest.openstack.common import log as logging
+
 
 class StressAction(object):
 
-    def __init__(self, manager, logger, max_runs=None, stop_on_error=False):
+    def __init__(self, manager, max_runs=None, stop_on_error=False):
+        full_cname = self.__module__ + "." + self.__class__.__name__
+        self.logger = logging.getLogger(full_cname)
         self.manager = manager
-        self.logger = logger
         self.max_runs = max_runs
         self.stop_on_error = stop_on_error
 

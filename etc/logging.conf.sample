@@ -1,5 +1,5 @@
 [loggers]
-keys=root,tempest
+keys=root,tempest,tempest_stress
 
 [handlers]
 keys=file,syslog,devel
@@ -15,6 +15,11 @@ handlers=syslog
 level=DEBUG
 handlers=file
 qualname=tempest
+
+[logger_tempest_stress]
+level=INFO
+handlers=file,devel
+qualname=tempest.stress
 
 [handler_file]
 class=FileHandler

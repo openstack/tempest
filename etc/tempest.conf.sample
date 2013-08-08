@@ -10,6 +10,8 @@ log_file = tempest.log
 # lock/semaphore base directory
 lock_path=/tmp
 
+default_log_levels=tempest.stress=INFO,amqplib=WARN,sqlalchemy=WARN,boto=WARN,suds=INFO,keystone=INFO,eventlet.wsgi.server=WARN
+
 [identity]
 # This section contains configuration options that a variety of Tempest
 # test clients use when authenticating with different user/tenant

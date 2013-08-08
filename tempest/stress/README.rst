@@ -23,7 +23,8 @@ location of the log files:
 	target_controller = "hostname or ip of controller node (for nova-manage)
 	log_check_interval = "time between checking logs for errors (default 60s)"
 
-
+To activate logging on your console please make sure that you activate `use_stderr`
+in tempest.conf or use the default `logging.conf.sample` file.
 
 Running the sample test
 -----------------------
