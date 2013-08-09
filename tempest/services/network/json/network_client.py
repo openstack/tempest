@@ -24,7 +24,7 @@ class NetworkClientJSON(RestClient):
     V1 API has been removed from the code base.
 
     Implements create, delete, update, list and show for the basic Neutron
-    abstractions (networks, sub-networks, routers and ports):
+    abstractions (networks, sub-networks, routers, ports and floating IP):
 
     Implements add/remove interface to router using subnet ID / port ID
 
@@ -283,5 +283,41 @@ class NetworkClientJSON(RestClient):
         update_body = {"port_id": port_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_floating_ip(self, ext_network_id, **kwargs):
+        post_body = {
+            'floatingip': kwargs}
+        post_body['floatingip']['floating_network_id'] = ext_network_id
+        body = json.dumps(post_body)
+        uri = '%s/floatingips' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def show_floating_ip(self, floating_ip_id):
+        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def list_floating_ips(self):
+        uri = '%s/floatingips' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_floating_ip(self, floating_ip_id):
+        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def update_floating_ip(self, floating_ip_id, **kwargs):
+        post_body = {
+            'floatingip': kwargs}
+        body = json.dumps(post_body)
+        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
+        resp, body = self.put(uri, headers=self.headers, body=body)
         body = json.loads(body)
         return resp, body
