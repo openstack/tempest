@@ -55,13 +55,6 @@ class OfficialClientManager(tempest.manager.Manager):
         self.identity_client = self._get_identity_client()
         self.network_client = self._get_network_client()
         self.volume_client = self._get_volume_client()
-        self.client_attr_names = [
-            'compute_client',
-            'image_client',
-            'identity_client',
-            'network_client',
-            'volume_client'
-        ]
 
     def _get_compute_client(self, username=None, password=None,
                             tenant_name=None):
@@ -160,7 +153,7 @@ class OfficialClientManager(tempest.manager.Manager):
                                                 insecure=dscv)
 
 
-class OfficialClientTest(tempest.test.TestCase):
+class OfficialClientTest(tempest.test.BaseTestCase):
     """
     Official Client test base class for scenario testing.
 
@@ -173,7 +166,16 @@ class OfficialClientTest(tempest.test.TestCase):
      * Use only the default client tool for calling an API
     """
 
-    manager_class = OfficialClientManager
+    @classmethod
+    def setUpClass(cls):
+        cls.manager = OfficialClientManager()
+        cls.compute_client = cls.manager.compute_client
+        cls.image_client = cls.manager.image_client
+        cls.identity_client = cls.manager.identity_client
+        cls.network_client = cls.manager.network_client
+        cls.volume_client = cls.manager.volume_client
+        cls.resource_keys = {}
+        cls.os_resources = []
 
     @classmethod
     def tearDownClass(cls):
@@ -214,6 +216,52 @@ class OfficialClientTest(tempest.test.TestCase):
 
             # Block until resource deletion has completed or timed-out
             tempest.test.call_until_true(is_deletion_complete, 10, 1)
+
+    @classmethod
+    def set_resource(cls, key, thing):
+        LOG.debug("Adding %r to shared resources of %s" %
+                  (thing, cls.__name__))
+        cls.resource_keys[key] = thing
+        cls.os_resources.append(thing)
+
+    @classmethod
+    def get_resource(cls, key):
+        return cls.resource_keys[key]
+
+    @classmethod
+    def remove_resource(cls, key):
+        thing = cls.resource_keys[key]
+        cls.os_resources.remove(thing)
+        del cls.resource_keys[key]
+
+    def status_timeout(self, things, thing_id, expected_status):
+        """
+        Given a thing and an expected status, do a loop, sleeping
+        for a configurable amount of time, checking for the
+        expected status to show. At any time, if the returned
+        status of the thing is ERROR, fail out.
+        """
+        def check_status():
+            # python-novaclient has resources available to its client
+            # that all implement a get() method taking an identifier
+            # for the singular resource to retrieve.
+            thing = things.get(thing_id)
+            new_status = thing.status
+            if new_status == 'ERROR':
+                self.fail("%s failed to get to expected status. "
+                          "In ERROR state."
+                          % thing)
+            elif new_status == expected_status:
+                return True  # All good.
+            LOG.debug("Waiting for %s to get to %s status. "
+                      "Currently in %s status",
+                      thing, expected_status, new_status)
+        if not tempest.test.call_until_true(
+            check_status,
+            self.config.compute.build_timeout,
+            self.config.compute.build_interval):
+            self.fail("Timed out waiting for thing %s to become %s"
+                      % (thing_id, expected_status))
 
 
 class NetworkScenarioTest(OfficialClientTest):
