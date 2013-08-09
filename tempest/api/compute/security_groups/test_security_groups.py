@@ -125,6 +125,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.get_security_group,
                           non_exist_id)
 
+    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+                      "Skipped until the Bug #1161411 is resolved")
     @attr(type=['negative', 'gate'])
     def test_security_group_create_with_invalid_group_name(self):
         # Negative test: Security Group should not be created with group name
@@ -143,6 +145,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                           self.client.create_security_group, s_name,
                           s_description)
 
+    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+                      "Skipped until the Bug #1161411 is resolved")
     @attr(type=['negative', 'gate'])
     def test_security_group_create_with_invalid_group_description(self):
         # Negative test:Security Group should not be created with description
