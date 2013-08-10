@@ -84,10 +84,13 @@ class AccountClient(RestClient):
             DEFAULT:  Python-List returned in response body
         """
 
-        url = '?format=%s' % self.format
         if params:
-            url += '&%s' + urllib.urlencode(params)
+            if 'format' not in params:
+                params['format'] = self.format
+        else:
+            params = {'format': self.format}
 
+        url = '?' + urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body

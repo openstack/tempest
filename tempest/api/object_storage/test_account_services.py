@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import random
+
 from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
@@ -26,12 +28,17 @@ class AccountTest(base.BaseObjectTest):
     @classmethod
     def setUpClass(cls):
         super(AccountTest, cls).setUpClass()
-        cls.container_name = rand_name(name='TestContainer')
-        cls.container_client.create_container(cls.container_name)
+        cls.containers = []
+        for i in xrange(ord('a'), ord('f') + 1):
+            name = rand_name(name='%s-' % chr(i))
+            cls.container_client.create_container(name)
+            cls.containers.append(name)
+        cls.containers_count = len(cls.containers)
 
     @classmethod
     def tearDownClass(cls):
-        cls.container_client.delete_container(cls.container_name)
+        cls.delete_containers(cls.containers)
+        super(AccountTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_list_containers(self):
@@ -42,7 +49,59 @@ class AccountTest(base.BaseObjectTest):
 
         self.assertIsNotNone(container_list)
         container_names = [c['name'] for c in container_list]
-        self.assertIn(self.container_name, container_names)
+        for container_name in self.containers:
+            self.assertIn(container_name, container_names)
+
+    @attr(type='smoke')
+    def test_list_containers_with_limit(self):
+        # list containers one of them, half of them then all of them
+        for limit in (1, self.containers_count / 2, self.containers_count):
+            params = {'limit': limit}
+            resp, container_list = \
+                self.account_client.list_account_containers(params=params)
+            self.assertEquals(len(container_list), limit)
+
+    @attr(type='smoke')
+    def test_list_containers_with_marker(self):
+        # list containers using marker param
+        # first expect to get 0 container as we specified last
+        # the container as marker
+        # second expect to get the bottom half of the containers
+        params = {'marker': self.containers[-1]}
+        resp, container_list = \
+            self.account_client.list_account_containers(params=params)
+        self.assertEquals(len(container_list), 0)
+        params = {'marker': self.containers[self.containers_count / 2]}
+        resp, container_list = \
+            self.account_client.list_account_containers(params=params)
+        self.assertEquals(len(container_list), self.containers_count / 2 - 1)
+
+    @attr(type='smoke')
+    def test_list_containers_with_end_marker(self):
+        # list containers using end_marker param
+        # first expect to get 0 container as we specified first container as
+        # end_marker
+        # second expect to get the top half of the containers
+        params = {'end_marker': self.containers[0]}
+        resp, container_list = \
+            self.account_client.list_account_containers(params=params)
+        self.assertEquals(len(container_list), 0)
+        params = {'end_marker': self.containers[self.containers_count / 2]}
+        resp, container_list = \
+            self.account_client.list_account_containers(params=params)
+        self.assertEquals(len(container_list), self.containers_count / 2)
+
+    @attr(type='smoke')
+    def test_list_containers_with_limit_and_marker(self):
+        # list containers combining marker and limit param
+        # result are always limitated by the limit whatever the marker
+        for marker in random.choice(self.containers):
+            limit = random.randint(0, self.containers_count - 1)
+            params = {'marker': marker,
+                      'limit': limit}
+            resp, container_list = \
+                self.account_client.list_account_containers(params=params)
+            self.assertLessEqual(len(container_list), limit)
 
     @attr(type='smoke')
     def test_list_account_metadata(self):
