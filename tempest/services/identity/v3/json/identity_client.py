@@ -63,11 +63,12 @@ class IdentityV3ClientJSON(RestClient):
 
     def update_user(self, user_id, name, **kwargs):
         """Updates a user."""
-        email = kwargs.get('email', None)
-        en = kwargs.get('enabled', True)
-        project_id = kwargs.get('project_id', None)
-        description = kwargs.get('description', None)
-        domain_id = kwargs.get('domain_id', 'default')
+        resp, body = self.get_user(user_id)
+        email = kwargs.get('email', body['email'])
+        en = kwargs.get('enabled', body['enabled'])
+        project_id = kwargs.get('project_id', body['project_id'])
+        description = kwargs.get('description', body['description'])
+        domain_id = kwargs.get('domain_id', body['domain_id'])
         post_body = {
             'name': name,
             'email': email,
@@ -149,6 +150,17 @@ class IdentityV3ClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['role']
 
+    def update_role(self, name, role_id):
+        """Create a Role."""
+        post_body = {
+            'name': name
+        }
+        post_body = json.dumps({'role': post_body})
+        resp, body = self.patch('roles/%s' % str(role_id), post_body,
+                                self.headers)
+        body = json.loads(body)
+        return resp, body['role']
+
     def delete_role(self, role_id):
         """Delete a role."""
         resp, body = self.delete('roles/%s' % str(role_id))
@@ -220,6 +232,107 @@ class IdentityV3ClientJSON(RestClient):
         """Deletes token."""
         headers = {'X-Subject-Token': resp_token}
         resp, body = self.delete("auth/tokens", headers=headers)
+        return resp, body
+
+    def create_group(self, name, **kwargs):
+        """Creates a group."""
+        description = kwargs.get('description', None)
+        domain_id = kwargs.get('domain_id', 'default')
+        project_id = kwargs.get('project_id', None)
+        post_body = {
+            'description': description,
+            'domain_id': domain_id,
+            'project_id': project_id,
+            'name': name
+        }
+        post_body = json.dumps({'group': post_body})
+        resp, body = self.post('groups', post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['group']
+
+    def delete_group(self, group_id):
+        """Delete a group."""
+        resp, body = self.delete('groups/%s' % str(group_id))
+        return resp, body
+
+    def assign_user_role_on_project(self, project_id, user_id, role_id):
+        """Add roles to a user on a project."""
+        resp, body = self.put('projects/%s/users/%s/roles/%s' %
+                              (project_id, user_id, role_id), None,
+                              self.headers)
+        return resp, body
+
+    def assign_user_role_on_domain(self, domain_id, user_id, role_id):
+        """Add roles to a user on a domain."""
+        resp, body = self.put('domains/%s/users/%s/roles/%s' %
+                              (domain_id, user_id, role_id), None,
+                              self.headers)
+        return resp, body
+
+    def list_user_roles_on_project(self, project_id, user_id):
+        """list roles of a user on a project."""
+        resp, body = self.get('projects/%s/users/%s/roles' %
+                              (project_id, user_id))
+        body = json.loads(body)
+        return resp, body['roles']
+
+    def list_user_roles_on_domain(self, domain_id, user_id):
+        """list roles of a user on a domain."""
+        resp, body = self.get('domains/%s/users/%s/roles' %
+                              (domain_id, user_id))
+        body = json.loads(body)
+        return resp, body['roles']
+
+    def revoke_role_from_user_on_project(self, project_id, user_id, role_id):
+        """Delete role of a user on a project."""
+        resp, body = self.delete('projects/%s/users/%s/roles/%s' %
+                                 (project_id, user_id, role_id))
+        return resp, body
+
+    def revoke_role_from_user_on_domain(self, domain_id, user_id, role_id):
+        """Delete role of a user on a domain."""
+        resp, body = self.delete('domains/%s/users/%s/roles/%s' %
+                                 (domain_id, user_id, role_id))
+        return resp, body
+
+    def assign_group_role_on_project(self, project_id, group_id, role_id):
+        """Add roles to a user on a project."""
+        resp, body = self.put('projects/%s/groups/%s/roles/%s' %
+                              (project_id, group_id, role_id), None,
+                              self.headers)
+        return resp, body
+
+    def assign_group_role_on_domain(self, domain_id, group_id, role_id):
+        """Add roles to a user on a domain."""
+        resp, body = self.put('domains/%s/groups/%s/roles/%s' %
+                              (domain_id, group_id, role_id), None,
+                              self.headers)
+        return resp, body
+
+    def list_group_roles_on_project(self, project_id, group_id):
+        """list roles of a user on a project."""
+        resp, body = self.get('projects/%s/groups/%s/roles' %
+                              (project_id, group_id))
+        body = json.loads(body)
+        return resp, body['roles']
+
+    def list_group_roles_on_domain(self, domain_id, group_id):
+        """list roles of a user on a domain."""
+        resp, body = self.get('domains/%s/groups/%s/roles' %
+                              (domain_id, group_id))
+        body = json.loads(body)
+        return resp, body['roles']
+
+    def revoke_role_from_group_on_project(self, project_id, group_id, role_id):
+        """Delete role of a user on a project."""
+        resp, body = self.delete('projects/%s/groups/%s/roles/%s' %
+                                 (project_id, group_id, role_id))
+        return resp, body
+
+    def revoke_role_from_group_on_domain(self, domain_id, group_id, role_id):
+        """Delete role of a user on a domain."""
+        resp, body = self.delete('domains/%s/groups/%s/roles/%s' %
+                                 (domain_id, group_id, role_id))
         return resp, body
 
 
