@@ -112,10 +112,10 @@ class Client(object):
         channel.shutdown_write()
         out_data = []
         err_data = []
-
-        select_params = [channel], [], [], self.channel_timeout
+        poll = select.poll()
+        poll.register(channel, select.POLLIN)
         while True:
-            ready = select.select(*select_params)
+            ready = poll.poll(self.channel_timeout)
             if not any(ready):
                 raise exceptions.TimeoutException(
                     "Command: '{0}' executed on host '{1}'.".format(
