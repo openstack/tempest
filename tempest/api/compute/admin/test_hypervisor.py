@@ -40,20 +40,20 @@ class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         return hypers
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_hypervisor_list(self):
         # List of hypervisor and available hypervisors hostname
         hypers = self._list_hypervisors()
         self.assertTrue(len(hypers) > 0)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_hypervisor_list_details(self):
         # Display the details of the all hypervisor
         resp, hypers = self.client.get_hypervisor_list_details()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hypers) > 0)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_hypervisor_show_details(self):
         # Display the details of the specified hypervisor
         hypers = self._list_hypervisors()
@@ -66,7 +66,7 @@ class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(details['hypervisor_hostname'],
                          hypers[0]['hypervisor_hostname'])
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_hypervisor_show_servers(self):
         # Show instances about the specific hypervisors
         hypers = self._list_hypervisors()
@@ -77,14 +77,14 @@ class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hypervisors) > 0)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_hypervisor_stats(self):
         # Verify the stats of the all hypervisor
         resp, stats = self.client.get_hypervisor_stats()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(stats) > 0)
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_get_hypervisor_uptime(self):
         # Verify that GET shows the specified hypervisor uptime
         hypers = self._list_hypervisors()
