@@ -76,11 +76,11 @@ class SnapshotsClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['snapshot']
 
-    #NOTE(afazekas): just for the wait function
+    # NOTE(afazekas): just for the wait function
     def _get_snapshot_status(self, snapshot_id):
         resp, body = self.get_snapshot(snapshot_id)
         status = body['status']
-        #NOTE(afazekas): snapshot can reach an "error"
+        # NOTE(afazekas): snapshot can reach an "error"
         # state in a "normal" lifecycle
         if (status == 'error'):
             raise exceptions.SnapshotBuildErrorException(
@@ -88,7 +88,7 @@ class SnapshotsClientJSON(RestClient):
 
         return status
 
-    #NOTE(afazkas): Wait reinvented again. It is not in the correct layer
+    # NOTE(afazkas): Wait reinvented again. It is not in the correct layer
     def wait_for_snapshot_status(self, snapshot_id, status):
         """Waits for a Snapshot to reach a given status."""
         start_time = time.time()

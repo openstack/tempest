@@ -26,7 +26,7 @@ class ContainerClient(RestClient):
         super(ContainerClient, self).__init__(config, username, password,
                                               auth_url, tenant_name)
 
-        #Overwrites json-specific header encoding in RestClient
+        # Overwrites json-specific header encoding in RestClient
         self.headers = {}
         self.service = self.config.object_storage.catalog_type
         self.format = 'json'
@@ -94,8 +94,8 @@ class ContainerClient(RestClient):
             item count is beyond 10,000 item listing limit.
             Does not require any paramaters aside from container name.
         """
-        #TODO(dwalleck):  Rewite using json format to avoid newlines at end of
-        #obj names. Set limit to API limit - 1 (max returned items = 9999)
+        # TODO(dwalleck):  Rewite using json format to avoid newlines at end of
+        # obj names. Set limit to API limit - 1 (max returned items = 9999)
         limit = 9999
         if params is not None:
             if 'limit' in params:
@@ -114,16 +114,16 @@ class ContainerClient(RestClient):
 
         if len(objlist) >= limit:
 
-            #Increment marker
+            # Increment marker
             marker = objlist[len(objlist) - 1]
 
-            #Get the next chunk of the list
+            # Get the next chunk of the list
             objlist.extend(_list_all_container_objects(container,
                                                       params={'marker': marker,
                                                               'limit': limit}))
             return objlist
         else:
-            #Return final, complete list
+            # Return final, complete list
             return objlist"""
 
     def list_container_contents(self, container, params=None):

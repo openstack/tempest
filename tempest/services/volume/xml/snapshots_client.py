@@ -81,7 +81,7 @@ class SnapshotsClientXML(RestClientXML):
         display_name: Optional snapshot Name.
         display_description: User friendly snapshot description.
         """
-        #NOTE(afazekas): it should use the volume namaspace
+        # NOTE(afazekas): it should use the volume namaspace
         snapshot = Element("snapshot", xmlns=XMLNS_11, volume_id=volume_id)
         for key, value in kwargs.items():
             snapshot.add_attr(key, value)
@@ -90,11 +90,11 @@ class SnapshotsClientXML(RestClientXML):
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
-    #NOTE(afazekas): just for the wait function
+    # NOTE(afazekas): just for the wait function
     def _get_snapshot_status(self, snapshot_id):
         resp, body = self.get_snapshot(snapshot_id)
         status = body['status']
-        #NOTE(afazekas): snapshot can reach an "error"
+        # NOTE(afazekas): snapshot can reach an "error"
         # state in a "normal" lifecycle
         if (status == 'error'):
             raise exceptions.SnapshotBuildErrorException(
@@ -102,7 +102,7 @@ class SnapshotsClientXML(RestClientXML):
 
         return status
 
-    #NOTE(afazkas): Wait reinvented again. It is not in the correct layer
+    # NOTE(afazkas): Wait reinvented again. It is not in the correct layer
     def wait_for_snapshot_status(self, snapshot_id, status):
         """Waits for a Snapshot to reach a given status."""
         start_time = time.time()
