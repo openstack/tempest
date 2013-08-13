@@ -306,6 +306,12 @@ class RestClient(object):
         self.LOG.info("Response Status: " + status)
         headers = resp.copy()
         del headers['status']
+        if headers.get('x-compute-request-id'):
+            self.LOG.info("Nova request id: %s" %
+                          headers.pop('x-compute-request-id'))
+        elif headers.get('x-openstack-request-id'):
+            self.LOG.info("Glance request id %s" %
+                          headers.pop('x-openstack-request-id'))
         if len(headers):
             self.LOG.debug('Response Headers: ' + str(headers))
         if resp_body:
