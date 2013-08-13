@@ -32,6 +32,7 @@ where your test contributions should go.
    field_guide/stress
    field_guide/thirdparty
    field_guide/whitebox
+   field_guide/unit_tests
 
 ------------------
 API and test cases
