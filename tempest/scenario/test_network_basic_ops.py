@@ -16,8 +16,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.network import common as net_common
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
@@ -247,8 +245,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.floating_ips[server].append(floating_ip)
 
     @attr(type='smoke')
-    @testtools.skipIf(CONF.service_available.neutron,
-                      "Skipped unti bug #1210664 is resolved")
     def test_008_check_public_network_connectivity(self):
         if not self.floating_ips:
             raise self.skipTest('No floating ips have been allocated.')
