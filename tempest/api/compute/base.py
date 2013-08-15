@@ -36,6 +36,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BaseComputeTest, cls).setUpClass()
         if not cls.config.service_available.nova:
             skip_msg = ("%s skipped as nova is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

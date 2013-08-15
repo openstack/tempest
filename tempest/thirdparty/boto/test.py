@@ -197,6 +197,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BotoTestCase, cls).setUpClass()
         # The trash contains cleanup functions and paramaters in tuples
         # (function, *args, **kwargs)
         cls._resource_trash_bin = {}
@@ -261,6 +262,10 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 LOG.exception(exc)
             finally:
                 del cls._resource_trash_bin[key]
+        super(BotoTestCase, cls).tearDownClass()
+        # NOTE(afazekas): let the super called even on exceptions
+        # The real exceptions already logged, if the super throws another,
+        # does not causes hidden issues
         if fail_count:
             raise exceptions.TearDownException(num=fail_count)
 

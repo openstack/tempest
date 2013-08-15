@@ -41,6 +41,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         NotFound exception and also non empty container cannot be deleted.
         """
         cls.delete_containers([cls.container_name])
+        super(ObjectExpiryTest, cls).tearDownClass()
 
     @testtools.skip('Until Bug #1069849 is resolved.')
     @attr(type='gate')

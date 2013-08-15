@@ -28,7 +28,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-
+        super(BaseOrchestrationTest, cls).setUpClass()
         os = clients.OrchestrationManager()
         cls.orchestration_cfg = os.config.orchestration
         if not os.config.service_available.heat:
@@ -107,6 +107,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def tearDownClass(cls):
         cls.clear_stacks()
         cls.clear_keypairs()
+        super(BaseOrchestrationTest, cls).tearDownClass()
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""

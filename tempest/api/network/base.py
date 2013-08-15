@@ -47,6 +47,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BaseNetworkTest, cls).setUpClass()
         os = clients.Manager()
         cls.network_cfg = os.config.network
         if not cls.config.service_available.neutron:
@@ -64,6 +65,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             cls.client.delete_subnet(subnet['id'])
         for network in cls.networks:
             cls.client.delete_network(network['id'])
+        super(BaseNetworkTest, cls).tearDownClass()
 
     @classmethod
     def create_network(cls, network_name=None):

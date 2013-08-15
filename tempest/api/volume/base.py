@@ -31,6 +31,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(BaseVolumeTest, cls).setUpClass()
         cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
 
         if not cls.config.service_available.cinder:

@@ -47,6 +47,7 @@ class ObjectTest(base.BaseObjectTest):
         cls.delete_containers(cls.containers)
         # delete the user setup created
         cls.data.teardown_all()
+        super(ObjectTest, cls).tearDownClass()
 
     @attr(type='smoke')
     def test_create_object(self):

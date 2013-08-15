@@ -50,6 +50,7 @@ class ContainerSyncTest(base.BaseObjectTest):
     def tearDownClass(cls):
         for client in cls.clients.values():
             cls.delete_containers(cls.containers, client[0], client[1])
+        super(ContainerSyncTest, cls).tearDownClass()
 
     @testtools.skip('Until Bug #1093743 is resolved.')
     @attr(type='gate')

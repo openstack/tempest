@@ -29,6 +29,7 @@ class ContainerTest(base.BaseObjectTest):
     @classmethod
     def tearDownClass(cls):
         cls.delete_containers(cls.containers)
+        super(ContainerTest, cls).tearDownClass()
 
     def assertContainer(self, container, count, byte, versioned):
         resp, _ = self.container_client.list_container_metadata(container)

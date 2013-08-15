@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import atexit
 import os
 import time
 
@@ -91,6 +92,17 @@ if 'TEMPEST_PY26_NOSE_COMPAT' in os.environ:
         LOG.info("Overriding skipException to nose SkipTest")
         testtools.TestCase.skipException = nose.plugins.skip.SkipTest
 
+at_exit_set = set()
+
+
+def validate_tearDownClass():
+    if at_exit_set:
+        raise RuntimeError("tearDownClass does not calls the super's"
+                           "tearDownClass in these classes: "
+                           + str(at_exit_set))
+
+atexit.register(validate_tearDownClass)
+
 
 class BaseTestCase(testtools.TestCase,
                    testtools.testcase.WithAttributes,
@@ -98,29 +110,43 @@ class BaseTestCase(testtools.TestCase,
 
     config = config.TempestConfig()
 
+    setUpClassCalled = False
+
     @classmethod
     def setUpClass(cls):
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
+        cls.setUpClassCalled = True
 
-    def setUp(cls):
-        super(BaseTestCase, cls).setUp()
+    @classmethod
+    def tearDownClass(cls):
+        at_exit_set.remove(cls)
+        if hasattr(super(BaseTestCase, cls), 'tearDownClass'):
+            super(BaseTestCase, cls).tearDownClass()
+
+    def setUp(self):
+        super(BaseTestCase, self).setUp()
+        if not self.setUpClassCalled:
+            raise RuntimeError("setUpClass does not calls the super's"
+                               "setUpClass in the "
+                               + self.__class__.__name__)
+        at_exit_set.add(self.__class__)
         test_timeout = os.environ.get('OS_TEST_TIMEOUT', 0)
         try:
             test_timeout = int(test_timeout)
         except ValueError:
             test_timeout = 0
         if test_timeout > 0:
-            cls.useFixture(fixtures.Timeout(test_timeout, gentle=True))
+            self.useFixture(fixtures.Timeout(test_timeout, gentle=True))
 
         if (os.environ.get('OS_STDOUT_CAPTURE') == 'True' or
                 os.environ.get('OS_STDOUT_CAPTURE') == '1'):
-            stdout = cls.useFixture(fixtures.StringStream('stdout')).stream
-            cls.useFixture(fixtures.MonkeyPatch('sys.stdout', stdout))
+            stdout = self.useFixture(fixtures.StringStream('stdout')).stream
+            self.useFixture(fixtures.MonkeyPatch('sys.stdout', stdout))
         if (os.environ.get('OS_STDERR_CAPTURE') == 'True' or
                 os.environ.get('OS_STDERR_CAPTURE') == '1'):
-            stderr = cls.useFixture(fixtures.StringStream('stderr')).stream
-            cls.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
+            stderr = self.useFixture(fixtures.StringStream('stderr')).stream
+            self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
 
     @classmethod
     def _get_identity_admin_client(cls):
