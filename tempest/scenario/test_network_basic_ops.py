@@ -213,8 +213,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             name = rand_name('server-smoke-%d-' % i)
             keypair_name = self.keypairs[tenant_id].name
             security_groups = [self.security_groups[tenant_id].name]
-            server = self._create_server(self.compute_client, network,
-                                         name, keypair_name, security_groups)
+            create_kwargs = {
+                'nics': [
+                    {'net-id': network.id},
+                ],
+                'key_name': keypair_name,
+                'security_groups': security_groups,
+            }
+            server = self.create_server(self.compute_client, name=name,
+                                        create_kwargs=create_kwargs)
             self.servers.append(server)
 
     @attr(type='smoke')

@@ -44,11 +44,6 @@ class TestVolumeSnapshotPattern(manager.OfficialClientTest):
         return vol
 
     def _boot_instance_from_volume(self, vol_id):
-        # NOTE(gfidente): the img_uuid here is only needed because
-        # the novaclient requires it to be passed as arg
-        img_uuid = self.config.compute.image_ref
-        i_name = rand_name('instance')
-        flavor_id = self.config.compute.flavor_ref
         # NOTE(gfidente): the syntax for block_device_mapping is
         # dev_name=id:type:size:delete_on_terminate
         # where type needs to be "snap" if the server is booted
@@ -59,15 +54,8 @@ class TestVolumeSnapshotPattern(manager.OfficialClientTest):
         create_kwargs = {
             'block_device_mapping': bd_map
         }
-        i = self.compute_client.servers.create(name=i_name,
-                                               image=img_uuid,
-                                               flavor=flavor_id,
-                                               **create_kwargs)
-        self.set_resource(i.id, i)
-        self.status_timeout(self.compute_client.servers,
-                            i.id,
-                            'ACTIVE')
-        return i
+        return self.create_server(self.compute_client,
+                                  create_kwargs=create_kwargs)
 
     def _create_snapshot_from_volume(self, vol_id):
         volume_snapshots = self.volume_client.volume_snapshots

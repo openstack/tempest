@@ -82,26 +82,12 @@ class TestServerBasicOps(manager.OfficialClientTest):
                 self.fail("Failed to create rule in security group.")
 
     def boot_instance(self):
-        i_name = rand_name('instance')
-        flavor_id = self.config.compute.flavor_ref
-        base_image_id = self.config.compute.image_ref
         create_kwargs = {
             'key_name': self.get_resource('keypair').id
         }
-        self.instance = self.compute_client.servers.create(
-            i_name, base_image_id, flavor_id, **create_kwargs)
-        try:
-            self.assertEqual(self.instance.name, i_name)
-            self.set_resource('instance', self.instance)
-        except AttributeError:
-            self.fail("Instance not successfully created.")
-
-        self.assertEqual(self.instance.status, 'BUILD')
-
-    def wait_on_active(self):
-        instance_id = self.get_resource('instance').id
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
+        instance = self.create_server(self.compute_client,
+                                      create_kwargs=create_kwargs)
+        self.set_resource('instance', instance)
 
     def pause_server(self):
         instance = self.get_resource('instance')
@@ -148,7 +134,6 @@ class TestServerBasicOps(manager.OfficialClientTest):
         self.create_keypair()
         self.create_security_group()
         self.boot_instance()
-        self.wait_on_active()
         self.pause_server()
         self.unpause_server()
         self.suspend_server()

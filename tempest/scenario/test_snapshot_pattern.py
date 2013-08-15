@@ -44,20 +44,11 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         self.status_timeout(self.image_client.images, image_id, status)
 
     def _boot_image(self, image_id):
-        name = rand_name('scenario-server-')
-        client = self.compute_client
-        flavor_id = self.config.compute.flavor_ref
-        LOG.debug("name:%s, image:%s" % (name, image_id))
-        server = client.servers.create(name=name,
-                                       image=image_id,
-                                       flavor=flavor_id,
-                                       key_name=self.keypair.name)
-        self.addCleanup(self.compute_client.servers.delete, server)
-        self.assertEqual(name, server.name)
-        self._wait_for_server_status(server, 'ACTIVE')
-        server = client.servers.get(server)  # getting network information
-        LOG.debug("server:%s" % server)
-        return server
+        create_kwargs = {
+            'key_name': self.keypair.name
+        }
+        return self.create_server(self.compute_client, image=image_id,
+                                  create_kwargs=create_kwargs)
 
     def _add_keypair(self):
         name = rand_name('scenario-keypair-')
