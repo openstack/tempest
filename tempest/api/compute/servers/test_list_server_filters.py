@@ -20,6 +20,7 @@ import testtools
 from tempest.api.compute import base
 from tempest.api import utils
 from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
@@ -218,6 +219,8 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
+    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+                      "Skipped until the Bug #1182883 is resolved")
     @attr(type='gate')
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip
