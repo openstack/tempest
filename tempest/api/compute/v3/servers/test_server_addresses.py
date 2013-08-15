@@ -20,12 +20,12 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServerAddressesTest(base.BaseV2ComputeTest):
+class ServerAddressesV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServerAddressesTest, cls).setUpClass()
+        super(ServerAddressesV3Test, cls).setUpClass()
         cls.client = cls.servers_client
 
         resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
@@ -80,5 +80,5 @@ class ServerAddressesTest(base.BaseV2ComputeTest):
                 self.assertTrue(any([a for a in addr if a == address]))
 
 
-class ServerAddressesTestXML(ServerAddressesTest):
+class ServerAddressesV3TestXML(ServerAddressesV3Test):
     _interface = 'xml'

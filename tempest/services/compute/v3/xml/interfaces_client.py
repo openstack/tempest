@@ -25,12 +25,12 @@ from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class InterfacesClientXML(RestClientXML):
+class InterfacesV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(InterfacesClientXML, self).__init__(config, username, password,
-                                                  auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(InterfacesV3ClientXML, self).__init__(config, username, password,
+                                                    auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def _process_xml_interface(self, node):
         iface = xml_to_json(node)
@@ -40,7 +40,8 @@ class InterfacesClientXML(RestClientXML):
         return iface
 
     def list_interfaces(self, server):
-        resp, body = self.get('servers/%s/os-interface' % server, self.headers)
+        resp, body = self.get('servers/%s/os-attach-interfaces' % server,
+                              self.headers)
         node = etree.fromstring(body)
         interfaces = [self._process_xml_interface(x)
                       for x in node.getchildren()]
@@ -49,7 +50,7 @@ class InterfacesClientXML(RestClientXML):
     def create_interface(self, server, port_id=None, network_id=None,
                          fixed_ip=None):
         doc = Document()
-        iface = Element('interfaceAttachment')
+        iface = Element('interface_attachment')
         if port_id:
             _port_id = Element('port_id')
             _port_id.append(Text(port_id))
@@ -67,21 +68,23 @@ class InterfacesClientXML(RestClientXML):
             _fixed_ips.append(_fixed_ip)
             iface.append(_fixed_ips)
         doc.append(iface)
-        resp, body = self.post('servers/%s/os-interface' % server,
+        resp, body = self.post('servers/%s/os-attach-interfaces' % server,
                                headers=self.headers,
                                body=str(doc))
         body = self._process_xml_interface(etree.fromstring(body))
         return resp, body
 
     def show_interface(self, server, port_id):
-        resp, body = self.get('servers/%s/os-interface/%s' % (server, port_id),
-                              self.headers)
+        resp, body =\
+            self.get('servers/%s/os-attach-interfaces/%s' % (server, port_id),
+                     self.headers)
         body = self._process_xml_interface(etree.fromstring(body))
         return resp, body
 
     def delete_interface(self, server, port_id):
-        resp, body = self.delete('servers/%s/os-interface/%s' % (server,
-                                                                 port_id))
+        resp, body =\
+            self.delete('servers/%s/os-attach-interfaces/%s' % (server,
+                                                                port_id))
         return resp, body
 
     def wait_for_interface_status(self, server, port_id, status):
