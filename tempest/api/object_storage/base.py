@@ -18,6 +18,7 @@
 
 from tempest.api.identity.base import DataGenerator
 from tempest import clients
+from tempest.common import isolated_creds
 from tempest import exceptions
 import tempest.test
 
@@ -30,21 +31,62 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         if not cls.config.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        cls.os = clients.Manager()
+        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+        if cls.config.compute.allow_tenant_isolation:
+            # Get isolated creds for normal user
+            creds = cls.isolated_creds.get_primary_creds()
+            username, tenant_name, password = creds
+            cls.os = clients.Manager(username=username,
+                                     password=password,
+                                     tenant_name=tenant_name)
+            # Get isolated creds for admin user
+            admin_creds = cls.isolated_creds.get_admin_creds()
+            admin_username, admin_tenant_name, admin_password = admin_creds
+            cls.os_admin = clients.Manager(username=admin_username,
+                                           password=admin_password,
+                                           tenant_name=admin_tenant_name)
+            # Get isolated creds for alt user
+            alt_creds = cls.isolated_creds.get_alt_creds()
+            alt_username, alt_tenant, alt_password = alt_creds
+            cls.os_alt = clients.Manager(username=alt_username,
+                                         password=alt_password,
+                                         tenant_name=alt_tenant)
+            # Add isolated users to operator role so that they can create a
+            # container in swift.
+            cls._assign_member_role()
+        else:
+            cls.os = clients.Manager()
+            cls.os_admin = clients.AdminManager()
+            cls.os_alt = clients.AltManager()
+
         cls.object_client = cls.os.object_client
         cls.container_client = cls.os.container_client
         cls.account_client = cls.os.account_client
         cls.custom_object_client = cls.os.custom_object_client
-        cls.os_admin = clients.AdminManager()
         cls.token_client = cls.os_admin.token_client
         cls.identity_admin_client = cls.os_admin.identity_client
         cls.custom_account_client = cls.os.custom_account_client
-        cls.os_alt = clients.AltManager()
         cls.object_client_alt = cls.os_alt.object_client
         cls.container_client_alt = cls.os_alt.container_client
         cls.identity_client_alt = cls.os_alt.identity_client
 
         cls.data = DataGenerator(cls.identity_admin_client)
+
+    @classmethod
+    def _assign_member_role(cls):
+        primary_user = cls.isolated_creds.get_primary_user()
+        alt_user = cls.isolated_creds.get_alt_user()
+        swift_role = cls.config.object_storage.operator_role
+        try:
+            resp, roles = cls.os_admin.identity_client.list_roles()
+            role = next(r for r in roles if r['name'] == swift_role)
+        except StopIteration:
+            msg = "No role named %s found" % swift_role
+            raise exceptions.NotFound(msg)
+        for user in [primary_user, alt_user]:
+            cls.os_admin.identity_client.assign_user_role(user['tenantId'],
+                                                          user['id'],
+                                                          role['id'])
 
     @classmethod
     def delete_containers(cls, containers, container_client=None,
