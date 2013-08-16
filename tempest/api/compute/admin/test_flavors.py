@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_int_id
@@ -193,9 +195,10 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
+    @testtools.skip("Skipped until the Bug #1209101 is resolved")
     @attr(type='gate')
-    def test_flavor_not_public_verify_entry_not_in_list_details(self):
-        # Create a flavor with os-flavor-access:is_public false should not
+    def test_list_non_public_flavor(self):
+        # Create a flavor with os-flavor-access:is_public false should
         # be present in list_details.
         # This operation requires the user to have 'admin' role
         flavor_name = rand_name(self.flavor_name_prefix)
@@ -208,9 +211,18 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                                                  new_flavor_id,
                                                  is_public="False")
         self.addCleanup(self.flavor_clean_up, flavor['id'])
-        flag = False
         # Verify flavor is retrieved
+        flag = False
         resp, flavors = self.client.list_flavors_with_detail()
+        self.assertEqual(resp.status, 200)
+        for flavor in flavors:
+            if flavor['name'] == flavor_name:
+                flag = True
+        self.assertTrue(flag)
+
+        # Verify flavor is not retrieved with other user
+        flag = False
+        resp, flavors = self.user_client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         for flavor in flavors:
             if flavor['name'] == flavor_name:
