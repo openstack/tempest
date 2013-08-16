@@ -9,15 +9,15 @@ One of Tempest's prime function is to ensure that your OpenStack cloud
 works with the OpenStack API as documented. The current largest
 portion of Tempest code is devoted to test cases that do exactly this.
 
-It's also important to test not only the expected possitive path on
+It's also important to test not only the expected positive path on
 APIs, but also to provide them with invalid data to ensure they fail
 in expected and documented ways. Over the course of the OpenStack
 project Tempest has discovered many fundamental bugs by doing just
 this.
 
-In order for some APIs to return meaniful results, there must be
+In order for some APIs to return meaningful results, there must be
 enough data in the system. This means these tests might start by
-spinning up a server, image, etc, then opperating on it.
+spinning up a server, image, etc, then operating on it.
 
 
 Why are these tests in tempest?
