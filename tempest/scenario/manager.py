@@ -258,6 +258,31 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             self.fail("Timed out waiting for thing %s to become %s"
                       % (thing_id, expected_status))
 
+    def create_server(self, client, name=None, image=None, flavor=None,
+                      create_kwargs={}):
+        if name is None:
+            name = rand_name('scenario-server-')
+        if image is None:
+            image = self.config.compute.image_ref
+        if flavor is None:
+            flavor = self.config.compute.flavor_ref
+        LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
+                  name, image, flavor)
+        server = client.servers.create(name, image, flavor, **create_kwargs)
+        try:
+            self.assertEqual(server.name, name)
+            self.set_resource(name, server)
+        except AttributeError:
+            self.fail("Server not successfully created.")
+        self.status_timeout(client.servers, server.id, 'ACTIVE')
+        # The instance retrieved on creation is missing network
+        # details, necessitating retrieval after it becomes active to
+        # ensure correct details.
+        server = client.servers.get(server.id)
+        self.set_resource(name, server)
+        LOG.debug("Created server: %s", server)
+        return server
+
 
 class NetworkScenarioTest(OfficialClientTest):
     """
@@ -411,31 +436,6 @@ class NetworkScenarioTest(OfficialClientTest):
                                         **result['port'])
         self.set_resource(name, port)
         return port
-
-    def _create_server(self, client, network, name, key_name, security_groups):
-        flavor_id = self.config.compute.flavor_ref
-        base_image_id = self.config.compute.image_ref
-        create_kwargs = {
-            'nics': [
-                {'net-id': network.id},
-            ],
-            'key_name': key_name,
-            'security_groups': security_groups,
-        }
-        server = client.servers.create(name, base_image_id, flavor_id,
-                                       **create_kwargs)
-        try:
-            self.assertEqual(server.name, name)
-            self.set_resource(name, server)
-        except AttributeError:
-            self.fail("Server not successfully created.")
-        self.status_timeout(client.servers, server.id, 'ACTIVE')
-        # The instance retrieved on creation is missing network
-        # details, necessitating retrieval after it becomes active to
-        # ensure correct details.
-        server = client.servers.get(server.id)
-        self.set_resource(name, server)
-        return server
 
     def _create_floating_ip(self, server, external_network_id):
         result = self.network_client.list_ports(device_id=server.id)

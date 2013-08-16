@@ -90,15 +90,10 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self.assertEqual(name, self.keypair.name)
 
     def nova_boot(self):
-        name = rand_name('scenario-server-')
-        client = self.compute_client
-        flavor_id = self.config.compute.flavor_ref
-        self.server = client.servers.create(name=name, image=self.image,
-                                            flavor=flavor_id,
-                                            key_name=self.keypair.name)
-        self.addCleanup(self.compute_client.servers.delete, self.server)
-        self.assertEqual(name, self.server.name)
-        self._wait_for_server_status('ACTIVE')
+        create_kwargs = {'key_name': self.keypair.name}
+        self.server = self.create_server(self.compute_client,
+                                         image=self.image,
+                                         create_kwargs=create_kwargs)
 
     def nova_list(self):
         servers = self.compute_client.servers.list()
