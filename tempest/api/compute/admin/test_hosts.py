@@ -33,13 +33,13 @@ class HostsAdminTestJSON(base.BaseComputeAdminTest):
         cls.client = cls.os_adm.hosts_client
         cls.non_admin_client = cls.os.hosts_client
 
-    @attr(type=['positive', 'gate'])
+    @attr(type='gate')
     def test_list_hosts(self):
         resp, hosts = self.client.list_hosts()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hosts) >= 2)
 
-    @attr(type='positive')
+    @attr(type='gate')
     def test_list_hosts_with_zone(self):
         resp, hosts = self.client.list_hosts()
         host = hosts[0]
