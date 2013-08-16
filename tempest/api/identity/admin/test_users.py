@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from testtools.matchers._basic import Contains
+from testtools.matchers import Contains
 
 from tempest.api.identity import base
 from tempest.common.utils.data_utils import rand_name
