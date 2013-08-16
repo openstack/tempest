@@ -68,15 +68,33 @@ Avoid using the ``self.fail`` alone, it's stack trace will signal
  the ``self.fail`` line as the origin of the error.
 
 Avoid constructing complex boolean expressions for assertion.
-The ``self.assertTrue`` or ``self.assertFalse`` will just tell you the
-single boolean, and you will not know anything about the values used in
-the formula. Most other assert method can include more information.
+The ``self.assertTrue`` or ``self.assertFalse`` without a ``msg`` argument,
+will just tell you the single boolean value, and you will not know anything
+about the values used in the formula, the ``msg`` argument might be good enough
+for providing more information.
+
+Most other assert method can include more information by default.
 For example ``self.assertIn`` can include the whole set.
+
+Recommended to use testtools matcher for more tricky assertion.
+`[doc] <http://testtools.readthedocs.org/en/latest/for-test-authors.html#matchers>`_
+
+You can implement your own specific matcher as well.
+`[doc] <http://testtools.readthedocs.org/en/latest/for-test-authors.html#writing-your-own-matchers>`_
 
 If the test case fails you can see the related logs and the information
 carried by the exception (exception class, backtrack and exception info).
 This and the service logs are your only guide to find the root cause of flaky
 issue.
+
+Test cases are independent
+--------------------------
+Every ``test_method`` must be callable individually and MUST NOT depends on,
+any other ``test_method`` or ``test_method`` ordering.
+
+Test cases MAY depend on commonly initialized resources/facilities, like
+credentials management, testresources and so on. These facilities, MUST be able
+to work even if just one ``test_method`` selected for execution.
 
 Guidelines
 ----------
