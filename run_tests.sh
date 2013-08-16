@@ -108,6 +108,21 @@ function run_tests {
   fi
 }
 
+function run_tests_nose {
+    NOSE_WITH_OPENSTACK=1
+    NOSE_OPENSTACK_COLOR=1
+    NOSE_OPENSTACK_RED=15.00
+    NOSE_OPENSTACK_YELLOW=3.00
+    NOSE_OPENSTACK_SHOW_ELAPSED=1
+    NOSE_OPENSTACK_STDOUT=1
+    if [[ "x$noseargs" =~ "tempest" ]]; then
+        noseargs="$testrargs"
+    else
+        noseargs="$noseargs tempest"
+    fi
+    ${wrapper} nosetests $noseargs
+}
+
 function run_pep8 {
   echo "Running pep8 ..."
   ${wrapper} flake8
@@ -162,7 +177,13 @@ if [ $nova_coverage -eq 1 ]; then
     run_coverage_start
 fi
 
-run_tests
+
+py_version=`${wrapper} python --version 2>&1`
+if [[ $py_version =~ "2.6" ]] ; then
+    run_tests_nose
+else
+    run_tests
+fi
 retval=$?
 
 if [ $nova_coverage -eq 1 ]; then
