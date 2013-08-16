@@ -26,11 +26,14 @@ from tempest.test import attr
 class UsersTestJSON(base.BaseIdentityAdminTest):
     _interface = 'json'
 
-    alt_user = rand_name('test_user_')
-    alt_password = rand_name('pass_')
-    alt_email = alt_user + '@testmail.tm'
-    alt_tenant = rand_name('test_tenant_')
-    alt_description = rand_name('desc_')
+    @classmethod
+    def setUpClass(cls):
+        super(UsersTestJSON, cls).setUpClass()
+        cls.alt_user = rand_name('test_user_')
+        cls.alt_password = rand_name('pass_')
+        cls.alt_email = cls.alt_user + '@testmail.tm'
+        cls.alt_tenant = rand_name('test_tenant_')
+        cls.alt_description = rand_name('desc_')
 
     @attr(type='smoke')
     def test_create_user(self):
@@ -101,8 +104,9 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     @attr(type='smoke')
     def test_delete_user(self):
         # Delete a user
+        alt_user2 = rand_name('alt_user_')
         self.data.setup_test_tenant()
-        resp, user = self.client.create_user('user_1234', self.alt_password,
+        resp, user = self.client.create_user(alt_user2, self.alt_password,
                                              self.data.tenant['id'],
                                              self.alt_email)
         self.assertEquals('200', resp['status'])
@@ -228,13 +232,16 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.data.setup_test_tenant()
         user_ids = list()
         fetched_user_ids = list()
-        resp, user1 = self.client.create_user('tenant_user1', 'password1',
+        alt_tenant_user1 = rand_name('tenant_user1_')
+        resp, user1 = self.client.create_user(alt_tenant_user1, 'password1',
                                               self.data.tenant['id'],
                                               'user1@123')
         self.assertEquals('200', resp['status'])
         user_ids.append(user1['id'])
         self.data.users.append(user1)
-        resp, user2 = self.client.create_user('tenant_user2', 'password2',
+
+        alt_tenant_user2 = rand_name('tenant_user2_')
+        resp, user2 = self.client.create_user(alt_tenant_user2, 'password2',
                                               self.data.tenant['id'],
                                               'user2@123')
         self.assertEquals('200', resp['status'])
@@ -267,9 +274,11 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         resp, role = self.client.assign_user_role(tenant['id'], user['id'],
                                                   role['id'])
         self.assertEquals('200', resp['status'])
-        resp, second_user = self.client.create_user('second_user', 'password1',
+
+        alt_user2 = rand_name('second_user_')
+        resp, second_user = self.client.create_user(alt_user2, 'password1',
                                                     self.data.tenant['id'],
-                                                    'user1@123')
+                                                    'user2@123')
         self.assertEquals('200', resp['status'])
         user_ids.append(second_user['id'])
         self.data.users.append(second_user)
