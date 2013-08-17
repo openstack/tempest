@@ -268,7 +268,7 @@ class NetworkScenarioTest(OfficialClientTest):
     def check_preconditions(cls):
         if (cls.config.service_available.neutron):
             cls.enabled = True
-            #verify that neutron_available is telling the truth
+            # verify that neutron_available is telling the truth
             try:
                 cls.network_client.list_networks()
             except exc.EndpointNotFound:

@@ -323,7 +323,7 @@ class RestClient(object):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
                 method.upper() == 'HEAD') and resp_body:
             raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
-        #NOTE(afazekas):
+        # NOTE(afazekas):
         # If the HTTP Status Code is 205
         #   'The response MUST NOT include an entity.'
         # A HTTP entity has an entity-body and an 'entity-header'.
@@ -336,7 +336,7 @@ class RestClient(object):
             0 != len(set(resp.keys()) - set(('status',)) -
                      self.response_header_lc - self.general_header_lc)):
                         raise exceptions.ResponseWithEntity()
-        #NOTE(afazekas)
+        # NOTE(afazekas)
         # Now the swift sometimes (delete not empty container)
         # returns with non json error response, we can create new rest class
         # for swift.
@@ -458,8 +458,8 @@ class RestClient(object):
             message = resp_body
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-                #I'm seeing both computeFault and cloudServersFault come back.
-                #Will file a bug to fix, but leave as is for now.
+                # I'm seeing both computeFault and cloudServersFault come back.
+                # Will file a bug to fix, but leave as is for now.
                 if 'cloudServersFault' in resp_body:
                     message = resp_body['cloudServersFault']['message']
                 elif 'computeFault' in resp_body:

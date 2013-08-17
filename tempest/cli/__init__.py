@@ -93,7 +93,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
     def cmd_with_auth(self, cmd, action, flags='', params='',
                       admin=True, fail_ok=False):
         """Executes given command with auth attributes appended."""
-        #TODO(jogo) make admin=False work
+        # TODO(jogo) make admin=False work
         creds = ('--os-username %s --os-tenant-name %s --os-password %s '
                  '--os-auth-url %s ' % (self.identity.admin_username,
                  self.identity.admin_tenant_name, self.identity.admin_password,

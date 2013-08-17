@@ -24,7 +24,7 @@ from tempest.exceptions import SSHTimeout
 
 class RemoteClient():
 
-    #Note(afazekas): It should always get an address instead of server
+    # NOTE(afazekas): It should always get an address instead of server
     def __init__(self, server, username, password=None, pkey=None):
         ssh_timeout = TempestConfig().compute.ssh_timeout
         network = TempestConfig().compute.network_for_ssh
