@@ -75,7 +75,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         for n in created_networks:
             self.assertNotIn(n['id'], networks_list)
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_create_update_delete_network_subnet(self):
         # Creates a network
         name = rand_name('network-')
@@ -116,7 +116,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         resp, body = self.client.delete_network(net_id)
         self.assertEqual('204', resp['status'])
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_show_network(self):
         # Verifies the details of a network
         resp, body = self.client.show_network(self.network['id'])
@@ -125,7 +125,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertEqual(self.network['id'], network['id'])
         self.assertEqual(self.name, network['name'])
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
         resp, body = self.client.list_networks()
@@ -138,7 +138,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         msg = "Network list doesn't contain created network"
         self.assertIsNotNone(found, msg)
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_show_subnet(self):
         # Verifies the details of a subnet
         resp, body = self.client.show_subnet(self.subnet['id'])
@@ -147,7 +147,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertEqual(self.subnet['id'], subnet['id'])
         self.assertEqual(self.cidr, subnet['cidr'])
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
         resp, body = self.client.list_subnets()
@@ -160,7 +160,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         msg = "Subnet list doesn't contain created subnet"
         self.assertIsNotNone(found, msg)
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_create_update_delete_port(self):
         # Verify that successful port creation, update & deletion
         resp, body = self.client.create_port(self.network['id'])
@@ -176,7 +176,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         resp, body = self.client.delete_port(port['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_show_port(self):
         # Verify the details of port
         resp, body = self.client.show_port(self.port['id'])
@@ -184,7 +184,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         port = body['port']
         self.assertEqual(self.port['id'], port['id'])
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_list_ports(self):
         # Verify the port exists in the list of all ports
         resp, body = self.client.list_ports()
@@ -196,19 +196,19 @@ class NetworksTestJSON(base.BaseNetworkTest):
                 found = n['id']
         self.assertIsNotNone(found, "Port list doesn't contain created port")
 
-    @attr(type=['negative', 'gate'])
+    @attr(type=['negative', 'smoke'])
     def test_show_non_existent_network(self):
         non_exist_id = rand_name('network')
         self.assertRaises(exceptions.NotFound, self.client.show_network,
                           non_exist_id)
 
-    @attr(type=['negative', 'gate'])
+    @attr(type=['negative', 'smoke'])
     def test_show_non_existent_subnet(self):
         non_exist_id = rand_name('subnet')
         self.assertRaises(exceptions.NotFound, self.client.show_subnet,
                           non_exist_id)
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
         network_names = [rand_name('network-'), rand_name('network-')]
