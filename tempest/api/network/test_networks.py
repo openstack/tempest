@@ -62,6 +62,18 @@ class NetworksTest(base.BaseNetworkTest):
         cls.cidr = cls.subnet['cidr']
         cls.port = cls.create_port(cls.network)
 
+    def _delete_networks(self, created_networks):
+        for n in created_networks:
+            resp, body = self.client.delete_network(n['id'])
+            self.assertEqual(204, resp.status)
+        # Asserting that the networks are not found in the list after deletion
+        resp, body = self.client.list_networks()
+        networks_list = list()
+        for network in body['networks']:
+            networks_list.append(network['id'])
+        for n in created_networks:
+            self.assertNotIn(n['id'], networks_list)
+
     @attr(type='gate')
     def test_create_update_delete_network_subnet(self):
         # Creates a network
@@ -192,3 +204,20 @@ class NetworksTest(base.BaseNetworkTest):
         non_exist_id = rand_name('subnet')
         self.assertRaises(exceptions.NotFound, self.client.show_subnet,
                           non_exist_id)
+
+    @attr(type='gate')
+    def test_bulk_create_delete_network(self):
+        # Creates 2 networks in one request
+        network_names = [rand_name('network-'), rand_name('network-')]
+        resp, body = self.client.create_bulk_network(2, network_names)
+        created_networks = body['networks']
+        self.assertEqual('201', resp['status'])
+        self.addCleanup(self._delete_networks, created_networks)
+        # Asserting that the networks are found in the list after creation
+        resp, body = self.client.list_networks()
+        networks_list = list()
+        for network in body['networks']:
+            networks_list.append(network['id'])
+        for n in created_networks:
+            self.assertIsNotNone(n['id'])
+            self.assertIn(n['id'], networks_list)

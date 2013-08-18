@@ -57,6 +57,17 @@ class NetworkClient(RestClient):
         body = json.loads(body)
         return resp, body
 
+    def create_bulk_network(self, count, names):
+        network_list = list()
+        for i in range(count):
+            network_list.append({'name': names[i]})
+        post_body = {'networks': network_list}
+        body = json.dumps(post_body)
+        uri = '%s/networks' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
     def show_network(self, uuid):
         uri = '%s/networks/%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri, self.headers)
