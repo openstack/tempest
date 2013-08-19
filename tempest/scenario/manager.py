@@ -258,6 +258,40 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             self.fail("Timed out waiting for thing %s to become %s"
                       % (thing_id, expected_status))
 
+    def create_loginable_secgroup_rule(self, client=None, secgroup_id=None):
+        if client is None:
+            client = self.compute_client
+        if secgroup_id is None:
+            sgs = client.security_groups.list()
+            for sg in sgs:
+                if sg.name == 'default':
+                    secgroup_id = sg.id
+
+        # These rules are intended to permit inbound ssh and icmp
+        # traffic from all sources, so no group_id is provided.
+        # Setting a group_id would only permit traffic from ports
+        # belonging to the same security group.
+        rulesets = [
+            {
+                # ssh
+                'ip_protocol': 'tcp',
+                'from_port': 22,
+                'to_port': 22,
+                'cidr': '0.0.0.0/0',
+            },
+            {
+                # ping
+                'ip_protocol': 'icmp',
+                'from_port': -1,
+                'to_port': -1,
+                'cidr': '0.0.0.0/0',
+            }
+        ]
+        for ruleset in rulesets:
+            sg_rule = client.security_group_rules.create(secgroup_id,
+                                                         **ruleset)
+            self.set_resource(sg_rule.id, sg_rule)
+
     def create_server(self, client, name=None, image=None, flavor=None,
                       create_kwargs={}):
         if name is None:
@@ -335,32 +369,7 @@ class NetworkScenarioTest(OfficialClientTest):
             self.fail("SecurityGroup object not successfully created.")
 
         # Add rules to the security group
-
-        # These rules are intended to permit inbound ssh and icmp
-        # traffic from all sources, so no group_id is provided.
-        # Setting a group_id would only permit traffic from ports
-        # belonging to the same security group.
-        rulesets = [
-            {
-                # ssh
-                'ip_protocol': 'tcp',
-                'from_port': 22,
-                'to_port': 22,
-                'cidr': '0.0.0.0/0',
-            },
-            {
-                # ping
-                'ip_protocol': 'icmp',
-                'from_port': -1,
-                'to_port': -1,
-                'cidr': '0.0.0.0/0',
-            }
-        ]
-        for ruleset in rulesets:
-            try:
-                client.security_group_rules.create(secgroup.id, **ruleset)
-            except Exception:
-                self.fail("Failed to create rule in security group.")
+        self.create_loginable_secgroup_rule(client, secgroup.id)
 
         return secgroup
 

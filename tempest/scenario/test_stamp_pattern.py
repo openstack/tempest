@@ -84,25 +84,6 @@ class TestStampPattern(manager.OfficialClientTest):
     def _add_floating_ip(self, server, floating_ip):
         server.add_floating_ip(floating_ip)
 
-    def _create_security_group_rule(self):
-        sgs = self.compute_client.security_groups.list()
-        for sg in sgs:
-            if sg.name == 'default':
-                secgroup = sg
-
-        ruleset = {
-            # ssh
-            'ip_protocol': 'tcp',
-            'from_port': 22,
-            'to_port': 22,
-            'cidr': '0.0.0.0/0',
-            'group_id': None
-        }
-        sg_rule = self.compute_client.security_group_rules.create(secgroup.id,
-                                                                  **ruleset)
-        self.addCleanup(self.compute_client.security_group_rules.delete,
-                        sg_rule.id)
-
     def _remote_client_to_server(self, server_or_ip):
         if isinstance(server_or_ip, basestring):
             ip = server_or_ip
@@ -214,7 +195,7 @@ class TestStampPattern(manager.OfficialClientTest):
     def test_stamp_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self._create_security_group_rule()
+        self.create_loginable_secgroup_rule()
 
         # boot an instance and create a timestamp file in it
         volume = self._create_volume()
