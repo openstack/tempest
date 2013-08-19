@@ -68,6 +68,10 @@ class VolumesGetTest(base.BaseVolumeTest):
                          fetched_volume['metadata'],
                          'The fetched Volume is different '
                          'from the created Volume')
+        if 'imageRef' in kwargs:
+            self.assertEqual(fetched_volume['bootable'], True)
+        if 'imageRef' not in kwargs:
+            self.assertEqual(fetched_volume['bootable'], False)
 
     @attr(type='gate')
     def test_volume_get_metadata_none(self):
