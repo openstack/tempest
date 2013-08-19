@@ -36,14 +36,8 @@ class TestServerBasicOps(manager.OfficialClientTest):
      * Terminate the instance
     """
 
-    def create_keypair(self):
-        kp_name = rand_name('keypair-smoke')
-        self.keypair = self.compute_client.keypairs.create(kp_name)
-        try:
-            self.assertEqual(self.keypair.id, kp_name)
-            self.set_resource('keypair', self.keypair)
-        except AttributeError:
-            self.fail("Keypair object not successfully created.")
+    def add_keypair(self):
+        self.keypair = self.create_keypair()
 
     def create_security_group(self):
         sg_name = rand_name('secgroup-smoke')
@@ -83,7 +77,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
 
     def boot_instance(self):
         create_kwargs = {
-            'key_name': self.get_resource('keypair').id
+            'key_name': self.keypair.id
         }
         instance = self.create_server(self.compute_client,
                                       create_kwargs=create_kwargs)
@@ -131,7 +125,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
         self.remove_resource('instance')
 
     def test_server_basicops(self):
-        self.create_keypair()
+        self.add_keypair()
         self.create_security_group()
         self.boot_instance()
         self.pause_server()
