@@ -132,20 +132,7 @@ class TestStampPattern(manager.OfficialClientTest):
             self.volume_client.volumes, volume.id, status)
 
     def _create_volume(self, snapshot_id=None):
-        name = rand_name('scenario-volume-')
-        LOG.debug("volume display-name:%s" % name)
-        volume = self.volume_client.volumes.create(size=1,
-                                                   display_name=name,
-                                                   snapshot_id=snapshot_id)
-        LOG.debug("volume created:%s" % volume.display_name)
-
-        def cleaner():
-            self._wait_for_volume_status(volume, 'available')
-            self.volume_client.volumes.delete(volume)
-        self.addCleanup(cleaner)
-        self._wait_for_volume_status(volume, 'available')
-        self.assertEqual(name, volume.display_name)
-        return volume
+        return self.create_volume(snapshot_id=snapshot_id)
 
     def _attach_volume(self, server, volume):
         attach_volume_client = self.compute_client.volumes.create_server_volume

@@ -317,6 +317,22 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         LOG.debug("Created server: %s", server)
         return server
 
+    def create_volume(self, client=None, size=1, name=None,
+                      snapshot_id=None, imageRef=None):
+        if client is None:
+            client = self.volume_client
+        if name is None:
+            name = rand_name('scenario-volume-')
+        LOG.debug("Creating a volume (size :%s, name: %s)", size, name)
+        volume = client.volumes.create(size=size, display_name=name,
+                                       snapshot_id=snapshot_id,
+                                       imageRef=imageRef)
+        self.set_resource(name, volume)
+        self.assertEqual(name, volume.display_name)
+        self.status_timeout(client.volumes, volume.id, 'available')
+        LOG.debug("Created volume: %s", volume)
+        return volume
+
     def create_keypair(self, client=None, name=None):
         if client is None:
             client = self.compute_client
