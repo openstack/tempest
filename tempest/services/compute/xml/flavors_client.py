@@ -30,8 +30,6 @@ XMLNS_OS_FLV_EXT_DATA = \
     "http://docs.openstack.org/compute/ext/flavor_extra_data/api/v1.1"
 XMLNS_OS_FLV_ACCESS = \
     "http://docs.openstack.org/compute/ext/flavor_access/api/v1.1"
-XMLNS_OS_FLV_WITH_EXT_SPECS = \
-    "http://docs.openstack.org/compute/ext/flavor_with_extra_specs/api/v2.0"
 
 
 class FlavorsClientXML(RestClientXML):
@@ -51,7 +49,7 @@ class FlavorsClientXML(RestClientXML):
             if k == '{%s}ephemeral' % XMLNS_OS_FLV_EXT_DATA:
                 k = 'OS-FLV-EXT-DATA:ephemeral'
 
-            if k == '{%s}extra_specs' % XMLNS_OS_FLV_WITH_EXT_SPECS:
+            if k == 'extra_specs':
                 k = 'OS-FLV-WITH-EXT-SPECS:extra_specs'
                 flavor[k] = dict(v)
                 continue
