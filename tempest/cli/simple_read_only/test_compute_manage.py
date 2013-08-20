@@ -41,7 +41,7 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
                           self.nova_manage,
                           'this-does-nova-exist')
 
-    #NOTE(jogo): Commands in order listed in 'nova-manage -h'
+    # NOTE(jogo): Commands in order listed in 'nova-manage -h'
 
     # test flags
     def test_help_flag(self):

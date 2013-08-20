@@ -26,7 +26,7 @@ class ServersWhiteboxTest(manager.ComputeWhiteboxTest):
     @classmethod
     def setUpClass(cls):
         super(ServersWhiteboxTest, cls).setUpClass()
-        #NOTE(afazekas): Strange relationship
+        # NOTE(afazekas): Strange relationship
         BaseIdentityAdminTest.setUpClass()
         cls.client = cls.servers_client
         cls.img_client = cls.images_client

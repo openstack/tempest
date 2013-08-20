@@ -72,7 +72,7 @@ class ComputeWhiteboxTest(manager.OfficialClientTest):
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
 
-    #NOTE(afazekas): Mimics the helper method used in the api tests
+    # NOTE(afazekas): Mimics the helper method used in the api tests
     @classmethod
     def create_server(cls, **kwargs):
         flavor_ref = cls.config.compute.flavor_ref
@@ -127,7 +127,7 @@ class ComputeWhiteboxTest(manager.OfficialClientTest):
             cmd = shlex.split(cmd)
             result = subprocess.Popen(cmd, stdout=subprocess.PIPE)
 
-        #Todo(rohitk): Need to define host connection parameters in config
+        # TODO(rohitk): Need to define host connection parameters in config
         else:
             client = self.get_ssh_connection(self.config.whitebox.api_host,
                                              self.config.whitebox.api_user,

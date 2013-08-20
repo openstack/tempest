@@ -48,7 +48,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
                           self.nova,
                           'this-does-nova-exist')
 
-    #NOTE(jogo): Commands in order listed in 'nova help'
+    # NOTE(jogo): Commands in order listed in 'nova help'
 
     # Positional arguments:
 

@@ -43,7 +43,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
          ssh server hosted at the IP address.  This check guarantees
          that the IP address is associated with the target VM.
 
-       #TODO(mnewby) - Need to implement the following:
+       # TODO(mnewby) - Need to implement the following:
        - the Tempest host can ssh into the VM via the IP address and
          successfully execute the following:
 
@@ -182,8 +182,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @attr(type='smoke')
     def test_004_check_networks(self):
-        #Checks that we see the newly created network/subnet/router via
-        #checking the result of list_[networks,routers,subnets]
+        # Checks that we see the newly created network/subnet/router via
+        # checking the result of list_[networks,routers,subnets]
         seen_nets = self._list_networks()
         seen_names = [n['name'] for n in seen_nets]
         seen_ids = [n['id'] for n in seen_nets]
