@@ -350,7 +350,7 @@ class ServersClientXML(RestClientXML):
         addrs = []
         for child in node.getchildren():
             addrs.append({'version': int(child.get('version')),
-                         'addr': child.get('version')})
+                         'addr': child.get('addr')})
         return {node.get('id'): addrs}
 
     def list_addresses(self, server_id):
