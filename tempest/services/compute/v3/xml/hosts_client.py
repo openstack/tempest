@@ -23,12 +23,12 @@ from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class HostsClientXML(RestClientXML):
+class HostsV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(HostsClientXML, self).__init__(config, username, password,
-                                             auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(HostsV3ClientXML, self).__init__(config, username, password,
+                                               auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_hosts(self, params=None):
         """Lists all hosts."""
@@ -53,7 +53,7 @@ class HostsClientXML(RestClientXML):
     def update_host(self, hostname, **kwargs):
         """Update a host."""
 
-        request_body = Element("updates")
+        request_body = Element("host")
         if kwargs:
             for k, v in kwargs.iteritems():
                 request_body.append(Element(k, v))

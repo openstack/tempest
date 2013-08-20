@@ -25,12 +25,12 @@ from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class AggregatesClientXML(RestClientXML):
+class AggregatesV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AggregatesClientXML, self).__init__(config, username, password,
-                                                  auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(AggregatesV3ClientXML, self).__init__(config, username, password,
+                                                    auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def _format_aggregate(self, g):
         agg = xml_to_json(g)

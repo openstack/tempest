@@ -16,10 +16,10 @@
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.test import attr
+from tempest import test
 
 
-class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
+class HostsAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests hosts API using admin privileges.
@@ -29,16 +29,16 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(HostsAdminTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.hosts_client
+        super(HostsAdminV3TestJSON, cls).setUpClass()
+        cls.client = cls.hosts_admin_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_hosts(self):
         resp, hosts = self.client.list_hosts()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hosts) >= 2, str(hosts))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_hosts_with_zone(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         resp, hosts = self.client.list_hosts()
@@ -50,7 +50,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(hosts) >= 1)
         self.assertIn(host, hosts)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_hosts_with_a_blank_zone(self):
         # If send the request with a blank zone, the request will be successful
         # and it will return all the hosts list
@@ -59,7 +59,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotEqual(0, len(hosts))
         self.assertEqual(200, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_hosts_with_nonexistent_zone(self):
         # If send the request with a nonexistent zone, the request will be
         # successful and no hosts will be retured
@@ -68,7 +68,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(0, len(hosts))
         self.assertEqual(200, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_show_host_detail(self):
         resp, hosts = self.client.list_hosts()
         self.assertEqual(200, resp.status)
@@ -90,5 +90,5 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
             self.assertEqual(hostname, host_resource['host'])
 
 
-class HostsAdminTestXML(HostsAdminTestJSON):
+class HostsAdminV3TestXML(HostsAdminV3TestJSON):
     _interface = 'xml'

@@ -50,6 +50,8 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
+from tempest.services.compute.v3.json.aggregates_client import \
+    AggregatesV3ClientJSON
 from tempest.services.compute.v3.json.availability_zone_client import \
     AvailabilityZoneV3ClientJSON
 from tempest.services.compute.v3.json.certificates_client import \
@@ -57,6 +59,7 @@ from tempest.services.compute.v3.json.certificates_client import \
 from tempest.services.compute.v3.json.extensions_client import \
     ExtensionsV3ClientJSON
 from tempest.services.compute.v3.json.flavors_client import FlavorsV3ClientJSON
+from tempest.services.compute.v3.json.hosts_client import HostsV3ClientJSON
 from tempest.services.compute.v3.json.hypervisor_client import \
     HypervisorV3ClientJSON
 from tempest.services.compute.v3.json.interfaces_client import \
@@ -69,6 +72,8 @@ from tempest.services.compute.v3.json.services_client import \
     ServicesV3ClientJSON
 from tempest.services.compute.v3.json.tenant_usages_client import \
     TenantUsagesV3ClientJSON
+from tempest.services.compute.v3.xml.aggregates_client import \
+    AggregatesV3ClientXML
 from tempest.services.compute.v3.xml.availability_zone_client import \
     AvailabilityZoneV3ClientXML
 from tempest.services.compute.v3.xml.certificates_client import \
@@ -76,6 +81,7 @@ from tempest.services.compute.v3.xml.certificates_client import \
 from tempest.services.compute.v3.xml.extensions_client import \
     ExtensionsV3ClientXML
 from tempest.services.compute.v3.xml.flavors_client import FlavorsV3ClientXML
+from tempest.services.compute.v3.xml.hosts_client import HostsV3ClientXML
 from tempest.services.compute.v3.xml.hypervisor_client import \
     HypervisorV3ClientXML
 from tempest.services.compute.v3.xml.interfaces_client import \
@@ -254,6 +260,7 @@ class Manager(object):
                 *client_args)
             self.services_v3_client = ServicesV3ClientXML(*client_args)
             self.service_client = ServiceClientXML(*client_args)
+            self.aggregates_v3_client = AggregatesV3ClientXML(*client_args)
             self.aggregates_client = AggregatesClientXML(*client_args)
             self.services_client = ServicesClientXML(*client_args)
             self.tenant_usages_v3_client = TenantUsagesV3ClientXML(
@@ -271,6 +278,7 @@ class Manager(object):
             self.volume_hosts_client = VolumeHostsClientXML(*client_args)
             self.volumes_extension_client = VolumeExtensionClientXML(
                 *client_args)
+            self.hosts_v3_client = HostsV3ClientXML(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientXML(
@@ -312,6 +320,7 @@ class Manager(object):
                 *client_args)
             self.services_v3_client = ServicesV3ClientJSON(*client_args)
             self.service_client = ServiceClientJSON(*client_args)
+            self.aggregates_v3_client = AggregatesV3ClientJSON(*client_args)
             self.aggregates_client = AggregatesClientJSON(*client_args)
             self.services_client = ServicesClientJSON(*client_args)
             self.tenant_usages_v3_client = TenantUsagesV3ClientJSON(
@@ -329,6 +338,7 @@ class Manager(object):
             self.volume_hosts_client = VolumeHostsClientJSON(*client_args)
             self.volumes_extension_client = VolumeExtensionClientJSON(
                 *client_args)
+            self.hosts_v3_client = HostsV3ClientJSON(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientJSON(

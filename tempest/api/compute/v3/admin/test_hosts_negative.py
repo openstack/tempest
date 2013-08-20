@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class HostsAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests hosts API using admin privileges.
@@ -30,9 +30,9 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(HostsAdminNegativeTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.hosts_client
-        cls.non_admin_client = cls.os.hosts_client
+        super(HostsAdminNegativeV3TestJSON, cls).setUpClass()
+        cls.client = cls.hosts_admin_client
+        cls.non_admin_client = cls.hosts_client
 
     def _get_host_name(self):
         resp, hosts = self.client.list_hosts()
@@ -68,7 +68,6 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.non_admin_client.update_host,
                           hostname)
 
-    @test.skip_because(bug="1261964", interface="xml")
     @test.attr(type=['negative', 'gate'])
     def test_update_host_with_extra_param(self):
         # only 'status' and 'maintenance_mode' are the valid params.
@@ -171,5 +170,5 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           hostname)
 
 
-class HostsAdminNegativeTestXML(HostsAdminNegativeTestJSON):
+class HostsAdminNegativeV3TestXML(HostsAdminNegativeV3TestJSON):
     _interface = 'xml'
