@@ -25,12 +25,12 @@ from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class ServicesClientXML(RestClientXML):
+class ServicesV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ServicesClientXML, self).__init__(config, username, password,
-                                                auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(ServicesV3ClientXML, self).__init__(config, username, password,
+                                                  auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_services(self, params=None):
         url = 'os-services'

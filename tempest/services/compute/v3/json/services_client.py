@@ -22,12 +22,12 @@ import urllib
 from tempest.common.rest_client import RestClient
 
 
-class ServicesClientJSON(RestClient):
+class ServicesV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ServicesClientJSON, self).__init__(config, username, password,
-                                                 auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(ServicesV3ClientJSON, self).__init__(config, username, password,
+                                                   auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_services(self, params=None):
         url = 'os-services'
@@ -44,7 +44,12 @@ class ServicesClientJSON(RestClient):
         host_name: Name of host
         binary: Service binary
         """
-        post_body = json.dumps({'binary': binary, 'host': host_name})
+        post_body = json.dumps({
+            'service': {
+                'binary': binary,
+                'host': host_name
+            }
+        })
         resp, body = self.put('os-services/enable', post_body, self.headers)
         body = json.loads(body)
         return resp, body['service']
@@ -55,7 +60,12 @@ class ServicesClientJSON(RestClient):
         host_name: Name of host
         binary: Service binary
         """
-        post_body = json.dumps({'binary': binary, 'host': host_name})
+        post_body = json.dumps({
+            'service': {
+                'binary': binary,
+                'host': host_name
+            }
+        })
         resp, body = self.put('os-services/disable', post_body, self.headers)
         body = json.loads(body)
         return resp, body['service']
