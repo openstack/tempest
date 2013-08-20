@@ -23,6 +23,7 @@ from tempest.test import attr
 
 
 class QuotasTest(base.BaseNetworkTest):
+    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for

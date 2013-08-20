@@ -48,7 +48,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseNetworkTest, cls).setUpClass()
-        os = clients.Manager()
+        os = clients.Manager(interface=cls._interface)
         cls.network_cfg = os.config.network
         if not cls.config.service_available.neutron:
             raise cls.skipException("Neutron support is required")

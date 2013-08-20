@@ -90,7 +90,8 @@ from tempest.services.identity.xml.identity_client import IdentityClientXML
 from tempest.services.identity.xml.identity_client import TokenClientXML
 from tempest.services.image.v1.json.image_client import ImageClientJSON
 from tempest.services.image.v2.json.image_client import ImageClientV2JSON
-from tempest.services.network.json.network_client import NetworkClient
+from tempest.services.network.json.network_client import NetworkClientJSON
+from tempest.services.network.xml.network_client import NetworkClientXML
 from tempest.services.object_storage.account_client import AccountClient
 from tempest.services.object_storage.account_client import \
     AccountClientCustomizedHeader
@@ -114,6 +115,11 @@ LOG = logging.getLogger(__name__)
 IMAGES_CLIENTS = {
     "json": ImagesClientJSON,
     "xml": ImagesClientXML,
+}
+
+NETWORKS_CLIENTS = {
+    "json": NetworkClientJSON,
+    "xml": NetworkClientXML,
 }
 
 KEYPAIRS_CLIENTS = {
@@ -295,6 +301,7 @@ class Manager(object):
 
         try:
             self.servers_client = SERVERS_CLIENTS[interface](*client_args)
+            self.network_client = NETWORKS_CLIENTS[interface](*client_args)
             self.limits_client = LIMITS_CLIENTS[interface](*client_args)
             if self.config.service_available.glance:
                 self.images_client = IMAGES_CLIENTS[interface](*client_args)
@@ -339,7 +346,6 @@ class Manager(object):
         except KeyError:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
-        self.network_client = NetworkClient(*client_args)
         self.hosts_client = HostsClientJSON(*client_args)
         self.account_client = AccountClient(*client_args)
         if self.config.service_available.glance:
