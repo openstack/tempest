@@ -312,6 +312,8 @@ class ServersClientXML(RestClientXML):
         start = int(time.time())
 
         while(server_status != status):
+            if status == 'BUILD' and server_status != 'UNKNOWN':
+                return
             time.sleep(self.build_interval)
             resp, body = self.get_server(server_id)
             server_status = body['status']
