@@ -225,7 +225,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             resp, output = self.servers_client.get_console_output(
                 self.server_id, 10)
             self.assertEqual(200, resp.status)
-            self.assertNotEqual(output, None)
+            self.assertIsNotNone(output)
             lines = len(output.split('\n'))
             self.assertEqual(lines, 10)
         self.wait_for(get_output)
@@ -249,7 +249,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         resp, output = self.servers_client.get_console_output(self.server_id,
                                                               10)
         self.assertEqual(200, resp.status)
-        self.assertNotEqual(output, None)
+        self.assertIsNotNone(output)
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
 

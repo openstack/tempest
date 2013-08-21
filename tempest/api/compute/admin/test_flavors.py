@@ -288,7 +288,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                 r, flavors = self.client.list_flavors_with_detail(params)
                 self.assertEqual(r.status, 200)
                 flavor = _flavor_lookup(flavors, flavor_name)
-                self.assertNotEqual(flavor, None)
+                self.assertIsNotNone(flavor)
 
         _test_string_variations(['f', 'false', 'no', '0'],
                                 flavor_name_not_public)
