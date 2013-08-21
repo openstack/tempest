@@ -238,6 +238,7 @@ class BaseV3ComputeTest(BaseComputeTest):
         cls.availability_zone_client = cls.os.availability_zone_v3_client
         cls.interfaces_client = cls.os.interfaces_v3_client
         cls.hypervisor_client = cls.os.hypervisor_v3_client
+        cls.tenant_usages_client = cls.os.tenant_usages_v3_client
 
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
@@ -301,3 +302,4 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
         cls.availability_zone_admin_client = \
             cls.os_adm.availability_zone_v3_client
         cls.hypervisor_admin_client = cls.os_adm.hypervisor_v3_client
+        cls.tenant_usages_admin_client = cls.os_adm.tenant_usages_v3_client

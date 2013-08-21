@@ -62,6 +62,8 @@ from tempest.services.compute.v3.json.servers_client import \
     ServersV3ClientJSON
 from tempest.services.compute.v3.json.services_client import \
     ServicesV3ClientJSON
+from tempest.services.compute.v3.json.tenant_usages_client import \
+    TenantUsagesV3ClientJSON
 from tempest.services.compute.v3.xml.availability_zone_client import \
     AvailabilityZoneV3ClientXML
 from tempest.services.compute.v3.xml.extensions_client import \
@@ -73,6 +75,8 @@ from tempest.services.compute.v3.xml.interfaces_client import \
 from tempest.services.compute.v3.xml.servers_client import ServersV3ClientXML
 from tempest.services.compute.v3.xml.services_client import \
     ServicesV3ClientXML
+from tempest.services.compute.v3.xml.tenant_usages_client import \
+    TenantUsagesV3ClientXML
 from tempest.services.compute.xml.aggregates_client import AggregatesClientXML
 from tempest.services.compute.xml.availability_zone_client import \
     AvailabilityZoneClientXML
@@ -230,6 +234,8 @@ class Manager(object):
             self.service_client = ServiceClientXML(*client_args)
             self.aggregates_client = AggregatesClientXML(*client_args)
             self.services_client = ServicesClientXML(*client_args)
+            self.tenant_usages_v3_client = TenantUsagesV3ClientXML(
+                *client_args)
             self.tenant_usages_client = TenantUsagesClientXML(*client_args)
             self.policy_client = PolicyClientXML(*client_args)
             self.hypervisor_v3_client = HypervisorV3ClientXML(*client_args)
@@ -278,6 +284,8 @@ class Manager(object):
             self.service_client = ServiceClientJSON(*client_args)
             self.aggregates_client = AggregatesClientJSON(*client_args)
             self.services_client = ServicesClientJSON(*client_args)
+            self.tenant_usages_v3_client = TenantUsagesV3ClientJSON(
+                *client_args)
             self.tenant_usages_client = TenantUsagesClientJSON(*client_args)
             self.policy_client = PolicyClientJSON(*client_args)
             self.hypervisor_v3_client = HypervisorV3ClientJSON(*client_args)

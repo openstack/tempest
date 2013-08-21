@@ -21,12 +21,12 @@ import urllib
 from tempest.common.rest_client import RestClient
 
 
-class TenantUsagesClientJSON(RestClient):
+class TenantUsagesV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(TenantUsagesClientJSON, self).__init__(
+        super(TenantUsagesV3ClientJSON, self).__init__(
             config, username, password, auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = self.config.compute.catalog_v3_type
 
     def list_tenant_usages(self, params=None):
         url = 'os-simple-tenant-usage'

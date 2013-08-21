@@ -23,13 +23,13 @@ from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class TenantUsagesClientXML(RestClientXML):
+class TenantUsagesV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(TenantUsagesClientXML, self).__init__(config, username,
-                                                    password, auth_url,
-                                                    tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(TenantUsagesV3ClientXML, self).__init__(config, username,
+                                                      password, auth_url,
+                                                      tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def _parse_array(self, node):
         json = xml_to_json(node)
