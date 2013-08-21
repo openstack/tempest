@@ -48,12 +48,16 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
+from tempest.services.compute.v3.json.availability_zone_client import \
+    AvailabilityZoneV3ClientJSON
 from tempest.services.compute.v3.json.extensions_client import \
     ExtensionsV3ClientJSON
 from tempest.services.compute.v3.json.servers_client import \
     ServersV3ClientJSON
 from tempest.services.compute.v3.json.services_client import \
     ServicesV3ClientJSON
+from tempest.services.compute.v3.xml.availability_zone_client import \
+    AvailabilityZoneV3ClientXML
 from tempest.services.compute.v3.xml.extensions_client import \
     ExtensionsV3ClientXML
 from tempest.services.compute.v3.xml.servers_client import ServersV3ClientXML
@@ -205,6 +209,8 @@ class Manager(object):
             self.interfaces_client = InterfacesClientXML(*client_args)
             self.endpoints_client = EndPointClientXML(*client_args)
             self.fixed_ips_client = FixedIPsClientXML(*client_args)
+            self.availability_zone_v3_client = AvailabilityZoneV3ClientXML(
+                *client_args)
             self.availability_zone_client = AvailabilityZoneClientXML(
                 *client_args)
             self.services_v3_client = ServicesV3ClientXML(*client_args)
@@ -247,6 +253,8 @@ class Manager(object):
             self.interfaces_client = InterfacesClientJSON(*client_args)
             self.endpoints_client = EndPointClientJSON(*client_args)
             self.fixed_ips_client = FixedIPsClientJSON(*client_args)
+            self.availability_zone_v3_client = AvailabilityZoneV3ClientJSON(
+                *client_args)
             self.availability_zone_client = AvailabilityZoneClientJSON(
                 *client_args)
             self.services_v3_client = ServicesV3ClientJSON(*client_args)

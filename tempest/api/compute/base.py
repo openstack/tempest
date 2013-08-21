@@ -231,6 +231,7 @@ class BaseV3ComputeTest(BaseComputeTest):
         cls.images_client = cls.os.image_client
         cls.services_client = cls.os.services_v3_client
         cls.extensions_client = cls.os.extensions_v3_client
+        cls.availability_zone_client = cls.os.availability_zone_v3_client
 
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
@@ -291,3 +292,5 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
         cls.os_adm = os_adm
         cls.severs_admin_client = cls.os_adm.servers_v3_client
         cls.services_admin_client = cls.os_adm.services_v3_client
+        cls.availability_zone_admin_client = \
+            cls.os_adm.availability_zone_v3_client

@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class AvailabilityZoneAdminTestJSON(base.BaseV2ComputeAdminTest):
+class AvailabilityZoneAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests Availability Zone API List that require admin privileges
@@ -30,8 +30,8 @@ class AvailabilityZoneAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(AvailabilityZoneAdminTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.availability_zone_client
+        super(AvailabilityZoneAdminV3TestJSON, cls).setUpClass()
+        cls.client = cls.availability_zone_admin_client
         cls.non_adm_client = cls.availability_zone_client
 
     @attr(type='gate')
@@ -66,5 +66,5 @@ class AvailabilityZoneAdminTestJSON(base.BaseV2ComputeAdminTest):
             self.non_adm_client.get_availability_zone_list_detail)
 
 
-class AvailabilityZoneAdminTestXML(AvailabilityZoneAdminTestJSON):
+class AvailabilityZoneAdminV3TestXML(AvailabilityZoneAdminV3TestJSON):
     _interface = 'xml'
