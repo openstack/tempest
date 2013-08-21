@@ -54,6 +54,8 @@ from tempest.services.compute.v3.json.availability_zone_client import \
     AvailabilityZoneV3ClientJSON
 from tempest.services.compute.v3.json.extensions_client import \
     ExtensionsV3ClientJSON
+from tempest.services.compute.v3.json.hypervisor_client import \
+    HypervisorV3ClientJSON
 from tempest.services.compute.v3.json.interfaces_client import \
     InterfacesV3ClientJSON
 from tempest.services.compute.v3.json.servers_client import \
@@ -64,6 +66,8 @@ from tempest.services.compute.v3.xml.availability_zone_client import \
     AvailabilityZoneV3ClientXML
 from tempest.services.compute.v3.xml.extensions_client import \
     ExtensionsV3ClientXML
+from tempest.services.compute.v3.xml.hypervisor_client import \
+    HypervisorV3ClientXML
 from tempest.services.compute.v3.xml.interfaces_client import \
     InterfacesV3ClientXML
 from tempest.services.compute.v3.xml.servers_client import ServersV3ClientXML
@@ -228,6 +232,7 @@ class Manager(object):
             self.services_client = ServicesClientXML(*client_args)
             self.tenant_usages_client = TenantUsagesClientXML(*client_args)
             self.policy_client = PolicyClientXML(*client_args)
+            self.hypervisor_v3_client = HypervisorV3ClientXML(*client_args)
             self.hypervisor_client = HypervisorClientXML(*client_args)
             self.token_v3_client = V3TokenClientXML(*client_args)
             self.network_client = NetworkClientXML(*client_args)
@@ -275,6 +280,7 @@ class Manager(object):
             self.services_client = ServicesClientJSON(*client_args)
             self.tenant_usages_client = TenantUsagesClientJSON(*client_args)
             self.policy_client = PolicyClientJSON(*client_args)
+            self.hypervisor_v3_client = HypervisorV3ClientJSON(*client_args)
             self.hypervisor_client = HypervisorClientJSON(*client_args)
             self.token_v3_client = V3TokenClientJSON(*client_args)
             self.network_client = NetworkClientJSON(*client_args)

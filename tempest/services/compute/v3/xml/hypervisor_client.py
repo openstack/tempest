@@ -21,13 +21,13 @@ from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class HypervisorClientXML(RestClientXML):
+class HypervisorV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(HypervisorClientXML, self).__init__(config, username,
-                                                  password, auth_url,
-                                                  tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(HypervisorV3ClientXML, self).__init__(config, username,
+                                                    password, auth_url,
+                                                    tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def _parse_array(self, node):
         return [xml_to_json(x) for x in node]
@@ -73,7 +73,7 @@ class HypervisorClientXML(RestClientXML):
 
     def search_hypervisor(self, hyper_name):
         """Search specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/search' % hyper_name,
+        resp, body = self.get('os-hypervisors/search?query=%s' % hyper_name,
                               self.headers)
         hypervisors = self._parse_array(etree.fromstring(body))
         return resp, hypervisors

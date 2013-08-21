@@ -19,7 +19,7 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
+class HypervisorAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests Hypervisors API that require admin privileges
@@ -29,8 +29,8 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(HypervisorAdminTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.hypervisor_client
+        super(HypervisorAdminV3TestJSON, cls).setUpClass()
+        cls.client = cls.hypervisor_admin_client
 
     def _list_hypervisors(self):
         # List of hypervisors
@@ -70,8 +70,8 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         hypers = self._list_hypervisors()
         self.assertTrue(len(hypers) > 0)
 
-        hostname = hypers[0]['hypervisor_hostname']
-        resp, hypervisors = self.client.get_hypervisor_servers(hostname)
+        hypervisor_id = hypers[0]['id']
+        resp, hypervisors = self.client.get_hypervisor_servers(hypervisor_id)
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hypervisors) > 0)
 
@@ -101,5 +101,5 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(len(hypers) > 0)
 
 
-class HypervisorAdminTestXML(HypervisorAdminTestJSON):
+class HypervisorAdminV3TestXML(HypervisorAdminV3TestJSON):
     _interface = 'xml'

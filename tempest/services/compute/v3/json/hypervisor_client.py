@@ -20,13 +20,13 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class HypervisorClientJSON(RestClient):
+class HypervisorV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(HypervisorClientJSON, self).__init__(config, username,
-                                                   password, auth_url,
-                                                   tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(HypervisorV3ClientJSON, self).__init__(config, username,
+                                                     password, auth_url,
+                                                     tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def get_hypervisor_list(self):
         """List hypervisors information."""
@@ -50,7 +50,7 @@ class HypervisorClientJSON(RestClient):
         """List instances belonging to the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/servers' % hyper_name)
         body = json.loads(body)
-        return resp, body['hypervisors']
+        return resp, body['hypervisor']
 
     def get_hypervisor_stats(self):
         """Get hypervisor statistics over all compute nodes."""
@@ -66,6 +66,6 @@ class HypervisorClientJSON(RestClient):
 
     def search_hypervisor(self, hyper_name):
         """Search specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/search' % hyper_name)
+        resp, body = self.get('os-hypervisors/search?query=%s' % hyper_name)
         body = json.loads(body)
         return resp, body['hypervisors']

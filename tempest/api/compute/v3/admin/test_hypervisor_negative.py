@@ -23,7 +23,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class HypervisorAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests Hypervisors API that require admin privileges
@@ -33,8 +33,8 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(HypervisorAdminNegativeTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.hypervisor_client
+        super(HypervisorAdminNegativeV3TestJSON, cls).setUpClass()
+        cls.client = cls.hypervisor_admin_client
         cls.non_adm_client = cls.hypervisor_client
 
     def _list_hypervisors(self):
@@ -124,10 +124,10 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def test_search_nonexistent_hypervisor(self):
         nonexistent_hypervisor_name = data_utils.rand_name('test_hypervisor')
 
-        self.assertRaises(
-            exceptions.NotFound,
-            self.client.search_hypervisor,
+        resp, hypers = self.client.search_hypervisor(
             nonexistent_hypervisor_name)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(hypers))
 
     @attr(type=['negative', 'gate'])
     def test_search_hypervisor_with_non_admin_user(self):
@@ -140,5 +140,5 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             hypers[0]['hypervisor_hostname'])
 
 
-class HypervisorAdminNegativeTestXML(HypervisorAdminNegativeTestJSON):
+class HypervisorAdminNegativeV3TestXML(HypervisorAdminNegativeV3TestJSON):
     _interface = 'xml'
