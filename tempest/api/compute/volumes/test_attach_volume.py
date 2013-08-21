@@ -55,6 +55,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         # Start a server and wait for it to become ready
         resp, server = self.create_server(wait_until='ACTIVE',
                                           adminPass='password')
+        self.server = server
 
         # Record addresses so that we can ssh later
         resp, server['addresses'] = \
