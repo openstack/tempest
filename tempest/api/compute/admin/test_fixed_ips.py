@@ -15,8 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.compute import base
 from tempest import config
 from tempest import exceptions
@@ -30,6 +28,9 @@ class FixedIPsBase(base.BaseComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FixedIPsBase, cls).setUpClass()
+        if cls.config.service_available.neutron:
+            msg = ("%s skipped as neutron is available" % cls.__name__)
+            raise cls.skipException(msg)
         # NOTE(maurosr): The idea here is: the server creation is just an
         # auxiliary element to the ip details or reservation, there was no way
         # (at least none in my mind) to get an valid and existing ip except
@@ -56,8 +57,6 @@ class FixedIPsTestJson(FixedIPsBase):
 
     CONF = config.TempestConfig()
 
-    @testtools.skipIf(CONF.service_available.neutron, "This feature is not" +
-                      "implemented by Neutron. See bug: #1194569")
     @attr(type='gate')
     def test_list_fixed_ip_details(self):
         resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)
