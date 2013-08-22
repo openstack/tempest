@@ -83,11 +83,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
                                         properties=properties)
 
     def nova_keypair_add(self):
-        name = rand_name('scenario-keypair-')
-
-        self.keypair = self.compute_client.keypairs.create(name=name)
-        self.addCleanup(self.compute_client.keypairs.delete, self.keypair)
-        self.assertEqual(name, self.keypair.name)
+        self.keypair = self.create_keypair()
 
     def nova_boot(self):
         create_kwargs = {'key_name': self.keypair.name}

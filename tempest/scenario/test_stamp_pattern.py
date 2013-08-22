@@ -71,10 +71,7 @@ class TestStampPattern(manager.OfficialClientTest):
                                   create_kwargs=create_kwargs)
 
     def _add_keypair(self):
-        name = rand_name('scenario-keypair-')
-        self.keypair = self.compute_client.keypairs.create(name=name)
-        self.addCleanup(self.compute_client.keypairs.delete, self.keypair)
-        self.assertEqual(name, self.keypair.name)
+        self.keypair = self.create_keypair()
 
     def _create_floating_ip(self):
         floating_ip = self.compute_client.floating_ips.create()

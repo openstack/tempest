@@ -283,6 +283,16 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         LOG.debug("Created server: %s", server)
         return server
 
+    def create_keypair(self, client=None, name=None):
+        if client is None:
+            client = self.compute_client
+        if name is None:
+            name = rand_name('scenario-keypair-')
+        keypair = client.keypairs.create(name)
+        self.assertEqual(keypair.name, name)
+        self.set_resource(name, keypair)
+        return keypair
+
 
 class NetworkScenarioTest(OfficialClientTest):
     """
@@ -311,16 +321,6 @@ class NetworkScenarioTest(OfficialClientTest):
             cls.config.identity.username,
             cls.config.identity.password,
             cls.config.identity.tenant_name).tenant_id
-
-    def _create_keypair(self, client, namestart='keypair-smoke-'):
-        kp_name = rand_name(namestart)
-        keypair = client.keypairs.create(kp_name)
-        try:
-            self.assertEqual(keypair.id, kp_name)
-            self.set_resource(kp_name, keypair)
-        except AttributeError:
-            self.fail("Keypair object not successfully created.")
-        return keypair
 
     def _create_security_group(self, client, namestart='secgroup-smoke-'):
         # Create security group

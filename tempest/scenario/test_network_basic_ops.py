@@ -160,8 +160,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @attr(type='smoke')
     def test_001_create_keypairs(self):
-        self.keypairs[self.tenant_id] = self._create_keypair(
-            self.compute_client)
+        self.keypairs[self.tenant_id] = self.create_keypair(
+            name=rand_name('keypair-smoke-'))
 
     @attr(type='smoke')
     def test_002_create_security_groups(self):
