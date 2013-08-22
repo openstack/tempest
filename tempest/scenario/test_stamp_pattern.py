@@ -21,7 +21,6 @@ from cinderclient import exceptions as cinder_exceptions
 import testtools
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
@@ -81,20 +80,8 @@ class TestStampPattern(manager.OfficialClientTest):
     def _add_floating_ip(self, server, floating_ip):
         server.add_floating_ip(floating_ip)
 
-    def _remote_client_to_server(self, server_or_ip):
-        if isinstance(server_or_ip, basestring):
-            ip = server_or_ip
-        else:
-            network_name_for_ssh = self.config.compute.network_for_ssh
-            ip = server_or_ip.networks[network_name_for_ssh][0]
-        username = self.config.scenario.ssh_user
-        linux_client = RemoteClient(ip,
-                                    username,
-                                    pkey=self.keypair.private_key)
-        return linux_client
-
     def _ssh_to_server(self, server_or_ip):
-        linux_client = self._remote_client_to_server(server_or_ip)
+        linux_client = self.get_remote_client(server_or_ip)
         return linux_client.ssh_client
 
     def _create_image(self, server):
@@ -148,7 +135,7 @@ class TestStampPattern(manager.OfficialClientTest):
         self._wait_for_volume_status(volume, 'available')
 
     def _wait_for_volume_availible_on_the_system(self, server_or_ip):
-        ssh = self._remote_client_to_server(server_or_ip)
+        ssh = self.get_remote_client(server_or_ip)
         conf = self.config
 
         def _func():

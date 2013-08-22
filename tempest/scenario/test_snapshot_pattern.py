@@ -16,7 +16,6 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 
@@ -54,16 +53,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         self.keypair = self.create_keypair()
 
     def _ssh_to_server(self, server_or_ip):
-        if isinstance(server_or_ip, basestring):
-            ip = server_or_ip
-        else:
-            network_name_for_ssh = self.config.compute.network_for_ssh
-            ip = server_or_ip.networks[network_name_for_ssh][0]
-        username = self.config.scenario.ssh_user
-        linux_client = RemoteClient(ip,
-                                    username,
-                                    pkey=self.keypair.private_key)
-
+        linux_client = self.get_remote_client(server_or_ip)
         return linux_client.ssh_client
 
     def _write_timestamp(self, server_or_ip):
