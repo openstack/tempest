@@ -139,25 +139,6 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
     def nova_floating_ip_add(self):
         self.server.add_floating_ip(self.floating_ip)
 
-    def nova_security_group_rule_create(self):
-        sgs = self.compute_client.security_groups.list()
-        for sg in sgs:
-            if sg.name == 'default':
-                secgroup = sg
-
-        ruleset = {
-            # ssh
-            'ip_protocol': 'tcp',
-            'from_port': 22,
-            'to_port': 22,
-            'cidr': '0.0.0.0/0',
-            'group_id': None
-        }
-        sg_rule = self.compute_client.security_group_rules.create(secgroup.id,
-                                                                  **ruleset)
-        self.addCleanup(self.compute_client.security_group_rules.delete,
-                        sg_rule.id)
-
     def ssh_to_server(self):
         username = self.config.scenario.ssh_user
         self.linux_client = RemoteClient(self.floating_ip.ip,
@@ -191,7 +172,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
 
         self.nova_floating_ip_create()
         self.nova_floating_ip_add()
-        self.nova_security_group_rule_create()
+        self.create_loginable_secgroup_rule()
         self.ssh_to_server()
         self.check_partitions()
 

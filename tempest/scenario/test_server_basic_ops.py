@@ -52,28 +52,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
             self.fail("SecurityGroup object not successfully created.")
 
         # Add rules to the security group
-        rulesets = [
-            {
-                'ip_protocol': 'tcp',
-                'from_port': 1,
-                'to_port': 65535,
-                'cidr': '0.0.0.0/0',
-                'group_id': self.secgroup.id
-            },
-            {
-                'ip_protocol': 'icmp',
-                'from_port': -1,
-                'to_port': -1,
-                'cidr': '0.0.0.0/0',
-                'group_id': self.secgroup.id
-            }
-        ]
-        for ruleset in rulesets:
-            try:
-                self.compute_client.security_group_rules.create(
-                    self.secgroup.id, **ruleset)
-            except Exception:
-                self.fail("Failed to create rule in security group.")
+        self.create_loginable_secgroup_rule(secgroup_id=self.secgroup.id)
 
     def boot_instance(self):
         create_kwargs = {
