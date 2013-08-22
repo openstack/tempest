@@ -46,10 +46,14 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
+from tempest.services.compute.v3.json.extensions_client import \
+    ExtensionsV3ClientJSON
 from tempest.services.compute.v3.json.servers_client import \
     ServersV3ClientJSON
 from tempest.services.compute.v3.json.services_client import \
     ServicesV3ClientJSON
+from tempest.services.compute.v3.xml.extensions_client import \
+    ExtensionsV3ClientXML
 from tempest.services.compute.v3.xml.servers_client import ServersV3ClientXML
 from tempest.services.compute.v3.xml.services_client import \
     ServicesV3ClientXML
@@ -180,6 +184,7 @@ class Manager(object):
             self.keypairs_client = KeyPairsClientXML(*client_args)
             self.quotas_client = QuotasClientXML(*client_args)
             self.flavors_client = FlavorsClientXML(*client_args)
+            self.extensions_v3_client = ExtensionsV3ClientXML(*client_args)
             self.extensions_client = ExtensionsClientXML(*client_args)
             self.volumes_extensions_client = VolumesExtensionsClientXML(
                 *client_args)
@@ -220,6 +225,7 @@ class Manager(object):
             self.keypairs_client = KeyPairsClientJSON(*client_args)
             self.quotas_client = QuotasClientJSON(*client_args)
             self.flavors_client = FlavorsClientJSON(*client_args)
+            self.extensions_v3_client = ExtensionsV3ClientJSON(*client_args)
             self.extensions_client = ExtensionsClientJSON(*client_args)
             self.volumes_extensions_client = VolumesExtensionsClientJSON(
                 *client_args)

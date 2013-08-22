@@ -20,7 +20,7 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class ExtensionsTestJSON(base.BaseV2ComputeTest):
+class ExtensionsV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @attr(type='gate')
@@ -31,5 +31,5 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(200, resp.status)
 
 
-class ExtensionsTestXML(ExtensionsTestJSON):
+class ExtensionsV3TestXML(ExtensionsV3TestJSON):
     _interface = 'xml'
