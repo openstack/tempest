@@ -23,7 +23,8 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class NetworksTest(base.BaseNetworkTest):
+class NetworksTestJSON(base.BaseNetworkTest):
+    _interface = 'json'
 
     """
     Tests the following operations in the Neutron API using the REST client for
@@ -55,7 +56,7 @@ class NetworksTest(base.BaseNetworkTest):
 
     @classmethod
     def setUpClass(cls):
-        super(NetworksTest, cls).setUpClass()
+        super(NetworksTestJSON, cls).setUpClass()
         cls.network = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)
@@ -109,7 +110,7 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEqual('200', resp['status'])
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_subnet)
-        # Deletes subnet and network
+        # Delete subnet and network
         resp, body = self.client.delete_subnet(subnet_id)
         self.assertEqual('204', resp['status'])
         resp, body = self.client.delete_network(net_id)
@@ -128,6 +129,7 @@ class NetworksTest(base.BaseNetworkTest):
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
         resp, body = self.client.list_networks()
+        self.assertEqual('200', resp['status'])
         networks = body['networks']
         found = None
         for n in networks:
@@ -149,6 +151,7 @@ class NetworksTest(base.BaseNetworkTest):
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
         resp, body = self.client.list_subnets()
+        self.assertEqual('200', resp['status'])
         subnets = body['subnets']
         found = None
         for n in subnets:
@@ -159,7 +162,7 @@ class NetworksTest(base.BaseNetworkTest):
 
     @attr(type='gate')
     def test_create_update_delete_port(self):
-        # Verify that successful port creation & deletion
+        # Verify that successful port creation, update & deletion
         resp, body = self.client.create_port(self.network['id'])
         self.assertEqual('201', resp['status'])
         port = body['port']
@@ -174,7 +177,7 @@ class NetworksTest(base.BaseNetworkTest):
         self.assertEqual('204', resp['status'])
 
     @attr(type='gate')
-    def test_show_ports(self):
+    def test_show_port(self):
         # Verify the details of port
         resp, body = self.client.show_port(self.port['id'])
         self.assertEqual('200', resp['status'])
@@ -221,3 +224,7 @@ class NetworksTest(base.BaseNetworkTest):
         for n in created_networks:
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], networks_list)
+
+
+class NetworksTestXML(NetworksTestJSON):
+    _interface = 'xml'

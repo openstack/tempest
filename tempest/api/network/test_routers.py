@@ -21,6 +21,7 @@ from tempest.test import attr
 
 
 class RoutersTest(base.BaseNetworkTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

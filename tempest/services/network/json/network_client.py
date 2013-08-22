@@ -17,7 +17,7 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class NetworkClient(RestClient):
+class NetworkClientJSON(RestClient):
 
     """
     Tempest REST client for Neutron. Uses v2 of the Neutron API, since the
@@ -33,8 +33,8 @@ class NetworkClient(RestClient):
     """
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(NetworkClient, self).__init__(config, username, password,
-                                            auth_url, tenant_name)
+        super(NetworkClientJSON, self).__init__(config, username, password,
+                                                auth_url, tenant_name)
         self.service = self.config.network.catalog_type
         self.version = '2.0'
         self.uri_prefix = "v%s" % (self.version)
@@ -108,15 +108,14 @@ class NetworkClient(RestClient):
         body = json.loads(body)
         return resp, body
 
-    def create_port(self, network_id, state=None):
-        if not state:
-            state = True
+    def create_port(self, network_id, **kwargs):
         post_body = {
             'port': {
                 'network_id': network_id,
-                'admin_state_up': state,
             }
         }
+        for key, val in kwargs.items():
+            post_body['port'][key] = val
         body = json.dumps(post_body)
         uri = '%s/ports' % (self.uri_prefix)
         resp, body = self.post(uri, headers=self.headers, body=body)
@@ -244,7 +243,7 @@ class NetworkClient(RestClient):
             'admin_state_up', body['router']['admin_state_up'])
         # Must uncomment/modify these lines once LP question#233187 is solved
         #update_body['external_gateway_info'] = kwargs.get(
-        #    'external_gateway_info', body['router']['external_gateway_info'])
+        # 'external_gateway_info', body['router']['external_gateway_info'])
         update_body = dict(router=update_body)
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body, self.headers)
