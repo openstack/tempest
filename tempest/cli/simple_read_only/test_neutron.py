@@ -92,7 +92,7 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
     def test_neutron_help(self):
         help_text = self.neutron('help')
         lines = help_text.split('\n')
-        self.assertTrue(lines[0].startswith('usage: neutron'))
+        self.assertFirstLineStartsWith(lines, 'usage: neutron')
 
         commands = []
         cmds_start = lines.index('Commands for API v2.0:')

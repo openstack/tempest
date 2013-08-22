@@ -48,7 +48,7 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
     def test_glance_help(self):
         help_text = self.glance('help')
         lines = help_text.split('\n')
-        self.assertTrue(lines[0].startswith('usage: glance'))
+        self.assertFirstLineStartsWith(lines, 'usage: glance')
 
         commands = []
         cmds_start = lines.index('Positional arguments:')

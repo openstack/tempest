@@ -134,6 +134,11 @@ class ClientTestBase(tempest.test.BaseTestCase):
             for field in field_names:
                 self.assertIn(field, item)
 
+    def assertFirstLineStartsWith(self, lines, beginning):
+        self.assertTrue(lines[0].startswith(beginning),
+                        msg=('Beginning of first line has invalid content: %s'
+                             % lines[:3]))
+
 
 class CommandFailed(subprocess.CalledProcessError):
     # adds output attribute for python2.6

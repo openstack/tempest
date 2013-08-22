@@ -87,7 +87,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
     def test_admin_help(self):
         help_text = self.cinder('help')
         lines = help_text.split('\n')
-        self.assertTrue(lines[0].startswith('usage: cinder'))
+        self.assertFirstLineStartsWith(lines, 'usage: cinder')
 
         commands = []
         cmds_start = lines.index('Positional arguments:')
