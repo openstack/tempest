@@ -272,6 +272,9 @@ container_sync_interval = 5
 # Set to True if the Account Quota middleware is enabled
 accounts_quotas_available = True
 
+# Set operator role for tests that require creating a container
+operator_role = Member
+
 [boto]
 # This section contains configuration options used when executing tests
 # with boto.
