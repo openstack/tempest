@@ -102,15 +102,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self.assertEqual(self.server, got_server)
 
     def cinder_create(self):
-        name = rand_name('scenario-volume-')
-        LOG.debug("volume display-name:%s" % name)
-        self.volume = self.volume_client.volumes.create(size=1,
-                                                        display_name=name)
-        LOG.debug("volume created:%s" % self.volume.display_name)
-        self._wait_for_volume_status('available')
-
-        self.addCleanup(self.volume_client.volumes.delete, self.volume)
-        self.assertEqual(name, self.volume.display_name)
+        self.volume = self.create_volume()
 
     def cinder_list(self):
         volumes = self.volume_client.volumes.list()

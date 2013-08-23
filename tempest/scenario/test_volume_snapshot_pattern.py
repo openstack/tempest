@@ -34,14 +34,7 @@ class TestVolumeSnapshotPattern(manager.OfficialClientTest):
     def _create_volume_from_image(self):
         img_uuid = self.config.compute.image_ref
         vol_name = rand_name('volume-origin')
-        vol = self.volume_client.volumes.create(size=1,
-                                                display_name=vol_name,
-                                                imageRef=img_uuid)
-        self.set_resource(vol.id, vol)
-        self.status_timeout(self.volume_client.volumes,
-                            vol.id,
-                            'available')
-        return vol
+        return self.create_volume(name=vol_name, imageRef=img_uuid)
 
     def _boot_instance_from_volume(self, vol_id):
         # NOTE(gfidente): the syntax for block_device_mapping is
@@ -71,14 +64,7 @@ class TestVolumeSnapshotPattern(manager.OfficialClientTest):
 
     def _create_volume_from_snapshot(self, snap_id):
         vol_name = rand_name('volume')
-        vol = self.volume_client.volumes.create(size=1,
-                                                display_name=vol_name,
-                                                snapshot_id=snap_id)
-        self.set_resource(vol.id, vol)
-        self.status_timeout(self.volume_client.volumes,
-                            vol.id,
-                            'available')
-        return vol
+        return self.create_volume(name=vol_name, snapshot_id=snap_id)
 
     def _stop_instances(self, instances):
         # NOTE(gfidente): two loops so we do not wait for the status twice
