@@ -1,0 +1,8 @@
+[{"action": "tempest.stress.actions.unit_test.UnitTest",
+  "threads": 8,
+  "use_admin": false,
+  "use_isolated_tenants": false,
+  "kwargs": {"test_method": "tempest.cli.simple_read_only.test_glance.SimpleReadOnlyGlanceClientTest.test_glance_fake_action",
+             "class_setup_per": "process"}
+  }
+]
