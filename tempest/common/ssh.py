@@ -114,9 +114,13 @@ class Client(object):
         err_data = []
         poll = select.poll()
         poll.register(channel, select.POLLIN)
+        start_time = time.time()
+
         while True:
             ready = poll.poll(self.channel_timeout)
             if not any(ready):
+                if not self._is_timed_out(self.timeout, start_time):
+                    continue
                 raise exceptions.TimeoutException(
                     "Command: '{0}' executed on host '{1}'.".format(
                         cmd, self.host))
