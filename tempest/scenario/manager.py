@@ -16,11 +16,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
 import subprocess
 
 # Default client libs
 import cinderclient.client
 import glanceclient
+import heatclient.client
 import keystoneclient.v2_0.client
 import netaddr
 from neutronclient.common import exceptions as exc
@@ -48,6 +50,7 @@ class OfficialClientManager(tempest.manager.Manager):
 
     NOVACLIENT_VERSION = '2'
     CINDERCLIENT_VERSION = '1'
+    HEATCLIENT_VERSION = '1'
 
     def __init__(self, username, password, tenant_name):
         super(OfficialClientManager, self).__init__()
@@ -62,6 +65,10 @@ class OfficialClientManager(tempest.manager.Manager):
         self.volume_client = self._get_volume_client(username,
                                                      password,
                                                      tenant_name)
+        self.orchestration_client = self._get_orchestration_client(
+            username,
+            password,
+            tenant_name)
 
     def _get_compute_client(self, username, password, tenant_name):
         # Novaclient will not execute operations for anyone but the
@@ -97,6 +104,32 @@ class OfficialClientManager(tempest.manager.Manager):
                                           password,
                                           tenant_name,
                                           auth_url)
+
+    def _get_orchestration_client(self, username=None, password=None,
+                                  tenant_name=None):
+        if not username:
+            username = self.config.identity.admin_username
+        if not password:
+            password = self.config.identity.admin_password
+        if not tenant_name:
+            tenant_name = self.config.identity.tenant_name
+
+        self._validate_credentials(username, password, tenant_name)
+
+        keystone = self._get_identity_client(username, password, tenant_name)
+        token = keystone.auth_token
+        try:
+            endpoint = keystone.service_catalog.url_for(
+                service_type='orchestration',
+                endpoint_type='publicURL')
+        except keystoneclient.exceptions.EndpointNotFound:
+            return None
+        else:
+            return heatclient.client.Client(self.HEATCLIENT_VERSION,
+                                            endpoint,
+                                            token=token,
+                                            username=username,
+                                            password=password)
 
     def _get_identity_client(self, username, password, tenant_name):
         # This identity client is not intended to check the security
@@ -153,13 +186,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         super(OfficialClientTest, cls).setUpClass()
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             __name__, tempest_client=False)
-        if cls.config.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_primary_creds()
-            username, tenant_name, password = creds
-        else:
-            username = cls.config.identity.username
-            password = cls.config.identity.password
-            tenant_name = cls.config.identity.tenant_name
+
+        username, tenant_name, password = cls.credentials()
 
         cls.manager = OfficialClientManager(username, password, tenant_name)
         cls.compute_client = cls.manager.compute_client
@@ -167,8 +195,19 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.identity_client = cls.manager.identity_client
         cls.network_client = cls.manager.network_client
         cls.volume_client = cls.manager.volume_client
+        cls.orchestration_client = cls.manager.orchestration_client
         cls.resource_keys = {}
         cls.os_resources = []
+
+    @classmethod
+    def credentials(cls):
+        if cls.config.compute.allow_tenant_isolation:
+            return cls.isolated_creds.get_primary_creds()
+
+        username = cls.config.identity.username
+        password = cls.config.identity.password
+        tenant_name = cls.config.identity.tenant_name
+        return username, tenant_name, password
 
     @classmethod
     def tearDownClass(cls):
@@ -498,3 +537,30 @@ class NetworkScenarioTest(OfficialClientTest):
             timeout=self.config.compute.ssh_timeout),
             'Auth failure in connecting to %s@%s via ssh' %
             (username, ip_address))
+
+
+class OrchestrationScenarioTest(OfficialClientTest):
+    """
+    Base class for orchestration scenario tests
+    """
+
+    @classmethod
+    def credentials(cls):
+        username = cls.config.identity.admin_username
+        password = cls.config.identity.admin_password
+        tenant_name = cls.config.identity.tenant_name
+        return username, tenant_name, password
+
+    def _load_template(self, base_file, file_name):
+        filepath = os.path.join(os.path.dirname(os.path.realpath(base_file)),
+                                file_name)
+        with open(filepath) as f:
+            return f.read()
+
+    @classmethod
+    def _stack_rand_name(cls):
+        return rand_name(cls.__name__ + '-')
+
+    def _create_keypair(self):
+        kp_name = rand_name('keypair-smoke')
+        return self.compute_client.keypairs.create(kp_name)

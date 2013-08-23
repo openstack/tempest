@@ -13,6 +13,7 @@ python-keystoneclient>=0.2.0
 python-novaclient>=2.10.0
 python-neutronclient>=2.2.3,<3.0.0
 python-cinderclient>=1.0.4
+python-heatclient>=0.2.3
 testresources
 keyring
 testrepository
