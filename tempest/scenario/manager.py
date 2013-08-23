@@ -589,7 +589,3 @@ class OrchestrationScenarioTest(OfficialClientTest):
     @classmethod
     def _stack_rand_name(cls):
         return rand_name(cls.__name__ + '-')
-
-    def _create_keypair(self):
-        kp_name = rand_name('keypair-smoke')
-        return self.compute_client.keypairs.create(kp_name)

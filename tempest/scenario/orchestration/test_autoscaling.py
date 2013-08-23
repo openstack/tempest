@@ -35,9 +35,8 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
         if self.config.orchestration.keypair_name:
             self.keypair_name = self.config.orchestration.keypair_name
         else:
-            self.keypair = self._create_keypair()
+            self.keypair = self.create_keypair()
             self.keypair_name = self.keypair.id
-            self.set_resource('keypair', self.keypair)
 
     def launch_stack(self):
         self.parameters = {
