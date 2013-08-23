@@ -18,6 +18,7 @@
 from tempest.api.volume.base import BaseVolumeTest
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
+from tempest.test import stresstest
 
 
 class VolumesActionsTest(BaseVolumeTest):
@@ -52,6 +53,7 @@ class VolumesActionsTest(BaseVolumeTest):
 
         super(VolumesActionsTest, cls).tearDownClass()
 
+    @stresstest(class_setup_per='process')
     @attr(type='smoke')
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
@@ -70,6 +72,7 @@ class VolumesActionsTest(BaseVolumeTest):
             self.assertEqual(202, resp.status)
             self.client.wait_for_volume_status(self.volume['id'], 'available')
 
+    @stresstest(class_setup_per='process')
     @attr(type='gate')
     def test_get_volume_attachment(self):
         # Verify that a volume's attachment information is retrieved

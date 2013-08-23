@@ -387,3 +387,11 @@ nova = True
 heat = false
 # Whether or not horizon is expected to be available
 horizon = True
+
+[stress]
+# Maximum number of instances to create during test
+max_instances = 32
+# Time (in seconds) between log file error checks
+log_check_interval = 60
+# The default number of threads created while stress test
+default_thread_number_per_action=4

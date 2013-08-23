@@ -102,6 +102,8 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
     """
     logfiles = admin_manager.config.stress.target_logfiles
     log_check_interval = int(admin_manager.config.stress.log_check_interval)
+    default_thread_num = int(admin_manager.config.stress.
+                             default_thread_number_per_action)
     if logfiles:
         controller = admin_manager.config.stress.target_controller
         computes = _get_compute_nodes(controller)
@@ -112,7 +114,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
             manager = admin_manager
         else:
             manager = clients.Manager()
-        for p_number in xrange(test.get('threads', 1)):
+        for p_number in xrange(test.get('threads', default_thread_num)):
             if test.get('use_isolated_tenants', False):
                 username = rand_name("stress_user")
                 tenant_name = rand_name("stress_tenant")

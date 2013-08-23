@@ -515,7 +515,10 @@ StressGroup = [
                help='regexp for list of log files.'),
     cfg.StrOpt('log_check_interval',
                default=60,
-               help='time between log file error checks.')
+               help='time (in seconds) between log file error checks.'),
+    cfg.StrOpt('default_thread_number_per_action',
+               default=4,
+               help='The number of threads created while stress test.')
 ]
 
 
