@@ -476,10 +476,13 @@ class NetworkScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
         super(NetworkScenarioTest, cls).setUpClass()
-        cls.tenant_id = cls.manager._get_identity_client(
-            cls.config.identity.username,
-            cls.config.identity.password,
-            cls.config.identity.tenant_name).tenant_id
+        if cls.config.compute.allow_tenant_isolation:
+            cls.tenant_id = cls.isolated_creds.get_primary_tenant().id
+        else:
+            cls.tenant_id = cls.manager._get_identity_client(
+                cls.config.identity.username,
+                cls.config.identity.password,
+                cls.config.identity.tenant_name).tenant_id
 
     def _create_security_group(self, client, namestart='secgroup-smoke-'):
         # Create security group

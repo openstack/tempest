@@ -222,7 +222,7 @@ catalog_type = network
 tenant_network_cidr = 10.100.0.0/16
 
 # The mask bits used to partition the tenant block.
-tenant_network_mask_bits = 28
+tenant_network_mask_bits = 24
 
 # If tenant networks are reachable, connectivity checks will be
 # performed directly against addresses on those networks.
