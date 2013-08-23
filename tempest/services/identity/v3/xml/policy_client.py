@@ -17,9 +17,9 @@
 
 from urlparse import urlparse
 
-import httplib2
 from lxml import etree
 
+from tempest.common import http
 from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
@@ -51,7 +51,8 @@ class PolicyClientXML(RestClientXML):
     def request(self, method, url, headers=None, body=None, wait=None):
         """Overriding the existing HTTP request in super class RestClient."""
         dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
+        self.http_obj = http.ClosingHttp(
+            disable_ssl_certificate_validation=dscv)
         self._set_auth()
         self.base_url = self.base_url.replace(urlparse(self.base_url).path,
                                               "/v3")
