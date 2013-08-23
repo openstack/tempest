@@ -75,22 +75,27 @@ class AccountQuotasTest(base.BaseObjectTest):
             cls.data.test_password,
             cls.data.test_tenant)
 
-        headers = {"X-Auth-Token": cls.reselleradmin_token,
+    def setUp(self):
+        super(AccountQuotasTest, self).setUp()
+
+        # Set a quota of 20 bytes on the user's account before each test
+        headers = {"X-Auth-Token": self.reselleradmin_token,
                    "X-Account-Meta-Quota-Bytes": "20"}
 
-        cls.os.custom_account_client.request("POST", "", headers, "")
+        self.os.custom_account_client.request("POST", "", headers, "")
+
+    def tearDown(self):
+        # remove the quota from the container
+        headers = {"X-Auth-Token": self.reselleradmin_token,
+                   "X-Remove-Account-Meta-Quota-Bytes": "x"}
+
+        self.os.custom_account_client.request("POST", "", headers, "")
+        super(AccountQuotasTest, self).tearDown()
 
     @classmethod
     def tearDownClass(cls):
         cls.delete_containers([cls.container_name])
         cls.data.teardown_all()
-
-        # remove the quota from the container
-        headers = {"X-Auth-Token": cls.reselleradmin_token,
-                   "X-Remove-Account-Meta-Quota-Bytes": "x"}
-
-        cls.os.custom_account_client.request("POST", "", headers, "")
-
         super(AccountQuotasTest, cls).tearDownClass()
 
     @testtools.skipIf(not accounts_quotas_available,
@@ -113,3 +118,45 @@ class AccountQuotasTest(base.BaseObjectTest):
         self.assertRaises(exceptions.OverLimit,
                           self.object_client.create_object,
                           self.container_name, object_name, data)
+
+    @testtools.skipIf(not accounts_quotas_available,
+                      "Account Quotas middleware not available")
+    @attr(type=["smoke"])
+    def test_admin_modify_quota(self):
+        """Test that the ResellerAdmin is able to modify and remove the quota
+        on a user's account.
+
+        Using the custom_account client, the test modifies the quota
+        successively to:
+
+        * "25": a random value different from the initial quota value.
+        * ""  : an empty value, equivalent to the removal of the quota.
+        * "20": set the quota to its initial value.
+        """
+        for quota in ("25", "", "20"):
+
+            headers = {"X-Auth-Token": self.reselleradmin_token,
+                       "X-Account-Meta-Quota-Bytes": quota}
+
+            resp, _ = self.os.custom_account_client.request("POST", "",
+                                                            headers, "")
+
+            self.assertEqual(resp["status"], "204")
+
+    @testtools.skipIf(not accounts_quotas_available,
+                      "Account Quotas middleware not available")
+    @attr(type=["negative", "smoke"])
+    def test_user_modify_quota(self):
+        """Test that a user is not able to modify or remove a quota on
+        its account.
+        """
+
+        # Not able to remove quota
+        self.assertRaises(exceptions.Unauthorized,
+                          self.account_client.create_account_metadata,
+                          {"Quota-Bytes": ""})
+
+        # Not able to modify quota
+        self.assertRaises(exceptions.Unauthorized,
+                          self.account_client.create_account_metadata,
+                          {"Quota-Bytes": "100"})
