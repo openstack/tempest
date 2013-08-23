@@ -175,7 +175,7 @@ class TestStampPattern(manager.OfficialClientTest):
         got_timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 
-    @testtools.skip("Until Bug #1205344 is fixed")
+    @testtools.skip("Skipped until the Bug #1205344 is resolved.")
     def test_stamp_pattern(self):
         # prepare for booting a instance
         self._add_keypair()

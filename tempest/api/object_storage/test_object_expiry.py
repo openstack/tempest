@@ -43,7 +43,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         cls.delete_containers([cls.container_name])
         super(ObjectExpiryTest, cls).tearDownClass()
 
-    @testtools.skip('Until Bug #1069849 is resolved.')
+    @testtools.skip('Skipped until the Bug #1069849 is resolved.')
     @attr(type='gate')
     def test_get_object_after_expiry_time(self):
         # TODO(harika-vakadi): similar test case has to be created for

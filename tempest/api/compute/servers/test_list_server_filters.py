@@ -205,7 +205,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @testtools.skip('Until Bug #1170718 is resolved.')
+    @testtools.skip('Skipped until the Bug #1170718 is resolved.')
     @attr(type='gate')
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
