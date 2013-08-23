@@ -45,7 +45,7 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
         # for a given server_id
         resp, output = self.client.list_virtual_interfaces(self.server_id)
         self.assertEqual(200, resp.status)
-        self.assertNotEqual(output, None)
+        self.assertIsNotNone(output)
         virt_ifaces = output
         self.assertNotEqual(0, len(virt_ifaces['virtual_interfaces']),
                             'Expected virtual interfaces, got 0 interfaces.')
