@@ -34,6 +34,7 @@ from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
 from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.manager
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -381,6 +382,18 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         self.assertEqual(keypair.name, name)
         self.set_resource(name, keypair)
         return keypair
+
+    def get_remote_client(self, server_or_ip, username=None, private_key=None):
+        if isinstance(server_or_ip, basestring):
+            ip = server_or_ip
+        else:
+            network_name_for_ssh = self.config.compute.network_for_ssh
+            ip = server_or_ip.networks[network_name_for_ssh][0]
+        if username is None:
+            username = self.config.scenario.ssh_user
+        if private_key is None:
+            private_key = self.keypair.private_key
+        return RemoteClient(ip, username, pkey=private_key)
 
 
 class NetworkScenarioTest(OfficialClientTest):

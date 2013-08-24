@@ -16,7 +16,6 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
-from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 
@@ -132,10 +131,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self.server.add_floating_ip(self.floating_ip)
 
     def ssh_to_server(self):
-        username = self.config.scenario.ssh_user
-        self.linux_client = RemoteClient(self.floating_ip.ip,
-                                         username,
-                                         pkey=self.keypair.private_key)
+        self.linux_client = self.get_remote_client(self.floating_ip.ip)
 
     def check_partitions(self):
         partitions = self.linux_client.get_partitions()
