@@ -574,6 +574,12 @@ class OrchestrationScenarioTest(OfficialClientTest):
     """
 
     @classmethod
+    def setUpClass(cls):
+        super(OrchestrationScenarioTest, cls).setUpClass()
+        if not cls.config.service_available.heat:
+            raise cls.skipException("Heat support is required")
+
+    @classmethod
     def credentials(cls):
         username = cls.config.identity.admin_username
         password = cls.config.identity.admin_password
