@@ -373,6 +373,24 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         LOG.debug("Created volume: %s", volume)
         return volume
 
+    def create_server_snapshot(self, server, compute_client=None,
+                               image_client=None, name=None):
+        if compute_client is None:
+            compute_client = self.compute_client
+        if image_client is None:
+            image_client = self.image_client
+        if name is None:
+            name = rand_name('scenario-snapshot-')
+        LOG.debug("Creating a snapshot image for server: %s", server.name)
+        image_id = compute_client.servers.create_image(server, name)
+        self.addCleanup(image_client.images.delete, image_id)
+        self.status_timeout(image_client.images, image_id, 'active')
+        snapshot_image = image_client.images.get(image_id)
+        self.assertEquals(name, snapshot_image.name)
+        LOG.debug("Created snapshot image %s for server %s",
+                  snapshot_image.name, server.name)
+        return snapshot_image
+
     def create_keypair(self, client=None, name=None):
         if client is None:
             client = self.compute_client
