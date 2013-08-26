@@ -68,44 +68,30 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
                          ', '.join(str(e) for e in missing_endpoints))
 
     @attr(type='gate')
-    def test_create_delete_endpoint(self):
+    def test_create_list_delete_endpoint(self):
         region = rand_name('region')
         url = rand_name('url')
         interface = 'public'
-        create_flag = False
-        matched = False
-        try:
-            resp, endpoint =\
-                self.client.create_endpoint(self.service_id, interface, url,
-                                            region=region, enabled=True)
-            create_flag = True
-            # Asserting Create Endpoint response body
-            self.assertEqual(resp['status'], '201')
-            self.assertEqual(region, endpoint['region'])
-            self.assertEqual(url, endpoint['url'])
-            # Checking if created endpoint is present in the list of endpoints
-            resp, fetched_endpoints = self.client.list_endpoints()
-            for e in fetched_endpoints:
-                if endpoint['id'] == e['id']:
-                    matched = True
-            if not matched:
-                self.fail("Created endpoint does not appear in the list"
-                          " of endpoints")
-        finally:
-            if create_flag:
-                matched = False
-                # Deleting the endpoint created in this method
-                resp_header, resp_body =\
-                    self.client.delete_endpoint(endpoint['id'])
-                self.assertEqual(resp_header['status'], '204')
-                self.assertEqual(resp_body, '')
-                # Checking whether endpoint is deleted successfully
-                resp, fetched_endpoints = self.client.list_endpoints()
-                for e in fetched_endpoints:
-                    if endpoint['id'] == e['id']:
-                        matched = True
-                if matched:
-                    self.fail("Delete endpoint is not successful")
+        resp, endpoint =\
+            self.client.create_endpoint(self.service_id, interface, url,
+                                        region=region, enabled=True)
+        # Asserting Create Endpoint response body
+        self.assertEqual(resp['status'], '201')
+        self.assertIn('id', endpoint)
+        self.assertEqual(region, endpoint['region'])
+        self.assertEqual(url, endpoint['url'])
+        # Checking if created endpoint is present in the list of endpoints
+        resp, fetched_endpoints = self.client.list_endpoints()
+        fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
+        self.assertIn(endpoint['id'], fetched_endpoints_id)
+        # Deleting the endpoint created in this method
+        resp, body = self.client.delete_endpoint(endpoint['id'])
+        self.assertEqual(resp['status'], '204')
+        self.assertEqual(body, '')
+        # Checking whether endpoint is deleted successfully
+        resp, fetched_endpoints = self.client.list_endpoints()
+        fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
+        self.assertNotIn(endpoint['id'], fetched_endpoints_id)
 
     @attr(type='smoke')
     def test_update_endpoint(self):

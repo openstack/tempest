@@ -211,24 +211,18 @@ class ObjectTest(base.BaseObjectTest):
                                                             object_name,
                                                             orig_metadata)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
-        try:
-            # copy object from source container to destination container
-            resp, _ = self.object_client.copy_object_across_containers(
-                src_container_name, object_name, dst_container_name,
-                object_name)
-            self.assertEqual(resp['status'], '201')
-
-            # check if object is present in destination container
-            resp, body = self.object_client.get_object(dst_container_name,
-                                                       object_name)
-            self.assertEqual(body, data)
-            actual_meta_key = 'x-object-meta-' + meta_key
-            self.assertTrue(actual_meta_key in resp)
-            self.assertEqual(resp[actual_meta_key], meta_value)
-
-        except Exception as e:
-            self.fail("Got exception :%s ; while copying"
-                      " object across containers" % e)
+        # copy object from source container to destination container
+        resp, _ = self.object_client.copy_object_across_containers(
+            src_container_name, object_name, dst_container_name,
+            object_name)
+        self.assertEqual(resp['status'], '201')
+        # check if object is present in destination container
+        resp, body = self.object_client.get_object(dst_container_name,
+                                                   object_name)
+        self.assertEqual(body, data)
+        actual_meta_key = 'x-object-meta-' + meta_key
+        self.assertTrue(actual_meta_key in resp)
+        self.assertEqual(resp[actual_meta_key], meta_value)
 
     @attr(type='gate')
     def test_get_object_using_temp_url(self):
@@ -367,36 +361,32 @@ class PublicObjectTest(base.BaseObjectTest):
     def test_access_public_object_with_another_user_creds(self):
         # make container public-readable and access an object in it using
         # another user's credentials
-        try:
-            cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
-            resp_meta, body = self.container_client.update_container_metadata(
-                self.container_name, metadata=cont_headers,
-                metadata_prefix='')
-            self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
-            # create object
-            object_name = rand_name(name='Object')
-            data = arbitrary_string(size=len(object_name) * 1,
-                                    base_text=object_name)
-            resp, _ = self.object_client.create_object(self.container_name,
-                                                       object_name, data)
-            self.assertEqual(resp['status'], '201')
+        cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
+        resp_meta, body = self.container_client.update_container_metadata(
+            self.container_name, metadata=cont_headers,
+            metadata_prefix='')
+        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
 
-            # list container metadata
-            resp, _ = self.container_client.list_container_metadata(
-                self.container_name)
-            self.assertIn(int(resp['status']), HTTP_SUCCESS)
-            self.assertIn('x-container-read', resp)
-            self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
+        # create object
+        object_name = rand_name(name='Object')
+        data = arbitrary_string(size=len(object_name) * 1,
+                                base_text=object_name)
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   object_name, data)
+        self.assertEqual(resp['status'], '201')
 
-            # get auth token of alternative user
-            token = self.identity_client_alt.get_auth()
-            headers = {'X-Auth-Token': token}
-            # access object using alternate user creds
-            resp, body = self.custom_object_client.get_object(
-                self.container_name, object_name,
-                metadata=headers)
-            self.assertEqual(body, data)
+        # list container metadata
+        resp, _ = self.container_client.list_container_metadata(
+            self.container_name)
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn('x-container-read', resp)
+        self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
 
-        except Exception as e:
-            self.fail("Failed to get public readable object with another"
-                      " user creds raised exception is %s" % e)
+        # get auth token of alternative user
+        token = self.identity_client_alt.get_auth()
+        headers = {'X-Auth-Token': token}
+        # access object using alternate user creds
+        resp, body = self.custom_object_client.get_object(
+            self.container_name, object_name,
+            metadata=headers)
+        self.assertEqual(body, data)

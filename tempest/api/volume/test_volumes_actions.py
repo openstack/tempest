@@ -55,20 +55,15 @@ class VolumesActionsTest(BaseVolumeTest):
     @attr(type='smoke')
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
-        try:
-            mountpoint = '/dev/vdc'
-            resp, body = self.client.attach_volume(self.volume['id'],
-                                                   self.server['id'],
-                                                   mountpoint)
-            self.assertEqual(202, resp.status)
-            self.client.wait_for_volume_status(self.volume['id'], 'in-use')
-        except Exception:
-            self.fail("Could not attach volume to instance")
-        finally:
-            # Detach the volume from the instance
-            resp, body = self.client.detach_volume(self.volume['id'])
-            self.assertEqual(202, resp.status)
-            self.client.wait_for_volume_status(self.volume['id'], 'available')
+        mountpoint = '/dev/vdc'
+        resp, body = self.client.attach_volume(self.volume['id'],
+                                               self.server['id'],
+                                               mountpoint)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_volume_status(self.volume['id'], 'in-use')
+        resp, body = self.client.detach_volume(self.volume['id'])
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_volume_status(self.volume['id'], 'available')
 
     @attr(type='gate')
     def test_get_volume_attachment(self):
@@ -77,22 +72,22 @@ class VolumesActionsTest(BaseVolumeTest):
         resp, body = self.client.attach_volume(self.volume['id'],
                                                self.server['id'],
                                                mountpoint)
-        self.client.wait_for_volume_status(self.volume['id'], 'in-use')
         self.assertEqual(202, resp.status)
-        try:
-            resp, volume = self.client.get_volume(self.volume['id'])
-            self.assertEqual(200, resp.status)
-            self.assertIn('attachments', volume)
-            attachment = volume['attachments'][0]
-            self.assertEqual(mountpoint, attachment['device'])
-            self.assertEqual(self.server['id'], attachment['server_id'])
-            self.assertEqual(self.volume['id'], attachment['id'])
-            self.assertEqual(self.volume['id'], attachment['volume_id'])
-        except Exception:
-            self.fail("Could not get attachment details from volume")
-        finally:
-            self.client.detach_volume(self.volume['id'])
-            self.client.wait_for_volume_status(self.volume['id'], 'available')
+        self.client.wait_for_volume_status(self.volume['id'], 'in-use')
+        # NOTE(gfidente): added in reverse order because functions will be
+        # called in reverse order to the order they are added (LIFO)
+        self.addCleanup(self.client.wait_for_volume_status,
+                        self.volume['id'],
+                        'available')
+        self.addCleanup(self.client.detach_volume, self.volume['id'])
+        resp, volume = self.client.get_volume(self.volume['id'])
+        self.assertEqual(200, resp.status)
+        self.assertIn('attachments', volume)
+        attachment = volume['attachments'][0]
+        self.assertEqual(mountpoint, attachment['device'])
+        self.assertEqual(self.server['id'], attachment['server_id'])
+        self.assertEqual(self.volume['id'], attachment['id'])
+        self.assertEqual(self.volume['id'], attachment['volume_id'])
 
     @attr(type='gate')
     def test_volume_upload(self):
