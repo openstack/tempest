@@ -17,9 +17,9 @@
 
 import hashlib
 import hmac
-import httplib2
 import urlparse
 
+from tempest.common import http
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
 
@@ -162,7 +162,8 @@ class ObjectClientCustomizedHeader(RestClient):
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
         dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
+        self.http_obj = http.ClosingHttp(
+            disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
         if self.base_url is None:

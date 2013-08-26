@@ -15,11 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
 import json
 
 from lxml import etree
 
+from tempest.common import http
 from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
@@ -275,7 +275,8 @@ class TokenClientXML(RestClientXML):
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
         dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
+        self.http_obj = http.ClosingHttp(
+            disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
         self._log_request(method, url, headers, body)

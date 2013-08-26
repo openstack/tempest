@@ -18,12 +18,12 @@
 
 import collections
 import hashlib
-import httplib2
 import json
 from lxml import etree
 import re
 import time
 
+from tempest.common import http
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.services.compute.xml.common import xml_to_json
@@ -64,7 +64,8 @@ class RestClient(object):
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
         dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = httplib2.Http(disable_ssl_certificate_validation=dscv)
+        self.http_obj = http.ClosingHttp(
+            disable_ssl_certificate_validation=dscv)
 
     def _set_auth(self):
         """

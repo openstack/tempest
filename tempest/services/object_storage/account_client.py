@@ -15,10 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
 import json
 import urllib
 
+from tempest.common import http
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
 
@@ -108,7 +108,7 @@ class AccountClientCustomizedHeader(RestClient):
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        self.http_obj = httplib2.Http()
+        self.http_obj = http.ClosingHttp()
         if headers is None:
             headers = {}
         if self.base_url is None:
