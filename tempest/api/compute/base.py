@@ -239,6 +239,7 @@ class BaseV3ComputeTest(BaseComputeTest):
         cls.interfaces_client = cls.os.interfaces_v3_client
         cls.hypervisor_client = cls.os.hypervisor_v3_client
         cls.tenant_usages_client = cls.os.tenant_usages_v3_client
+        cls.volumes_client = cls.os.volumes_client
 
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):

@@ -254,6 +254,10 @@ class ServersV3ClientXML(RestClientXML):
             server.add_attr("access_ip_v4", access_ip_v4)
         if access_ip_v6 is not None:
             server.add_attr("access_ip_v6", access_ip_v6)
+        if disk_config is not None:
+            server.add_attr('xmlns:os-disk-config', "http://docs.openstack.org"
+                            "/compute/ext/disk_config/api/v3")
+            server.add_attr("os-disk-config:disk_config", disk_config)
         if meta is not None:
             metadata = Element("metadata")
             server.append(metadata)
@@ -510,12 +514,6 @@ class ServersV3ClientXML(RestClientXML):
         resp, body = self.post('servers/%s/action' % str(server_id),
                                str(Document(post_body)), self.headers)
         return resp, body
-
-    def add_security_group(self, server_id, name):
-        return self.action(server_id, 'add_security_group', None, name=name)
-
-    def remove_security_group(self, server_id, name):
-        return self.action(server_id, 'remove_security_group', None, name=name)
 
     def live_migrate_server(self, server_id, dest_host, use_block_migration):
         """This should be called with administrator privileges ."""

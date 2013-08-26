@@ -121,7 +121,7 @@ class ServersV3ClientJSON(RestClient):
             post_body['access_ip_v6'] = access_ip_v6
 
         if disk_config is not None:
-            post_body['OS-DCF:diskConfig'] = disk_config
+            post_body['os-disk-config:disk_config'] = disk_config
 
         post_body = json.dumps({'server': post_body})
         resp, body = self.put("servers/%s" % str(server_id),
@@ -308,14 +308,6 @@ class ServersV3ClientJSON(RestClient):
     def detach_volume(self, server_id, volume_id):
         """Detaches a volume from a server instance."""
         return self.action(server_id, 'detach', None, volume_id=volume_id)
-
-    def add_security_group(self, server_id, name):
-        """Adds a security group to the server."""
-        return self.action(server_id, 'add_security_group', None, name=name)
-
-    def remove_security_group(self, server_id, name):
-        """Removes a security group from the server."""
-        return self.action(server_id, 'remove_security_group', None, name=name)
 
     def live_migrate_server(self, server_id, dest_host, use_block_migration):
         """This should be called with administrator privileges ."""
