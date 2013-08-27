@@ -101,31 +101,30 @@ class ClientTestBase(tempest.test.BaseTestCase):
         flags = creds + ' ' + flags
         return self.cmd(cmd, action, flags, params, fail_ok)
 
-    def check_output(self, cmd, **kwargs):
-        # substitutes subprocess.check_output which is not in python2.6
-        kwargs['stdout'] = subprocess.PIPE
-        proc = subprocess.Popen(cmd, **kwargs)
-        output = proc.communicate()[0]
-        if proc.returncode != 0:
-            raise CommandFailed(proc.returncode, cmd, output)
-        return output
-
     def cmd(self, cmd, action, flags='', params='', fail_ok=False,
             merge_stderr=False):
         """Executes specified command for the given action."""
         cmd = ' '.join([os.path.join(CONF.cli.cli_dir, cmd),
                         flags, action, params])
         LOG.info("running: '%s'" % cmd)
+        cmd_str = cmd
         cmd = shlex.split(cmd)
+        result = ''
+        result_err = ''
         try:
-            if merge_stderr:
-                result = self.check_output(cmd, stderr=subprocess.STDOUT)
-            else:
-                with open('/dev/null', 'w') as devnull:
-                    result = self.check_output(cmd, stderr=devnull)
-        except subprocess.CalledProcessError as e:
-            LOG.error("command output:\n%s" % e.output)
-            raise
+            stdout = subprocess.PIPE
+            stderr = subprocess.STDOUT if merge_stderr else subprocess.PIPE
+            proc = subprocess.Popen(
+                cmd, stdout=stdout, stderr=stderr)
+            result, result_err = proc.communicate()
+            if not fail_ok and proc.returncode != 0:
+                raise CommandFailed(proc.returncode,
+                                    cmd,
+                                    result)
+        finally:
+            LOG.debug('output of %s:\n%s' % (cmd_str, result))
+            if not merge_stderr and result_err:
+                LOG.debug('error output of %s:\n%s' % (cmd_str, result_err))
         return result
 
     def assertTableStruct(self, items, field_names):
