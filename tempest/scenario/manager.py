@@ -16,6 +16,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
 import os
 import subprocess
 
@@ -36,11 +37,18 @@ from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.manager
-from tempest.openstack.common import log as logging
+from tempest.openstack.common import log
 import tempest.test
 
 
-LOG = logging.getLogger(__name__)
+LOG = log.getLogger(__name__)
+
+# NOTE(afazekas): Workaround for the stdout logging
+LOG_nova_client = logging.getLogger('novaclient.client')
+LOG_nova_client.addHandler(log.NullHandler())
+
+LOG_cinder_client = logging.getLogger('cinderclient.client')
+LOG_cinder_client.addHandler(log.NullHandler())
 
 
 class OfficialClientManager(tempest.manager.Manager):
@@ -88,7 +96,8 @@ class OfficialClientManager(tempest.manager.Manager):
                                         *client_args,
                                         service_type=service_type,
                                         no_cache=True,
-                                        insecure=dscv)
+                                        insecure=dscv,
+                                        http_log_debug=True)
 
     def _get_image_client(self):
         token = self.identity_client.auth_token
@@ -104,7 +113,8 @@ class OfficialClientManager(tempest.manager.Manager):
                                           username,
                                           password,
                                           tenant_name,
-                                          auth_url)
+                                          auth_url,
+                                          http_log_debug=True)
 
     def _get_orchestration_client(self, username=None, password=None,
                                   tenant_name=None):
