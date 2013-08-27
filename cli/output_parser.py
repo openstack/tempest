@@ -133,6 +133,10 @@ def table(output_lines):
     if not isinstance(output_lines, list):
         output_lines = output_lines.split('\n')
 
+    if not output_lines[-1]:
+        # skip last line if empty (just newline at the end)
+        output_lines = output_lines[:-1]
+
     for line in output_lines:
         if delimiter_line.match(line):
             columns = _table_columns(line)
