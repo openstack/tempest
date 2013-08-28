@@ -135,7 +135,7 @@ class OrchestrationClient(rest_client.RestClient):
                 # been created yet
                 pass
             else:
-                resource_name = body['logical_resource_id']
+                resource_name = body['resource_name']
                 resource_status = body['resource_status']
                 if resource_status == status:
                     return
