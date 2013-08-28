@@ -16,9 +16,12 @@
 #    under the License.
 
 from tempest.common.utils.data_utils import rand_name
+from tempest.openstack.common import log as logging
 from tempest.whitebox import manager
 
 from novaclient import exceptions
+
+LOG = logging.getLogger(__name__)
 
 
 class ImagesWhiteboxTest(manager.ComputeWhiteboxTest):
@@ -65,8 +68,9 @@ class ImagesWhiteboxTest(manager.ComputeWhiteboxTest):
                               self.create_image,
                               self.shared_server.id, image_name)
         except Exception:
-            self.fail("Should not allow create image when vm_state=%s and "
+            LOG.error("Should not allow create image when vm_state=%s and "
                       "task_state=%s" % (vm_state, task_state))
+            raise
         finally:
             self.update_state(self.shared_server.id, 'active', None)
 

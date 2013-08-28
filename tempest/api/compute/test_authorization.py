@@ -21,7 +21,10 @@ from tempest import clients
 from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.test import attr
+
+LOG = logging.getLogger(__name__)
 
 
 class AuthorizationTestJSON(base.BaseComputeTest):
@@ -204,7 +207,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
             self.alt_keypairs_client.base_url = self.saved_base_url
             if (resp['status'] is not None):
                 resp, _ = self.alt_keypairs_client.delete_keypair(k_name)
-                self.fail("Create keypair request should not happen "
+                LOG.error("Create keypair request should not happen "
                           "if the tenant id does not match the current user")
 
     @attr(type='gate')
@@ -255,7 +258,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] is not None:
                 self.alt_security_client.delete_security_group(resp['id'])
-                self.fail("Create Security Group request should not happen if"
+                LOG.error("Create Security Group request should not happen if"
                           "the tenant id does not match the current user")
 
     @attr(type='gate')
@@ -297,7 +300,7 @@ class AuthorizationTestJSON(base.BaseComputeTest):
             self.alt_security_client.base_url = self.saved_base_url
             if resp['status'] is not None:
                 self.alt_security_client.delete_security_group_rule(resp['id'])
-                self.fail("Create security group rule request should not "
+                LOG.error("Create security group rule request should not "
                           "happen if the tenant id does not match the"
                           " current user")
 

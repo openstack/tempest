@@ -29,12 +29,12 @@ from neutronclient.common import exceptions as exc
 import neutronclient.v2_0.client
 import novaclient.client
 
-
 from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
 from tempest.common import ssh
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest import exceptions
 import tempest.manager
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -283,9 +283,9 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             thing = things.get(thing_id)
             new_status = thing.status
             if new_status == 'ERROR':
-                self.fail("%s failed to get to expected status. "
-                          "In ERROR state."
-                          % thing)
+                message = "%s failed to get to expected status. \
+                          In ERROR state." % (thing)
+                raise exceptions.BuildErrorException(message)
             elif new_status == expected_status:
                 return True  # All good.
             LOG.debug("Waiting for %s to get to %s status. "
@@ -295,8 +295,9 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             check_status,
             self.config.compute.build_timeout,
             self.config.compute.build_interval):
-            self.fail("Timed out waiting for thing %s to become %s"
-                      % (thing_id, expected_status))
+            message = "Timed out waiting for thing %s \
+                      to become %s" % (thing_id, expected_status)
+            raise exceptions.TimeoutException(message)
 
     def create_loginable_secgroup_rule(self, client=None, secgroup_id=None):
         if client is None:
@@ -343,11 +344,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)
         server = client.servers.create(name, image, flavor, **create_kwargs)
-        try:
-            self.assertEqual(server.name, name)
-            self.set_resource(name, server)
-        except AttributeError:
-            self.fail("Server not successfully created.")
+        self.assertEqual(server.name, name)
+        self.set_resource(name, server)
         self.status_timeout(client.servers, server.id, 'ACTIVE')
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
@@ -429,12 +427,9 @@ class NetworkScenarioTest(OfficialClientTest):
         sg_name = rand_name(namestart)
         sg_desc = sg_name + " description"
         secgroup = client.security_groups.create(sg_name, sg_desc)
-        try:
-            self.assertEqual(secgroup.name, sg_name)
-            self.assertEqual(secgroup.description, sg_desc)
-            self.set_resource(sg_name, secgroup)
-        except AttributeError:
-            self.fail("SecurityGroup object not successfully created.")
+        self.assertEqual(secgroup.name, sg_name)
+        self.assertEqual(secgroup.description, sg_desc)
+        self.set_resource(sg_name, secgroup)
 
         # Add rules to the security group
         self.create_loginable_secgroup_rule(client, secgroup.id)

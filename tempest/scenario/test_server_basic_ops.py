@@ -44,12 +44,9 @@ class TestServerBasicOps(manager.OfficialClientTest):
         sg_desc = sg_name + " description"
         self.secgroup = self.compute_client.security_groups.create(sg_name,
                                                                    sg_desc)
-        try:
-            self.assertEqual(self.secgroup.name, sg_name)
-            self.assertEqual(self.secgroup.description, sg_desc)
-            self.set_resource('secgroup', self.secgroup)
-        except AttributeError:
-            self.fail("SecurityGroup object not successfully created.")
+        self.assertEqual(self.secgroup.name, sg_name)
+        self.assertEqual(self.secgroup.description, sg_desc)
+        self.set_resource('secgroup', self.secgroup)
 
         # Add rules to the security group
         self.create_loginable_secgroup_rule(secgroup_id=self.secgroup.id)

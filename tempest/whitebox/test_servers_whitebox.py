@@ -17,7 +17,10 @@
 
 from tempest.api.identity.base import BaseIdentityAdminTest
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.whitebox import manager
+
+LOG = logging.getLogger(__name__)
 
 
 class ServersWhiteboxTest(manager.ComputeWhiteboxTest):
@@ -66,25 +69,21 @@ class ServersWhiteboxTest(manager.ComputeWhiteboxTest):
         Base method for delete server tests based on vm and task states.
         Validates for successful server termination.
         """
-        try:
-            server = self.create_server()
-            self.update_state(server['id'], vm_state, task_state)
+        server = self.create_server()
+        self.update_state(server['id'], vm_state, task_state)
 
-            resp, body = self.client.delete_server(server['id'])
-            self.assertEqual('204', resp['status'])
-            self.client.wait_for_server_termination(server['id'],
-                                                    ignore_error=True)
+        resp, body = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'],
+                                                ignore_error=True)
 
-            instances = self.meta.tables['instances']
-            stmt = instances.select().where(instances.c.uuid == server['id'])
-            result = self.connection.execute(stmt).first()
+        instances = self.meta.tables['instances']
+        stmt = instances.select().where(instances.c.uuid == server['id'])
+        result = self.connection.execute(stmt).first()
 
-            self.assertEqual(True, result.deleted > 0)
-            self.assertEqual('deleted', result.vm_state)
-            self.assertEqual(None, result.task_state)
-        except Exception:
-            self.fail("Should be able to delete a server when vm_state=%s and "
-                      "task_state=%s" % (vm_state, task_state))
+        self.assertEqual(True, result.deleted > 0)
+        self.assertEqual('deleted', result.vm_state)
+        self.assertEqual(None, result.task_state)
 
     def _test_delete_server_403_base(self, vm_state, task_state):
         """
@@ -98,8 +97,9 @@ class ServersWhiteboxTest(manager.ComputeWhiteboxTest):
                               self.client.delete_server,
                               self.shared_server['id'])
         except Exception:
-            self.fail("Should not allow delete server when vm_state=%s and "
+            LOG.error("Should not allow delete server when vm_state=%s and "
                       "task_state=%s" % (vm_state, task_state))
+            raise
         finally:
             self.update_state(self.shared_server['id'], 'active', None)
 
