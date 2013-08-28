@@ -60,6 +60,8 @@ class StressAction(object):
 
         while self.max_runs is None or (shared_statistic['runs'] <
                                         self.max_runs):
+            self.logger.debug("Trigger new run (run %d)" %
+                              shared_statistic['runs'])
             try:
                 self.run()
             except Exception:

@@ -57,6 +57,27 @@ def attr(*args, **kwargs):
     return decorator
 
 
+def stresstest(*args, **kwargs):
+    """Add stress test decorator
+
+    For all functions with this decorator a attr stress will be
+    set automatically.
+
+    @param class_setup_per: allowed values are application, process, action
+           ``application``: once in the stress job lifetime
+           ``process``: once in the worker process lifetime
+           ``action``: on each action
+    """
+    def decorator(f):
+        if 'class_setup_per' in kwargs:
+            setattr(f, "st_class_setup_per", kwargs['class_setup_per'])
+        else:
+            setattr(f, "st_class_setup_per", 'process')
+        attr(type='stress')(f)
+        return f
+    return decorator
+
+
 # there is a mis-match between nose and testtools for older pythons.
 # testtools will set skipException to be either
 # unittest.case.SkipTest, unittest2.case.SkipTest or an internal skip
