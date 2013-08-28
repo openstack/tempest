@@ -46,9 +46,12 @@ class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
         out = self.keystone('catalog')
         catalog = self.parser.details_multiple(out, with_label=True)
         for svc in catalog:
-            self.assertTrue(svc['__label'].startswith('Service:'),
-                            msg=('Invalid beginning of service block: %s' %
-                                 svc['__label']))
+            if svc.get('__label'):
+                self.assertTrue(svc['__label'].startswith('Service:'),
+                                msg=('Invalid beginning of service block: '
+                                     '%s' % svc['__label']))
+            self.assertIn('id', svc.keys())
+            self.assertIn('region', svc.keys())
 
     def test_admin_endpoint_list(self):
         out = self.keystone('endpoint-list')
