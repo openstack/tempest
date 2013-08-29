@@ -50,14 +50,6 @@ class TestStampPattern(manager.OfficialClientTest):
     14. Check the existence of a file which created at 6. in volume2
     """
 
-    def _wait_for_server_status(self, server, status):
-        self.status_timeout(self.compute_client.servers,
-                            server.id,
-                            status)
-
-    def _wait_for_image_status(self, image_id, status):
-        self.status_timeout(self.image_client.images, image_id, status)
-
     def _wait_for_volume_snapshot_status(self, volume_snapshot, status):
         self.status_timeout(self.volume_client.volume_snapshots,
                             volume_snapshot.id, status)
@@ -83,17 +75,6 @@ class TestStampPattern(manager.OfficialClientTest):
     def _ssh_to_server(self, server_or_ip):
         linux_client = self.get_remote_client(server_or_ip)
         return linux_client.ssh_client
-
-    def _create_image(self, server):
-        snapshot_name = rand_name('scenario-snapshot-')
-        create_image_client = self.compute_client.servers.create_image
-        image_id = create_image_client(server, snapshot_name)
-        self.addCleanup(self.image_client.images.delete, image_id)
-        self._wait_for_server_status(server, 'ACTIVE')
-        self._wait_for_image_status(image_id, 'active')
-        snapshot_image = self.image_client.images.get(image_id)
-        self.assertEquals(snapshot_name, snapshot_image.name)
-        return image_id
 
     def _create_volume_snapshot(self, volume):
         snapshot_name = rand_name('scenario-snapshot-')
@@ -189,14 +170,14 @@ class TestStampPattern(manager.OfficialClientTest):
         volume_snapshot = self._create_volume_snapshot(volume)
 
         # snapshot the instance
-        snapshot_image_id = self._create_image(server)
+        snapshot_image = self.create_server_snapshot(server=server)
 
         # create second volume from the snapshot(volume2)
         volume_from_snapshot = self._create_volume(
             snapshot_id=volume_snapshot.id)
 
         # boot second instance from the snapshot(instance2)
-        server_from_snapshot = self._boot_image(snapshot_image_id)
+        server_from_snapshot = self._boot_image(snapshot_image.id)
 
         # create and add floating IP to server_from_snapshot
         if self.config.compute.use_floatingip_for_ssh:

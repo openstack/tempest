@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils.data_utils import rand_name
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 
@@ -33,14 +32,6 @@ class TestSnapshotPattern(manager.OfficialClientTest):
      * check the existence of the timestamp file in the second instance
 
     """
-
-    def _wait_for_server_status(self, server, status):
-        self.status_timeout(self.compute_client.servers,
-                            server.id,
-                            status)
-
-    def _wait_for_image_status(self, image_id, status):
-        self.status_timeout(self.image_client.images, image_id, status)
 
     def _boot_image(self, image_id):
         create_kwargs = {
@@ -60,17 +51,6 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         ssh_client = self._ssh_to_server(server_or_ip)
         ssh_client.exec_command('date > /tmp/timestamp; sync')
         self.timestamp = ssh_client.exec_command('cat /tmp/timestamp')
-
-    def _create_image(self, server):
-        snapshot_name = rand_name('scenario-snapshot-')
-        create_image_client = self.compute_client.servers.create_image
-        image_id = create_image_client(server, snapshot_name)
-        self.addCleanup(self.image_client.images.delete, image_id)
-        self._wait_for_server_status(server, 'ACTIVE')
-        self._wait_for_image_status(image_id, 'active')
-        snapshot_image = self.image_client.images.get(image_id)
-        self.assertEquals(snapshot_name, snapshot_image.name)
-        return image_id
 
     def _check_timestamp(self, server_or_ip):
         ssh_client = self._ssh_to_server(server_or_ip)
@@ -100,10 +80,10 @@ class TestSnapshotPattern(manager.OfficialClientTest):
             self._write_timestamp(server)
 
         # snapshot the instance
-        snapshot_image_id = self._create_image(server)
+        snapshot_image = self.create_server_snapshot(server=server)
 
         # boot a second instance from the snapshot
-        server_from_snapshot = self._boot_image(snapshot_image_id)
+        server_from_snapshot = self._boot_image(snapshot_image.id)
 
         # check the existence of the timestamp file in the second instance
         if self.config.compute.use_floatingip_for_ssh:
