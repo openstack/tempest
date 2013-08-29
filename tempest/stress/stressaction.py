@@ -33,6 +33,13 @@ class StressAction(object):
         self.tearDown()
         sys.exit(0)
 
+    @property
+    def action(self):
+        """This methods returns the action. Overload this if you
+        create a stress test wrapper.
+        """
+        return self.__class__.__name__
+
     def setUp(self, **kwargs):
         """This method is called before the run method
         to help the test initiatlize any structures.

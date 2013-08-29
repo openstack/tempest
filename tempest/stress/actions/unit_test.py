@@ -13,6 +13,7 @@
 #    under the License.
 
 from tempest.openstack.common import importutils
+from tempest.openstack.common import log as logging
 import tempest.stress.stressaction as stressaction
 
 
@@ -46,6 +47,7 @@ class UnitTest(stressaction.StressAction):
         method = kwargs['test_method'].split('.')
         self.test_method = method.pop()
         self.klass = importutils.import_class('.'.join(method))
+        self.logger = logging.getLogger('.'.join(method))
         # valid options are 'process', 'application' , 'action'
         self.class_setup_per = kwargs.get('class_setup_per',
                                           SetUpClassRunTime.process)
@@ -54,6 +56,12 @@ class UnitTest(stressaction.StressAction):
         if self.class_setup_per == SetUpClassRunTime.application:
             self.klass.setUpClass()
         self.setupclass_called = False
+
+    @property
+    def action(self):
+        if self.test_method:
+            return self.test_method
+        return super(UnitTest, self).action
 
     def run_core(self):
         res = self.klass(self.test_method).run()
