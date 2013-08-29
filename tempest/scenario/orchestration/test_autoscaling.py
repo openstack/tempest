@@ -12,14 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import call_until_true
 import time
-
-
-LOG = logging.getLogger(__name__)
 
 
 class AutoScalingTest(manager.OrchestrationScenarioTest):

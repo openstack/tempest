@@ -12,12 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.openstack.common import log as logging
-
 from tempest.common.utils.data_utils import rand_name
 from tempest.scenario import manager
-
-LOG = logging.getLogger(__name__)
 
 
 class TestVolumeSnapshotPattern(manager.OfficialClientTest):
