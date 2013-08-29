@@ -56,6 +56,10 @@ class VolumesClientXML(RestClientXML):
                 vol[tag] = xml_to_json(child)
         return vol
 
+    def get_attachment_from_volume(self, volume):
+        """Return the element 'attachment' from input volumes."""
+        return volume['attachments']['attachment']
+
     def list_volumes(self, params=None):
         """List all the volumes created."""
         url = 'volumes'
@@ -157,3 +161,33 @@ class VolumesClientXML(RestClientXML):
         except exceptions.NotFound:
             return True
         return False
+
+    def attach_volume(self, volume_id, instance_uuid, mountpoint):
+        """Attaches a volume to a given instance on a given mountpoint."""
+        post_body = Element("os-attach",
+                            instance_uuid=instance_uuid,
+                            mountpoint=mountpoint
+                            )
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def detach_volume(self, volume_id):
+        """Detaches a volume from an instance."""
+        post_body = Element("os-detach")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def upload_volume(self, volume_id, image_name):
+        """Uploads a volume in Glance."""
+        post_body = Element("os-volume_upload_image",
+                            image_name=image_name)
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        volume = xml_to_json(etree.fromstring(body))
+        return resp, volume
