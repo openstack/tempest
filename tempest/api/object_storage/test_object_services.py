@@ -16,7 +16,6 @@
 #    under the License.
 
 import hashlib
-import time
 
 from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import arbitrary_string
@@ -223,44 +222,6 @@ class ObjectTest(base.BaseObjectTest):
         actual_meta_key = 'x-object-meta-' + meta_key
         self.assertTrue(actual_meta_key in resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
-
-    @attr(type='gate')
-    def test_get_object_using_temp_url(self):
-        # access object using temporary URL within expiration time
-
-        try:
-            # update account metadata
-            # flag to check if account metadata got updated
-            flag = False
-            key = 'Meta'
-            metadata = {'Temp-URL-Key': key}
-            resp, _ = self.account_client.create_account_metadata(
-                metadata=metadata)
-            self.assertIn(int(resp['status']), HTTP_SUCCESS)
-            flag = True
-            resp, _ = self.account_client.list_account_metadata()
-            self.assertIn('x-account-meta-temp-url-key', resp)
-            self.assertEqual(resp['x-account-meta-temp-url-key'], key)
-
-            # create object
-            object_name = rand_name(name='ObjectTemp')
-            data = arbitrary_string(size=len(object_name),
-                                    base_text=object_name)
-            self.object_client.create_object(self.container_name,
-                                             object_name, data)
-            expires = int(time.time() + 10)
-
-            # trying to get object using temp url with in expiry time
-            _, body = self.object_client.get_object_using_temp_url(
-                self.container_name, object_name,
-                expires, key)
-            self.assertEqual(body, data)
-        finally:
-            if flag:
-                resp, _ = self.account_client.delete_account_metadata(
-                    metadata=metadata)
-                resp, _ = self.account_client.list_account_metadata()
-                self.assertNotIn('x-account-meta-temp-url-key', resp)
 
     @attr(type='gate')
     def test_object_upload_in_segments(self):

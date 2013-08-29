@@ -448,8 +448,8 @@ class RestClient(object):
         # NOTE(mtreinish): This is for compatibility with Glance and swift
         # APIs. These are the return content types that Glance api v1
         # (and occasionally swift) are using.
-        TXT_ENC = ['text/plain; charset=UTF-8', 'text/html; charset=UTF-8',
-                   'text/plain; charset=utf-8']
+        TXT_ENC = ['text/plain', 'text/plain; charset=UTF-8',
+                   'text/html; charset=UTF-8', 'text/plain; charset=utf-8']
         XML_ENC = ['application/xml', 'application/xml; charset=UTF-8']
 
         if ctype in JSON_ENC or ctype in XML_ENC:

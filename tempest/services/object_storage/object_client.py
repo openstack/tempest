@@ -15,10 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import hashlib
-import hmac
-import urlparse
-
 from tempest.common import http
 from tempest.common.rest_client import RestClient
 from tempest import exceptions
@@ -125,28 +121,19 @@ class ObjectClient(RestClient):
         resp, body = self.copy(url, headers=headers)
         return resp, body
 
-    def get_object_using_temp_url(self, container, object_name, expires, key):
-        """Retrieve object's data using temporary URL."""
-
-        self._set_auth()
-        method = 'GET'
-        path = "%s/%s/%s" % (urlparse.urlparse(self.base_url).path, container,
-                             object_name)
-        hmac_body = '%s\n%s\n%s' % (method, expires, path)
-        sig = hmac.new(key, hmac_body, hashlib.sha1).hexdigest()
-
-        url = "%s/%s?temp_url_sig=%s&temp_url_expires=%s" % (container,
-                                                             object_name,
-                                                             sig, expires)
-
-        resp, body = self.get(url)
-        return resp, body
-
     def create_object_segments(self, container, object_name, segment, data):
         """Creates object segments."""
         url = "{0}/{1}/{2}".format(container, object_name, segment)
         resp, body = self.put(url, data, self.headers)
         return resp, body
+
+    def get_object_using_temp_url(self, url):
+        """Retrieve object's data using temp URL."""
+        return self.get(url)
+
+    def put_object_using_temp_url(self, url, data):
+        """Put data in an object using temp URL."""
+        return self.put(url, data, None)
 
 
 class ObjectClientCustomizedHeader(RestClient):
