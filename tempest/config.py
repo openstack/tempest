@@ -353,6 +353,9 @@ VolumeGroup = [
     cfg.StrOpt('vendor_name',
                default='Open Source',
                help='Backend vendor to target when creating volume types'),
+    cfg.StrOpt('disk_format',
+               default='raw',
+               help='Disk format to use when copying a volume to image'),
 ]
 
 

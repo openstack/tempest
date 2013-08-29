@@ -246,6 +246,8 @@ public_router_id = {$PUBLIC_ROUTER_ID}
 # Unless you have a custom Keystone service catalog implementation, you
 # probably want to leave this value as "volume"
 catalog_type = volume
+# The disk format to use when copying a volume to image
+disk_format = raw
 # Number of seconds to wait while looping to check the status of a
 # volume that is being made available
 build_interval = 10

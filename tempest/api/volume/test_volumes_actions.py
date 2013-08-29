@@ -99,7 +99,9 @@ class VolumesActionsTest(BaseVolumeTest):
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance image_client and from Cinder via tearDownClass.
         image_name = rand_name('Image-')
-        resp, body = self.client.upload_volume(self.volume['id'], image_name)
+        resp, body = self.client.upload_volume(self.volume['id'],
+                                               image_name,
+                                               self.config.volume.disk_format)
         image_id = body["image_id"]
         self.addCleanup(self.image_client.delete_image, image_id)
         self.assertEqual(202, resp.status)
