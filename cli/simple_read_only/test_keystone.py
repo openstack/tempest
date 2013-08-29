@@ -45,7 +45,9 @@ class SimpleReadOnlyKeystoneClientTest(cli.ClientTestBase):
         out = self.keystone('catalog')
         catalog = self.parser.details_multiple(out, with_label=True)
         for svc in catalog:
-            self.assertTrue(svc['__label'].startswith('Service:'))
+            self.assertTrue(svc['__label'].startswith('Service:'),
+                            msg=('Invalid beginning of service block: %s' %
+                                 svc['__label']))
 
     def test_admin_endpoint_list(self):
         out = self.keystone('endpoint-list')
@@ -94,7 +96,7 @@ class SimpleReadOnlyKeystoneClientTest(cli.ClientTestBase):
     def test_admin_help(self):
         help_text = self.keystone('help')
         lines = help_text.split('\n')
-        self.assertTrue(lines[0].startswith('usage: keystone'))
+        self.assertFirstLineStartsWith(lines, 'usage: keystone')
 
         commands = []
         cmds_start = lines.index('Positional arguments:')
