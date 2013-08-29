@@ -148,7 +148,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
 
             process = {'process': p,
                        'p_number': p_number,
-                       'action': test['action'],
+                       'action': test_run.action,
                        'statistic': shared_statistic}
 
             processes.append(process)
