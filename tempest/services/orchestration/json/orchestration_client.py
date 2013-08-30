@@ -42,7 +42,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         resp, body = self.get(uri)
         body = json.loads(body)
-        return resp, body
+        return resp, body['stacks']
 
     def create_stack(self, name, disable_rollback=True, parameters={},
                      timeout_mins=60, template=None, template_url=None):
@@ -176,3 +176,64 @@ class OrchestrationClient(rest_client.RestClient):
                            (stack_name, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
             time.sleep(self.build_interval)
+
+    def show_resource_metadata(self, stack_identifier, resource_name):
+        """Returns the resource's metadata."""
+        url = ('stacks/{stack_identifier}/resources/{resource_name}'
+               '/metadata'.format(**locals()))
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def list_events(self, stack_identifier):
+        """Returns list of all events for a stack."""
+        url = 'stacks/{stack_identifier}/events'.format(**locals())
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['events']
+
+    def list_resource_events(self, stack_identifier, resource_name):
+        """Returns list of all events for a resource from stack."""
+        url = ('stacks/{stack_identifier}/resources/{resource_name}'
+               '/events'.format(**locals()))
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['events']
+
+    def show_event(self, stack_identifier, resource_name, event_id):
+        """Returns the details of a single stack's event."""
+        url = ('stacks/{stack_identifier}/resources/{resource_name}/events'
+               '/{event_id}'.format(**locals()))
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['event']
+
+    def show_template(self, stack_identifier):
+        """Returns the template for the stack."""
+        url = ('stacks/{stack_identifier}/template'.format(**locals()))
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body
+
+    def _validate_template(self, post_body):
+        """Returns the validation request result."""
+        post_body = json.dumps(post_body)
+        resp, body = self.post('validate', post_body, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def validate_template(self, template, parameters={}):
+        """Returns the validation result for a template with parameters."""
+        post_body = {
+            'template': template,
+            'parameters': parameters,
+        }
+        return self._validate_template(post_body)
+
+    def validate_template_url(self, template_url, parameters={}):
+        """Returns the validation result for a template with parameters."""
+        post_body = {
+            'template_url': template_url,
+            'parameters': parameters,
+        }
+        return self._validate_template(post_body)
