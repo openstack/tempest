@@ -84,9 +84,9 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         # Keypair should be created, Got details by name and deleted
         k_name = rand_name('keypair-')
         resp, keypair = self.client.create_keypair(k_name)
+        self.addCleanup(self.client.delete_keypair, k_name)
         resp, keypair_detail = self.client.get_keypair(k_name)
         self.assertEqual(200, resp.status)
-        self.addCleanup(self.client.delete_keypair, k_name)
         self.assertIn('name', keypair_detail)
         self.assertIn('public_key', keypair_detail)
         self.assertEqual(keypair_detail['name'], k_name,
