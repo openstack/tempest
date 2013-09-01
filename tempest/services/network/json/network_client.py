@@ -242,7 +242,7 @@ class NetworkClientJSON(RestClient):
         update_body['admin_state_up'] = kwargs.get(
             'admin_state_up', body['router']['admin_state_up'])
         # Must uncomment/modify these lines once LP question#233187 is solved
-        #update_body['external_gateway_info'] = kwargs.get(
+        # update_body['external_gateway_info'] = kwargs.get(
         # 'external_gateway_info', body['router']['external_gateway_info'])
         update_body = dict(router=update_body)
         update_body = json.dumps(update_body)
@@ -296,14 +296,51 @@ class NetworkClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
+    def list_security_groups(self):
+        uri = '%s/security-groups' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_security_group(self, secgroup_id):
+        uri = '%s/security-groups/%s' % (self.uri_prefix, secgroup_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def create_security_group(self, name, **kwargs):
+        post_body = {
+            'security_group': {
+                'name': name,
+            }
+        }
+        for key, value in kwargs.iteritems():
+            post_body['security_group'][str(key)] = value
+        body = json.dumps(post_body)
+        uri = '%s/security-groups' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
     def show_floating_ip(self, floating_ip_id):
         uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
 
+    def show_security_group(self, secgroup_id):
+        uri = '%s/security-groups/%s' % (self.uri_prefix, secgroup_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
     def list_floating_ips(self):
         uri = '%s/floatingips' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def list_security_group_rules(self):
+        uri = '%s/security-group-rules' % (self.uri_prefix)
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
@@ -319,5 +356,32 @@ class NetworkClientJSON(RestClient):
         body = json.dumps(post_body)
         uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
         resp, body = self.put(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def create_security_group_rule(self, secgroup_id,
+                                   direction='ingress', **kwargs):
+        post_body = {
+            'security_group_rule': {
+                'direction': direction,
+                'security_group_id': secgroup_id
+            }
+        }
+        for key, value in kwargs.iteritems():
+            post_body['security_group_rule'][str(key)] = value
+        body = json.dumps(post_body)
+        uri = '%s/security-group-rules' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_security_group_rule(self, rule_id):
+        uri = '%s/security-group-rules/%s' % (self.uri_prefix, rule_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def show_security_group_rule(self, rule_id):
+        uri = '%s/security-group-rules/%s' % (self.uri_prefix, rule_id)
+        resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
