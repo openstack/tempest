@@ -67,12 +67,17 @@ def stresstest(*args, **kwargs):
            ``application``: once in the stress job lifetime
            ``process``: once in the worker process lifetime
            ``action``: on each action
+    @param allow_inheritance: allows inheritance of this attribute
     """
     def decorator(f):
         if 'class_setup_per' in kwargs:
             setattr(f, "st_class_setup_per", kwargs['class_setup_per'])
         else:
             setattr(f, "st_class_setup_per", 'process')
+        if 'allow_inheritance' in kwargs:
+            setattr(f, "st_allow_inheritance", kwargs['allow_inheritance'])
+        else:
+            setattr(f, "st_allow_inheritance", False)
         attr(type='stress')(f)
         return f
     return decorator

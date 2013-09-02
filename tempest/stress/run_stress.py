@@ -17,16 +17,16 @@
 #    limitations under the License.
 
 import argparse
+import inspect
 import json
 import sys
 from testtools.testsuite import iterate_tests
 from unittest import loader
 
 
-def discover_stress_tests(path="./", filter_attr=None):
+def discover_stress_tests(path="./", filter_attr=None, call_inherited=False):
     """Discovers all tempest tests and create action out of them
     """
-
     tests = []
     testloader = loader.TestLoader()
     list = testloader.discover(path)
@@ -52,6 +52,11 @@ def discover_stress_tests(path="./", filter_attr=None):
                                  "class_setup_per": class_setup_per
                                  }
                       }
+            if (not call_inherited and
+                getattr(test_func, "st_allow_inheritance") is not True):
+                class_structure = inspect.getmro(test_func.im_class)
+                if test_func.__name__ not in class_structure[0].__dict__:
+                    continue
             tests.append(action)
     return tests
 
@@ -63,7 +68,8 @@ def main(ns):
     if not ns.all:
         tests = json.load(open(ns.tests, 'r'))
     else:
-        tests = discover_stress_tests(filter_attr=ns.type)
+        tests = discover_stress_tests(filter_attr=ns.type,
+                                      call_inherited=ns.call_inherited)
 
     if ns.serial:
         for test in tests:
@@ -79,22 +85,25 @@ def main(ns):
     return result
 
 
-parser = argparse.ArgumentParser(description='Run stress tests. ')
+parser = argparse.ArgumentParser(description='Run stress tests')
 parser.add_argument('-d', '--duration', default=300, type=int,
-                    help="Duration of test in secs.")
+                    help="Duration of test in secs")
 parser.add_argument('-s', '--serial', action='store_true',
-                    help="Trigger running tests serially.")
+                    help="Trigger running tests serially")
 parser.add_argument('-S', '--stop', action='store_true',
-                    default=False, help="Stop on first error.")
+                    default=False, help="Stop on first error")
 parser.add_argument('-n', '--number', type=int,
-                    help="How often an action is executed for each process.")
+                    help="How often an action is executed for each process")
 group = parser.add_mutually_exclusive_group(required=True)
 group.add_argument('-a', '--all', action='store_true',
                    help="Execute all stress tests")
 parser.add_argument('-T', '--type',
                     help="Filters tests of a certain type (e.g. gate)")
+parser.add_argument('-i', '--call-inherited', action='store_true',
+                    default=False,
+                    help="Call also inherited function with stress attribute")
 group.add_argument('-t', "--tests", nargs='?',
-                   help="Name of the file with test description.")
+                   help="Name of the file with test description")
 
 if __name__ == "__main__":
     sys.exit(main(parser.parse_args()))
