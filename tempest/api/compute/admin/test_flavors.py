@@ -296,6 +296,24 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         _test_string_variations(['t', 'true', 'yes', '1'],
                                 flavor_name_public)
 
+    @attr(type='gate')
+    def test_create_flavor_using_string_ram(self):
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
+        ram = " 1024 "
+        resp, flavor = self.client.create_flavor(flavor_name,
+                                                 ram, self.vcpus,
+                                                 self.disk,
+                                                 new_flavor_id)
+        self.addCleanup(self.flavor_clean_up, flavor['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(flavor['name'], flavor_name)
+        self.assertEqual(flavor['vcpus'], self.vcpus)
+        self.assertEqual(flavor['disk'], self.disk)
+        self.assertEqual(flavor['ram'], int(ram))
+        self.assertEqual(int(flavor['id']), new_flavor_id)
+
     @attr(type=['negative', 'gate'])
     def test_invalid_is_public_string(self):
         self.assertRaises(exceptions.BadRequest,
@@ -318,6 +336,26 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         self.assertRaises(exceptions.Unauthorized,
                           self.user_client.delete_flavor,
                           self.flavor_ref_alt)
+
+    @attr(type=['negative', 'gate'])
+    def test_create_flavor_using_invalid_ram(self):
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_flavor,
+                          flavor_name, -1, self.vcpus,
+                          self.disk, new_flavor_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_create_flavor_using_invalid_vcpus(self):
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.create_flavor,
+                          flavor_name, self.ram, 0,
+                          self.disk, new_flavor_id)
 
 
 class FlavorsAdminTestXML(FlavorsAdminTestJSON):
