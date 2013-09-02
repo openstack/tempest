@@ -15,7 +15,9 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.test import attr
 
 
@@ -31,6 +33,12 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
     def setUpClass(cls):
         super(ServersAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.servers_client
+        cls.flavors_client = cls.os_adm.flavors_client
+
+        cls.admin_client = cls._get_identity_admin_client()
+        tenant = cls.admin_client.get_tenant_by_name(
+            cls.client.tenant_name)
+        cls.tenant_id = tenant['id']
 
         cls.s1_name = rand_name('server')
         resp, server = cls.create_server(name=cls.s1_name,
@@ -38,6 +46,16 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
         cls.s2_name = rand_name('server')
         resp, server = cls.create_server(name=cls.s2_name,
                                          wait_until='ACTIVE')
+
+    def _get_unused_flavor_id(self):
+        flavor_id = rand_int_id(start=1000)
+        while True:
+            try:
+                resp, body = self.flavors_client.get_flavor_details(flavor_id)
+            except exceptions.NotFound:
+                break
+            flavor_id = rand_int_id(start=1000)
+        return flavor_id
 
     @attr(type='gate')
     def test_list_servers_by_admin(self):
@@ -58,6 +76,42 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
 
         self.assertIn(self.s1_name, servers_name)
         self.assertIn(self.s2_name, servers_name)
+
+    @attr(type=['negative', 'gate'])
+    def test_resize_server_using_overlimit_ram(self):
+        flavor_name = rand_name("flavor-")
+        flavor_id = self._get_unused_flavor_id()
+        resp, quota_set = self.quotas_client.get_default_quota_set(
+            self.tenant_id)
+        ram = int(quota_set['ram']) + 1
+        vcpus = 8
+        disk = 10
+        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
+                                                             ram, vcpus, disk,
+                                                             flavor_id)
+        self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
+        self.assertRaises(exceptions.OverLimit,
+                          self.client.resize,
+                          self.servers[0]['id'],
+                          flavor_ref['id'])
+
+    @attr(type=['negative', 'gate'])
+    def test_resize_server_using_overlimit_vcpus(self):
+        flavor_name = rand_name("flavor-")
+        flavor_id = self._get_unused_flavor_id()
+        ram = 512
+        resp, quota_set = self.quotas_client.get_default_quota_set(
+            self.tenant_id)
+        vcpus = int(quota_set['cores']) + 1
+        disk = 10
+        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
+                                                             ram, vcpus, disk,
+                                                             flavor_id)
+        self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
+        self.assertRaises(exceptions.OverLimit,
+                          self.client.resize,
+                          self.servers[0]['id'],
+                          flavor_ref['id'])
 
 
 class ServersAdminTestXML(ServersAdminTestJSON):
