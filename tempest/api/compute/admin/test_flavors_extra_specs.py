@@ -58,6 +58,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
     @classmethod
     def tearDownClass(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
+        cls.client.wait_for_resource_deletion(cls.flavor['id'])
         super(FlavorsExtraSpecsTestJSON, cls).tearDownClass()
 
     @attr(type='gate')
