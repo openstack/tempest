@@ -141,7 +141,7 @@ class BaseTestCase(testtools.TestCase,
 
     @classmethod
     def tearDownClass(cls):
-        at_exit_set.remove(cls)
+        at_exit_set.discard(cls)
         if hasattr(super(BaseTestCase, cls), 'tearDownClass'):
             super(BaseTestCase, cls).tearDownClass()
 
