@@ -1,0 +1,189 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+#    Licensed under the Apache License, Version 2.0 (the "License");
+#    you may not use this file except in compliance with the License.
+#    You may obtain a copy of the License at
+#
+#        http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+
+import socket
+import subprocess
+
+from tempest.common.utils.data_utils import rand_name
+import tempest.stress.stressaction as stressaction
+import tempest.test
+
+
+class FloatingStress(stressaction.StressAction):
+
+    # from the scenario manager
+    def ping_ip_address(self, ip_address):
+        cmd = ['ping', '-c1', '-w1', ip_address]
+
+        proc = subprocess.Popen(cmd,
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        proc.wait()
+        success = proc.returncode == 0
+        self.logger.info("%s(%s): %s", self.server_id, self.floating['ip'],
+                         "pong!" if success else "no pong :(")
+        return success
+
+    def tcp_connect_scan(self, addr, port):
+        # like tcp
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect((addr, port))
+        except socket.error as exc:
+            self.logger.info("%s(%s): %s", self.server_id, self.floating['ip'],
+                             str(exc))
+            return False
+        self.logger.info("%s(%s): Connected :)", self.server_id,
+                         self.floating['ip'])
+        s.close()
+        return True
+
+    def check_port_ssh(self):
+        def func():
+            return self.tcp_connect_scan(self.floating['ip'], 22)
+        if not tempest.test.call_until_true(func, self.check_timeout,
+                                            self.check_interval):
+            raise RuntimeError("Cannot connect to the ssh port.")
+
+    def check_icmp_echo(self):
+        def func():
+            return self.ping_ip_address(self.floating['ip'])
+        if not tempest.test.call_until_true(func, self.check_timeout,
+                                            self.check_interval):
+            raise RuntimeError("Cannot ping the machine.")
+
+    def _create_vm(self):
+        self.name = name = rand_name("instance")
+        servers_client = self.manager.servers_client
+        self.logger.info("creating %s" % name)
+        vm_args = self.vm_extra_args.copy()
+        vm_args['security_groups'] = [{'name': self.sec_grp}]
+        resp, server = servers_client.create_server(name, self.image,
+                                                    self.flavor,
+                                                    **vm_args)
+        self.server_id = server['id']
+        assert(resp.status == 202)
+        if self.wait_after_vm_create:
+            self.manager.servers_client.wait_for_server_status(self.server_id,
+                                                               'ACTIVE')
+
+    def _destroy_vm(self):
+        self.logger.info("deleting %s" % self.server_id)
+        resp, _ = self.manager.servers_client.delete_server(self.server_id)
+        assert(resp.status == 204)  # It cannot be 204 if I had to wait..
+        self.manager.servers_client.wait_for_server_termination(self.server_id)
+        self.logger.info("deleted %s" % self.server_id)
+
+    def _create_sec_group(self):
+        sec_grp_cli = self.manager.security_groups_client
+        s_name = rand_name('sec_grp-')
+        s_description = rand_name('desc-')
+        _, _sec_grp = sec_grp_cli.create_security_group(s_name,
+                                                        s_description)
+        self.sec_grp = _sec_grp['id']
+        create_rule = sec_grp_cli.create_security_group_rule
+        create_rule(self.sec_grp, 'tcp', 22, 22)
+        create_rule(self.sec_grp, 'icmp', -1, -1)
+
+    def _destroy_sec_grp(self):
+        sec_grp_cli = self.manager.security_groups_client
+        sec_grp_cli.delete_security_group(self.sec_grp)
+
+    def _create_floating_ip(self):
+        floating_cli = self.manager.floating_ips_client
+        _, self.floating = floating_cli.create_floating_ip(self.floating_pool)
+
+    def _destroy_floating_ip(self):
+        cli = self.manager.floating_ips_client
+        cli.delete_floating_ip(self.floating['id'])
+        cli.wait_for_resource_deletion(self.floating['id'])
+        self.logger.info("Deleted Floating IP %s", str(self.floating['ip']))
+
+    def setUp(self, **kwargs):
+        self.image = self.manager.config.compute.image_ref
+        self.flavor = self.manager.config.compute.flavor_ref
+        self.vm_extra_args = kwargs.get('vm_extra_args', {})
+        self.wait_after_vm_create = kwargs.get('wait_after_vm_create',
+                                               True)
+        self.new_vm = kwargs.get('new_vm', False)
+        self.new_sec_grp = kwargs.get('new_sec_group', False)
+        self.new_floating = kwargs.get('new_floating', False)
+        self.reboot = kwargs.get('reboot', False)
+        self.floating_pool = kwargs.get('floating_pool', None)
+        self.verify = kwargs.get('verify', ('check_port_ssh',
+                                            'check_icmp_echo'))
+        self.check_timeout = kwargs.get('check_timeout', 120)
+        self.check_interval = kwargs.get('check_interval', 1)
+        self.wait_for_disassociate = kwargs.get('wait_for_disassociate',
+                                                True)
+
+        # allocate floating
+        if not self.new_floating:
+            self._create_floating_ip()
+        # add security group
+        if not self.new_sec_grp:
+            self._create_sec_group()
+        # create vm
+        if not self.new_vm:
+            self._create_vm()
+
+    def wait_disassociate(self):
+        cli = self.manager.floating_ips_client
+
+        def func():
+            _, floating = cli.get_floating_ip_details(self.floating['id'])
+            return floating['instance_id'] is None
+
+        if not tempest.test.call_until_true(func, self.check_timeout,
+                                            self.check_interval):
+            raise RuntimeError("IP disassociate timeout!")
+
+    def run_core(self):
+        cli = self.manager.floating_ips_client
+        cli.associate_floating_ip_to_server(self.floating['ip'],
+                                            self.server_id)
+        for method in self.verify:
+            m = getattr(self, method)
+            m()
+        cli.disassociate_floating_ip_from_server(self.floating['ip'],
+                                                 self.server_id)
+        if self.wait_for_disassociate:
+            self.wait_disassociate()
+
+    def run(self):
+        if self.new_sec_grp:
+            self._create_sec_group()
+        if self.new_floating:
+            self._create_floating_ip()
+        if self.new_vm:
+            self._create_vm()
+        if self.reboot:
+            self.manager.servers_client.reboot(self.server_id, 'HARD')
+
+        self.run_core()
+
+        if self.new_vm:
+            self._destroy_vm()
+        if self.new_floating:
+            self._destroy_floating_ip()
+        if self.new_sec_grp:
+            self._destroy_sec_grp()
+
+    def tearDown(self):
+        if not self.new_vm:
+            self._destroy_vm()
+        if not self.new_floating:
+            self._destroy_floating_ip()
+        if not self.new_sec_grp:
+            self._destroy_sec_grp()
