@@ -32,6 +32,19 @@ class VolumesListTest(base.BaseVolumeTest):
 
     _interface = 'json'
 
+    def assertVolumesIn(self, fetched_list, expected_list):
+        missing_vols = [v for v in expected_list if v not in fetched_list]
+        if len(missing_vols) == 0:
+            return
+
+        def str_vol(vol):
+            return "%s:%s" % (vol['id'], vol['display_name'])
+
+        raw_msg = "Could not find volumes %s in expected list %s; fetched %s"
+        self.fail(raw_msg % ([str_vol(v) for v in missing_vols],
+                             [str_vol(v) for v in expected_list],
+                             [str_vol(v) for v in fetched_list]))
+
     @classmethod
     def setUpClass(cls):
         super(VolumesListTest, cls).setUpClass()
@@ -82,12 +95,7 @@ class VolumesListTest(base.BaseVolumeTest):
         # Fetch all volumes
         resp, fetched_list = self.client.list_volumes()
         self.assertEqual(200, resp.status)
-        # Now check if all the volumes created in setup are in fetched list
-        missing_vols = [v for v in self.volume_list if v not in fetched_list]
-        self.assertFalse(missing_vols,
-                         "Failed to find volume %s in fetched list" %
-                         ', '.join(m_vol['display_name']
-                                   for m_vol in missing_vols))
+        self.assertVolumesIn(fetched_list, self.volume_list)
 
     @attr(type='gate')
     def test_volume_list_with_details(self):
@@ -95,12 +103,7 @@ class VolumesListTest(base.BaseVolumeTest):
         # Fetch all Volumes
         resp, fetched_list = self.client.list_volumes_with_detail()
         self.assertEqual(200, resp.status)
-        # Verify that all the volumes are returned
-        missing_vols = [v for v in self.volume_list if v not in fetched_list]
-        self.assertFalse(missing_vols,
-                         "Failed to find volume %s in fetched list" %
-                         ', '.join(m_vol['display_name']
-                                   for m_vol in missing_vols))
+        self.assertVolumesIn(fetched_list, self.volume_list)
 
 
 class VolumeListTestXML(VolumesListTest):
