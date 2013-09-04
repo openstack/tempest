@@ -428,6 +428,19 @@ class NetworkClientXML(RestClientXML):
                                                      health_monitor_id)
         return self.delete(uri, self.headers)
 
+    def list_extensions(self):
+        url = '%s/extensions' % (self.uri_prefix)
+        resp, body = self.get(url, self.headers)
+        extensions = self._parse_array(etree.fromstring(body))
+        extensions = {"extensions": extensions}
+        return resp, extensions
+
+    def show_extension_details(self, ext_alias):
+        uri = '%s/extensions/%s' % (self.uri_prefix, str(ext_alias))
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
