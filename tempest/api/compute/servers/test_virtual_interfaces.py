@@ -37,8 +37,8 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
         resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @testtools.skipIf(CONF.service_available.neutron, "This feature is not " +
-                      "implemented by Neutron. See bug: #1183436")
+    @testtools.skipIf(CONF.service_available.neutron, "Not implemented by " +
+                      "Neutron. Skipped until the Bug #1183436 is resolved.")
     @attr(type='gate')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list

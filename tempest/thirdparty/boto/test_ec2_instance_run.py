@@ -233,7 +233,7 @@ class InstanceRunTest(BotoTestCase):
 
     # NOTE(afazekas): doctored test case,
     # with normal validation it would fail
-    @testtools.skip("Until Bug #1182679 is fixed")
+    @testtools.skip("Skipped until the Bug #1182679 is resolved.")
     @attr(type='smoke')
     def test_integration_1(self):
         # EC2 1. integration test (not strict)

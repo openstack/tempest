@@ -64,7 +64,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                 cls.alt_manager = clients.AltManager()
             cls.alt_client = cls.alt_manager.images_client
 
-    @testtools.skip("Until Bug #1006725 is fixed")
+    @testtools.skip("Skipped until the Bug #1006725 is resolved.")
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         # Return an error if the image name has multi-byte characters
