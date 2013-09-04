@@ -26,7 +26,7 @@ from tempest.test import attr
 LOG = logging.getLogger(__name__)
 
 
-class InstanceCfnInitTestJSON(base.BaseOrchestrationTest):
+class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
     _interface = 'json'
     existing_keypair = (tempest.config.TempestConfig().
                         orchestration.keypair_name is not None)
@@ -37,11 +37,11 @@ Description: |
   Template which uses a wait condition to confirm that a minimal
   cfn-init and cfn-signal has worked
 Parameters:
-  KeyName:
+  key_name:
     Type: String
-  InstanceType:
+  flavor:
     Type: String
-  ImageId:
+  image:
     Type: String
 Resources:
   CfnUser:
@@ -58,7 +58,7 @@ Resources:
     Properties:
       UserName: {Ref: CfnUser}
   SmokeServer:
-    Type: AWS::EC2::Instance
+    Type: OS::Nova::Server
     Metadata:
       AWS::CloudFormation::Init:
         config:
@@ -83,12 +83,12 @@ Resources:
               owner: root
               group: root
     Properties:
-      ImageId: {Ref: ImageId}
-      InstanceType: {Ref: InstanceType}
-      KeyName: {Ref: KeyName}
-      SecurityGroups:
+      image: {Ref: image}
+      flavor: {Ref: flavor}
+      key_name: {Ref: key_name}
+      security_groups:
       - {Ref: SmokeSecurityGroup}
-      UserData:
+      user_data:
         Fn::Base64:
           Fn::Join:
           - ''
@@ -118,12 +118,12 @@ Outputs:
   SmokeServerIp:
     Description: IP address of server
     Value:
-      Fn::GetAtt: [SmokeServer, PublicIp]
+      Fn::GetAtt: [SmokeServer, first_private_address]
 """
 
     @classmethod
     def setUpClass(cls):
-        super(InstanceCfnInitTestJSON, cls).setUpClass()
+        super(ServerCfnInitTestJSON, cls).setUpClass()
         if not cls.orchestration_cfg.image_ref:
             raise cls.skipException("No image available to test")
         cls.client = cls.orchestration_client
@@ -140,9 +140,9 @@ Outputs:
             stack_name,
             cls.template,
             parameters={
-                'KeyName': keypair_name,
-                'InstanceType': cls.orchestration_cfg.instance_type,
-                'ImageId': cls.orchestration_cfg.image_ref
+                'key_name': keypair_name,
+                'flavor': cls.orchestration_cfg.instance_type,
+                'image': cls.orchestration_cfg.image_ref
             })
 
     @attr(type='slow')
@@ -187,7 +187,7 @@ Outputs:
         # This is an assert of great significance, as it means the following
         # has happened:
         # - cfn-init read the provided metadata and wrote out a file
-        # - a user was created and credentials written to the instance
+        # - a user was created and credentials written to the server
         # - a cfn-signal was built which was signed with provided credentials
         # - the wait condition was fulfilled and the stack has changed state
         wait_status = json.loads(
