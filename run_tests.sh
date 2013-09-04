@@ -124,7 +124,11 @@ function run_tests_nose {
 }
 
 function run_pep8 {
-  echo "Running pep8 ..."
+  echo "Running flake8 ..."
+  if [ $never_venv -eq 1 ]; then
+      echo "**WARNING**:" >&2
+      echo "Running flake8 without virtual env may miss OpenStack HACKING detection" >&2
+  fi
   ${wrapper} flake8
 }
 
