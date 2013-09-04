@@ -76,9 +76,17 @@ image_ref_alt = {$IMAGE_ID_ALT}
 flavor_ref = 1
 flavor_ref_alt = 2
 
-# User names used to authenticate to an instance for a given image.
+# User name used to authenticate to an instance
 image_ssh_user = root
+
+# Password used to authenticate to an instance
+image_ssh_password = password
+
+# User name used to authenticate to an instance using the alternate image
 image_alt_ssh_user = root
+
+# Password used to authenticate to an instance using the alternate image
+image_alt_ssh_password = password
 
 # Number of seconds to wait while looping to check the status of an
 # instance that is building.
@@ -93,7 +101,7 @@ build_timeout = 600
 #  executing the tests
 run_ssh = false
 
-# Name of a user used to authenticated to an instance
+# Name of a user used to authenticate to an instance.
 ssh_user = cirros
 
 # Visible fixed network name
@@ -149,6 +157,9 @@ disk_config_enabled = true
 
 # When set to false, flavor extra data tests are forced to skip
 flavor_extra_enabled = true
+
+# Expected first device name when a volume is attached to an instance
+volume_device_name = vdb
 
 [whitebox]
 # Whitebox options for compute. Whitebox options enable the

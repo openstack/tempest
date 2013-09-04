@@ -26,6 +26,7 @@ from tempest.test import attr
 class AttachVolumeTestJSON(base.BaseComputeTest):
     _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
+    device = tempest.config.TempestConfig().compute.volume_device_name
 
     def __init__(self, *args, **kwargs):
         super(AttachVolumeTestJSON, self).__init__(*args, **kwargs)
@@ -36,7 +37,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         super(AttachVolumeTestJSON, cls).setUpClass()
-        cls.device = 'vdb'
+
         if not cls.config.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -54,7 +55,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
     def _create_and_attach(self):
         # Start a server and wait for it to become ready
         resp, server = self.create_server(wait_until='ACTIVE',
-                                          adminPass='password')
+                                          adminPass=self.image_ssh_password)
         self.server = server
 
         # Record addresses so that we can ssh later
@@ -92,7 +93,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
         linux_client = RemoteClient(server,
-                                    self.ssh_user, server['adminPass'])
+                                    self.image_ssh_user, server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertIn(self.device, partitions)
 
@@ -106,7 +107,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
         linux_client = RemoteClient(server,
-                                    self.ssh_user, server['adminPass'])
+                                    self.image_ssh_user, server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 
