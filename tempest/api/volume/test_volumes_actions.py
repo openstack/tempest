@@ -86,7 +86,7 @@ class VolumesActionsTest(BaseVolumeTest):
         resp, volume = self.client.get_volume(self.volume['id'])
         self.assertEqual(200, resp.status)
         self.assertIn('attachments', volume)
-        attachment = volume['attachments'][0]
+        attachment = self.client.get_attachment_from_volume(volume)
         self.assertEqual(mountpoint, attachment['device'])
         self.assertEqual(self.server['id'], attachment['server_id'])
         self.assertEqual(self.volume['id'], attachment['id'])
@@ -105,3 +105,7 @@ class VolumesActionsTest(BaseVolumeTest):
         self.assertEqual(202, resp.status)
         self.image_client.wait_for_image_status(image_id, 'active')
         self.client.wait_for_volume_status(self.volume['id'], 'available')
+
+
+class VolumesActionsTestXML(VolumesActionsTest):
+    _interface = "xml"

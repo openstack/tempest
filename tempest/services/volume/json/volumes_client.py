@@ -36,6 +36,10 @@ class VolumesClientJSON(RestClient):
         self.build_interval = self.config.volume.build_interval
         self.build_timeout = self.config.volume.build_timeout
 
+    def get_attachment_from_volume(self, volume):
+        """Return the element 'attachment' from input volumes."""
+        return volume['attachments'][0]
+
     def list_volumes(self, params=None):
         """List all the volumes created."""
         url = 'volumes'
