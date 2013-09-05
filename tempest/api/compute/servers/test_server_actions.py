@@ -225,7 +225,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             resp, output = self.servers_client.get_console_output(
                 self.server_id, 10)
             self.assertEqual(200, resp.status)
-            self.assertIsNotNone(output)
+            self.assertTrue(output, "Console output was empty.")
             lines = len(output.split('\n'))
             self.assertEqual(lines, 10)
         self.wait_for(get_output)
