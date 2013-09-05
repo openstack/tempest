@@ -361,7 +361,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             client = self.volume_client
         if name is None:
             name = rand_name('scenario-volume-')
-        LOG.debug("Creating a volume (size :%s, name: %s)", size, name)
+        LOG.debug("Creating a volume (size: %s, name: %s)", size, name)
         volume = client.volumes.create(size=size, display_name=name,
                                        snapshot_id=snapshot_id,
                                        imageRef=imageRef)
