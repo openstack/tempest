@@ -56,7 +56,7 @@ class Client(object):
             paramiko.AutoAddPolicy())
         _start_time = time.time()
 
-        while not self._is_timed_out(self.timeout, _start_time):
+        while not self._is_timed_out(_start_time):
             try:
                 ssh.connect(self.host, username=self.username,
                             password=self.password,
@@ -76,8 +76,8 @@ class Client(object):
                                         password=self.password)
         return ssh
 
-    def _is_timed_out(self, timeout, start_time):
-        return (time.time() - timeout) > start_time
+    def _is_timed_out(self, start_time):
+        return (time.time() - self.timeout) > start_time
 
     def connect_until_closed(self):
         """Connect to the server and wait until connection is lost."""
@@ -85,10 +85,10 @@ class Client(object):
             ssh = self._get_ssh_connection()
             _transport = ssh.get_transport()
             _start_time = time.time()
-            _timed_out = self._is_timed_out(self.timeout, _start_time)
+            _timed_out = self._is_timed_out(_start_time)
             while _transport.is_active() and not _timed_out:
                 time.sleep(5)
-                _timed_out = self._is_timed_out(self.timeout, _start_time)
+                _timed_out = self._is_timed_out(_start_time)
             ssh.close()
         except (EOFError, paramiko.AuthenticationException, socket.error):
             return
@@ -119,7 +119,7 @@ class Client(object):
         while True:
             ready = poll.poll(self.channel_timeout)
             if not any(ready):
-                if not self._is_timed_out(self.timeout, start_time):
+                if not self._is_timed_out(start_time):
                     continue
                 raise exceptions.TimeoutException(
                     "Command: '{0}' executed on host '{1}'.".format(
