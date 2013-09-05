@@ -41,6 +41,7 @@ class VolumeTypesTest(BaseVolumeTest):
     def _delete_volume(self, volume_id):
         resp, _ = self.volumes_client.delete_volume(volume_id)
         self.assertEqual(202, resp.status)
+        self.volumes_client.wait_for_resource_deletion(volume_id)
 
     def _delete_volume_type(self, volume_type_id):
         resp, _ = self.client.delete_volume_type(volume_type_id)
