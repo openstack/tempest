@@ -73,6 +73,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.build_interval = cls.config.compute.build_interval
         cls.build_timeout = cls.config.compute.build_timeout
         cls.ssh_user = cls.config.compute.ssh_user
+        cls.image_ssh_user = cls.config.compute.image_ssh_user
+        cls.image_ssh_password = cls.config.compute.image_ssh_password
         cls.image_ref = cls.config.compute.image_ref
         cls.image_ref_alt = cls.config.compute.image_ref_alt
         cls.flavor_ref = cls.config.compute.flavor_ref

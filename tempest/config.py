@@ -121,9 +121,16 @@ ComputeGroup = [
     cfg.StrOpt('image_ssh_user',
                default="root",
                help="User name used to authenticate to an instance."),
+    cfg.StrOpt('image_ssh_password',
+               default="password",
+               help="Password used to authenticate to an instance."),
     cfg.StrOpt('image_alt_ssh_user',
                default="root",
                help="User name used to authenticate to an instance using "
+                    "the alternate image."),
+    cfg.StrOpt('image_alt_ssh_password',
+               default="password",
+               help="Password used to authenticate to an instance using "
                     "the alternate image."),
     cfg.BoolOpt('resize_available',
                 default=False,
@@ -196,6 +203,10 @@ ComputeGroup = [
     cfg.BoolOpt('flavor_extra_enabled',
                 default=True,
                 help="If false, skip flavor extra data test"),
+    cfg.StrOpt('volume_device_name',
+               default='vdb',
+               help="Expected device name when a volume is attached to "
+                    "an instance")
 ]
 
 
