@@ -375,6 +375,14 @@ class NetworkClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
+    def create_bulk_subnet(self, subnet_list):
+        post_body = {'subnets': subnet_list}
+        body = json.dumps(post_body)
+        uri = '%s/subnets' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
     def delete_security_group_rule(self, rule_id):
         uri = '%s/security-group-rules/%s' % (self.uri_prefix, rule_id)
         resp, body = self.delete(uri, self.headers)
@@ -383,5 +391,13 @@ class NetworkClientJSON(RestClient):
     def show_security_group_rule(self, rule_id):
         uri = '%s/security-group-rules/%s' % (self.uri_prefix, rule_id)
         resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_bulk_port(self, port_list):
+        post_body = {'ports': port_list}
+        body = json.dumps(post_body)
+        uri = '%s/ports' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
         body = json.loads(body)
         return resp, body

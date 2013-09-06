@@ -58,6 +58,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def setUpClass(cls):
         super(NetworksTestJSON, cls).setUpClass()
         cls.network = cls.create_network()
+        cls.network1 = cls.create_network()
+        cls.network2 = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)
         cls.cidr = cls.subnet['cidr']
@@ -74,6 +76,30 @@ class NetworksTestJSON(base.BaseNetworkTest):
             networks_list.append(network['id'])
         for n in created_networks:
             self.assertNotIn(n['id'], networks_list)
+
+    def _delete_subnets(self, created_subnets):
+        for n in created_subnets:
+            resp, body = self.client.delete_subnet(n['id'])
+            self.assertEqual(204, resp.status)
+        # Asserting that the subnets are not found in the list after deletion
+        resp, body = self.client.list_subnets()
+        subnets_list = list()
+        for subnet in body['subnets']:
+            subnets_list.append(subnet['id'])
+        for n in created_subnets:
+            self.assertNotIn(n['id'], subnets_list)
+
+    def _delete_ports(self, created_ports):
+        for n in created_ports:
+            resp, body = self.client.delete_port(n['id'])
+            self.assertEqual(204, resp.status)
+        # Asserting that the ports are not found in the list after deletion
+        resp, body = self.client.list_ports()
+        ports_list = list()
+        for port in body['ports']:
+            ports_list.append(port['id'])
+        for n in created_ports:
+            self.assertNotIn(n['id'], ports_list)
 
     @attr(type='smoke')
     def test_create_update_delete_network_subnet(self):
@@ -224,6 +250,74 @@ class NetworksTestJSON(base.BaseNetworkTest):
         for n in created_networks:
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], networks_list)
+
+    @attr(type='smoke')
+    def test_bulk_create_delete_subnet(self):
+        # Creates 2 subnets in one request
+        cidr = netaddr.IPNetwork(self.network_cfg.tenant_network_cidr)
+        mask_bits = self.network_cfg.tenant_network_mask_bits
+        cidrs = []
+        for subnet_cidr in cidr.subnet(mask_bits):
+            cidrs.append(subnet_cidr)
+        names = []
+        networks = [self.network1['id'], self.network2['id']]
+        for i in range(len(networks)):
+            names.append(rand_name('subnet-'))
+        subnet_list = []
+        # TODO(raies): "for IPv6, version list [4, 6] will be used.
+        # and cidr for IPv6 will be of IPv6"
+        ip_version = [4, 4]
+        for i in range(len(names)):
+            p1 = {
+                'network_id': networks[i],
+                'cidr': str(cidrs[(i)]),
+                'name': names[i],
+                'ip_version': ip_version[i]
+            }
+            subnet_list.append(p1)
+        del subnet_list[1]['name']
+        resp, body = self.client.create_bulk_subnet(subnet_list)
+        created_subnets = body['subnets']
+        self.addCleanup(self._delete_subnets, created_subnets)
+        self.assertEqual('201', resp['status'])
+        # Asserting that the subnets are found in the list after creation
+        resp, body = self.client.list_subnets()
+        subnets_list = list()
+        for subnet in body['subnets']:
+            subnets_list.append(subnet['id'])
+        for n in created_subnets:
+            self.assertIsNotNone(n['id'])
+            self.assertIn(n['id'], subnets_list)
+
+    @attr(type='smoke')
+    def test_bulk_create_delete_port(self):
+        # Creates 2 ports in one request
+        names = []
+        networks = [self.network1['id'], self.network2['id']]
+        for i in range(len(networks)):
+            names.append(rand_name('port-'))
+        port_list = []
+        state = [True, False]
+        for i in range(len(names)):
+            p1 = {
+                'network_id': networks[i],
+                'name': names[i],
+                'admin_state_up': state[i],
+            }
+            port_list.append(p1)
+        del port_list[1]['name']
+        resp, body = self.client.create_bulk_port(port_list)
+        created_ports = body['ports']
+        self.addCleanup(self._delete_ports, created_ports)
+        self.assertEqual('201', resp['status'])
+        # Asserting that the ports are found in the list after creation
+        resp, body = self.client.list_ports()
+        ports_list = list()
+        for port in body['ports']:
+            ports_list.append(port['id'])
+        for n in created_ports:
+            self.assertIsNotNone(n['id'])
+            self.assertIn(n['id'], ports_list)
 
 
 class NetworksTestXML(NetworksTestJSON):

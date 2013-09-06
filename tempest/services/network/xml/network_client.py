@@ -219,6 +219,36 @@ class NetworkClientXML(RestClientXML):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def create_bulk_subnet(self, subnet_list):
+        uri = '%s/subnets' % (self.uri_prefix)
+        post_body = Element("subnets")
+        for i in range(len(subnet_list)):
+            v = subnet_list[i]
+            p1 = Element("subnet")
+            for k, kv in v.iteritems():
+                p2 = Element(k, kv)
+                p1.append(p2)
+            post_body.append(p1)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        subnets = self._parse_array(etree.fromstring(body))
+        subnets = {"subnets": subnets}
+        return resp, subnets
+
+    def create_bulk_port(self, port_list):
+        uri = '%s/ports' % (self.uri_prefix)
+        post_body = Element("ports")
+        for i in range(len(port_list)):
+            v = port_list[i]
+            p1 = Element("port")
+            for k, kv in v.iteritems():
+                p2 = Element(k, kv)
+                p1.append(p2)
+            post_body.append(p1)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        ports = self._parse_array(etree.fromstring(body))
+        ports = {"ports": ports}
+        return resp, ports
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
