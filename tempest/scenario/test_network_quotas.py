@@ -16,6 +16,7 @@
 #    under the License.
 
 from neutronclient.common import exceptions as exc
+
 from tempest.scenario.manager import NetworkScenarioTest
 
 MAX_REASONABLE_ITERATIONS = 51  # more than enough. Default for port is 50.
