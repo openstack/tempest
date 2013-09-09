@@ -446,6 +446,9 @@ OrchestrationGroup = [
     cfg.StrOpt('keypair_name',
                default=None,
                help="Name of existing keypair to launch servers with."),
+    cfg.IntOpt('max_template_size',
+               default=10240,
+               help="Value must match heat configuration of the same name."),
 ]
 
 
