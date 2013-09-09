@@ -18,6 +18,7 @@
 from tempest.api.volume import base
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
+from tempest.test import services
 
 
 class VolumesGetTest(base.BaseVolumeTest):
@@ -93,6 +94,7 @@ class VolumesGetTest(base.BaseVolumeTest):
         self._volume_create_get_delete()
 
     @attr(type='smoke')
+    @services('image')
     def test_volume_create_get_delete_from_image(self):
         self._volume_create_get_delete(imageRef=self.config.compute.image_ref)
 
