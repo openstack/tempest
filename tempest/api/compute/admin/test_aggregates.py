@@ -15,11 +15,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fixtures
+
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.openstack.common import lockutils
 from tempest.test import attr
+
+
+class LockFixture(fixtures.Fixture):
+    def __init__(self, name):
+        self.mgr = lockutils.lock(name, 'tempest-', True)
+
+    def setUp(self):
+        super(LockFixture, self).setUp()
+        self.addCleanup(self.mgr.__exit__, None, None, None)
+        self.mgr.__enter__()
 
 
 class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
@@ -146,9 +158,9 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                           self.client.get_aggregate, -1)
 
     @attr(type='gate')
-    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_remove_host(self):
         # Add an host to the given aggregate and remove.
+        self.useFixture(LockFixture('availability_zone'))
         aggregate_name = rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
@@ -168,9 +180,9 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertNotIn(self.host, body['hosts'])
 
     @attr(type='gate')
-    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_host_list(self):
         # Add an host to the given aggregate and list.
+        self.useFixture(LockFixture('availability_zone'))
         aggregate_name = rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
@@ -186,9 +198,9 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertIn(self.host, agg['hosts'])
 
     @attr(type='gate')
-    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_host_get_details(self):
         # Add an host to the given aggregate and get details.
+        self.useFixture(LockFixture('availability_zone'))
         aggregate_name = rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
@@ -201,9 +213,9 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertIn(self.host, body['hosts'])
 
     @attr(type='gate')
-    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_add_host_create_server_with_az(self):
         # Add an host to the given aggregate and create a server.
+        self.useFixture(LockFixture('availability_zone'))
         aggregate_name = rand_name(self.aggregate_name_prefix)
         az_name = rand_name(self.az_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
@@ -248,9 +260,9 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
                           aggregate['id'], self.host)
 
     @attr(type=['negative', 'gate'])
-    @lockutils.synchronized('availability_zone', 'tempest-', True)
     def test_aggregate_remove_host_as_user(self):
         # Regular user is not allowed to remove a host from an aggregate.
+        self.useFixture(LockFixture('availability_zone'))
         aggregate_name = rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
