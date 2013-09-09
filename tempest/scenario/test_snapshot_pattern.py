@@ -16,6 +16,7 @@
 #    under the License.
 
 from tempest.scenario import manager
+from tempest.test import services
 
 
 class TestSnapshotPattern(manager.OfficialClientTest):
@@ -61,6 +62,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
     def _set_floating_ip_to_server(self, server, floating_ip):
         server.add_floating_ip(floating_ip)
 
+    @services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting a instance
         self._add_keypair()

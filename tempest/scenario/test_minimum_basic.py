@@ -18,6 +18,7 @@
 from tempest.common.utils.data_utils import rand_name
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+from tempest.test import services
 
 
 LOG = logging.getLogger(__name__)
@@ -145,6 +146,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         volume = self.volume_client.volumes.get(self.volume.id)
         self.assertEqual('available', volume.status)
 
+    @services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         self.glance_image_create()
         self.nova_keypair_add()

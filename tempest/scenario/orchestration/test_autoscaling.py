@@ -17,6 +17,7 @@ import time
 from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import call_until_true
+from tempest.test import services
 
 
 class AutoScalingTest(manager.OrchestrationScenarioTest):
@@ -59,6 +60,7 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
             self.set_resource('stack', self.stack)
 
     @attr(type='slow')
+    @services('orchestration', 'compute')
     def test_scale_up_then_down(self):
 
         self.assign_keypair()

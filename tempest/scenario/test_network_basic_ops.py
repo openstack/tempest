@@ -22,6 +22,7 @@ from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import attr
+from tempest.test import services
 
 LOG = logging.getLogger(__name__)
 
@@ -251,6 +252,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 self._check_vm_connectivity(ip_address, ssh_login, private_key)
 
     @attr(type='smoke')
+    @services('compute', 'network')
     def test_network_basic_ops(self):
         self._create_keypairs()
         self._create_security_groups()

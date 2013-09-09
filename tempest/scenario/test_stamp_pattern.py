@@ -144,6 +144,7 @@ class TestStampPattern(manager.OfficialClientTest):
         self.assertEqual(self.timestamp, got_timestamp)
 
     @testtools.skip("Skipped until the Bug #1205344 is resolved.")
+    @tempest.test.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
         # prepare for booting a instance
         self._add_keypair()

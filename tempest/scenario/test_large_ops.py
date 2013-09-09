@@ -18,6 +18,7 @@
 from tempest.common.utils.data_utils import rand_name
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+from tempest.test import services
 
 
 LOG = logging.getLogger(__name__)
@@ -96,6 +97,7 @@ class TestLargeOpsScenario(manager.OfficialClientTest):
         self.addCleanup(delete, self.servers)
         self._wait_for_server_status('ACTIVE')
 
+    @services('compute', 'image')
     def test_large_ops_scenario(self):
         if self.config.scenario.large_ops_number < 1:
             return

@@ -14,6 +14,7 @@
 
 from tempest.common.utils.data_utils import rand_name
 from tempest.scenario import manager
+from tempest.test import services
 
 
 class TestVolumeBootPattern(manager.OfficialClientTest):
@@ -117,6 +118,7 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
         actual = self._get_content(ssh_client)
         self.assertEqual(expected, actual)
 
+    @services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
         self.create_loginable_secgroup_rule()

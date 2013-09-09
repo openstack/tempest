@@ -18,6 +18,7 @@
 from neutronclient.common import exceptions as exc
 
 from tempest.scenario.manager import NetworkScenarioTest
+from tempest.test import services
 
 MAX_REASONABLE_ITERATIONS = 51  # more than enough. Default for port is 50.
 
@@ -42,6 +43,7 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
         cls.subnets = []
         cls.ports = []
 
+    @services('network')
     def test_create_network_until_quota_hit(self):
         hit_limit = False
         for n in xrange(MAX_REASONABLE_ITERATIONS):
@@ -56,6 +58,7 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                 break
         self.assertTrue(hit_limit, "Failed: Did not hit quota limit !")
 
+    @services('network')
     def test_create_subnet_until_quota_hit(self):
         if not self.networks:
             self.networks.append(
@@ -74,6 +77,7 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                 break
         self.assertTrue(hit_limit, "Failed: Did not hit quota limit !")
 
+    @services('network')
     def test_create_ports_until_quota_hit(self):
         if not self.networks:
             self.networks.append(

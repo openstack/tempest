@@ -18,6 +18,7 @@
 from tempest.common.utils.data_utils import rand_name
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+from tempest.test import services
 
 LOG = logging.getLogger(__name__)
 
@@ -100,6 +101,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
         instance.delete()
         self.remove_resource('instance')
 
+    @services('compute', 'network')
     def test_server_basicops(self):
         self.add_keypair()
         self.create_security_group()

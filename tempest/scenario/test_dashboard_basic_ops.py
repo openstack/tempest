@@ -20,6 +20,7 @@ import urllib2
 from lxml import html
 
 from tempest.scenario import manager
+from tempest.test import services
 
 
 class TestDashboardBasicOps(manager.OfficialClientTest):
@@ -66,6 +67,7 @@ class TestDashboardBasicOps(manager.OfficialClientTest):
         response = self.opener.open(self.config.dashboard.dashboard_url)
         self.assertIn('Overview', response.read())
 
+    @services('dashboard')
     def test_basic_scenario(self):
         self.check_login_page()
         self.user_login()
