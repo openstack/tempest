@@ -19,8 +19,11 @@
 from tempest.api.network import common as net_common
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
+from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import attr
+
+LOG = logging.getLogger(__name__)
 
 
 class TestNetworkBasicOps(manager.NetworkScenarioTest):
@@ -158,18 +161,15 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.set_resource(name, router)
         return router
 
-    @attr(type='smoke')
-    def test_001_create_keypairs(self):
+    def _create_keypairs(self):
         self.keypairs[self.tenant_id] = self.create_keypair(
             name=rand_name('keypair-smoke-'))
 
-    @attr(type='smoke')
-    def test_002_create_security_groups(self):
+    def _create_security_groups(self):
         self.security_groups[self.tenant_id] = self._create_security_group(
             self.compute_client)
 
-    @attr(type='smoke')
-    def test_003_create_networks(self):
+    def _create_networks(self):
         network = self._create_network(self.tenant_id)
         router = self._get_router(self.tenant_id)
         subnet = self._create_subnet(network)
@@ -178,8 +178,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.subnets.append(subnet)
         self.routers.append(router)
 
-    @attr(type='smoke')
-    def test_004_check_networks(self):
+    def _check_networks(self):
         # Checks that we see the newly created network/subnet/router via
         # checking the result of list_[networks,routers,subnets]
         seen_nets = self._list_networks()
@@ -202,10 +201,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.assertIn(myrouter.name, seen_router_names)
             self.assertIn(myrouter.id, seen_router_ids)
 
-    @attr(type='smoke')
-    def test_005_create_servers(self):
-        if not (self.keypairs or self.security_groups or self.networks):
-            raise self.skipTest('Necessary resources have not been defined')
+    def _create_servers(self):
         for i, network in enumerate(self.networks):
             tenant_id = network.tenant_id
             name = rand_name('server-smoke-%d-' % i)
@@ -222,13 +218,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                         create_kwargs=create_kwargs)
             self.servers.append(server)
 
-    @attr(type='smoke')
-    def test_006_check_tenant_network_connectivity(self):
+    def _check_tenant_network_connectivity(self):
         if not self.config.network.tenant_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
-            raise self.skipTest(msg)
-        if not self.servers:
-            raise self.skipTest("No VM's have been created")
+            LOG.info(msg)
+            return
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         ssh_login = self.config.compute.image_ssh_user
@@ -239,22 +233,14 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                     self._check_vm_connectivity(ip_address, ssh_login,
                                                 private_key)
 
-    @attr(type='smoke')
-    def test_007_assign_floating_ips(self):
+    def _assign_floating_ips(self):
         public_network_id = self.config.network.public_network_id
-        if not public_network_id:
-            raise self.skipTest('Public network not configured')
-        if not self.servers:
-            raise self.skipTest("No VM's have been created")
         for server in self.servers:
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips.setdefault(server, [])
             self.floating_ips[server].append(floating_ip)
 
-    @attr(type='smoke')
-    def test_008_check_public_network_connectivity(self):
-        if not self.floating_ips:
-            raise self.skipTest('No floating ips have been allocated.')
+    def _check_public_network_connectivity(self):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         ssh_login = self.config.compute.image_ssh_user
@@ -263,3 +249,14 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             for floating_ip in floating_ips:
                 ip_address = floating_ip.floating_ip_address
                 self._check_vm_connectivity(ip_address, ssh_login, private_key)
+
+    @attr(type='smoke')
+    def test_network_basic_ops(self):
+        self._create_keypairs()
+        self._create_security_groups()
+        self._create_networks()
+        self._check_networks()
+        self._create_servers()
+        self._check_tenant_network_connectivity()
+        self._assign_floating_ips()
+        self._check_public_network_connectivity()
