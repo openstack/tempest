@@ -26,7 +26,6 @@ from tempest.test import attr
 class AttachVolumeTestJSON(base.BaseComputeTest):
     _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
-    device = tempest.config.TempestConfig().compute.volume_device_name
 
     def __init__(self, *args, **kwargs):
         super(AttachVolumeTestJSON, self).__init__(*args, **kwargs)
@@ -37,7 +36,7 @@ class AttachVolumeTestJSON(base.BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         super(AttachVolumeTestJSON, cls).setUpClass()
-
+        cls.device = cls.config.compute.volume_device_name
         if not cls.config.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
