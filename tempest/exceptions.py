@@ -65,6 +65,10 @@ class Unauthorized(RestClientException):
     message = 'Unauthorized'
 
 
+class InvalidServiceTag(RestClientException):
+    message = "Invalid service tag"
+
+
 class TimeoutException(TempestException):
     message = "Request timed out"
 

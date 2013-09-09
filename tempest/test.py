@@ -26,6 +26,7 @@ import testtools
 
 from tempest import clients
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -54,6 +55,25 @@ def attr(*args, **kwargs):
                     f = testtools.testcase.attr('gate')(f)
         return nose.plugins.attrib.attr(*args, **kwargs)(f)
 
+    return decorator
+
+
+def services(*args, **kwargs):
+    """A decorator used to set an attr for each service used in a test case
+
+    This decorator applies a testtools attr for each service that gets
+    exercised by a test case.
+    """
+    valid_service_list = ['compute', 'image', 'volume', 'orchestration',
+                          'network', 'identity', 'object', 'dashboard']
+
+    def decorator(f):
+        for service in args:
+            if service not in valid_service_list:
+                raise exceptions.InvalidServiceTag('%s is not a valid service'
+                                                   % service)
+        attr(type=list(args))(f)
+        return f
     return decorator
 
 
