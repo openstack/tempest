@@ -12,10 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
 from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import call_until_true
-import time
 
 
 class AutoScalingTest(manager.OrchestrationScenarioTest):
