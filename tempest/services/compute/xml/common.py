@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
+
 XMLNS_11 = "http://docs.openstack.org/compute/api/v1.1"
 
 
@@ -110,3 +112,19 @@ def xml_to_json(node):
             ns, tag = tag.split("}", 1)
         json[tag] = xml_to_json(child)
     return json
+
+
+def deep_dict_to_xml(dest, source):
+    """Populates the ``dest`` xml element with the ``source`` ``Mapping``
+       elements, if the source Mapping's value is also a ``Mapping``
+       they will be recursively added as a child elements.
+       :param source: A python ``Mapping`` (dict)
+       :param dest: XML child element will be added to the ``dest``
+    """
+    for element, content in source.iteritems():
+        if isinstance(content, collections.Mapping):
+            xml_element = Element(element)
+            deep_dict_to_xml(xml_element, content)
+            dest.append(xml_element)
+        else:
+            dest.append(Element(element, content))

@@ -16,6 +16,7 @@ from lxml import etree
 import xml.etree.ElementTree as ET
 
 from tempest.common.rest_client import RestClientXML
+from tempest.services.compute.xml.common import deep_dict_to_xml
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
@@ -441,6 +442,111 @@ class NetworkClientXML(RestClientXML):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def create_router(self, name, **kwargs):
+        uri = '%s/routers' % (self.uri_prefix)
+        router = Element("router")
+        router.append(Element("name", name))
+        deep_dict_to_xml(router, kwargs)
+        resp, body = self.post(uri, str(Document(router)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def delete_router(self, router_id):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def show_router(self, router_id):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def update_router(self, router_id, **kwargs):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        router = Element("router")
+        for element, content in kwargs.iteritems():
+            router.append(Element(element, content))
+        resp, body = self.put(uri, str(Document(router)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def add_router_interface_with_subnet_id(self, router_id, subnet_id):
+        uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
+              router_id)
+        subnet = Element("subnet_id", subnet_id)
+        resp, body = self.put(uri, str(Document(subnet)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def add_router_interface_with_port_id(self, router_id, port_id):
+        uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
+              router_id)
+        port = Element("port_id", port_id)
+        resp, body = self.put(uri, str(Document(port)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def remove_router_interface_with_subnet_id(self, router_id, subnet_id):
+        uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
+              router_id)
+        subnet = Element("subnet_id", subnet_id)
+        resp, body = self.put(uri, str(Document(subnet)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def remove_router_interface_with_port_id(self, router_id, port_id):
+        uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
+              router_id)
+        port = Element("port_id", port_id)
+        resp, body = self.put(uri, str(Document(port)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def create_floating_ip(self, ext_network_id, **kwargs):
+        uri = '%s/floatingips' % (self.uri_prefix)
+        floatingip = Element('floatingip')
+        floatingip.append(Element("floating_network_id", ext_network_id))
+        for element, content in kwargs.iteritems():
+            floatingip.append(Element(element, content))
+        resp, body = self.post(uri, str(Document(floatingip)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def show_floating_ip(self, floating_ip_id):
+        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def list_floating_ips(self):
+        uri = '%s/floatingips' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        floatingips = self._parse_array(etree.fromstring(body))
+        floatingips = {"floatingips": floatingips}
+        return resp, floatingips
+
+    def delete_floating_ip(self, floating_ip_id):
+        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def update_floating_ip(self, floating_ip_id, **kwargs):
+        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
+        floatingip = Element('floatingip')
+        floatingip.add_attr('xmlns:xsi',
+                            'http://www.w3.org/2001/XMLSchema-instance')
+        for element, content in kwargs.iteritems():
+            if content is None:
+                xml_elem = Element(element)
+                xml_elem.add_attr("xsi:nil", "true")
+                floatingip.append(xml_elem)
+            else:
+                floatingip.append(Element(element, content))
+        resp, body = self.put(uri, str(Document(floatingip)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
@@ -448,5 +554,10 @@ def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     if root_tag.startswith("{"):
         ns, root_tag = root_tag.split("}", 1)
     body = xml_to_json(etree.fromstring(xml_returned_body))
+    nil = '{http://www.w3.org/2001/XMLSchema-instance}nil'
+    for key, val in body.iteritems():
+        if isinstance(val, dict):
+            if (nil in val and val[nil] == 'true'):
+                body[key] = None
     body = {root_tag: body}
     return body
