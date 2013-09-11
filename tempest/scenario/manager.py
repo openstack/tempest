@@ -28,6 +28,7 @@ import netaddr
 from neutronclient.common import exceptions as exc
 import neutronclient.v2_0.client
 import novaclient.client
+from novaclient import exceptions as nova_exceptions
 
 from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
@@ -276,27 +277,57 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         expected status to show. At any time, if the returned
         status of the thing is ERROR, fail out.
         """
+        self._status_timeout(things, thing_id, expected_status=expected_status)
+
+    def delete_timeout(self, things, thing_id):
+        """
+        Given a thing, do a loop, sleeping
+        for a configurable amount of time, checking for the
+        deleted status to show. At any time, if the returned
+        status of the thing is ERROR, fail out.
+        """
+        self._status_timeout(things,
+                             thing_id,
+                             allow_notfound=True)
+
+    def _status_timeout(self,
+                        things,
+                        thing_id,
+                        expected_status=None,
+                        allow_notfound=False):
+
+        log_status = expected_status if expected_status else ''
+        if allow_notfound:
+            log_status += ' or NotFound' if log_status != '' else 'NotFound'
+
         def check_status():
             # python-novaclient has resources available to its client
             # that all implement a get() method taking an identifier
             # for the singular resource to retrieve.
-            thing = things.get(thing_id)
+            try:
+                thing = things.get(thing_id)
+            except nova_exceptions.NotFound:
+                if allow_notfound:
+                    return True
+                else:
+                    raise
+
             new_status = thing.status
             if new_status == 'ERROR':
                 message = "%s failed to get to expected status. \
                           In ERROR state." % (thing)
                 raise exceptions.BuildErrorException(message)
-            elif new_status == expected_status:
+            elif new_status == expected_status and expected_status is not None:
                 return True  # All good.
             LOG.debug("Waiting for %s to get to %s status. "
                       "Currently in %s status",
-                      thing, expected_status, new_status)
+                      thing, log_status, new_status)
         if not tempest.test.call_until_true(
             check_status,
             self.config.compute.build_timeout,
             self.config.compute.build_interval):
             message = "Timed out waiting for thing %s \
-                      to become %s" % (thing_id, expected_status)
+                      to become %s" % (thing_id, log_status)
             raise exceptions.TimeoutException(message)
 
     def create_loginable_secgroup_rule(self, client=None, secgroup_id=None):
