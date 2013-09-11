@@ -20,10 +20,10 @@ import contextlib
 import errno
 import functools
 import os
+import threading
 import time
 import weakref
 
-from eventlet import semaphore
 from oslo.config import cfg
 
 from tempest.openstack.common import fileutils
@@ -137,7 +137,8 @@ _semaphores = weakref.WeakValueDictionary()
 def lock(name, lock_file_prefix=None, external=False, lock_path=None):
     """Context based lock
 
-    This function yields a `semaphore.Semaphore` instance unless external is
+    This function yields a `threading.Semaphore` instance (if we don't use
+    eventlet.monkey_patch(), else `semaphore.Semaphore`) unless external is
     True, in which case, it'll yield an InterProcessLock instance.
 
     :param lock_file_prefix: The lock_file_prefix argument is used to provide
@@ -155,7 +156,7 @@ def lock(name, lock_file_prefix=None, external=False, lock_path=None):
     # NOTE(soren): If we ever go natively threaded, this will be racy.
     #              See http://stackoverflow.com/questions/5390569/dyn
     #              amically-allocating-and-destroying-mutexes
-    sem = _semaphores.get(name, semaphore.Semaphore())
+    sem = _semaphores.get(name, threading.Semaphore())
     if name not in _semaphores:
         # this check is not racy - we're already holding ref locally
         # so GC won't remove the item and there was no IO switch
