@@ -33,11 +33,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def setUpClass(cls):
         super(ServersAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.servers_client
+        cls.non_admin_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
-        cls.identity_client = cls._get_identity_admin_client()
-        tenant = cls.identity_client.get_tenant_by_name(
-            cls.client.tenant_name)
-        cls.tenant_id = tenant['id']
 
         cls.s1_name = data_utils.rand_name('server')
         resp, server = cls.create_test_server(name=cls.s1_name,
@@ -115,6 +112,34 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                        'read_req', 'write_req', 'cpu', 'memory']
         for key in basic_attrs:
             self.assertIn(key, str(diagnostic.keys()))
+
+    @attr(type='gate')
+    def test_rebuild_server_in_error_state(self):
+        # The server in error state should be rebuilt using the provided
+        # image and changed to ACTIVE state
+
+        # resetting vm state require admin priviledge
+        resp, server = self.client.reset_state(self.s1_id, state='error')
+        self.assertEqual(202, resp.status)
+        resp, rebuilt_server = self.non_admin_client.rebuild(
+            self.s1_id, self.image_ref_alt)
+        self.addCleanup(self.non_admin_client.wait_for_server_status,
+                        self.s1_id, 'ACTIVE')
+        self.addCleanup(self.non_admin_client.rebuild, self.s1_id,
+                        self.image_ref)
+
+        # Verify the properties in the initial response are correct
+        self.assertEqual(self.s1_id, rebuilt_server['id'])
+        rebuilt_image_id = rebuilt_server['image']['id']
+        self.assertEqual(self.image_ref_alt, rebuilt_image_id)
+        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
+        self.non_admin_client.wait_for_server_status(rebuilt_server['id'],
+                                                     'ACTIVE',
+                                                     raise_on_error=False)
+        # Verify the server properties after rebuilding
+        resp, server = self.non_admin_client.get_server(rebuilt_server['id'])
+        rebuilt_image_id = server['image']['id']
+        self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 
 
 class ServersAdminTestXML(ServersAdminTestJSON):

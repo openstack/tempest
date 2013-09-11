@@ -123,6 +123,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                                    metadata=meta,
                                                    personality=personality,
                                                    adminPass=password)
+        self.addCleanup(self.client.rebuild, self.server_id, self.image_ref)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -133,14 +134,43 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # Verify the server properties after the rebuild completes
         self.client.wait_for_server_status(rebuilt_server['id'], 'ACTIVE')
         resp, server = self.client.get_server(rebuilt_server['id'])
-        rebuilt_image_id = rebuilt_server['image']['id']
+        rebuilt_image_id = server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
-        self.assertEqual(new_name, rebuilt_server['name'])
+        self.assertEqual(new_name, server['name'])
 
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
             linux_client = RemoteClient(server, self.ssh_user, password)
             self.assertTrue(linux_client.can_authenticate())
+
+    @attr(type='gate')
+    def test_rebuild_server_in_stop_state(self):
+        # The server in stop state  should be rebuilt using the provided
+        # image and remain in SHUTOFF state
+        resp, server = self.client.get_server(self.server_id)
+        old_image = server['image']['id']
+        new_image = self.image_ref_alt \
+            if old_image == self.image_ref else self.image_ref
+        resp, server = self.client.stop(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
+        self.addCleanup(self.client.start, self.server_id)
+        resp, rebuilt_server = self.client.rebuild(self.server_id, new_image)
+        self.addCleanup(self.client.wait_for_server_status, self.server_id,
+                        'SHUTOFF')
+        self.addCleanup(self.client.rebuild, self.server_id, old_image)
+
+        # Verify the properties in the initial response are correct
+        self.assertEqual(self.server_id, rebuilt_server['id'])
+        rebuilt_image_id = rebuilt_server['image']['id']
+        self.assertEqual(new_image, rebuilt_image_id)
+        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
+
+        # Verify the server properties after the rebuild completes
+        self.client.wait_for_server_status(rebuilt_server['id'], 'SHUTOFF')
+        resp, server = self.client.get_server(rebuilt_server['id'])
+        rebuilt_image_id = server['image']['id']
+        self.assertEqual(new_image, rebuilt_image_id)
 
     def _detect_server_image_flavor(self, server_id):
         # Detects the current server image flavor ref.
