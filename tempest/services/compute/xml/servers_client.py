@@ -46,9 +46,14 @@ def _translate_ip_xml_json(ip):
     # expanded xml namespace.
     type_ns_prefix = ('{http://docs.openstack.org/compute/ext/extended_ips/'
                       'api/v1.1}type')
+    mac_ns_prefix = ('{http://docs.openstack.org/compute/ext/extended_ips_mac'
+                     '/api/v1.1}mac_addr')
+
     if type_ns_prefix in ip:
-        ip['OS-EXT-IPS:type'] = ip[type_ns_prefix]
-        ip.pop(type_ns_prefix)
+        ip['OS-EXT-IPS:type'] = ip.pop(type_ns_prefix)
+
+    if mac_ns_prefix in ip:
+        ip['OS-EXT-IPS-MAC:mac_addr'] = ip.pop(mac_ns_prefix)
     return ip
 
 
@@ -101,11 +106,35 @@ def _translate_server_xml_to_json(xml_dom):
         json['addresses'] = json_addresses
     else:
         json = xml_to_json(xml_dom)
-    diskConfig = '{http://docs.openstack.org/compute/ext/disk_config/api/v1.1'\
-                 '}diskConfig'
+    diskConfig = ('{http://docs.openstack.org'
+                  '/compute/ext/disk_config/api/v1.1}diskConfig')
+    terminated_at = ('{http://docs.openstack.org/'
+                     'compute/ext/server_usage/api/v1.1}terminated_at')
+    launched_at = ('{http://docs.openstack.org'
+                   '/compute/ext/server_usage/api/v1.1}launched_at')
+    power_state = ('{http://docs.openstack.org'
+                   '/compute/ext/extended_status/api/v1.1}power_state')
+    availability_zone = ('{http://docs.openstack.org'
+                         '/compute/ext/extended_availability_zone/api/v2}'
+                         'availability_zone')
+    vm_state = ('{http://docs.openstack.org'
+                '/compute/ext/extended_status/api/v1.1}vm_state')
+    task_state = ('{http://docs.openstack.org'
+                  '/compute/ext/extended_status/api/v1.1}task_state')
     if diskConfig in json:
-        json['OS-DCF:diskConfig'] = json[diskConfig]
-        del json[diskConfig]
+        json['OS-DCF:diskConfig'] = json.pop(diskConfig)
+    if terminated_at in json:
+        json['OS-SRV-USG:terminated_at'] = json.pop(terminated_at)
+    if launched_at in json:
+        json['OS-SRV-USG:launched_at'] = json.pop(launched_at)
+    if power_state in json:
+        json['OS-EXT-STS:power_state'] = json.pop(power_state)
+    if availability_zone in json:
+        json['OS-EXT-AZ:availability_zone'] = json.pop(availability_zone)
+    if vm_state in json:
+        json['OS-EXT-STS:vm_state'] = json.pop(vm_state)
+    if task_state in json:
+        json['OS-EXT-STS:task_state'] = json.pop(task_state)
     return json
 
 
