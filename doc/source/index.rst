@@ -31,7 +31,6 @@ where your test contributions should go.
    field_guide/scenario
    field_guide/stress
    field_guide/thirdparty
-   field_guide/whitebox
    field_guide/unit_tests
 
 ------------------

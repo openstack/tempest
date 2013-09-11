@@ -161,29 +161,6 @@ flavor_extra_enabled = true
 # Expected first device name when a volume is attached to an instance
 volume_device_name = vdb
 
-[whitebox]
-# Whitebox options for compute. Whitebox options enable the
-# whitebox test cases, which look at internal Nova database state,
-# SSH into VMs to check instance state, etc.
-
-# Should we run whitebox tests for Compute?
-whitebox_enabled = true
-
-# Path of nova source directory
-source_dir = /opt/stack/nova
-
-# Path of nova configuration file
-config_path = /etc/nova/nova.conf
-
-# Directory containing nova binaries such as nova-manage
-bin_dir = /usr/local/bin
-
-# Connection string to the database of Compute service
-db_uri = mysql://nova:secret@localhost/nova
-
-# Path to a private key file for SSH access to remote hosts
-path_to_private_key = /home/user/.ssh/id_rsa
-
 [compute-admin]
 # This should be the username of a user WITH administrative privileges
 # If not defined the admin user from the identity section will be used

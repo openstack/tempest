@@ -18,6 +18,4 @@ testresources>=0.2.4
 keyring>=1.6.1
 testrepository>=0.0.17
 oslo.config>=1.1.0
-# Needed for whitebox testing
-SQLAlchemy>=0.7.8,<=0.7.99
 eventlet>=0.13.0

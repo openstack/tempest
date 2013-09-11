@@ -10,7 +10,6 @@ function usage {
   echo "  -f, --force              Force a clean re-build of the virtual environment. Useful when dependencies have been added."
   echo "  -u, --update             Update the virtual environment with any newer package versions"
   echo "  -s, --smoke              Only run smoke tests"
-  echo "  -w, --whitebox           Only run whitebox tests"
   echo "  -t, --serial             Run testr serially"
   echo "  -c, --nova-coverage      Enable Nova coverage collection"
   echo "  -C, --config             Config file location"
@@ -38,7 +37,7 @@ update=0
 logging=0
 logging_config=etc/logging.conf
 
-if ! options=$(getopt -o VNnfuswtcphdC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,whitebox,serial,nova-coverage,pep8,help,debug,config:,logging,logging-config: -- "$@")
+if ! options=$(getopt -o VNnfustcphdC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,nova-coverage,pep8,help,debug,config:,logging,logging-config: -- "$@")
 then
     # parse error
     usage
@@ -60,7 +59,6 @@ while [ $# -gt 0 ]; do
     -C|--config) config_file=$2; shift;;
     -p|--pep8) let just_pep8=1;;
     -s|--smoke) testrargs="$testrargs smoke";;
-    -w|--whitebox) testrargs="$testrargs whitebox";;
     -t|--serial) serial=1;;
     -l|--logging) logging=1;;
     -L|--logging-config) logging_config=$2; shift;;
