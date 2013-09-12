@@ -15,7 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 from tempest.tests.compute import base
@@ -135,6 +138,8 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
             resp, _ = self.client.delete_security_group(securitygroup_id)
 
     @attr(type='negative')
+    @testtools.skipIf(config.TempestConfig().network.quantum_available,
+                      "Skipped until the Bug #1182384 is resolved")
     def test_security_group_rules_create_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid Parent group id
@@ -225,6 +230,8 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           secgroup_id, ip_protocol, from_port, to_port)
 
     @attr(type='negative')
+    @testtools.skipIf(config.TempestConfig().network.quantum_available,
+                      "Skipped until the Bug #1182384 is resolved")
     def test_security_group_rules_delete_with_invalid_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with invalid rule id
