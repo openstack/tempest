@@ -1,1 +1,0 @@
-../../../tempest/whitebox/README.rst

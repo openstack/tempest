@@ -18,7 +18,6 @@ to make this clear.
 |    scenario/ - complex scenario tests
 |    stress/ - stress tests
 |    thirdparty/ - 3rd party api tests
-|    whitebox/ - white box testing
 
 Each of these directories contains different types of tests. What
 belongs in each directory, the rules and examples for good tests, are
@@ -78,11 +77,3 @@ Many openstack components include 3rdparty API support. It is
 completely legitimate for Tempest to include tests of 3rdparty APIs,
 but those should be kept separate from the normal OpenStack
 validation.
-
-
-whitebox
---------
-
-Whitebox tests are tests which require access to the database of the
-target OpenStack machine to verify internal state after operations
-are made. White box tests are allowed to use the python clients.
