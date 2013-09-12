@@ -18,6 +18,7 @@
 from tempest.api.volume.base import BaseVolumeTest
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
+from tempest.test import services
 from tempest.test import stresstest
 
 
@@ -55,6 +56,7 @@ class VolumesActionsTest(BaseVolumeTest):
 
     @stresstest(class_setup_per='process')
     @attr(type='smoke')
+    @services('compute')
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
         mountpoint = '/dev/vdc'
@@ -69,6 +71,7 @@ class VolumesActionsTest(BaseVolumeTest):
 
     @stresstest(class_setup_per='process')
     @attr(type='gate')
+    @services('compute')
     def test_get_volume_attachment(self):
         # Verify that a volume's attachment information is retrieved
         mountpoint = '/dev/vdc'
@@ -93,6 +96,7 @@ class VolumesActionsTest(BaseVolumeTest):
         self.assertEqual(self.volume['id'], attachment['volume_id'])
 
     @attr(type='gate')
+    @services('image')
     def test_volume_upload(self):
         # NOTE(gfidente): the volume uploaded in Glance comes from setUpClass,
         # it is shared with the other tests. After it is uploaded in Glance,
