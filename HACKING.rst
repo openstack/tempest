@@ -20,6 +20,7 @@ Example::
 
 - [T102] Cannot import OpenStack python clients in tempest/api tests
 - [T103] tempest/tests is deprecated
+- [T104] Scenario tests require a services decorator
 
 Test Data/Configuration
 -----------------------
@@ -95,6 +96,24 @@ any other ``test_method`` or ``test_method`` ordering.
 Test cases MAY depend on commonly initialized resources/facilities, like
 credentials management, testresources and so on. These facilities, MUST be able
 to work even if just one ``test_method`` selected for execution.
+
+Service Tagging
+---------------
+Service tagging is used to specify which services are exercised by a particular
+test method. You specify the services with the tempest.test.services decorator.
+For example:
+
+@services('compute', 'image')
+
+Valid service tag names are the same as the list of directories in tempest.api
+that have tests.
+
+For scenario tests having a service tag is required. For the api tests service
+tags are only needed if the test method makes an api call (either directly or
+indirectly through another service) that differs from the parent directory
+name. For example, any test that make an api call to a service other than nova
+in tempest.api.compute would require a service tag for those services, however
+they do not need to be tagged as compute.
 
 Guidelines
 ----------
