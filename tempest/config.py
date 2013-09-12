@@ -360,6 +360,10 @@ ObjectStoreConfig = [
     cfg.BoolOpt('accounts_quotas_available',
                 default=True,
                 help="Set to True if the Account Quota middleware is enabled"),
+    cfg.BoolOpt('container_quotas_available',
+                default=True,
+                help="Set to True if the container quota middleware "
+                     "is enabled"),
     cfg.StrOpt('operator_role',
                default='Member',
                help="Role to add to users created for swift tests to "

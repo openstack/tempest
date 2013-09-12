@@ -268,6 +268,8 @@ container_sync_timeout = 120
 container_sync_interval = 5
 # Set to True if the Account Quota middleware is enabled
 accounts_quotas_available = True
+# Set to True if the Container Quota middleware is enabled
+container_quotas_available = True
 
 # Set operator role for tests that require creating a container
 operator_role = Member
