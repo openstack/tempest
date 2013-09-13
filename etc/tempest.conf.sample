@@ -53,6 +53,9 @@ admin_password = secret
 # The above administrative user's tenant name
 admin_tenant_name = admin
 
+# The role that is required to administrate keystone.
+admin_role = admin
+
 [compute]
 # This section contains configuration options used when executing tests
 # against the OpenStack Compute API.
