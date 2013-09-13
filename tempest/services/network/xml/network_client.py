@@ -161,6 +161,64 @@ class NetworkClientXML(RestClientXML):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def create_security_group(self, name):
+        uri = '%s/security-groups' % (self.uri_prefix)
+        post_body = Element("security_group")
+        p2 = Element("name", name)
+        post_body.append(p2)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def list_security_groups(self):
+        url = '%s/security-groups' % (self.uri_prefix)
+        resp, body = self.get(url, self.headers)
+        secgroups = self._parse_array(etree.fromstring(body))
+        secgroups = {"security_groups": secgroups}
+        return resp, secgroups
+
+    def delete_security_group(self, secgroup_id):
+        uri = '%s/security-groups/%s' % (self.uri_prefix, str(secgroup_id))
+        return self.delete(uri, self.headers)
+
+    def show_security_group(self, secgroup_id):
+        uri = '%s/security-groups/%s' % (self.uri_prefix, str(secgroup_id))
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def list_security_group_rules(self):
+        url = '%s/security-group-rules' % (self.uri_prefix)
+        resp, body = self.get(url, self.headers)
+        rules = self._parse_array(etree.fromstring(body))
+        rules = {"security_group_rules": rules}
+        return resp, rules
+
+    def create_security_group_rule(self, secgroup_id,
+                                   direction='ingress', **kwargs):
+        uri = '%s/security-group-rules' % (self.uri_prefix)
+        rule = Element("security_group_rule")
+        p1 = Element('security_group_id', secgroup_id)
+        p2 = Element('direction', direction)
+        rule.append(p1)
+        rule.append(p2)
+        for key, val in kwargs.items():
+            key = Element(key, val)
+            rule.append(key)
+        resp, body = self.post(uri, str(Document(rule)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def delete_security_group_rule(self, rule_id):
+        uri = '%s/security-group-rules/%s' % (self.uri_prefix, str(rule_id))
+        return self.delete(uri, self.headers)
+
+    def show_security_group_rule(self, rule_id):
+        uri = '%s/security-group-rules/%s' % (self.uri_prefix, str(rule_id))
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
