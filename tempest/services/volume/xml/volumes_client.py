@@ -183,10 +183,11 @@ class VolumesClientXML(RestClientXML):
             body = xml_to_json(etree.fromstring(body))
         return resp, body
 
-    def upload_volume(self, volume_id, image_name):
+    def upload_volume(self, volume_id, image_name, disk_format):
         """Uploads a volume in Glance."""
         post_body = Element("os-volume_upload_image",
-                            image_name=image_name)
+                            image_name=image_name,
+                            disk_format=disk_format)
         url = 'volumes/%s/action' % str(volume_id)
         resp, body = self.post(url, str(Document(post_body)), self.headers)
         volume = xml_to_json(etree.fromstring(body))

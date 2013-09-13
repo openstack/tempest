@@ -89,10 +89,11 @@ class VolumesClientJSON(RestClient):
         """Deletes the Specified Volume."""
         return self.delete("volumes/%s" % str(volume_id))
 
-    def upload_volume(self, volume_id, image_name):
+    def upload_volume(self, volume_id, image_name, disk_format):
         """Uploads a volume in Glance."""
         post_body = {
             'image_name': image_name,
+            'disk_format': disk_format
         }
         post_body = json.dumps({'os-volume_upload_image': post_body})
         url = 'volumes/%s/action' % (volume_id)
