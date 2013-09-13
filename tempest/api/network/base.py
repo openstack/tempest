@@ -56,9 +56,15 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.networks = []
         cls.subnets = []
         cls.ports = []
+        cls.pools = []
+        cls.vips = []
 
     @classmethod
     def tearDownClass(cls):
+        for vip in cls.vips:
+            cls.client.delete_vip(vip['id'])
+        for pool in cls.pools:
+            cls.client.delete_pool(pool['id'])
         for port in cls.ports:
             cls.client.delete_port(port['id'])
         for subnet in cls.subnets:
@@ -111,3 +117,21 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         port = body['port']
         cls.ports.append(port)
         return port
+
+    @classmethod
+    def create_pool(cls, name, lb_method, protocol, subnet):
+        """Wrapper utility that returns a test pool."""
+        resp, body = cls.client.create_pool(name, lb_method, protocol,
+                                            subnet['id'])
+        pool = body['pool']
+        cls.pools.append(pool)
+        return pool
+
+    @classmethod
+    def create_vip(cls, name, protocol, protocol_port, subnet, pool):
+        """Wrapper utility that returns a test vip."""
+        resp, body = cls.client.create_vip(name, protocol, protocol_port,
+                                           subnet['id'], pool['id'])
+        vip = body['vip']
+        cls.vips.append(vip)
+        return vip

@@ -401,3 +401,80 @@ class NetworkClientJSON(RestClient):
         resp, body = self.post(uri, headers=self.headers, body=body)
         body = json.loads(body)
         return resp, body
+
+    def list_vips(self):
+        uri = '%s/lb/vips' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_vip(self, name, protocol, protocol_port, subnet_id, pool_id):
+        post_body = {
+            "vip": {
+                "protocol": protocol,
+                "name": name,
+                "subnet_id": subnet_id,
+                "pool_id": pool_id,
+                "protocol_port": protocol_port
+            }
+        }
+        body = json.dumps(post_body)
+        uri = '%s/lb/vips' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def create_pool(self, name, lb_method, protocol, subnet_id):
+        post_body = {
+            "pool": {
+                "protocol": protocol,
+                "name": name,
+                "subnet_id": subnet_id,
+                "lb_method": lb_method
+            }
+        }
+        body = json.dumps(post_body)
+        uri = '%s/lb/pools' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def show_vip(self, uuid):
+        uri = '%s/lb/vips/%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_vip(self, uuid):
+        uri = '%s/lb/vips/%s' % (self.uri_prefix, uuid)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def delete_pool(self, uuid):
+        uri = '%s/lb/pools/%s' % (self.uri_prefix, uuid)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def update_vip(self, vip_id, new_name):
+        put_body = {
+            "vip": {
+                "name": new_name,
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/lb/vips/%s' % (self.uri_prefix, vip_id)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def update_pool(self, pool_id, new_name):
+        put_body = {
+            "pool": {
+                "name": new_name,
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/lb/pools/%s' % (self.uri_prefix, pool_id)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
