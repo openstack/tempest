@@ -114,4 +114,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
         self.cinder('list', flags='--retries 3')
 
     def test_cinder_region_list(self):
-        self.cinder('list', flags='--os-region-name ' + self.identity.region)
+        region = self.config.volume.region
+        if not region:
+            region = self.config.identity.region
+        self.cinder('list', flags='--os-region-name ' + region)

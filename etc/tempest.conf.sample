@@ -28,7 +28,8 @@ disable_ssl_certificate_validation = False
 uri = http://127.0.0.1:5000/v2.0/
 # URL for where to find the OpenStack V3 Identity API endpoint (Keystone)
 uri_v3 = http://127.0.0.1:5000/v3/
-# The identity region
+# The identity region. Also used as the other services' region name unless
+# they are set explicitly.
 region = RegionOne
 
 # This should be the username of a user WITHOUT administrative privileges
@@ -137,6 +138,11 @@ use_floatingip_for_ssh = True
 # this value as "compute"
 catalog_type = compute
 
+# The name of a region for compute. If empty or commented-out, the value of
+# identity.region is used instead. If no such region is found in the service
+# catalog, the first found one is used.
+#region = RegionOne
+
 # Does the Compute API support creation of images?
 create_image_enabled = true
 
@@ -186,6 +192,11 @@ tenant_name =
 # this value as "image"
 catalog_type = image
 
+# The name of a region for image. If empty or commented-out, the value of
+# identity.region is used instead. If no such region is found in the service
+# catalog, the first found one is used.
+#region = RegionOne
+
 # The version of the OpenStack Images API to use
 api_version = 1
 
@@ -200,6 +211,11 @@ http_image = http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.
 api_version = v1.1
 # Catalog type of the Neutron Service
 catalog_type = network
+
+# The name of a region for network. If empty or commented-out, the value of
+# identity.region is used instead. If no such region is found in the service
+# catalog, the first found one is used.
+#region = RegionOne
 
 # A large private cidr block from which to allocate smaller blocks for
 # tenant networks.
@@ -230,6 +246,10 @@ public_router_id = {$PUBLIC_ROUTER_ID}
 # Unless you have a custom Keystone service catalog implementation, you
 # probably want to leave this value as "volume"
 catalog_type = volume
+# The name of a region for volume. If empty or commented-out, the value of
+# identity.region is used instead. If no such region is found in the service
+# catalog, the first found one is used.
+#region = RegionOne
 # The disk format to use when copying a volume to image
 disk_format = raw
 # Number of seconds to wait while looping to check the status of a
@@ -259,6 +279,11 @@ vendor_name = Open Source
 # custom Keystone service catalog implementation, you probably want to leave
 # this value as "object-store"
 catalog_type = object-store
+
+# The name of a region for object storage. If empty or commented-out, the
+# value of identity.region is used instead. If no such region is found in
+# the service catalog, the first found one is used.
+#region = RegionOne
 
 # Number of seconds to time on waiting for a container to container
 # synchronization complete
@@ -318,6 +343,16 @@ build_timeout = 120
 build_interval = 1
 
 [orchestration]
+# The type of endpoint for an Orchestration API service. Unless you have a
+# custom Keystone service catalog implementation, you probably want to leave
+# this value as "orchestration"
+catalog_type = orchestration
+
+# The name of a region for orchestration. If empty or commented-out, the value
+# of identity.region is used instead. If no such region is found in the service
+# catalog, the first found one is used.
+#region = RegionOne
+
 # Status change wait interval
 build_interval = 1
 
