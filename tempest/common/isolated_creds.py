@@ -141,10 +141,11 @@ class IsolatedCreds(object):
             role = None
             try:
                 roles = self._list_roles()
+                admin_role = self.config.identity.admin_role
                 if self.tempest_client:
-                    role = next(r for r in roles if r['name'] == 'admin')
+                    role = next(r for r in roles if r['name'] == admin_role)
                 else:
-                    role = next(r for r in roles if r.name == 'admin')
+                    role = next(r for r in roles if r.name == admin_role)
             except StopIteration:
                 msg = "No admin role found"
                 raise exceptions.NotFound(msg)
