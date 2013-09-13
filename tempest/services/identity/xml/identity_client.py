@@ -172,6 +172,18 @@ class IdentityClientXML(RestClientXML):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def update_user(self, user_id, **kwargs):
+        """Updates a user."""
+        if 'enabled' in kwargs:
+            kwargs['enabled'] = str(kwargs['enabled']).lower()
+        update_user = Element("user", xmlns=XMLNS, **kwargs)
+
+        resp, body = self.put('users/%s' % user_id,
+                              str(Document(update_user)),
+                              self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
     def get_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id, self.headers)

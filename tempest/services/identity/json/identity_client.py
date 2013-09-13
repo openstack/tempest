@@ -152,6 +152,14 @@ class IdentityClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['user']
 
+    def update_user(self, user_id, **kwargs):
+        """Updates a user."""
+        put_body = json.dumps({'user': kwargs})
+        resp, body = self.put('users/%s' % user_id, put_body,
+                              self.headers)
+        body = json.loads(body)
+        return resp, body['user']
+
     def get_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
