@@ -21,6 +21,7 @@ import time
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest.common import waiters
 from tempest import exceptions
 
 
@@ -152,28 +153,7 @@ class ServersClientJSON(RestClient):
 
     def wait_for_server_status(self, server_id, status):
         """Waits for a server to reach a given status."""
-        resp, body = self.get_server(server_id)
-        server_status = body['status']
-        start = int(time.time())
-
-        while(server_status != status):
-            if status == 'BUILD' and server_status != 'UNKNOWN':
-                return
-            time.sleep(self.build_interval)
-            resp, body = self.get_server(server_id)
-            server_status = body['status']
-
-            if server_status == 'ERROR':
-                raise exceptions.BuildErrorException(server_id=server_id)
-
-            timed_out = int(time.time()) - start >= self.build_timeout
-
-            if server_status != status and timed_out:
-                message = ('Server %s failed to reach %s status within the '
-                           'required time (%s s).' %
-                           (server_id, status, self.build_timeout))
-                message += ' Current status: %s.' % server_status
-                raise exceptions.TimeoutException(message)
+        return waiters.wait_for_server_status(self, server_id, status)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination."""
