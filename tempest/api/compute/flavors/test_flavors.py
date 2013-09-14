@@ -52,7 +52,7 @@ class FlavorsTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_get_non_existant_flavor(self):
-        # flavor details are not returned for non existant flavors
+        # flavor details are not returned for non-existent flavors
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
                           999)
 
@@ -150,7 +150,7 @@ class FlavorsTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_get_flavor_details_for_invalid_flavor_id(self):
-        # Ensure 404 returned for non-existant flavor ID
+        # Ensure 404 returned for non-existent flavor ID
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
                           9999)
 

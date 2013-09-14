@@ -59,7 +59,7 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
     def test_list_endpoints(self):
         # Get a list of endpoints
         resp, fetched_endpoints = self.client.list_endpoints()
-        # Asserting LIST Endpoint
+        # Asserting LIST endpoints
         self.assertEqual(resp['status'], '200')
         missing_endpoints =\
             [e for e in self.setup_endpoints if e not in fetched_endpoints]

@@ -54,7 +54,7 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
         resp[1], _ = cls.v3_client.delete_group(cls.group_body['id'])
         resp[2], _ = cls.v3_client.delete_user(cls.user_body['id'])
         resp[3], _ = cls.v3_client.delete_project(cls.project['id'])
-        # NOTE(harika-vakadi): It is necessary to disable the domian
+        # NOTE(harika-vakadi): It is necessary to disable the domain
         # before deleting,or else it would result in unauthorized error
         cls.v3_client.update_domain(cls.domain['id'], enabled=False)
         resp[4], _ = cls.v3_client.delete_domain(cls.domain['id'])

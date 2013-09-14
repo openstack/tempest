@@ -26,7 +26,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_list_tenants_by_unauthorized_user(self):
-        # Non-admin user should not be able to list tenants
+        # Non-administrator user should not be able to list tenants
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.list_tenants)
 
@@ -63,7 +63,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_tenant_delete_by_unauthorized_user(self):
-        # Non-admin user should not be able to delete a tenant
+        # Non-administrator user should not be able to delete a tenant
         tenant_name = rand_name('tenant-')
         resp, tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
@@ -164,7 +164,7 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_create_tenant_by_unauthorized_user(self):
-        # Non-admin user should not be authorized to create a tenant
+        # Non-administrator user should not be authorized to create a tenant
         tenant_name = rand_name('tenant-')
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.create_tenant, tenant_name)

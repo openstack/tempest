@@ -80,12 +80,12 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_get_nonexistant_floating_ip_details(self):
         # Negative test:Should not be able to GET the details
-        # of nonexistant floating IP
+        # of non-existent floating IP
         floating_ip_id = []
         resp, body = self.client.list_floating_ips()
         for i in range(len(body)):
             floating_ip_id.append(body[i]['id'])
-        # Creating a nonexistant floatingIP id
+        # Creating a non-existent floatingIP id
         while True:
             non_exist_id = rand_name('999')
             if non_exist_id not in floating_ip_id:

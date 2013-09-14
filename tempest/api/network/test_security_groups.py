@@ -31,7 +31,7 @@ class SecGroupTest(base.BaseNetworkTest):
     def _delete_security_group(self, secgroup_id):
         resp, _ = self.client.delete_security_group(secgroup_id)
         self.assertEqual(204, resp.status)
-        # Asserting that the secgroup is not found in the list
+        # Asserting that the security group is not found in the list
         # after deletion
         resp, list_body = self.client.list_security_groups()
         self.assertEqual('200', resp['status'])
@@ -43,7 +43,7 @@ class SecGroupTest(base.BaseNetworkTest):
     def _delete_security_group_rule(self, rule_id):
         resp, _ = self.client.delete_security_group_rule(rule_id)
         self.assertEqual(204, resp.status)
-        # Asserting that the secgroup is not found in the list
+        # Asserting that the security group is not found in the list
         # after deletion
         resp, list_body = self.client.list_security_group_rules()
         self.assertEqual('200', resp['status'])
@@ -88,7 +88,7 @@ class SecGroupTest(base.BaseNetworkTest):
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])
         self.assertIn(group_create_body['security_group']['id'], secgroup_list)
-        # No Udpate in security group
+        # No Update in security group
         # Create rule
         resp, rule_create_body = self.client.create_security_group_rule(
             group_create_body['security_group']['id']

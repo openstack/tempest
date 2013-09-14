@@ -147,7 +147,7 @@ Resources:
 
     @attr(type='slow')
     def test_created_network(self):
-        """Verifies created netowrk."""
+        """Verifies created network."""
         network_id = self.test_resources.get('Network')['physical_resource_id']
         resp, body = self.network_client.show_network(network_id)
         self.assertEqual('200', resp['status'])

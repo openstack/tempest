@@ -48,7 +48,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type=['negative', 'gate'])
     def test_create_user_by_unauthorized_user(self):
-        # Non-admin should not be authorized to create a user
+        # Non-administrator should not be authorized to create a user
         self.data.setup_test_tenant()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.create_user, self.alt_user,
@@ -115,7 +115,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type=['negative', 'gate'])
     def test_delete_users_by_unauthorized_user(self):
-        # Non admin user should not be authorized to delete a user
+        # Non-administrator user should not be authorized to delete a user
         self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.delete_user,
@@ -213,7 +213,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type=['negative', 'gate'])
     def test_get_users_by_unauthorized_user(self):
-        # Non admin user should not be authorized to get user list
+        # Non-administrator user should not be authorized to get user list
         self.data.setup_test_user()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.get_users)
@@ -301,7 +301,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_list_users_with_invalid_tenant(self):
         # Should not be able to return a list of all
-        # users for a nonexistant tenant
+        # users for a non-existent tenant
         # Assign invalid tenant ids
         invalid_id = list()
         invalid_id.append(rand_name('999'))

@@ -157,7 +157,7 @@ class KeyPairsTestJSON(base.BaseComputeTest):
         k_name = rand_name('keypair-')
         resp, _ = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
-        # Now try the same keyname to ceate another key
+        # Now try the same keyname to create another key
         self.assertRaises(exceptions.Duplicate, self.client.create_keypair,
                           k_name)
         resp, _ = self.client.delete_keypair(k_name)

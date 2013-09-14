@@ -158,7 +158,7 @@ Outputs:
         resp, body = self.client.get_resource(sid, rid)
         self.assertEqual('CREATE_COMPLETE', body['resource_status'])
 
-        # fetch the ip address from servers client, since we can't get it
+        # fetch the IP address from servers client, since we can't get it
         # from the stack until stack create is complete
         resp, server = self.servers_client.get_server(
             body['physical_resource_id'])

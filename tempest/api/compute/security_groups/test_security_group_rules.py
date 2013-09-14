@@ -35,7 +35,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_security_group_rules_create(self):
         # Positive test: Creation of Security Group rule
-        # should be successfull
+        # should be successful
         # Creating a Security Group to add rules to it
         s_name = rand_name('securitygroup-')
         s_description = rand_name('description-')
@@ -59,7 +59,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     def test_security_group_rules_create_with_optional_arguments(self):
         # Positive test: Creation of Security Group rule
         # with optional arguments
-        # should be successfull
+        # should be successful
 
         secgroup1 = None
         secgroup2 = None

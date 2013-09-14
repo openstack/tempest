@@ -25,7 +25,7 @@ class DomainsTestJSON(base.BaseIdentityAdminTest):
     _interface = 'json'
 
     def _delete_domain(self, domain_id):
-        # It is necessary to disable the domian before deleting,
+        # It is necessary to disable the domain before deleting,
         # or else it would result in unauthorized error
         _, body = self.v3_client.update_domain(domain_id, enabled=False)
         resp, _ = self.v3_client.delete_domain(domain_id)
@@ -39,7 +39,7 @@ class DomainsTestJSON(base.BaseIdentityAdminTest):
         for _ in range(3):
             _, domain = self.v3_client.create_domain(
                 rand_name('domain-'), description=rand_name('domain-desc-'))
-            # Delete the domian at the end of this method
+            # Delete the domain at the end of this method
             self.addCleanup(self._delete_domain, domain['id'])
             domain_ids.append(domain['id'])
         # List and Verify Domains

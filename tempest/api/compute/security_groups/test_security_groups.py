@@ -112,12 +112,12 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_security_group_get_nonexistant_group(self):
         # Negative test:Should not be able to GET the details
-        # of nonexistant Security Group
+        # of non-existent Security Group
         security_group_id = []
         resp, body = self.client.list_security_groups()
         for i in range(len(body)):
             security_group_id.append(body[i]['id'])
-        # Creating a nonexistant Security Group id
+        # Creating a non-existent Security Group id
         while True:
             non_exist_id = rand_name('999')
             if non_exist_id not in security_group_id:
@@ -201,12 +201,12 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
                       "Skipped until the Bug #1182384 is resolved")
     @attr(type=['negative', 'gate'])
     def test_delete_nonexistant_security_group(self):
-        # Negative test:Deletion of a nonexistant Security Group should Fail
+        # Negative test:Deletion of a non-existent Security Group should Fail
         security_group_id = []
         resp, body = self.client.list_security_groups()
         for i in range(len(body)):
             security_group_id.append(body[i]['id'])
-        # Creating Non Existant Security Group
+        # Creating non-existent Security Group
         while True:
             non_exist_id = rand_name('999')
             if non_exist_id not in security_group_id:
