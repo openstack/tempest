@@ -85,7 +85,7 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
 
         def server_count():
             # the number of servers is the number of resources
-            # in the nexted stack
+            # in the nested stack
             self.server_count = len(
                 self.client.resources.list(nested_stack_id))
             return self.server_count

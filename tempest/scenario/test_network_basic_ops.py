@@ -62,7 +62,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
      Tempest host.  A public network is assumed to be reachable from
      the Tempest host, and it should be possible to associate a public
      ('floating') IP address with a tenant ('fixed') IP address to
-     faciliate external connectivity to a potentially unroutable
+     facilitate external connectivity to a potentially unroutable
      tenant IP address.
 
      This test suite can be configured to test network connectivity to

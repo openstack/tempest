@@ -158,7 +158,7 @@ def table(output_lines):
 def _table_columns(first_table_row):
     """Find column ranges in output line.
 
-    Return list of touples (start,end) for each column
+    Return list of tuples (start,end) for each column
     detected by plus (+) characters in delimiter line.
     """
     positions = []

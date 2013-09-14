@@ -52,12 +52,12 @@ class RemoteClient():
         return self.ssh_client.test_connection_auth()
 
     def hostname_equals_servername(self, expected_hostname):
-        # Get hostname using command "hostname"
+        # Get host name using command "hostname"
         actual_hostname = self.ssh_client.exec_command("hostname").rstrip()
         return expected_hostname == actual_hostname
 
     def get_files(self, path):
-        # Return a list of comma seperated files
+        # Return a list of comma separated files
         command = "ls -m " + path
         return self.ssh_client.exec_command(command).rstrip('\n').split(', ')
 
