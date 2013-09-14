@@ -71,6 +71,8 @@ from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
 from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
+from tempest.services.identity.v3.json.credentials_client import \
+    CredentialsClientJSON
 from tempest.services.identity.v3.json.endpoints_client import \
     EndPointClientJSON
 from tempest.services.identity.v3.json.identity_client import \
@@ -79,6 +81,8 @@ from tempest.services.identity.v3.json.identity_client import V3TokenClientJSON
 from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
+from tempest.services.identity.v3.xml.credentials_client import \
+    CredentialsClientXML
 from tempest.services.identity.v3.xml.endpoints_client import EndPointClientXML
 from tempest.services.identity.v3.xml.identity_client import \
     IdentityV3ClientXML
@@ -252,6 +256,11 @@ V3_TOKEN_CLIENT = {
     "xml": V3TokenClientXML,
 }
 
+CREDENTIALS_CLIENT = {
+    "json": CredentialsClientJSON,
+    "xml": CredentialsClientXML,
+}
+
 
 class Manager(object):
 
@@ -336,6 +345,8 @@ class Manager(object):
             self.policy_client = POLICY_CLIENT[interface](*client_args)
             self.hypervisor_client = HYPERVISOR_CLIENT[interface](*client_args)
             self.token_v3_client = V3_TOKEN_CLIENT[interface](*client_args)
+            self.credentials_client = \
+                CREDENTIALS_CLIENT[interface](*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = SERVERS_CLIENTS[interface](
