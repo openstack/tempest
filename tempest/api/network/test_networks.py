@@ -234,6 +234,12 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertRaises(exceptions.NotFound, self.client.show_subnet,
                           non_exist_id)
 
+    @attr(type=['negative', 'smoke'])
+    def test_show_non_existent_port(self):
+        non_exist_id = rand_name('port')
+        self.assertRaises(exceptions.NotFound, self.client.show_port,
+                          non_exist_id)
+
     @attr(type='smoke')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
