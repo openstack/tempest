@@ -81,7 +81,7 @@ class SnapshotsClientXML(RestClientXML):
         display_name: Optional snapshot Name.
         display_description: User friendly snapshot description.
         """
-        # NOTE(afazekas): it should use the volume namaspace
+        # NOTE(afazekas): it should use the volume namespace
         snapshot = Element("snapshot", xmlns=XMLNS_11, volume_id=volume_id)
         for key, value in kwargs.items():
             snapshot.add_attr(key, value)

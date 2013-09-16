@@ -42,7 +42,7 @@ class StressAction(object):
 
     def setUp(self, **kwargs):
         """This method is called before the run method
-        to help the test initiatlize any structures.
+        to help the test initialize any structures.
         kwargs contains arguments passed in from the
         configuration json file.
 
@@ -59,7 +59,7 @@ class StressAction(object):
     def execute(self, shared_statistic):
         """This is the main execution entry point called
         by the driver.   We register a signal handler to
-        allow us to gracefull tearDown, and then exit.
+        allow us to tearDown gracefully, and then exit.
         We also keep track of how many runs we do.
         """
         signal.signal(signal.SIGHUP, self._shutdown_handler)

@@ -126,7 +126,7 @@ class ObjectClient(RestClient):
         return resp, body
 
     def get_object_using_temp_url(self, container, object_name, expires, key):
-        """Retrieve object's data using temp URL."""
+        """Retrieve object's data using temporary URL."""
 
         self._set_auth()
         method = 'GET'
