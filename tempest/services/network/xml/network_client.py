@@ -249,6 +249,88 @@ class NetworkClientXML(RestClientXML):
         ports = {"ports": ports}
         return resp, ports
 
+    def list_vips(self):
+        url = '%s/lb/vips' % (self.uri_prefix)
+        resp, body = self.get(url, self.headers)
+        vips = self._parse_array(etree.fromstring(body))
+        vips = {"vips": vips}
+        return resp, vips
+
+    def create_vip(self, name, protocol, protocol_port, subnet_id, pool_id):
+        uri = '%s/lb/vips' % (self.uri_prefix)
+        post_body = Element("vip")
+        p1 = Element("name", name)
+        p2 = Element("protocol", protocol)
+        p3 = Element("protocol_port", protocol_port)
+        p4 = Element("subnet_id", subnet_id)
+        p5 = Element("pool_id", pool_id)
+        post_body.append(p1)
+        post_body.append(p2)
+        post_body.append(p3)
+        post_body.append(p4)
+        post_body.append(p5)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def delete_vip(self, vip_id):
+        uri = '%s/lb/vips/%s' % (self.uri_prefix, str(vip_id))
+        return self.delete(uri, self.headers)
+
+    def show_vip(self, vip_id):
+        uri = '%s/lb/vips/%s' % (self.uri_prefix, str(vip_id))
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def update_vip(self, vip_id, new_name):
+        uri = '%s/lb/vips/%s' % (self.uri_prefix, str(vip_id))
+        put_body = Element("vip")
+        p2 = Element("name", new_name)
+        put_body.append(p2)
+        resp, body = self.put(uri, str(Document(put_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def list_pools(self):
+        url = '%s/lb/pools' % (self.uri_prefix)
+        resp, body = self.get(url, self.headers)
+        pools = self._parse_array(etree.fromstring(body))
+        pools = {"pools": pools}
+        return resp, pools
+
+    def create_pool(self, name, lb_method, protocol, subnet_id):
+        uri = '%s/lb/pools' % (self.uri_prefix)
+        post_body = Element("pool")
+        p1 = Element("lb_method", lb_method)
+        p2 = Element("protocol", protocol)
+        p3 = Element("subnet_id", subnet_id)
+        post_body.append(p1)
+        post_body.append(p2)
+        post_body.append(p3)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def delete_pool(self, pool_id):
+        uri = '%s/lb/pools/%s' % (self.uri_prefix, str(pool_id))
+        return self.delete(uri, self.headers)
+
+    def show_pool(self, pool_id):
+        uri = '%s/lb/pools/%s' % (self.uri_prefix, str(pool_id))
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def update_pool(self, pool_id, new_name):
+        uri = '%s/lb/pools/%s' % (self.uri_prefix, str(pool_id))
+        put_body = Element("pool")
+        p2 = Element("name", new_name)
+        put_body.append(p2)
+        resp, body = self.put(uri, str(Document(put_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
