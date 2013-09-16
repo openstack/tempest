@@ -60,6 +60,21 @@ class VolumesClientXML(RestClientXML):
         """Return the element 'attachment' from input volumes."""
         return volume['attachments']['attachment']
 
+    def _check_if_bootable(self, volume):
+        """
+        Check if the volume is bootable, also change the value
+        of 'bootable' from string to boolean.
+        """
+        if volume['bootable'] == 'True':
+            volume['bootable'] = True
+        elif volume['bootable'] == 'False':
+            volume['bootable'] = False
+        else:
+            raise ValueError(
+                'bootable flag is supposed to be either True or False,'
+                'it is %s' % volume['bootable'])
+        return volume
+
     def list_volumes(self, params=None):
         """List all the volumes created."""
         url = 'volumes'
@@ -72,6 +87,8 @@ class VolumesClientXML(RestClientXML):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
+        for v in volumes:
+            v = self._check_if_bootable(v)
         return resp, volumes
 
     def list_volumes_with_detail(self, params=None):
@@ -86,14 +103,17 @@ class VolumesClientXML(RestClientXML):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
+        for v in volumes:
+            v = self._check_if_bootable(v)
         return resp, volumes
 
     def get_volume(self, volume_id):
         """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
         resp, body = self.get(url, self.headers)
-        body = etree.fromstring(body)
-        return resp, self._parse_volume(body)
+        body = self._parse_volume(etree.fromstring(body))
+        body = self._check_if_bootable(body)
+        return resp, body
 
     def create_volume(self, size, **kwargs):
         """Creates a new Volume.
