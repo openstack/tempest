@@ -1,8 +1,8 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2012 Red Hat, Inc.
-# All Rights Reserved.
 # Copyright 2013 IBM Corp.
+# All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -26,22 +26,44 @@ Usual usage in an openstack.common module:
 
 import copy
 import gettext
-import logging.handlers
+import logging
 import os
 import re
-import UserString
+try:
+    import UserString as _userString
+except ImportError:
+    import collections as _userString
 
+from babel import localedata
 import six
 
 _localedir = os.environ.get('tempest'.upper() + '_LOCALEDIR')
 _t = gettext.translation('tempest', localedir=_localedir, fallback=True)
 
+_AVAILABLE_LANGUAGES = {}
+USE_LAZY = False
+
+
+def enable_lazy():
+    """Convenience function for configuring _() to use lazy gettext
+
+    Call this at the start of execution to enable the gettextutils._
+    function to use lazy gettext functionality. This is useful if
+    your project is importing _ directly instead of using the
+    gettextutils.install() way of importing the _ function.
+    """
+    global USE_LAZY
+    USE_LAZY = True
+
 
 def _(msg):
-    return _t.ugettext(msg)
+    if USE_LAZY:
+        return Message(msg, 'tempest')
+    else:
+        return _t.ugettext(msg)
 
 
-def install(domain):
+def install(domain, lazy=False):
     """Install a _() function using the given translation domain.
 
     Given a translation domain, install a _() function using gettext's
@@ -51,44 +73,48 @@ def install(domain):
     overriding the default localedir (e.g. /usr/share/locale) using
     a translation-domain-specific environment variable (e.g.
     NOVA_LOCALEDIR).
+
+    :param domain: the translation domain
+    :param lazy: indicates whether or not to install the lazy _() function.
+                 The lazy _() introduces a way to do deferred translation
+                 of messages by installing a _ that builds Message objects,
+                 instead of strings, which can then be lazily translated into
+                 any available locale.
     """
-    gettext.install(domain,
-                    localedir=os.environ.get(domain.upper() + '_LOCALEDIR'),
-                    unicode=True)
+    if lazy:
+        # NOTE(mrodden): Lazy gettext functionality.
+        #
+        # The following introduces a deferred way to do translations on
+        # messages in OpenStack. We override the standard _() function
+        # and % (format string) operation to build Message objects that can
+        # later be translated when we have more information.
+        #
+        # Also included below is an example LocaleHandler that translates
+        # Messages to an associated locale, effectively allowing many logs,
+        # each with their own locale.
+
+        def _lazy_gettext(msg):
+            """Create and return a Message object.
+
+            Lazy gettext function for a given domain, it is a factory method
+            for a project/module to get a lazy gettext function for its own
+            translation domain (i.e. nova, glance, cinder, etc.)
+
+            Message encapsulates a string so that we can translate
+            it later when needed.
+            """
+            return Message(msg, domain)
+
+        import __builtin__
+        __builtin__.__dict__['_'] = _lazy_gettext
+    else:
+        localedir = '%s_LOCALEDIR' % domain.upper()
+        gettext.install(domain,
+                        localedir=os.environ.get(localedir),
+                        unicode=True)
 
 
-"""
-Lazy gettext functionality.
-
-The following is an attempt to introduce a deferred way
-to do translations on messages in OpenStack. We attempt to
-override the standard _() function and % (format string) operation
-to build Message objects that can later be translated when we have
-more information. Also included is an example LogHandler that
-translates Messages to an associated locale, effectively allowing
-many logs, each with their own locale.
-"""
-
-
-def get_lazy_gettext(domain):
-    """Assemble and return a lazy gettext function for a given domain.
-
-    Factory method for a project/module to get a lazy gettext function
-    for its own translation domain (i.e. nova, glance, cinder, etc.)
-    """
-
-    def _lazy_gettext(msg):
-        """Create and return a Message object.
-
-        Message encapsulates a string so that we can translate it later when
-        needed.
-        """
-        return Message(msg, domain)
-
-    return _lazy_gettext
-
-
-class Message(UserString.UserString, object):
+class Message(_userString.UserString, object):
     """Class used to encapsulate translatable messages."""
     def __init__(self, msg, domain):
         # _msg is the gettext msgid and should never change
@@ -130,7 +156,7 @@ class Message(UserString.UserString, object):
         # look for %(blah) fields in string;
         # ignore %% and deal with the
         # case where % is first character on the line
-        keys = re.findall('(?:[^%]|^)%\((\w*)\)[a-z]', full_msg)
+        keys = re.findall('(?:[^%]|^)?%\((\w*)\)[a-z]', full_msg)
 
         # if we don't find any %(blah) blocks but have a %s
         if not keys and re.findall('(?:[^%]|^)%[a-z]', full_msg):
@@ -229,7 +255,47 @@ class Message(UserString.UserString, object):
         if name in ops:
             return getattr(self.data, name)
         else:
-            return UserString.UserString.__getattribute__(self, name)
+            return _userString.UserString.__getattribute__(self, name)
+
+
+def get_available_languages(domain):
+    """Lists the available languages for the given translation domain.
+
+    :param domain: the domain to get languages for
+    """
+    if domain in _AVAILABLE_LANGUAGES:
+        return copy.copy(_AVAILABLE_LANGUAGES[domain])
+
+    localedir = '%s_LOCALEDIR' % domain.upper()
+    find = lambda x: gettext.find(domain,
+                                  localedir=os.environ.get(localedir),
+                                  languages=[x])
+
+    # NOTE(mrodden): en_US should always be available (and first in case
+    # order matters) since our in-line message strings are en_US
+    language_list = ['en_US']
+    # NOTE(luisg): Babel <1.0 used a function called list(), which was
+    # renamed to locale_identifiers() in >=1.0, the requirements master list
+    # requires >=0.9.6, uncapped, so defensively work with both. We can remove
+    # this check when the master list updates to >=1.0, and all projects udpate
+    list_identifiers = (getattr(localedata, 'list', None) or
+                        getattr(localedata, 'locale_identifiers'))
+    locale_identifiers = list_identifiers()
+    for i in locale_identifiers:
+        if find(i) is not None:
+            language_list.append(i)
+    _AVAILABLE_LANGUAGES[domain] = language_list
+    return copy.copy(language_list)
+
+
+def get_localized_message(message, user_locale):
+    """Gets a localized version of the given message in the given locale."""
+    if isinstance(message, Message):
+        if user_locale:
+            message.locale = user_locale
+        return unicode(message)
+    else:
+        return message
 
 
 class LocaleHandler(logging.Handler):
