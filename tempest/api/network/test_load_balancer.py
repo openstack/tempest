@@ -34,6 +34,8 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         delete vIP
         update pool
         delete pool
+        show pool
+        list pool
     """
 
     @classmethod
@@ -100,6 +102,23 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         vip = body['vip']
         self.assertEqual(self.vip['id'], vip['id'])
         self.assertEqual(self.vip['name'], vip['name'])
+
+    @attr(type='smoke')
+    def test_show_pool(self):
+        # Verifies the details of a pool
+        resp, body = self.client.show_pool(self.pool['id'])
+        self.assertEqual('200', resp['status'])
+        pool = body['pool']
+        self.assertEqual(self.pool['id'], pool['id'])
+        self.assertEqual(self.pool['name'], pool['name'])
+
+    @attr(type='smoke')
+    def test_list_pools(self):
+        # Verify the pool exists in the list of all pools
+        resp, body = self.client.list_pools()
+        self.assertEqual('200', resp['status'])
+        pools = body['pools']
+        self.assertIn(self.pool['id'], [p['id'] for p in pools])
 
 
 class LoadBalancerXML(LoadBalancerJSON):
