@@ -17,7 +17,10 @@
 
 from tempest.api.volume import base
 from tempest.common.utils.data_utils import rand_name
+from tempest.openstack.common import log as logging
 from tempest.test import attr
+
+LOG = logging.getLogger(__name__)
 
 
 class VolumesListTest(base.BaseVolumeTest):
@@ -64,22 +67,17 @@ class VolumesListTest(base.BaseVolumeTest):
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])
-            except Exception:
+            except Exception as exc:
+                LOG.exception(exc)
                 if cls.volume_list:
                     # We could not create all the volumes, though we were able
                     # to create *some* of the volumes. This is typically
                     # because the backing file size of the volume group is
-                    # too small. So, here, we clean up whatever we did manage
-                    # to create and raise a SkipTest
+                    # too small.
                     for volid in cls.volume_id_list:
                         cls.client.delete_volume(volid)
                         cls.client.wait_for_resource_deletion(volid)
-                    msg = ("Failed to create ALL necessary volumes to run "
-                           "test. This typically means that the backing file "
-                           "size of the nova-volumes group is too small to "
-                           "create the 3 volumes needed by this test case")
-                    raise cls.skipException(msg)
-                raise
+                raise exc
 
     @classmethod
     def tearDownClass(cls):
