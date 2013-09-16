@@ -122,3 +122,28 @@ Guidelines
 - Consistently check the status code of responses in testcases. The
   earlier a problem is detected the easier it is to debug, especially
   where there is complicated setup required.
+
+Parallel Test Exectution
+------------------------
+Tempest by default runs its tests in parallel this creates the possibility for
+interesting interactions between tests which can cause unexpected failures.
+Tenant isolation provides protection from most of the potential race conditions
+between tests outside the same class. But there are still a few of things to
+watch out for to try to avoid issues when running your tests in parallel.
+
+- Resources outside of a tenant scope still have the potential to conflict. This
+  is a larger concern for the admin tests since most resources and actions that
+  require admin privleges are outside of tenants.
+
+- Races between methods in the same class are not a problem because
+  parallelization in tempest is at the test class level, but if there is a json
+  and xml version of the same test class there could still be a race between
+  methods.
+
+- The rand_name() function from tempest.common.utils.data_utils should be used
+  anywhere a resource is created with a name. Static naming should be avoided
+  to prevent resource conflicts.
+
+- If the execution of a set of tests is required to be serialized then locking
+  can be used to perform this. See AggregatesAdminTest in
+  tempest.api.compute.admin for an example of using locking.
