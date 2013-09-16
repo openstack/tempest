@@ -58,48 +58,10 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def setUpClass(cls):
         super(NetworksTestJSON, cls).setUpClass()
         cls.network = cls.create_network()
-        cls.network1 = cls.create_network()
-        cls.network2 = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)
         cls.cidr = cls.subnet['cidr']
         cls.port = cls.create_port(cls.network)
-
-    def _delete_networks(self, created_networks):
-        for n in created_networks:
-            resp, body = self.client.delete_network(n['id'])
-            self.assertEqual(204, resp.status)
-        # Asserting that the networks are not found in the list after deletion
-        resp, body = self.client.list_networks()
-        networks_list = list()
-        for network in body['networks']:
-            networks_list.append(network['id'])
-        for n in created_networks:
-            self.assertNotIn(n['id'], networks_list)
-
-    def _delete_subnets(self, created_subnets):
-        for n in created_subnets:
-            resp, body = self.client.delete_subnet(n['id'])
-            self.assertEqual(204, resp.status)
-        # Asserting that the subnets are not found in the list after deletion
-        resp, body = self.client.list_subnets()
-        subnets_list = list()
-        for subnet in body['subnets']:
-            subnets_list.append(subnet['id'])
-        for n in created_subnets:
-            self.assertNotIn(n['id'], subnets_list)
-
-    def _delete_ports(self, created_ports):
-        for n in created_ports:
-            resp, body = self.client.delete_port(n['id'])
-            self.assertEqual(204, resp.status)
-        # Asserting that the ports are not found in the list after deletion
-        resp, body = self.client.list_ports()
-        ports_list = list()
-        for port in body['ports']:
-            ports_list.append(port['id'])
-        for n in created_ports:
-            self.assertNotIn(n['id'], ports_list)
 
     @attr(type='smoke')
     def test_create_update_delete_network_subnet(self):
@@ -240,6 +202,75 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertRaises(exceptions.NotFound, self.client.show_port,
                           non_exist_id)
 
+
+class NetworksTestXML(NetworksTestJSON):
+    _interface = 'xml'
+
+
+class BulkNetworkOpsJSON(base.BaseNetworkTest):
+    _interface = 'json'
+
+    """
+    Tests the following operations in the Neutron API using the REST client for
+    Neutron:
+
+        bulk network creation
+        bulk subnet creation
+        bulk subnet creation
+        list tenant's networks
+
+    v2.0 of the Neutron API is assumed. It is also assumed that the following
+    options are defined in the [network] section of etc/tempest.conf:
+
+        tenant_network_cidr with a block of cidr's from which smaller blocks
+        can be allocated for tenant networks
+
+        tenant_network_mask_bits with the mask bits to be used to partition the
+        block defined by tenant-network_cidr
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super(BulkNetworkOpsJSON, cls).setUpClass()
+        cls.network1 = cls.create_network()
+        cls.network2 = cls.create_network()
+
+    def _delete_networks(self, created_networks):
+        for n in created_networks:
+            resp, body = self.client.delete_network(n['id'])
+            self.assertEqual(204, resp.status)
+        # Asserting that the networks are not found in the list after deletion
+        resp, body = self.client.list_networks()
+        networks_list = list()
+        for network in body['networks']:
+            networks_list.append(network['id'])
+        for n in created_networks:
+            self.assertNotIn(n['id'], networks_list)
+
+    def _delete_subnets(self, created_subnets):
+        for n in created_subnets:
+            resp, body = self.client.delete_subnet(n['id'])
+            self.assertEqual(204, resp.status)
+        # Asserting that the subnets are not found in the list after deletion
+        resp, body = self.client.list_subnets()
+        subnets_list = list()
+        for subnet in body['subnets']:
+            subnets_list.append(subnet['id'])
+        for n in created_subnets:
+            self.assertNotIn(n['id'], subnets_list)
+
+    def _delete_ports(self, created_ports):
+        for n in created_ports:
+            resp, body = self.client.delete_port(n['id'])
+            self.assertEqual(204, resp.status)
+        # Asserting that the ports are not found in the list after deletion
+        resp, body = self.client.list_ports()
+        ports_list = list()
+        for port in body['ports']:
+            ports_list.append(port['id'])
+        for n in created_ports:
+            self.assertNotIn(n['id'], ports_list)
+
     @attr(type='smoke')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
@@ -326,5 +357,5 @@ class NetworksTestJSON(base.BaseNetworkTest):
             self.assertIn(n['id'], ports_list)
 
 
-class NetworksTestXML(NetworksTestJSON):
+class BulkNetworkOpsXML(BulkNetworkOpsJSON):
     _interface = 'xml'
