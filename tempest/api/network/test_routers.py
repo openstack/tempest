@@ -97,7 +97,7 @@ class RoutersTest(base.BaseNetworkTest):
         name = rand_name('router-')
         resp, create_body = self.client.create_router(name)
         self.addCleanup(self.client.delete_router, create_body['router']['id'])
-        # Add router interafce with subnet id
+        # Add router interface with subnet id
         resp, interface = self.client.add_router_interface_with_subnet_id(
             create_body['router']['id'], subnet['id'])
         self.assertEqual('200', resp['status'])

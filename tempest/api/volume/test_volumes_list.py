@@ -30,7 +30,7 @@ class VolumesListTest(base.BaseVolumeTest):
     ensure that the backing file for the volume group that Nova uses
     has space for at least 3 1G volumes!
     If you are running a Devstack environment, ensure that the
-    VOLUME_BACKING_FILE_SIZE is atleast 4G in your localrc
+    VOLUME_BACKING_FILE_SIZE is at least 4G in your localrc
     """
 
     _interface = 'json'

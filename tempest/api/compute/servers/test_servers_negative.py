@@ -154,7 +154,7 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_create_with_non_existant_keypair(self):
-        # Pass a non existant keypair while creating a server
+        # Pass a non-existent keypair while creating a server
 
         key_name = rand_name('key')
         self.assertRaises(exceptions.BadRequest,

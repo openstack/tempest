@@ -120,20 +120,20 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_update_nonexistant_image_metadata(self):
-        # Negative test:An update should not happen for a nonexistant image
+        # Negative test:An update should not happen for a non-existent image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
         self.assertRaises(exceptions.NotFound,
                           self.client.update_image_metadata, 999, meta)
 
     @attr(type=['negative', 'gate'])
     def test_get_nonexistant_image_metadata_item(self):
-        # Negative test: Get on nonexistant image should not happen
+        # Negative test: Get on non-existent image should not happen
         self.assertRaises(exceptions.NotFound,
                           self.client.get_image_metadata_item, 999, 'key2')
 
     @attr(type=['negative', 'gate'])
     def test_set_nonexistant_image_metadata(self):
-        # Negative test: Metadata should not be set to a nonexistant image
+        # Negative test: Metadata should not be set to a non-existent image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
         self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
                           999, meta)
@@ -149,8 +149,8 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_delete_nonexistant_image_metadata_item(self):
-        # Negative test: Shouldnt be able to delete metadata
-        # item from nonexistant image
+        # Negative test: Shouldn't be able to delete metadata
+        # item from non-existent image
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_image_metadata_item, 999, 'key1')
 

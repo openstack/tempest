@@ -56,7 +56,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_list_roles_by_unauthorized_user(self):
-        # Non admin user should not be able to list roles
+        # Non-administrator user should not be able to list roles
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.list_roles)
 
@@ -116,7 +116,8 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_assign_user_role_by_unauthorized_user(self):
-        # Non admin user should not be authorized to assign a role to user
+        # Non-administrator user should not be authorized to
+        # assign a role to user
         (user, tenant, role) = self._get_role_params()
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.assign_user_role,
@@ -174,7 +175,8 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_remove_user_role_by_unauthorized_user(self):
-        # Non admin user should not be authorized to remove a user's role
+        # Non-administrator user should not be authorized to
+        # remove a user's role
         (user, tenant, role) = self._get_role_params()
         resp, user_role = self.client.assign_user_role(tenant['id'],
                                                        user['id'],
@@ -237,7 +239,8 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_list_user_roles_by_unauthorized_user(self):
-        # Non admin user should not be authorized to list a user's roles
+        # Non-administrator user should not be authorized to list
+        # a user's roles
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         self.assertRaises(exceptions.Unauthorized,

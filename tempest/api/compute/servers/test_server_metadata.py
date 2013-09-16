@@ -115,7 +115,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
 
     @attr(type='gate')
     def test_get_server_metadata_item(self):
-        # The value for a specic metadata key should be returned
+        # The value for a specific metadata key should be returned
         resp, meta = self.client.get_server_metadata_item(self.server_id,
                                                           'key2')
         self.assertTrue('value2', meta['key2'])
@@ -148,13 +148,13 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_get_nonexistant_server_metadata_item(self):
-        # Negative test: GET on nonexistant server should not succeed
+        # Negative test: GET on a non-existent server should not succeed
         self.assertRaises(exceptions.NotFound,
                           self.client.get_server_metadata_item, 999, 'test2')
 
     @attr(type=['negative', 'gate'])
     def test_list_nonexistant_server_metadata(self):
-        # Negative test:List metadata on a non existant server should
+        # Negative test:List metadata on a non-existent server should
         # not succeed
         self.assertRaises(exceptions.NotFound,
                           self.client.list_server_metadata, 999)
@@ -171,7 +171,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_set_nonexistant_server_metadata(self):
-        # Negative test: Set metadata on a non existant server should not
+        # Negative test: Set metadata on a non-existent server should not
         # succeed
         meta = {'meta1': 'data1'}
         self.assertRaises(exceptions.NotFound,
@@ -179,7 +179,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_update_nonexistant_server_metadata(self):
-        # Negative test: An update should not happen for a nonexistant image
+        # Negative test: An update should not happen for a non-existent image
         meta = {'key1': 'value1', 'key2': 'value2'}
         self.assertRaises(exceptions.NotFound,
                           self.client.update_server_metadata, 999, meta)
@@ -195,7 +195,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_delete_nonexistant_server_metadata_item(self):
         # Negative test: Should not be able to delete metadata item from a
-        #  nonexistant server
+        #  non-existent server
 
         # Delete the metadata item
         self.assertRaises(exceptions.NotFound,
