@@ -100,3 +100,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         vip = body['vip']
         self.assertEqual(self.vip['id'], vip['id'])
         self.assertEqual(self.vip['name'], vip['name'])
+
+
+class LoadBalancerXML(LoadBalancerJSON):
+    _interface = 'xml'
