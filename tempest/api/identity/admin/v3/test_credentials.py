@@ -112,8 +112,7 @@ class CredentialsTestJSON(base.BaseIdentityAdminTest):
                          if c not in fetched_cred_ids]
         self.assertEqual(0, len(missing_creds),
                          "Failed to find cred %s in fetched list" %
-                         ', '.join(m_cred for m_cred
-                         in missing_creds))
+                         ', '.join(m_cred for m_cred in missing_creds))
 
 
 class CredentialsTestXML(CredentialsTestJSON):

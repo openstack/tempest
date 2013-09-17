@@ -116,7 +116,7 @@ class UsersV3TestJSON(base.BaseIdentityAdminTest):
         self.assertEqual(0, len(missing_projects),
                          "Failed to find project %s in fetched list" %
                          ', '.join(m_project for m_project
-                         in missing_projects))
+                                   in missing_projects))
 
 
 class UsersV3TestXML(UsersV3TestJSON):
