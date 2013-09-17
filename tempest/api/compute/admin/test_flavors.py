@@ -230,6 +230,26 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         self.assertFalse(flag)
 
     @attr(type='gate')
+    def test_create_server_with_non_public_flavor(self):
+        # Create a flavor with os-flavor-access:is_public false
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+
+        # Create the flavor
+        resp, flavor = self.client.create_flavor(flavor_name,
+                                                 self.ram, self.vcpus,
+                                                 self.disk,
+                                                 new_flavor_id,
+                                                 is_public="False")
+        self.addCleanup(self.flavor_clean_up, flavor['id'])
+        self.assertEqual(200, resp.status)
+
+        # Verify flavor is not used by other user
+        self.assertRaises(exceptions.BadRequest,
+                          self.os.servers_client.create_server,
+                          'test', self.image_ref, flavor['id'])
+
+    @attr(type='gate')
     def test_list_public_flavor_with_other_user(self):
         # Create a Flavor with public access.
         # Try to List/Get flavor with another user
