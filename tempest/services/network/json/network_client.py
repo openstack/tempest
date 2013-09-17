@@ -490,3 +490,46 @@ class NetworkClientJSON(RestClient):
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_members(self):
+        uri = '%s/lb/members' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_member(self, address, protocol_port, pool_id):
+        post_body = {
+            "member": {
+                "protocol_port": protocol_port,
+                "pool_id": pool_id,
+                "address": address
+            }
+        }
+        body = json.dumps(post_body)
+        uri = '%s/lb/members' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def show_member(self, uuid):
+        uri = '%s/lb/members/%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_member(self, uuid):
+        uri = '%s/lb/members/%s' % (self.uri_prefix, uuid)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def update_member(self, admin_state_up, member_id):
+        put_body = {
+            "member": {
+                "admin_state_up": admin_state_up
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/lb/members/%s' % (self.uri_prefix, member_id)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
