@@ -24,7 +24,7 @@ from tempest import exceptions
 
 
 def rand_name(name='test'):
-    return name + str(random.randint(1, 0x7fffffff))
+    return name + "-tempest-" + str(random.randint(1, 0x7fffffff))
 
 
 def rand_int_id(start=0, end=0x7fffffff):
