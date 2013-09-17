@@ -370,6 +370,64 @@ class NetworkClientXML(RestClientXML):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def list_health_monitors(self):
+        uri = '%s/lb/health_monitors' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = self._parse_array(etree.fromstring(body))
+        body = {"health_monitors": body}
+        return resp, body
+
+    def create_health_monitor(self, delay, max_retries, Type, timeout):
+        uri = '%s/lb/health_monitors' % (self.uri_prefix)
+        post_body = Element("health_monitor")
+        p1 = Element("delay", delay)
+        p2 = Element("max_retries", max_retries)
+        p3 = Element("type", Type)
+        p4 = Element("timeout", timeout)
+        post_body.append(p1)
+        post_body.append(p2)
+        post_body.append(p3)
+        post_body.append(p4)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def delete_health_monitor(self, uuid):
+        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, str(uuid))
+        return self.delete(uri, self.headers)
+
+    def show_health_monitor(self, uuid):
+        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, str(uuid))
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def update_health_monitor(self, admin_state_up, uuid):
+        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, str(uuid))
+        put_body = Element("health_monitor")
+        p2 = Element("admin_state_up", admin_state_up)
+        put_body.append(p2)
+        resp, body = self.put(uri, str(Document(put_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def associate_health_monitor_with_pool(self, health_monitor_id,
+                                           pool_id):
+        uri = '%s/lb/pools/%s/health_monitors' % (self.uri_prefix,
+                                                  pool_id)
+        post_body = Element("health_monitor")
+        p1 = Element("id", health_monitor_id,)
+        post_body.append(p1)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def disassociate_health_monitor_with_pool(self, health_monitor_id,
+                                              pool_id):
+        uri = '%s/lb/pools/%s/health_monitors/%s' % (self.uri_prefix, pool_id,
+                                                     health_monitor_id)
+        return self.delete(uri, self.headers)
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
