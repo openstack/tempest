@@ -166,7 +166,7 @@ class ImagesTestJSON(base.BaseComputeTest):
     def test_delete_image_id_is_over_35_character_limit(self):
         # Return an error while trying to delete image with id over limit
         self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                          '11a22b9-120q-5555-cc11-00ab112223gj-3fac')
+                          '11a22b9-12a9-5555-cc11-00ab112223fa-3fac')
 
 
 class ImagesTestXML(ImagesTestJSON):
