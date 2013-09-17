@@ -37,3 +37,10 @@ class HostsClientJSON(RestClient):
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['hosts']
+
+    def show_host_detail(self, hostname):
+        """Show detail information for the host."""
+
+        resp, body = self.get("os-hosts/%s" % str(hostname))
+        body = json.loads(body)
+        return resp, body['host']
