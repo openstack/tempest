@@ -32,16 +32,18 @@ and reference data to be used in testing.
     will have a configuration file already set up to work with your
     devstack installation.
 
-Tempest is not tied to any single test runner, but Nose been the most commonly
+Tempest is not tied to any single test runner, but testr is the most commonly
 used tool. After setting up your configuration file, you can execute
-the set of Tempest tests by using ``nosetests`` ::
+the set of Tempest tests by using ``testr`` ::
 
-    $> nosetests tempest
+    $> testr run --parallel tempest
 
 To run one single test  ::
 
-    $> nosetests -sv tempest.api.compute.servers.test_server_actions.py:
-       ServerActionsTestJSON.test_rebuild_nonexistent_server
+    $> testr run --parallel tempest.api.compute.servers.test_server_actions.ServerActionsTestJSON.test_rebuild_nonexistent_server
+
+Alternatively, you can use the run_tests.sh script which will create a venv
+and run the tests or use tox to do the same.
 
 Configuration
 -------------
