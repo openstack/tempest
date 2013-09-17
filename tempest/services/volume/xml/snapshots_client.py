@@ -90,6 +90,16 @@ class SnapshotsClientXML(RestClientXML):
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
+    def update_snapshot(self, snapshot_id, **kwargs):
+        """Updates a snapshot."""
+        put_body = Element("snapshot", xmlns=XMLNS_11, **kwargs)
+
+        resp, body = self.put('snapshots/%s' % snapshot_id,
+                              str(Document(put_body)),
+                              self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
     # NOTE(afazekas): just for the wait function
     def _get_snapshot_status(self, snapshot_id):
         resp, body = self.get_snapshot(snapshot_id)

@@ -76,6 +76,14 @@ class SnapshotsClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['snapshot']
 
+    def update_snapshot(self, snapshot_id, **kwargs):
+        """Updates a snapshot."""
+        put_body = json.dumps({'snapshot': kwargs})
+        resp, body = self.put('snapshots/%s' % snapshot_id, put_body,
+                              self.headers)
+        body = json.loads(body)
+        return resp, body['snapshot']
+
     # NOTE(afazekas): just for the wait function
     def _get_snapshot_status(self, snapshot_id):
         resp, body = self.get_snapshot(snapshot_id)
