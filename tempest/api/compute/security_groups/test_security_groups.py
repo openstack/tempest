@@ -18,7 +18,7 @@
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
@@ -43,8 +43,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         # Create 3 Security Groups
         security_group_list = list()
         for i in range(3):
-            s_name = rand_name('securitygroup-')
-            s_description = rand_name('description-')
+            s_name = data_utils.rand_name('securitygroup-')
+            s_description = data_utils.rand_name('description-')
             resp, securitygroup = \
                 self.client.create_security_group(s_name, s_description)
             self.assertEqual(200, resp.status)
@@ -68,8 +68,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_security_group_create_delete(self):
         # Security Group should be created, verified and deleted
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name, s_description)
         self.assertIn('id', securitygroup)
@@ -87,8 +87,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name, s_description)
         self.addCleanup(self._delete_security_group,
@@ -120,7 +120,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             security_group_id.append(body[i]['id'])
         # Creating a non-existent Security Group id
         while True:
-            non_exist_id = rand_name('999')
+            non_exist_id = data_utils.rand_int_id(start=999)
             if non_exist_id not in security_group_id:
                 break
         self.assertRaises(exceptions.NotFound, self.client.get_security_group,
@@ -132,7 +132,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
     def test_security_group_create_with_invalid_group_name(self):
         # Negative test: Security Group should not be created with group name
         # as an empty string/with white spaces/chars more than 255
-        s_description = rand_name('description-')
+        s_description = data_utils.rand_name('description-')
         # Create Security Group with empty string as group name
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group, "", s_description)
@@ -152,7 +152,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
     def test_security_group_create_with_invalid_group_description(self):
         # Negative test:Security Group should not be created with description
         # as an empty string/with white spaces/chars more than 255
-        s_name = rand_name('securitygroup-')
+        s_name = data_utils.rand_name('securitygroup-')
         # Create Security Group with empty string as description
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group, s_name, "")
@@ -171,8 +171,8 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
     def test_security_group_create_with_duplicate_name(self):
         # Negative test:Security Group with duplicate name should not
         # be created
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, security_group =\
             self.client.create_security_group(s_name, s_description)
         self.assertEqual(200, resp.status)
@@ -209,7 +209,7 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
             security_group_id.append(body[i]['id'])
         # Creating non-existent Security Group
         while True:
-            non_exist_id = rand_name('999')
+            non_exist_id = data_utils.rand_int_id(start=999)
             if non_exist_id not in security_group_id:
                 break
         self.assertRaises(exceptions.NotFound,
@@ -228,19 +228,19 @@ class SecurityGroupsTestJSON(base.BaseComputeTest):
         # and not deleted if the server is active.
         # Create a couple security groups that we will use
         # for the server resource this test creates
-        sg_name = rand_name('sg')
-        sg_desc = rand_name('sg-desc')
+        sg_name = data_utils.rand_name('sg')
+        sg_desc = data_utils.rand_name('sg-desc')
         resp, sg = self.client.create_security_group(sg_name, sg_desc)
         sg_id = sg['id']
 
-        sg2_name = rand_name('sg')
-        sg2_desc = rand_name('sg-desc')
+        sg2_name = data_utils.rand_name('sg')
+        sg2_desc = data_utils.rand_name('sg-desc')
         resp, sg2 = self.client.create_security_group(sg2_name, sg2_desc)
         sg2_id = sg2['id']
 
         # Create server and add the security group created
         # above to the server we just created
-        server_name = rand_name('server')
+        server_name = data_utils.rand_name('server')
         resp, server = self.servers_client.create_server(server_name,
                                                          self.image_ref,
                                                          self.flavor_ref)

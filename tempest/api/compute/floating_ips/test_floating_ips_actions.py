@@ -15,8 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
+
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -46,7 +48,9 @@ class FloatingIPsTestJSON(base.BaseComputeTest):
         for i in range(len(body)):
             cls.floating_ip_ids.append(body[i]['id'])
         while True:
-            cls.non_exist_id = rand_name('999')
+            cls.non_exist_id = data_utils.rand_int_id(start=999)
+            if cls.config.service_available.neutron:
+                cls.non_exist_id = str(uuid.uuid4())
             if cls.non_exist_id not in cls.floating_ip_ids:
                 break
 

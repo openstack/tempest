@@ -18,7 +18,7 @@
 from testtools.matchers import Contains
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -28,11 +28,11 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     @classmethod
     def setUpClass(cls):
         super(UsersTestJSON, cls).setUpClass()
-        cls.alt_user = rand_name('test_user_')
-        cls.alt_password = rand_name('pass_')
+        cls.alt_user = data_utils.rand_name('test_user_')
+        cls.alt_password = data_utils.rand_name('pass_')
         cls.alt_email = cls.alt_user + '@testmail.tm'
-        cls.alt_tenant = rand_name('test_tenant_')
-        cls.alt_description = rand_name('desc_')
+        cls.alt_tenant = data_utils.rand_name('test_tenant_')
+        cls.alt_description = data_utils.rand_name('desc_')
 
     @attr(type='smoke')
     def test_create_user(self):
@@ -49,7 +49,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     def test_create_user_with_enabled(self):
         # Create a user with enabled : False
         self.data.setup_test_tenant()
-        name = rand_name('test_user_')
+        name = data_utils.rand_name('test_user_')
         resp, user = self.client.create_user(name, self.alt_password,
                                              self.data.tenant['id'],
                                              self.alt_email, enabled=False)
@@ -62,7 +62,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     @attr(type='smoke')
     def test_update_user(self):
         # Test case to check if updating of user attributes is successful.
-        test_user = rand_name('test_user_')
+        test_user = data_utils.rand_name('test_user_')
         self.data.setup_test_tenant()
         resp, user = self.client.create_user(test_user, self.alt_password,
                                              self.data.tenant['id'],
@@ -70,7 +70,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user['id'])
         # Updating user details with new values
-        u_name2 = rand_name('user2-')
+        u_name2 = data_utils.rand_name('user2-')
         u_email2 = u_name2 + '@testmail.tm'
         resp, update_user = self.client.update_user(user['id'], name=u_name2,
                                                     email=u_email2,
@@ -90,7 +90,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     @attr(type='smoke')
     def test_delete_user(self):
         # Delete a user
-        test_user = rand_name('test_user_')
+        test_user = data_utils.rand_name('test_user_')
         self.data.setup_test_tenant()
         resp, user = self.client.create_user(test_user, self.alt_password,
                                              self.data.tenant['id'],
@@ -144,7 +144,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.data.setup_test_tenant()
         user_ids = list()
         fetched_user_ids = list()
-        alt_tenant_user1 = rand_name('tenant_user1_')
+        alt_tenant_user1 = data_utils.rand_name('tenant_user1_')
         resp, user1 = self.client.create_user(alt_tenant_user1, 'password1',
                                               self.data.tenant['id'],
                                               'user1@123')
@@ -152,7 +152,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         user_ids.append(user1['id'])
         self.data.users.append(user1)
 
-        alt_tenant_user2 = rand_name('tenant_user2_')
+        alt_tenant_user2 = data_utils.rand_name('tenant_user2_')
         resp, user2 = self.client.create_user(alt_tenant_user2, 'password2',
                                               self.data.tenant['id'],
                                               'user2@123')
@@ -187,7 +187,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                                                   role['id'])
         self.assertEqual('200', resp['status'])
 
-        alt_user2 = rand_name('second_user_')
+        alt_user2 = data_utils.rand_name('second_user_')
         resp, second_user = self.client.create_user(alt_user2, 'password1',
                                                     self.data.tenant['id'],
                                                     'user2@123')
