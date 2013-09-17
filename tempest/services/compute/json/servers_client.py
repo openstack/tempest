@@ -236,8 +236,11 @@ class ServersClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['metadata']
 
-    def set_server_metadata(self, server_id, meta):
-        post_body = json.dumps({'metadata': meta})
+    def set_server_metadata(self, server_id, meta, no_metadata_field=False):
+        if no_metadata_field:
+            post_body = ""
+        else:
+            post_body = json.dumps({'metadata': meta})
         resp, body = self.put('servers/%s/metadata' % str(server_id),
                               post_body, self.headers)
         body = json.loads(body)

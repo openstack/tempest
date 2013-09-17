@@ -482,14 +482,15 @@ class ServersClientXML(RestClientXML):
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
-    def set_server_metadata(self, server_id, meta):
+    def set_server_metadata(self, server_id, meta, no_metadata_field=False):
         doc = Document()
-        metadata = Element("metadata")
-        doc.append(metadata)
-        for k, v in meta.items():
-            meta_element = Element("meta", key=k)
-            meta_element.append(Text(v))
-            metadata.append(meta_element)
+        if not no_metadata_field:
+            metadata = Element("metadata")
+            doc.append(metadata)
+            for k, v in meta.items():
+                meta_element = Element("meta", key=k)
+                meta_element.append(Text(v))
+                metadata.append(meta_element)
         resp, body = self.put('servers/%s/metadata' % str(server_id),
                               str(doc), self.headers)
         return resp, xml_to_json(etree.fromstring(body))
