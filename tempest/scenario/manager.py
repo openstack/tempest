@@ -425,7 +425,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         self.addCleanup(image_client.images.delete, image_id)
         self.status_timeout(image_client.images, image_id, 'active')
         snapshot_image = image_client.images.get(image_id)
-        self.assertEquals(name, snapshot_image.name)
+        self.assertEqual(name, snapshot_image.name)
         LOG.debug("Created snapshot image %s for server %s",
                   snapshot_image.name, server.name)
         return snapshot_image

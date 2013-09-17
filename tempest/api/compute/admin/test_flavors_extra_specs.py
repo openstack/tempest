@@ -102,7 +102,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
             self.flavor['id'])
         self.assertEqual(resp.status, 200)
         for key in specs:
-            self.assertEquals(body[key], specs[key])
+            self.assertEqual(body[key], specs[key])
 
     @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_unset_keys(self):

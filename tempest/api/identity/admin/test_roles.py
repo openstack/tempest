@@ -171,7 +171,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
                                                        user['id'], role['id'])
         resp, body = self.client.remove_user_role(tenant['id'], user['id'],
                                                   user_role['id'])
-        self.assertEquals(resp['status'], '204')
+        self.assertEqual(resp['status'], '204')
 
     @attr(type='gate')
     def test_remove_user_role_by_unauthorized_user(self):

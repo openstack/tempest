@@ -92,7 +92,7 @@ class TestStampPattern(manager.OfficialClientTest):
         self.addCleanup(cleaner)
         self._wait_for_volume_status(volume, 'available')
         self._wait_for_volume_snapshot_status(snapshot, 'available')
-        self.assertEquals(snapshot_name, snapshot.display_name)
+        self.assertEqual(snapshot_name, snapshot.display_name)
         return snapshot
 
     def _wait_for_volume_status(self, volume, status):

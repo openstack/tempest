@@ -50,7 +50,7 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
             self.assertTrue(resp['status'].startswith('2'))
             # verifying the existence of service created
             self.assertIn('id', fetched_service)
-            self.assertEquals(fetched_service['id'], service_data['id'])
+            self.assertEqual(fetched_service['id'], service_data['id'])
             self.assertIn('name', fetched_service)
             self.assertEqual(fetched_service['name'], service_data['name'])
             self.assertIn('type', fetched_service)
