@@ -118,7 +118,7 @@ class ServerMetadataTestJSON(base.BaseComputeTest):
         # The value for a specific metadata key should be returned
         resp, meta = self.client.get_server_metadata_item(self.server_id,
                                                           'key2')
-        self.assertTrue('value2', meta['key2'])
+        self.assertEqual('value2', meta['key2'])
 
     @attr(type='gate')
     def test_set_server_metadata_item(self):

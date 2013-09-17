@@ -46,7 +46,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
         resp, body = self.client.list_volume_types_extra_specs(
             self.volume_type['id'])
         self.assertEqual(200, resp.status)
-        self.assertTrue(type(body), dict)
+        self.assertIsInstance(body, dict)
         self.assertTrue('spec1' in body, "Incorrect volume type extra"
                         " spec returned")
 

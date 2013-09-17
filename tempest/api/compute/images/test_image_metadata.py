@@ -89,7 +89,7 @@ class ImagesMetadataTestJSON(base.BaseComputeTest):
         # The value for a specific metadata key should be returned
         resp, meta = self.client.get_image_metadata_item(self.image_id,
                                                          'key2')
-        self.assertTrue('value2', meta['key2'])
+        self.assertEqual('value2', meta['key2'])
 
     @attr(type='gate')
     def test_set_image_metadata_item(self):

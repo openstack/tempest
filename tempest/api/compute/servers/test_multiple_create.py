@@ -87,7 +87,7 @@ class MultipleCreateTestJSON(base.BaseComputeTest):
                                                    min_count=1,
                                                    max_count=2,
                                                    return_reservation_id=True)
-        self.assertTrue(resp['status'], 202)
+        self.assertEqual(resp['status'], '202')
         self.assertIn('reservation_id', body)
 
 
