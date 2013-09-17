@@ -202,21 +202,25 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.assertIn(myrouter.name, seen_router_names)
             self.assertIn(myrouter.id, seen_router_ids)
 
+    def _create_server(self, name, network):
+        tenant_id = network.tenant_id
+        keypair_name = self.keypairs[tenant_id].name
+        security_groups = [self.security_groups[tenant_id].name]
+        create_kwargs = {
+            'nics': [
+                {'net-id': network.id},
+            ],
+            'key_name': keypair_name,
+            'security_groups': security_groups,
+        }
+        server = self.create_server(self.compute_client, name=name,
+                                    create_kwargs=create_kwargs)
+        return server
+
     def _create_servers(self):
         for i, network in enumerate(self.networks):
-            tenant_id = network.tenant_id
             name = rand_name('server-smoke-%d-' % i)
-            keypair_name = self.keypairs[tenant_id].name
-            security_groups = [self.security_groups[tenant_id].name]
-            create_kwargs = {
-                'nics': [
-                    {'net-id': network.id},
-                ],
-                'key_name': keypair_name,
-                'security_groups': security_groups,
-            }
-            server = self.create_server(self.compute_client, name=name,
-                                        create_kwargs=create_kwargs)
+            server = self._create_server(name, network)
             self.servers.append(server)
 
     def _check_tenant_network_connectivity(self):
