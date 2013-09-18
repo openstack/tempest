@@ -54,8 +54,7 @@ def state_wait(lfunction, final_set=set(), valid_set=None):
             raise TestCase.failureException("State change timeout exceeded!"
                                             '(%ds) While waiting'
                                             'for %s at "%s"' %
-                                            (dtime,
-                                            final_set, status))
+                                            (dtime, final_set, status))
         time.sleep(default_check_interval)
         old_status = status
         status = lfunction()
@@ -78,8 +77,7 @@ def re_search_wait(lfunction, regexp):
             raise TestCase.failureException('Pattern find timeout exceeded!'
                                             '(%ds) While waiting for'
                                             '"%s" pattern in "%s"' %
-                                            (dtime,
-                                            regexp, text))
+                                            (dtime, regexp, text))
         time.sleep(default_check_interval)
 
 
