@@ -49,7 +49,17 @@ class RestClient(object):
         self.service = None
         self.token = None
         self.base_url = None
-        self.region = {'compute': self.config.identity.region}
+        self.region = {}
+        for cfgname in dir(self.config):
+            # Find all config.FOO.catalog_type and assume FOO is a service.
+            cfg = getattr(self.config, cfgname)
+            catalog_type = getattr(cfg, 'catalog_type', None)
+            if not catalog_type:
+                continue
+            service_region = getattr(cfg, 'region', None)
+            if not service_region:
+                service_region = self.config.identity.region
+            self.region[catalog_type] = service_region
         self.endpoint_url = 'publicURL'
         self.headers = {'Content-Type': 'application/%s' % self.TYPE,
                         'Accept': 'application/%s' % self.TYPE}

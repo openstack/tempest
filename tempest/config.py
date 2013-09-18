@@ -44,7 +44,10 @@ IdentityGroup = [
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
     cfg.StrOpt('region',
                default='RegionOne',
-               help="The identity region name to use."),
+               help="The identity region name to use. Also used as the other "
+                    "services' region name unless they are set explicitly. "
+                    "If no such region is found in the service catalog, the "
+                    "first found one is used."),
     cfg.StrOpt('username',
                default='demo',
                help="Username to use for Nova API requests."),
@@ -200,6 +203,12 @@ ComputeGroup = [
     cfg.StrOpt('catalog_type',
                default='compute',
                help="Catalog type of the Compute service."),
+    cfg.StrOpt('region',
+               default='',
+               help="The compute region name to use. If empty, the value "
+                    "of identity.region is used instead. If no such region "
+                    "is found in the service catalog, the first found one is "
+                    "used."),
     cfg.StrOpt('path_to_private_key',
                default=None,
                help="Path to a private key file for SSH access to remote "
@@ -255,6 +264,12 @@ ImageGroup = [
     cfg.StrOpt('catalog_type',
                default='image',
                help='Catalog type of the Image service.'),
+    cfg.StrOpt('region',
+               default='',
+               help="The image region name to use. If empty, the value "
+                    "of identity.region is used instead. If no such region "
+                    "is found in the service catalog, the first found one is "
+                    "used."),
     cfg.StrOpt('http_image',
                default='http://download.cirros-cloud.net/0.3.1/'
                'cirros-0.3.1-x86_64-uec.tar.gz',
@@ -275,6 +290,12 @@ NetworkGroup = [
     cfg.StrOpt('catalog_type',
                default='network',
                help='Catalog type of the Neutron service.'),
+    cfg.StrOpt('region',
+               default='',
+               help="The network region name to use. If empty, the value "
+                    "of identity.region is used instead. If no such region "
+                    "is found in the service catalog, the first found one is "
+                    "used."),
     cfg.StrOpt('tenant_network_cidr',
                default="10.100.0.0/16",
                help="The cidr block to allocate tenant networks from"),
@@ -315,6 +336,12 @@ VolumeGroup = [
     cfg.StrOpt('catalog_type',
                default='Volume',
                help="Catalog type of the Volume Service"),
+    cfg.StrOpt('region',
+               default='',
+               help="The volume region name to use. If empty, the value "
+                    "of identity.region is used instead. If no such region "
+                    "is found in the service catalog, the first found one is "
+                    "used."),
     cfg.BoolOpt('multi_backend_enabled',
                 default=False,
                 help="Runs Cinder multi-backend test (requires 2 backends)"),
@@ -349,6 +376,12 @@ ObjectStoreConfig = [
     cfg.StrOpt('catalog_type',
                default='object-store',
                help="Catalog type of the Object-Storage service."),
+    cfg.StrOpt('region',
+               default='',
+               help="The object-storage region name to use. If empty, the "
+                    "value of identity.region is used instead. If no such "
+                    "region is found in the service catalog, the first found "
+                    "one is used."),
     cfg.StrOpt('container_sync_timeout',
                default=120,
                help="Number of seconds to time on waiting for a container"
@@ -380,6 +413,12 @@ OrchestrationGroup = [
     cfg.StrOpt('catalog_type',
                default='orchestration',
                help="Catalog type of the Orchestration service."),
+    cfg.StrOpt('region',
+               default='',
+               help="The orchestration region name to use. If empty, the "
+                    "value of identity.region is used instead. If no such "
+                    "region is found in the service catalog, the first found "
+                    "one is used."),
     cfg.BoolOpt('allow_tenant_isolation',
                 default=False,
                 help="Allows test cases to create/destroy tenants and "

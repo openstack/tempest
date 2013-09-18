@@ -111,7 +111,10 @@ class APIClientEC2(BotoClientBase):
         aws_secret = config.boto.aws_secret
         purl = urlparse.urlparse(config.boto.ec2_url)
 
-        region = boto.ec2.regioninfo.RegionInfo(name=config.identity.region,
+        region_name = config.compute.region
+        if not region_name:
+            region_name = config.identity.region
+        region = boto.ec2.regioninfo.RegionInfo(name=region_name,
                                                 endpoint=purl.hostname)
         port = purl.port
         if port is None:
