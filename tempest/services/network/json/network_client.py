@@ -478,3 +478,15 @@ class NetworkClientJSON(RestClient):
         resp, body = self.put(uri, body=body, headers=self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_pools(self):
+        uri = '%s/lb/pools' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def show_pool(self, uuid):
+        uri = '%s/lb/pools/%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
