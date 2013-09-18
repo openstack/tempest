@@ -60,7 +60,7 @@ class TestWrappers(testtools.TestCase):
         subprocess.call(['git', 'init'])
         exit_code = subprocess.call('sh pretty_tox.sh tests.passing',
                                     shell=True, stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEquals(exit_code, 0)
+        self.assertEqual(exit_code, 0)
 
     @attr(type='smoke')
     def test_pretty_tox_fails(self):
@@ -76,7 +76,7 @@ class TestWrappers(testtools.TestCase):
         subprocess.call(['git', 'init'])
         exit_code = subprocess.call('sh pretty_tox.sh', shell=True,
                                     stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEquals(exit_code, 1)
+        self.assertEqual(exit_code, 1)
 
     @attr(type='smoke')
     def test_pretty_tox_serial(self):
@@ -88,7 +88,7 @@ class TestWrappers(testtools.TestCase):
         os.chdir(self.directory)
         exit_code = subprocess.call('sh pretty_tox_serial.sh tests.passing',
                                     shell=True, stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEquals(exit_code, 0)
+        self.assertEqual(exit_code, 0)
 
     @attr(type='smoke')
     def test_pretty_tox_serial_fails(self):
@@ -100,4 +100,4 @@ class TestWrappers(testtools.TestCase):
         os.chdir(self.directory)
         exit_code = subprocess.call('sh pretty_tox_serial.sh', shell=True,
                                     stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEquals(exit_code, 1)
+        self.assertEqual(exit_code, 1)

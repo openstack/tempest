@@ -136,8 +136,8 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
         # Delete the flavor
         new_flavor_id = flavor['id']
         resp_delete, body = self.client.delete_flavor(new_flavor_id)
-        self.assertEquals(200, resp.status)
-        self.assertEquals(202, resp_delete.status)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(202, resp_delete.status)
 
         # Deleted flavors can be seen via detailed GET
         resp, flavor = self.client.get_flavor_details(new_flavor_id)

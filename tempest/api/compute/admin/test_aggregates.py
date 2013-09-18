@@ -61,12 +61,12 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         # Create and delete an aggregate.
         aggregate_name = rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
-        self.assertEquals(200, resp.status)
-        self.assertEquals(aggregate_name, aggregate['name'])
-        self.assertEquals(None, aggregate['availability_zone'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(aggregate_name, aggregate['name'])
+        self.assertEqual(None, aggregate['availability_zone'])
 
         resp, _ = self.client.delete_aggregate(aggregate['id'])
-        self.assertEquals(200, resp.status)
+        self.assertEqual(200, resp.status)
         self.client.wait_for_resource_deletion(aggregate['id'])
 
     @attr(type='gate')
@@ -75,12 +75,12 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         aggregate_name = rand_name(self.aggregate_name_prefix)
         az_name = rand_name(self.az_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
-        self.assertEquals(200, resp.status)
-        self.assertEquals(aggregate_name, aggregate['name'])
-        self.assertEquals(az_name, aggregate['availability_zone'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(aggregate_name, aggregate['name'])
+        self.assertEqual(az_name, aggregate['availability_zone'])
 
         resp, _ = self.client.delete_aggregate(aggregate['id'])
-        self.assertEquals(200, resp.status)
+        self.assertEqual(200, resp.status)
         self.client.wait_for_resource_deletion(aggregate['id'])
 
     @attr(type='gate')
@@ -91,7 +91,7 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         resp, aggregates = self.client.list_aggregates()
-        self.assertEquals(200, resp.status)
+        self.assertEqual(200, resp.status)
         self.assertIn((aggregate['id'], aggregate['availability_zone']),
                       map(lambda x: (x['id'], x['availability_zone']),
                           aggregates))
@@ -104,10 +104,10 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         resp, body = self.client.get_aggregate(aggregate['id'])
-        self.assertEquals(200, resp.status)
-        self.assertEquals(aggregate['name'], body['name'])
-        self.assertEquals(aggregate['availability_zone'],
-                          body['availability_zone'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(aggregate['name'], body['name'])
+        self.assertEqual(aggregate['availability_zone'],
+                         body['availability_zone'])
 
     @attr(type=['negative', 'gate'])
     def test_aggregate_create_as_user(self):
@@ -166,17 +166,17 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         resp, body = self.client.add_host(aggregate['id'], self.host)
-        self.assertEquals(200, resp.status)
-        self.assertEquals(aggregate_name, body['name'])
-        self.assertEquals(aggregate['availability_zone'],
-                          body['availability_zone'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(aggregate_name, body['name'])
+        self.assertEqual(aggregate['availability_zone'],
+                         body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
         resp, body = self.client.remove_host(aggregate['id'], self.host)
-        self.assertEquals(200, resp.status)
-        self.assertEquals(aggregate_name, body['name'])
-        self.assertEquals(aggregate['availability_zone'],
-                          body['availability_zone'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(aggregate_name, body['name'])
+        self.assertEqual(aggregate['availability_zone'],
+                         body['availability_zone'])
         self.assertNotIn(self.host, body['hosts'])
 
     @attr(type='gate')
@@ -191,10 +191,10 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
 
         resp, aggregates = self.client.list_aggregates()
         aggs = filter(lambda x: x['id'] == aggregate['id'], aggregates)
-        self.assertEquals(1, len(aggs))
+        self.assertEqual(1, len(aggs))
         agg = aggs[0]
-        self.assertEquals(aggregate_name, agg['name'])
-        self.assertEquals(None, agg['availability_zone'])
+        self.assertEqual(aggregate_name, agg['name'])
+        self.assertEqual(None, agg['availability_zone'])
         self.assertIn(self.host, agg['hosts'])
 
     @attr(type='gate')
@@ -208,8 +208,8 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
 
         resp, body = self.client.get_aggregate(aggregate['id'])
-        self.assertEquals(aggregate_name, body['name'])
-        self.assertEquals(None, body['availability_zone'])
+        self.assertEqual(aggregate_name, body['name'])
+        self.assertEqual(None, body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
     @attr(type='gate')

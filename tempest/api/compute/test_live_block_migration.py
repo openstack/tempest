@@ -110,7 +110,7 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
         target_host = self._get_host_other_than(actual_host)
         self._migrate_server_to(server_id, target_host)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
-        self.assertEquals(target_host, self._get_host_for_server(server_id))
+        self.assertEqual(target_host, self._get_host_for_server(server_id))
 
     @testtools.skipIf(not CONF.compute.live_migration_available,
                       'Live migration not available')
@@ -122,7 +122,7 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
 
         self.assertRaises(exceptions.BadRequest, self._migrate_server_to,
                           server_id, target_host)
-        self.assertEquals('ACTIVE', self._get_server_status(server_id))
+        self.assertEqual('ACTIVE', self._get_server_status(server_id))
 
     @testtools.skipIf(not CONF.compute.live_migration_available or
                       not CONF.compute.use_block_migration_for_live_migration,
@@ -153,7 +153,7 @@ class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
 
         self._migrate_server_to(server_id, target_host)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
-        self.assertEquals(target_host, self._get_host_for_server(server_id))
+        self.assertEqual(target_host, self._get_host_for_server(server_id))
 
     @classmethod
     def tearDownClass(cls):

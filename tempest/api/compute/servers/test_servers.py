@@ -81,7 +81,7 @@ class ServersTestJSON(base.BaseComputeTest):
         # Update the server with a new name
         resp, server = self.client.update_server(server['id'],
                                                  name='newname')
-        self.assertEquals(200, resp.status)
+        self.assertEqual(200, resp.status)
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the name of the server has changed

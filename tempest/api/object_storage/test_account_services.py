@@ -59,7 +59,7 @@ class AccountTest(base.BaseObjectTest):
             params = {'limit': limit}
             resp, container_list = \
                 self.account_client.list_account_containers(params=params)
-            self.assertEquals(len(container_list), limit)
+            self.assertEqual(len(container_list), limit)
 
     @attr(type='smoke')
     def test_list_containers_with_marker(self):
@@ -70,11 +70,11 @@ class AccountTest(base.BaseObjectTest):
         params = {'marker': self.containers[-1]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEquals(len(container_list), 0)
+        self.assertEqual(len(container_list), 0)
         params = {'marker': self.containers[self.containers_count / 2]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEquals(len(container_list), self.containers_count / 2 - 1)
+        self.assertEqual(len(container_list), self.containers_count / 2 - 1)
 
     @attr(type='smoke')
     def test_list_containers_with_end_marker(self):
@@ -85,11 +85,11 @@ class AccountTest(base.BaseObjectTest):
         params = {'end_marker': self.containers[0]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEquals(len(container_list), 0)
+        self.assertEqual(len(container_list), 0)
         params = {'end_marker': self.containers[self.containers_count / 2]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEquals(len(container_list), self.containers_count / 2)
+        self.assertEqual(len(container_list), self.containers_count / 2)
 
     @attr(type='smoke')
     def test_list_containers_with_limit_and_marker(self):

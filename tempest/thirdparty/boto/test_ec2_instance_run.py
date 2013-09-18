@@ -176,25 +176,25 @@ class InstanceRunTest(BotoTestCase):
             instance.add_tag('key1', value='value1')
 
         tags = self.ec2_client.get_all_tags()
-        self.assertEquals(tags[0].name, 'key1')
-        self.assertEquals(tags[0].value, 'value1')
+        self.assertEqual(tags[0].name, 'key1')
+        self.assertEqual(tags[0].value, 'value1')
 
         tags = self.ec2_client.get_all_tags(filters={'key': 'key1'})
-        self.assertEquals(tags[0].name, 'key1')
-        self.assertEquals(tags[0].value, 'value1')
+        self.assertEqual(tags[0].name, 'key1')
+        self.assertEqual(tags[0].value, 'value1')
 
         tags = self.ec2_client.get_all_tags(filters={'value': 'value1'})
-        self.assertEquals(tags[0].name, 'key1')
-        self.assertEquals(tags[0].value, 'value1')
+        self.assertEqual(tags[0].name, 'key1')
+        self.assertEqual(tags[0].value, 'value1')
 
         tags = self.ec2_client.get_all_tags(filters={'key': 'value2'})
-        self.assertEquals(len(tags), 0)
+        self.assertEqual(len(tags), 0)
 
         for instance in reservation.instances:
             instance.remove_tag('key1', value='value1')
 
         tags = self.ec2_client.get_all_tags()
-        self.assertEquals(len(tags), 0)
+        self.assertEqual(len(tags), 0)
 
         for instance in reservation.instances:
             instance.stop()
