@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils.data_utils import rand_name
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import services
@@ -49,18 +48,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     @services('compute')
     def test_resize_server_confirm(self):
         # We create an instance for use in this test
-        i_name = rand_name('instance')
-        flavor_id = self.config.compute.flavor_ref
-        base_image_id = self.config.compute.image_ref
-        self.instance = self.compute_client.servers.create(
-            i_name, base_image_id, flavor_id)
-        self.assertEqual(self.instance.name, i_name)
-        self.set_resource('instance', self.instance)
-        self.assertEqual(self.instance.status, 'BUILD')
-        instance_id = self.get_resource('instance').id
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
-        instance = self.get_resource('instance')
+        instance = self.create_server(self.compute_client)
         instance_id = instance.id
         resize_flavor = self.config.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
@@ -78,18 +66,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     @services('compute')
     def test_server_sequence_suspend_resume(self):
         # We create an instance for use in this test
-        i_name = rand_name('instance')
-        flavor_id = self.config.compute.flavor_ref
-        base_image_id = self.config.compute.image_ref
-        self.instance = self.compute_client.servers.create(
-            i_name, base_image_id, flavor_id)
-        self.assertEqual(self.instance.name, i_name)
-        self.set_resource('instance', self.instance)
-        self.assertEqual(self.instance.status, 'BUILD')
-        instance_id = self.get_resource('instance').id
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
-        instance = self.get_resource('instance')
+        instance = self.create_server(self.compute_client)
         instance_id = instance.id
         LOG.debug("Suspending instance %s. Current status: %s",
                   instance_id, instance.status)
