@@ -58,9 +58,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.ports = []
         cls.pools = []
         cls.vips = []
+        cls.members = []
 
     @classmethod
     def tearDownClass(cls):
+        for member in cls.members:
+            cls.client.delete_member(member['id'])
         for vip in cls.vips:
             cls.client.delete_vip(vip['id'])
         for pool in cls.pools:
@@ -135,3 +138,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         vip = body['vip']
         cls.vips.append(vip)
         return vip
+
+    @classmethod
+    def create_member(cls, protocol_port, pool):
+        """Wrapper utility that returns a test member."""
+        resp, body = cls.client.create_member("10.0.9.46",
+                                              protocol_port,
+                                              pool['id'])
+        member = body['member']
+        cls.members.append(member)
+        return member

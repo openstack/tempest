@@ -331,6 +331,45 @@ class NetworkClientXML(RestClientXML):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def list_members(self):
+        url = '%s/lb/members' % (self.uri_prefix)
+        resp, body = self.get(url, self.headers)
+        members = self._parse_array(etree.fromstring(body))
+        members = {"members": members}
+        return resp, members
+
+    def create_member(self, address, protocol_port, pool_id):
+        uri = '%s/lb/members' % (self.uri_prefix)
+        post_body = Element("member")
+        p1 = Element("address", address)
+        p2 = Element("protocol_port", protocol_port)
+        p3 = Element("pool_id", pool_id)
+        post_body.append(p1)
+        post_body.append(p2)
+        post_body.append(p3)
+        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def delete_member(self, member_id):
+        uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
+        return self.delete(uri, self.headers)
+
+    def show_member(self, member_id):
+        uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
+        resp, body = self.get(uri, self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def update_member(self, admin_state_up, member_id):
+        uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
+        put_body = Element("member")
+        p2 = Element("admin_state_up", admin_state_up)
+        put_body.append(p2)
+        resp, body = self.put(uri, str(Document(put_body)), self.headers)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)

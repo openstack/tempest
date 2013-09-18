@@ -49,6 +49,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         cls.pool = cls.create_pool(pool_name, "ROUND_ROBIN",
                                    "HTTP", cls.subnet)
         cls.vip = cls.create_vip(vip_name, "HTTP", 80, cls.subnet, cls.pool)
+        cls.member = cls.create_member(80, cls.pool)
 
     @attr(type='smoke')
     def test_list_vips(self):
@@ -119,6 +120,41 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertEqual('200', resp['status'])
         pools = body['pools']
         self.assertIn(self.pool['id'], [p['id'] for p in pools])
+
+    @attr(type='smoke')
+    def test_list_members(self):
+        # Verify the member exists in the list of all members
+        resp, body = self.client.list_members()
+        self.assertEqual('200', resp['status'])
+        members = body['members']
+        self.assertIn(self.member['id'], [m['id'] for m in members])
+
+    @attr(type='smoke')
+    def test_create_update_delete_member(self):
+        # Creates a member
+        resp, body = self.client.create_member("10.0.9.46", 80,
+                                               self.pool['id'])
+        self.assertEqual('201', resp['status'])
+        member = body['member']
+        # Verification of member update
+        admin_state = [False, 'False']
+        resp, body = self.client.update_member(admin_state[0], member['id'])
+        self.assertEqual('200', resp['status'])
+        updated_member = body['member']
+        self.assertIn(updated_member['admin_state_up'], admin_state)
+        # Verification of member delete
+        resp, body = self.client.delete_member(member['id'])
+        self.assertEqual('204', resp['status'])
+
+    @attr(type='smoke')
+    def test_show_member(self):
+        # Verifies the details of a member
+        resp, body = self.client.show_member(self.member['id'])
+        self.assertEqual('200', resp['status'])
+        member = body['member']
+        self.assertEqual(self.member['id'], member['id'])
+        self.assertEqual(self.member['admin_state_up'],
+                         member['admin_state_up'])
 
 
 class LoadBalancerXML(LoadBalancerJSON):
