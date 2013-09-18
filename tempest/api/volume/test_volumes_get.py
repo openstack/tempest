@@ -34,7 +34,7 @@ class VolumesGetTest(base.BaseVolumeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_resource_deletion(volume_id)
 
-    def _volume_create_get_delete(self, **kwargs):
+    def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         volume = {}
         v_name = rand_name('Volume')
@@ -74,6 +74,29 @@ class VolumesGetTest(base.BaseVolumeTest):
         if 'imageRef' not in kwargs:
             self.assertEqual(fetched_volume['bootable'], False)
 
+        # Update Volume
+        new_v_name = rand_name('new-Volume')
+        new_desc = 'This is the new description of volume'
+        resp, update_volume = \
+            self.client.update_volume(volume['id'],
+                                      display_name=new_v_name,
+                                      display_description=new_desc)
+        # Assert response body for update_volume method
+        self.assertEqual(200, resp.status)
+        self.assertEqual(new_v_name, update_volume['display_name'])
+        self.assertEqual(new_desc, update_volume['display_description'])
+        # Assert response body for get_volume method
+        resp, updated_volume = self.client.get_volume(volume['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(volume['id'], updated_volume['id'])
+        self.assertEqual(new_v_name, updated_volume['display_name'])
+        self.assertEqual(new_desc, updated_volume['display_description'])
+        self.assertEqual(metadata, updated_volume['metadata'])
+        if 'imageRef' in kwargs:
+            self.assertEqual(updated_volume['bootable'], True)
+        if 'imageRef' not in kwargs:
+            self.assertEqual(updated_volume['bootable'], False)
+
     @attr(type='gate')
     def test_volume_get_metadata_none(self):
         # Create a volume without passing metadata, get details, and delete
@@ -94,19 +117,20 @@ class VolumesGetTest(base.BaseVolumeTest):
         self.assertEqual(fetched_volume['metadata'], {})
 
     @attr(type='smoke')
-    def test_volume_create_get_delete(self):
-        self._volume_create_get_delete()
+    def test_volume_create_get_update_delete(self):
+        self._volume_create_get_update_delete()
 
     @attr(type='smoke')
     @services('image')
-    def test_volume_create_get_delete_from_image(self):
-        self._volume_create_get_delete(imageRef=self.config.compute.image_ref)
+    def test_volume_create_get_update_delete_from_image(self):
+        self._volume_create_get_update_delete(imageRef=self.
+                                              config.compute.image_ref)
 
     @attr(type='gate')
-    def test_volume_create_get_delete_as_clone(self):
+    def test_volume_create_get_update_delete_as_clone(self):
         origin = self.create_volume(size=1,
                                     display_name="Volume Origin")
-        self._volume_create_get_delete(source_volid=origin['id'])
+        self._volume_create_get_update_delete(source_volid=origin['id'])
 
 
 class VolumesGetTestXML(VolumesGetTest):

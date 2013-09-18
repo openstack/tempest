@@ -151,6 +151,16 @@ class VolumesClientXML(RestClientXML):
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
+    def update_volume(self, volume_id, **kwargs):
+        """Updates the Specified Volume."""
+        put_body = Element("volume", xmlns=XMLNS_11, **kwargs)
+
+        resp, body = self.put('volumes/%s' % volume_id,
+                              str(Document(put_body)),
+                              self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
         return self.delete("volumes/%s" % str(volume_id))
