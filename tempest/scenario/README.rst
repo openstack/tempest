@@ -24,13 +24,12 @@ projects.
 
 Scope of these tests
 --------------------
-Scenario tests should always test at least 2 services in
-interaction. They should use the official python client libraries for
+Scenario tests should use the official python client libraries for
 OpenStack, as they provide a more realistic approach in how people
 will interact with the services.
 
-TODO: once we have service tags, tests should be tagged with which
-services they exercise.
+Tests should be tagged with which services they exercise, as
+determined by which client libraries are used directly by the test.
 
 
 Example of a good test
