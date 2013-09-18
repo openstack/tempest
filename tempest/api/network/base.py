@@ -59,9 +59,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.pools = []
         cls.vips = []
         cls.members = []
+        cls.health_monitors = []
 
     @classmethod
     def tearDownClass(cls):
+        for health_monitor in cls.health_monitors:
+            cls.client.delete_health_monitor(health_monitor['id'])
         for member in cls.members:
             cls.client.delete_member(member['id'])
         for vip in cls.vips:
@@ -148,3 +151,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         member = body['member']
         cls.members.append(member)
         return member
+
+    @classmethod
+    def create_health_monitor(cls, delay, max_retries, Type, timeout):
+        """Wrapper utility that returns a test health monitor."""
+        resp, body = cls.client.create_health_monitor(delay,
+                                                      max_retries,
+                                                      Type, timeout)
+        health_monitor = body['health_monitor']
+        cls.health_monitors.append(health_monitor)
+        return health_monitor

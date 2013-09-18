@@ -533,3 +533,68 @@ class NetworkClientJSON(RestClient):
         resp, body = self.put(uri, body=body, headers=self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_health_monitors(self):
+        uri = '%s/lb/health_monitors' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_health_monitor(self, delay, max_retries, Type, timeout):
+        post_body = {
+            "health_monitor": {
+                "delay": delay,
+                "max_retries": max_retries,
+                "type": Type,
+                "timeout": timeout
+            }
+        }
+        body = json.dumps(post_body)
+        uri = '%s/lb/health_monitors' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def show_health_monitor(self, uuid):
+        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_health_monitor(self, uuid):
+        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, uuid)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def update_health_monitor(self, admin_state_up, uuid):
+        put_body = {
+            "health_monitor": {
+                "admin_state_up": admin_state_up
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, uuid)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def associate_health_monitor_with_pool(self, health_monitor_id,
+                                           pool_id):
+        post_body = {
+            "health_monitor": {
+                "id": health_monitor_id,
+            }
+        }
+        body = json.dumps(post_body)
+        uri = '%s/lb/pools/%s/health_monitors' % (self.uri_prefix,
+                                                  pool_id)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def disassociate_health_monitor_with_pool(self, health_monitor_id,
+                                              pool_id):
+        uri = '%s/lb/pools/%s/health_monitors/%s' % (self.uri_prefix, pool_id,
+                                                     health_monitor_id)
+        resp, body = self.delete(uri, headers=self.headers)
+        return resp, body
