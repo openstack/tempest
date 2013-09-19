@@ -39,3 +39,11 @@ class HostsClientXML(RestClientXML):
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body
+
+    def show_host_detail(self, hostname):
+        """Show detail information for the host."""
+
+        resp, body = self.get("os-hosts/%s" % str(hostname), self.headers)
+        node = etree.fromstring(body)
+        body = [xml_to_json(x) for x in node.getchildren()]
+        return resp, body

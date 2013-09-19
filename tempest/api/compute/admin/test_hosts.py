@@ -15,6 +15,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
 
@@ -70,6 +71,30 @@ class HostsAdminTestJSON(base.BaseComputeAdminTest):
     def test_list_hosts_with_non_admin_user(self):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.list_hosts)
+
+    @attr(type='gate')
+    def test_show_host_detail(self):
+        resp, hosts = self.client.list_hosts()
+        self.assertEqual(200, resp.status)
+        self.assertTrue(len(hosts) >= 1)
+        hostname = hosts[0]['host_name']
+
+        resp, resources = self.client.show_host_detail(hostname)
+        self.assertEqual(200, resp.status)
+        self.assertTrue(len(resources) >= 1)
+        host_resource = resources[0]['resource']
+        self.assertIsNotNone(host_resource)
+        self.assertIsNotNone(host_resource['cpu'])
+        self.assertIsNotNone(host_resource['disk_gb'])
+        self.assertIsNotNone(host_resource['memory_mb'])
+        self.assertIsNotNone(host_resource['project'])
+        self.assertEqual(hostname, host_resource['host'])
+
+    @attr(type='negative')
+    def test_show_host_detail_with_nonexist_hostname(self):
+        hostname = rand_name('rand_hostname')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.show_host_detail, hostname)
 
 
 class HostsAdminTestXML(HostsAdminTestJSON):
