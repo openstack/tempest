@@ -102,11 +102,39 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.client.clear_auth()
 
     @attr(type='smoke')
+    def test_update_user(self):
+        # Test case to check if updating of user attributes is successful.
+        test_user = rand_name('test_user_')
+        self.data.setup_test_tenant()
+        resp, user = self.client.create_user(test_user, self.alt_password,
+                                             self.data.tenant['id'],
+                                             self.alt_email)
+        # Delete the User at the end of this method
+        self.addCleanup(self.client.delete_user, user['id'])
+        # Updating user details with new values
+        u_name2 = rand_name('user2-')
+        u_email2 = u_name2 + '@testmail.tm'
+        resp, update_user = self.client.update_user(user['id'], name=u_name2,
+                                                    email=u_email2,
+                                                    enabled=False)
+        # Assert response body of update user.
+        self.assertEqual(200, resp.status)
+        self.assertEqual(u_name2, update_user['name'])
+        self.assertEqual(u_email2, update_user['email'])
+        self.assertEqual('false', str(update_user['enabled']).lower())
+        # GET by id after updating
+        resp, updated_user = self.client.get_user(user['id'])
+        # Assert response body of GET after updating
+        self.assertEqual(u_name2, updated_user['name'])
+        self.assertEqual(u_email2, updated_user['email'])
+        self.assertEqual('false', str(updated_user['enabled']).lower())
+
+    @attr(type='smoke')
     def test_delete_user(self):
         # Delete a user
-        alt_user2 = rand_name('alt_user_')
+        test_user = rand_name('test_user_')
         self.data.setup_test_tenant()
-        resp, user = self.client.create_user(alt_user2, self.alt_password,
+        resp, user = self.client.create_user(test_user, self.alt_password,
                                              self.data.tenant['id'],
                                              self.alt_email)
         self.assertEqual('200', resp['status'])
