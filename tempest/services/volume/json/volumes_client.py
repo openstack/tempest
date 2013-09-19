@@ -85,6 +85,14 @@ class VolumesClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['volume']
 
+    def update_volume(self, volume_id, **kwargs):
+        """Updates the Specified Volume."""
+        put_body = json.dumps({'volume': kwargs})
+        resp, body = self.put('volumes/%s' % volume_id, put_body,
+                              self.headers)
+        body = json.loads(body)
+        return resp, body['volume']
+
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
         return self.delete("volumes/%s" % str(volume_id))
