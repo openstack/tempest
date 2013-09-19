@@ -77,6 +77,21 @@ class RestClient(object):
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
 
+    def __str__(self):
+        STRING_LIMIT = 80
+        str_format = ("config:%s, user:%s, password:%s, "
+                      "auth_url:%s, tenant_name:%s, auth_version:%s, "
+                      "service:%s, base_url:%s, region:%s, "
+                      "endpoint_url:%s, build_interval:%s, build_timeout:%s"
+                      "\ntoken:%s..., \nheaders:%s...")
+        return str_format % (self.config, self.user, self.password,
+                             self.auth_url, self.tenant_name,
+                             self.auth_version, self.service,
+                             self.base_url, self.region, self.endpoint_url,
+                             self.build_interval, self.build_timeout,
+                             str(self.token)[0:STRING_LIMIT],
+                             str(self.headers)[0:STRING_LIMIT])
+
     def _set_auth(self):
         """
         Sets the token and base_url used in requests based on the strategy type
