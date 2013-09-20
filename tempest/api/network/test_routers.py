@@ -20,7 +20,10 @@ from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 
 
-class RoutersTest(base.BaseNetworkTest):
+class RoutersTest(base.BaseAdminNetworkTest):
+    # NOTE(salv-orlando): This class inherits from BaseAdminNetworkTest
+    # as some router operations, such as enabling or disabling SNAT
+    # require admin credentials by default
     _interface = 'json'
 
     @classmethod
@@ -130,3 +133,99 @@ class RoutersTest(base.BaseNetworkTest):
             interface['port_id'])
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
+
+    def _verify_router_gateway(self, router_id, exp_ext_gw_info=None):
+        resp, show_body = self.client.show_router(router_id)
+        self.assertEqual('200', resp['status'])
+        actual_ext_gw_info = show_body['router']['external_gateway_info']
+        if exp_ext_gw_info is None:
+            self.assertIsNone(actual_ext_gw_info)
+            return
+        # Verify only keys passed in exp_ext_gw_info
+        for k, v in exp_ext_gw_info.iteritems():
+            self.assertEqual(v, actual_ext_gw_info[k])
+
+    def _verify_gateway_port(self, router_id):
+        resp, list_body = self.admin_client.list_ports(
+            network_id=self.network_cfg.public_network_id,
+            device_id=router_id)
+        self.assertEqual(len(list_body['ports']), 1)
+        gw_port = list_body['ports'][0]
+        fixed_ips = gw_port['fixed_ips']
+        self.assertEqual(len(fixed_ips), 1)
+        resp, public_net_body = self.admin_client.show_network(
+            self.network_cfg.public_network_id)
+        public_subnet_id = public_net_body['network']['subnets'][0]
+        self.assertEqual(fixed_ips[0]['subnet_id'], public_subnet_id)
+
+    @attr(type='smoke')
+    def test_update_router_set_gateway(self):
+        router = self.create_router(rand_name('router-'))
+        self.client.update_router(
+            router['id'],
+            external_gateway_info={
+                'network_id': self.network_cfg.public_network_id})
+        # Verify operation - router
+        resp, show_body = self.client.show_router(router['id'])
+        self.assertEqual('200', resp['status'])
+        self._verify_router_gateway(
+            router['id'],
+            {'network_id': self.network_cfg.public_network_id})
+        self._verify_gateway_port(router['id'])
+
+    @attr(type='smoke')
+    def test_update_router_set_gateway_with_snat_explicit(self):
+        router = self.create_router(rand_name('router-'))
+        self.admin_client.update_router_with_snat_gw_info(
+            router['id'],
+            external_gateway_info={
+                'network_id': self.network_cfg.public_network_id,
+                'enable_snat': True})
+        self._verify_router_gateway(
+            router['id'],
+            {'network_id': self.network_cfg.public_network_id,
+             'enable_snat': True})
+        self._verify_gateway_port(router['id'])
+
+    @attr(type='smoke')
+    def test_update_router_set_gateway_without_snat(self):
+        router = self.create_router(rand_name('router-'))
+        self.admin_client.update_router_with_snat_gw_info(
+            router['id'],
+            external_gateway_info={
+                'network_id': self.network_cfg.public_network_id,
+                'enable_snat': False})
+        self._verify_router_gateway(
+            router['id'],
+            {'network_id': self.network_cfg.public_network_id,
+             'enable_snat': False})
+        self._verify_gateway_port(router['id'])
+
+    @attr(type='smoke')
+    def test_update_router_unset_gateway(self):
+        router = self.create_router(
+            rand_name('router-'),
+            external_network_id=self.network_cfg.public_network_id)
+        self.client.update_router(router['id'], external_gateway_info={})
+        self._verify_router_gateway(router['id'])
+        # No gateway port expected
+        resp, list_body = self.admin_client.list_ports(
+            network_id=self.network_cfg.public_network_id,
+            device_id=router['id'])
+        self.assertFalse(list_body['ports'])
+
+    @attr(type='smoke')
+    def test_update_router_reset_gateway_without_snat(self):
+        router = self.create_router(
+            rand_name('router-'),
+            external_network_id=self.network_cfg.public_network_id)
+        self.admin_client.update_router_with_snat_gw_info(
+            router['id'],
+            external_gateway_info={
+                'network_id': self.network_cfg.public_network_id,
+                'enable_snat': False})
+        self._verify_router_gateway(
+            router['id'],
+            {'network_id': self.network_cfg.public_network_id,
+             'enable_snat': False})
+        self._verify_gateway_port(router['id'])
