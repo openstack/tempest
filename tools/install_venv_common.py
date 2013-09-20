@@ -119,8 +119,7 @@ class InstallVenv(object):
         self.pip_install('setuptools')
         self.pip_install('pbr')
 
-        self.pip_install('-r', self.requirements)
-        self.pip_install('-r', self.test_requirements)
+        self.pip_install('-r', self.requirements, '-r', self.test_requirements)
 
     def post_process(self):
         self.get_distro().post_process()
