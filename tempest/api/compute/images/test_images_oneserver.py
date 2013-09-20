@@ -104,7 +104,6 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         resp, body = self.client.create_image(self.server['id'], name, meta)
         self.assertEqual(202, resp.status)
         image_id = parse_image_id(resp['location'])
-        self.client.wait_for_image_resp_code(image_id, 200)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
         # Verify the image was created correctly

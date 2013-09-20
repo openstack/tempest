@@ -47,7 +47,6 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
             # Create images to be used in the filter tests
             resp, body = cls.create_image_from_server(cls.server1['id'])
             cls.image1_id = parse_image_id(resp['location'])
-            cls.client.wait_for_image_resp_code(cls.image1_id, 200)
             cls.client.wait_for_image_status(cls.image1_id, 'ACTIVE')
             resp, cls.image1 = cls.client.get_image(cls.image1_id)
 
@@ -56,13 +55,11 @@ class ListImageFiltersTestJSON(base.BaseComputeTest):
             # server will sometimes cause failures
             resp, body = cls.create_image_from_server(cls.server2['id'])
             cls.image3_id = parse_image_id(resp['location'])
-            cls.client.wait_for_image_resp_code(cls.image3_id, 200)
             cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
             resp, cls.image3 = cls.client.get_image(cls.image3_id)
 
             resp, body = cls.create_image_from_server(cls.server1['id'])
             cls.image2_id = parse_image_id(resp['location'])
-            cls.client.wait_for_image_resp_code(cls.image2_id, 200)
 
             cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
             resp, cls.image2 = cls.client.get_image(cls.image2_id)

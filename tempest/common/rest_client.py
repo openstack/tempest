@@ -32,6 +32,9 @@ from tempest.services.compute.xml.common import xml_to_json
 MAX_RECURSION_DEPTH = 2
 TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
+# All the successful HTTP status codes from RFC 2616
+HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
+
 
 class RestClient(object):
     TYPE = "json"
@@ -265,6 +268,20 @@ class RestClient(object):
                            (req_url, resp.status))
             raise exceptions.AuthenticationFailure(user=user,
                                                    password=password)
+
+    def expected_success(self, expected_code, read_code):
+        assert_msg = ("This function only allowed to use for HTTP status"
+                      "codes which explicitly defined in the RFC 2616. {0}"
+                      " is not a defined Success Code!").format(expected_code)
+        assert expected_code in HTTP_SUCCESS, assert_msg
+
+        # NOTE(afazekas): the http status code above 400 is processed by
+        # the _error_checker method
+        if read_code < 400 and read_code != expected_code:
+                pattern = """Unexpected http success status code {0},
+                             The expected status code is {1}"""
+                details = pattern.format(read_code, expected_code)
+                raise exceptions.InvalidHttpSuccessCode(details)
 
     def post(self, url, body, headers):
         return self.request('POST', url, headers, body)
