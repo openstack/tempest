@@ -19,7 +19,6 @@ from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
-import testtools
 
 
 class QuotasAdminTestJSON(base.BaseComputeAdminTest):
@@ -73,12 +72,12 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
 
-    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        new_quota_set = {'force': True,
-                         'injected_file_content_bytes': 20480,
+        resp, default_quota_set = self.client.get_default_quota_set(
+            self.demo_tenant_id)
+        new_quota_set = {'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,
                          'ram': 10240, 'floating_ips': 20, 'fixed_ips': 10,
                          'key_pairs': 200, 'injected_file_path_bytes': 512,
@@ -87,9 +86,12 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         # Update limits for all quota resources
         resp, quota_set = self.adm_client.update_quota_set(
             self.demo_tenant_id,
+            force=True,
             **new_quota_set)
+
+        default_quota_set.pop('id')
         self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id, **self.default_quota_set)
+                        self.demo_tenant_id, **default_quota_set)
         self.assertEqual(200, resp.status)
         self.assertEqual(new_quota_set, quota_set)
 
@@ -114,7 +116,6 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
     # TODO(afazekas): Add dedicated tenant to the skiped quota tests
     # it can be moved into the setUpClass as well
-    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
@@ -130,7 +131,6 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         cores=default_vcpu_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
-    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type='gate')
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
@@ -146,9 +146,13 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         ram=default_mem_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
-# TODO(afazekas): Add test that tried to update the quota_set as a regular user
+    @attr(type='gate')
+    def test_update_quota_normal_user(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.client.update_quota_set,
+                          self.demo_tenant_id,
+                          ram=0)
 
-    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
@@ -163,7 +167,6 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         instances=default_instances_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
-    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type=['negative', 'gate'])
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
@@ -174,6 +177,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
 
         resp, quota_set =\
             self.adm_client.update_quota_set(self.demo_tenant_id,
+                                             force=True,
                                              security_groups=sg_quota)
 
         self.addCleanup(self.adm_client.update_quota_set,
@@ -185,7 +189,6 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
-    @testtools.skip("Skipped until the Bug #1160749 is resolved")
     @attr(type=['negative', 'gate'])
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
@@ -198,6 +201,7 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         resp, quota_set =\
             self.adm_client.update_quota_set(
                 self.demo_tenant_id,
+                force=True,
                 security_group_rules=sg_rules_quota)
 
         self.addCleanup(self.adm_client.update_quota_set,
