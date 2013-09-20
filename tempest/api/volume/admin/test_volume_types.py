@@ -52,7 +52,7 @@ class VolumeTypesTest(BaseVolumeTest):
         # List Volume types.
         resp, body = self.client.list_volume_types()
         self.assertEqual(200, resp.status)
-        self.assertTrue(type(body), list)
+        self.assertIsInstance(body, list)
 
     @attr(type='smoke')
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
