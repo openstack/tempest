@@ -19,11 +19,13 @@ from tempest.api.identity import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+import testtools
 
 
 class UsersTestJSON(base.BaseIdentityAdminTest):
     _interface = 'json'
 
+    @testtools.skip("Skipped until the Bug #1221889 is resolved")
     @attr(type='smoke')
     def test_tokens(self):
         # Valid user's token is authenticated
