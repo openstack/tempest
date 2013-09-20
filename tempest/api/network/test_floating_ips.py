@@ -47,11 +47,9 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         # Create network, subnet, router and add interface
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
-        resp, router = cls.client.create_router(
+        cls.router = cls.create_router(
             rand_name('router-'),
-            external_gateway_info={"network_id":
-                                   cls.network_cfg.public_network_id})
-        cls.router = router['router']
+            external_network_id=cls.network_cfg.public_network_id)
         resp, _ = cls.client.add_router_interface_with_subnet_id(
             cls.router['id'], cls.subnet['id'])
         cls.port = list()
@@ -66,7 +64,6 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
                                                           cls.subnet['id'])
         for i in range(2):
             cls.client.delete_port(cls.port[i]['id'])
-        cls.client.delete_router(cls.router['id'])
         super(FloatingIPTestJSON, cls).tearDownClass()
 
     def _delete_floating_ip(self, floating_ip_id):
