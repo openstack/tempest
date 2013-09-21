@@ -65,9 +65,14 @@ class VolumesClientXML(RestClientXML):
         Check if the volume is bootable, also change the value
         of 'bootable' from string to boolean.
         """
-        if volume['bootable'] == 'True':
+
+        # NOTE(jdg): Version 1 of Cinder API uses lc strings
+        # We should consider being explicit in this check to
+        # avoid introducing bugs like: LP #1227837
+
+        if volume['bootable'].lower() == 'true':
             volume['bootable'] = True
-        elif volume['bootable'] == 'False':
+        elif volume['bootable'].lower() == 'false':
             volume['bootable'] = False
         else:
             raise ValueError(
