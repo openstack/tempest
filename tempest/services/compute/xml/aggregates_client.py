@@ -72,6 +72,17 @@ class AggregatesClientXML(RestClientXML):
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
+    def update_aggregate(self, aggregate_id, name, availability_zone=None):
+        """Update a aggregate."""
+        put_body = Element("aggregate",
+                           name=name,
+                           availability_zone=availability_zone)
+        resp, body = self.put('os-aggregates/%s' % str(aggregate_id),
+                              str(Document(put_body)),
+                              self.headers)
+        aggregate = self._format_aggregate(etree.fromstring(body))
+        return resp, aggregate
+
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
         return self.delete("os-aggregates/%s" % str(aggregate_id),

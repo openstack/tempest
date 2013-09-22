@@ -97,6 +97,38 @@ class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
 
+    @attr(type='gate')
+    def test_aggregate_create_update_with_az(self):
+        # Update an aggregate and ensure properties are updated correctly
+        self.useFixture(fixtures.LockFixture('availability_zone'))
+        aggregate_name = rand_name(self.aggregate_name_prefix)
+        az_name = rand_name(self.az_name_prefix)
+        resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
+        self.addCleanup(self.client.delete_aggregate, aggregate['id'])
+
+        self.assertEqual(200, resp.status)
+        self.assertEqual(aggregate_name, aggregate['name'])
+        self.assertEqual(az_name, aggregate['availability_zone'])
+        self.assertIsNotNone(aggregate['id'])
+
+        aggregate_id = aggregate['id']
+        new_aggregate_name = aggregate_name + '_new'
+        new_az_name = az_name + '_new'
+
+        resp, resp_aggregate = self.client.update_aggregate(aggregate_id,
+                                                            new_aggregate_name,
+                                                            new_az_name)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(new_aggregate_name, resp_aggregate['name'])
+        self.assertEqual(new_az_name, resp_aggregate['availability_zone'])
+
+        resp, aggregates = self.client.list_aggregates()
+        self.assertEqual(200, resp.status)
+        self.assertIn((aggregate_id, new_aggregate_name, new_az_name),
+                      map(lambda x:
+                         (x['id'], x['name'], x['availability_zone']),
+                          aggregates))
+
     @attr(type=['negative', 'gate'])
     def test_aggregate_create_as_user(self):
         # Regular user is not allowed to create an aggregate.

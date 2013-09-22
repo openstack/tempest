@@ -52,6 +52,19 @@ class AggregatesClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['aggregate']
 
+    def update_aggregate(self, aggregate_id, name, availability_zone=None):
+        """Update a aggregate."""
+        put_body = {
+            'name': name,
+            'availability_zone': availability_zone
+        }
+        put_body = json.dumps({'aggregate': put_body})
+        resp, body = self.put('os-aggregates/%s' % str(aggregate_id),
+                              put_body, self.headers)
+
+        body = json.loads(body)
+        return resp, body['aggregate']
+
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
         return self.delete("os-aggregates/%s" % str(aggregate_id))
