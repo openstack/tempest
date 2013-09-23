@@ -93,6 +93,14 @@ class FloatingIPDetailsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.get_floating_ip_details, non_exist_id)
 
+    @attr(type='gate')
+    def test_list_floating_ip_pools(self):
+        # Positive test:Should return the list of floating IP Pools
+        resp, floating_ip_pools = self.client.list_floating_ip_pools()
+        self.assertEqual(200, resp.status)
+        self.assertNotEqual(0, len(floating_ip_pools),
+                            "Expected floating IP Pools. Got zero.")
+
 
 class FloatingIPDetailsTestXML(FloatingIPDetailsTestJSON):
     _interface = 'xml'

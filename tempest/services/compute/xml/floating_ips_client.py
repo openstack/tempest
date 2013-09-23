@@ -107,3 +107,13 @@ class FloatingIPsClientXML(RestClientXML):
         except exceptions.NotFound:
             return True
         return False
+
+    def list_floating_ip_pools(self, params=None):
+        """Returns a list of all floating IP Pools."""
+        url = 'os-floating-ip-pools'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        resp, body = self.get(url, self.headers)
+        body = self._parse_array(etree.fromstring(body))
+        return resp, body
