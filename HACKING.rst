@@ -123,8 +123,8 @@ Guidelines
   earlier a problem is detected the easier it is to debug, especially
   where there is complicated setup required.
 
-Parallel Test Exectution
-------------------------
+Parallel Test Execution
+-----------------------
 Tempest by default runs its tests in parallel this creates the possibility for
 interesting interactions between tests which can cause unexpected failures.
 Tenant isolation provides protection from most of the potential race conditions
@@ -133,7 +133,7 @@ watch out for to try to avoid issues when running your tests in parallel.
 
 - Resources outside of a tenant scope still have the potential to conflict. This
   is a larger concern for the admin tests since most resources and actions that
-  require admin privleges are outside of tenants.
+  require admin privileges are outside of tenants.
 
 - Races between methods in the same class are not a problem because
   parallelization in tempest is at the test class level, but if there is a json
