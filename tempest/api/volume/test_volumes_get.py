@@ -34,6 +34,15 @@ class VolumesGetTest(base.BaseVolumeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_resource_deletion(volume_id)
 
+    def _is_true(self, val):
+        # NOTE(jdg): Temporary conversion method to get cinder patch
+        # merged.  Then we'll make this strict again and
+        #specifically check "true" or "false"
+        if val in ['true', 'True', True]:
+            return True
+        else:
+            return False
+
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         volume = {}
@@ -69,10 +78,14 @@ class VolumesGetTest(base.BaseVolumeTest):
                          fetched_volume['metadata'],
                          'The fetched Volume is different '
                          'from the created Volume')
+
+        # NOTE(jdg): Revert back to strict true/false checking
+        # after fix for bug #1227837 merges
+        boot_flag = self._is_true(fetched_volume['bootable'])
         if 'imageRef' in kwargs:
-            self.assertEqual(fetched_volume['bootable'], True)
+            self.assertEqual(boot_flag, True)
         if 'imageRef' not in kwargs:
-            self.assertEqual(fetched_volume['bootable'], False)
+            self.assertEqual(boot_flag, False)
 
         # Update Volume
         new_v_name = rand_name('new-Volume')
@@ -92,10 +105,14 @@ class VolumesGetTest(base.BaseVolumeTest):
         self.assertEqual(new_v_name, updated_volume['display_name'])
         self.assertEqual(new_desc, updated_volume['display_description'])
         self.assertEqual(metadata, updated_volume['metadata'])
+
+        # NOTE(jdg): Revert back to strict true/false checking
+        # after fix for bug #1227837 merges
+        boot_flag = self._is_true(updated_volume['bootable'])
         if 'imageRef' in kwargs:
-            self.assertEqual(updated_volume['bootable'], True)
+            self.assertEqual(boot_flag, True)
         if 'imageRef' not in kwargs:
-            self.assertEqual(updated_volume['bootable'], False)
+            self.assertEqual(boot_flag, False)
 
     @attr(type='gate')
     def test_volume_get_metadata_none(self):
