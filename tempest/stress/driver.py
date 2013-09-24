@@ -61,19 +61,20 @@ def _get_compute_nodes(controller):
     return nodes
 
 
-def _error_in_logs(logfiles, nodes):
+def _has_error_in_logs(logfiles, nodes, stop_on_error=False):
     """
     Detect errors in the nova log files on the controller and compute nodes.
     """
     grep = 'egrep "ERROR|TRACE" %s' % logfiles
+    ret = False
     for node in nodes:
         errors = do_ssh(grep, node)
-        if not errors:
-            return None
         if len(errors) > 0:
             LOG.error('%s: %s' % (node, errors))
-            return errors
-    return None
+            ret = True
+            if stop_on_error:
+                break
+    return ret
 
 
 def sigchld_handler(signal, frame):
@@ -181,8 +182,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
 
         if not logfiles:
             continue
-        errors = _error_in_logs(logfiles, computes)
-        if errors:
+        if _has_error_in_logs(logfiles, computes):
             had_errors = True
             break
 
