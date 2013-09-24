@@ -56,8 +56,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
         create_kwargs = {
             'key_name': self.keypair.id
         }
-        instance = self.create_server(self.compute_client,
-                                      create_kwargs=create_kwargs)
+        instance = self.create_server(create_kwargs=create_kwargs)
         self.set_resource('instance', instance)
 
     def pause_server(self):

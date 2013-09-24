@@ -87,8 +87,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
 
     def nova_boot(self):
         create_kwargs = {'key_name': self.keypair.name}
-        self.server = self.create_server(self.compute_client,
-                                         image=self.image,
+        self.server = self.create_server(image=self.image,
                                          create_kwargs=create_kwargs)
 
     def nova_list(self):
