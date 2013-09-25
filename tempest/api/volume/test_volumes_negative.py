@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
+
 from tempest.api.volume import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
@@ -29,37 +31,24 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         super(VolumesNegativeTest, cls).setUpClass()
         cls.client = cls.volumes_client
 
+        # Create a test shared instance and volume for attach/detach tests
+        vol_name = rand_name('Volume-')
+
+        cls.volume = cls.create_volume(size=1, display_name=vol_name)
+        cls.client.wait_for_volume_status(cls.volume['id'], 'available')
+        cls.mountpoint = "/dev/vdc"
+
     @attr(type='gate')
     def test_volume_get_nonexistant_volume_id(self):
-        # Should not be able to get a non-existent volume
-        # Creating a non-existent volume id
-        volume_id_list = []
-        resp, volumes = self.client.list_volumes()
-        for i in range(len(volumes)):
-            volume_id_list.append(volumes[i]['id'])
-        while True:
-            non_exist_id = rand_name('999')
-            if non_exist_id not in volume_id_list:
-                break
-        # Trying to Get a non-existent volume
+        # Should not be able to get a non-existant volume
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
-                          non_exist_id)
+                          str(uuid.uuid4()))
 
     @attr(type='gate')
     def test_volume_delete_nonexistant_volume_id(self):
-        # Should not be able to delete a non-existent Volume
-        # Creating non-existent volume id
-        volume_id_list = []
-        resp, volumes = self.client.list_volumes()
-        for i in range(len(volumes)):
-            volume_id_list.append(volumes[i]['id'])
-        while True:
-            non_exist_id = '12345678-abcd-4321-abcd-123456789098'
-            if non_exist_id not in volume_id_list:
-                break
-        # Try to delete a non-existent volume
+        # Should not be able to delete a non-existant Volume
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
-                          non_exist_id)
+                          str(uuid.uuid4()))
 
     @attr(type='gate')
     def test_create_volume_with_invalid_size(self):
@@ -108,6 +97,26 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     def test_delete_volume_without_passing_volume_id(self):
         # Should not be able to delete volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
+
+    @attr(type=['negative', 'gate'])
+    def test_attach_volumes_with_nonexistent_volume_id(self):
+        srv_name = rand_name('Instance-')
+        resp, server = self.servers_client.create_server(srv_name,
+                                                         self.image_ref,
+                                                         self.flavor_ref)
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.attach_volume,
+                          str(uuid.uuid4()),
+                          server['id'],
+                          self.mountpoint)
+
+    @attr(type=['negative', 'gate'])
+    def test_detach_volumes_with_invalid_volume_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.detach_volume,
+                          'xxx')
 
 
 class VolumesNegativeTestXML(VolumesNegativeTest):
