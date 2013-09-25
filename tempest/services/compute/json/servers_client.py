@@ -366,6 +366,11 @@ class ServersClientJSON(RestClient):
         """Unrescue the provided server."""
         return self.action(server_id, 'unrescue', None)
 
+    def get_server_diagnostics(self, server_id):
+        """Get the usage data for a server."""
+        resp, body = self.get("servers/%s/diagnostics" % str(server_id))
+        return resp, json.loads(body)
+
     def list_instance_actions(self, server_id):
         """List the provided server action."""
         resp, body = self.get("servers/%s/os-instance-actions" %
