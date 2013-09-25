@@ -374,8 +374,10 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                                                          **ruleset)
             self.set_resource(sg_rule.id, sg_rule)
 
-    def create_server(self, client, name=None, image=None, flavor=None,
+    def create_server(self, client=None, name=None, image=None, flavor=None,
                       create_kwargs={}):
+        if client is None:
+            client = self.compute_client
         if name is None:
             name = rand_name('scenario-server-')
         if image is None:
@@ -481,7 +483,9 @@ class NetworkScenarioTest(OfficialClientTest):
             cls.config.identity.password,
             cls.config.identity.tenant_name).tenant_id
 
-    def _create_security_group(self, client, namestart='secgroup-smoke-'):
+    def _create_security_group(self, client=None, namestart='secgroup-smoke-'):
+        if client is None:
+            client = self.compute_client
         # Create security group
         sg_name = rand_name(namestart)
         sg_desc = sg_name + " description"

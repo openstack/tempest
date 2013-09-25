@@ -49,8 +49,7 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
             'block_device_mapping': bd_map,
             'key_name': keypair.name
         }
-        return self.create_server(self.compute_client,
-                                  create_kwargs=create_kwargs)
+        return self.create_server(create_kwargs=create_kwargs)
 
     def _create_snapshot_from_volume(self, vol_id):
         volume_snapshots = self.volume_client.volume_snapshots

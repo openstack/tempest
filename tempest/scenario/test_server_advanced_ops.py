@@ -48,7 +48,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     @services('compute')
     def test_resize_server_confirm(self):
         # We create an instance for use in this test
-        instance = self.create_server(self.compute_client)
+        instance = self.create_server()
         instance_id = instance.id
         resize_flavor = self.config.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
@@ -66,7 +66,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     @services('compute')
     def test_server_sequence_suspend_resume(self):
         # We create an instance for use in this test
-        instance = self.create_server(self.compute_client)
+        instance = self.create_server()
         instance_id = instance.id
         LOG.debug("Suspending instance %s. Current status: %s",
                   instance_id, instance.status)

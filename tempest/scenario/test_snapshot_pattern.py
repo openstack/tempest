@@ -34,8 +34,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         create_kwargs = {
             'key_name': self.keypair.name
         }
-        return self.create_server(self.compute_client, image=image_id,
-                                  create_kwargs=create_kwargs)
+        return self.create_server(image=image_id, create_kwargs=create_kwargs)
 
     def _add_keypair(self):
         self.keypair = self.create_keypair()

@@ -168,8 +168,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             name=rand_name('keypair-smoke-'))
 
     def _create_security_groups(self):
-        self.security_groups[self.tenant_id] = self._create_security_group(
-            self.compute_client)
+        self.security_groups[self.tenant_id] = self._create_security_group()
 
     def _create_networks(self):
         network = self._create_network(self.tenant_id)
@@ -214,8 +213,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             'key_name': keypair_name,
             'security_groups': security_groups,
         }
-        server = self.create_server(self.compute_client, name=name,
-                                    create_kwargs=create_kwargs)
+        server = self.create_server(name=name, create_kwargs=create_kwargs)
         return server
 
     def _create_servers(self):
