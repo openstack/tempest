@@ -598,3 +598,15 @@ class NetworkClientJSON(RestClient):
                                                      health_monitor_id)
         resp, body = self.delete(uri, headers=self.headers)
         return resp, body
+
+    def list_extensions(self):
+        uri = '%s/extensions' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def show_extension_details(self, ext_alias):
+        uri = '%s/extensions/%s' % (self.uri_prefix, ext_alias)
+        resp, body = self.get(uri, headers=self.headers)
+        body = json.loads(body)
+        return resp, body

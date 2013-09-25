@@ -1,0 +1,79 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
+# Copyright 2013 OpenStack, Foundation
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+
+from tempest.api.network import base
+from tempest.test import attr
+
+
+class ExtensionsTestJSON(base.BaseNetworkTest):
+    _interface = 'json'
+
+    """
+    Tests the following operations in the Neutron API using the REST client for
+    Neutron:
+
+        List all available extensions
+
+    v2.0 of the Neutron API is assumed. It is also assumed that the following
+    options are defined in the [network] section of etc/tempest.conf:
+
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super(ExtensionsTestJSON, cls).setUpClass()
+
+    @attr(type='smoke')
+    def test_list_show_extensions(self):
+        # List available extensions for the tenant
+        expected_alias = ['security-group', 'l3_agent_scheduler',
+                          'ext-gw-mode', 'binding', 'quotas',
+                          'agent', 'dhcp_agent_scheduler', 'provider',
+                          'router', 'extraroute', 'external-net',
+                          'allowed-address-pairs', 'extra_dhcp_opt']
+        actual_alias = list()
+        resp, extensions = self.client.list_extensions()
+        self.assertEqual('200', resp['status'])
+        list_extensions = extensions['extensions']
+        # Show and verify the details of the available extensions
+        for ext in list_extensions:
+            ext_name = ext['name']
+            ext_alias = ext['alias']
+            actual_alias.append(ext['alias'])
+            resp, ext_details = self.client.show_extension_details(ext_alias)
+            self.assertEqual('200', resp['status'])
+            ext_details = ext_details['extension']
+
+            self.assertIsNotNone(ext_details)
+            self.assertIn('updated', ext_details.keys())
+            self.assertIn('name', ext_details.keys())
+            self.assertIn('description', ext_details.keys())
+            self.assertIn('namespace', ext_details.keys())
+            self.assertIn('links', ext_details.keys())
+            self.assertIn('alias', ext_details.keys())
+            self.assertEqual(ext_details['name'], ext_name)
+            self.assertEqual(ext_details['alias'], ext_alias)
+            self.assertEqual(ext_details, ext)
+        # Verify if expected extensions are present in the actual list
+        # of extensions returned
+        for e in expected_alias:
+            self.assertIn(e, actual_alias)
+
+
+class ExtensionsTestXML(ExtensionsTestJSON):
+    _interface = 'xml'
