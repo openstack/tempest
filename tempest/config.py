@@ -702,6 +702,7 @@ class TempestConfig:
         register_stress_opts(cfg.CONF)
         register_scenario_opts(cfg.CONF)
         register_service_available_opts(cfg.CONF)
+        register_debug_opts(cfg.CONF)
         self.compute = cfg.CONF.compute
         self.identity = cfg.CONF.identity
         self.images = cfg.CONF.image
@@ -715,6 +716,7 @@ class TempestConfig:
         self.stress = cfg.CONF.stress
         self.scenario = cfg.CONF.scenario
         self.service_available = cfg.CONF.service_available
+        self.debug = cfg.CONF.debug
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
