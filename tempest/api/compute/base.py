@@ -22,6 +22,7 @@ from tempest import clients
 from tempest.common import isolated_creds
 from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -103,6 +104,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         for image_id in cls.images:
             try:
                 cls.images_client.delete_image(image_id)
+            except exceptions.NotFound:
+                # The image may have already been deleted which is OK.
+                pass
             except Exception as exc:
                 LOG.info('Exception raised deleting image %s', image_id)
                 LOG.exception(exc)
