@@ -8,6 +8,8 @@ Parameters:
     Type: String
   ImageId:
     Type: String
+  Subnet:
+    Type: String
   StackStart:
     Description: Epoch seconds when the stack was launched
     Type: Number
@@ -39,6 +41,7 @@ Resources:
       LaunchConfigurationName: {Ref: LaunchConfig}
       MinSize: '1'
       MaxSize: '3'
+      VPCZoneIdentifier: [{Ref: Subnet}]
   SmokeServerScaleUpPolicy:
     Type: AWS::AutoScaling::ScalingPolicy
     Properties:

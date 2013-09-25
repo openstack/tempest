@@ -31,6 +31,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         super(BaseOrchestrationTest, cls).setUpClass()
         os = clients.OrchestrationManager()
         cls.orchestration_cfg = os.config.orchestration
+        cls.compute_cfg = os.config.compute
         if not os.config.service_available.heat:
             raise cls.skipException("Heat support is required")
         cls.build_timeout = cls.orchestration_cfg.build_timeout
@@ -40,8 +41,16 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.orchestration_client = os.orchestration_client
         cls.servers_client = os.servers_client
         cls.keypairs_client = os.keypairs_client
+        cls.network_client = os.network_client
         cls.stacks = []
         cls.keypairs = []
+
+    @classmethod
+    def _get_default_network(cls):
+        resp, networks = cls.network_client.list_networks()
+        for net in networks['networks']:
+            if net['name'] == cls.compute_cfg.fixed_network_name:
+                return net
 
     @classmethod
     def _get_identity_admin_client(cls):

@@ -43,6 +43,8 @@ Parameters:
     Type: String
   image:
     Type: String
+  network:
+    Type: String
 Resources:
   CfnUser:
     Type: AWS::IAM::User
@@ -88,6 +90,8 @@ Resources:
       key_name: {Ref: key_name}
       security_groups:
       - {Ref: SmokeSecurityGroup}
+      networks:
+      - uuid: {Ref: network}
       user_data:
         Fn::Base64:
           Fn::Join:
@@ -142,7 +146,8 @@ Outputs:
             parameters={
                 'key_name': keypair_name,
                 'flavor': cls.orchestration_cfg.instance_type,
-                'image': cls.orchestration_cfg.image_ref
+                'image': cls.orchestration_cfg.image_ref,
+                'network': cls._get_default_network()['id']
             })
 
     @attr(type='slow')

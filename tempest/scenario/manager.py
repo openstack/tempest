@@ -656,3 +656,10 @@ class OrchestrationScenarioTest(OfficialClientTest):
     @classmethod
     def _stack_rand_name(cls):
         return rand_name(cls.__name__ + '-')
+
+    @classmethod
+    def _get_default_network(cls):
+        networks = cls.network_client.list_networks()
+        for net in networks['networks']:
+            if net['name'] == cls.config.compute.fixed_network_name:
+                return net
