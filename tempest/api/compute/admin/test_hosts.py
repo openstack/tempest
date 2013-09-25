@@ -15,6 +15,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
@@ -42,6 +43,7 @@ class HostsAdminTestJSON(base.BaseComputeAdminTest):
 
     @attr(type='gate')
     def test_list_hosts_with_zone(self):
+        self.useFixture(fixtures.LockFixture('availability_zone'))
         resp, hosts = self.client.list_hosts()
         host = hosts[0]
         zone_name = host['zone']
