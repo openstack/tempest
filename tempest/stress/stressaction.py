@@ -30,7 +30,10 @@ class StressAction(object):
         self.stop_on_error = stop_on_error
 
     def _shutdown_handler(self, signal, frame):
-        self.tearDown()
+        try:
+            self.tearDown()
+        except Exception:
+            self.logger.exception("Error while tearDown")
         sys.exit(0)
 
     @property
