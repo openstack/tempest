@@ -150,7 +150,6 @@ class IsolatedCreds(object):
             rand_name_root += suffix
         tenant_name = rand_name_root + "-tenant"
         tenant_desc = tenant_name + "-desc"
-        rand_name_root = rand_name(self.name)
         tenant = self._create_tenant(name=tenant_name,
                                      description=tenant_desc)
         if suffix:
