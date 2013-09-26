@@ -119,6 +119,15 @@ class ServersTestJSON(base.BaseComputeTest):
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
 
+    @attr(type='gate')
+    def test_create_server_with_ipv6_addr_only(self):
+        # Create a server without an IPv4 address(only IPv6 address).
+        resp, server = self.create_server(accessIPv6='2001:2001::3')
+        self.assertEqual('202', resp['status'])
+        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.client.get_server(server['id'])
+        self.assertEqual('2001:2001::3', server['accessIPv6'])
+
 
 class ServersTestXML(ServersTestJSON):
     _interface = 'xml'
