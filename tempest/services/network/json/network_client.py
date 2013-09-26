@@ -45,12 +45,9 @@ class NetworkClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
-    def create_network(self, name):
-        post_body = {
-            'network': {
-                'name': name,
-            }
-        }
+    def create_network(self, name, **kwargs):
+        post_body = {'network': kwargs}
+        post_body['network']['name'] = name
         body = json.dumps(post_body)
         uri = '%s/networks' % (self.uri_prefix)
         resp, body = self.post(uri, headers=self.headers, body=body)
@@ -79,12 +76,11 @@ class NetworkClientJSON(RestClient):
         resp, body = self.delete(uri, self.headers)
         return resp, body
 
-    def create_subnet(self, net_uuid, cidr):
-        post_body = dict(
-            subnet=dict(
-                ip_version=4,
-                network_id=net_uuid,
-                cidr=cidr),)
+    def create_subnet(self, net_uuid, cidr, ip_version=4, **kwargs):
+        post_body = {'subnet': kwargs}
+        post_body['subnet']['ip_version'] = ip_version
+        post_body['subnet']['network_id'] = net_uuid
+        post_body['subnet']['cidr'] = cidr
         body = json.dumps(post_body)
         uri = '%s/subnets' % (self.uri_prefix)
         resp, body = self.post(uri, headers=self.headers, body=body)
@@ -206,16 +202,10 @@ class NetworkClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
-    def create_router(self, name, **kwargs):
-        post_body = {
-            'router': {
-                'name': name,
-            }
-        }
-        post_body['router']['admin_state_up'] = kwargs.get(
-            'admin_state_up', True)
-        post_body['router']['external_gateway_info'] = kwargs.get(
-            'external_gateway_info', None)
+    def create_router(self, name, admin_state_up=True, **kwargs):
+        post_body = {'router': kwargs}
+        post_body['router']['name'] = name
+        post_body['router']['admin_state_up'] = admin_state_up
         body = json.dumps(post_body)
         uri = '%s/routers' % (self.uri_prefix)
         resp, body = self.post(uri, headers=self.headers, body=body)
