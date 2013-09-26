@@ -196,6 +196,18 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                 raise exceptions.TimeoutException(message)
 
     @attr(type=['negative', 'gate'])
+    def test_resize_server_using_nonexist_flavor(self):
+        flavor_id = -1
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.resize, self.server_id, flavor_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_resize_server_using_null_flavor(self):
+        flavor_id = ""
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.resize, self.server_id, flavor_id)
+
+    @attr(type=['negative', 'gate'])
     def test_reboot_nonexistent_server_soft(self):
         # Negative Test: The server reboot on non existent server should return
         # an error
