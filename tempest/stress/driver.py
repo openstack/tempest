@@ -13,6 +13,7 @@
 #    limitations under the License.
 
 import multiprocessing
+import os
 import signal
 import time
 
@@ -87,10 +88,20 @@ def terminate_all_processes():
     """
     Goes through the process list and terminates all child processes.
     """
+    log_check_interval = int(admin_manager.config.stress.log_check_interval)
     for process in processes:
         if process['process'].is_alive():
             try:
                 process['process'].terminate()
+            except Exception:
+                pass
+    time.sleep(log_check_interval)
+    for process in processes:
+        if process['process'].is_alive():
+            try:
+                pid = process['process'].pid
+                LOG.warn("Process %d hangs. Send SIGKILL." % pid)
+                os.kill(pid, signal.SIGKILL)
             except Exception:
                 pass
         process['process'].join()
