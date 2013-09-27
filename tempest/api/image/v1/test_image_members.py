@@ -18,6 +18,8 @@ import cStringIO as StringIO
 
 from tempest.api.image import base
 from tempest import clients
+from tempest.common.utils.data_utils import rand_name
+from tempest import exceptions
 from tempest.test import attr
 
 
@@ -83,3 +85,25 @@ class ImageMembersTests(base.BaseV1ImageTest):
         self.assertEqual(200, resp.status)
         members = body['members']
         self.assertEqual(0, len(members))
+
+    @attr(type=['negative', 'gate'])
+    def test_add_member_with_non_existing_image(self):
+        # Add member with non existing image.
+        non_exist_image = rand_name('image_')
+        self.assertRaises(exceptions.NotFound, self.client.add_member,
+                          self.tenants[0], non_exist_image)
+
+    @attr(type=['negative', 'gate'])
+    def test_delete_member_with_non_existing_image(self):
+        # Delete member with non existing image.
+        non_exist_image = rand_name('image_')
+        self.assertRaises(exceptions.NotFound, self.client.delete_member,
+                          self.tenants[0], non_exist_image)
+
+    @attr(type=['negative', 'gate'])
+    def test_delete_member_with_non_existing_tenant(self):
+        # Delete member with non existing tenant.
+        image_id = self._create_image()
+        non_exist_tenant = rand_name('tenant_')
+        self.assertRaises(exceptions.NotFound, self.client.delete_member,
+                          non_exist_tenant, image_id)
