@@ -300,6 +300,26 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+    @attr(type='gate')
+    def test_lock_unlock_server(self):
+        # Lock the server,try server stop(exceptions throw),unlock it and retry
+        resp, server = self.servers_client.lock_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        resp, server = self.servers_client.get_server(self.server_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(server['status'], 'ACTIVE')
+        # Locked server is not allowed to be stopped by non-admin user
+        self.assertRaises(exceptions.BadRequest,
+                          self.servers_client.stop, self.server_id)
+        resp, server = self.servers_client.unlock_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        resp, server = self.servers_client.stop(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(self.server_id, 'SHUTOFF')
+        resp, server = self.servers_client.start(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+
 
 class ServerActionsTestXML(ServerActionsTestJSON):
     _interface = 'xml'

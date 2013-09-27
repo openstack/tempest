@@ -193,6 +193,14 @@ class ServersClientXML(RestClientXML):
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
+    def lock_server(self, server_id, **kwargs):
+        """Locks the given server."""
+        return self.action(server_id, 'lock', None, **kwargs)
+
+    def unlock_server(self, server_id, **kwargs):
+        """Unlocks the given server."""
+        return self.action(server_id, 'unlock', None, **kwargs)
+
     def suspend_server(self, server_id, **kwargs):
         """Suspends the provided server."""
         return self.action(server_id, 'suspend', None, **kwargs)
