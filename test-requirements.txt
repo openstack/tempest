@@ -3,3 +3,4 @@ hacking>=0.5.6,<0.8
 docutils==0.9.1
 sphinx>=1.1.2
 python-subunit
+oslo.sphinx
