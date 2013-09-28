@@ -94,7 +94,9 @@ class IsolatedCreds(object):
             for ten in tenants:
                 if ten['name'] == name:
                     tenant = ten
-            raise exceptions.NotFound('No such tenant')
+                    break
+            else:
+                raise exceptions.NotFound('No such tenant')
         return tenant
 
     def _create_user(self, username, password, tenant, email):
