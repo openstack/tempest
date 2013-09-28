@@ -35,11 +35,14 @@ def do_ssh(command, host):
     username = admin_manager.config.stress.target_ssh_user
     key_filename = admin_manager.config.stress.target_private_key_path
     if not (username and key_filename):
+        LOG.error('username and key_filename should not be empty')
         return None
     ssh_client = ssh.Client(host, username, key_filename=key_filename)
     try:
         return ssh_client.exec_command(command)
     except exceptions.SSHExecCommandFailed:
+        LOG.error('do_ssh raise exception. command:%s, host:%s.'
+                  % (command, host))
         return None
 
 
