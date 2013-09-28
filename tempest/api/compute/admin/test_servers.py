@@ -43,6 +43,8 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
         cls.s1_name = rand_name('server')
         resp, server = cls.create_server(name=cls.s1_name,
                                          wait_until='ACTIVE')
+        cls.s1_id = server['id']
+
         cls.s2_name = rand_name('server')
         resp, server = cls.create_server(name=cls.s2_name,
                                          wait_until='ACTIVE')
@@ -112,6 +114,41 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
+
+    @attr(type='gate')
+    def test_reset_state_server(self):
+        # Reset server's state to 'error'
+        resp, server = self.client.reset_state(self.s1_id)
+        self.assertEqual(202, resp.status)
+
+        # Verify server's state
+        resp, server = self.client.get_server(self.s1_id)
+        self.assertEqual(server['status'], 'ERROR')
+
+        # Reset server's state to 'active'
+        resp, server = self.client.reset_state(self.s1_id, state='active')
+        self.assertEqual(202, resp.status)
+
+        # Verify server's state
+        resp, server = self.client.get_server(self.s1_id)
+        self.assertEqual(server['status'], 'ACTIVE')
+
+    @attr(type=['negative', 'gate'])
+    def test_reset_state_server_invalid_state(self):
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.reset_state, self.s1_id,
+                          state='invalid')
+
+    @attr(type=['negative', 'gate'])
+    def test_reset_state_server_invalid_type(self):
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.reset_state, self.s1_id,
+                          state=1)
+
+    @attr(type=['negative', 'gate'])
+    def test_reset_state_server_nonexistent_server(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.reset_state, '999')
 
 
 class ServersAdminTestXML(ServersAdminTestJSON):

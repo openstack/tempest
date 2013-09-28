@@ -217,6 +217,10 @@ class ServersClientXML(RestClientXML):
         """Un-pauses the provided server."""
         return self.action(server_id, 'unpause', None, **kwargs)
 
+    def reset_state(self, server_id, state='error'):
+        """Resets the state of a server to active/error."""
+        return self.action(server_id, 'os-resetState', None, state=state)
+
     def delete_server(self, server_id):
         """Deletes the given server."""
         return self.delete("servers/%s" % str(server_id))
