@@ -182,8 +182,8 @@ ComputeGroup = [
                     "succeed."),
     cfg.IntOpt('ready_wait',
                default=0,
-               help="Additinal wait time for clean state, when there is"
-                    " no OS-EXT-STS extension availiable"),
+               help="Additional wait time for clean state, when there is "
+                    "no OS-EXT-STS extension available"),
     cfg.IntOpt('ssh_channel_timeout',
                default=60,
                help="Timeout in seconds to wait for output from ssh "
@@ -273,7 +273,7 @@ ImageGroup = [
     cfg.StrOpt('http_image',
                default='http://download.cirros-cloud.net/0.3.1/'
                'cirros-0.3.1-x86_64-uec.tar.gz',
-               help='http accessable image')
+               help='http accessible image')
 ]
 
 
