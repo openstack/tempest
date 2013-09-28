@@ -17,7 +17,7 @@ python-heatclient>=0.2.3
 testresources>=0.2.4
 keyring>=1.6.1
 testrepository>=0.0.17
-oslo.config>=1.1.0
+oslo.config>=1.2.0
 eventlet>=0.13.0
 six<1.4.0
 iso8601>=0.1.4
