@@ -38,19 +38,19 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
         cls.mountpoint = "/dev/vdc"
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_volume_get_nonexistant_volume_id(self):
         # Should not be able to get a non-existant volume
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           str(uuid.uuid4()))
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_volume_delete_nonexistant_volume_id(self):
         # Should not be able to delete a non-existant Volume
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           str(uuid.uuid4()))
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_create_volume_with_invalid_size(self):
         # Should not be able to create volume with invalid size
         # in request
@@ -59,7 +59,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_create_volume_with_out_passing_size(self):
         # Should not be able to create volume without passing size
         # in request
@@ -68,7 +68,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_create_volume_with_size_zero(self):
         # Should not be able to create volume with size zero
         v_name = rand_name('Volume-')
@@ -76,24 +76,56 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
+    def test_create_volume_with_size_negative(self):
+        # Should not be able to create volume with size negative
+        v_name = rand_name('Volume-')
+        metadata = {'Type': 'work'}
+        self.assertRaises(exceptions.BadRequest, self.client.create_volume,
+                          size='-1', display_name=v_name, metadata=metadata)
+
+    @attr(type=['negative', 'gate'])
+    def test_update_volume_with_nonexistant_volume_id(self):
+        v_name = rand_name('Volume-')
+        metadata = {'Type': 'work'}
+        self.assertRaises(exceptions.NotFound, self.client.update_volume,
+                          volume_id=str(uuid.uuid4()), display_name=v_name,
+                          metadata=metadata)
+
+    @attr(type=['negative', 'gate'])
+    def test_update_volume_with_invalid_volume_id(self):
+        v_name = rand_name('Volume-')
+        metadata = {'Type': 'work'}
+        self.assertRaises(exceptions.NotFound, self.client.update_volume,
+                          volume_id='#$%%&^&^', display_name=v_name,
+                          metadata=metadata)
+
+    @attr(type=['negative', 'gate'])
+    def test_update_volume_with_empty_volume_id(self):
+        v_name = rand_name('Volume-')
+        metadata = {'Type': 'work'}
+        self.assertRaises(exceptions.NotFound, self.client.update_volume,
+                          volume_id='', display_name=v_name,
+                          metadata=metadata)
+
+    @attr(type=['negative', 'gate'])
     def test_get_invalid_volume_id(self):
         # Should not be able to get volume with invalid id
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           '#$%%&^&^')
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_get_volume_without_passing_volume_id(self):
         # Should not be able to get volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.get_volume, '')
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_delete_invalid_volume_id(self):
         # Should not be able to delete volume when invalid ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           '!@#$%^&*()')
 
-    @attr(type='gate')
+    @attr(type=['negative', 'gate'])
     def test_delete_volume_without_passing_volume_id(self):
         # Should not be able to delete volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
