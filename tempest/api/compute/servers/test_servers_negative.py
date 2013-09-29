@@ -16,6 +16,7 @@
 #    under the License.
 
 import sys
+import uuid
 
 from tempest.api.compute import base
 from tempest import clients
@@ -268,6 +269,43 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
         non_exist_id = rand_name('non-existent-server')
         self.assertRaises(exceptions.NotFound, self.client.pause_server,
                           non_exist_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_suspend_non_existent_server(self):
+        # suspend a non existent server
+        self.assertRaises(exceptions.NotFound, self.client.suspend_server,
+                          str(uuid.uuid4()))
+
+    @attr(type=['negative', 'gate'])
+    def test_suspend_server_invalid_state(self):
+        # create server.
+        resp, server = self.create_server(wait_until='ACTIVE')
+        server_id = server['id']
+
+        # suspend a suspended server.
+        resp, _ = self.client.suspend_server(server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(server_id, 'SUSPENDED')
+        self.assertRaises(exceptions.Duplicate,
+                          self.client.suspend_server,
+                          server_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_resume_non_existent_server(self):
+        # resume a non existent server
+        self.assertRaises(exceptions.NotFound, self.client.resume_server,
+                          str(uuid.uuid4()))
+
+    @attr(type=['negative', 'gate'])
+    def test_resume_server_invalid_state(self):
+        # create server.
+        resp, server = self.create_server(wait_until='ACTIVE')
+        server_id = server['id']
+
+        # resume an active server.
+        self.assertRaises(exceptions.Duplicate,
+                          self.client.resume_server,
+                          server_id)
 
 
 class ServersNegativeTestXML(ServersNegativeTestJSON):
