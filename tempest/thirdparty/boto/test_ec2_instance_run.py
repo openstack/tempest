@@ -188,13 +188,13 @@ class InstanceRunTest(BotoTestCase):
         self.assertEqual(tags[0].value, 'value1')
 
         tags = self.ec2_client.get_all_tags(filters={'key': 'value2'})
-        self.assertEqual(len(tags), 0)
+        self.assertEqual(len(tags), 0, str(tags))
 
         for instance in reservation.instances:
             instance.remove_tag('key1', value='value1')
 
         tags = self.ec2_client.get_all_tags()
-        self.assertEqual(len(tags), 0)
+        self.assertEqual(len(tags), 0, str(tags))
 
         for instance in reservation.instances:
             instance.stop()
