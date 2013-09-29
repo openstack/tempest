@@ -280,16 +280,23 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.os_resources.remove(thing)
         del cls.resource_keys[key]
 
-    def status_timeout(self, things, thing_id, expected_status):
+    def status_timeout(self, things, thing_id, expected_status,
+                       error_status='ERROR',
+                       not_found_exception=nova_exceptions.NotFound):
         """
         Given a thing and an expected status, do a loop, sleeping
         for a configurable amount of time, checking for the
         expected status to show. At any time, if the returned
         status of the thing is ERROR, fail out.
         """
-        self._status_timeout(things, thing_id, expected_status=expected_status)
+        self._status_timeout(things, thing_id,
+                             expected_status=expected_status,
+                             error_status=error_status,
+                             not_found_exception=not_found_exception)
 
-    def delete_timeout(self, things, thing_id):
+    def delete_timeout(self, things, thing_id,
+                       error_status='ERROR',
+                       not_found_exception=nova_exceptions.NotFound):
         """
         Given a thing, do a loop, sleeping
         for a configurable amount of time, checking for the
@@ -298,13 +305,17 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         """
         self._status_timeout(things,
                              thing_id,
-                             allow_notfound=True)
+                             allow_notfound=True,
+                             error_status=error_status,
+                             not_found_exception=not_found_exception)
 
     def _status_timeout(self,
                         things,
                         thing_id,
                         expected_status=None,
-                        allow_notfound=False):
+                        allow_notfound=False,
+                        error_status='ERROR',
+                        not_found_exception=nova_exceptions.NotFound):
 
         log_status = expected_status if expected_status else ''
         if allow_notfound:
@@ -316,16 +327,16 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             # for the singular resource to retrieve.
             try:
                 thing = things.get(thing_id)
-            except nova_exceptions.NotFound:
+            except not_found_exception:
                 if allow_notfound:
                     return True
                 else:
                     raise
 
             new_status = thing.status
-            if new_status == 'ERROR':
+            if new_status == error_status:
                 message = "%s failed to get to expected status. \
-                          In ERROR state." % (thing)
+                          In %s state." % (thing, new_status)
                 raise exceptions.BuildErrorException(message)
             elif new_status == expected_status and expected_status is not None:
                 return True  # All good.
