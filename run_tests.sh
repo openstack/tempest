@@ -58,7 +58,7 @@ while [ $# -gt 0 ]; do
     -c|--nova-coverage) let nova_coverage=1;;
     -C|--config) config_file=$2; shift;;
     -p|--pep8) let just_pep8=1;;
-    -s|--smoke) testrargs="$testrargs smoke";;
+    -s|--smoke) testrargs+="smoke"; noseargs+="--attr=type=smoke";;
     -t|--serial) serial=1;;
     -l|--logging) logging=1;;
     -L|--logging-config) logging_config=$2; shift;;
