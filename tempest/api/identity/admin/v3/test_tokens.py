@@ -19,13 +19,11 @@ from tempest.api.identity import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
-import testtools
 
 
 class UsersTestJSON(base.BaseIdentityAdminTest):
     _interface = 'json'
 
-    @testtools.skip("Skipped until the Bug #1221889 is resolved")
     @attr(type='smoke')
     def test_tokens(self):
         # Valid user's token is authenticated
@@ -51,7 +49,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual(token_details['user']['name'], u_name)
         # Perform Delete Token
         resp, _ = self.v3_client.delete_token(subject_token)
-        self.assertRaises(exceptions.Unauthorized, self.v3_client.get_token,
+        self.assertRaises(exceptions.NotFound, self.v3_client.get_token,
                           subject_token)
 
 
