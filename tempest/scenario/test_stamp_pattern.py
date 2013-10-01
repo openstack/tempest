@@ -18,6 +18,7 @@
 import time
 
 from cinderclient import exceptions as cinder_exceptions
+import testtools
 
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
@@ -141,6 +142,7 @@ class TestStampPattern(manager.OfficialClientTest):
         got_timestamp = ssh_client.exec_command('sudo cat /mnt/timestamp')
         self.assertEqual(self.timestamp, got_timestamp)
 
+    @testtools.skip("Skipped until the Bug #1205344 is resolved.")
     @tempest.test.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
         # prepare for booting a instance
