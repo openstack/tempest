@@ -61,8 +61,8 @@ def find_skips_in_file(path):
     """
     Return the skip tuples in a test file
     """
-    BUG_RE = re.compile(r'.*skip.*bug:*\s*\#*(\d+)', re.IGNORECASE)
-    DEF_RE = re.compile(r'.*def (\w+)\(')
+    BUG_RE = re.compile(r'\s*@.*skip_because\(bug=[\'"](\d+)[\'"]')
+    DEF_RE = re.compile(r'\s*def (\w+)\(')
     bug_found = False
     results = []
     lines = open(path, 'rb').readlines()

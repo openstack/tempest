@@ -16,7 +16,6 @@
 #    under the License.
 
 from boto import exception
-import testtools
 
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
@@ -24,6 +23,7 @@ from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
+from tempest.test import skip_because
 from tempest.thirdparty.boto.test import BotoTestCase
 from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
 from tempest.thirdparty.boto.utils.wait import re_search_wait
@@ -206,8 +206,8 @@ class InstanceRunTest(BotoTestCase):
             instance.terminate()
         self.cancelResourceCleanUp(rcuk)
 
+    @skip_because(bug="1098891")
     @attr(type='smoke')
-    @testtools.skip("Skipped until the Bug #1098891 is resolved")
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -233,7 +233,7 @@ class InstanceRunTest(BotoTestCase):
 
     # NOTE(afazekas): doctored test case,
     # with normal validation it would fail
-    @testtools.skip("Skipped until the Bug #1182679 is resolved.")
+    @skip_because(bug="1182679")
     @attr(type='smoke')
     def test_integration_1(self):
         # EC2 1. integration test (not strict)

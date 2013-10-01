@@ -19,26 +19,9 @@ import re
 
 PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron']
 
-SKIP_DECORATOR_RE = re.compile(r'\s*@testtools.skip\((.*)\)')
-SKIP_STR_RE = re.compile(r'.*Bug #\d+.*')
 PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 TEST_DEFINITION = re.compile(r'^\s*def test.*')
 SCENARIO_DECORATOR = re.compile(r'\s*@.*services\(')
-
-
-def skip_bugs(physical_line):
-    """Check skip lines for proper bug entries
-
-    T101: skips must contain "Bug #<bug_number>"
-    """
-
-    res = SKIP_DECORATOR_RE.match(physical_line)
-    if res:
-        content = res.group(1)
-        res = SKIP_STR_RE.match(content)
-        if not res:
-            return (physical_line.find(content),
-                    'T101: skips must contain "Bug #<bug_number>"')
 
 
 def import_no_clients_in_api(physical_line, filename):
@@ -70,6 +53,5 @@ def scenario_tests_need_service_tags(physical_line, filename,
 
 
 def factory(register):
-    register(skip_bugs)
     register(import_no_clients_in_api)
     register(scenario_tests_need_service_tags)

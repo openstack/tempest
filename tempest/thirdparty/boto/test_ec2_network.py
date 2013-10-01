@@ -15,10 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest import clients
 from tempest.test import attr
+from tempest.test import skip_because
 from tempest.thirdparty.boto.test import BotoTestCase
 
 
@@ -30,8 +29,8 @@ class EC2NetworkTest(BotoTestCase):
         cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
 
-# Note(afazekas): these tests for things duable without an instance
-    @testtools.skip("Skipped until the Bug #1080406 is resolved")
+    # Note(afazekas): these tests for things duable without an instance
+    @skip_because(bug="1080406")
     @attr(type='smoke')
     def test_disassociate_not_associated_floating_ip(self):
         # EC2 disassociate not associated floating ip

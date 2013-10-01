@@ -15,11 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
+from tempest.test import skip_because
 from tempest.thirdparty.boto.test import BotoTestCase
 
 
@@ -31,7 +30,7 @@ class S3BucketsTest(BotoTestCase):
         cls.os = clients.Manager()
         cls.client = cls.os.s3_client
 
-    @testtools.skip("Skipped until the Bug #1076965 is resolved")
+    @skip_because(bug="1076965")
     @attr(type='smoke')
     def test_create_and_get_delete_bucket(self):
         # S3 Create, get and delete bucket

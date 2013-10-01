@@ -15,14 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
@@ -195,7 +194,7 @@ class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @testtools.skip("Skipped until the Bug #1209101 is resolved")
+    @skip_because(bug="1209101")
     @attr(type='gate')
     def test_list_non_public_flavor(self):
         # Create a flavor with os-flavor-access:is_public false should

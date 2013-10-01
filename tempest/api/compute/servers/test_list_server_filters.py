@@ -15,14 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.compute import base
 from tempest.api import utils
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class ListServerFiltersTestJSON(base.BaseComputeTest):
@@ -205,7 +204,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @testtools.skip('Skipped until the Bug #1170718 is resolved.')
+    @skip_because(bug="1170718")
     @attr(type='gate')
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
@@ -219,8 +218,8 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @testtools.skipIf(config.TempestConfig().service_available.neutron,
-                      "Skipped until the Bug #1182883 is resolved")
+    @skip_because(bug="1182883",
+                  condition=config.TempestConfig().service_available.neutron)
     @attr(type='gate')
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip

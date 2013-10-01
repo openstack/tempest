@@ -15,11 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
+from tempest.test import skip_because
 from tempest.thirdparty.boto.test import BotoTestCase
 
 
@@ -47,8 +46,8 @@ class EC2KeysTest(BotoTestCase):
         self.assertTrue(compare_key_pairs(keypair,
                         self.client.get_key_pair(key_name)))
 
+    @skip_because(bug="1072318")
     @attr(type='smoke')
-    @testtools.skip("Skipped until the Bug #1072318 is resolved")
     def test_delete_ec2_keypair(self):
         # EC2 delete KeyPair
         key_name = rand_name("keypair-")

@@ -24,6 +24,7 @@ from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class ImagesOneServerTestJSON(base.BaseComputeTest):
@@ -64,7 +65,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
                 cls.alt_manager = clients.AltManager()
             cls.alt_client = cls.alt_manager.images_client
 
-    @testtools.skip("Skipped until the Bug #1006725 is resolved.")
+    @skip_because(bug="1006725")
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         # Return an error if the image name has multi-byte characters

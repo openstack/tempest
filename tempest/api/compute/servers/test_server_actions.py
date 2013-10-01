@@ -27,6 +27,7 @@ from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class ServerActionsTestJSON(base.BaseComputeTest):
@@ -86,7 +87,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             new_boot_time = linux_client.get_boot_time()
             self.assertGreater(new_boot_time, boot_time)
 
-    @testtools.skip('Skipped until the Bug #1014647 is resolved.')
+    @skip_because(bug="1014647")
     @attr(type='smoke')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
@@ -250,7 +251,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                           self.servers_client.get_console_output,
                           '!@#$%^&*()', 10)
 
-    @testtools.skip('Skipped until the Bug #1014683 is resolved.')
+    @skip_because(bug="1014683")
     @attr(type='gate')
     def test_get_console_output_server_id_in_reboot_status(self):
         # Positive test:Should be able to GET the console output

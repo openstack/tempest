@@ -103,6 +103,21 @@ def stresstest(*args, **kwargs):
     return decorator
 
 
+def skip_because(*args, **kwargs):
+    """A decorator useful to skip tests hitting known bugs
+
+    @param bug: bug number causing the test to skip
+    @param condition: optional condition to be True for the skip to have place
+    """
+    def decorator(f):
+        if "bug" in kwargs:
+            if "condition" not in kwargs or kwargs["condition"] is True:
+                msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
+                raise testtools.TestCase.skipException(msg)
+        return f
+    return decorator
+
+
 # there is a mis-match between nose and testtools for older pythons.
 # testtools will set skipException to be either
 # unittest.case.SkipTest, unittest2.case.SkipTest or an internal skip

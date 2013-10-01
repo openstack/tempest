@@ -15,13 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class SecurityGroupRulesTestJSON(base.BaseComputeTest):
@@ -94,8 +93,8 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         self.addCleanup(self.client.delete_security_group_rule, rule['id'])
         self.assertEqual(200, resp.status)
 
-    @testtools.skipIf(config.TempestConfig().service_available.neutron,
-                      "Skipped until the Bug #1182384 is resolved")
+    @skip_because(bug="1182384",
+                  condition=config.TempestConfig().service_available.neutron)
     @attr(type=['negative', 'gate'])
     def test_security_group_rules_create_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -186,8 +185,8 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
                           self.client.create_security_group_rule,
                           secgroup_id, ip_protocol, from_port, to_port)
 
-    @testtools.skipIf(config.TempestConfig().service_available.neutron,
-                      "Skipped until the Bug #1182384 is resolved")
+    @skip_because(bug="1182384",
+                  condition=config.TempestConfig().service_available.neutron)
     @attr(type=['negative', 'gate'])
     def test_security_group_rules_delete_with_invalid_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL

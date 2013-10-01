@@ -16,13 +16,13 @@
 #    under the License.
 
 import netaddr
-import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class VirtualInterfacesTestJSON(base.BaseComputeTest):
@@ -37,8 +37,8 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
         resp, server = cls.create_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @testtools.skipIf(CONF.service_available.neutron, "Not implemented by " +
-                      "Neutron. Skipped until the Bug #1183436 is resolved.")
+    @skip_because(bug="1183436",
+                  condition=CONF.service_available.neutron)
     @attr(type='gate')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list

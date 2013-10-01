@@ -17,11 +17,10 @@
 
 import time
 
-import testtools
-
 from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class ContainerSyncTest(base.BaseObjectTest):
@@ -52,7 +51,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             cls.delete_containers(cls.containers, client[0], client[1])
         super(ContainerSyncTest, cls).tearDownClass()
 
-    @testtools.skip('Skipped until the Bug #1093743 is resolved.')
+    @skip_because(bug="1093743")
     @attr(type='gate')
     def test_container_synchronization(self):
         # container to container synchronization

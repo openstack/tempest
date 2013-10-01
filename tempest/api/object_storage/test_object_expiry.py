@@ -17,13 +17,12 @@
 
 import time
 
-import testtools
-
 from tempest.api.object_storage import base
 from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
@@ -43,7 +42,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
         cls.delete_containers([cls.container_name])
         super(ObjectExpiryTest, cls).tearDownClass()
 
-    @testtools.skip('Skipped until the Bug #1069849 is resolved.')
+    @skip_because(bug="1069849")
     @attr(type='gate')
     def test_get_object_after_expiry_time(self):
         # TODO(harika-vakadi): similar test case has to be created for

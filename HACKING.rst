@@ -8,16 +8,6 @@ Tempest Coding Guide
 Tempest Specific Commandments
 ------------------------------
 
-[T101] If a test is broken because of a bug it is appropriate to skip the test until
-bug has been fixed. However, the skip message should be formatted so that
-Tempest's skip tracking tool can watch the bug status. The skip message should
-contain the string 'Bug' immediately followed by a space. Then the bug number
-should be included in the message '#' in front of the number.
-
-Example::
-
-  @testtools.skip("Skipped until the Bug #980688 is resolved")
-
 - [T102] Cannot import OpenStack python clients in tempest/api tests
 - [T103] tempest/tests is deprecated
 - [T104] Scenario tests require a services decorator
@@ -114,6 +104,19 @@ indirectly through another service) that differs from the parent directory
 name. For example, any test that make an api call to a service other than nova
 in tempest.api.compute would require a service tag for those services, however
 they do not need to be tagged as compute.
+
+Test skips because of Known Bugs
+--------------------------------
+
+If a test is broken because of a bug it is appropriate to skip the test until
+bug has been fixed. You should use the skip_because decorator so that
+Tempest's skip tracking tool can watch the bug status.
+
+Example::
+
+  @skip_because(bug="980688")
+  def test_this_and_that(self):
+    ...
 
 Guidelines
 ----------
