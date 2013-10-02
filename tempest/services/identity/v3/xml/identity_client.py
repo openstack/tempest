@@ -163,6 +163,31 @@ class IdentityV3ClientXML(RestClientXML):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def list_projects(self):
+        """Get the list of projects."""
+        resp, body = self.get("projects", self.headers)
+        body = self._parse_projects(etree.fromstring(body))
+        return resp, body
+
+    def update_project(self, project_id, **kwargs):
+        """Updates a Project."""
+        resp, body = self.get_project(project_id)
+        name = kwargs.get('name', body['name'])
+        desc = kwargs.get('description', body['description'])
+        en = kwargs.get('enabled', body['enabled'])
+        domain_id = kwargs.get('domain_id', body['domain_id'])
+        post_body = Element("project",
+                            xmlns=XMLNS,
+                            name=name,
+                            description=desc,
+                            enabled=str(en).lower(),
+                            domain_id=domain_id)
+        resp, body = self.patch('projects/%s' % project_id,
+                                str(Document(post_body)),
+                                self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
     def get_project(self, project_id):
         """GET a Project."""
         resp, body = self.get("projects/%s" % project_id, self.headers)

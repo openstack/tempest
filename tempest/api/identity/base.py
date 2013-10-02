@@ -40,13 +40,16 @@ class BaseIdentityAdminTest(tempest.test.BaseTestCase):
             raise cls.skipException("Admin extensions disabled")
 
         cls.data = DataGenerator(cls.client)
+        cls.v3data = DataGenerator(cls.v3_client)
 
         os = clients.Manager(interface=cls._interface)
         cls.non_admin_client = os.identity_client
+        cls.v3_non_admin_client = os.identity_v3_client
 
     @classmethod
     def tearDownClass(cls):
         cls.data.teardown_all()
+        cls.v3data.teardown_all()
         super(BaseIdentityAdminTest, cls).tearDownClass()
 
     def disable_user(self, user_name):
@@ -84,6 +87,9 @@ class DataGenerator(object):
             self.tenants = []
             self.roles = []
             self.role_name = None
+            self.v3_users = []
+            self.projects = []
+            self.v3_roles = []
 
         def setup_test_user(self):
             """Set up a test user."""
@@ -112,6 +118,33 @@ class DataGenerator(object):
             resp, self.role = self.client.create_role(self.test_role)
             self.roles.append(self.role)
 
+        def setup_test_v3_user(self):
+            """Set up a test v3 user."""
+            self.setup_test_project()
+            self.test_user = rand_name('test_user_')
+            self.test_password = rand_name('pass_')
+            self.test_email = self.test_user + '@testmail.tm'
+            resp, self.v3_user = self.client.create_user(self.test_user,
+                                                         self.test_password,
+                                                         self.project['id'],
+                                                         self.test_email)
+            self.v3_users.append(self.v3_user)
+
+        def setup_test_project(self):
+            """Set up a test project."""
+            self.test_project = rand_name('test_project_')
+            self.test_description = rand_name('desc_')
+            resp, self.project = self.client.create_project(
+                name=self.test_project,
+                description=self.test_description)
+            self.projects.append(self.project)
+
+        def setup_test_v3_role(self):
+            """Set up a test v3 role."""
+            self.test_role = rand_name('role')
+            resp, self.v3_role = self.client.create_role(self.test_role)
+            self.v3_roles.append(self.v3_role)
+
         def teardown_all(self):
             for user in self.users:
                 self.client.delete_user(user['id'])
@@ -119,3 +152,9 @@ class DataGenerator(object):
                 self.client.delete_tenant(tenant['id'])
             for role in self.roles:
                 self.client.delete_role(role['id'])
+            for v3_user in self.v3_users:
+                self.client.delete_user(v3_user['id'])
+            for v3_project in self.projects:
+                self.client.delete_project(v3_project['id'])
+            for v3_role in self.v3_roles:
+                self.client.delete_role(v3_role['id'])

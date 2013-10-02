@@ -123,6 +123,30 @@ class IdentityV3ClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['project']
 
+    def list_projects(self):
+        resp, body = self.get("projects")
+        body = json.loads(body)
+        return resp, body['projects']
+
+    def update_project(self, project_id, **kwargs):
+        resp, body = self.get_project(project_id)
+        name = kwargs.get('name', body['name'])
+        desc = kwargs.get('description', body['description'])
+        en = kwargs.get('enabled', body['enabled'])
+        domain_id = kwargs.get('domain_id', body['domain_id'])
+        post_body = {
+            'id': project_id,
+            'name': name,
+            'description': desc,
+            'enabled': en,
+            'domain_id': domain_id,
+        }
+        post_body = json.dumps({'project': post_body})
+        resp, body = self.patch('projects/%s' % project_id, post_body,
+                                self.headers)
+        body = json.loads(body)
+        return resp, body['project']
+
     def get_project(self, project_id):
         """GET a Project."""
         resp, body = self.get("projects/%s" % project_id)
