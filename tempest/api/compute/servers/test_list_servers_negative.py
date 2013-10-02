@@ -28,6 +28,26 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
     @classmethod
+    def _ensure_no_servers(cls, servers, username, tenant_name):
+        """
+        If there are servers and there is tenant isolation then a
+        skipException is raised to skip the test since it requires no servers
+        to already exist for the given user/tenant.
+        If there are servers and there is not tenant isolation then the test
+        blocks while the servers are being deleted.
+        """
+        if len(servers):
+            if not compute.MULTI_USER:
+                for srv in servers:
+                    cls.client.wait_for_server_termination(srv['id'],
+                                                           ignore_error=True)
+            else:
+                msg = ("User/tenant %(u)s/%(t)s already have "
+                       "existing server instances. Skipping test." %
+                       {'u': username, 't': tenant_name})
+                raise cls.skipException(msg)
+
+    @classmethod
     def setUpClass(cls):
         super(ListServersNegativeTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
@@ -54,26 +74,14 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
         # start of the test instead of destroying any existing
         # servers.
         resp, body = cls.client.list_servers()
-        servers = body['servers']
-        num_servers = len(servers)
-        if num_servers > 0:
-            username = cls.os.username
-            tenant_name = cls.os.tenant_name
-            msg = ("User/tenant %(u)s/%(t)s already have "
-                   "existing server instances. Skipping test." %
-                   {'u': username, 't': tenant_name})
-            raise cls.skipException(msg)
+        cls._ensure_no_servers(body['servers'],
+                               cls.os.username,
+                               cls.os.tenant_name)
 
         resp, body = cls.alt_client.list_servers()
-        servers = body['servers']
-        num_servers = len(servers)
-        if num_servers > 0:
-            username = cls.alt_manager.username
-            tenant_name = cls.alt_manager.tenant_name
-            msg = ("Alt User/tenant %(u)s/%(t)s already have "
-                   "existing server instances. Skipping test." %
-                   {'u': username, 't': tenant_name})
-            raise cls.skipException(msg)
+        cls._ensure_no_servers(body['servers'],
+                               cls.alt_manager.username,
+                               cls.alt_manager.tenant_name)
 
         # The following servers are created for use
         # by the test methods in this class. These
