@@ -2,7 +2,7 @@ Tempest Coding Guide
 ====================
 
 - Step 1: Read the OpenStack Style Commandments
-  https://github.com/openstack-dev/hacking/blob/master/HACKING.rst
+  http://docs.openstack.org/developer/hacking/
 - Step 2: Read on
 
 Tempest Specific Commandments
