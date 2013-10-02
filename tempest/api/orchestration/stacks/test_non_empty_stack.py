@@ -36,6 +36,8 @@ Parameters:
     Type: String
   ImageId:
     Type: String
+  Subnet:
+    Type: String
 Resources:
   SmokeServer:
     Type: AWS::EC2::Instance
@@ -45,6 +47,7 @@ Resources:
       ImageId: {Ref: ImageId}
       InstanceType: {Ref: InstanceType}
       KeyName: {Ref: KeyName}
+      SubnetId: {Ref: Subnet}
       UserData:
         Fn::Base64:
           Fn::Join:
@@ -78,13 +81,15 @@ Resources:
                         cls._create_keypair()['name'])
 
         # create the stack
+        subnet = cls._get_default_network()['subnets'][0]
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
             cls.template,
             parameters={
                 'KeyName': keypair_name,
                 'InstanceType': cls.orchestration_cfg.instance_type,
-                'ImageId': cls.orchestration_cfg.image_ref
+                'ImageId': cls.orchestration_cfg.image_ref,
+                'Subnet': subnet
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.resource_name = 'SmokeServer'

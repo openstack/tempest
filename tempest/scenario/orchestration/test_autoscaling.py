@@ -37,11 +37,13 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
             self.keypair_name = self.keypair.id
 
     def launch_stack(self):
+        net = self._get_default_network()
         self.parameters = {
             'KeyName': self.keypair_name,
             'InstanceType': self.config.orchestration.instance_type,
             'ImageId': self.config.orchestration.image_ref,
-            'StackStart': str(time.time())
+            'StackStart': str(time.time()),
+            'Subnet': net['subnets'][0]
         }
 
         # create the stack
