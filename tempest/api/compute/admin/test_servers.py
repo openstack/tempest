@@ -79,6 +79,14 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
         self.assertIn(self.s1_name, servers_name)
         self.assertIn(self.s2_name, servers_name)
 
+    @attr(type='gate')
+    def test_admin_delete_servers_of_others(self):
+        # Administrator can delete servers of others
+        _, server = self.create_server()
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+        self.servers_client.wait_for_server_termination(server['id'])
+
     @attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_ram(self):
         flavor_name = rand_name("flavor-")
