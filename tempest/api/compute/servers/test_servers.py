@@ -112,6 +112,13 @@ class ServersTestJSON(base.BaseComputeTest):
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
 
+    @attr(type='gate')
+    def test_delete_active_server(self):
+        # Delete a server while it's VM state is Active
+        resp, server = self.create_server(wait_until='ACTIVE')
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+
 
 class ServersTestXML(ServersTestJSON):
     _interface = 'xml'
