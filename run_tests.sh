@@ -107,12 +107,13 @@ function run_tests {
 }
 
 function run_tests_nose {
-    NOSE_WITH_OPENSTACK=1
-    NOSE_OPENSTACK_COLOR=1
-    NOSE_OPENSTACK_RED=15.00
-    NOSE_OPENSTACK_YELLOW=3.00
-    NOSE_OPENSTACK_SHOW_ELAPSED=1
-    NOSE_OPENSTACK_STDOUT=1
+    export NOSE_WITH_OPENSTACK=1
+    export NOSE_OPENSTACK_COLOR=1
+    export NOSE_OPENSTACK_RED=15.00
+    export NOSE_OPENSTACK_YELLOW=3.00
+    export NOSE_OPENSTACK_SHOW_ELAPSED=1
+    export NOSE_OPENSTACK_STDOUT=1
+    export TEMPEST_PY26_NOSE_COMPAT=1
     if [[ "x$noseargs" =~ "tempest" ]]; then
         noseargs="$testrargs"
     else
