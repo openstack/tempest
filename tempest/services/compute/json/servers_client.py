@@ -390,3 +390,11 @@ class ServersClientJSON(RestClient):
                               (str(server_id), str(request_id)))
         body = json.loads(body)
         return resp, body['instanceAction']
+
+    def force_delete_server(self, server_id, **kwargs):
+        """Force delete a server."""
+        return self.action(server_id, 'forceDelete', None, **kwargs)
+
+    def restore_soft_deleted_server(self, server_id, **kwargs):
+        """Restore a soft-deleted server."""
+        return self.action(server_id, 'restore', None, **kwargs)
