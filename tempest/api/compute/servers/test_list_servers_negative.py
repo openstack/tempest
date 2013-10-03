@@ -81,6 +81,7 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
         # tearDownClass method of the super-class.
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
+        cls.start_time = datetime.datetime.utcnow()
         for x in xrange(2):
             resp, srv = cls.create_server()
             cls.existing_fixtures.append(srv)
@@ -173,8 +174,7 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type='gate')
     def test_list_servers_by_changes_since(self):
         # Servers are listed by specifying changes-since date
-        since = datetime.datetime.utcnow() - datetime.timedelta(minutes=2)
-        changes_since = {'changes-since': since.isoformat()}
+        changes_since = {'changes-since': self.start_time.isoformat()}
         resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
         # changes-since returns all instances, including deleted.
