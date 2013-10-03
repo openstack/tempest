@@ -122,7 +122,7 @@ Outputs:
   SmokeServerIp:
     Description: IP address of server
     Value:
-      Fn::GetAtt: [SmokeServer, first_private_address]
+      Fn::GetAtt: [SmokeServer, first_address]
 """
 
     @classmethod
