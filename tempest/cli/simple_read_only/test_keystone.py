@@ -50,7 +50,10 @@ class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
                 self.assertTrue(svc['__label'].startswith('Service:'),
                                 msg=('Invalid beginning of service block: '
                                      '%s' % svc['__label']))
-            self.assertIn('id', svc.keys())
+            # check that region and publicURL exists. One might also
+            # check for adminURL and internalURL. id seems to be optional
+            # and is missing in the catalog backend
+            self.assertIn('publicURL', svc.keys())
             self.assertIn('region', svc.keys())
 
     def test_admin_endpoint_list(self):
