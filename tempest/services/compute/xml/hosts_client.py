@@ -18,6 +18,8 @@ import urllib
 
 from lxml import etree
 from tempest.common.rest_client import RestClientXML
+from tempest.services.compute.xml.common import Document
+from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
 
 
@@ -44,6 +46,49 @@ class HostsClientXML(RestClientXML):
         """Show detail information for the host."""
 
         resp, body = self.get("os-hosts/%s" % str(hostname), self.headers)
+        node = etree.fromstring(body)
+        body = [xml_to_json(x) for x in node.getchildren()]
+        return resp, body
+
+    def update_host(self, hostname, status=None, maintenance_mode=None,
+                    **kwargs):
+        """Update a host."""
+
+        request_body = Element(status=status,
+                               maintenance_mode=maintenance_mode)
+        if kwargs:
+            for k, v in kwargs.iteritem():
+                request_body.add_attr(k, v)
+        resp, body = self.put("os-hosts/%s" % str(hostname),
+                              str(Document(request_body)),
+                              self.headers)
+        node = etree.fromstring(body)
+        body = [xml_to_json(x) for x in node.getchildren()]
+        return resp, body
+
+    def startup_host(self, hostname):
+        """Startup a host."""
+
+        resp, body = self.get("os-hosts/%s/startup" % str(hostname),
+                              self.headers)
+        node = etree.fromstring(body)
+        body = [xml_to_json(x) for x in node.getchildren()]
+        return resp, body
+
+    def shutdown_host(self, hostname):
+        """Shutdown a host."""
+
+        resp, body = self.get("os-hosts/%s/shutdown" % str(hostname),
+                              self.headers)
+        node = etree.fromstring(body)
+        body = [xml_to_json(x) for x in node.getchildren()]
+        return resp, body
+
+    def reboot_host(self, hostname):
+        """Reboot a host."""
+
+        resp, body = self.get("os-hosts/%s/reboot" % str(hostname),
+                              self.headers)
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body
