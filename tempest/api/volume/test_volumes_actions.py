@@ -32,8 +32,8 @@ class VolumesActionsTest(BaseVolumeTest):
         cls.image_client = cls.os.image_client
 
         # Create a test shared instance and volume for attach/detach tests
-        srv_name = rand_name('Instance-')
-        vol_name = rand_name('Volume-')
+        srv_name = rand_name(cls.__name__ + '-Instance-')
+        vol_name = rand_name(cls.__name__ + '-Volume-')
         resp, cls.server = cls.servers_client.create_server(srv_name,
                                                             cls.image_ref,
                                                             cls.flavor_ref)
