@@ -16,15 +16,12 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
 
 class FixedIPsTestJson(base.BaseComputeAdminTest):
     _interface = 'json'
-
-    CONF = config.TempestConfig()
 
     @classmethod
     def setUpClass(cls):
