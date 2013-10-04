@@ -422,6 +422,8 @@ swift = True
 nova = True
 # Whether or not Heat is expected to be available
 heat = false
+# Whether or not Ceilometer is expected to be available
+ceilometer = True
 # Whether or not horizon is expected to be available
 horizon = True
 

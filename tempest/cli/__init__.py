@@ -80,6 +80,12 @@ class ClientTestBase(tempest.test.BaseTestCase):
         return self.cmd_with_auth(
             'glance', action, flags, params, admin, fail_ok)
 
+    def ceilometer(self, action, flags='', params='', admin=True,
+                   fail_ok=False):
+        """Executes ceilometer command for the given action."""
+        return self.cmd_with_auth(
+            'ceilometer', action, flags, params, admin, fail_ok)
+
     def cinder(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes cinder command for the given action."""
         return self.cmd_with_auth(
