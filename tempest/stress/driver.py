@@ -196,7 +196,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
 
         if not logfiles:
             continue
-        if _has_error_in_logs(logfiles, computes):
+        if _has_error_in_logs(logfiles, computes, stop_on_error):
             had_errors = True
             break
 
