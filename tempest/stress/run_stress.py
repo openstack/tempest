@@ -23,14 +23,20 @@ import sys
 from testtools.testsuite import iterate_tests
 from unittest import loader
 
+from tempest.openstack.common import log as logging
+
+LOG = logging.getLogger(__name__)
+
 
 def discover_stress_tests(path="./", filter_attr=None, call_inherited=False):
     """Discovers all tempest tests and create action out of them
     """
+    LOG.info("Start test discovery")
     tests = []
     testloader = loader.TestLoader()
     list = testloader.discover(path)
     for func in (iterate_tests(list)):
+        attrs = []
         try:
             method_name = getattr(func, '_testMethodName')
             full_name = "%s.%s.%s" % (func.__module__,
@@ -106,4 +112,8 @@ group.add_argument('-t', "--tests", nargs='?',
                    help="Name of the file with test description")
 
 if __name__ == "__main__":
-    sys.exit(main(parser.parse_args()))
+    try:
+        sys.exit(main(parser.parse_args()))
+    except Exception:
+        LOG.exception("Failure in the stress test framework")
+        sys.exit(1)
