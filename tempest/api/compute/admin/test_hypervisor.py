@@ -16,7 +16,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest.test import attr
 
 
@@ -32,7 +31,6 @@ class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
     def setUpClass(cls):
         super(HypervisorAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.hypervisor_client
-        cls.non_adm_client = cls.hypervisor_client
 
     def _list_hypervisors(self):
         # List of hypervisors
@@ -93,19 +91,14 @@ class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertTrue(len(uptime) > 0)
 
-    @attr(type=['negative', 'gate'])
-    def test_get_hypervisor_list_with_non_admin_user(self):
-        # List of hypervisor and available services with non admin user
-        self.assertRaises(
-            exceptions.Unauthorized,
-            self.non_adm_client.get_hypervisor_list)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_hypervisor_list_details_with_non_admin_user(self):
-        # List of hypervisor details and available services with non admin user
-        self.assertRaises(
-            exceptions.Unauthorized,
-            self.non_adm_client.get_hypervisor_list_details)
+    @attr(type='gate')
+    def test_search_hypervisor(self):
+        hypers = self._list_hypervisors()
+        self.assertTrue(len(hypers) > 0)
+        resp, hypers = self.client.search_hypervisor(
+            hypers[0]['hypervisor_hostname'])
+        self.assertEqual(200, resp.status)
+        self.assertTrue(len(hypers) > 0)
 
 
 class HypervisorAdminTestXML(HypervisorAdminTestJSON):
