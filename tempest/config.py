@@ -196,7 +196,14 @@ ComputeGroup = [
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "
-                    "an instance")
+                    "an instance"),
+    cfg.IntOpt('shelved_offload_time',
+               default=0,
+               help='Time in seconds before a shelved instance is eligible '
+                    'for removing from a host.  -1 never offload, 0 offload '
+                    'when shelved. This time should be the same as the time '
+                    'of nova.conf, and some tests will run for as long as the '
+                    'time.')
 ]
 
 compute_features_group = cfg.OptGroup(name='compute-feature-enabled',

@@ -24,7 +24,8 @@ LOG = logging.getLogger(__name__)
 
 
 # NOTE(afazekas): This function needs to know a token and a subject.
-def wait_for_server_status(client, server_id, status, ready_wait=True):
+def wait_for_server_status(client, server_id, status, ready_wait=True,
+                           extra_timeout=0):
     """Waits for a server to reach a given status."""
 
     def _get_task_state(body):
@@ -37,6 +38,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True):
     old_status = server_status = body['status']
     old_task_state = task_state = _get_task_state(body)
     start_time = int(time.time())
+    timeout = client.build_timeout + extra_timeout
     while True:
         # NOTE(afazekas): Now the BUILD status only reached
         # between the UNKOWN->ACTIVE transition.
@@ -70,12 +72,12 @@ def wait_for_server_status(client, server_id, status, ready_wait=True):
         if server_status == 'ERROR':
             raise exceptions.BuildErrorException(server_id=server_id)
 
-        timed_out = int(time.time()) - start_time >= client.build_timeout
+        timed_out = int(time.time()) - start_time >= timeout
 
         if timed_out:
             message = ('Server %s failed to reach %s status within the '
                        'required time (%s s).' %
-                       (server_id, status, client.build_timeout))
+                       (server_id, status, timeout))
             message += ' Current status: %s.' % server_status
             raise exceptions.TimeoutException(message)
         old_status = server_status

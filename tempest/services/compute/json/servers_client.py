@@ -154,9 +154,10 @@ class ServersClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
-    def wait_for_server_status(self, server_id, status):
+    def wait_for_server_status(self, server_id, status, extra_timeout=0):
         """Waits for a server to reach a given status."""
-        return waiters.wait_for_server_status(self, server_id, status)
+        return waiters.wait_for_server_status(self, server_id, status,
+                                              extra_timeout=extra_timeout)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination."""
@@ -333,24 +334,32 @@ class ServersClientJSON(RestClient):
         return self.action(server_id, 'unlock', None, **kwargs)
 
     def suspend_server(self, server_id, **kwargs):
-        """Suspends the provded server."""
+        """Suspends the provided server."""
         return self.action(server_id, 'suspend', None, **kwargs)
 
     def resume_server(self, server_id, **kwargs):
-        """Un-suspends the provded server."""
+        """Un-suspends the provided server."""
         return self.action(server_id, 'resume', None, **kwargs)
 
     def pause_server(self, server_id, **kwargs):
-        """Pauses the provded server."""
+        """Pauses the provided server."""
         return self.action(server_id, 'pause', None, **kwargs)
 
     def unpause_server(self, server_id, **kwargs):
-        """Un-pauses the provded server."""
+        """Un-pauses the provided server."""
         return self.action(server_id, 'unpause', None, **kwargs)
 
     def reset_state(self, server_id, state='error'):
         """Resets the state of a server to active/error."""
         return self.action(server_id, 'os-resetState', None, state=state)
+
+    def shelve_server(self, server_id, **kwargs):
+        """Shelves the provided server."""
+        return self.action(server_id, 'shelve', None, **kwargs)
+
+    def unshelve_server(self, server_id, **kwargs):
+        """Un-shelves the provided server."""
+        return self.action(server_id, 'unshelve', None, **kwargs)
 
     def get_console_output(self, server_id, length):
         return self.action(server_id, 'os-getConsoleOutput', 'output',

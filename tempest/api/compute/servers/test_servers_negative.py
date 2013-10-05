@@ -389,6 +389,54 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.restore_soft_deleted_server,
                           self.server_id)
 
+    @attr(type=['negative', 'gate'])
+    def test_shelve_non_existent_server(self):
+        # shelve a non existent server
+        nonexistent_server = str(uuid.uuid4())
+        self.assertRaises(exceptions.NotFound, self.client.shelve_server,
+                          nonexistent_server)
+
+    @attr(type=['negative', 'gate'])
+    def test_shelve_shelved_server(self):
+        # shelve a shelved server.
+        resp, server = self.client.shelve_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.addCleanup(self.client.unshelve_server, self.server_id)
+
+        offload_time = self.config.compute.shelved_offload_time
+        if offload_time >= 0:
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED_OFFLOADED',
+                                               extra_timeout=offload_time)
+        else:
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED')
+
+        resp, server = self.client.get_server(self.server_id)
+        image_name = server['name'] + '-shelved'
+        params = {'name': image_name}
+        resp, images = self.images_client.list_images(params)
+        self.assertEqual(1, len(images))
+        self.assertEqual(image_name, images[0]['name'])
+
+        self.assertRaises(exceptions.Conflict,
+                          self.client.shelve_server,
+                          self.server_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_unshelve_non_existent_server(self):
+        # unshelve a non existent server
+        nonexistent_server = str(uuid.uuid4())
+        self.assertRaises(exceptions.NotFound, self.client.unshelve_server,
+                          nonexistent_server)
+
+    @attr(type=['negative', 'gate'])
+    def test_unshelve_server_invalid_state(self):
+        # unshelve an active server.
+        self.assertRaises(exceptions.Conflict,
+                          self.client.unshelve_server,
+                          self.server_id)
+
 
 class ServersNegativeTestXML(ServersNegativeTestJSON):
     _interface = 'xml'
