@@ -20,7 +20,7 @@ from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 
 
-class FloatingIPTest(base.BaseNetworkTest):
+class FloatingIPTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
     """
@@ -41,7 +41,7 @@ class FloatingIPTest(base.BaseNetworkTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FloatingIPTest, cls).setUpClass()
+        super(FloatingIPTestJSON, cls).setUpClass()
         cls.ext_net_id = cls.config.network.public_network_id
 
         # Create network, subnet, router and add interface
@@ -67,7 +67,7 @@ class FloatingIPTest(base.BaseNetworkTest):
         for i in range(2):
             cls.client.delete_port(cls.port[i]['id'])
         cls.client.delete_router(cls.router['id'])
-        super(FloatingIPTest, cls).tearDownClass()
+        super(FloatingIPTestJSON, cls).tearDownClass()
 
     def _delete_floating_ip(self, floating_ip_id):
         # Deletes a floating IP and verifies if it is deleted or not
@@ -133,3 +133,7 @@ class FloatingIPTest(base.BaseNetworkTest):
         self.assertIsNone(update_floating_ip['port_id'])
         self.assertIsNone(update_floating_ip['fixed_ip_address'])
         self.assertIsNone(update_floating_ip['router_id'])
+
+
+class FloatingIPTestXML(FloatingIPTestJSON):
+    _interface = 'xml'
