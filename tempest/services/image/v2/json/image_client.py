@@ -134,3 +134,27 @@ class ImageClientV2JSON(rest_client.RestClient):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)
         resp, _ = self.delete(url)
         return resp
+
+    def get_image_membership(self, image_id):
+        url = 'v2/images/%s/members' % image_id
+        resp, body = self.get(url)
+        body = json.loads(body)
+        self.expected_success(200, resp)
+        return resp, body
+
+    def add_member(self, image_id, member_id):
+        url = 'v2/images/%s/members' % image_id
+        data = json.dumps({'member': member_id})
+        resp, body = self.post(url, data, self.headers)
+        body = json.loads(body)
+        self.expected_success(200, resp)
+        return resp, body
+
+    def update_member_status(self, image_id, member_id, status):
+        """Valid status are: ``pending``, ``accepted``,  ``rejected``."""
+        url = 'v2/images/%s/members/%s' % (image_id, member_id)
+        data = json.dumps({'status': status})
+        resp, body = self.put(url, data, self.headers)
+        body = json.loads(body)
+        self.expected_success(200, resp)
+        return resp, body

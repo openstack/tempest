@@ -16,7 +16,7 @@
 
 from tempest import clients
 from tempest.common import isolated_creds
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -61,7 +61,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
     @classmethod
     def create_image(cls, **kwargs):
         """Wrapper that returns a test image."""
-        name = rand_name(cls.__name__ + "-instance")
+        name = data_utils.rand_name(cls.__name__ + "-instance")
 
         if 'name' in kwargs:
             name = kwargs.pop('name')
@@ -95,3 +95,40 @@ class BaseV2ImageTest(BaseImageTest):
         if not cls.config.image_feature_enabled.api_v2:
             msg = "Glance API v2 not supported"
             raise cls.skipException(msg)
+
+
+class BaseV2MemeberImageTest(BaseImageTest):
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseV2MemeberImageTest, cls).setUpClass()
+        if cls.config.compute.allow_tenant_isolation:
+            creds = cls.isolated_creds.get_alt_creds()
+            username, tenant_name, password = creds
+            cls.os_alt = clients.Manager(username=username,
+                                         password=password,
+                                         tenant_name=tenant_name,
+                                         interface=cls._interface)
+            cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
+        else:
+            cls.os_alt = clients.AltManager()
+            alt_tenant_name = cls.os_alt.tenant_name
+            identity_client = cls._get_identity_admin_client()
+            cls.alt_tenant_id = identity_client.get_tenant_by_name(
+                alt_tenant_name)['id']
+        cls.os_img_client = cls.os.image_client_v2
+        cls.alt_img_client = cls.os_alt.image_client_v2
+
+    def _list_image_ids_as_alt(self):
+        _, image_list = self.alt_img_client.image_list()
+        image_ids = map(lambda x: x['id'], image_list)
+        return image_ids
+
+    def _create_image(self):
+        name = data_utils.rand_name('image')
+        resp, image = self.os_img_client.create_image(name,
+                                                      container_format='bare',
+                                                      disk_format='raw')
+        image_id = image['id']
+        self.addCleanup(self.os_img_client.delete_image, image_id)
+        return image_id
