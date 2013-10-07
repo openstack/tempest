@@ -37,7 +37,7 @@ class ListServersNegativeTestJSON(base.BaseComputeTest):
         blocks while the servers are being deleted.
         """
         if len(servers):
-            if not compute.MULTI_USER:
+            if not cls.config.compute.allow_tenant_isolation:
                 for srv in servers:
                     cls.client.wait_for_server_termination(srv['id'],
                                                            ignore_error=True)
