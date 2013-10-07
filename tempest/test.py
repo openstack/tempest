@@ -16,6 +16,7 @@
 #    under the License.
 
 import atexit
+import functools
 import os
 import time
 
@@ -110,11 +111,14 @@ def skip_because(*args, **kwargs):
     @param condition: optional condition to be True for the skip to have place
     """
     def decorator(f):
-        if "bug" in kwargs:
-            if "condition" not in kwargs or kwargs["condition"] is True:
-                msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
-                raise testtools.TestCase.skipException(msg)
-        return f
+        @functools.wraps(f)
+        def wrapper(*func_args, **func_kwargs):
+            if "bug" in kwargs:
+                if "condition" not in kwargs or kwargs["condition"] is True:
+                    msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
+                    raise testtools.TestCase.skipException(msg)
+            return f(*func_args, **func_kwargs)
+        return wrapper
     return decorator
 
 
