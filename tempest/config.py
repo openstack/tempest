@@ -372,7 +372,7 @@ def register_volume_opts(conf):
 object_storage_group = cfg.OptGroup(name='object-storage',
                                     title='Object Storage Service Options')
 
-ObjectStoreConfig = [
+ObjectStoreGroup = [
     cfg.StrOpt('catalog_type',
                default='object-store',
                help="Catalog type of the Object-Storage service."),
@@ -406,7 +406,7 @@ ObjectStoreConfig = [
 
 def register_object_storage_opts(conf):
     conf.register_group(object_storage_group)
-    for opt in ObjectStoreConfig:
+    for opt in ObjectStoreGroup:
         conf.register_opt(opt, group='object-storage')
 
 
@@ -472,14 +472,14 @@ DashboardGroup = [
 
 
 def register_dashboard_opts(conf):
-    conf.register_group(scenario_group)
+    conf.register_group(dashboard_group)
     for opt in DashboardGroup:
         conf.register_opt(opt, group='dashboard')
 
 
 boto_group = cfg.OptGroup(name='boto',
                           title='EC2/S3 options')
-BotoConfig = [
+BotoGroup = [
     cfg.StrOpt('ec2_url',
                default="http://localhost:8773/services/Cloud",
                help="EC2 URL"),
@@ -526,7 +526,7 @@ BotoConfig = [
 
 def register_boto_opts(conf):
     conf.register_group(boto_group)
-    for opt in BotoConfig:
+    for opt in BotoGroup:
         conf.register_opt(opt, group='boto')
 
 stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
@@ -631,7 +631,7 @@ ServiceAvailableGroup = [
 
 
 def register_service_available_opts(conf):
-    conf.register_group(scenario_group)
+    conf.register_group(service_available_group)
     for opt in ServiceAvailableGroup:
         conf.register_opt(opt, group='service_available')
 
