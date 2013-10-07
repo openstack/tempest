@@ -57,31 +57,25 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
 
-        cls.s1_name = rand_name('server')
-        resp, cls.s1 = cls.client.create_server(cls.s1_name, cls.image_ref,
-                                                cls.flavor_ref)
-        cls.s2_name = rand_name('server')
-        resp, cls.s2 = cls.client.create_server(cls.s2_name, cls.image_ref_alt,
-                                                cls.flavor_ref)
-        cls.s3_name = rand_name('server')
-        resp, cls.s3 = cls.client.create_server(cls.s3_name, cls.image_ref,
-                                                cls.flavor_ref_alt)
+        cls.s1_name = rand_name(cls.__name__ + '-instance')
+        resp, cls.s1 = cls.create_server(name=cls.s1_name,
+                                         image_id=cls.image_ref,
+                                         flavor=cls.flavor_ref,
+                                         wait_until='ACTIVE')
 
-        cls.client.wait_for_server_status(cls.s1['id'], 'ACTIVE')
-        resp, cls.s1 = cls.client.get_server(cls.s1['id'])
-        cls.client.wait_for_server_status(cls.s2['id'], 'ACTIVE')
-        resp, cls.s2 = cls.client.get_server(cls.s2['id'])
-        cls.client.wait_for_server_status(cls.s3['id'], 'ACTIVE')
-        resp, cls.s3 = cls.client.get_server(cls.s3['id'])
+        cls.s2_name = rand_name(cls.__name__ + '-instance')
+        resp, cls.s2 = cls.create_server(name=cls.s2_name,
+                                         image_id=cls.image_ref_alt,
+                                         flavor=cls.flavor_ref,
+                                         wait_until='ACTIVE')
+
+        cls.s3_name = rand_name(cls.__name__ + '-instance')
+        resp, cls.s3 = cls.create_server(name=cls.s3_name,
+                                         image_id=cls.image_ref,
+                                         flavor=cls.flavor_ref_alt,
+                                         wait_until='ACTIVE')
 
         cls.fixed_network_name = cls.config.compute.fixed_network_name
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.client.delete_server(cls.s1['id'])
-        cls.client.delete_server(cls.s2['id'])
-        cls.client.delete_server(cls.s3['id'])
-        super(ListServerFiltersTestJSON, cls).tearDownClass()
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='gate')
@@ -184,8 +178,8 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
 
     @attr(type='gate')
     def test_list_servers_filtered_by_name_wildcard(self):
-        # List all servers that contains 'server' in name
-        params = {'name': 'server'}
+        # List all servers that contains '-instance' in name
+        params = {'name': '-instance'}
         resp, body = self.client.list_servers(params)
         servers = body['servers']
 
@@ -209,6 +203,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
+        resp, self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr']
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)
@@ -225,6 +220,7 @@ class ListServerFiltersTestJSON(base.BaseComputeTest):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
         # Here should be listed all servers
+        resp, self.s1 = self.client.get_server(self.s1['id'])
         ip = self.s1['addresses'][self.fixed_network_name][0]['addr'][0:-3]
         params = {'ip': ip}
         resp, body = self.client.list_servers(params)
