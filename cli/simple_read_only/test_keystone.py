@@ -19,8 +19,6 @@ import logging
 import re
 import subprocess
 
-import testtools
-
 import cli
 
 
@@ -40,7 +38,6 @@ class SimpleReadOnlyKeystoneClientTest(cli.ClientTestBase):
                           self.keystone,
                           'this-does-not-exist')
 
-    @testtools.skip("Skipped until the Bug #1213912 is resolved")
     def test_admin_catalog_list(self):
         out = self.keystone('catalog')
         catalog = self.parser.details_multiple(out, with_label=True)
@@ -92,7 +89,6 @@ class SimpleReadOnlyKeystoneClientTest(cli.ClientTestBase):
         self.assertIn('Keystone found at http', discovered)
         self.assertIn('supports version', discovered)
 
-    @testtools.skip("Skipped until the Bug #1213912 is resolved")
     def test_admin_help(self):
         help_text = self.keystone('help')
         lines = help_text.split('\n')
