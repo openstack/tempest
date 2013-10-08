@@ -118,7 +118,8 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         password = 'rebuildPassw0rd'
         resp, rebuilt_server = self.client.rebuild(self.server_id,
                                                    self.image_ref_alt,
-                                                   name=new_name, meta=meta,
+                                                   name=new_name,
+                                                   metadata=meta,
                                                    personality=personality,
                                                    adminPass=password)
 
@@ -226,7 +227,8 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.rebuild,
                           999, self.image_ref_alt,
-                          name=new_name, meta=meta,
+                          name=new_name,
+                          metadata=meta,
                           personality=personality,
                           adminPass='rebuild')
 
