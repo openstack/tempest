@@ -167,6 +167,10 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_net_list(self):
         self.nova('net-list')
 
+    def test_agent_list(self):
+        self.nova('agent-list')
+        self.nova('agent-list', flags='--debug')
+
     # Optional arguments:
 
     def test_admin_version(self):
