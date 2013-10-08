@@ -1,6 +1,7 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2012 OpenStack Foundation
+# Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -16,6 +17,7 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
 from tempest.openstack.common import log as logging
 from tempest.test import attr
@@ -101,6 +103,66 @@ class VolumesListTest(base.BaseVolumeTest):
         # Fetch all Volumes
         resp, fetched_list = self.client.list_volumes_with_detail()
         self.assertEqual(200, resp.status)
+        self.assertVolumesIn(fetched_list, self.volume_list)
+
+    @attr(type='gate')
+    def test_volume_list_by_name(self):
+        volume = self.volume_list[rand_int_id(0, 2)]
+        params = {'display_name': volume['display_name']}
+        resp, fetched_vol = self.client.list_volumes(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(1, len(fetched_vol), str(fetched_vol))
+        self.assertEqual(fetched_vol[0]['display_name'],
+                         volume['display_name'])
+
+    @attr(type='gate')
+    def test_volume_list_details_by_name(self):
+        volume = self.volume_list[rand_int_id(0, 2)]
+        params = {'display_name': volume['display_name']}
+        resp, fetched_vol = self.client.list_volumes_with_detail(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(1, len(fetched_vol), str(fetched_vol))
+        self.assertEqual(fetched_vol[0]['display_name'],
+                         volume['display_name'])
+
+    @attr(type='gate')
+    def test_volumes_list_by_status(self):
+        params = {'status': 'available'}
+        resp, fetched_list = self.client.list_volumes(params)
+        self.assertEqual(200, resp.status)
+        for volume in fetched_list:
+            self.assertEqual('available', volume['status'])
+        self.assertVolumesIn(fetched_list, self.volume_list)
+
+    @attr(type='gate')
+    def test_volumes_list_details_by_status(self):
+        params = {'status': 'available'}
+        resp, fetched_list = self.client.list_volumes_with_detail(params)
+        self.assertEqual(200, resp.status)
+        for volume in fetched_list:
+            self.assertEqual('available', volume['status'])
+        self.assertVolumesIn(fetched_list, self.volume_list)
+
+    @attr(type='gate')
+    def test_volumes_list_by_availability_zone(self):
+        volume = self.volume_list[rand_int_id(0, 2)]
+        zone = volume['availability_zone']
+        params = {'availability_zone': zone}
+        resp, fetched_list = self.client.list_volumes(params)
+        self.assertEqual(200, resp.status)
+        for volume in fetched_list:
+            self.assertEqual(zone, volume['availability_zone'])
+        self.assertVolumesIn(fetched_list, self.volume_list)
+
+    @attr(type='gate')
+    def test_volumes_list_details_by_availability_zone(self):
+        volume = self.volume_list[rand_int_id(0, 2)]
+        zone = volume['availability_zone']
+        params = {'availability_zone': zone}
+        resp, fetched_list = self.client.list_volumes_with_detail(params)
+        self.assertEqual(200, resp.status)
+        for volume in fetched_list:
+            self.assertEqual(zone, volume['availability_zone'])
         self.assertVolumesIn(fetched_list, self.volume_list)
 
 
