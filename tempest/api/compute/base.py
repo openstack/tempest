@@ -100,6 +100,19 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
+    def rebuild_server(cls, **kwargs):
+        # Destroy an existing server and creates a new one
+        try:
+            cls.servers_client.delete_server(cls.server_id)
+            cls.servers_client.wait_for_server_termination(cls.server_id)
+        except Exception as exc:
+            LOG.exception(exc)
+            pass
+        resp, server = cls.create_server(wait_until='ACTIVE', **kwargs)
+        cls.server_id = server['id']
+        cls.password = server['adminPass']
+
+    @classmethod
     def clear_images(cls):
         for image_id in cls.images:
             try:

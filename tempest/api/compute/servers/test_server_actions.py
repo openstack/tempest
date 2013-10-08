@@ -44,13 +44,13 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except Exception:
             # Rebuild server if something happened to it during a test
-            self.rebuild_servers()
+            self.rebuild_server()
 
     @classmethod
     def setUpClass(cls):
         super(ServerActionsTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
-        cls.rebuild_servers()
+        cls.rebuild_server()
 
     @testtools.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
                           'Change password not available.')
@@ -285,14 +285,6 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         resp, server = self.client.resume_server(self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-
-    @classmethod
-    def rebuild_servers(cls):
-        # Destroy any existing server and creates a new one
-        cls.clear_servers()
-        resp, server = cls.create_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
-        cls.password = server['adminPass']
 
     @attr(type='gate')
     def test_stop_start_server(self):
