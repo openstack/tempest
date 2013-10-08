@@ -159,7 +159,7 @@ class IdentityClientXML(RestClientXML):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
-    def create_user(self, name, password, tenant_id, email):
+    def create_user(self, name, password, tenant_id, email, **kwargs):
         """Create a user."""
         create_user = Element("user",
                               xmlns=XMLNS,
@@ -167,6 +167,9 @@ class IdentityClientXML(RestClientXML):
                               password=password,
                               tenantId=tenant_id,
                               email=email)
+        if 'enabled' in kwargs:
+            create_user.add_attr('enabled', str(kwargs['enabled']).lower())
+
         resp, body = self.post('users', str(Document(create_user)),
                                self.headers)
         body = self._parse_body(etree.fromstring(body))

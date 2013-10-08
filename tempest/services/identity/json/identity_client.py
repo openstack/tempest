@@ -139,7 +139,7 @@ class IdentityClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['tenant']
 
-    def create_user(self, name, password, tenant_id, email):
+    def create_user(self, name, password, tenant_id, email, **kwargs):
         """Create a user."""
         post_body = {
             'name': name,
@@ -147,6 +147,8 @@ class IdentityClientJSON(RestClient):
             'tenantId': tenant_id,
             'email': email
         }
+        if kwargs.get('enabled') is not None:
+            post_body['enabled'] = kwargs.get('enabled')
         post_body = json.dumps({'user': post_body})
         resp, body = self.post('users', post_body, self.headers)
         body = json.loads(body)
