@@ -19,8 +19,17 @@ import itertools
 import random
 import re
 import urllib
+import uuid
 
 from tempest import exceptions
+
+
+def rand_uuid():
+    return str(uuid.uuid4())
+
+
+def rand_uuid_hex():
+    return uuid.uuid4().hex
 
 
 def rand_name(name='test'):
