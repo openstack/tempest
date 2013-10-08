@@ -27,6 +27,12 @@ from tempest.common.utils.misc import singleton
 from tempest.openstack.common import log as logging
 
 
+def register_opt_group(conf, opt_group, options):
+    conf.register_group(opt_group)
+    for opt in options:
+        conf.register_opt(opt, group=opt_group.name)
+
+
 identity_group = cfg.OptGroup(name='identity',
                               title="Keystone Configuration Options")
 
@@ -86,13 +92,6 @@ IdentityGroup = [
                help="API key to use when authenticating as admin.",
                secret=True),
 ]
-
-
-def register_identity_opts(conf):
-    conf.register_group(identity_group)
-    for opt in IdentityGroup:
-        conf.register_opt(opt, group='identity')
-
 
 compute_group = cfg.OptGroup(name='compute',
                              title='Compute Service Options')
@@ -225,12 +224,6 @@ ComputeGroup = [
                     "an instance")
 ]
 
-
-def register_compute_opts(conf):
-    conf.register_group(compute_group)
-    for opt in ComputeGroup:
-        conf.register_opt(opt, group='compute')
-
 compute_admin_group = cfg.OptGroup(name='compute-admin',
                                    title="Compute Admin Options")
 
@@ -247,12 +240,6 @@ ComputeAdminGroup = [
                help="API key to use when authenticating as admin.",
                secret=True),
 ]
-
-
-def register_compute_admin_opts(conf):
-    conf.register_group(compute_admin_group)
-    for opt in ComputeAdminGroup:
-        conf.register_opt(opt, group='compute-admin')
 
 image_group = cfg.OptGroup(name='image',
                            title="Image Service Options")
@@ -275,12 +262,6 @@ ImageGroup = [
                'cirros-0.3.1-x86_64-uec.tar.gz',
                help='http accessible image')
 ]
-
-
-def register_image_opts(conf):
-    conf.register_group(image_group)
-    for opt in ImageGroup:
-        conf.register_opt(opt, group='image')
 
 
 network_group = cfg.OptGroup(name='network',
@@ -315,12 +296,6 @@ NetworkGroup = [
                help="Id of the public router that provides external "
                     "connectivity"),
 ]
-
-
-def register_network_opts(conf):
-    conf.register_group(network_group)
-    for opt in NetworkGroup:
-        conf.register_opt(opt, group='network')
 
 volume_group = cfg.OptGroup(name='volume',
                             title='Block Storage Options')
@@ -363,12 +338,6 @@ VolumeGroup = [
 ]
 
 
-def register_volume_opts(conf):
-    conf.register_group(volume_group)
-    for opt in VolumeGroup:
-        conf.register_opt(opt, group='volume')
-
-
 object_storage_group = cfg.OptGroup(name='object-storage',
                                     title='Object Storage Service Options')
 
@@ -402,12 +371,6 @@ ObjectStoreGroup = [
                help="Role to add to users created for swift tests to "
                     "enable creating containers"),
 ]
-
-
-def register_object_storage_opts(conf):
-    conf.register_group(object_storage_group)
-    for opt in ObjectStoreGroup:
-        conf.register_opt(opt, group='object-storage')
 
 
 orchestration_group = cfg.OptGroup(name='orchestration',
@@ -452,12 +415,6 @@ OrchestrationGroup = [
 ]
 
 
-def register_orchestration_opts(conf):
-    conf.register_group(orchestration_group)
-    for opt in OrchestrationGroup:
-        conf.register_opt(opt, group='orchestration')
-
-
 dashboard_group = cfg.OptGroup(name="dashboard",
                                title="Dashboard options")
 
@@ -469,12 +426,6 @@ DashboardGroup = [
                default='http://localhost/auth/login/',
                help="Login page for the dashboard"),
 ]
-
-
-def register_dashboard_opts(conf):
-    conf.register_group(dashboard_group)
-    for opt in DashboardGroup:
-        conf.register_opt(opt, group='dashboard')
 
 
 boto_group = cfg.OptGroup(name='boto',
@@ -523,12 +474,6 @@ BotoGroup = [
                help="Status Change Test Interval"),
 ]
 
-
-def register_boto_opts(conf):
-    conf.register_group(boto_group)
-    for opt in BotoGroup:
-        conf.register_opt(opt, group='boto')
-
 stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
 
 StressGroup = [
@@ -563,12 +508,6 @@ StressGroup = [
 ]
 
 
-def register_stress_opts(conf):
-    conf.register_group(stress_group)
-    for opt in StressGroup:
-        conf.register_opt(opt, group='stress')
-
-
 scenario_group = cfg.OptGroup(name='scenario', title='Scenario Test Options')
 
 ScenarioGroup = [
@@ -594,12 +533,6 @@ ScenarioGroup = [
         help="specifies how many resources to request at once. Used "
         "for large operations testing.")
 ]
-
-
-def register_scenario_opts(conf):
-    conf.register_group(scenario_group)
-    for opt in ScenarioGroup:
-        conf.register_opt(opt, group='scenario')
 
 
 service_available_group = cfg.OptGroup(name="service_available",
@@ -629,12 +562,6 @@ ServiceAvailableGroup = [
                 help="Whether or not Horizon is expected to be available"),
 ]
 
-
-def register_service_available_opts(conf):
-    conf.register_group(service_available_group)
-    for opt in ServiceAvailableGroup:
-        conf.register_opt(opt, group='service_available')
-
 debug_group = cfg.OptGroup(name="debug",
                            title="Debug System")
 
@@ -643,12 +570,6 @@ DebugGroup = [
                 default=True,
                 help="Enable diagnostic commands"),
 ]
-
-
-def register_debug_opts(conf):
-    conf.register_group(debug_group)
-    for opt in DebugGroup:
-        conf.register_opt(opt, group='debug')
 
 
 @singleton
@@ -689,20 +610,21 @@ class TempestConfig:
         LOG = logging.getLogger('tempest')
         LOG.info("Using tempest config file %s" % path)
 
-        register_compute_opts(cfg.CONF)
-        register_identity_opts(cfg.CONF)
-        register_image_opts(cfg.CONF)
-        register_network_opts(cfg.CONF)
-        register_volume_opts(cfg.CONF)
-        register_object_storage_opts(cfg.CONF)
-        register_orchestration_opts(cfg.CONF)
-        register_dashboard_opts(cfg.CONF)
-        register_boto_opts(cfg.CONF)
-        register_compute_admin_opts(cfg.CONF)
-        register_stress_opts(cfg.CONF)
-        register_scenario_opts(cfg.CONF)
-        register_service_available_opts(cfg.CONF)
-        register_debug_opts(cfg.CONF)
+        register_opt_group(cfg.CONF, compute_group, ComputeGroup)
+        register_opt_group(cfg.CONF, identity_group, IdentityGroup)
+        register_opt_group(cfg.CONF, image_group, ImageGroup)
+        register_opt_group(cfg.CONF, network_group, NetworkGroup)
+        register_opt_group(cfg.CONF, volume_group, VolumeGroup)
+        register_opt_group(cfg.CONF, object_storage_group, ObjectStoreGroup)
+        register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
+        register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
+        register_opt_group(cfg.CONF, boto_group, BotoGroup)
+        register_opt_group(cfg.CONF, compute_admin_group, ComputeAdminGroup)
+        register_opt_group(cfg.CONF, stress_group, StressGroup)
+        register_opt_group(cfg.CONF, scenario_group, ScenarioGroup)
+        register_opt_group(cfg.CONF, service_available_group,
+                           ServiceAvailableGroup)
+        register_opt_group(cfg.CONF, debug_group, DebugGroup)
         self.compute = cfg.CONF.compute
         self.identity = cfg.CONF.identity
         self.images = cfg.CONF.image
