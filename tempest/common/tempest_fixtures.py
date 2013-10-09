@@ -15,16 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import fixtures
-
 from tempest.openstack.common import lockutils
 
 
-class LockFixture(fixtures.Fixture):
+class LockFixture(lockutils.LockFixture):
     def __init__(self, name):
-        self.mgr = lockutils.lock(name, 'tempest-', True)
-
-    def setUp(self):
-        super(LockFixture, self).setUp()
-        self.addCleanup(self.mgr.__exit__, None, None, None)
-        self.mgr.__enter__()
+        super(LockFixture, self).__init__(name, 'tempest-')
