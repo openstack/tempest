@@ -81,3 +81,11 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
 
     def test_db_version(self):
         self.assertNotEqual("", self.nova_manage('db version'))
+
+    def test_cell_list(self):
+        # make sure command doesn't error out
+        self.nova_manage('cell list')
+
+    def test_host_list(self):
+        # make sure command doesn't error out
+        self.nova_manage('host list')
