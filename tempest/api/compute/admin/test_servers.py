@@ -33,11 +33,8 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
     def setUpClass(cls):
         super(ServersAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.servers_client
-        cls.flavors_client = cls.os_adm.flavors_client
-
         cls.non_adm_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
-
         cls.identity_client = cls._get_identity_admin_client()
         tenant = cls.identity_client.get_tenant_by_name(
             cls.client.tenant_name)
