@@ -154,14 +154,17 @@ class FlavorsClientXML(RestClientXML):
         return resp, body
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
-        """Gets a specified key detail for the mentioned flavor."""
-        resp, body = self.get('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
-                              key), self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        """Gets extra Specs key-value of the mentioned flavor and key."""
+        resp, xml_body = self.get('flavors/%s/os-extra_specs/%s' %
+                                  (str(flavor_id), key), self.headers)
+        body = {}
+        element = etree.fromstring(xml_body)
+        key = element.get('key')
+        body[key] = xml_to_json(element)
         return resp, body
 
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
-        """Gets specified extra Specs details of the mentioned flavor."""
+        """Update extra Specs details of the mentioned flavor and key."""
         doc = Document()
         for (k, v) in kwargs.items():
             element = Element(k)

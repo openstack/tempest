@@ -26,7 +26,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Flavor Extra Spec API extension.
-    SET, UNSET Flavor Extra specs require admin privileges.
+    SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
     GET Flavor Extra specs can be performed even by without admin privileges.
     """
 
@@ -87,13 +87,6 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(update_resp.status, 200)
         self.assertEqual({"key1": "value"}, update_body)
 
-        # GET a key value and verify
-        show_resp, get_body = \
-            self.client.get_flavor_extra_spec_with_key(self.flavor['id'],
-                                                       "key1")
-        self.assertEqual(show_resp.status, 200)
-        self.assertEqual(get_body, 'value')
-
         # GET extra specs and verify the value of the key2
         # is the same as before
         get_resp, get_body = \
@@ -110,7 +103,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(unset_resp.status, 200)
 
     @attr(type='gate')
-    def test_flavor_non_admin_get_all_keys_and_specified_key(self):
+    def test_flavor_non_admin_get_all_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
         set_resp, set_body = self.client.set_flavor_extra_spec(
             self.flavor['id'], specs)
@@ -121,12 +114,19 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         for key in specs:
             self.assertEqual(body[key], specs[key])
 
-        get_resp, get_body = \
-            self.flavors_client.get_flavor_extra_spec_with_key(
-                self.flavor['id'],
-                "key1")
-        self.assertEqual(get_resp.status, 200)
-        self.assertEqual("value1", get_body)
+    @attr(type='gate')
+    def test_flavor_non_admin_get_specific_key(self):
+        specs = {"key1": "value1", "key2": "value2"}
+        resp, body = self.client.set_flavor_extra_spec(
+            self.flavor['id'], specs)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(body['key1'], 'value1')
+        self.assertIn('key2', body)
+        resp, body = self.flavors_client.get_flavor_extra_spec_with_key(
+            self.flavor['id'], 'key1')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(body['key1'], 'value1')
+        self.assertNotIn('key2', body)
 
 
 class FlavorsExtraSpecsTestXML(FlavorsExtraSpecsTestJSON):
