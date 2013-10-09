@@ -128,7 +128,8 @@ class ClientTestBase(tempest.test.BaseTestCase):
             if not fail_ok and proc.returncode != 0:
                 raise CommandFailed(proc.returncode,
                                     cmd,
-                                    result)
+                                    result,
+                                    stderr=result_err)
         finally:
             LOG.debug('output of %s:\n%s' % (cmd_str, result))
             if not merge_stderr and result_err:
@@ -149,6 +150,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
 
 class CommandFailed(subprocess.CalledProcessError):
     # adds output attribute for python2.6
-    def __init__(self, returncode, cmd, output):
+    def __init__(self, returncode, cmd, output, stderr=""):
         super(CommandFailed, self).__init__(returncode, cmd)
         self.output = output
+        self.stderr = stderr
