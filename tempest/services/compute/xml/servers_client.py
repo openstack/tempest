@@ -575,6 +575,13 @@ class ServersClientXML(RestClientXML):
                                  (server_id, volume_id), headers)
         return resp, body
 
+    def get_server_diagnostics(self, server_id):
+        """Get the usage data for a server."""
+        resp, body = self.get("servers/%s/diagnostics" % server_id,
+                              self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
     def list_instance_actions(self, server_id):
         """List the provided server action."""
         resp, body = self.get("servers/%s/os-instance-actions" % server_id,

@@ -35,8 +35,11 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
         cls.client = cls.os_adm.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
 
-        cls.admin_client = cls._get_identity_admin_client()
-        tenant = cls.admin_client.get_tenant_by_name(
+        cls.non_adm_client = cls.servers_client
+        cls.flavors_client = cls.os_adm.flavors_client
+
+        cls.identity_client = cls._get_identity_admin_client()
+        tenant = cls.identity_client.get_tenant_by_name(
             cls.client.tenant_name)
         cls.tenant_id = tenant['id']
 
@@ -157,6 +160,24 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
     def test_reset_state_server_nonexistent_server(self):
         self.assertRaises(exceptions.NotFound,
                           self.client.reset_state, '999')
+
+    @attr(type='gate')
+    def test_get_server_diagnostics_by_admin(self):
+        # Retrieve server diagnostics by admin user
+        resp, diagnostic = self.client.get_server_diagnostics(self.s1_id)
+        self.assertEqual(200, resp.status)
+        basic_attrs = ['rx_packets', 'rx_errors', 'rx_drop',
+                       'tx_packets', 'tx_errors', 'tx_drop',
+                       'read_req', 'write_req', 'cpu', 'memory']
+        for key in basic_attrs:
+            self.assertIn(key, str(diagnostic.keys()))
+
+    @attr(type=['negative', 'gate'])
+    def test_get_server_diagnostics_by_non_admin(self):
+        # Non-admin user can not view server diagnostics according to policy
+        self.assertRaises(exceptions.Unauthorized,
+                          self.non_adm_client.get_server_diagnostics,
+                          self.s1_id)
 
 
 class ServersAdminTestXML(ServersAdminTestJSON):
