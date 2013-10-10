@@ -164,7 +164,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             name=data_utils.rand_name('keypair-smoke-'))
 
     def _create_security_groups(self):
-        self.security_groups[self.tenant_id] = self._create_security_group()
+        self.security_groups[self.tenant_id] =\
+            self._create_security_group_neutron(tenant_id=self.tenant_id)
 
     def _create_networks(self):
         network = self._create_network(self.tenant_id)

@@ -50,7 +50,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
         self.set_resource('secgroup', self.secgroup)
 
         # Add rules to the security group
-        self.create_loginable_secgroup_rule(secgroup_id=self.secgroup.id)
+        self._create_loginable_secgroup_rule_nova(secgroup_id=self.secgroup.id)
 
     def boot_instance(self):
         create_kwargs = {

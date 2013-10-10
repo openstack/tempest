@@ -94,3 +94,18 @@ class DeletablePort(DeletableResource):
 
     def delete(self):
         self.client.delete_port(self.id)
+
+
+class DeletableSecurityGroup(DeletableResource):
+
+    def delete(self):
+        self.client.delete_security_group(self.id)
+
+
+class DeletableSecurityGroupRule(DeletableResource):
+
+    def __repr__(self):
+        return '<%s id="%s">' % (self.__class__.__name__, self.id)
+
+    def delete(self):
+        self.client.delete_security_group_rule(self.id)

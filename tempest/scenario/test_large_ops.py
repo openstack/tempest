@@ -85,7 +85,7 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
         name = data_utils.rand_name('scenario-server-')
         client = self.compute_client
         flavor_id = self.config.compute.flavor_ref
-        secgroup = self._create_security_group()
+        secgroup = self._create_security_group_nova()
         self.servers = client.servers.create(
             name=name, image=self.image,
             flavor=flavor_id,
