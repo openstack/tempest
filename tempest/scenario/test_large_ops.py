@@ -82,9 +82,6 @@ class TestLargeOpsScenario(manager.OfficialClientTest):
                                         properties=properties)
 
     def nova_boot(self):
-        def delete(servers):
-            [x.delete() for x in servers]
-
         name = rand_name('scenario-server-')
         client = self.compute_client
         flavor_id = self.config.compute.flavor_ref
@@ -94,7 +91,8 @@ class TestLargeOpsScenario(manager.OfficialClientTest):
             min_count=self.config.scenario.large_ops_number)
         # needed because of bug 1199788
         self.servers = [x for x in client.servers.list() if name in x.name]
-        self.addCleanup(delete, self.servers)
+        for server in self.servers:
+            self.set_resource(server.name, server)
         self._wait_for_server_status('ACTIVE')
 
     @services('compute', 'image')
