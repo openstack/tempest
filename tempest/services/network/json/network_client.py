@@ -697,3 +697,21 @@ class NetworkClientJSON(RestClient):
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_dhcp_agent_hosting_network(self, network_id):
+        uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
+        uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def remove_network_from_dhcp_agent(self, agent_id, network_id):
+        uri = '%s/agents/%s/dhcp-networks/%s' % (self.uri_prefix, agent_id,
+                                                 network_id)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
