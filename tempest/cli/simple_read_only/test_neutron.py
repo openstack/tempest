@@ -67,6 +67,12 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
     def test_neutron_floatingip_list(self):
         self.neutron('floatingip-list')
 
+    def test_neutron_meter_label_list(self):
+        self.neutron('meter-label-list')
+
+    def test_neutron_meter_label_rule_list(self):
+        self.neutron('meter-label-rule-list')
+
     def test_neutron_net_external_list(self):
         self.neutron('net-external-list')
 
