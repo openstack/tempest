@@ -84,6 +84,24 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
         roles = self.parser.listing(self.cinder('list-extensions'))
         self.assertTableStruct(roles, ['Name', 'Summary', 'Alias', 'Updated'])
 
+    def test_cinder_credentials(self):
+        self.cinder('credentials')
+
+    def test_cinder_availability_zone_list(self):
+        self.cinder('availability-zone-list')
+
+    def test_cinder_endpoints(self):
+        self.cinder('endpoints')
+
+    def test_cinder_service_list(self):
+        self.cinder('service-list')
+
+    def test_cinder_transfer_list(self):
+        self.cinder('transfer-list')
+
+    def test_cinder_bash_completion(self):
+        self.cinder('bash-completion')
+
     def test_admin_help(self):
         help_text = self.cinder('help')
         lines = help_text.split('\n')
