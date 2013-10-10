@@ -24,7 +24,7 @@ from tempest.test import services
 LOG = logging.getLogger(__name__)
 
 
-class TestLargeOpsScenario(manager.OfficialClientTest):
+class TestLargeOpsScenario(manager.NetworkScenarioTest):
 
     """
     Test large operations.
@@ -85,10 +85,12 @@ class TestLargeOpsScenario(manager.OfficialClientTest):
         name = rand_name('scenario-server-')
         client = self.compute_client
         flavor_id = self.config.compute.flavor_ref
+        secgroup = self._create_security_group()
         self.servers = client.servers.create(
             name=name, image=self.image,
             flavor=flavor_id,
-            min_count=self.config.scenario.large_ops_number)
+            min_count=self.config.scenario.large_ops_number,
+            security_groups=[secgroup.name])
         # needed because of bug 1199788
         self.servers = [x for x in client.servers.list() if name in x.name]
         for server in self.servers:
