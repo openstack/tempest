@@ -1,0 +1,131 @@
+n-cpu:
+    - module: "nova.virt.libvirt.driver"
+      message: "During wait destroy, instance disappeared"
+    - module: "glanceclient.common.http"
+      message: "Request returned failure status"
+    - module: "nova.openstack.common.periodic_task"
+      message: "Error during ComputeManager\\.update_available_resource: \
+        'NoneType' object is not iterable"
+    - module: "nova.compute.manager"
+      message: "Possibly task preempted"
+    - module: "nova.openstack.common.rpc.amqp"
+      message: "Exception during message handling"
+    - module: "nova.network.api"
+      message: "Failed storing info cache"
+    - module: "nova.compute.manager"
+      message: "Error while trying to clean up image"
+    - module: "nova.virt.libvirt.driver"
+      message: "Error injecting data into image.*\\(Unexpected error while \
+        running command"
+    - module: "nova.compute.manager"
+      message: "Instance failed to spawn"
+    - module: "nova.compute.manager"
+      message: "Error: Unexpected error while running command"
+
+g-api:
+    - module: "glance.store.sheepdog"
+      message: "Error in store configuration: Unexpected error while \
+        running command"
+    - module: "swiftclient"
+      message: "Container HEAD failed: .*404 Not Found"
+
+ceilometer-acompute:
+    - module: "ceilometer.compute.pollsters.disk"
+      message: "Requested operation is not valid: domain is not running"
+    - module: "ceilometer.compute.pollsters.disk"
+      message: "Domain not found: no domain with matching uuid"
+
+h-api:
+    - module: "root"
+      message: "Returning 400 to user: The server could not comply with \
+        the request since it is either malformed or otherwise incorrect"
+    - module: "root"
+      message: "Unexpected error occurred serving API: Request limit \
+        exceeded: Template exceeds maximum allowed size"
+    - module: "root"
+      message: "Unexpected error occurred serving API: The Stack \
+        .*could not be found"
+
+h-eng:
+    - module: "heat.openstack.common.rpc.amqp"
+      message: "Exception during message handling"
+    - module: "heat.openstack.common.rpc.common"
+      message: "The Stack .* could not be found"
+
+n-api:
+    - module: "glanceclient.common.http"
+      message: "Request returned failure status"
+    - module: "nova.api.openstack"
+      message: "Caught error: Quota exceeded for"
+    - module: "nova.compute.api"
+      message: "ServerDiskConfigTest"
+    - module: "nova.compute.api"
+      message: "ServersTest"
+    - module: "nova.compute.api"
+      message: "\\{u'kernel_id'.*u'ramdisk_id':"
+
+n-cond:
+    - module: "nova.notifications"
+      message: "Failed to send state update notification"
+
+n-sch:
+    - module: "nova.scheduler.filter_scheduler"
+      message: "Error from last host: "
+
+c-api:
+    - module: "cinder.api.middleware.fault"
+      message: "Caught error: Volume .* could not be found"
+
+q-dhpc:
+    - module: "neutron.common.legacy"
+      message: "Skipping unknown group key: firewall_driver"
+    - module: "neutron.agent.dhcp_agent"
+      message: "Unable to enable dhcp"
+    - module: "neutron.agent.dhcp_agent"
+      message: " Network .* RPC info call failed"
+
+ceilometer-collector:
+    - module: "stevedore.extension"
+      message: ".*"
+    - module: "ceilometer.collector.dispatcher.database"
+      message: "duplicate key value violates unique constraint"
+
+q-agt:
+    - module: "neutron.agent.linux.ovs_lib"
+      message: "Unable to execute.*Exception:"
+
+q-dhcp:
+    - module: "neutron.common.legacy"
+      message: "Skipping unknown group key: firewall_driver"
+    - module: "neutron.agent.dhcp_agent"
+      message: "Unable to enable dhcp"
+    - module: "neutron.agent.dhcp_agent"
+      message: "Network .* RPC info call failed"
+
+q-l3:
+    - module: "neutron.common.legacy"
+      message: "Skipping unknown group key: firewall_driver"
+    - module: "neutron.agent.l3_agent"
+      message: "Failed synchronizing routers"
+
+
+q-lbaas:
+    - module: "neutron.common.legacy"
+      message: "Skipping unknown group key: firewall_driver"
+    - module: "neutron.services.loadbalancer.drivers.haproxy.agent_manager"
+      message: "Error upating stats"
+    - module: "neutron.services.loadbalancer.drivers.haproxy.agent_manager"
+      message: "Unable to destroy device for pool"
+
+q-svc:
+    - module: "neutron.common.legacy"
+      message: "Skipping unknown group key: firewall_driver"
+    - module: "neutron.openstack.common.rpc.amqp"
+      message: "Exception during message handling"
+    - module: "neutron.openstack.common.rpc.common"
+      message: "Network .* could not be found"
+    - module: "neutron.openstack.common.rpc.common"
+      message: "Pool .* could not be found"
+    - module: "neutron.api.v2.resource"
+      message: "show failed"
+
