@@ -115,6 +115,14 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
                           self.flavor['id'],
                           'key1')
 
+    @attr(type=['negative', 'gate'])
+    def test_flavor_unset_nonexistent_key(self):
+        nonexistent_key = rand_name('flavor_key')
+        self.assertRaises(exceptions.NotFound,
+                          self.client.unset_flavor_extra_spec,
+                          self.flavor['id'],
+                          nonexistent_key)
+
 
 class FlavorsExtraSpecsTestXML(FlavorsExtraSpecsTestJSON):
     _interface = 'xml'
