@@ -123,43 +123,6 @@ class ImagesV3TestJSON(base.BaseV3ComputeTest):
                           self.servers_client.create_image,
                           test_uuid, snapshot_name)
 
-    @attr(type=['negative', 'gate'])
-    def test_delete_image_with_invalid_image_id(self):
-        # An image should not be deleted with invalid image id
-        self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                          '!@$%^&*()')
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_non_existent_image(self):
-        # Return an error while trying to delete a non-existent image
-
-        non_existent_image_id = '11a22b9-12a9-5555-cc11-00ab112223fa'
-        self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                          non_existent_image_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_image_blank_id(self):
-        # Return an error while trying to delete an image with blank Id
-        self.assertRaises(exceptions.NotFound, self.client.delete_image, '')
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_image_non_hex_string_id(self):
-        # Return an error while trying to delete an image with non hex id
-        image_id = '11a22b9-120q-5555-cc11-00ab112223gj'
-        self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                          image_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_image_negative_image_id(self):
-        # Return an error while trying to delete an image with negative id
-        self.assertRaises(exceptions.NotFound, self.client.delete_image, -1)
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_image_id_is_over_35_character_limit(self):
-        # Return an error while trying to delete image with id over limit
-        self.assertRaises(exceptions.NotFound, self.client.delete_image,
-                          '11a22b9-12a9-5555-cc11-00ab112223fa-3fac')
-
 
 class ImagesV3TestXML(ImagesV3TestJSON):
     _interface = 'xml'

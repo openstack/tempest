@@ -18,23 +18,11 @@
 import cStringIO as StringIO
 
 from tempest.api.image import base
-from tempest import exceptions
 from tempest.test import attr
 
 
 class CreateRegisterImagesTest(base.BaseV1ImageTest):
     """Here we test the registration and creation of images."""
-
-    @attr(type='gate')
-    def test_register_with_invalid_container_format(self):
-        # Negative tests for invalid data supplied to POST /images
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          'test', 'wrong', 'vhd')
-
-    @attr(type='gate')
-    def test_register_with_invalid_disk_format(self):
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          'test', 'bare', 'wrong')
 
     @attr(type='gate')
     def test_register_then_upload(self):
@@ -108,6 +96,8 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         self.assertEqual(40, body.get('min_ram'))
         for key, val in properties.items():
             self.assertEqual(val, body.get('properties')[key])
+        resp, body = self.client.delete_image(body['id'])
+        self.assertEqual('200', resp['status'])
 
 
 class ListImagesTest(base.BaseV1ImageTest):
