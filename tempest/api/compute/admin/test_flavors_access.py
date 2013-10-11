@@ -15,13 +15,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
-
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 from tempest.test import attr
 
 
@@ -43,14 +40,36 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
         cls.client = cls.os_adm.flavors_client
         admin_client = cls._get_identity_admin_client()
-        resp, tenants = admin_client.list_tenants()
-        cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
-                         cls.flavors_client.tenant_name][0]
-
+        cls.tenant = admin_client.get_tenant_by_name(cls.flavors_client.
+                                                     tenant_name)
+        cls.tenant_id = cls.tenant['id']
+        cls.adm_tenant = admin_client.get_tenant_by_name(cls.os_adm.
+                                                         flavors_client.
+                                                         tenant_name)
+        cls.adm_tenant_id = cls.adm_tenant['id']
         cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
         cls.vcpus = 1
         cls.disk = 10
+
+    @attr(type='gate')
+    def test_flavor_access_list_with_private_flavor(self):
+        # Test to list flavor access successfully by querying private flavor
+        flavor_name = rand_name(self.flavor_name_prefix)
+        new_flavor_id = rand_int_id(start=1000)
+        resp, new_flavor = self.client.create_flavor(flavor_name,
+                                                     self.ram, self.vcpus,
+                                                     self.disk,
+                                                     new_flavor_id,
+                                                     is_public='False')
+        self.addCleanup(self.client.delete_flavor, new_flavor['id'])
+        self.assertEqual(resp.status, 200)
+        resp, flavor_access = self.client.list_flavor_access(new_flavor_id)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(len(flavor_access), 1, str(flavor_access))
+        first_flavor = flavor_access[0]
+        self.assertEqual(str(new_flavor_id), str(first_flavor['flavor_id']))
+        self.assertEqual(self.adm_tenant_id, first_flavor['tenant_id'])
 
     @attr(type='gate')
     def test_flavor_access_add_remove(self):
@@ -88,84 +107,6 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         resp, flavors = self.flavors_client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         self.assertNotIn(new_flavor['id'], map(lambda x: x['id'], flavors))
-
-    @attr(type=['negative', 'gate'])
-    def test_flavor_non_admin_add(self):
-        # Test to add flavor access as a user without admin privileges.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
-        self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertRaises(exceptions.Unauthorized,
-                          self.flavors_client.add_flavor_access,
-                          new_flavor['id'],
-                          self.tenant_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_flavor_non_admin_remove(self):
-        # Test to remove flavor access as a user without admin privileges.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
-        self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        # Add flavor access to a tenant.
-        self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
-        self.addCleanup(self.client.remove_flavor_access,
-                        new_flavor['id'], self.tenant_id)
-        self.assertRaises(exceptions.Unauthorized,
-                          self.flavors_client.remove_flavor_access,
-                          new_flavor['id'],
-                          self.tenant_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_add_flavor_access_duplicate(self):
-        # Create a new flavor.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
-        self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-
-        # Add flavor access to a tenant.
-        self.client.add_flavor_access(new_flavor['id'], self.tenant_id)
-        self.addCleanup(self.client.remove_flavor_access,
-                        new_flavor['id'], self.tenant_id)
-
-        # An exception should be raised when adding flavor access to the same
-        # tenant
-        self.assertRaises(exceptions.Conflict,
-                          self.client.add_flavor_access,
-                          new_flavor['id'],
-                          self.tenant_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_remove_flavor_access_not_found(self):
-        # Create a new flavor.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
-        resp, new_flavor = self.client.create_flavor(flavor_name,
-                                                     self.ram, self.vcpus,
-                                                     self.disk,
-                                                     new_flavor_id,
-                                                     is_public='False')
-        self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-
-        # An exception should be raised when flavor access is not found
-        self.assertRaises(exceptions.NotFound,
-                          self.client.remove_flavor_access,
-                          new_flavor['id'],
-                          str(uuid.uuid4()))
 
 
 class FlavorsAdminTestXML(FlavorsAccessTestJSON):
