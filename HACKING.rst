@@ -105,6 +105,19 @@ name. For example, any test that make an api call to a service other than nova
 in tempest.api.compute would require a service tag for those services, however
 they do not need to be tagged as compute.
 
+Negative Tests
+--------------
+When adding negative tests to tempest there are 2 requirements. First the tests
+must be marked with a negative attribute. For example::
+
+  @attr(type=negative)
+  def test_resource_no_uuid(self):
+    ...
+
+The second requirement is that all negative tests must be added to a negative
+test file. If such a file doesn't exist for the particular resource being
+tested a new test file should be added.
+
 Test skips because of Known Bugs
 --------------------------------
 
