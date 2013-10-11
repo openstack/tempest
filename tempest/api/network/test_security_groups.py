@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -66,9 +66,9 @@ class SecGroupTest(base.BaseNetworkTest):
         self.assertIsNotNone(found, msg)
 
     @attr(type='smoke')
-    def test_create_show_delete_security_group_and_rule(self):
+    def test_create_show_delete_security_group(self):
         # Create a security group
-        name = rand_name('secgroup-')
+        name = data_utils.rand_name('secgroup-')
         resp, group_create_body = self.client.create_security_group(name)
         self.assertEqual('201', resp['status'])
         self.addCleanup(self._delete_security_group,
@@ -88,14 +88,29 @@ class SecGroupTest(base.BaseNetworkTest):
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])
         self.assertIn(group_create_body['security_group']['id'], secgroup_list)
-        # No Update in security group
-        # Create rule
-        resp, rule_create_body = self.client.create_security_group_rule(
-            group_create_body['security_group']['id']
-        )
+
+    @attr(type='smoke')
+    def test_create_show_delete_security_group_rule(self):
+        # Create a security group
+        name = data_utils.rand_name('secgroup-')
+        resp, group_create_body = self.client.create_security_group(name)
         self.assertEqual('201', resp['status'])
-        self.addCleanup(self._delete_security_group_rule,
-                        rule_create_body['security_group_rule']['id'])
+        self.addCleanup(self._delete_security_group,
+                        group_create_body['security_group']['id'])
+        self.assertEqual(group_create_body['security_group']['name'], name)
+
+        # Create rules for each protocol
+        protocols = ['tcp', 'udp', 'icmp']
+        for protocol in protocols:
+            resp, rule_create_body = self.client.create_security_group_rule(
+                group_create_body['security_group']['id'],
+                protocol=protocol
+            )
+            self.assertEqual('201', resp['status'])
+            self.addCleanup(self._delete_security_group_rule,
+                            rule_create_body['security_group_rule']['id']
+                            )
+
         # Show details of the created security rule
         resp, show_rule_body = self.client.show_security_group_rule(
             rule_create_body['security_group_rule']['id']
@@ -111,13 +126,13 @@ class SecGroupTest(base.BaseNetworkTest):
 
     @attr(type=['negative', 'smoke'])
     def test_show_non_existent_security_group(self):
-        non_exist_id = rand_name('secgroup-')
+        non_exist_id = data_utils.rand_name('secgroup-')
         self.assertRaises(exceptions.NotFound, self.client.show_security_group,
                           non_exist_id)
 
     @attr(type=['negative', 'smoke'])
     def test_show_non_existent_security_group_rule(self):
-        non_exist_id = rand_name('rule-')
+        non_exist_id = data_utils.rand_name('rule-')
         self.assertRaises(exceptions.NotFound,
                           self.client.show_security_group_rule,
                           non_exist_id)
