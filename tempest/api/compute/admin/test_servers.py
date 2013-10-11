@@ -33,7 +33,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     def setUpClass(cls):
         super(ServersAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.servers_client
-        cls.non_adm_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
         cls.identity_client = cls._get_identity_admin_client()
         tenant = cls.identity_client.get_tenant_by_name(
@@ -87,42 +86,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual('204', resp['status'])
         self.servers_client.wait_for_server_termination(server['id'])
 
-    @attr(type=['negative', 'gate'])
-    def test_resize_server_using_overlimit_ram(self):
-        flavor_name = data_utils.rand_name("flavor-")
-        flavor_id = self._get_unused_flavor_id()
-        resp, quota_set = self.quotas_client.get_default_quota_set(
-            self.tenant_id)
-        ram = int(quota_set['ram']) + 1
-        vcpus = 8
-        disk = 10
-        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                             ram, vcpus, disk,
-                                                             flavor_id)
-        self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises(exceptions.OverLimit,
-                          self.client.resize,
-                          self.servers[0]['id'],
-                          flavor_ref['id'])
-
-    @attr(type=['negative', 'gate'])
-    def test_resize_server_using_overlimit_vcpus(self):
-        flavor_name = data_utils.rand_name("flavor-")
-        flavor_id = self._get_unused_flavor_id()
-        ram = 512
-        resp, quota_set = self.quotas_client.get_default_quota_set(
-            self.tenant_id)
-        vcpus = int(quota_set['cores']) + 1
-        disk = 10
-        resp, flavor_ref = self.flavors_client.create_flavor(flavor_name,
-                                                             ram, vcpus, disk,
-                                                             flavor_id)
-        self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises(exceptions.OverLimit,
-                          self.client.resize,
-                          self.servers[0]['id'],
-                          flavor_ref['id'])
-
     @attr(type='gate')
     def test_reset_state_server(self):
         # Reset server's state to 'error'
@@ -141,23 +104,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, server = self.client.get_server(self.s1_id)
         self.assertEqual(server['status'], 'ACTIVE')
 
-    @attr(type=['negative', 'gate'])
-    def test_reset_state_server_invalid_state(self):
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.reset_state, self.s1_id,
-                          state='invalid')
-
-    @attr(type=['negative', 'gate'])
-    def test_reset_state_server_invalid_type(self):
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.reset_state, self.s1_id,
-                          state=1)
-
-    @attr(type=['negative', 'gate'])
-    def test_reset_state_server_nonexistent_server(self):
-        self.assertRaises(exceptions.NotFound,
-                          self.client.reset_state, '999')
-
     @attr(type='gate')
     @skip_because(bug="1240043")
     def test_get_server_diagnostics_by_admin(self):
@@ -169,13 +115,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                        'read_req', 'write_req', 'cpu', 'memory']
         for key in basic_attrs:
             self.assertIn(key, str(diagnostic.keys()))
-
-    @attr(type=['negative', 'gate'])
-    def test_get_server_diagnostics_by_non_admin(self):
-        # Non-admin user can not view server diagnostics according to policy
-        self.assertRaises(exceptions.Unauthorized,
-                          self.non_adm_client.get_server_diagnostics,
-                          self.s1_id)
 
 
 class ServersAdminTestXML(ServersAdminTestJSON):

@@ -193,6 +193,10 @@ class ServersClientXML(RestClientXML):
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
+    def migrate_server(self, server_id, **kwargs):
+        """Migrates the given server ."""
+        return self.action(server_id, 'migrate', None, **kwargs)
+
     def lock_server(self, server_id, **kwargs):
         """Locks the given server."""
         return self.action(server_id, 'lock', None, **kwargs)
