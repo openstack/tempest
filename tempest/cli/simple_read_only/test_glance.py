@@ -18,8 +18,12 @@
 import re
 import subprocess
 
+from oslo.config import cfg
+
 import tempest.cli
 from tempest.openstack.common import log as logging
+
+CONF = cfg.CONF
 
 
 LOG = logging.getLogger(__name__)
@@ -45,6 +49,14 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
             'ID', 'Name', 'Disk Format', 'Container Format',
             'Size', 'Status'])
 
+    def test_glance_member_list(self):
+        tenant_name = '--tenant-id %s' % self.identity.admin_tenant_name
+        out = self.glance('member-list',
+                          params=tenant_name)
+        endpoints = self.parser.listing(out)
+        self.assertTableStruct(endpoints,
+                               ['Image ID', 'Member ID', 'Can Share'])
+
     def test_glance_help(self):
         help_text = self.glance('help')
         lines = help_text.split('\n')
@@ -64,3 +76,14 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
                                'member-add', 'member-create', 'member-delete',
                                'member-list'))
         self.assertFalse(wanted_commands - commands)
+
+    # Optional arguments:
+
+    def test_glance_version(self):
+        self.glance('', flags='--version')
+
+    def test_glance_debug_list(self):
+        self.glance('image-list', flags='--debug')
+
+    def test_glance_timeout(self):
+        self.glance('image-list', flags='--timeout %d' % CONF.cli.timeout)
