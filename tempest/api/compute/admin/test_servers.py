@@ -19,6 +19,7 @@ from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class ServersAdminTestJSON(base.BaseComputeAdminTest):
@@ -162,6 +163,7 @@ class ServersAdminTestJSON(base.BaseComputeAdminTest):
                           self.client.reset_state, '999')
 
     @attr(type='gate')
+    @skip_because(bug="1240043")
     def test_get_server_diagnostics_by_admin(self):
         # Retrieve server diagnostics by admin user
         resp, diagnostic = self.client.get_server_diagnostics(self.s1_id)
