@@ -65,7 +65,9 @@ class StackTrace(object):
 
 def hunt_for_stacktrace(url):
     """Return TRACE or ERROR lines out of logs."""
-    page = urllib2.urlopen(url)
+    req = urllib2.Request(url)
+    req.add_header('Accept-Encoding', 'gzip')
+    page = urllib2.urlopen(req)
     buf = StringIO.StringIO(page.read())
     f = gzip.GzipFile(fileobj=buf)
     content = f.read()
