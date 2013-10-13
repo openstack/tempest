@@ -15,6 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import base64
 import sys
 import uuid
 
@@ -99,6 +100,26 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
                           self.create_server, accessIPv6=IPv6)
 
     @attr(type=['negative', 'gate'])
+    def test_resize_server_with_non_existent_flavor(self):
+        # Resize a server with non-existent flavor
+        nonexistent_flavor = str(uuid.uuid4())
+        self.assertRaises(exceptions.BadRequest, self.client.resize,
+                          self.server_id, flavor_ref=nonexistent_flavor)
+
+    @attr(type=['negative', 'gate'])
+    def test_resize_server_with_null_flavor(self):
+        # Resize a server with null flavor
+        self.assertRaises(exceptions.BadRequest, self.client.resize,
+                          self.server_id, flavor_ref="")
+
+    @attr(type=['negative', 'gate'])
+    def test_reboot_non_existent_server(self):
+        # Reboot a non existent server
+        nonexistent_server = str(uuid.uuid4())
+        self.assertRaises(exceptions.NotFound, self.client.reboot,
+                          nonexistent_server, 'SOFT')
+
+    @attr(type=['negative', 'gate'])
     def test_reboot_deleted_server(self):
         # Reboot a deleted server
         self.client.delete_server(self.server_id)
@@ -124,6 +145,23 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.rebuild,
                           self.server_id, self.image_ref_alt)
+
+    @attr(type=['negative', 'gate'])
+    def test_rebuild_non_existent_server(self):
+        # Rebuild a non existent server
+        nonexistent_server = str(uuid.uuid4())
+        meta = {'rebuild': 'server'}
+        new_name = rand_name('server')
+        file_contents = 'Test server rebuild.'
+        personality = [{'path': '/etc/rebuild.txt',
+                        'contents': base64.b64encode(file_contents)}]
+        self.assertRaises(exceptions.NotFound,
+                          self.client.rebuild,
+                          nonexistent_server,
+                          self.image_ref_alt,
+                          name=new_name, meta=meta,
+                          personality=personality,
+                          adminPass='rebuild')
 
     @attr(type=['negative', 'gate'])
     def test_create_numeric_server_name(self):
@@ -258,20 +296,23 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_stop_non_existent_server(self):
         # Stop a non existent server
+        nonexistent_server = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.servers_client.stop,
-                          str(uuid.uuid4()))
+                          nonexistent_server)
 
     @attr(type=['negative', 'gate'])
     def test_pause_non_existent_server(self):
         # pause a non existent server
+        nonexistent_server = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.pause_server,
-                          str(uuid.uuid4()))
+                          nonexistent_server)
 
     @attr(type=['negative', 'gate'])
     def test_unpause_non_existent_server(self):
         # unpause a non existent server
+        nonexistent_server = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.unpause_server,
-                          str(uuid.uuid4()))
+                          nonexistent_server)
 
     @attr(type=['negative', 'gate'])
     def test_unpause_server_invalid_state(self):
@@ -283,8 +324,9 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_suspend_non_existent_server(self):
         # suspend a non existent server
+        nonexistent_server = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.suspend_server,
-                          str(uuid.uuid4()))
+                          nonexistent_server)
 
     @attr(type=['negative', 'gate'])
     def test_suspend_server_invalid_state(self):
@@ -299,8 +341,9 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_resume_non_existent_server(self):
         # resume a non existent server
+        nonexistent_server = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.resume_server,
-                          str(uuid.uuid4()))
+                          nonexistent_server)
 
     @attr(type=['negative', 'gate'])
     def test_resume_server_invalid_state(self):
@@ -308,6 +351,14 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
         self.assertRaises(exceptions.Duplicate,
                           self.client.resume_server,
                           self.server_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_get_console_output_of_non_existent_server(self):
+        # get the console output for a non existent server
+        nonexistent_server = str(uuid.uuid4())
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_console_output,
+                          nonexistent_server, 10)
 
 
 class ServersNegativeTestXML(ServersNegativeTestJSON):
