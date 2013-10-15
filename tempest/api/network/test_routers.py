@@ -52,6 +52,8 @@ class RoutersTest(base.BaseNetworkTest):
     @attr(type='smoke')
     def test_create_show_list_update_delete_router(self):
         # Create a router
+        # NOTE(salv-orlando): Do not invoke self.create_router
+        # as we need to check the response code
         name = rand_name('router-')
         resp, create_body = self.client.create_router(
             name, external_gateway_info={
@@ -94,41 +96,37 @@ class RoutersTest(base.BaseNetworkTest):
     def test_add_remove_router_interface_with_subnet_id(self):
         network = self.create_network()
         subnet = self.create_subnet(network)
-        name = rand_name('router-')
-        resp, create_body = self.client.create_router(name)
-        self.addCleanup(self.client.delete_router, create_body['router']['id'])
+        router = self.create_router(rand_name('router-'))
         # Add router interface with subnet id
         resp, interface = self.client.add_router_interface_with_subnet_id(
-            create_body['router']['id'], subnet['id'])
+            router['id'], subnet['id'])
         self.assertEqual('200', resp['status'])
         self.addCleanup(self._remove_router_interface_with_subnet_id,
-                        create_body['router']['id'], subnet['id'])
+                        router['id'], subnet['id'])
         self.assertTrue('subnet_id' in interface.keys())
         self.assertTrue('port_id' in interface.keys())
         # Verify router id is equal to device id in port details
         resp, show_port_body = self.client.show_port(
             interface['port_id'])
         self.assertEqual(show_port_body['port']['device_id'],
-                         create_body['router']['id'])
+                         router['id'])
 
     @attr(type='smoke')
     def test_add_remove_router_interface_with_port_id(self):
         network = self.create_network()
         self.create_subnet(network)
-        name = rand_name('router-')
-        resp, create_body = self.client.create_router(name)
-        self.addCleanup(self.client.delete_router, create_body['router']['id'])
+        router = self.create_router(rand_name('router-'))
         resp, port_body = self.client.create_port(network['id'])
         # add router interface to port created above
         resp, interface = self.client.add_router_interface_with_port_id(
-            create_body['router']['id'], port_body['port']['id'])
+            router['id'], port_body['port']['id'])
         self.assertEqual('200', resp['status'])
         self.addCleanup(self._remove_router_interface_with_port_id,
-                        create_body['router']['id'], port_body['port']['id'])
+                        router['id'], port_body['port']['id'])
         self.assertTrue('subnet_id' in interface.keys())
         self.assertTrue('port_id' in interface.keys())
         # Verify router id is equal to device id in port details
         resp, show_port_body = self.client.show_port(
             interface['port_id'])
         self.assertEqual(show_port_body['port']['device_id'],
-                         create_body['router']['id'])
+                         router['id'])

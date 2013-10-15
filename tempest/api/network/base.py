@@ -56,6 +56,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.networks = []
         cls.subnets = []
         cls.ports = []
+        cls.routers = []
         cls.pools = []
         cls.vips = []
         cls.members = []
@@ -73,6 +74,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             cls.client.delete_pool(pool['id'])
         for port in cls.ports:
             cls.client.delete_port(port['id'])
+        for router in cls.routers:
+            cls.client.delete_router(router['id'])
         for subnet in cls.subnets:
             cls.client.delete_subnet(subnet['id'])
         for network in cls.networks:
@@ -123,6 +126,21 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         port = body['port']
         cls.ports.append(port)
         return port
+
+    @classmethod
+    def create_router(cls, router_name=None, admin_state_up=False,
+                      external_network_id=None, enable_snat=None):
+        ext_gw_info = {}
+        if external_network_id:
+            ext_gw_info['network_id'] = external_network_id
+        if enable_snat:
+            ext_gw_info['enable_snat'] = enable_snat
+        resp, body = cls.client.create_router(
+            router_name, external_gateway_info=ext_gw_info,
+            admin_state_up=admin_state_up)
+        router = body['router']
+        cls.routers.append(router)
+        return router
 
     @classmethod
     def create_pool(cls, name, lb_method, protocol, subnet):
