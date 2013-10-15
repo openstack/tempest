@@ -28,6 +28,13 @@ from tempest.test import attr
 class ServersNegativeTestJSON(base.BaseComputeTest):
     _interface = 'json'
 
+    def setUp(self):
+        super(ServersNegativeTestJSON, self).setUp()
+        try:
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except Exception:
+            self.rebuild_server()
+
     @classmethod
     def setUpClass(cls):
         super(ServersNegativeTestJSON, cls).setUpClass()
@@ -35,6 +42,8 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
         cls.img_client = cls.images_client
         cls.alt_os = clients.AltManager()
         cls.alt_client = cls.alt_os.servers_client
+        resp, server = cls.create_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
 
     @attr(type=['negative', 'gate'])
     def test_server_name_blank(self):
@@ -92,8 +101,6 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_reboot_deleted_server(self):
         # Reboot a deleted server
-        resp, server = self.create_server()
-        self.server_id = server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
         self.assertRaises(exceptions.NotFound, self.client.reboot,
@@ -102,8 +109,6 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_pause_paused_server(self):
         # Pause a paused server.
-        resp, server = self.create_server(wait_until='ACTIVE')
-        self.server_id = server['id']
         self.client.pause_server(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'PAUSED')
         self.assertRaises(exceptions.Duplicate,
@@ -113,9 +118,6 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_rebuild_deleted_server(self):
         # Rebuild a deleted server
-
-        resp, server = self.create_server()
-        self.server_id = server['id']
         self.client.delete_server(self.server_id)
         self.client.wait_for_server_termination(self.server_id)
 
@@ -195,21 +197,19 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     def test_update_server_of_another_tenant(self):
         # Update name of a server that belongs to another tenant
 
-        resp, server = self.create_server(wait_until='ACTIVE')
-        new_name = server['id'] + '_new'
+        new_name = self.server_id + '_new'
         self.assertRaises(exceptions.NotFound,
-                          self.alt_client.update_server, server['id'],
+                          self.alt_client.update_server, self.server_id,
                           name=new_name)
 
     @attr(type=['negative', 'gate'])
     def test_update_server_name_length_exceeds_256(self):
         # Update name of server exceed the name length limit
 
-        resp, server = self.create_server(wait_until='ACTIVE')
         new_name = 'a' * 256
         self.assertRaises(exceptions.BadRequest,
                           self.client.update_server,
-                          server['id'],
+                          self.server_id,
                           name=new_name)
 
     @attr(type=['negative', 'gate'])
@@ -222,10 +222,9 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_delete_a_server_of_another_tenant(self):
         # Delete a server that belongs to another tenant
-        resp, server = self.create_server(wait_until='ACTIVE')
         self.assertRaises(exceptions.NotFound,
                           self.alt_client.delete_server,
-                          server['id'])
+                          self.server_id)
 
     @attr(type=['negative', 'gate'])
     def test_delete_server_pass_negative_id(self):
@@ -277,11 +276,9 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_unpause_server_invalid_state(self):
         # unpause an active server.
-        resp, server = self.create_server(wait_until='ACTIVE')
-        server_id = server['id']
         self.assertRaises(exceptions.Duplicate,
                           self.client.unpause_server,
-                          server_id)
+                          self.server_id)
 
     @attr(type=['negative', 'gate'])
     def test_suspend_non_existent_server(self):
@@ -291,17 +288,13 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_suspend_server_invalid_state(self):
-        # create server.
-        resp, server = self.create_server(wait_until='ACTIVE')
-        server_id = server['id']
-
         # suspend a suspended server.
-        resp, _ = self.client.suspend_server(server_id)
+        resp, _ = self.client.suspend_server(self.server_id)
         self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(server_id, 'SUSPENDED')
+        self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
         self.assertRaises(exceptions.Duplicate,
                           self.client.suspend_server,
-                          server_id)
+                          self.server_id)
 
     @attr(type=['negative', 'gate'])
     def test_resume_non_existent_server(self):
@@ -311,14 +304,10 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_resume_server_invalid_state(self):
-        # create server.
-        resp, server = self.create_server(wait_until='ACTIVE')
-        server_id = server['id']
-
         # resume an active server.
         self.assertRaises(exceptions.Duplicate,
                           self.client.resume_server,
-                          server_id)
+                          self.server_id)
 
 
 class ServersNegativeTestXML(ServersNegativeTestJSON):
