@@ -20,8 +20,6 @@ import subprocess
 import tempfile
 import testtools
 
-from tempest.test import attr
-
 DEVNULL = open(os.devnull, 'wb')
 
 
@@ -46,7 +44,6 @@ class TestWrappers(testtools.TestCase):
         shutil.copy('tempest/tests/files/setup.cfg', self.setup_cfg_file)
         shutil.copy('tempest/tests/files/__init__.py', self.init_file)
 
-    @attr(type='smoke')
     def test_pretty_tox(self):
         # Copy wrapper script and requirements:
         pretty_tox = os.path.join(self.directory, 'pretty_tox.sh')
@@ -62,7 +59,6 @@ class TestWrappers(testtools.TestCase):
                                     shell=True, stdout=DEVNULL, stderr=DEVNULL)
         self.assertEqual(exit_code, 0)
 
-    @attr(type='smoke')
     def test_pretty_tox_fails(self):
         # Copy wrapper script and requirements:
         pretty_tox = os.path.join(self.directory, 'pretty_tox.sh')
@@ -78,7 +74,6 @@ class TestWrappers(testtools.TestCase):
                                     stdout=DEVNULL, stderr=DEVNULL)
         self.assertEqual(exit_code, 1)
 
-    @attr(type='smoke')
     def test_pretty_tox_serial(self):
         # Copy wrapper script and requirements:
         pretty_tox = os.path.join(self.directory, 'pretty_tox_serial.sh')
@@ -90,7 +85,6 @@ class TestWrappers(testtools.TestCase):
                                     shell=True, stdout=DEVNULL, stderr=DEVNULL)
         self.assertEqual(exit_code, 0)
 
-    @attr(type='smoke')
     def test_pretty_tox_serial_fails(self):
         # Copy wrapper script and requirements:
         pretty_tox = os.path.join(self.directory, 'pretty_tox_serial.sh')
