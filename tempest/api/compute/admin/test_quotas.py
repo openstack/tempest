@@ -52,15 +52,6 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @classmethod
-    def tearDownClass(cls):
-        for server in cls.servers:
-            try:
-                cls.servers_client.delete_server(server['id'])
-            except exceptions.NotFound:
-                continue
-        super(QuotasAdminTestJSON, cls).tearDownClass()
-
     @attr(type='smoke')
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
