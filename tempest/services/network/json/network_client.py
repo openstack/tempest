@@ -691,3 +691,9 @@ class NetworkClientJSON(RestClient):
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_service_providers(self):
+        uri = '%s/service-providers' % self.uri_prefix
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
