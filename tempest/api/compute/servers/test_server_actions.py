@@ -295,6 +295,7 @@ class ServerActionsTestJSON(base.BaseComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+    @skip_because(bug="1233026")
     @attr(type='gate')
     def test_lock_unlock_server(self):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
