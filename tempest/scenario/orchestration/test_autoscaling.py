@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import heatclient.exc as heat_exceptions
 import time
 
 from tempest.scenario import manager
@@ -74,7 +75,8 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
 
         self.assertEqual('CREATE', self.stack.action)
         # wait for create to complete.
-        self.status_timeout(self.client.stacks, sid, 'COMPLETE')
+        self.status_timeout(self.client.stacks, sid, 'COMPLETE',
+                            error_status='FAILED')
 
         self.stack.get()
         self.assertEqual('CREATE_COMPLETE', self.stack.stack_status)
@@ -96,8 +98,10 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
             call_until_true(lambda: server_count() == to_servers,
                             timeout, interval)
             self.assertEqual(to_servers, self.server_count,
-                             'Failed scaling from %d to %d servers' % (
-                                 from_servers, to_servers))
+                             'Failed scaling from %d to %d servers. '
+                             'Current server count: %s' % (
+                                 from_servers, to_servers,
+                                 self.server_count))
 
         # he marched them up to the top of the hill
         assertScale(1, 2)
@@ -106,3 +110,15 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
         # and he marched them down again
         assertScale(3, 2)
         assertScale(2, 1)
+
+        # delete stack on completion
+        self.stack.delete()
+        self.status_timeout(self.client.stacks, sid, 'COMPLETE',
+                            error_status='FAILED',
+                            not_found_exception=heat_exceptions.NotFound)
+
+        try:
+            self.stack.get()
+            self.assertEqual('DELETE_COMPLETE', self.stack.stack_status)
+        except heat_exceptions.NotFound:
+            pass
