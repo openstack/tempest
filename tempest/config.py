@@ -644,6 +644,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('savanna',
                 default=False,
                 help="Whether or not Savanna is expected to be available"),
+    cfg.BoolOpt('ironic',
+                default=False,
+                help="Whether or not Ironic is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -653,6 +656,16 @@ DebugGroup = [
     cfg.BoolOpt('enable',
                 default=True,
                 help="Enable diagnostic commands"),
+]
+
+
+baremetal_group = cfg.OptGroup(name='baremetal',
+                               title='Baremetal provisioning service options')
+
+BaremetalGroup = [
+    cfg.StrOpt('catalog_type',
+               default='baremetal',
+               help="Catalog type of the baremetal provisioning service."),
 ]
 
 
@@ -721,6 +734,8 @@ class TempestConfigPrivate(object):
         register_opt_group(cfg.CONF, service_available_group,
                            ServiceAvailableGroup)
         register_opt_group(cfg.CONF, debug_group, DebugGroup)
+        register_opt_group(cfg.CONF, baremetal_group, BaremetalGroup)
+
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity
@@ -743,6 +758,8 @@ class TempestConfigPrivate(object):
         self.scenario = cfg.CONF.scenario
         self.service_available = cfg.CONF.service_available
         self.debug = cfg.CONF.debug
+        self.baremetal = cfg.CONF.baremetal
+
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
