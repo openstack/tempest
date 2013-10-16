@@ -17,8 +17,10 @@
 
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+from tempest.test import skip_because
 
 
 class QuotasAdminTestJSON(base.BaseComputeAdminTest):
@@ -158,6 +160,8 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                         instances=default_instances_quota)
         self.assertRaises(exceptions.OverLimit, self.create_server)
 
+    @skip_because(bug="1186354",
+                  condition=config.TempestConfig().service_available.neutron)
     @attr(type=['negative', 'gate'])
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
@@ -180,6 +184,8 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
+    @skip_because(bug="1186354",
+                  condition=config.TempestConfig().service_available.neutron)
     @attr(type=['negative', 'gate'])
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
