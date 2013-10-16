@@ -46,14 +46,24 @@ def find_skips(start=TESTDIR):
     test methods that have been decorated to skip because of
     a particular bug.
     """
-    results = []
+    results = {}
     debug("Searching in %s", start)
     for root, _dirs, files in os.walk(start):
         for name in files:
             if name.startswith('test_') and name.endswith('py'):
                 path = os.path.join(root, name)
                 debug("Searching in %s", path)
-                results += find_skips_in_file(path)
+                temp_result = find_skips_in_file(path)
+                for method_name, bug_no in temp_result:
+                    if results.get(bug_no):
+                        result_dict = results.get(bug_no)
+                        if result_dict.get(name):
+                            result_dict[name].append(method_name)
+                        else:
+                            result_dict[name] = [method_name]
+                        results[bug_no] = result_dict
+                    else:
+                        results[bug_no] = {name: [method_name]}
     return results
 
 
@@ -83,11 +93,19 @@ def find_skips_in_file(path):
     return results
 
 
+def get_results(result_dict):
+    results = []
+    for bug_no in result_dict.keys():
+        for method in result_dict[bug_no]:
+            results.append((method, bug_no))
+    return results
+
+
 if __name__ == '__main__':
     logging.basicConfig(format='%(levelname)s: %(message)s',
                         level=logging.INFO)
     results = find_skips()
-    unique_bugs = sorted(set([bug for (method, bug) in results]))
+    unique_bugs = sorted(set([bug for (method, bug) in get_results(results)]))
     unskips = []
     duplicates = []
     info("Total bug skips found: %d", len(results))
@@ -122,4 +140,7 @@ if __name__ == '__main__':
         print("should be removed from the test cases:")
         print()
         for bug in unskips:
-            print("  %7s" % bug)
+            message = "  %7s in " % bug
+            locations = ["%s" % x for x in results[bug].keys()]
+            message += " and ".join(locations)
+            print(message)
