@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
@@ -36,8 +36,8 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         # Positive test: Creation of Security Group rule
         # should be successful
         # Creating a Security Group to add rules to it
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name, s_description)
         securitygroup_id = securitygroup['id']
@@ -63,15 +63,15 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         secgroup1 = None
         secgroup2 = None
         # Creating a Security Group to add rules to it
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name, s_description)
         secgroup1 = securitygroup['id']
         self.addCleanup(self.client.delete_security_group, secgroup1)
         # Creating a Security Group so as to assign group_id to the rule
-        s_name2 = rand_name('securitygroup-')
-        s_description2 = rand_name('description-')
+        s_name2 = data_utils.rand_name('securitygroup-')
+        s_description2 = data_utils.rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name2, s_description2)
         secgroup2 = securitygroup['id']
@@ -100,7 +100,7 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid Parent group id
         # Adding rules to the invalid Security Group id
-        parent_group_id = rand_name('999')
+        parent_group_id = data_utils.rand_int_id(start=999)
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
@@ -113,13 +113,13 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid ip_protocol
         # Creating a Security Group to add rule to it
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = self.client.create_security_group(s_name,
                                                                 s_description)
         # Adding rules to the created Security Group
         parent_group_id = securitygroup['id']
-        ip_protocol = rand_name('999')
+        ip_protocol = data_utils.rand_name('999')
         from_port = 22
         to_port = 22
 
@@ -133,14 +133,14 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
         # Creating a Security Group to add rule to it
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = self.client.create_security_group(s_name,
                                                                 s_description)
         # Adding rules to the created Security Group
         parent_group_id = securitygroup['id']
         ip_protocol = 'tcp'
-        from_port = rand_name('999')
+        from_port = data_utils.rand_int_id(start=999, end=65535)
         to_port = 22
         self.addCleanup(self.client.delete_security_group, securitygroup['id'])
         self.assertRaises(exceptions.BadRequest,
@@ -150,17 +150,17 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_security_group_rules_create_with_invalid_to_port(self):
         # Negative test: Creation of Security Group rule should FAIL
-        # with invalid from_port
+        # with invalid to_port
         # Creating a Security Group to add rule to it
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = self.client.create_security_group(s_name,
                                                                 s_description)
         # Adding rules to the created Security Group
         parent_group_id = securitygroup['id']
         ip_protocol = 'tcp'
         from_port = 22
-        to_port = rand_name('999')
+        to_port = data_utils.rand_int_id(start=65536)
         self.addCleanup(self.client.delete_security_group, securitygroup['id'])
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group_rule,
@@ -171,8 +171,8 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid port range.
         # Creating a Security Group to add rule to it.
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = self.client.create_security_group(s_name,
                                                                 s_description)
         # Adding a rule to the created Security Group
@@ -193,15 +193,15 @@ class SecurityGroupRulesTestJSON(base.BaseComputeTest):
         # with invalid rule id
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_security_group_rule,
-                          rand_name('999'))
+                          data_utils.rand_int_id(start=999))
 
     @attr(type='gate')
     def test_security_group_rules_list(self):
         # Positive test: Created Security Group rules should be
         # in the list of all rules
         # Creating a Security Group to add rules to it
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup = \
             self.client.create_security_group(s_name, s_description)
         securitygroup_id = securitygroup['id']
