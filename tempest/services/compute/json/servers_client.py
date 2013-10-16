@@ -89,7 +89,7 @@ class ServersClientJSON(RestClient):
         return resp, body['server']
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
-                      accessIPv6=None):
+                      accessIPv6=None, disk_config=None):
         """
         Updates the properties of an existing server.
         server_id: The id of an existing server.
@@ -112,6 +112,9 @@ class ServersClientJSON(RestClient):
 
         if accessIPv6 is not None:
             post_body['accessIPv6'] = accessIPv6
+
+        if disk_config is not None:
+            post_body['OS-DCF:diskConfig'] = disk_config
 
         post_body = json.dumps({'server': post_body})
         resp, body = self.put("servers/%s" % str(server_id),
