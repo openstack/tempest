@@ -26,7 +26,8 @@ CONF = config.CONF
 class RemoteClient():
 
     # NOTE(afazekas): It should always get an address instead of server
-    def __init__(self, server, username, password=None, pkey=None):
+    # Added a new parameter "GW" for allowing the use of multi host tunneling
+    def __init__(self, server, username, password=None, pkey=None, gws=None):
         ssh_timeout = CONF.compute.ssh_timeout
         network = CONF.compute.network_for_ssh
         ip_version = CONF.compute.ip_version_for_ssh
@@ -41,12 +42,24 @@ class RemoteClient():
                     break
             else:
                 raise exceptions.ServerUnreachable()
-        self.ssh_client = ssh.Client(ip_address, username, password,
-                                     ssh_timeout, pkey=pkey,
-                                     channel_timeout=ssh_channel_timeout)
 
-    def exec_command(self, cmd):
-        return self.ssh_client.exec_command(cmd)
+        self.ssh_client = ssh.Client(ip_address,
+                                     username,
+                                     password,
+                                     timeout=ssh_timeout,
+                                     pkey=pkey,
+                                     channel_timeout=ssh_channel_timeout,
+                                     gws=gws)
+
+    def exec_command(self, cmd, cmd_timeout=0):
+        """
+        function that wraps the paramiko exec_command
+        :param cmd: command to execute
+        :param cmd_timeout: custom timeout for the
+        concrete command to execute.
+        :return: returns the contend of the execution
+        """
+        return self.ssh_client.exec_command(cmd, cmd_timeout)
 
     def validate_authentication(self):
         """Validate ssh connection and authentication
@@ -97,9 +110,9 @@ class RemoteClient():
         cmd = "/bin/ip addr | awk '/ether/ {print $2}'"
         return self.exec_command(cmd)
 
-    def get_ip_list(self):
+    def get_ip_list(self, timeout=0):
         cmd = "/bin/ip address"
-        return self.exec_command(cmd)
+        return self.exec_command(cmd, cmd_timeout=timeout)
 
     def assign_static_ip(self, nic, addr):
         cmd = "sudo /bin/ip addr add {ip}/{mask} dev {nic}".format(
