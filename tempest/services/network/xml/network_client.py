@@ -547,6 +547,13 @@ class NetworkClientXML(RestClientXML):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def list_router_interfaces(self, uuid):
+        uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        ports = self._parse_array(etree.fromstring(body))
+        ports = {"ports": ports}
+        return resp, ports
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
