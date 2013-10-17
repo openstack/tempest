@@ -197,41 +197,6 @@ class ServerActionsTestJSON(base.BaseComputeTest):
                 required time (%s s).' % (self.server_id, self.build_timeout)
                 raise exceptions.TimeoutException(message)
 
-    @attr(type=['negative', 'gate'])
-    def test_resize_server_using_nonexist_flavor(self):
-        flavor_id = -1
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.resize, self.server_id, flavor_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_resize_server_using_null_flavor(self):
-        flavor_id = ""
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.resize, self.server_id, flavor_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_reboot_nonexistent_server_soft(self):
-        # Negative Test: The server reboot on non existent server should return
-        # an error
-        self.assertRaises(exceptions.NotFound, self.client.reboot, 999, 'SOFT')
-
-    @attr(type=['negative', 'gate'])
-    def test_rebuild_nonexistent_server(self):
-        # Negative test: The server rebuild for a non existing server
-        # should not be allowed
-        meta = {'rebuild': 'server'}
-        new_name = rand_name('server')
-        file_contents = 'Test server rebuild.'
-        personality = [{'path': '/etc/rebuild.txt',
-                        'contents': base64.b64encode(file_contents)}]
-        self.assertRaises(exceptions.NotFound,
-                          self.client.rebuild,
-                          999, self.image_ref_alt,
-                          name=new_name,
-                          metadata=meta,
-                          personality=personality,
-                          adminPass='rebuild')
-
     @attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
@@ -244,14 +209,6 @@ class ServerActionsTestJSON(base.BaseComputeTest):
             lines = len(output.split('\n'))
             self.assertEqual(lines, 10)
         self.wait_for(get_output)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_console_output_invalid_server_id(self):
-        # Negative test: Should not be able to get the console output
-        # for an invalid server_id
-        self.assertRaises(exceptions.NotFound,
-                          self.servers_client.get_console_output,
-                          '!@#$%^&*()', 10)
 
     @skip_because(bug="1014683")
     @attr(type='gate')
