@@ -120,31 +120,28 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
                           nonexistent_server, 'SOFT')
 
     @attr(type=['negative', 'gate'])
-    def test_reboot_deleted_server(self):
-        # Reboot a deleted server
-        self.client.delete_server(self.server_id)
-        self.client.wait_for_server_termination(self.server_id)
-        self.assertRaises(exceptions.NotFound, self.client.reboot,
-                          self.server_id, 'SOFT')
-
-    @attr(type=['negative', 'gate'])
     def test_pause_paused_server(self):
         # Pause a paused server.
         self.client.pause_server(self.server_id)
+        self.addCleanup(self.client.unpause_server,
+                        self.server_id)
         self.client.wait_for_server_status(self.server_id, 'PAUSED')
         self.assertRaises(exceptions.Duplicate,
                           self.client.pause_server,
                           self.server_id)
 
     @attr(type=['negative', 'gate'])
-    def test_rebuild_deleted_server(self):
-        # Rebuild a deleted server
-        self.client.delete_server(self.server_id)
-        self.client.wait_for_server_termination(self.server_id)
+    def test_rebuild_reboot_deleted_server(self):
+        # Rebuild and Reboot a deleted server
+        _, server = self.create_server()
+        self.client.delete_server(server['id'])
+        self.client.wait_for_server_termination(server['id'])
 
         self.assertRaises(exceptions.NotFound,
                           self.client.rebuild,
-                          self.server_id, self.image_ref_alt)
+                          server['id'], self.image_ref_alt)
+        self.assertRaises(exceptions.NotFound, self.client.reboot,
+                          server['id'], 'SOFT')
 
     @attr(type=['negative', 'gate'])
     def test_rebuild_non_existent_server(self):
@@ -332,6 +329,8 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     def test_suspend_server_invalid_state(self):
         # suspend a suspended server.
         resp, _ = self.client.suspend_server(self.server_id)
+        self.addCleanup(self.client.resume_server,
+                        self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
         self.assertRaises(exceptions.Duplicate,
