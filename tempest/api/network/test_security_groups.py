@@ -17,7 +17,6 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest.test import attr
 
 
@@ -123,19 +122,6 @@ class SecGroupTest(base.BaseNetworkTest):
         rule_list = [rule['id']
                      for rule in rule_list_body['security_group_rules']]
         self.assertIn(rule_create_body['security_group_rule']['id'], rule_list)
-
-    @attr(type=['negative', 'smoke'])
-    def test_show_non_existent_security_group(self):
-        non_exist_id = data_utils.rand_name('secgroup-')
-        self.assertRaises(exceptions.NotFound, self.client.show_security_group,
-                          non_exist_id)
-
-    @attr(type=['negative', 'smoke'])
-    def test_show_non_existent_security_group_rule(self):
-        non_exist_id = data_utils.rand_name('rule-')
-        self.assertRaises(exceptions.NotFound,
-                          self.client.show_security_group_rule,
-                          non_exist_id)
 
 
 class SecGroupTestXML(SecGroupTest):
