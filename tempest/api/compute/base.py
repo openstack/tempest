@@ -34,6 +34,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     """Base test case class for all Compute API tests."""
 
     conclusion = compute.generic_setup_package()
+    force_tenant_isolation = False
 
     @classmethod
     def setUpClass(cls):
@@ -43,7 +44,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             raise cls.skipException(skip_msg)
         cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
 
-        if cls.config.compute.allow_tenant_isolation:
+        if (cls.config.compute.allow_tenant_isolation or
+            cls.force_tenant_isolation is True):
             creds = cls.isolated_creds.get_primary_creds()
             username, tenant_name, password = creds
             os = clients.Manager(username=username,
@@ -208,7 +210,8 @@ class BaseComputeAdminTest(BaseComputeTest):
             msg = ("Missing Compute Admin API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
-        if cls.config.compute.allow_tenant_isolation:
+        if (cls.config.compute.allow_tenant_isolation or
+            cls.force_tenant_isolation is True):
             creds = cls.isolated_creds.get_admin_creds()
             admin_username, admin_tenant_name, admin_password = creds
             cls.os_adm = clients.Manager(username=admin_username,
