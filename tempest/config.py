@@ -137,28 +137,6 @@ ComputeGroup = [
                default="password",
                help="Password used to authenticate to an instance using "
                     "the alternate image."),
-    cfg.BoolOpt('resize_available',
-                default=False,
-                help="Does the test environment support resizing?"),
-    cfg.BoolOpt('live_migration_available',
-                default=False,
-                help="Does the test environment support live migration "
-                     "available?"),
-    cfg.BoolOpt('use_block_migration_for_live_migration',
-                default=False,
-                help="Does the test environment use block devices for live "
-                     "migration"),
-    cfg.BoolOpt('block_migrate_supports_cinder_iscsi',
-                default=False,
-                help="Does the test environment block migration support "
-                     "cinder iSCSI volumes"),
-    cfg.BoolOpt('change_password_available',
-                default=False,
-                help="Does the test environment support changing the admin "
-                     "password?"),
-    cfg.BoolOpt('create_image_enabled',
-                default=False,
-                help="Does the test environment support snapshots?"),
     cfg.IntOpt('build_interval',
                default=10,
                help="Time in seconds between build status checks."),
@@ -212,17 +190,46 @@ ComputeGroup = [
                default=None,
                help="Path to a private key file for SSH access to remote "
                     "hosts"),
-    cfg.BoolOpt('disk_config_enabled',
-                default=True,
-                help="If false, skip disk config tests"),
-    cfg.BoolOpt('flavor_extra_enabled',
-                default=True,
-                help="If false, skip flavor extra data test"),
     cfg.StrOpt('volume_device_name',
                default='vdb',
                help="Expected device name when a volume is attached to "
                     "an instance")
 ]
+
+compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
+                                      title="Enabled Compute Service Features")
+
+ComputeFeaturesGroup = [
+    cfg.BoolOpt('disk_config',
+                default=True,
+                help="If false, skip disk config tests"),
+    cfg.BoolOpt('flavor_extra',
+                default=True,
+                help="If false, skip flavor extra data test"),
+    cfg.BoolOpt('change_password',
+                default=False,
+                help="Does the test environment support changing the admin "
+                     "password?"),
+    cfg.BoolOpt('create_image',
+                default=False,
+                help="Does the test environment support snapshots?"),
+    cfg.BoolOpt('resize',
+                default=False,
+                help="Does the test environment support resizing?"),
+    cfg.BoolOpt('live_migration',
+                default=False,
+                help="Does the test environment support live migration "
+                     "available?"),
+    cfg.BoolOpt('block_migration_for_live_migration',
+                default=False,
+                help="Does the test environment use block devices for live "
+                     "migration"),
+    cfg.BoolOpt('block_migrate_cinder_iscsi',
+                default=False,
+                help="Does the test environment block migration support "
+                     "cinder iSCSI volumes")
+]
+
 
 compute_admin_group = cfg.OptGroup(name='compute-admin',
                                    title="Compute Admin Options")
@@ -317,9 +324,6 @@ VolumeGroup = [
                     "of identity.region is used instead. If no such region "
                     "is found in the service catalog, the first found one is "
                     "used."),
-    cfg.BoolOpt('multi_backend_enabled',
-                default=False,
-                help="Runs Cinder multi-backend test (requires 2 backends)"),
     cfg.StrOpt('backend1_name',
                default='BACKEND_1',
                help="Name of the backend1 (must be declared in cinder.conf)"),
@@ -335,6 +339,15 @@ VolumeGroup = [
     cfg.StrOpt('disk_format',
                default='raw',
                help='Disk format to use when copying a volume to image'),
+]
+
+volume_feature_group = cfg.OptGroup(name='volume-feature-enabled',
+                                    title='Enabled Cinder Features')
+
+VolumeFeaturesGroup = [
+    cfg.BoolOpt('multi_backend',
+                default=False,
+                help="Runs Cinder multi-backend test (requires 2 backends)")
 ]
 
 
@@ -359,17 +372,24 @@ ObjectStoreGroup = [
                default=5,
                help="Number of seconds to wait while looping to check the"
                     "status of a container to container synchronization"),
-    cfg.BoolOpt('accounts_quotas_available',
-                default=True,
-                help="Set to True if the Account Quota middleware is enabled"),
-    cfg.BoolOpt('container_quotas_available',
-                default=True,
-                help="Set to True if the container quota middleware "
-                     "is enabled"),
     cfg.StrOpt('operator_role',
                default='Member',
                help="Role to add to users created for swift tests to "
                     "enable creating containers"),
+]
+
+object_storage_feature_group = cfg.OptGroup(
+    name='object-storage-feature-enabled',
+    title='Enabled object-storage features')
+
+ObjectStoreFeaturesGroup = [
+    cfg.BoolOpt('container_quotas',
+                default=True,
+                help="Set to True if the container quota middleware "
+                     "is enabled"),
+    cfg.BoolOpt('accounts_quotas',
+                default=True,
+                help="Set to True if the Account Quota middleware is enabled"),
 ]
 
 
@@ -611,11 +631,17 @@ class TempestConfig:
         LOG.info("Using tempest config file %s" % path)
 
         register_opt_group(cfg.CONF, compute_group, ComputeGroup)
+        register_opt_group(cfg.CONF, compute_features_group,
+                           ComputeFeaturesGroup)
         register_opt_group(cfg.CONF, identity_group, IdentityGroup)
         register_opt_group(cfg.CONF, image_group, ImageGroup)
         register_opt_group(cfg.CONF, network_group, NetworkGroup)
         register_opt_group(cfg.CONF, volume_group, VolumeGroup)
+        register_opt_group(cfg.CONF, volume_feature_group,
+                           VolumeFeaturesGroup)
         register_opt_group(cfg.CONF, object_storage_group, ObjectStoreGroup)
+        register_opt_group(cfg.CONF, object_storage_feature_group,
+                           ObjectStoreFeaturesGroup)
         register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
         register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
         register_opt_group(cfg.CONF, boto_group, BotoGroup)
@@ -626,11 +652,15 @@ class TempestConfig:
                            ServiceAvailableGroup)
         register_opt_group(cfg.CONF, debug_group, DebugGroup)
         self.compute = cfg.CONF.compute
+        self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity
         self.images = cfg.CONF.image
         self.network = cfg.CONF.network
         self.volume = cfg.CONF.volume
+        self.volume_feature_enabled = cfg.CONF['volume-feature-enabled']
         self.object_storage = cfg.CONF['object-storage']
+        self.object_storage_feature_enabled = cfg.CONF[
+            'object-storage-feature-enabled']
         self.orchestration = cfg.CONF.orchestration
         self.dashboard = cfg.CONF.dashboard
         self.boto = cfg.CONF.boto

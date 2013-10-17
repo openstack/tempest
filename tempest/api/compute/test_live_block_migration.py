@@ -59,7 +59,8 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     def _migrate_server_to(self, server_id, dest_host):
         _resp, body = self.admin_servers_client.live_migrate_server(
             server_id, dest_host,
-            self.config.compute.use_block_migration_for_live_migration)
+            self.config.compute_feature_enabled.
+            block_migration_for_live_migration)
         return body
 
     def _get_host_other_than(self, host):
@@ -97,7 +98,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
             self.volumes_client.wait_for_volume_status(volume_id, 'available')
         self.volumes_client.delete_volume(volume_id)
 
-    @testtools.skipIf(not CONF.compute.live_migration_available,
+    @testtools.skipIf(not CONF.compute_feature_enabled.live_migration,
                       'Live migration not available')
     @attr(type='gate')
     def test_live_block_migration(self):
@@ -112,7 +113,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         self.assertEqual(target_host, self._get_host_for_server(server_id))
 
-    @testtools.skipIf(not CONF.compute.live_migration_available,
+    @testtools.skipIf(not CONF.compute_feature_enabled.live_migration,
                       'Live migration not available')
     @attr(type='gate')
     def test_invalid_host_for_migration(self):
@@ -124,10 +125,12 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
                           server_id, target_host)
         self.assertEqual('ACTIVE', self._get_server_status(server_id))
 
-    @testtools.skipIf(not CONF.compute.live_migration_available or
-                      not CONF.compute.use_block_migration_for_live_migration,
+    @testtools.skipIf(not CONF.compute_feature_enabled.live_migration or not
+                      CONF.compute_feature_enabled.
+                      block_migration_for_live_migration,
                       'Block Live migration not available')
-    @testtools.skipIf(not CONF.compute.block_migrate_supports_cinder_iscsi,
+    @testtools.skipIf(not CONF.compute_feature_enabled.
+                      block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
     @attr(type='gate')
     def test_iscsi_volume(self):
