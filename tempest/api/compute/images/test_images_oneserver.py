@@ -23,8 +23,11 @@ from tempest import clients
 from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 from tempest.test import attr
 from tempest.test import skip_because
+
+LOG = logging.getLogger(__name__)
 
 
 class ImagesOneServerTestJSON(base.BaseComputeTest):
@@ -37,6 +40,19 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
             self.image_ids.remove(image_id)
         super(ImagesOneServerTestJSON, self).tearDown()
 
+    def setUp(self):
+        # NOTE(afazekas): Normally we use the same server with all test cases,
+        # but if it has an issue, we build a new one
+        super(ImagesOneServerTestJSON, self).setUp()
+        # Check if the server is in a clean state after test
+        try:
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except Exception as exc:
+            LOG.exception(exc)
+            # Rebuild server if cannot reach the ACTIVE state
+            # Usually it means the server had a serius accident
+            self.rebuild_server()
+
     @classmethod
     def setUpClass(cls):
         super(ImagesOneServerTestJSON, cls).setUpClass()
@@ -46,7 +62,8 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
             raise cls.skipException(skip_msg)
 
         try:
-            resp, cls.server = cls.create_server(wait_until='ACTIVE')
+            resp, server = cls.create_server(wait_until='ACTIVE')
+            cls.server_id = server['id']
         except Exception:
             cls.tearDownClass()
             raise
@@ -71,7 +88,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         # Return an error if the image name has multi-byte characters
         snapshot_name = rand_name('\xef\xbb\xbf')
         self.assertRaises(exceptions.BadRequest,
-                          self.client.create_image, self.server['id'],
+                          self.client.create_image, self.server_id,
                           snapshot_name)
 
     @attr(type=['negative', 'gate'])
@@ -80,7 +97,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         snapshot_name = rand_name('test-snap-')
         meta = {'': ''}
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          self.server['id'], snapshot_name, meta)
+                          self.server_id, snapshot_name, meta)
 
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_metadata_over_limits(self):
@@ -88,7 +105,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         snapshot_name = rand_name('test-snap-')
         meta = {'a' * 260: 'b' * 260}
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          self.server['id'], snapshot_name, meta)
+                          self.server_id, snapshot_name, meta)
 
     def _get_default_flavor_disk_size(self, flavor_id):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
@@ -102,7 +119,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         # Create a new image
         name = rand_name('image')
         meta = {'image_type': 'test'}
-        resp, body = self.client.create_image(self.server['id'], name, meta)
+        resp, body = self.client.create_image(self.server_id, name, meta)
         self.assertEqual(202, resp.status)
         image_id = parse_image_id(resp['location'])
         self.client.wait_for_image_status(image_id, 'ACTIVE')
@@ -133,7 +150,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
 
         # Create first snapshot
         snapshot_name = rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server['id'],
+        resp, body = self.client.create_image(self.server_id,
                                               snapshot_name)
         self.assertEqual(202, resp.status)
         image_id = parse_image_id(resp['location'])
@@ -142,7 +159,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         # Create second snapshot
         alt_snapshot_name = rand_name('test-snap-')
         self.assertRaises(exceptions.Duplicate, self.client.create_image,
-                          self.server['id'], alt_snapshot_name)
+                          self.server_id, alt_snapshot_name)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
     @attr(type=['negative', 'gate'])
@@ -151,14 +168,14 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
 
         snapshot_name = rand_name('a' * 260)
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          self.server['id'], snapshot_name)
+                          self.server_id, snapshot_name)
 
     @attr(type=['negative', 'gate'])
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 
         snapshot_name = rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server['id'], snapshot_name)
+        resp, body = self.client.create_image(self.server_id, snapshot_name)
         self.assertEqual(202, resp.status)
         image_id = parse_image_id(resp['location'])
         self.image_ids.append(image_id)
