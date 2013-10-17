@@ -20,7 +20,10 @@ import netaddr
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 import tempest.test
+
+LOG = logging.getLogger(__name__)
 
 
 class BaseNetworkTest(tempest.test.BaseTestCase):
@@ -61,26 +64,79 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.vips = []
         cls.members = []
         cls.health_monitors = []
+        cls.vpnservices = []
 
     @classmethod
     def tearDownClass(cls):
-        for health_monitor in cls.health_monitors:
-            cls.client.delete_health_monitor(health_monitor['id'])
-        for member in cls.members:
-            cls.client.delete_member(member['id'])
-        for vip in cls.vips:
-            cls.client.delete_vip(vip['id'])
-        for pool in cls.pools:
-            cls.client.delete_pool(pool['id'])
-        for port in cls.ports:
-            cls.client.delete_port(port['id'])
+        has_exception = False
+        for vpnservice in cls.vpnservices:
+            try:
+                cls.client.delete_vpn_service(vpnservice['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
+
         for router in cls.routers:
-            cls.client.delete_router(router['id'])
+            try:
+                resp, body = cls.client.list_router_interfaces(router['id'])
+                interfaces = body['ports']
+                for i in interfaces:
+                    cls.client.remove_router_interface_with_subnet_id(
+                        router['id'], i['fixed_ips'][0]['subnet_id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
+            try:
+                cls.client.delete_router(router['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
+
+        for health_monitor in cls.health_monitors:
+            try:
+                cls.client.delete_health_monitor(health_monitor['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
+        for member in cls.members:
+            try:
+                cls.client.delete_member(member['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
+        for vip in cls.vips:
+            try:
+                cls.client.delete_vip(vip['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
+        for pool in cls.pools:
+            try:
+                cls.client.delete_pool(pool['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
+        for port in cls.ports:
+            try:
+                cls.client.delete_port(port['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
         for subnet in cls.subnets:
-            cls.client.delete_subnet(subnet['id'])
+            try:
+                cls.client.delete_subnet(subnet['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
         for network in cls.networks:
-            cls.client.delete_network(network['id'])
+            try:
+                cls.client.delete_network(network['id'])
+            except Exception as exc:
+                LOG.exception(exc)
+                has_exception = True
         super(BaseNetworkTest, cls).tearDownClass()
+        if has_exception:
+            raise exceptions.TearDownException()
 
     @classmethod
     def create_network(cls, network_name=None):
@@ -179,3 +235,19 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         health_monitor = body['health_monitor']
         cls.health_monitors.append(health_monitor)
         return health_monitor
+
+    @classmethod
+    def create_router_interface(cls, router_id, subnet_id):
+        """Wrapper utility that returns a router interface."""
+        resp, interface = cls.client.add_router_interface_with_subnet_id(
+            router_id, subnet_id)
+
+    @classmethod
+    def create_vpnservice(cls, subnet_id, router_id):
+        """Wrapper utility that returns a test vpn service."""
+        resp, body = cls.client.create_vpn_service(
+            subnet_id, router_id, admin_state_up=True,
+            name=rand_name("vpnservice-"))
+        vpnservice = body['vpnservice']
+        cls.vpnservices.append(vpnservice)
+        return vpnservice

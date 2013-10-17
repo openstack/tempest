@@ -600,3 +600,53 @@ class NetworkClientJSON(RestClient):
         resp, body = self.get(uri, headers=self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_vpn_services(self):
+        uri = '%s/vpn/vpnservices' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_vpn_service(self, subnet_id, router_id, **kwargs):
+        post_body = {
+            "vpnservice": {
+                "subnet_id": subnet_id,
+                "router_id": router_id
+            }
+        }
+        for key, val in kwargs.items():
+            post_body['vpnservice'][key] = val
+        body = json.dumps(post_body)
+        uri = '%s/vpn/vpnservices' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def show_vpn_service(self, uuid):
+        uri = '%s/vpn/vpnservices/%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_vpn_service(self, uuid):
+        uri = '%s/vpn/vpnservices/%s' % (self.uri_prefix, uuid)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def update_vpn_service(self, uuid, description):
+        put_body = {
+            "vpnservice": {
+                "description": description
+            }
+        }
+        body = json.dumps(put_body)
+        uri = '%s/vpn/vpnservices/%s' % (self.uri_prefix, uuid)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def list_router_interfaces(self, uuid):
+        uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
