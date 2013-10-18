@@ -22,6 +22,7 @@ from oslo.config import cfg
 
 import tempest.cli
 from tempest.openstack.common import log as logging
+from tempest import test
 
 CONF = cfg.CONF
 
@@ -67,9 +68,11 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
     def test_neutron_floatingip_list(self):
         self.neutron('floatingip-list')
 
+    @test.skip_because(bug="1240694")
     def test_neutron_meter_label_list(self):
         self.neutron('meter-label-list')
 
+    @test.skip_because(bug="1240694")
     def test_neutron_meter_label_rule_list(self):
         self.neutron('meter-label-rule-list')
 
