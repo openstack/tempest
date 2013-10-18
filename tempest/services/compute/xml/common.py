@@ -36,7 +36,9 @@ class Element(object):
         self._elements.append(element)
 
     def __str__(self):
-        args = " ".join(['%s="%s"' % (k, v) for k, v in self._attrs.items()])
+        args = " ".join(['%s="%s"' %
+                        (k, v if v is not None else "")
+                        for k, v in self._attrs.items()])
         string = '<%s %s' % (self.element_name, args)
         if not self._elements:
             string += '/>'
@@ -78,7 +80,9 @@ class Document(Element):
         Element.__init__(self, '?xml', *args, **kwargs)
 
     def __str__(self):
-        args = " ".join(['%s="%s"' % (k, v) for k, v in self._attrs.items()])
+        args = " ".join(['%s="%s"' %
+                        (k, v if v is not None else "")
+                        for k, v in self._attrs.items()])
         string = '<?xml %s?>\n' % args
         for element in self._elements:
             string += str(element)
