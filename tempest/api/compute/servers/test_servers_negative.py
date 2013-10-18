@@ -126,7 +126,7 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
         self.addCleanup(self.client.unpause_server,
                         self.server_id)
         self.client.wait_for_server_status(self.server_id, 'PAUSED')
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.client.pause_server,
                           self.server_id)
 
@@ -314,7 +314,7 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_unpause_server_invalid_state(self):
         # unpause an active server.
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.client.unpause_server,
                           self.server_id)
 
@@ -333,7 +333,7 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
                         self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.client.suspend_server,
                           self.server_id)
 
@@ -347,7 +347,7 @@ class ServersNegativeTestJSON(base.BaseComputeTest):
     @attr(type=['negative', 'gate'])
     def test_resume_server_invalid_state(self):
         # resume an active server.
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.client.resume_server,
                           self.server_id)
 

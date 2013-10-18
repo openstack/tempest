@@ -488,7 +488,7 @@ class RestClient(object):
         if resp.status == 409:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.Duplicate(resp_body)
+            raise exceptions.Conflict(resp_body)
 
         if resp.status == 413:
             if parse_resp:
@@ -519,7 +519,7 @@ class RestClient(object):
                 elif 'message' in resp_body:
                     message = resp_body['message']
 
-            raise exceptions.ComputeFault(message)
+            raise exceptions.ServerFault(message)
 
         if resp.status >= 400:
             if parse_resp:

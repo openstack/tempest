@@ -144,7 +144,7 @@ class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
 
         # An exception should be raised when adding flavor access to the same
         # tenant
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.client.add_flavor_access,
                           new_flavor['id'],
                           self.tenant_id)

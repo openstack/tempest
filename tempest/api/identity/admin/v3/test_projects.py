@@ -212,7 +212,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
         self.v3data.projects.append(project)
 
         self.assertRaises(
-            exceptions.Duplicate, self.v3_client.create_project, project_name)
+            exceptions.Conflict, self.v3_client.create_project, project_name)
 
     @attr(type=['negative', 'gate'])
     def test_create_project_by_unauthorized_user(self):

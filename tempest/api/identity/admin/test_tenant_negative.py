@@ -81,7 +81,7 @@ class TenantsNegativeTestJSON(base.BaseIdentityAdminTest):
 
         self.addCleanup(self.client.delete_tenant, tenant1_id)
         self.addCleanup(self.data.tenants.remove, tenant)
-        self.assertRaises(exceptions.Duplicate, self.client.create_tenant,
+        self.assertRaises(exceptions.Conflict, self.client.create_tenant,
                           tenant_name)
 
     @attr(type=['negative', 'gate'])

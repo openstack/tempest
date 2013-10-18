@@ -133,13 +133,13 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.addCleanup(self._unpause, self.server_id)
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'PAUSED')
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.servers_client.rescue_server,
                           self.server_id)
 
     @attr(type=['negative', 'gate'])
     def test_rescued_vm_reboot(self):
-        self.assertRaises(exceptions.Duplicate, self.servers_client.reboot,
+        self.assertRaises(exceptions.Conflict, self.servers_client.reboot,
                           self.rescue_id, 'HARD')
 
     @attr(type=['negative', 'gate'])
@@ -151,7 +151,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_rescued_vm_rebuild(self):
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.servers_client.rebuild,
                           self.rescue_id,
                           self.image_ref_alt)
@@ -164,7 +164,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.addCleanup(self._unrescue, self.server_id)
 
         # Attach the volume to the server
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.servers_client.attach_volume,
                           self.server_id,
                           self.volume_to_attach['id'],
@@ -188,7 +188,7 @@ class ServerRescueTestJSON(base.BaseComputeTest):
         self.addCleanup(self._unrescue, self.server_id)
 
         # Detach the volume from the server expecting failure
-        self.assertRaises(exceptions.Duplicate,
+        self.assertRaises(exceptions.Conflict,
                           self.servers_client.detach_volume,
                           self.server_id,
                           self.volume_to_detach['id'])

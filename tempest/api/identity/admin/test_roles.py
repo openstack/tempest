@@ -103,7 +103,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         self.assertIn('status', resp)
         self.assertTrue(resp['status'].startswith('2'))
         self.addCleanup(self.client.delete_role, role1_id)
-        self.assertRaises(exceptions.Duplicate, self.client.create_role,
+        self.assertRaises(exceptions.Conflict, self.client.create_role,
                           role_name)
 
     @attr(type='gate')
@@ -160,7 +160,7 @@ class RolesTestJSON(base.BaseIdentityAdminTest):
         # Duplicate user role should not get assigned
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
-        self.assertRaises(exceptions.Duplicate, self.client.assign_user_role,
+        self.assertRaises(exceptions.Conflict, self.client.assign_user_role,
                           tenant['id'], user['id'], role['id'])
 
     @attr(type='gate')

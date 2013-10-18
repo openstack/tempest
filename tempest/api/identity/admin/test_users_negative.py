@@ -63,7 +63,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
     def test_create_user_with_duplicate_name(self):
         # Duplicate user should not be created
         self.data.setup_test_user()
-        self.assertRaises(exceptions.Duplicate, self.client.create_user,
+        self.assertRaises(exceptions.Conflict, self.client.create_user,
                           self.data.test_user, self.data.test_password,
                           self.data.tenant['id'], self.data.test_email)
 

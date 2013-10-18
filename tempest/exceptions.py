@@ -129,8 +129,8 @@ class OverLimit(TempestException):
     message = "Quota exceeded"
 
 
-class ComputeFault(TempestException):
-    message = "Got compute fault"
+class ServerFault(TempestException):
+    message = "Got server fault"
 
 
 class ImageFault(TempestException):
@@ -141,7 +141,7 @@ class IdentityError(TempestException):
     message = "Got identity error"
 
 
-class Duplicate(RestClientException):
+class Conflict(RestClientException):
     message = "An object with that identifier already exists"
 
 

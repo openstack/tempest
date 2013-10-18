@@ -158,7 +158,7 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
 
         # Create second snapshot
         alt_snapshot_name = rand_name('test-snap-')
-        self.assertRaises(exceptions.Duplicate, self.client.create_image,
+        self.assertRaises(exceptions.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
