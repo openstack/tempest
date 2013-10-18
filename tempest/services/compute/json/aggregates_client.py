@@ -97,3 +97,14 @@ class AggregatesClientJSON(RestClient):
                                post_body, self.headers)
         body = json.loads(body)
         return resp, body['aggregate']
+
+    def set_metadata(self, aggregate_id, meta):
+        """Replaces the aggregate's existing metadata with new metadata."""
+        post_body = {
+            'metadata': meta,
+        }
+        post_body = json.dumps({'set_metadata': post_body})
+        resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
+                               post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['aggregate']

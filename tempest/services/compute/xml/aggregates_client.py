@@ -21,6 +21,7 @@ from tempest.common.rest_client import RestClientXML
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
+from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 
 
@@ -107,6 +108,21 @@ class AggregatesClientXML(RestClientXML):
     def remove_host(self, aggregate_id, host):
         """Removes a host from the given aggregate."""
         post_body = Element("remove_host", host=host)
+        resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
+                               str(Document(post_body)),
+                               self.headers)
+        aggregate = self._format_aggregate(etree.fromstring(body))
+        return resp, aggregate
+
+    def set_metadata(self, aggregate_id, meta):
+        """Replaces the aggregate's existing metadata with new metadata."""
+        post_body = Element("set_metadata")
+        metadata = Element("metadata")
+        post_body.append(metadata)
+        for k, v in meta.items():
+            meta = Element(k)
+            meta.append(Text(v))
+            metadata.append(meta)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                str(Document(post_body)),
                                self.headers)

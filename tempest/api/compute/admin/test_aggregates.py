@@ -85,7 +85,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                           aggregates))
 
     @attr(type='gate')
-    def test_aggregate_create_get_details(self):
+    def test_aggregate_create_update_metadata_get_details(self):
         # Create an aggregate and ensure its details are returned.
         aggregate_name = rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
@@ -96,6 +96,18 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(aggregate['name'], body['name'])
         self.assertEqual(aggregate['availability_zone'],
                          body['availability_zone'])
+        self.assertEqual({}, body["metadata"])
+
+        # set the metadata of the aggregate
+        meta = {"key": "value"}
+        resp, body = self.client.set_metadata(aggregate['id'], meta)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(meta, body["metadata"])
+
+        # verify the metadata has been set
+        resp, body = self.client.get_aggregate(aggregate['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(meta, body["metadata"])
 
     @attr(type='gate')
     def test_aggregate_create_update_with_az(self):
