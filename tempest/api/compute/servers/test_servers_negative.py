@@ -26,7 +26,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServersNegativeTestJSON(base.BaseComputeTest):
+class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     def setUp(self):

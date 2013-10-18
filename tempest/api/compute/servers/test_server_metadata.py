@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServerMetadataTestJSON(base.BaseComputeTest):
+class ServerMetadataTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

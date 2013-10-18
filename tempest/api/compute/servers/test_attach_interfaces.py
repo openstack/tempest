@@ -19,7 +19,7 @@ from tempest.test import attr
 import time
 
 
-class AttachInterfacesTestJSON(base.BaseComputeTest):
+class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

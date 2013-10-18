@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class AvailabilityZoneAdminTestJSON(base.BaseComputeAdminTest):
+class AvailabilityZoneAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Availability Zone API List that require admin privileges

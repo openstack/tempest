@@ -23,7 +23,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class QuotasAdminTestJSON(base.BaseComputeAdminTest):
+class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     _interface = 'json'
 
     @classmethod

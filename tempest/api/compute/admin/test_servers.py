@@ -22,7 +22,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class ServersAdminTestJSON(base.BaseComputeAdminTest):
+class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Servers API using admin privileges

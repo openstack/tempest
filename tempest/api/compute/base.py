@@ -54,36 +54,18 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             os = clients.Manager(interface=cls._interface)
 
         cls.os = os
-        cls.servers_client = os.servers_client
-        cls.flavors_client = os.flavors_client
-        cls.images_client = os.images_client
-        cls.extensions_client = os.extensions_client
-        cls.floating_ips_client = os.floating_ips_client
-        cls.keypairs_client = os.keypairs_client
-        cls.security_groups_client = os.security_groups_client
-        cls.quotas_client = os.quotas_client
-        cls.limits_client = os.limits_client
-        cls.volumes_extensions_client = os.volumes_extensions_client
-        cls.volumes_client = os.volumes_client
-        cls.interfaces_client = os.interfaces_client
-        cls.fixed_ips_client = os.fixed_ips_client
-        cls.availability_zone_client = os.availability_zone_client
-        cls.aggregates_client = os.aggregates_client
-        cls.services_client = os.services_client
-        cls.hypervisor_client = os.hypervisor_client
+
         cls.build_interval = cls.config.compute.build_interval
         cls.build_timeout = cls.config.compute.build_timeout
         cls.ssh_user = cls.config.compute.ssh_user
-        cls.image_ssh_user = cls.config.compute.image_ssh_user
-        cls.image_ssh_password = cls.config.compute.image_ssh_password
         cls.image_ref = cls.config.compute.image_ref
         cls.image_ref_alt = cls.config.compute.image_ref_alt
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
+        cls.image_ssh_user = cls.config.compute.image_ssh_user
+        cls.image_ssh_password = cls.config.compute.image_ssh_password
         cls.servers = []
         cls.images = []
-
-        cls.servers_client_v3_auth = os.servers_client_v3_auth
 
     @classmethod
     def clear_servers(cls):
@@ -162,7 +144,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
-        """Wrapper utility that returns a test server."""
+        """Wrapper utility that returns an image created from the server."""
         name = rand_name(cls.__name__ + "-image")
         if 'name' in kwargs:
             name = kwargs.pop('name')
@@ -195,12 +177,37 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             time.sleep(self.build_interval)
 
 
-class BaseComputeAdminTest(BaseComputeTest):
-    """Base test case class for all Compute Admin API tests."""
+class BaseV2ComputeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(BaseComputeAdminTest, cls).setUpClass()
+        super(BaseV2ComputeTest, cls).setUpClass()
+        cls.servers_client = cls.os.servers_client
+        cls.flavors_client = cls.os.flavors_client
+        cls.images_client = cls.os.images_client
+        cls.extensions_client = cls.os.extensions_client
+        cls.floating_ips_client = cls.os.floating_ips_client
+        cls.keypairs_client = cls.os.keypairs_client
+        cls.security_groups_client = cls.os.security_groups_client
+        cls.quotas_client = cls.os.quotas_client
+        cls.limits_client = cls.os.limits_client
+        cls.volumes_extensions_client = cls.os.volumes_extensions_client
+        cls.volumes_client = cls.os.volumes_client
+        cls.interfaces_client = cls.os.interfaces_client
+        cls.fixed_ips_client = cls.os.fixed_ips_client
+        cls.availability_zone_client = cls.os.availability_zone_client
+        cls.aggregates_client = cls.os.aggregates_client
+        cls.services_client = cls.os.services_client
+        cls.hypervisor_client = cls.os.hypervisor_client
+        cls.servers_client_v3_auth = cls.os.servers_client_v3_auth
+
+
+class BaseV2ComputeAdminTest(BaseV2ComputeTest):
+    """Base test case class for Compute Admin V2 API tests."""
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseV2ComputeAdminTest, cls).setUpClass()
         admin_username = cls.config.compute_admin.username
         admin_password = cls.config.compute_admin.password
         admin_tenant = cls.config.compute_admin.tenant_name

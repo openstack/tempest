@@ -23,7 +23,7 @@ import tempest.config
 from tempest.test import attr
 
 
-class AttachVolumeTestJSON(base.BaseComputeTest):
+class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 

@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServicesAdminTestJSON(base.BaseComputeAdminTest):
+class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Services API. List and Enable/Disable require admin privileges.

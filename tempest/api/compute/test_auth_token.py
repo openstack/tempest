@@ -19,7 +19,7 @@ from tempest.api.compute import base
 import tempest.config as config
 
 
-class AuthTokenTestJSON(base.BaseComputeTest):
+class AuthTokenTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

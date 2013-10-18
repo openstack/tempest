@@ -23,7 +23,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
+class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Flavor Extra Spec API extension.

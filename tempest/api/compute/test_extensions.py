@@ -20,7 +20,7 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class ExtensionsTestJSON(base.BaseComputeTest):
+class ExtensionsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @attr(type='gate')

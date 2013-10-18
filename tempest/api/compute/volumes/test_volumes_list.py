@@ -20,7 +20,7 @@ from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 
 
-class VolumesTestJSON(base.BaseComputeTest):
+class VolumesTestJSON(base.BaseV2ComputeTest):
 
     """
     This test creates a number of 1G volumes. To run successfully,

@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class FixedIPsTestJson(base.BaseComputeAdminTest):
+class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
     _interface = 'json'
 
     @classmethod

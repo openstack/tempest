@@ -24,7 +24,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class FlavorsAdminTestJSON(base.BaseComputeAdminTest):
+class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Flavors API Create and Delete that require admin privileges

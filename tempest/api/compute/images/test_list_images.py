@@ -19,7 +19,7 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class ListImagesTestJSON(base.BaseComputeTest):
+class ListImagesTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

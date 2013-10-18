@@ -25,7 +25,7 @@ from tempest.test import attr
 LOG = logging.getLogger(__name__)
 
 
-class ListImageFiltersTestJSON(base.BaseComputeTest):
+class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

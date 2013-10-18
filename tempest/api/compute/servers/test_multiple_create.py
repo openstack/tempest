@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class MultipleCreateTestJSON(base.BaseComputeTest):
+class MultipleCreateTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
     _name = 'multiple-create-test'
 

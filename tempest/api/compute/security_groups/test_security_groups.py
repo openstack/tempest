@@ -25,7 +25,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class SecurityGroupsTestJSON(base.BaseComputeTest):
+class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

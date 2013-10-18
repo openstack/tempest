@@ -30,7 +30,7 @@ from tempest.test import skip_because
 LOG = logging.getLogger(__name__)
 
 
-class ImagesOneServerTestJSON(base.BaseComputeTest):
+class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     def tearDown(self):

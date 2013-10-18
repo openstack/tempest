@@ -28,7 +28,7 @@ import tempest.config
 from tempest.test import attr
 
 
-class ServersTestJSON(base.BaseComputeTest):
+class ServersTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
     disk_config = 'AUTO'

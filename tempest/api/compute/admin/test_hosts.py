@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class HostsAdminTestJSON(base.BaseComputeAdminTest):
+class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests hosts API using admin privileges.

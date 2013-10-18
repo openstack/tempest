@@ -23,7 +23,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class FloatingIPDetailsTestJSON(base.BaseComputeTest):
+class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

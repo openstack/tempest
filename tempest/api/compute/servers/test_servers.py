@@ -20,7 +20,7 @@ from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 
 
-class ServersTestJSON(base.BaseComputeTest):
+class ServersTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod
