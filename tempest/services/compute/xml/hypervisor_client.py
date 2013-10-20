@@ -70,3 +70,10 @@ class HypervisorClientXML(RestClientXML):
                               self.headers)
         uptime = xml_to_json(etree.fromstring(body))
         return resp, uptime
+
+    def search_hypervisor(self, hyper_name):
+        """Search specified hypervisor."""
+        resp, body = self.get('os-hypervisors/%s/search' % hyper_name,
+                              self.headers)
+        hypervisors = self._parse_array(etree.fromstring(body))
+        return resp, hypervisors

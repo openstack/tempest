@@ -63,3 +63,9 @@ class HypervisorClientJSON(RestClient):
         resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id)
         body = json.loads(body)
         return resp, body['hypervisor']
+
+    def search_hypervisor(self, hyper_name):
+        """Search specified hypervisor."""
+        resp, body = self.get('os-hypervisors/%s/search' % hyper_name)
+        body = json.loads(body)
+        return resp, body['hypervisors']
