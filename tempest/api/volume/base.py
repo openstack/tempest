@@ -42,6 +42,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         cls.volumes_client = os.volumes_client
         cls.snapshots_client = os.snapshots_client
         cls.servers_client = os.servers_client
+        cls.volumes_extension_client = os.volumes_extension_client
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.build_interval = cls.config.volume.build_interval
