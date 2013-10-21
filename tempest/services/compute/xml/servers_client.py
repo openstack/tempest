@@ -250,7 +250,7 @@ class ServersClientXML(RestClientXML):
         return resp, {"servers": servers}
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
-                      accessIPv6=None):
+                      accessIPv6=None, disk_config=None):
         doc = Document()
         server = Element("server")
         doc.append(server)
@@ -261,6 +261,10 @@ class ServersClientXML(RestClientXML):
             server.add_attr("accessIPv4", accessIPv4)
         if accessIPv6 is not None:
             server.add_attr("accessIPv6", accessIPv6)
+        if disk_config is not None:
+            server.add_attr('xmlns:OS-DCF', "http://docs.openstack.org/"
+                            "compute/ext/disk_config/api/v1.1")
+            server.add_attr("OS-DCF:diskConfig", disk_config)
         if meta is not None:
             metadata = Element("metadata")
             server.append(metadata)
