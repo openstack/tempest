@@ -681,18 +681,32 @@ class NetworkScenarioTest(OfficialClientTest):
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
         """
+
+        def cidr_in_use(cidr, tenant_id):
+            """
+            :return True if subnet with cidr already exist in tenant
+                False else
+            """
+            cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
+            return len(cidr_in_use) != 0
+
         tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         result = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
         for subnet_cidr in tenant_cidr.subnet(
             CONF.network.tenant_network_mask_bits):
+            str_cidr = str(subnet_cidr)
+            if cidr_in_use(str_cidr, tenant_id=network.tenant_id):
+                continue
+
             body = dict(
                 subnet=dict(
+                    name=data_utils.rand_name(namestart),
                     ip_version=4,
                     network_id=network.id,
                     tenant_id=network.tenant_id,
-                    cidr=str(subnet_cidr),
+                    cidr=str_cidr,
                 ),
             )
             try:
@@ -705,7 +719,7 @@ class NetworkScenarioTest(OfficialClientTest):
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
         subnet = net_common.DeletableSubnet(client=self.network_client,
                                             **result['subnet'])
-        self.assertEqual(subnet.cidr, str(subnet_cidr))
+        self.assertEqual(subnet.cidr, str_cidr)
         self.set_resource(data_utils.rand_name(namestart), subnet)
         return subnet
 
