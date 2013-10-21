@@ -46,7 +46,8 @@ class ImagesOneServerTestJSON(base.BaseComputeTest):
         super(ImagesOneServerTestJSON, self).setUp()
         # Check if the server is in a clean state after test
         try:
-            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+            self.servers_client.wait_for_server_status(self.server_id,
+                                                       'ACTIVE')
         except Exception as exc:
             LOG.exception(exc)
             # Rebuild server if cannot reach the ACTIVE state
