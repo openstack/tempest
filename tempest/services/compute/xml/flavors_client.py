@@ -22,6 +22,7 @@ from lxml import etree
 from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
+from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 from tempest.services.compute.xml.common import XMLNS_11
 
@@ -29,7 +30,7 @@ from tempest.services.compute.xml.common import XMLNS_11
 XMLNS_OS_FLV_EXT_DATA = \
     "http://docs.openstack.org/compute/ext/flavor_extra_data/api/v1.1"
 XMLNS_OS_FLV_ACCESS = \
-    "http://docs.openstack.org/compute/ext/flavor_access/api/v1.1"
+    "http://docs.openstack.org/compute/ext/flavor_access/api/v2"
 
 
 class FlavorsClientXML(RestClientXML):
@@ -48,6 +49,10 @@ class FlavorsClientXML(RestClientXML):
 
             if k == '{%s}ephemeral' % XMLNS_OS_FLV_EXT_DATA:
                 k = 'OS-FLV-EXT-DATA:ephemeral'
+
+            if k == '{%s}is_public' % XMLNS_OS_FLV_ACCESS:
+                k = 'os-flavor-access:is_public'
+                v = True if v == 'True' else False
 
             if k == 'extra_specs':
                 k = 'OS-FLV-WITH-EXT-SPECS:extra_specs'
@@ -154,6 +159,21 @@ class FlavorsClientXML(RestClientXML):
                               key), self.headers)
         body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
+        """Gets specified extra Specs details of the mentioned flavor."""
+        doc = Document()
+        for (k, v) in kwargs.items():
+            element = Element(k)
+            doc.append(element)
+            value = Text(v)
+            element.append(value)
+
+        resp, body = self.put('flavors/%s/os-extra_specs/%s' %
+                              (flavor_id, key),
+                              str(doc), self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, {key: body}
 
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets an extra spec based on the mentioned flavor and key."""

@@ -19,7 +19,6 @@ from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_int_id
 from tempest.common.utils.data_utils import rand_name
-from tempest import exceptions
 from tempest.test import attr
 
 
@@ -64,9 +63,9 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         super(FlavorsExtraSpecsTestJSON, cls).tearDownClass()
 
     @attr(type='gate')
-    def test_flavor_set_get_unset_keys(self):
-        # Test to SET, GET UNSET flavor extra spec as a user
-        # with admin privileges.
+    def test_flavor_set_get_update_show_unset_keys(self):
+        # Test to SET, GET, UPDATE, SHOW, UNSET flavor extra
+        # spec as a user with admin privileges.
         # Assigning extra specs values that are to be set
         specs = {"key1": "value1", "key2": "value2"}
         # SET extra specs to the flavor created in setUp
@@ -79,55 +78,55 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
             self.client.get_flavor_extra_spec(self.flavor['id'])
         self.assertEqual(get_resp.status, 200)
         self.assertEqual(get_body, specs)
+
+        # UPDATE the value of the extra specs key1
+        update_resp, update_body = \
+            self.client.update_flavor_extra_spec(self.flavor['id'],
+                                                 "key1",
+                                                 key1="value")
+        self.assertEqual(update_resp.status, 200)
+        self.assertEqual({"key1": "value"}, update_body)
+
         # GET a key value and verify
-        get_resp, get_body = \
+        show_resp, get_body = \
             self.client.get_flavor_extra_spec_with_key(self.flavor['id'],
-                                                       "key2")
+                                                       "key1")
+        self.assertEqual(show_resp.status, 200)
+        self.assertEqual(get_body, 'value')
+
+        # GET extra specs and verify the value of the key2
+        # is the same as before
+        get_resp, get_body = \
+            self.client.get_flavor_extra_spec(self.flavor['id'])
         self.assertEqual(get_resp.status, 200)
-        self.assertEqual(get_body, specs['key2'])
+        self.assertEqual(get_body, {"key1": "value", "key2": "value2"})
+
         # UNSET extra specs that were set in this test
         unset_resp, _ = \
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key1")
         self.assertEqual(unset_resp.status, 200)
-
-    @attr(type=['negative', 'gate'])
-    def test_flavor_non_admin_set_keys(self):
-        # Test to SET flavor extra spec as a user without admin privileges.
-        specs = {"key1": "value1", "key2": "value2"}
-        self.assertRaises(exceptions.Unauthorized,
-                          self.flavors_client.set_flavor_extra_spec,
-                          self.flavor['id'],
-                          specs)
+        unset_resp, _ = \
+            self.client.unset_flavor_extra_spec(self.flavor['id'], "key2")
+        self.assertEqual(unset_resp.status, 200)
 
     @attr(type='gate')
-    def test_flavor_non_admin_get_keys(self):
+    def test_flavor_non_admin_get_all_keys_and_specified_key(self):
         specs = {"key1": "value1", "key2": "value2"}
         set_resp, set_body = self.client.set_flavor_extra_spec(
             self.flavor['id'], specs)
         resp, body = self.flavors_client.get_flavor_extra_spec(
             self.flavor['id'])
         self.assertEqual(resp.status, 200)
+
         for key in specs:
             self.assertEqual(body[key], specs[key])
 
-    @attr(type=['negative', 'gate'])
-    def test_flavor_non_admin_unset_keys(self):
-        specs = {"key1": "value1", "key2": "value2"}
-        set_resp, set_body = self.client.set_flavor_extra_spec(
-            self.flavor['id'], specs)
-
-        self.assertRaises(exceptions.Unauthorized,
-                          self.flavors_client.unset_flavor_extra_spec,
-                          self.flavor['id'],
-                          'key1')
-
-    @attr(type=['negative', 'gate'])
-    def test_flavor_unset_nonexistent_key(self):
-        nonexistent_key = rand_name('flavor_key')
-        self.assertRaises(exceptions.NotFound,
-                          self.client.unset_flavor_extra_spec,
-                          self.flavor['id'],
-                          nonexistent_key)
+        get_resp, get_body = \
+            self.flavors_client.get_flavor_extra_spec_with_key(
+                self.flavor['id'],
+                "key1")
+        self.assertEqual(get_resp.status, 200)
+        self.assertEqual("value1", get_body)
 
 
 class FlavorsExtraSpecsTestXML(FlavorsExtraSpecsTestJSON):
