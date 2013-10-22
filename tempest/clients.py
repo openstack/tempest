@@ -33,6 +33,8 @@ from tempest.services.compute.json.hosts_client import HostsClientJSON
 from tempest.services.compute.json.hypervisor_client import \
     HypervisorClientJSON
 from tempest.services.compute.json.images_client import ImagesClientJSON
+from tempest.services.compute.json.instance_usage_audit_log_client import \
+    InstanceUsagesAuditLogClientJSON
 from tempest.services.compute.json.interfaces_client import \
     InterfacesClientJSON
 from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
@@ -56,6 +58,8 @@ from tempest.services.compute.xml.floating_ips_client import \
     FloatingIPsClientXML
 from tempest.services.compute.xml.hypervisor_client import HypervisorClientXML
 from tempest.services.compute.xml.images_client import ImagesClientXML
+from tempest.services.compute.xml.instance_usage_audit_log_client import \
+    InstanceUsagesAuditLogClientXML
 from tempest.services.compute.xml.interfaces_client import \
     InterfacesClientXML
 from tempest.services.compute.xml.keypairs_client import KeyPairsClientXML
@@ -198,6 +202,8 @@ class Manager(object):
             self.token_v3_client = V3TokenClientXML(*client_args)
             self.network_client = NetworkClientXML(*client_args)
             self.credentials_client = CredentialsClientXML(*client_args)
+            self.instance_usages_audit_log_client = \
+                InstanceUsagesAuditLogClientXML(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientXML(
@@ -236,6 +242,8 @@ class Manager(object):
             self.token_v3_client = V3TokenClientJSON(*client_args)
             self.network_client = NetworkClientJSON(*client_args)
             self.credentials_client = CredentialsClientJSON(*client_args)
+            self.instance_usages_audit_log_client = \
+                InstanceUsagesAuditLogClientJSON(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientJSON(
