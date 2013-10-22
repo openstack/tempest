@@ -227,3 +227,13 @@ class VolumesClientXML(RestClientXML):
         resp, body = self.post(url, str(Document(post_body)), self.headers)
         volume = xml_to_json(etree.fromstring(body))
         return resp, volume
+
+    def extend_volume(self, volume_id, extend_size):
+        """Extend a volume."""
+        post_body = Element("os-extend",
+                            new_size=extend_size)
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body

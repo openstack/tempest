@@ -150,6 +150,41 @@ class VolumesNegativeTest(base.BaseVolumeTest):
                           self.client.detach_volume,
                           'xxx')
 
+    @attr(type=['negative', 'gate'])
+    def test_volume_extend_with_size_smaller_than_original_size(self):
+        # Extend volume with smaller size than original size.
+        extend_size = 0
+        self.assertRaises(exceptions.BadRequest, self.client.extend_volume,
+                          self.volume['id'], extend_size)
+
+    @attr(type=['negative', 'gate'])
+    def test_volume_extend_with_non_number_size(self):
+        # Extend volume when size is non number.
+        extend_size = 'abc'
+        self.assertRaises(exceptions.BadRequest, self.client.extend_volume,
+                          self.volume['id'], extend_size)
+
+    @attr(type=['negative', 'gate'])
+    def test_volume_extend_with_None_size(self):
+        # Extend volume with None size.
+        extend_size = None
+        self.assertRaises(exceptions.BadRequest, self.client.extend_volume,
+                          self.volume['id'], extend_size)
+
+    @attr(type=['negative', 'gate'])
+    def test_volume_extend_with_nonexistent_volume_id(self):
+        # Extend volume size when volume is nonexistent.
+        extend_size = int(self.volume['size']) + 1
+        self.assertRaises(exceptions.NotFound, self.client.extend_volume,
+                          str(uuid.uuid4()), extend_size)
+
+    @attr(type=['negative', 'gate'])
+    def test_volume_extend_without_passing_volume_id(self):
+        # Extend volume size when passing volume id is None.
+        extend_size = int(self.volume['size']) + 1
+        self.assertRaises(exceptions.NotFound, self.client.extend_volume,
+                          None, extend_size)
+
 
 class VolumesNegativeTestXML(VolumesNegativeTest):
     _interface = 'xml'
