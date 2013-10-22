@@ -25,7 +25,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class FlavorsAccessTestJSON(base.BaseComputeAdminTest):
+class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Flavor Access API extension.

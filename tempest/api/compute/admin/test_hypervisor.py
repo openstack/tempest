@@ -19,7 +19,7 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
+class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Hypervisors API that require admin privileges

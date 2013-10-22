@@ -24,7 +24,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ListServersNegativeTestJSON(base.BaseComputeTest):
+class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

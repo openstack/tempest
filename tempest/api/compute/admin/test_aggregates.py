@@ -22,7 +22,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class AggregatesAdminTestJSON(base.BaseComputeAdminTest):
+class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Aggregates API that require admin privileges

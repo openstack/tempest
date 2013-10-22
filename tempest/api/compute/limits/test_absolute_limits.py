@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class AbsoluteLimitsTestJSON(base.BaseComputeTest):
+class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

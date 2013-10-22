@@ -24,7 +24,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class ListServerFiltersTestJSON(base.BaseComputeTest):
+class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

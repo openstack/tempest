@@ -27,7 +27,7 @@ from tempest.test import attr
 LOG = logging.getLogger(__name__)
 
 
-class AuthorizationTestJSON(base.BaseComputeTest):
+class AuthorizationTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod

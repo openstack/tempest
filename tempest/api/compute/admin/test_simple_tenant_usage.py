@@ -23,7 +23,7 @@ from tempest.test import attr
 import time
 
 
-class TenantUsagesTestJSON(base.BaseComputeAdminTest):
+class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
     _interface = 'json'
 

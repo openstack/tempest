@@ -26,7 +26,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class LiveBlockMigrationTestJSON(base.BaseComputeAdminTest):
+class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
     _interface = 'json'
 
