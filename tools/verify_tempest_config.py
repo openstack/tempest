@@ -31,6 +31,18 @@ NOVA_EXTENSIONS = {
 }
 
 
+def verify_glance_api_versions(os):
+    # Check glance api versions
+    __, versions = os.image_client.get_versions()
+    if CONF.image_feature_enabled.api_v1 != ('v1.1' in versions or 'v1.0' in
+                                             versions):
+        print 'Config option image api_v1 should be change to: %s' % (
+            not CONF.image_feature_enabled.api_v1)
+    if CONF.image_feature_enabled.api_v2 != ('v2.0' in versions):
+        print 'Config option image api_v2 should be change to: %s' % (
+            not CONF.image_feature_enabled.api_v2)
+
+
 def verify_extensions(os):
     results = {}
     extensions_client = os.extensions_client
@@ -57,6 +69,7 @@ def display_results(results):
 def main(argv):
     os = clients.ComputeAdminManager(interface='json')
     results = verify_extensions(os)
+    verify_glance_api_versions(os)
     display_results(results)
 
 
