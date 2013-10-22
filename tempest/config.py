@@ -252,9 +252,6 @@ image_group = cfg.OptGroup(name='image',
                            title="Image Service Options")
 
 ImageGroup = [
-    cfg.StrOpt('api_version',
-               default='1',
-               help="Version of the API"),
     cfg.StrOpt('catalog_type',
                default='image',
                help='Catalog type of the Image service.'),
@@ -270,6 +267,17 @@ ImageGroup = [
                help='http accessible image')
 ]
 
+image_feature_group = cfg.OptGroup(name='image-feature-enabled',
+                                   title='Enabled image service features')
+
+ImageFeaturesGroup = [
+    cfg.BoolOpt('api_v2',
+                default=True,
+                help="Is the v2 image API enabled"),
+    cfg.BoolOpt('api_v1',
+                default=True,
+                help="Is the v1 image API enabled"),
+]
 
 network_group = cfg.OptGroup(name='network',
                              title='Network Service Options')
@@ -635,6 +643,7 @@ class TempestConfig:
                            ComputeFeaturesGroup)
         register_opt_group(cfg.CONF, identity_group, IdentityGroup)
         register_opt_group(cfg.CONF, image_group, ImageGroup)
+        register_opt_group(cfg.CONF, image_feature_group, ImageFeaturesGroup)
         register_opt_group(cfg.CONF, network_group, NetworkGroup)
         register_opt_group(cfg.CONF, volume_group, VolumeGroup)
         register_opt_group(cfg.CONF, volume_feature_group,
@@ -655,6 +664,7 @@ class TempestConfig:
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity
         self.images = cfg.CONF.image
+        self.image_feature_enabled = cfg.CONF['image-feature-enabled']
         self.network = cfg.CONF.network
         self.volume = cfg.CONF.volume
         self.volume_feature_enabled = cfg.CONF['volume-feature-enabled']
