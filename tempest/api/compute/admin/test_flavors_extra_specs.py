@@ -79,6 +79,12 @@ class FlavorsExtraSpecsTestJSON(base.BaseComputeAdminTest):
             self.client.get_flavor_extra_spec(self.flavor['id'])
         self.assertEqual(get_resp.status, 200)
         self.assertEqual(get_body, specs)
+        # GET a key value and verify
+        get_resp, get_body = \
+            self.client.get_flavor_extra_spec_with_key(self.flavor['id'],
+                                                       "key2")
+        self.assertEqual(get_resp.status, 200)
+        self.assertEqual(get_body, specs['key2'])
         # UNSET extra specs that were set in this test
         unset_resp, _ = \
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key1")

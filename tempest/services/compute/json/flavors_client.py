@@ -102,6 +102,13 @@ class FlavorsClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['extra_specs']
 
+    def get_flavor_extra_spec_with_key(self, flavor_id, key):
+        """Gets a specified key value for the mentioned flavor."""
+        resp, body = self.get('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
+                              key))
+        body = json.loads(body)
+        return resp, body[key]
+
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets extra Specs from the mentioned flavor."""
         return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),

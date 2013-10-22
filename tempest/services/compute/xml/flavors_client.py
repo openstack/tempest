@@ -148,6 +148,13 @@ class FlavorsClientXML(RestClientXML):
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
+    def get_flavor_extra_spec_with_key(self, flavor_id, key):
+        """Gets a specified key detail for the mentioned flavor."""
+        resp, body = self.get('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
+                              key), self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets an extra spec based on the mentioned flavor and key."""
         return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
