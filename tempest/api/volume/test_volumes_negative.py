@@ -85,6 +85,33 @@ class VolumesNegativeTest(base.BaseVolumeTest):
                           size='-1', display_name=v_name, metadata=metadata)
 
     @attr(type=['negative', 'gate'])
+    def test_create_volume_with_nonexistant_volume_type(self):
+        # Should not be able to create volume with non-existant volume type
+        v_name = rand_name('Volume-')
+        metadata = {'Type': 'work'}
+        self.assertRaises(exceptions.NotFound, self.client.create_volume,
+                          size='1', volume_type=str(uuid.uuid4()),
+                          display_name=v_name, metadata=metadata)
+
+    @attr(type=['negative', 'gate'])
+    def test_create_volume_with_nonexistant_snapshot_id(self):
+        # Should not be able to create volume with non-existant snapshot
+        v_name = rand_name('Volume-')
+        metadata = {'Type': 'work'}
+        self.assertRaises(exceptions.NotFound, self.client.create_volume,
+                          size='1', snapshot_id=str(uuid.uuid4()),
+                          display_name=v_name, metadata=metadata)
+
+    @attr(type=['negative', 'gate'])
+    def test_create_volume_with_nonexistant_source_volid(self):
+        # Should not be able to create volume with non-existant source volume
+        v_name = rand_name('Volume-')
+        metadata = {'Type': 'work'}
+        self.assertRaises(exceptions.NotFound, self.client.create_volume,
+                          size='1', source_volid=str(uuid.uuid4()),
+                          display_name=v_name, metadata=metadata)
+
+    @attr(type=['negative', 'gate'])
     def test_update_volume_with_nonexistant_volume_id(self):
         v_name = rand_name('Volume-')
         metadata = {'Type': 'work'}
