@@ -116,151 +116,6 @@ from tempest.services.volume.xml.volumes_client import VolumesClientXML
 
 LOG = logging.getLogger(__name__)
 
-IMAGES_CLIENTS = {
-    "json": ImagesClientJSON,
-    "xml": ImagesClientXML,
-}
-
-NETWORKS_CLIENTS = {
-    "json": NetworkClientJSON,
-    "xml": NetworkClientXML,
-}
-
-KEYPAIRS_CLIENTS = {
-    "json": KeyPairsClientJSON,
-    "xml": KeyPairsClientXML,
-}
-
-QUOTAS_CLIENTS = {
-    "json": QuotasClientJSON,
-    "xml": QuotasClientXML,
-}
-
-SERVERS_CLIENTS = {
-    "json": ServersClientJSON,
-    "xml": ServersClientXML,
-}
-
-LIMITS_CLIENTS = {
-    "json": LimitsClientJSON,
-    "xml": LimitsClientXML,
-}
-
-FLAVORS_CLIENTS = {
-    "json": FlavorsClientJSON,
-    "xml": FlavorsClientXML
-}
-
-EXTENSIONS_CLIENTS = {
-    "json": ExtensionsClientJSON,
-    "xml": ExtensionsClientXML
-}
-
-VOLUMES_EXTENSIONS_CLIENTS = {
-    "json": VolumesExtensionsClientJSON,
-    "xml": VolumesExtensionsClientXML,
-}
-
-FLOAT_CLIENTS = {
-    "json": FloatingIPsClientJSON,
-    "xml": FloatingIPsClientXML,
-}
-
-SNAPSHOTS_CLIENTS = {
-    "json": SnapshotsClientJSON,
-    "xml": SnapshotsClientXML,
-}
-
-VOLUMES_CLIENTS = {
-    "json": VolumesClientJSON,
-    "xml": VolumesClientXML,
-}
-
-VOLUME_TYPES_CLIENTS = {
-    "json": VolumeTypesClientJSON,
-    "xml": VolumeTypesClientXML,
-}
-
-IDENTITY_CLIENT = {
-    "json": IdentityClientJSON,
-    "xml": IdentityClientXML,
-}
-
-IDENTITY_V3_CLIENT = {
-    "json": IdentityV3ClientJSON,
-    "xml": IdentityV3ClientXML,
-}
-
-TOKEN_CLIENT = {
-    "json": TokenClientJSON,
-    "xml": TokenClientXML,
-}
-
-SECURITY_GROUPS_CLIENT = {
-    "json": SecurityGroupsClientJSON,
-    "xml": SecurityGroupsClientXML,
-}
-
-INTERFACES_CLIENT = {
-    "json": InterfacesClientJSON,
-    "xml": InterfacesClientXML,
-}
-
-ENDPOINT_CLIENT = {
-    "json": EndPointClientJSON,
-    "xml": EndPointClientXML,
-}
-
-FIXED_IPS_CLIENT = {
-    "json": FixedIPsClientJSON,
-    "xml": FixedIPsClientXML
-}
-
-AVAILABILITY_ZONE_CLIENT = {
-    "json": AvailabilityZoneClientJSON,
-    "xml": AvailabilityZoneClientXML,
-}
-
-SERVICE_CLIENT = {
-    "json": ServiceClientJSON,
-    "xml": ServiceClientXML,
-}
-
-AGGREGATES_CLIENT = {
-    "json": AggregatesClientJSON,
-    "xml": AggregatesClientXML,
-}
-
-SERVICES_CLIENT = {
-    "json": ServicesClientJSON,
-    "xml": ServicesClientXML,
-}
-
-TENANT_USAGES_CLIENT = {
-    "json": TenantUsagesClientJSON,
-    "xml": TenantUsagesClientXML,
-}
-
-POLICY_CLIENT = {
-    "json": PolicyClientJSON,
-    "xml": PolicyClientXML,
-}
-
-HYPERVISOR_CLIENT = {
-    "json": HypervisorClientJSON,
-    "xml": HypervisorClientXML,
-}
-
-V3_TOKEN_CLIENT = {
-    "json": V3TokenClientJSON,
-    "xml": V3TokenClientXML,
-}
-
-CREDENTIALS_CLIENT = {
-    "json": CredentialsClientJSON,
-    "xml": CredentialsClientXML,
-}
-
 
 class Manager(object):
 
@@ -308,55 +163,88 @@ class Manager(object):
         else:
             client_args_v3_auth = None
 
-        try:
-            self.servers_client = SERVERS_CLIENTS[interface](*client_args)
-            self.network_client = NETWORKS_CLIENTS[interface](*client_args)
-            self.limits_client = LIMITS_CLIENTS[interface](*client_args)
-            if self.config.service_available.glance:
-                self.images_client = IMAGES_CLIENTS[interface](*client_args)
-            self.keypairs_client = KEYPAIRS_CLIENTS[interface](*client_args)
-            self.quotas_client = QUOTAS_CLIENTS[interface](*client_args)
-            self.flavors_client = FLAVORS_CLIENTS[interface](*client_args)
-            ext_cli = EXTENSIONS_CLIENTS[interface](*client_args)
-            self.extensions_client = ext_cli
-            vol_ext_cli = VOLUMES_EXTENSIONS_CLIENTS[interface](*client_args)
-            self.volumes_extensions_client = vol_ext_cli
-            self.floating_ips_client = FLOAT_CLIENTS[interface](*client_args)
-            self.snapshots_client = SNAPSHOTS_CLIENTS[interface](*client_args)
-            self.volumes_client = VOLUMES_CLIENTS[interface](*client_args)
-            self.volume_types_client = \
-                VOLUME_TYPES_CLIENTS[interface](*client_args)
-            self.identity_client = IDENTITY_CLIENT[interface](*client_args)
-            self.identity_v3_client = \
-                IDENTITY_V3_CLIENT[interface](*client_args)
-            self.token_client = TOKEN_CLIENT[interface](self.config)
-            self.security_groups_client = \
-                SECURITY_GROUPS_CLIENT[interface](*client_args)
-            self.interfaces_client = INTERFACES_CLIENT[interface](*client_args)
-            self.endpoints_client = ENDPOINT_CLIENT[interface](*client_args)
-            self.fixed_ips_client = FIXED_IPS_CLIENT[interface](*client_args)
-            self.availability_zone_client = \
-                AVAILABILITY_ZONE_CLIENT[interface](*client_args)
-            self.service_client = SERVICE_CLIENT[interface](*client_args)
-            self.aggregates_client = AGGREGATES_CLIENT[interface](*client_args)
-            self.services_client = SERVICES_CLIENT[interface](*client_args)
-            self.tenant_usages_client = \
-                TENANT_USAGES_CLIENT[interface](*client_args)
-            self.policy_client = POLICY_CLIENT[interface](*client_args)
-            self.hypervisor_client = HYPERVISOR_CLIENT[interface](*client_args)
-            self.token_v3_client = V3_TOKEN_CLIENT[interface](*client_args)
-            self.credentials_client = \
-                CREDENTIALS_CLIENT[interface](*client_args)
+        self.servers_client_v3_auth = None
+
+        if interface == 'xml':
+            self.servers_client = ServersClientXML(*client_args)
+            self.limits_client = LimitsClientXML(*client_args)
+            self.images_client = ImagesClientXML(*client_args)
+            self.keypairs_client = KeyPairsClientXML(*client_args)
+            self.quotas_client = QuotasClientXML(*client_args)
+            self.flavors_client = FlavorsClientXML(*client_args)
+            self.extensions_client = ExtensionsClientXML(*client_args)
+            self.volumes_extensions_client = VolumesExtensionsClientXML(
+                *client_args)
+            self.floating_ips_client = FloatingIPsClientXML(*client_args)
+            self.snapshots_client = SnapshotsClientXML(*client_args)
+            self.volumes_client = VolumesClientXML(*client_args)
+            self.volume_types_client = VolumeTypesClientXML(*client_args)
+            self.identity_client = IdentityClientXML(*client_args)
+            self.identity_v3_client = IdentityV3ClientXML(*client_args)
+            self.token_client = TokenClientXML(self.config)
+            self.security_groups_client = SecurityGroupsClientXML(
+                *client_args)
+            self.interfaces_client = InterfacesClientXML(*client_args)
+            self.endpoints_client = EndPointClientXML(*client_args)
+            self.fixed_ips_client = FixedIPsClientXML(*client_args)
+            self.availability_zone_client = AvailabilityZoneClientXML(
+                *client_args)
+            self.service_client = ServiceClientXML(*client_args)
+            self.aggregates_client = AggregatesClientXML(*client_args)
+            self.services_client = ServicesClientXML(*client_args)
+            self.tenant_usages_client = TenantUsagesClientXML(*client_args)
+            self.policy_client = PolicyClientXML(*client_args)
+            self.hypervisor_client = HypervisorClientXML(*client_args)
+            self.token_v3_client = V3TokenClientXML(*client_args)
+            self.network_client = NetworkClientXML(*client_args)
+            self.credentials_client = CredentialsClientXML(*client_args)
 
             if client_args_v3_auth:
-                self.servers_client_v3_auth = SERVERS_CLIENTS[interface](
+                self.servers_client_v3_auth = ServersClientXML(
                     *client_args_v3_auth)
-            else:
-                self.servers_client_v3_auth = None
 
-        except KeyError:
+        elif interface == 'json':
+            self.servers_client = ServersClientJSON(*client_args)
+            self.limits_client = LimitsClientJSON(*client_args)
+            self.images_client = ImagesClientJSON(*client_args)
+            self.keypairs_client = KeyPairsClientJSON(*client_args)
+            self.quotas_client = QuotasClientJSON(*client_args)
+            self.flavors_client = FlavorsClientJSON(*client_args)
+            self.extensions_client = ExtensionsClientJSON(*client_args)
+            self.volumes_extensions_client = VolumesExtensionsClientJSON(
+                *client_args)
+            self.floating_ips_client = FloatingIPsClientJSON(*client_args)
+            self.snapshots_client = SnapshotsClientJSON(*client_args)
+            self.volumes_client = VolumesClientJSON(*client_args)
+            self.volume_types_client = VolumeTypesClientJSON(*client_args)
+            self.identity_client = IdentityClientJSON(*client_args)
+            self.identity_v3_client = IdentityV3ClientJSON(*client_args)
+            self.token_client = TokenClientJSON(self.config)
+            self.security_groups_client = SecurityGroupsClientJSON(
+                *client_args)
+            self.interfaces_client = InterfacesClientJSON(*client_args)
+            self.endpoints_client = EndPointClientJSON(*client_args)
+            self.fixed_ips_client = FixedIPsClientJSON(*client_args)
+            self.availability_zone_client = AvailabilityZoneClientJSON(
+                *client_args)
+            self.service_client = ServiceClientJSON(*client_args)
+            self.aggregates_client = AggregatesClientJSON(*client_args)
+            self.services_client = ServicesClientJSON(*client_args)
+            self.tenant_usages_client = TenantUsagesClientJSON(*client_args)
+            self.policy_client = PolicyClientJSON(*client_args)
+            self.hypervisor_client = HypervisorClientJSON(*client_args)
+            self.token_v3_client = V3TokenClientJSON(*client_args)
+            self.network_client = NetworkClientJSON(*client_args)
+            self.credentials_client = CredentialsClientJSON(*client_args)
+
+            if client_args_v3_auth:
+                self.servers_client_v3_auth = ServersClientJSON(
+                    *client_args_v3_auth)
+        else:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
+
+        # common clients
         self.hosts_client = HostsClientJSON(*client_args)
         self.account_client = AccountClient(*client_args)
         if self.config.service_available.glance:
