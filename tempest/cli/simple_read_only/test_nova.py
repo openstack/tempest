@@ -22,6 +22,7 @@ import testtools
 
 import tempest.cli
 from tempest.openstack.common import log as logging
+import tempest.test
 
 CONF = cfg.CONF
 
@@ -73,7 +74,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_dns_domains(self):
         self.nova('dns-domains')
 
-    @testtools.skip("Test needs parameters, Bug #1157349")
+    @tempest.test.skip_because(bug="1157349")
     def test_admin_dns_list(self):
         self.nova('dns-list')
 
@@ -111,7 +112,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_image_list(self):
         self.nova('image-list')
 
-    @testtools.skip("Test needs parameters, Bug #1157349")
+    @tempest.test.skip_because(bug="1157349")
     def test_admin_interface_list(self):
         self.nova('interface-list')
 
@@ -136,7 +137,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_secgroup_list(self):
         self.nova('secgroup-list')
 
-    @testtools.skip("Test needs parameters, Bug #1157349")
+    @tempest.test.skip_because(bug="1157349")
     def test_admin_secgroup_list_rules(self):
         self.nova('secgroup-list-rules')
 
