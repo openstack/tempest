@@ -201,3 +201,48 @@ class VolumesClientJSON(RestClient):
         resp, body = self.post('volumes/%s/action' % volume_id, post_body,
                                self.headers)
         return resp, body
+
+    def create_volume_transfer(self, vol_id, display_name=None):
+        """Create a volume transfer."""
+        post_body = {
+            'volume_id': vol_id
+        }
+        if display_name:
+            post_body['name'] = display_name
+        post_body = json.dumps({'transfer': post_body})
+        resp, body = self.post('os-volume-transfer',
+                               post_body,
+                               self.headers)
+        body = json.loads(body)
+        return resp, body['transfer']
+
+    def get_volume_transfer(self, transfer_id):
+        """Returns the details of a volume transfer."""
+        url = "os-volume-transfer/%s" % str(transfer_id)
+        resp, body = self.get(url, self.headers)
+        body = json.loads(body)
+        return resp, body['transfer']
+
+    def list_volume_transfers(self, params=None):
+        """List all the volume transfers created."""
+        url = 'os-volume-transfer'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['transfers']
+
+    def delete_volume_transfer(self, transfer_id):
+        """Delete a volume transfer."""
+        return self.delete("os-volume-transfer/%s" % str(transfer_id))
+
+    def accept_volume_transfer(self, transfer_id, transfer_auth_key):
+        """Accept a volume transfer."""
+        post_body = {
+            'auth_key': transfer_auth_key,
+        }
+        url = 'os-volume-transfer/%s/accept' % transfer_id
+        post_body = json.dumps({'accept': post_body})
+        resp, body = self.post(url, post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['transfer']
