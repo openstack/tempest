@@ -18,7 +18,6 @@
 import netaddr
 
 from tempest import clients
-from tempest.common import isolated_creds
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -52,19 +51,10 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseNetworkTest, cls).setUpClass()
-        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+        os = clients.Manager(interface=cls._interface)
+        cls.network_cfg = os.config.network
         if not cls.config.service_available.neutron:
             raise cls.skipException("Neutron support is required")
-        if cls.config.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_primary_creds()
-            username, tenant_name, password = creds
-            os = clients.Manager(username=username,
-                                 password=password,
-                                 tenant_name=tenant_name,
-                                 interface=cls._interface)
-        else:
-            os = clients.Manager(interface=cls._interface)
-        cls.network_cfg = os.config.network
         cls.client = os.network_client
         cls.networks = []
         cls.subnets = []
