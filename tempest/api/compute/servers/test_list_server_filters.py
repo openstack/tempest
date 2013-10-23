@@ -58,22 +58,18 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
                                cls.image_ref_alt)
 
         cls.s1_name = rand_name(cls.__name__ + '-instance')
-        resp, cls.s1 = cls.create_server(name=cls.s1_name,
-                                         image_id=cls.image_ref,
-                                         flavor=cls.flavor_ref,
-                                         wait_until='ACTIVE')
+        resp, cls.s1 = cls.create_test_server(name=cls.s1_name,
+                                              wait_until='ACTIVE')
 
         cls.s2_name = rand_name(cls.__name__ + '-instance')
-        resp, cls.s2 = cls.create_server(name=cls.s2_name,
-                                         image_id=cls.image_ref_alt,
-                                         flavor=cls.flavor_ref,
-                                         wait_until='ACTIVE')
+        resp, cls.s2 = cls.create_test_server(name=cls.s2_name,
+                                              image_id=cls.image_ref_alt,
+                                              wait_until='ACTIVE')
 
         cls.s3_name = rand_name(cls.__name__ + '-instance')
-        resp, cls.s3 = cls.create_server(name=cls.s3_name,
-                                         image_id=cls.image_ref,
-                                         flavor=cls.flavor_ref_alt,
-                                         wait_until='ACTIVE')
+        resp, cls.s3 = cls.create_test_server(name=cls.s3_name,
+                                              flavor=cls.flavor_ref_alt,
+                                              wait_until='ACTIVE')
 
         cls.fixed_network_name = cls.config.compute.fixed_network_name
 

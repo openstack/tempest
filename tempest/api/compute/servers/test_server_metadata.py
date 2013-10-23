@@ -32,7 +32,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         resp, tenants = cls.admin_client.list_tenants()
         cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
                          cls.client.tenant_name][0]
-        resp, server = cls.create_server(meta={}, wait_until='ACTIVE')
+        resp, server = cls.create_test_server(meta={}, wait_until='ACTIVE')
 
         cls.server_id = server['id']
 
@@ -76,7 +76,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
             key = "k" * sz
             meta = {key: 'data1'}
             self.assertRaises(exceptions.OverLimit,
-                              self.create_server,
+                              self.create_test_server,
                               meta=meta)
 
         # no teardown - all creates should fail
@@ -143,7 +143,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         # Blank key should trigger an error.
         meta = {'': 'data1'}
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           meta=meta)
 
         # GET on a non-existent server should not succeed

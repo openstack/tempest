@@ -42,13 +42,13 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.tenant_id = tenant['id']
 
         cls.s1_name = rand_name('server')
-        resp, server = cls.create_server(name=cls.s1_name,
-                                         wait_until='ACTIVE')
+        resp, server = cls.create_test_server(name=cls.s1_name,
+                                              wait_until='ACTIVE')
         cls.s1_id = server['id']
 
         cls.s2_name = rand_name('server')
-        resp, server = cls.create_server(name=cls.s2_name,
-                                         wait_until='ACTIVE')
+        resp, server = cls.create_test_server(name=cls.s2_name,
+                                              wait_until='ACTIVE')
 
     def _get_unused_flavor_id(self):
         flavor_id = rand_int_id(start=1000)
@@ -83,7 +83,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_admin_delete_servers_of_others(self):
         # Administrator can delete servers of others
-        _, server = self.create_server()
+        _, server = self.create_test_server()
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
         self.servers_client.wait_for_server_termination(server['id'])

@@ -36,8 +36,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_rebuild_server_with_manual_disk_config(self):
         # A server should be rebuilt using the manual disk config option
-        resp, server = self.create_server(disk_config='AUTO',
-                                          wait_until='ACTIVE')
+        resp, server = self.create_test_server(disk_config='AUTO',
+                                               wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
 
         # Verify the specified attributes are set correctly
@@ -58,8 +58,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_rebuild_server_with_auto_disk_config(self):
         # A server should be rebuilt using the auto disk config option
-        resp, server = self.create_server(disk_config='MANUAL',
-                                          wait_until='ACTIVE')
+        resp, server = self.create_test_server(disk_config='MANUAL',
+                                               wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
 
         # Verify the specified attributes are set correctly
@@ -81,9 +81,10 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_resize_server_from_manual_to_auto(self):
         # A server should be resized from manual to auto disk config
-        resp, server = self.create_server(disk_config='MANUAL',
-                                          wait_until='ACTIVE')
+        resp, server = self.create_test_server(disk_config='MANUAL',
+                                               wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
+
         # Resize with auto option
         self.client.resize(server['id'], self.flavor_ref_alt,
                            disk_config='AUTO')
@@ -98,8 +99,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_resize_server_from_auto_to_manual(self):
         # A server should be resized from auto to manual disk config
-        resp, server = self.create_server(disk_config='AUTO',
-                                          wait_until='ACTIVE')
+        resp, server = self.create_test_server(disk_config='AUTO',
+                                               wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
 
         # Resize with manual option
@@ -115,8 +116,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_update_server_from_auto_to_manual(self):
         # A server should be updated from auto to manual disk config
-        resp, server = self.create_server(disk_config='AUTO',
-                                          wait_until='ACTIVE')
+        resp, server = self.create_test_server(disk_config='AUTO',
+                                               wait_until='ACTIVE')
         self.addCleanup(self.client.delete_server, server['id'])
 
         # Verify the disk_config attribute is set correctly

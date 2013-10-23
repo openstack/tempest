@@ -63,7 +63,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(skip_msg)
 
         try:
-            resp, server = cls.create_server(wait_until='ACTIVE')
+            resp, server = cls.create_test_server(wait_until='ACTIVE')
             cls.server_id = server['id']
         except Exception:
             cls.tearDownClass()
