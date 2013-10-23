@@ -173,18 +173,22 @@ class TestNetworkBasicOps(smoke.DefaultClientSmokeTest):
     def check_preconditions(cls):
         cfg = cls.config.network
         msg = None
-        if not (cfg.tenant_networks_reachable or cfg.public_network_id):
-            msg = ('Either tenant_networks_reachable must be "true", or '
-                   'public_network_id must be defined.')
-        else:
+        if cfg.quantum_available:
+            cls.enabled = True
             try:
                 cls.network_client.list_networks()
             except exc.QuantumClientException:
+                cls.enabled = False
                 msg = 'Unable to connect to Quantum service.'
-
-        cls.enabled = not bool(msg)
-        if msg:
-            raise cls.skipException(msg)
+                raise cls.skipException(msg)
+            if not (cfg.tenant_networks_reachable or cfg.public_network_id):
+                cls.enabled = False
+                msg = ('Either tenant_networks_reachable must be "true", or '
+                       'public_network_id must be defined.')
+                raise cls.skipException(msg)
+        else:
+            cls.enabled = False
+            raise cls.skipException("Quantum support is required")
 
     @classmethod
     def setUpClass(cls):
