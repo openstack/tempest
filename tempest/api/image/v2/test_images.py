@@ -20,6 +20,7 @@ import cStringIO as StringIO
 import random
 
 from tempest.api.image import base
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -42,28 +43,45 @@ class CreateRegisterImagesTest(base.BaseV2ImageTest):
                           'test', 'bare', 'wrong')
 
     @attr(type='gate')
-    def test_register_then_upload(self):
-        # Register, then upload an image
-        resp, body = self.create_image(name='New Name',
+    def test_register_upload_get_image_file(self):
+
+        """
+        Here we test these functionalities - Register image,
+        upload the image file, get image and get image file api's
+        """
+
+        image_name = data_utils.rand_name('image')
+        resp, body = self.create_image(name=image_name,
                                        container_format='bare',
                                        disk_format='raw',
                                        visibility='public')
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertIn('name', body)
-        self.assertEqual('New Name', body.get('name'))
+        self.assertEqual(image_name, body['name'])
         self.assertIn('visibility', body)
-        self.assertTrue(body.get('visibility') == 'public')
+        self.assertEqual('public', body['visibility'])
         self.assertIn('status', body)
-        self.assertEqual('queued', body.get('status'))
+        self.assertEqual('queued', body['status'])
 
         # Now try uploading an image file
-        image_file = StringIO.StringIO(('*' * 1024))
+        file_content = '*' * 1024
+        image_file = StringIO.StringIO(file_content)
         resp, body = self.client.store_image(image_id, image_file)
         self.assertEqual(resp.status, 204)
-        resp, body = self.client.get_image_metadata(image_id)
+
+        # Now try to get image details
+        resp, body = self.client.get_image(image_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(image_id, body['id'])
+        self.assertEqual(image_name, body['name'])
         self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
+
+        # Now try get image file
+        resp, body = self.client.get_image_file(image_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(file_content, body)
 
 
 class ListImagesTest(base.BaseV2ImageTest):
@@ -107,6 +125,6 @@ class ListImagesTest(base.BaseV2ImageTest):
             self.assertIn(image, image_list)
 
     @attr(type=['negative', 'gate'])
-    def test_get_image_meta_by_null_id(self):
+    def test_get_image_by_null_id(self):
         self.assertRaises(exceptions.NotFound,
-                          self.client.get_image_metadata, '')
+                          self.client.get_image, '')

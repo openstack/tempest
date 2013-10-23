@@ -33,13 +33,13 @@ class ImagesTagsTest(base.BaseV2ImageTest):
         # Creating image tag and verify it.
         resp, body = self.client.add_image_tag(image_id, tag)
         self.assertEqual(resp.status, 204)
-        resp, body = self.client.get_image_metadata(image_id)
+        resp, body = self.client.get_image(image_id)
         self.assertEqual(resp.status, 200)
         self.assertIn(tag, body['tags'])
 
         # Deleting image tag and verify it.
         resp = self.client.delete_image_tag(image_id, tag)
         self.assertEqual(resp.status, 204)
-        resp, body = self.client.get_image_metadata(image_id)
+        resp, body = self.client.get_image(image_id)
         self.assertEqual(resp.status, 200)
         self.assertNotIn(tag, body['tags'])
