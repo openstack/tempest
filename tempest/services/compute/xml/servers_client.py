@@ -415,6 +415,21 @@ class ServersClientXML(RestClientXML):
         return self.action(server_id, "changePassword", None,
                            adminPass=password)
 
+    def get_password(self, server_id):
+        resp, body = self.get("servers/%s/os-server-password" %
+                              str(server_id), self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def delete_password(self, server_id):
+        """
+        Removes the encrypted server password from the metadata server
+        Note that this does not actually change the instance server
+        password.
+        """
+        return self.delete("servers/%s/os-server-password" %
+                           str(server_id))
+
     def reboot(self, server_id, reboot_type):
         return self.action(server_id, "reboot", None, type=reboot_type)
 
