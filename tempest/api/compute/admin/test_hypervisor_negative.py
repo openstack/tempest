@@ -23,7 +23,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class HypervisorAdminNegativeTestJSON(base.BaseComputeAdminTest):
+class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Hypervisors API that require admin privileges
