@@ -265,9 +265,12 @@ class ImageClientJSON(RestClient):
                 LOG.info('Value transition from "%s" to "%s"'
                          'in %d second(s).', old_value,
                          value, dtime)
-            if (value == status):
+            if value == status:
                 return value
 
+            if value == 'killed':
+                raise exceptions.ImageKilledException(image_id=image_id,
+                                                      status=value)
             if dtime > self.build_timeout:
                 message = ('Time Limit Exceeded! (%ds)'
                            'while waiting for %s, '
