@@ -212,6 +212,31 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         self.assertRaises(exceptions.NotFound, self.client.extend_volume,
                           None, extend_size)
 
+    @attr(type=['negative', 'gate'])
+    def test_reserve_volume_with_nonexistent_volume_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.reserve_volume,
+                          str(uuid.uuid4()))
+
+    @attr(type=['negative', 'gate'])
+    def test_unreserve_volume_with_nonexistent_volume_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.unreserve_volume,
+                          str(uuid.uuid4()))
+
+    @attr(type=['negative', 'gate'])
+    def test_reserve_volume_with_negative_volume_status(self):
+        # Mark volume as reserved.
+        resp, body = self.client.reserve_volume(self.volume['id'])
+        self.assertEqual(202, resp.status)
+        # Mark volume which is marked as reserved before
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.reserve_volume,
+                          self.volume['id'])
+        # Unmark volume as reserved.
+        resp, body = self.client.unreserve_volume(self.volume['id'])
+        self.assertEqual(202, resp.status)
+
 
 class VolumesNegativeTestXML(VolumesNegativeTest):
     _interface = 'xml'

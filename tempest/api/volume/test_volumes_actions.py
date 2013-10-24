@@ -123,6 +123,23 @@ class VolumesActionsTest(BaseVolumeTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(int(volume['size']), extend_size)
 
+    @attr(type='gate')
+    def test_reserve_unreserve_volume(self):
+        # Mark volume as reserved.
+        resp, body = self.client.reserve_volume(self.volume['id'])
+        self.assertEqual(202, resp.status)
+        # To get the volume info
+        resp, body = self.client.get_volume(self.volume['id'])
+        self.assertEqual(200, resp.status)
+        self.assertIn('attaching', body['status'])
+        # Unmark volume as reserved.
+        resp, body = self.client.unreserve_volume(self.volume['id'])
+        self.assertEqual(202, resp.status)
+        # To get the volume info
+        resp, body = self.client.get_volume(self.volume['id'])
+        self.assertEqual(200, resp.status)
+        self.assertIn('available', body['status'])
+
 
 class VolumesActionsTestXML(VolumesActionsTest):
     _interface = "xml"
