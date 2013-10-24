@@ -21,6 +21,16 @@ n-cpu:
       message: "Instance failed to spawn"
     - module: "nova.compute.manager"
       message: "Error: Unexpected error while running command"
+    - module: "nova.virt.libvirt.driver"
+      message: "Error from libvirt during destroy"
+    - module: "nova.virt.libvirt.vif"
+      message: "Failed while unplugging vif"
+    - module: "nova.openstack.common.loopingcal"
+      message: "in fixed duration looping call"
+    - module: "nova.virt.libvirt.driver"
+      message: "Getting disk size of instance"
+    - module: "nova.virt.libvirt.driver"
+      message: "No such file or directory: '/opt/stack/data/nova/instances"
 
 g-api:
     - module: "glance.store.sheepdog"
@@ -34,6 +44,12 @@ ceilometer-acompute:
       message: "Requested operation is not valid: domain is not running"
     - module: "ceilometer.compute.pollsters.disk"
       message: "Domain not found: no domain with matching uuid"
+    - module: "ceilometer.compute.pollsters.net"
+      message: "No module named libvirt"
+
+ceilometer-alarm-evaluator:
+    - module: "ceilometer.alarm.service"
+      message: "alarm evaluation cycle failed"
 
 h-api:
     - module: "root"
@@ -63,6 +79,8 @@ n-api:
       message: "ServersTest"
     - module: "nova.compute.api"
       message: "\\{u'kernel_id'.*u'ramdisk_id':"
+    - module: "nova.api.openstack.wsgi"
+      message: "takes exactly 4 arguments"
 
 n-cond:
     - module: "nova.notifications"
@@ -75,6 +93,16 @@ n-sch:
 c-api:
     - module: "cinder.api.middleware.fault"
       message: "Caught error: Volume .* could not be found"
+    - module: "cinder.api.middleware.fault"
+      message: "Caught error: Snapshot .* could not be found"
+
+c-vol:
+    - module: "cinder.brick.iscsi.iscsi"
+      message: "Failed to create iscsi target for volume id"
+    - module: "cinder.brick.local_dev.lvm"
+      message: "/dev/dm-1: stat failed: No such file or directory"
+    - module: "cinder.brick.local_dev.lvm"
+      message: "Can't remove open logical volume"
 
 q-dhpc:
     - module: "neutron.common.legacy"
@@ -89,6 +117,8 @@ ceilometer-collector:
       message: ".*"
     - module: "ceilometer.collector.dispatcher.database"
       message: "duplicate key value violates unique constraint"
+    - module: "ceilometer.collector.dispatcher.database"
+      message: "Failed to record metering data: QueuePool limit"
 
 q-agt:
     - module: "neutron.agent.linux.ovs_lib"
@@ -108,6 +138,9 @@ q-l3:
     - module: "neutron.agent.l3_agent"
       message: "Failed synchronizing routers"
 
+q-vpn:
+    - module: "neutron.common.legacy"
+      message: "Skipping unknown group key: firewall_driver"
 
 q-lbaas:
     - module: "neutron.common.legacy"
@@ -123,9 +156,7 @@ q-svc:
     - module: "neutron.openstack.common.rpc.amqp"
       message: "Exception during message handling"
     - module: "neutron.openstack.common.rpc.common"
-      message: "Network .* could not be found"
-    - module: "neutron.openstack.common.rpc.common"
-      message: "Pool .* could not be found"
+      message: "(Network|Pool|Subnet|Agent|Port) .* could not be found"
     - module: "neutron.api.v2.resource"
-      message: "show failed"
+      message: ".* failed"
 
