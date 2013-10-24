@@ -216,7 +216,8 @@ class BaseTestCase(testtools.TestCase,
             os.environ.get('OS_LOG_CAPTURE') != '0'):
             log_format = '%(asctime)-15s %(message)s'
             self.useFixture(fixtures.LoggerFixture(nuke_handlers=False,
-                                                   format=log_format))
+                                                   format=log_format,
+                                                   level=None))
 
     @classmethod
     def _get_identity_admin_client(cls):
