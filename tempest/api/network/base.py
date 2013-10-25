@@ -68,75 +68,39 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        has_exception = False
+        # Clean up vpn services
         for vpnservice in cls.vpnservices:
-            try:
-                cls.client.delete_vpn_service(vpnservice['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
-
+            cls.client.delete_vpn_service(vpnservice['id'])
+        # Clean up routers
         for router in cls.routers:
-            try:
-                resp, body = cls.client.list_router_interfaces(router['id'])
-                interfaces = body['ports']
-                for i in interfaces:
-                    cls.client.remove_router_interface_with_subnet_id(
-                        router['id'], i['fixed_ips'][0]['subnet_id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
-            try:
-                cls.client.delete_router(router['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
-
+            resp, body = cls.client.list_router_interfaces(router['id'])
+            interfaces = body['ports']
+            for i in interfaces:
+                cls.client.remove_router_interface_with_subnet_id(
+                    router['id'], i['fixed_ips'][0]['subnet_id'])
+            cls.client.delete_router(router['id'])
+        # Clean up health monitors
         for health_monitor in cls.health_monitors:
-            try:
-                cls.client.delete_health_monitor(health_monitor['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
+            cls.client.delete_health_monitor(health_monitor['id'])
+        # Clean up members
         for member in cls.members:
-            try:
-                cls.client.delete_member(member['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
+            cls.client.delete_member(member['id'])
+        # Clean up vips
         for vip in cls.vips:
-            try:
-                cls.client.delete_vip(vip['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
+            cls.client.delete_vip(vip['id'])
+        # Clean up pools
         for pool in cls.pools:
-            try:
-                cls.client.delete_pool(pool['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
+            cls.client.delete_pool(pool['id'])
+        # Clean up ports
         for port in cls.ports:
-            try:
-                cls.client.delete_port(port['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
+            cls.client.delete_port(port['id'])
+        # Clean up subnets
         for subnet in cls.subnets:
-            try:
-                cls.client.delete_subnet(subnet['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
+            cls.client.delete_subnet(subnet['id'])
+        # Clean up networks
         for network in cls.networks:
-            try:
-                cls.client.delete_network(network['id'])
-            except Exception as exc:
-                LOG.exception(exc)
-                has_exception = True
+            cls.client.delete_network(network['id'])
         super(BaseNetworkTest, cls).tearDownClass()
-        if has_exception:
-            raise exceptions.TearDownException()
 
     @classmethod
     def create_network(cls, network_name=None):
