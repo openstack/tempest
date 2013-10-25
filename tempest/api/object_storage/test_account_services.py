@@ -101,7 +101,7 @@ class AccountTest(base.BaseObjectTest):
                       'limit': limit}
             resp, container_list = \
                 self.account_client.list_account_containers(params=params)
-            self.assertLessEqual(len(container_list), limit)
+            self.assertTrue(len(container_list) <= limit, str(container_list))
 
     @attr(type='smoke')
     def test_list_account_metadata(self):
