@@ -81,6 +81,10 @@ class BuildErrorException(TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
+class ImageKilledException(TempestException):
+    message = "Image %(image_id)s 'killed' while waiting for %(status)s"
+
+
 class AddImageException(TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
