@@ -33,7 +33,7 @@ cli_opts = [
                 default=True,
                 help="enable cli tests"),
     cfg.StrOpt('cli_dir',
-               default='/usr/local/bin/',
+               default='/usr/local/bin',
                help="directory where python client binaries are located"),
     cfg.IntOpt('timeout',
                default=15,
