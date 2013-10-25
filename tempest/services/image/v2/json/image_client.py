@@ -124,3 +124,13 @@ class ImageClientV2JSON(rest_client.RestClient):
         url = 'v2/images/%s/file' % image_id
         resp, body = self.get(url)
         return resp, body
+
+    def add_image_tag(self, image_id, tag):
+        url = 'v2/images/%s/tags/%s' % (image_id, tag)
+        resp, body = self.put(url, body=None, headers=self.headers)
+        return resp, body
+
+    def delete_image_tag(self, image_id, tag):
+        url = 'v2/images/%s/tags/%s' % (image_id, tag)
+        resp, _ = self.delete(url)
+        return resp
