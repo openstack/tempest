@@ -19,7 +19,6 @@ import time
 
 from tempest.api import compute
 from tempest import clients
-from tempest.common import isolated_creds
 from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
@@ -42,21 +41,10 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if not cls.config.service_available.nova:
             skip_msg = ("%s skipped as nova is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
 
-        if (cls.config.compute.allow_tenant_isolation or
-            cls.force_tenant_isolation is True):
-            creds = cls.isolated_creds.get_primary_creds()
-            username, tenant_name, password = creds
-            os = clients.Manager(username=username,
-                                 password=password,
-                                 tenant_name=tenant_name,
-                                 interface=cls._interface)
-        else:
-            os = clients.Manager(interface=cls._interface)
+        os = cls.get_client_manager()
 
         cls.os = os
-
         cls.build_interval = cls.config.compute.build_interval
         cls.build_timeout = cls.config.compute.build_timeout
         cls.ssh_user = cls.config.compute.ssh_user
@@ -113,7 +101,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def tearDownClass(cls):
         cls.clear_images()
         cls.clear_servers()
-        cls.isolated_creds.clear_isolated_creds()
+        cls.clear_isolated_creds()
         super(BaseComputeTest, cls).tearDownClass()
 
     @classmethod

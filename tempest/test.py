@@ -26,6 +26,7 @@ import testresources
 import testtools
 
 from tempest import clients
+from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -218,6 +219,34 @@ class BaseTestCase(testtools.TestCase,
             self.useFixture(fixtures.LoggerFixture(nuke_handlers=False,
                                                    format=log_format,
                                                    level=None))
+
+    @classmethod
+    def get_client_manager(cls):
+        """
+        Returns an Openstack client manager
+        """
+        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+
+        force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
+        if (cls.config.compute.allow_tenant_isolation or
+            force_tenant_isolation):
+            creds = cls.isolated_creds.get_primary_creds()
+            username, tenant_name, password = creds
+            os = clients.Manager(username=username,
+                                 password=password,
+                                 tenant_name=tenant_name,
+                                 interface=cls._interface)
+        else:
+            os = clients.Manager(interface=cls._interface)
+        return os
+
+    @classmethod
+    def clear_isolated_creds(cls):
+        """
+        Clears isolated creds if set
+        """
+        if getattr(cls, 'isolated_creds'):
+            cls.isolated_creds.clear_isolated_creds()
 
     @classmethod
     def _get_identity_admin_client(cls):
