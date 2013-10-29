@@ -32,19 +32,25 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(msg)
         super(ServerDiskConfigTestJSON, cls).setUpClass()
         cls.client = cls.os.servers_client
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
+
+    def _update_server_with_disk_config(self, disk_config):
+        resp, server = self.client.get_server(self.server_id)
+        if disk_config != server['OS-DCF:diskConfig']:
+            resp, server = self.client.update_server(self.server_id,
+                                                     disk_config=disk_config)
+            self.assertEqual(200, resp.status)
+            self.client.wait_for_server_status(server['id'], 'ACTIVE')
+            resp, server = self.client.get_server(server['id'])
+            self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
     @attr(type='gate')
     def test_rebuild_server_with_manual_disk_config(self):
         # A server should be rebuilt using the manual disk config option
-        resp, server = self.create_test_server(disk_config='AUTO',
-                                               wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
+        self._update_server_with_disk_config(disk_config='AUTO')
 
-        # Verify the specified attributes are set correctly
-        resp, server = self.client.get_server(server['id'])
-        self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
-
-        resp, server = self.client.rebuild(server['id'],
+        resp, server = self.client.rebuild(self.server_id,
                                            self.image_ref_alt,
                                            disk_config='MANUAL')
 
@@ -58,15 +64,9 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_rebuild_server_with_auto_disk_config(self):
         # A server should be rebuilt using the auto disk config option
-        resp, server = self.create_test_server(disk_config='MANUAL',
-                                               wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
+        self._update_server_with_disk_config(disk_config='MANUAL')
 
-        # Verify the specified attributes are set correctly
-        resp, server = self.client.get_server(server['id'])
-        self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
-
-        resp, server = self.client.rebuild(server['id'],
+        resp, server = self.client.rebuild(self.server_id,
                                            self.image_ref_alt,
                                            disk_config='AUTO')
 
@@ -77,55 +77,53 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
+    def _get_alternative_flavor(self):
+        resp, server = self.client.get_server(self.server_id)
+
+        if int(server['flavor']['id']) == self.flavor_ref:
+            return self.flavor_ref_alt
+        else:
+            return self.flavor_ref
+
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     @attr(type='gate')
     def test_resize_server_from_manual_to_auto(self):
         # A server should be resized from manual to auto disk config
-        resp, server = self.create_test_server(disk_config='MANUAL',
-                                               wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
+        self._update_server_with_disk_config(disk_config='MANUAL')
 
         # Resize with auto option
-        self.client.resize(server['id'], self.flavor_ref_alt,
-                           disk_config='AUTO')
-        self.client.wait_for_server_status(server['id'], 'VERIFY_RESIZE')
-        self.client.confirm_resize(server['id'])
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        flavor_id = self._get_alternative_flavor()
+        self.client.resize(self.server_id, flavor_id, disk_config='AUTO')
+        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
+        self.client.confirm_resize(self.server_id)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        resp, server = self.client.get_server(server['id'])
+        resp, server = self.client.get_server(self.server_id)
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
     @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
     @attr(type='gate')
     def test_resize_server_from_auto_to_manual(self):
         # A server should be resized from auto to manual disk config
-        resp, server = self.create_test_server(disk_config='AUTO',
-                                               wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
+        self._update_server_with_disk_config(disk_config='AUTO')
 
         # Resize with manual option
-        self.client.resize(server['id'], self.flavor_ref_alt,
-                           disk_config='MANUAL')
-        self.client.wait_for_server_status(server['id'], 'VERIFY_RESIZE')
-        self.client.confirm_resize(server['id'])
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        flavor_id = self._get_alternative_flavor()
+        self.client.resize(self.server_id, flavor_id, disk_config='MANUAL')
+        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
+        self.client.confirm_resize(self.server_id)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        resp, server = self.client.get_server(server['id'])
+        resp, server = self.client.get_server(self.server_id)
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
     @attr(type='gate')
     def test_update_server_from_auto_to_manual(self):
         # A server should be updated from auto to manual disk config
-        resp, server = self.create_test_server(disk_config='AUTO',
-                                               wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
-
-        # Verify the disk_config attribute is set correctly
-        resp, server = self.client.get_server(server['id'])
-        self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
+        self._update_server_with_disk_config(disk_config='AUTO')
 
         # Update the disk_config attribute to manual
-        resp, server = self.client.update_server(server['id'],
+        resp, server = self.client.update_server(self.server_id,
                                                  disk_config='MANUAL')
         self.assertEqual(200, resp.status)
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
