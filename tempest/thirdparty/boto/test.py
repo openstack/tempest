@@ -193,11 +193,10 @@ def friendly_function_call_str(call_able, *args, **kwargs):
 class BotoTestCase(tempest.test.BaseTestCase):
     """Recommended to use as base class for boto related test."""
 
-    conclusion = decision_maker()
-
     @classmethod
     def setUpClass(cls):
         super(BotoTestCase, cls).setUpClass()
+        cls.conclusion = decision_maker()
         # The trash contains cleanup functions and paramaters in tuples
         # (function, *args, **kwargs)
         cls._resource_trash_bin = {}
