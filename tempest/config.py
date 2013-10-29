@@ -410,7 +410,7 @@ OrchestrationGroup = [
                default=None,
                help="Name of existing keypair to launch servers with."),
     cfg.IntOpt('max_template_size',
-               default=32768,
+               default=524288,
                help="Value must match heat configuration of the same name."),
 ]
 
