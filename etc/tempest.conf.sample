@@ -2,7 +2,7 @@
 #log_config = /opt/stack/tempest/etc/logging.conf.sample
 
 # disable logging to the stderr
-use_stderr = False
+use_stderr = false
 
 # log file
 log_file = tempest.log
@@ -23,7 +23,7 @@ default_log_levels=tempest.stress=INFO,amqplib=WARN,sqlalchemy=WARN,boto=WARN,su
 catalog_type = identity
 # Ignore SSL certificate validation failures? Use when in testing
 # environments that have self-signed SSL certs.
-disable_ssl_certificate_validation = False
+disable_ssl_certificate_validation = false
 # URL for where to find the OpenStack Identity API endpoint (Keystone)
 uri = http://127.0.0.1:5000/v2.0/
 # URL for where to find the OpenStack V3 Identity API endpoint (Keystone)
@@ -131,7 +131,7 @@ ready_wait = 0
 ssh_channel_timeout = 60
 
 # Dose the SSH uses Floating IP?
-use_floatingip_for_ssh = True
+use_floatingip_for_ssh = true
 
 # The type of endpoint for a Compute API service. Unless you have a
 # custom Keystone service catalog implementation, you probably want to leave
@@ -147,12 +147,12 @@ catalog_type = compute
 create_image_enabled = true
 
 # For resize to work with libvirt/kvm, one of the following must be true:
-# Single node: allow_resize_to_same_host=True must be set in nova.conf
+# Single node: allow_resize_to_same_host=true must be set in nova.conf
 # Cluster: the 'nova' user must have scp access between cluster nodes
 resize_available = true
 
 # Does the compute API support changing the admin password?
-change_password_available=true
+change_password_available = true
 
 # Run live migration tests (requires 2 hosts)
 live_migration_available = false
@@ -291,10 +291,10 @@ container_sync_timeout = 120
 # Number of seconds to wait while looping to check the status of a
 # container to container synchronization
 container_sync_interval = 5
-# Set to True if the Account Quota middleware is enabled
-accounts_quotas_available = True
-# Set to True if the Container Quota middleware is enabled
-container_quotas_available = True
+# Set to true if the Account Quota middleware is enabled
+accounts_quotas_available = true
+# Set to true if the Container Quota middleware is enabled
+container_quotas_available = true
 
 # Set operator role for tests that require creating a container
 operator_role = Member
@@ -403,7 +403,7 @@ large_ops_number = 0
 
 [cli]
 # Enable cli tests
-enabled = True
+enabled = true
 # directory where python client binaries are located
 cli_dir = /usr/local/bin
 # Number of seconds to wait on a CLI timeout
@@ -411,19 +411,19 @@ timeout = 15
 
 [service_available]
 # Whether or not cinder is expected to be available
-cinder = True
+cinder = true
 # Whether or not neutron is expected to be available
 neutron = false
 # Whether or not glance is expected to be available
-glance = True
+glance = true
 # Whether or not swift is expected to be available
-swift = True
+swift = true
 # Whether or not nova is expected to be available
-nova = True
+nova = true
 # Whether or not Heat is expected to be available
 heat = false
 # Whether or not horizon is expected to be available
-horizon = True
+horizon = true
 
 [stress]
 # Maximum number of instances to create during test
@@ -431,8 +431,8 @@ max_instances = 32
 # Time (in seconds) between log file error checks
 log_check_interval = 60
 # The default number of threads created while stress test
-default_thread_number_per_action=4
+default_thread_number_per_action = 4
 
 [debug]
 # Enable diagnostic commands
-enable = True
+enable = true
