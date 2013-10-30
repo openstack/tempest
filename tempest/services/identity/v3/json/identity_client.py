@@ -359,6 +359,66 @@ class IdentityV3ClientJSON(RestClient):
                                  (domain_id, group_id, role_id))
         return resp, body
 
+    def create_trust(self, trustor_user_id, trustee_user_id, project_id,
+                     role_names, impersonation, expires_at):
+        """Creates a trust."""
+        roles = [{'name': n} for n in role_names]
+        post_body = {
+            'trustor_user_id': trustor_user_id,
+            'trustee_user_id': trustee_user_id,
+            'project_id': project_id,
+            'impersonation': impersonation,
+            'roles': roles,
+            'expires_at': expires_at
+        }
+        post_body = json.dumps({'trust': post_body})
+        resp, body = self.post('OS-TRUST/trusts', post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['trust']
+
+    def delete_trust(self, trust_id):
+        """Deletes a trust."""
+        resp, body = self.delete("OS-TRUST/trusts/%s" % trust_id)
+        return resp, body
+
+    def get_trusts(self, trustor_user_id=None, trustee_user_id=None):
+        """GET trusts."""
+        if trustor_user_id:
+            resp, body = self.get("OS-TRUST/trusts?trustor_user_id=%s"
+                                  % trustor_user_id)
+        elif trustee_user_id:
+            resp, body = self.get("OS-TRUST/trusts?trustee_user_id=%s"
+                                  % trustee_user_id)
+        else:
+            resp, body = self.get("OS-TRUST/trusts")
+        body = json.loads(body)
+        return resp, body['trusts']
+
+    def get_trust(self, trust_id):
+        """GET trust."""
+        resp, body = self.get("OS-TRUST/trusts/%s" % trust_id)
+        body = json.loads(body)
+        return resp, body['trust']
+
+    def get_trust_roles(self, trust_id):
+        """GET roles delegated by a trust."""
+        resp, body = self.get("OS-TRUST/trusts/%s/roles" % trust_id)
+        body = json.loads(body)
+        return resp, body['roles']
+
+    def get_trust_role(self, trust_id, role_id):
+        """GET role delegated by a trust."""
+        resp, body = self.get("OS-TRUST/trusts/%s/roles/%s"
+                              % (trust_id, role_id))
+        body = json.loads(body)
+        return resp, body['role']
+
+    def check_trust_role(self, trust_id, role_id):
+        """HEAD Check if role is delegated by a trust."""
+        resp, body = self.head("OS-TRUST/trusts/%s/roles/%s"
+                               % (trust_id, role_id))
+        return resp, body
+
 
 class V3TokenClientJSON(RestClient):
 
