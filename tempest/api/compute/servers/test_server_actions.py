@@ -32,7 +32,8 @@ from tempest.test import skip_because
 
 class ServerActionsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
-    resize_available = tempest.config.TempestConfig().compute.resize_available
+    resize_available = tempest.config.TempestConfig().\
+        compute_feature_enabled.resize
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
     def setUp(self):

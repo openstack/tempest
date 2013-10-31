@@ -35,7 +35,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     def setUpClass(cls):
         super(TestServerAdvancedOps, cls).setUpClass()
 
-        if not cls.config.compute.resize_available:
+        if not cls.config.compute_feature_enabled.resize:
             msg = "Skipping test - resize not available on this host"
             raise cls.skipException(msg)
 

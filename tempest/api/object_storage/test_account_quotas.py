@@ -20,14 +20,14 @@ from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils.data_utils import arbitrary_string
 from tempest.common.utils.data_utils import rand_name
-import tempest.config
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
 
 class AccountQuotasTest(base.BaseObjectTest):
     accounts_quotas_available = \
-        tempest.config.TempestConfig().object_storage.accounts_quotas_available
+        config.TempestConfig().object_storage_feature_enabled.accounts_quotas
 
     @classmethod
     def setUpClass(cls):

@@ -143,36 +143,37 @@ catalog_type = compute
 # catalog, the first found one is used.
 #region = RegionOne
 
+# Expected first device name when a volume is attached to an instance
+volume_device_name = vdb
+
+[compute-feature-enabled]
 # Does the Compute API support creation of images?
-create_image_enabled = true
+create_image = true
 
 # For resize to work with libvirt/kvm, one of the following must be true:
 # Single node: allow_resize_to_same_host=true must be set in nova.conf
 # Cluster: the 'nova' user must have scp access between cluster nodes
-resize_available = true
+resize = true
 
 # Does the compute API support changing the admin password?
-change_password_available = true
+change_password = false
 
 # Run live migration tests (requires 2 hosts)
-live_migration_available = false
+live_migration = false
 
 # Use block live migration (Otherwise, non-block migration will be
 # performed, which requires XenServer pools in case of using XS)
-use_block_migration_for_live_migration = false
+block_migration_for_live_migration = false
 
 # Supports iSCSI block migration - depends on a XAPI supporting
 # relax-xsm-sr-check
-block_migrate_supports_cinder_iscsi = false
+block_migrate_cinder_iscsi = false
 
 # When set to false, disk config tests are forced to skip
-disk_config_enabled = true
+disk_config = true
 
 # When set to false, flavor extra data tests are forced to skip
-flavor_extra_enabled = true
-
-# Expected first device name when a volume is attached to an instance
-volume_device_name = vdb
+flavor_extra = true
 
 [compute-admin]
 # This should be the username of a user WITH administrative privileges
@@ -258,16 +259,18 @@ build_interval = 10
 # Number of seconds to time out on waiting for a volume
 # to be available or reach an expected status
 build_timeout = 300
-# Runs Cinder multi-backend tests (requires 2 backends declared in cinder.conf)
-# They must have different volume_backend_name (backend1_name and backend2_name
-# have to be different)
-multi_backend_enabled = false
+# If multi_backend is enabled there must be 2 volume_backend_names (
+# backend1_name and backend2_name) which have to be different)
 backend1_name = BACKEND_1
 backend2_name = BACKEND_2
 # Protocol and vendor of volume backend to target when testing volume-types.
 # You should update to reflect those exported by configured backend driver.
 storage_protocol = iSCSI
 vendor_name = Open Source
+
+[volume-feature-enabled]
+#Runs Cinder multi-backend tests (requires 2 backends declared in cinder.conf)
+multi_backend = false
 
 [object-storage]
 # This section contains configuration options used when executing tests
@@ -291,13 +294,15 @@ container_sync_timeout = 120
 # Number of seconds to wait while looping to check the status of a
 # container to container synchronization
 container_sync_interval = 5
-# Set to true if the Account Quota middleware is enabled
-accounts_quotas_available = true
-# Set to true if the Container Quota middleware is enabled
-container_quotas_available = true
 
 # Set operator role for tests that require creating a container
 operator_role = Member
+
+[object-feature-enabled]
+# Set to True if the Account Quota middleware is enabled
+accounts_quotas = True
+# Set to True if the Container Quota middleware is enabled
+container_quotas = True
 
 [boto]
 # This section contains configuration options used when executing tests

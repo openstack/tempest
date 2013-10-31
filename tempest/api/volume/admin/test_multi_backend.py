@@ -28,7 +28,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(VolumeMultiBackendTest, cls).setUpClass()
-        if not cls.config.volume.multi_backend_enabled:
+        if not cls.config.volume_feature_enabled.multi_backend:
             raise cls.skipException("Cinder multi-backend feature disabled")
 
         cls.backend1_name = cls.config.volume.backend1_name

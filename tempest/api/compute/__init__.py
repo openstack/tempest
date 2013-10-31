@@ -22,11 +22,11 @@ from tempest.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 CONFIG = config.TempestConfig()
-CREATE_IMAGE_ENABLED = CONFIG.compute.create_image_enabled
-RESIZE_AVAILABLE = CONFIG.compute.resize_available
-CHANGE_PASSWORD_AVAILABLE = CONFIG.compute.change_password_available
-DISK_CONFIG_ENABLED = CONFIG.compute.disk_config_enabled
-FLAVOR_EXTRA_DATA_ENABLED = CONFIG.compute.flavor_extra_enabled
+CREATE_IMAGE_ENABLED = CONFIG.compute_feature_enabled.create_image
+RESIZE_AVAILABLE = CONFIG.compute_feature_enabled.resize
+CHANGE_PASSWORD_AVAILABLE = CONFIG.compute_feature_enabled.change_password
+DISK_CONFIG_ENABLED = CONFIG.compute_feature_enabled.disk_config
+FLAVOR_EXTRA_DATA_ENABLED = CONFIG.compute_feature_enabled.flavor_extra
 MULTI_USER = True
 
 
