@@ -187,8 +187,14 @@ class ImageClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['images']
 
-    def image_list_detail(self, **kwargs):
+    def image_list_detail(self, properties=dict(), **kwargs):
         url = 'v1/images/detail'
+
+        params = {}
+        for key, value in properties.items():
+            params['property-%s' % key] = value
+
+        kwargs.update(params)
 
         if len(kwargs) > 0:
             url += '?%s' % urllib.urlencode(kwargs)

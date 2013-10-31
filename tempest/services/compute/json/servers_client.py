@@ -197,6 +197,13 @@ class ServersClientJSON(RestClient):
             body = json.loads(body)[response_key]
         return resp, body
 
+    def create_backup(self, server_id, backup_type, rotation, name):
+        """Backup a server instance."""
+        return self.action(server_id, "createBackup", None,
+                           backup_type=backup_type,
+                           rotation=rotation,
+                           name=name)
+
     def change_password(self, server_id, adminPass):
         """Changes the root password for the server."""
         return self.action(server_id, 'changePassword', None,
