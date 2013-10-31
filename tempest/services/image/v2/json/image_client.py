@@ -100,7 +100,7 @@ class ImageClientV2JSON(rest_client.RestClient):
         self._validate_schema(body, type='images')
         return resp, body['images']
 
-    def get_image_metadata(self, image_id):
+    def get_image(self, image_id):
         url = 'v2/images/%s' % image_id
         resp, body = self.get(url)
         body = json.loads(body)
@@ -108,7 +108,7 @@ class ImageClientV2JSON(rest_client.RestClient):
 
     def is_resource_deleted(self, id):
         try:
-            self.get_image_metadata(id)
+            self.get_image(id)
         except exceptions.NotFound:
             return True
         return False
