@@ -58,6 +58,16 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.tenant_id)
 
+    @attr(type='smoke')
+    def test_compare_tenant_quotas_with_default_quotas(self):
+        # Tenants are created with the default quota values
+        resp, defualt_quota_set = \
+            self.client.get_default_quota_set(self.tenant_id)
+        self.assertEqual(200, resp.status)
+        resp, tenant_quota_set = self.client.get_quota_set(self.tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(defualt_quota_set, tenant_quota_set)
+
 
 class QuotasTestXML(QuotasTestJSON):
     _interface = 'xml'
