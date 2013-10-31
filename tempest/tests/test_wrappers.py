@@ -18,12 +18,13 @@ import os
 import shutil
 import subprocess
 import tempfile
-import testtools
+
+from tempest.tests import base
 
 DEVNULL = open(os.devnull, 'wb')
 
 
-class TestWrappers(testtools.TestCase):
+class TestWrappers(base.TestCase):
     def setUp(self):
         super(TestWrappers, self).setUp()
         # Setup test dirs
