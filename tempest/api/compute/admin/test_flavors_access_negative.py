@@ -19,8 +19,7 @@ import uuid
 
 from tempest.api import compute
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_int_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -58,8 +57,8 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_flavor_access_list_with_public_flavor(self):
         # Test to list flavor access with exceptions by querying public flavor
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
@@ -74,8 +73,8 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_add(self):
         # Test to add flavor access as a user without admin privileges.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
@@ -90,8 +89,8 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_remove(self):
         # Test to remove flavor access as a user without admin privileges.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
@@ -110,8 +109,8 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_add_flavor_access_duplicate(self):
         # Create a new flavor.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
@@ -134,8 +133,8 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_remove_flavor_access_not_found(self):
         # Create a new flavor.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,

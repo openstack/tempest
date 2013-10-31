@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -35,7 +35,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
         # Create several projects and delete them
         for _ in xrange(3):
             resp, project = self.v3_client.create_project(
-                rand_name('project-new'))
+                data_utils.rand_name('project-new'))
             self.addCleanup(self._delete_project, project['id'])
 
         resp, list_projects = self.v3_client.list_projects()
@@ -47,8 +47,8 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type='gate')
     def test_project_create_with_description(self):
         # Create project with a description
-        project_name = rand_name('project-')
-        project_desc = rand_name('desc-')
+        project_name = data_utils.rand_name('project-')
+        project_desc = data_utils.rand_name('desc-')
         resp, project = self.v3_client.create_project(
             project_name, description=project_desc)
         self.v3data.projects.append(project)
@@ -66,7 +66,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type='gate')
     def test_project_create_enabled(self):
         # Create a project that is enabled
-        project_name = rand_name('project-')
+        project_name = data_utils.rand_name('project-')
         resp, project = self.v3_client.create_project(
             project_name, enabled=True)
         self.v3data.projects.append(project)
@@ -82,7 +82,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type='gate')
     def test_project_create_not_enabled(self):
         # Create a project that is not enabled
-        project_name = rand_name('project-')
+        project_name = data_utils.rand_name('project-')
         resp, project = self.v3_client.create_project(
             project_name, enabled=False)
         self.v3data.projects.append(project)
@@ -99,13 +99,13 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type='gate')
     def test_project_update_name(self):
         # Update name attribute of a project
-        p_name1 = rand_name('project-')
+        p_name1 = data_utils.rand_name('project-')
         resp, project = self.v3_client.create_project(p_name1)
         self.v3data.projects.append(project)
 
         resp1_name = project['name']
 
-        p_name2 = rand_name('project2-')
+        p_name2 = data_utils.rand_name('project2-')
         resp, body = self.v3_client.update_project(project['id'], name=p_name2)
         st2 = resp['status']
         resp2_name = body['name']
@@ -122,14 +122,14 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type='gate')
     def test_project_update_desc(self):
         # Update description attribute of a project
-        p_name = rand_name('project-')
-        p_desc = rand_name('desc-')
+        p_name = data_utils.rand_name('project-')
+        p_desc = data_utils.rand_name('desc-')
         resp, project = self.v3_client.create_project(
             p_name, description=p_desc)
         self.v3data.projects.append(project)
         resp1_desc = project['description']
 
-        p_desc2 = rand_name('desc2-')
+        p_desc2 = data_utils.rand_name('desc2-')
         resp, body = self.v3_client.update_project(
             project['id'], description=p_desc2)
         st2 = resp['status']
@@ -147,7 +147,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type='gate')
     def test_project_update_enable(self):
         # Update the enabled attribute of a project
-        p_name = rand_name('project-')
+        p_name = data_utils.rand_name('project-')
         p_en = False
         resp, project = self.v3_client.create_project(p_name, enabled=p_en)
         self.v3data.projects.append(project)
@@ -173,15 +173,15 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     def test_associate_user_to_project(self):
         #Associate a user to a project
         #Create a Project
-        p_name = rand_name('project-')
+        p_name = data_utils.rand_name('project-')
         resp, project = self.v3_client.create_project(p_name)
         self.v3data.projects.append(project)
 
         #Create a User
-        u_name = rand_name('user-')
+        u_name = data_utils.rand_name('user-')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
-        u_password = rand_name('pass-')
+        u_password = data_utils.rand_name('pass-')
         resp, user = self.v3_client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=project['id'])
@@ -207,7 +207,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_project_create_duplicate(self):
         # Project names should be unique
-        project_name = rand_name('project-dup-')
+        project_name = data_utils.rand_name('project-dup-')
         resp, project = self.v3_client.create_project(project_name)
         self.v3data.projects.append(project)
 
@@ -217,7 +217,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_create_project_by_unauthorized_user(self):
         # Non-admin user should not be authorized to create a project
-        project_name = rand_name('project-')
+        project_name = data_utils.rand_name('project-')
         self.assertRaises(
             exceptions.Unauthorized, self.v3_non_admin_client.create_project,
             project_name)
@@ -238,7 +238,7 @@ class ProjectsTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_project_delete_by_unauthorized_user(self):
         # Non-admin user should not be able to delete a project
-        project_name = rand_name('project-')
+        project_name = data_utils.rand_name('project-')
         resp, project = self.v3_client.create_project(project_name)
         self.v3data.projects.append(project)
         self.assertRaises(

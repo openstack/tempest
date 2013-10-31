@@ -19,8 +19,7 @@ import time
 
 from tempest.api import compute
 from tempest import clients
-from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -94,7 +93,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_test_server(cls, **kwargs):
         """Wrapper utility that returns a test server."""
-        name = rand_name(cls.__name__ + "-instance")
+        name = data_utils.rand_name(cls.__name__ + "-instance")
         if 'name' in kwargs:
             name = kwargs.pop('name')
         flavor = kwargs.get('flavor', cls.flavor_ref)
@@ -163,13 +162,13 @@ class BaseV2ComputeTest(BaseComputeTest):
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
         """Wrapper utility that returns an image created from the server."""
-        name = rand_name(cls.__name__ + "-image")
+        name = data_utils.rand_name(cls.__name__ + "-image")
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
         resp, image = cls.images_client.create_image(
             server_id, name)
-        image_id = parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
@@ -236,13 +235,13 @@ class BaseV3ComputeTest(BaseComputeTest):
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
         """Wrapper utility that returns an image created from the server."""
-        name = rand_name(cls.__name__ + "-image")
+        name = data_utils.rand_name(cls.__name__ + "-image")
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
         resp, image = cls.servers_client.create_image(
             server_id, name)
-        image_id = parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:

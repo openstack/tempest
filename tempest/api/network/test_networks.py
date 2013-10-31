@@ -18,7 +18,7 @@
 import netaddr
 
 from tempest.api.network import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -66,7 +66,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @attr(type='smoke')
     def test_create_update_delete_network_subnet(self):
         # Creates a network
-        name = rand_name('network-')
+        name = data_utils.rand_name('network-')
         resp, body = self.client.create_network(name)
         self.assertEqual('201', resp['status'])
         network = body['network']
@@ -186,19 +186,19 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
     @attr(type=['negative', 'smoke'])
     def test_show_non_existent_network(self):
-        non_exist_id = rand_name('network')
+        non_exist_id = data_utils.rand_name('network')
         self.assertRaises(exceptions.NotFound, self.client.show_network,
                           non_exist_id)
 
     @attr(type=['negative', 'smoke'])
     def test_show_non_existent_subnet(self):
-        non_exist_id = rand_name('subnet')
+        non_exist_id = data_utils.rand_name('subnet')
         self.assertRaises(exceptions.NotFound, self.client.show_subnet,
                           non_exist_id)
 
     @attr(type=['negative', 'smoke'])
     def test_show_non_existent_port(self):
-        non_exist_id = rand_name('port')
+        non_exist_id = data_utils.rand_name('port')
         self.assertRaises(exceptions.NotFound, self.client.show_port,
                           non_exist_id)
 
@@ -274,7 +274,8 @@ class BulkNetworkOpsJSON(base.BaseNetworkTest):
     @attr(type='smoke')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
-        network_names = [rand_name('network-'), rand_name('network-')]
+        network_names = [data_utils.rand_name('network-'),
+                         data_utils.rand_name('network-')]
         resp, body = self.client.create_bulk_network(2, network_names)
         created_networks = body['networks']
         self.assertEqual('201', resp['status'])
@@ -299,7 +300,7 @@ class BulkNetworkOpsJSON(base.BaseNetworkTest):
         names = []
         networks = [self.network1['id'], self.network2['id']]
         for i in range(len(networks)):
-            names.append(rand_name('subnet-'))
+            names.append(data_utils.rand_name('subnet-'))
         subnet_list = []
         # TODO(raies): "for IPv6, version list [4, 6] will be used.
         # and cidr for IPv6 will be of IPv6"
@@ -332,7 +333,7 @@ class BulkNetworkOpsJSON(base.BaseNetworkTest):
         names = []
         networks = [self.network1['id'], self.network2['id']]
         for i in range(len(networks)):
-            names.append(rand_name('port-'))
+            names.append(data_utils.rand_name('port-'))
         port_list = []
         state = [True, False]
         for i in range(len(names)):

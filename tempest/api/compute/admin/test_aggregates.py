@@ -17,7 +17,7 @@
 
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -47,7 +47,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_aggregate_create_delete(self):
         # Create and delete an aggregate.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.assertEqual(200, resp.status)
         self.assertEqual(aggregate_name, aggregate['name'])
@@ -60,8 +60,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_aggregate_create_delete_with_az(self):
         # Create and delete an aggregate.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
-        az_name = rand_name(self.az_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        az_name = data_utils.rand_name(self.az_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
         self.assertEqual(200, resp.status)
         self.assertEqual(aggregate_name, aggregate['name'])
@@ -74,7 +74,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_aggregate_create_verify_entry_in_list(self):
         # Create an aggregate and ensure it is listed.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -87,7 +87,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_aggregate_create_update_metadata_get_details(self):
         # Create an aggregate and ensure its details are returned.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -113,8 +113,8 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_create_update_with_az(self):
         # Update an aggregate and ensure properties are updated correctly
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = rand_name(self.aggregate_name_prefix)
-        az_name = rand_name(self.az_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        az_name = data_utils.rand_name(self.az_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -144,7 +144,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_aggregate_create_as_user(self):
         # Regular user is not allowed to create an aggregate.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         self.assertRaises(exceptions.Unauthorized,
                           self.user_client.create_aggregate,
                           aggregate_name)
@@ -152,7 +152,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_aggregate_delete_as_user(self):
         # Regular user is not allowed to delete an aggregate.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -169,7 +169,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_aggregate_get_details_as_user(self):
         # Regular user is not allowed to get aggregate details.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -193,7 +193,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_add_remove_host(self):
         # Add an host to the given aggregate and remove.
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -215,7 +215,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_add_host_list(self):
         # Add an host to the given aggregate and list.
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
@@ -233,7 +233,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_add_host_get_details(self):
         # Add an host to the given aggregate and get details.
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
@@ -248,13 +248,13 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_add_host_create_server_with_az(self):
         # Add an host to the given aggregate and create a server.
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = rand_name(self.aggregate_name_prefix)
-        az_name = rand_name(self.az_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
+        az_name = data_utils.rand_name(self.az_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
-        server_name = rand_name('test_server_')
+        server_name = data_utils.rand_name('test_server_')
         admin_servers_client = self.os_adm.servers_client
         resp, server = self.create_test_server(name=server_name,
                                                availability_zone=az_name,
@@ -268,11 +268,11 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, hosts_all = self.os_adm.hosts_client.list_hosts()
         hosts = map(lambda x: x['host_name'], hosts_all)
         while True:
-            non_exist_host = rand_name('nonexist_host_')
+            non_exist_host = data_utils.rand_name('nonexist_host_')
             if non_exist_host not in hosts:
                 break
 
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -282,7 +282,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type=['negative', 'gate'])
     def test_aggregate_add_host_as_user(self):
         # Regular user is not allowed to add a host to an aggregate.
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
@@ -294,7 +294,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_aggregate_remove_host_as_user(self):
         # Regular user is not allowed to remove a host from an aggregate.
         self.useFixture(fixtures.LockFixture('availability_zone'))
-        aggregate_name = rand_name(self.aggregate_name_prefix)
+        aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)

@@ -22,8 +22,7 @@ import testtools
 
 from tempest.api import compute
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
 from tempest import exceptions
@@ -113,7 +112,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
-        new_name = rand_name('server')
+        new_name = data_utils.rand_name('server')
         file_contents = 'Test server rebuild.'
         personality = [{'path': 'rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
@@ -204,7 +203,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
         # create the first and the second backup
-        backup1 = rand_name('backup')
+        backup1 = data_utils.rand_name('backup')
         resp, _ = self.servers_client.create_backup(self.server_id,
                                                     'daily',
                                                     2,
@@ -216,17 +215,17 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             if oldest_backup_exist:
                 self.os.image_client.delete_image(oldest_backup)
 
-        image1_id = parse_image_id(resp['location'])
+        image1_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)
         self.assertEqual(202, resp.status)
 
-        backup2 = rand_name('backup')
+        backup2 = data_utils.rand_name('backup')
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         resp, _ = self.servers_client.create_backup(self.server_id,
                                                     'daily',
                                                     2,
                                                     backup2)
-        image2_id = parse_image_id(resp['location'])
+        image2_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image2_id)
         self.assertEqual(202, resp.status)
 
@@ -247,13 +246,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         # create the third one, due to the rotation is 2,
         # the first one will be deleted
-        backup3 = rand_name('backup')
+        backup3 = data_utils.rand_name('backup')
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         resp, _ = self.servers_client.create_backup(self.server_id,
                                                     'daily',
                                                     2,
                                                     backup3)
-        image3_id = parse_image_id(resp['location'])
+        image3_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image3_id)
         self.assertEqual(202, resp.status)
         # the first back up should be deleted

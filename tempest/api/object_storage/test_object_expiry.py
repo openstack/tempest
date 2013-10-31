@@ -18,8 +18,7 @@
 import time
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 from tempest.test import skip_because
@@ -29,7 +28,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
     @classmethod
     def setUpClass(cls):
         super(ObjectExpiryTest, cls).setUpClass()
-        cls.container_name = rand_name(name='TestContainer')
+        cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
 
     @classmethod
@@ -49,8 +48,8 @@ class ObjectExpiryTest(base.BaseObjectTest):
         # "X-Delete-At", after this test case works.
 
         # create object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         # update object metadata with expiry time of 3 seconds

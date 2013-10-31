@@ -22,7 +22,7 @@ import testtools
 
 from tempest.api import compute
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
 from tempest import exceptions
@@ -112,7 +112,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
-        new_name = rand_name('server')
+        new_name = data_utils.rand_name('server')
         file_contents = 'Test server rebuild.'
         personality = [{'path': 'rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]

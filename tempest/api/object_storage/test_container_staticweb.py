@@ -15,8 +15,7 @@
 # under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -25,15 +24,15 @@ class StaticWebTest(base.BaseObjectTest):
     @classmethod
     def setUpClass(cls):
         super(StaticWebTest, cls).setUpClass()
-        cls.container_name = rand_name(name="TestContainer")
+        cls.container_name = data_utils.rand_name(name="TestContainer")
 
         # This header should be posted on the container before every test
         cls.headers_public_read_acl = {'Read': '.r:*'}
 
         # Create test container and create one object in it
         cls.container_client.create_container(cls.container_name)
-        cls.object_name = rand_name(name="TestObject")
-        cls.object_data = arbitrary_string()
+        cls.object_name = data_utils.rand_name(name="TestObject")
+        cls.object_data = data_utils.arbitrary_string()
         cls.object_client.create_object(cls.container_name,
                                         cls.object_name,
                                         cls.object_data)

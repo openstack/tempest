@@ -18,7 +18,7 @@
 import netaddr
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -105,7 +105,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_network(cls, network_name=None):
         """Wrapper utility that returns a test network."""
-        network_name = network_name or rand_name('test-network-')
+        network_name = network_name or data_utils.rand_name('test-network-')
 
         resp, body = cls.client.create_network(network_name)
         network = body['network']
@@ -211,7 +211,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         """Wrapper utility that returns a test vpn service."""
         resp, body = cls.client.create_vpn_service(
             subnet_id, router_id, admin_state_up=True,
-            name=rand_name("vpnservice-"))
+            name=data_utils.rand_name("vpnservice-"))
         vpnservice = body['vpnservice']
         cls.vpnservices.append(vpnservice)
         return vpnservice

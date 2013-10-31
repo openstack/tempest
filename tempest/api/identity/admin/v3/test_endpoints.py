@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -29,9 +29,9 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         cls.identity_client = cls.client
         cls.client = cls.endpoints_client
         cls.service_ids = list()
-        s_name = rand_name('service-')
-        s_type = rand_name('type--')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('service-')
+        s_type = data_utils.rand_name('type--')
+        s_description = data_utils.rand_name('description-')
         resp, cls.service_data =\
             cls.identity_client.create_service(s_name, s_type,
                                                description=s_description)
@@ -40,8 +40,8 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         # Create endpoints so as to use for LIST and GET test cases
         cls.setup_endpoints = list()
         for i in range(2):
-            region = rand_name('region')
-            url = rand_name('url')
+            region = data_utils.rand_name('region')
+            url = data_utils.rand_name('url')
             interface = 'public'
             resp, endpoint = cls.client.create_endpoint(
                 cls.service_id, interface, url, region=region, enabled=True)
@@ -69,8 +69,8 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='gate')
     def test_create_list_delete_endpoint(self):
-        region = rand_name('region')
-        url = rand_name('url')
+        region = data_utils.rand_name('region')
+        url = data_utils.rand_name('url')
         interface = 'public'
         resp, endpoint =\
             self.client.create_endpoint(self.service_id, interface, url,
@@ -97,24 +97,24 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
     def test_update_endpoint(self):
         # Creating an endpoint so as to check update endpoint
         # with new values
-        region1 = rand_name('region')
-        url1 = rand_name('url')
+        region1 = data_utils.rand_name('region')
+        url1 = data_utils.rand_name('url')
         interface1 = 'public'
         resp, endpoint_for_update =\
             self.client.create_endpoint(self.service_id, interface1,
                                         url1, region=region1,
                                         enabled=True)
         # Creating service so as update endpoint with new service ID
-        s_name = rand_name('service-')
-        s_type = rand_name('type--')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('service-')
+        s_type = data_utils.rand_name('type--')
+        s_description = data_utils.rand_name('description-')
         resp, self.service2 =\
             self.identity_client.create_service(s_name, s_type,
                                                 description=s_description)
         self.service_ids.append(self.service2['id'])
         # Updating endpoint with new values
-        region2 = rand_name('region')
-        url2 = rand_name('url')
+        region2 = data_utils.rand_name('region')
+        url2 = data_utils.rand_name('url')
         interface2 = 'internal'
         resp, endpoint = \
             self.client.update_endpoint(endpoint_for_update['id'],

@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.services.volume.json.admin import volume_types_client
 from tempest.services.volume.json import volumes_client
@@ -54,8 +54,8 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
         cls.volume_id_list = []
         try:
             # Volume/Type creation (uses backend1_name)
-            type1_name = rand_name('Type-')
-            vol1_name = rand_name('Volume-')
+            type1_name = data_utils.rand_name('Type-')
+            vol1_name = data_utils.rand_name('Volume-')
             extra_specs1 = {"volume_backend_name": cls.backend1_name}
             resp, cls.type1 = cls.type_client.create_volume_type(
                 type1_name, extra_specs=extra_specs1)
@@ -69,8 +69,8 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
 
             if cls.backend1_name != cls.backend2_name:
                 # Volume/Type creation (uses backend2_name)
-                type2_name = rand_name('Type-')
-                vol2_name = rand_name('Volume-')
+                type2_name = data_utils.rand_name('Type-')
+                vol2_name = data_utils.rand_name('Volume-')
                 extra_specs2 = {"volume_backend_name": cls.backend2_name}
                 resp, cls.type2 = cls.type_client.create_volume_type(
                     type2_name, extra_specs=extra_specs2)

@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import services
@@ -41,7 +41,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
         self.keypair = self.create_keypair()
 
     def create_security_group(self):
-        sg_name = rand_name('secgroup-smoke')
+        sg_name = data_utils.rand_name('secgroup-smoke')
         sg_desc = sg_name + " description"
         self.secgroup = self.compute_client.security_groups.create(sg_name,
                                                                    sg_desc)

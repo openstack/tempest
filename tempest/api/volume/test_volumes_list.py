@@ -17,8 +17,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_int_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
@@ -59,7 +58,7 @@ class VolumesListTest(base.BaseVolumeTest):
         cls.volume_list = []
         cls.volume_id_list = []
         for i in range(3):
-            v_name = rand_name('volume')
+            v_name = data_utils.rand_name('volume')
             metadata = {'Type': 'work'}
             try:
                 resp, volume = cls.client.create_volume(size=1,
@@ -107,7 +106,7 @@ class VolumesListTest(base.BaseVolumeTest):
 
     @attr(type='gate')
     def test_volume_list_by_name(self):
-        volume = self.volume_list[rand_int_id(0, 2)]
+        volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {'display_name': volume['display_name']}
         resp, fetched_vol = self.client.list_volumes(params)
         self.assertEqual(200, resp.status)
@@ -117,7 +116,7 @@ class VolumesListTest(base.BaseVolumeTest):
 
     @attr(type='gate')
     def test_volume_list_details_by_name(self):
-        volume = self.volume_list[rand_int_id(0, 2)]
+        volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {'display_name': volume['display_name']}
         resp, fetched_vol = self.client.list_volumes_with_detail(params)
         self.assertEqual(200, resp.status)
@@ -145,7 +144,7 @@ class VolumesListTest(base.BaseVolumeTest):
 
     @attr(type='gate')
     def test_volumes_list_by_availability_zone(self):
-        volume = self.volume_list[rand_int_id(0, 2)]
+        volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
         params = {'availability_zone': zone}
         resp, fetched_list = self.client.list_volumes(params)
@@ -156,7 +155,7 @@ class VolumesListTest(base.BaseVolumeTest):
 
     @attr(type='gate')
     def test_volumes_list_details_by_availability_zone(self):
-        volume = self.volume_list[rand_int_id(0, 2)]
+        volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
         params = {'availability_zone': zone}
         resp, fetched_list = self.client.list_volumes_with_detail(params)

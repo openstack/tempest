@@ -18,7 +18,7 @@
 import random
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
@@ -30,7 +30,7 @@ class AccountTest(base.BaseObjectTest):
         super(AccountTest, cls).setUpClass()
         cls.containers = []
         for i in xrange(ord('a'), ord('f') + 1):
-            name = rand_name(name='%s-' % chr(i))
+            name = data_utils.rand_name(name='%s-' % chr(i))
             cls.container_client.create_container(name)
             cls.containers.append(name)
         cls.containers_count = len(cls.containers)

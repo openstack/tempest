@@ -15,7 +15,7 @@
 import logging
 
 from tempest.api.orchestration import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -76,7 +76,7 @@ Resources:
         if not cls.orchestration_cfg.image_ref:
             raise cls.skipException("No image available to test")
         cls.client = cls.orchestration_client
-        cls.stack_name = rand_name('heat')
+        cls.stack_name = data_utils.rand_name('heat')
         keypair_name = (cls.orchestration_cfg.keypair_name or
                         cls._create_keypair()['name'])
 

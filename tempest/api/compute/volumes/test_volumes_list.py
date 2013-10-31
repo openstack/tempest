@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -43,7 +43,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
         cls.volume_list = []
         cls.volume_id_list = []
         for i in range(3):
-            v_name = rand_name('volume-%s')
+            v_name = data_utils.rand_name('volume-%s')
             metadata = {'Type': 'work'}
             v_name += cls._interface
             try:

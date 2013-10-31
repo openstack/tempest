@@ -22,7 +22,7 @@ import testtools
 
 from tempest.api import compute
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
 from tempest.test import attr
@@ -39,7 +39,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
-        cls.name = rand_name('server')
+        cls.name = data_utils.rand_name('server')
         file_contents = 'This is a test file.'
         personality = [{'path': '/test.txt',
                        'contents': base64.b64encode(file_contents)}]

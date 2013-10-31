@@ -18,7 +18,7 @@
 from boto import exception
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -50,8 +50,8 @@ class InstanceRunTest(BotoTestCase):
         aki_manifest = config.boto.aki_manifest
         ari_manifest = config.boto.ari_manifest
         cls.instance_type = config.boto.instance_type
-        cls.bucket_name = rand_name("s3bucket-")
-        cls.keypair_name = rand_name("keypair-")
+        cls.bucket_name = data_utils.rand_name("s3bucket-")
+        cls.keypair_name = data_utils.rand_name("keypair-")
         cls.keypair = cls.ec2_client.create_key_pair(cls.keypair_name)
         cls.addResourceCleanUp(cls.ec2_client.delete_key_pair,
                                cls.keypair_name)
@@ -61,13 +61,13 @@ class InstanceRunTest(BotoTestCase):
                                cls.bucket_name)
         s3_upload_dir(bucket, cls.materials_path)
         cls.images = {"ami":
-                      {"name": rand_name("ami-name-"),
+                      {"name": data_utils.rand_name("ami-name-"),
                        "location": cls.bucket_name + "/" + ami_manifest},
                       "aki":
-                      {"name": rand_name("aki-name-"),
+                      {"name": data_utils.rand_name("aki-name-"),
                        "location": cls.bucket_name + "/" + aki_manifest},
                       "ari":
-                      {"name": rand_name("ari-name-"),
+                      {"name": data_utils.rand_name("ari-name-"),
                        "location": cls.bucket_name + "/" + ari_manifest}}
         for image in cls.images.itervalues():
             image["image_id"] = cls.ec2_client.register_image(
@@ -238,7 +238,7 @@ class InstanceRunTest(BotoTestCase):
     def test_integration_1(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])
-        sec_group_name = rand_name("securitygroup-")
+        sec_group_name = data_utils.rand_name("securitygroup-")
         group_desc = sec_group_name + " security group description "
         security_group = self.ec2_client.create_security_group(sec_group_name,
                                                                group_desc)
@@ -285,7 +285,7 @@ class InstanceRunTest(BotoTestCase):
         ssh = RemoteClient(address.public_ip,
                            self.os.config.compute.ssh_user,
                            pkey=self.keypair.material)
-        text = rand_name("Pattern text for console output -")
+        text = data_utils.rand_name("Pattern text for console output -")
         resp = ssh.write_to_console(text)
         self.assertFalse(resp)
 

@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -44,14 +44,14 @@ class ContainerTest(base.BaseObjectTest):
     @attr(type='smoke')
     def test_versioned_container(self):
         # create container
-        vers_container_name = rand_name(name='TestVersionContainer')
+        vers_container_name = data_utils.rand_name(name='TestVersionContainer')
         resp, body = self.container_client.create_container(
             vers_container_name)
         self.containers.append(vers_container_name)
         self.assertIn(resp['status'], ('202', '201'))
         self.assertContainer(vers_container_name, '0', '0', 'Missing Header')
 
-        base_container_name = rand_name(name='TestBaseContainer')
+        base_container_name = data_utils.rand_name(name='TestBaseContainer')
         headers = {'X-versions-Location': vers_container_name}
         resp, body = self.container_client.create_container(
             base_container_name,
@@ -61,7 +61,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertIn(resp['status'], ('202', '201'))
         self.assertContainer(base_container_name, '0', '0',
                              vers_container_name)
-        object_name = rand_name(name='TestObject')
+        object_name = data_utils.rand_name(name='TestObject')
         # create object
         resp, _ = self.object_client.create_object(base_container_name,
                                                    object_name, '1')

@@ -17,7 +17,7 @@
 
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -30,9 +30,9 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
         # GET Service
         try:
             # Creating a Service
-            name = rand_name('service-')
-            type = rand_name('type--')
-            description = rand_name('description-')
+            name = data_utils.rand_name('service-')
+            type = data_utils.rand_name('type--')
+            description = data_utils.rand_name('description-')
             resp, service_data = self.client.create_service(
                 name, type, description=description)
             self.assertTrue(resp['status'].startswith('2'))
@@ -72,9 +72,9 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
         # Create, List, Verify and Delete Services
         services = []
         for _ in xrange(3):
-            name = rand_name('service-')
-            type = rand_name('type--')
-            description = rand_name('description-')
+            name = data_utils.rand_name('service-')
+            type = data_utils.rand_name('type--')
+            description = data_utils.rand_name('description-')
             resp, service = self.client.create_service(
                 name, type, description=description)
             services.append(service)

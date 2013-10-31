@@ -18,7 +18,7 @@
 
 from tempest.api.network import common as net_common
 from tempest.common import debug
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
@@ -144,7 +144,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                             "'public_network_id' has been defined.")
 
     def _create_router(self, tenant_id, namestart='router-smoke-'):
-        name = rand_name(namestart)
+        name = data_utils.rand_name(namestart)
         body = dict(
             router=dict(
                 name=name,
@@ -161,7 +161,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _create_keypairs(self):
         self.keypairs[self.tenant_id] = self.create_keypair(
-            name=rand_name('keypair-smoke-'))
+            name=data_utils.rand_name('keypair-smoke-'))
 
     def _create_security_groups(self):
         self.security_groups[self.tenant_id] = self._create_security_group()
@@ -214,7 +214,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _create_servers(self):
         for i, network in enumerate(self.networks):
-            name = rand_name('server-smoke-%d-' % i)
+            name = data_utils.rand_name('server-smoke-%d-' % i)
             server = self._create_server(name, network)
             self.servers.append(server)
 

@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -35,8 +35,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         cls.floating_ip = str(body['ip']).strip()
 
         # Security group creation
-        cls.sg_name = rand_name('sg')
-        cls.sg_desc = rand_name('sg-desc')
+        cls.sg_name = data_utils.rand_name('sg')
+        cls.sg_desc = data_utils.rand_name('sg-desc')
         resp, cls.sg = \
             cls.security_groups_client.create_security_group(cls.sg_name,
                                                              cls.sg_desc)

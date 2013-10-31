@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -48,7 +48,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.router = cls.create_router(
-            rand_name('router-'),
+            data_utils.rand_name('router-'),
             external_network_id=cls.network_cfg.public_network_id)
         resp, _ = cls.client.add_router_interface_with_subnet_id(
             cls.router['id'], cls.subnet['id'])

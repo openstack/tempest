@@ -18,7 +18,7 @@
 import time
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import skip_because
 
@@ -37,9 +37,9 @@ class ContainerSyncTest(base.BaseObjectTest):
             int(container_sync_timeout / cls.container_sync_interval)
         # define container and object clients
         cls.clients = {}
-        cls.clients[rand_name(name='TestContainerSync')] = \
+        cls.clients[data_utils.rand_name(name='TestContainerSync')] = \
             (cls.container_client, cls.object_client)
-        cls.clients[rand_name(name='TestContainerSync')] = \
+        cls.clients[data_utils.rand_name(name='TestContainerSync')] = \
             (cls.container_client_alt, cls.object_client_alt)
         for cont_name, client in cls.clients.items():
             client[0].create_container(cont_name)
@@ -71,8 +71,8 @@ class ContainerSyncTest(base.BaseObjectTest):
                           'Error installing X-Container-Sync-To '
                           'for the container "%s"' % (cont[0]))
             # create object in container
-            object_name = rand_name(name='TestSyncObject')
-            data = object_name[::-1]  # arbitrary_string()
+            object_name = data_utils.rand_name(name='TestSyncObject')
+            data = object_name[::-1]  # data_utils.arbitrary_string()
             resp, _ = obj_client[0].create_object(cont[0], object_name, data)
             self.assertEqual(resp['status'], '201',
                              'Error creating the object "%s" in'

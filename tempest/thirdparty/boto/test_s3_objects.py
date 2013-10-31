@@ -20,7 +20,7 @@ import contextlib
 import boto.s3.key
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 
@@ -36,8 +36,8 @@ class S3BucketsTest(BotoTestCase):
     @attr(type='smoke')
     def test_create_get_delete_object(self):
         # S3 Create, get and delete object
-        bucket_name = rand_name("s3bucket-")
-        object_name = rand_name("s3object-")
+        bucket_name = data_utils.rand_name("s3bucket-")
+        object_name = data_utils.rand_name("s3object-")
         content = 'x' * 42
         bucket = self.client.create_bucket(bucket_name)
         self.addResourceCleanUp(self.destroy_bucket,

@@ -15,7 +15,7 @@
 import socket
 import subprocess
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 import tempest.stress.stressaction as stressaction
 import tempest.test
 
@@ -64,7 +64,7 @@ class FloatingStress(stressaction.StressAction):
             raise RuntimeError("Cannot ping the machine.")
 
     def _create_vm(self):
-        self.name = name = rand_name("instance")
+        self.name = name = data_utils.rand_name("instance")
         servers_client = self.manager.servers_client
         self.logger.info("creating %s" % name)
         vm_args = self.vm_extra_args.copy()
@@ -87,8 +87,8 @@ class FloatingStress(stressaction.StressAction):
 
     def _create_sec_group(self):
         sec_grp_cli = self.manager.security_groups_client
-        s_name = rand_name('sec_grp-')
-        s_description = rand_name('desc-')
+        s_name = data_utils.rand_name('sec_grp-')
+        s_description = data_utils.rand_name('desc-')
         _, _sec_grp = sec_grp_cli.create_security_group(s_name,
                                                         s_description)
         self.sec_grp = _sec_grp['id']

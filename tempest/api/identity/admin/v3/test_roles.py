@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -27,23 +27,26 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
     def setUpClass(cls):
         super(RolesV3TestJSON, cls).setUpClass()
         cls.fetched_role_ids = list()
-        u_name = rand_name('user-')
+        u_name = data_utils.rand_name('user-')
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        u_password = rand_name('pass-')
+        u_password = data_utils.rand_name('pass-')
         resp = [None] * 5
         resp[0], cls.project = cls.v3_client.create_project(
-            rand_name('project-'), description=rand_name('project-desc-'))
+            data_utils.rand_name('project-'),
+            description=data_utils.rand_name('project-desc-'))
         resp[1], cls.domain = cls.v3_client.create_domain(
-            rand_name('domain-'), description=rand_name('domain-desc-'))
+            data_utils.rand_name('domain-'),
+            description=data_utils.rand_name('domain-desc-'))
         resp[2], cls.group_body = cls.v3_client.create_group(
-            rand_name('Group-'), project_id=cls.project['id'],
+            data_utils.rand_name('Group-'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])
         resp[3], cls.user_body = cls.v3_client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])
-        resp[4], cls.role = cls.v3_client.create_role(rand_name('Role-'))
+        resp[4], cls.role = cls.v3_client.create_role(
+            data_utils.rand_name('Role-'))
         for r in resp:
             assert r['status'] == '201', "Expected: %s" % r['status']
 
@@ -69,14 +72,14 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='smoke')
     def test_role_create_update_get(self):
-        r_name = rand_name('Role-')
+        r_name = data_utils.rand_name('Role-')
         resp, role = self.v3_client.create_role(r_name)
         self.addCleanup(self.v3_client.delete_role, role['id'])
         self.assertEqual(resp['status'], '201')
         self.assertIn('name', role)
         self.assertEqual(role['name'], r_name)
 
-        new_name = rand_name('NewRole-')
+        new_name = data_utils.rand_name('NewRole-')
         resp, updated_role = self.v3_client.update_role(new_name, role['id'])
         self.assertEqual(resp['status'], '200')
         self.assertIn('name', updated_role)

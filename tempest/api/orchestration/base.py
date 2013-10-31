@@ -15,7 +15,7 @@
 import time
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -99,7 +99,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def _create_keypair(cls, name_start='keypair-heat-'):
-        kp_name = rand_name(name_start)
+        kp_name = data_utils.rand_name(name_start)
         resp, body = cls.keypairs_client.create_keypair(kp_name)
         cls.keypairs.append(kp_name)
         return body

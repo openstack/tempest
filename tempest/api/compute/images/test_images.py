@@ -17,8 +17,7 @@
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
-from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -58,7 +57,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
 
     def __create_image__(self, server_id, name, meta=None):
         resp, body = self.client.create_image(server_id, name, meta)
-        image_id = parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         self.client.wait_for_image_status(image_id, 'ACTIVE')
         self.image_ids.append(image_id)
         return resp, body
@@ -72,7 +71,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         self.servers_client.delete_server(server['id'])
         self.servers_client.wait_for_server_termination(server['id'])
         # Create a new image after server is deleted
-        name = rand_name('image')
+        name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
         self.assertRaises(exceptions.NotFound,
                           self.__create_image__,
@@ -82,7 +81,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     def test_create_image_from_invalid_server(self):
         # An image should not be created with invalid server id
         # Create a new image with invalid server id
-        name = rand_name('image')
+        name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
         resp = {}
         resp['status'] = None
@@ -96,7 +95,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(server['id'],
                                                    'SHUTOFF')
         self.addCleanup(self.servers_client.delete_server, server['id'])
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         resp, image = self.create_image_from_server(server['id'],
                                                     name=snapshot_name,
                                                     wait_until='ACTIVE')
@@ -105,7 +104,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
 
     @attr(type='gate')
     def test_delete_saving_image(self):
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         resp, server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         resp, image = self.create_image_from_server(server['id'],
@@ -117,7 +116,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_uuid_35_characters_or_less(self):
         # Return an error if Image ID passed is 35 characters or less
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         test_uuid = ('a' * 35)
         self.assertRaises(exceptions.NotFound, self.client.create_image,
                           test_uuid, snapshot_name)
@@ -125,7 +124,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_uuid_37_characters_or_more(self):
         # Return an error if Image ID passed is 37 characters or more
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         test_uuid = ('a' * 37)
         self.assertRaises(exceptions.NotFound, self.client.create_image,
                           test_uuid, snapshot_name)

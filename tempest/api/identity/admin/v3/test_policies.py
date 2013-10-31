@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -33,8 +33,8 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
         policy_ids = list()
         fetched_ids = list()
         for _ in range(3):
-            blob = rand_name('BlobName-')
-            policy_type = rand_name('PolicyType-')
+            blob = data_utils.rand_name('BlobName-')
+            policy_type = data_utils.rand_name('PolicyType-')
             resp, policy = self.policy_client.create_policy(blob,
                                                             policy_type)
             # Delete the Policy at the end of this method
@@ -51,8 +51,8 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
     @attr(type='smoke')
     def test_create_update_delete_policy(self):
         # Test to update policy
-        blob = rand_name('BlobName-')
-        policy_type = rand_name('PolicyType-')
+        blob = data_utils.rand_name('BlobName-')
+        policy_type = data_utils.rand_name('PolicyType-')
         resp, policy = self.policy_client.create_policy(blob, policy_type)
         self.addCleanup(self._delete_policy, policy['id'])
         self.assertIn('id', policy)
@@ -64,7 +64,7 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
         resp, fetched_policy = self.policy_client.get_policy(policy['id'])
         self.assertEqual(resp['status'], '200')
         # Update policy
-        update_type = rand_name('UpdatedPolicyType-')
+        update_type = data_utils.rand_name('UpdatedPolicyType-')
         resp, data = self.policy_client.update_policy(
             policy['id'], type=update_type)
         self.assertIn('type', data)

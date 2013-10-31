@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -45,8 +45,8 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         cls.network = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)
-        pool_name = rand_name('pool-')
-        vip_name = rand_name('vip-')
+        pool_name = data_utils.rand_name('pool-')
+        vip_name = data_utils.rand_name('vip-')
         cls.pool = cls.create_pool(pool_name, "ROUND_ROBIN",
                                    "HTTP", cls.subnet)
         cls.vip = cls.create_vip(vip_name, "HTTP", 80, cls.subnet, cls.pool)
@@ -68,8 +68,8 @@ class LoadBalancerJSON(base.BaseNetworkTest):
 
     def test_create_update_delete_pool_vip(self):
         # Creates a vip
-        name = rand_name('vip-')
-        resp, body = self.client.create_pool(rand_name("pool-"),
+        name = data_utils.rand_name('vip-')
+        resp, body = self.client.create_pool(data_utils.rand_name("pool-"),
                                              "ROUND_ROBIN", "HTTP",
                                              self.subnet['id'])
         pool = body['pool']

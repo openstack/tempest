@@ -10,14 +10,14 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 import tempest.stress.stressaction as stressaction
 
 
 class VolumeCreateDeleteTest(stressaction.StressAction):
 
     def run(self):
-        name = rand_name("volume")
+        name = data_utils.rand_name("volume")
         self.logger.info("creating %s" % name)
         volumes_client = self.manager.volumes_client
         resp, volume = volumes_client.create_volume(size=1,

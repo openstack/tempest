@@ -19,7 +19,7 @@ import time
 
 from tempest import clients
 from tempest.common import ssh
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import importutils
 from tempest.openstack.common import log as logging
@@ -131,8 +131,8 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
             manager = clients.Manager()
         for p_number in xrange(test.get('threads', default_thread_num)):
             if test.get('use_isolated_tenants', False):
-                username = rand_name("stress_user")
-                tenant_name = rand_name("stress_tenant")
+                username = data_utils.rand_name("stress_user")
+                tenant_name = data_utils.rand_name("stress_tenant")
                 password = "pass"
                 identity_client = admin_manager.identity_client
                 _, tenant = identity_client.create_tenant(name=tenant_name)

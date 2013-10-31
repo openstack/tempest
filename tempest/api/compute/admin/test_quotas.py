@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
@@ -87,7 +87,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_get_updated_quotas(self):
         # Verify that GET shows the updated quota set
-        tenant_name = rand_name('cpu_quota_tenant_')
+        tenant_name = data_utils.rand_name('cpu_quota_tenant_')
         tenant_desc = tenant_name + '-desc'
         identity_client = self.os_adm.identity_client
         _, tenant = identity_client.create_tenant(name=tenant_name,
@@ -200,8 +200,8 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                         self.demo_tenant_id,
                         security_group_rules=default_sg_rules_quota)
 
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
+        s_name = data_utils.rand_name('securitygroup-')
+        s_description = data_utils.rand_name('description-')
         resp, securitygroup =\
             self.sg_client.create_security_group(s_name, s_description)
         self.addCleanup(self.sg_client.delete_security_group,

@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import services
 
@@ -46,7 +46,7 @@ class VolumesGetTest(base.BaseVolumeTest):
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         volume = {}
-        v_name = rand_name('Volume')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'Test'}
         # Create a volume
         resp, volume = self.client.create_volume(size=1,
@@ -88,7 +88,7 @@ class VolumesGetTest(base.BaseVolumeTest):
             self.assertEqual(boot_flag, False)
 
         # Update Volume
-        new_v_name = rand_name('new-Volume')
+        new_v_name = data_utils.rand_name('new-Volume')
         new_desc = 'This is the new description of volume'
         resp, update_volume = \
             self.client.update_volume(volume['id'],
@@ -118,7 +118,7 @@ class VolumesGetTest(base.BaseVolumeTest):
     def test_volume_get_metadata_none(self):
         # Create a volume without passing metadata, get details, and delete
         volume = {}
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         # Create a volume without metadata
         resp, volume = self.client.create_volume(size=1,
                                                  display_name=v_name,
