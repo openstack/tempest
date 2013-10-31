@@ -372,11 +372,11 @@ ObjectStoreGroup = [
                     "value of identity.region is used instead. If no such "
                     "region is found in the service catalog, the first found "
                     "one is used."),
-    cfg.StrOpt('container_sync_timeout',
+    cfg.IntOpt('container_sync_timeout',
                default=120,
                help="Number of seconds to time on waiting for a container"
                     "to container synchronization complete."),
-    cfg.StrOpt('container_sync_interval',
+    cfg.IntOpt('container_sync_interval',
                default=5,
                help="Number of seconds to wait while looping to check the"
                     "status of a container to container synchronization"),
@@ -527,10 +527,10 @@ StressGroup = [
     cfg.StrOpt('target_logfiles',
                default=None,
                help='regexp for list of log files.'),
-    cfg.StrOpt('log_check_interval',
+    cfg.IntOpt('log_check_interval',
                default=60,
                help='time (in seconds) between log file error checks.'),
-    cfg.StrOpt('default_thread_number_per_action',
+    cfg.IntOpt('default_thread_number_per_action',
                default=4,
                help='The number of threads created while stress test.')
 ]
