@@ -252,7 +252,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @skip_because(bug="1233026")
     @attr(type='gate')
     def test_lock_unlock_server(self):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
@@ -262,7 +261,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(server['status'], 'ACTIVE')
         # Locked server is not allowed to be stopped by non-admin user
-        self.assertRaises(exceptions.BadRequest,
+        self.assertRaises(exceptions.Conflict,
                           self.servers_client.stop, self.server_id)
         resp, server = self.servers_client.unlock_server(self.server_id)
         self.assertEqual(202, resp.status)
