@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.volume.base import BaseVolumeTest
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import services
 from tempest.test import stresstest
@@ -32,8 +32,8 @@ class VolumesActionsTest(BaseVolumeTest):
         cls.image_client = cls.os.image_client
 
         # Create a test shared instance and volume for attach/detach tests
-        srv_name = rand_name(cls.__name__ + '-Instance-')
-        vol_name = rand_name(cls.__name__ + '-Volume-')
+        srv_name = data_utils.rand_name(cls.__name__ + '-Instance-')
+        vol_name = data_utils.rand_name(cls.__name__ + '-Volume-')
         resp, cls.server = cls.servers_client.create_server(srv_name,
                                                             cls.image_ref,
                                                             cls.flavor_ref)
@@ -102,7 +102,7 @@ class VolumesActionsTest(BaseVolumeTest):
         # it is shared with the other tests. After it is uploaded in Glance,
         # there is no way to delete it from Cinder, so we delete it from Glance
         # using the Glance image_client and from Cinder via tearDownClass.
-        image_name = rand_name('Image-')
+        image_name = data_utils.rand_name('Image-')
         resp, body = self.client.upload_volume(self.volume['id'],
                                                image_name,
                                                self.config.volume.disk_format)
@@ -111,6 +111,17 @@ class VolumesActionsTest(BaseVolumeTest):
         self.assertEqual(202, resp.status)
         self.image_client.wait_for_image_status(image_id, 'active')
         self.client.wait_for_volume_status(self.volume['id'], 'available')
+
+    @attr(type='gate')
+    def test_volume_extend(self):
+        # Extend Volume Test.
+        extend_size = int(self.volume['size']) + 1
+        resp, body = self.client.extend_volume(self.volume['id'], extend_size)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_volume_status(self.volume['id'], 'available')
+        resp, volume = self.client.get_volume(self.volume['id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(int(volume['size']), extend_size)
 
 
 class VolumesActionsTestXML(VolumesActionsTest):

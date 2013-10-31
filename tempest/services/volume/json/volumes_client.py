@@ -154,3 +154,13 @@ class VolumesClientJSON(RestClient):
         except exceptions.NotFound:
             return True
         return False
+
+    def extend_volume(self, volume_id, extend_size):
+        """Extend a volume."""
+        post_body = {
+            'new_size': extend_size
+        }
+        post_body = json.dumps({'os-extend': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body, self.headers)
+        return resp, body
