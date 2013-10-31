@@ -32,13 +32,6 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(HostsAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.hosts_client
 
-    def _get_host_name(self):
-        resp, hosts = self.client.list_hosts()
-        self.assertEqual(200, resp.status)
-        self.assertTrue(len(hosts) >= 1)
-        hostname = hosts[0]['host_name']
-        return hostname
-
     @attr(type='gate')
     def test_list_hosts(self):
         resp, hosts = self.client.list_hosts()
@@ -77,18 +70,24 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @attr(type='gate')
     def test_show_host_detail(self):
-        hostname = self._get_host_name()
-
-        resp, resources = self.client.show_host_detail(hostname)
+        resp, hosts = self.client.list_hosts()
         self.assertEqual(200, resp.status)
-        self.assertTrue(len(resources) >= 1)
-        host_resource = resources[0]['resource']
-        self.assertIsNotNone(host_resource)
-        self.assertIsNotNone(host_resource['cpu'])
-        self.assertIsNotNone(host_resource['disk_gb'])
-        self.assertIsNotNone(host_resource['memory_mb'])
-        self.assertIsNotNone(host_resource['project'])
-        self.assertEqual(hostname, host_resource['host'])
+
+        hosts = [host for host in hosts if host['service'] == 'compute']
+        self.assertTrue(len(hosts) >= 1)
+
+        for host in hosts:
+            hostname = host['host_name']
+            resp, resources = self.client.show_host_detail(hostname)
+            self.assertEqual(200, resp.status)
+            self.assertTrue(len(resources) >= 1)
+            host_resource = resources[0]['resource']
+            self.assertIsNotNone(host_resource)
+            self.assertIsNotNone(host_resource['cpu'])
+            self.assertIsNotNone(host_resource['disk_gb'])
+            self.assertIsNotNone(host_resource['memory_mb'])
+            self.assertIsNotNone(host_resource['project'])
+            self.assertEqual(hostname, host_resource['host'])
 
 
 class HostsAdminTestXML(HostsAdminTestJSON):
