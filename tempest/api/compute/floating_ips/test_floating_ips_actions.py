@@ -64,10 +64,10 @@ class FloatingIPsTestJSON(base.BaseV2ComputeTest):
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
+        resp, body = self.client.create_floating_ip()
+        self.assertEqual(200, resp.status)
+        floating_ip_id_allocated = body['id']
         try:
-            resp, body = self.client.create_floating_ip()
-            self.assertEqual(200, resp.status)
-            floating_ip_id_allocated = body['id']
             resp, floating_ip_details = \
                 self.client.get_floating_ip_details(floating_ip_id_allocated)
             # Checking if the details of allocated IP is in list of floating IP
