@@ -123,8 +123,12 @@ class NetworkClientJSON(RestClient):
         resp, body = self.delete(uri, self.headers)
         return resp, body
 
-    def list_ports(self):
+    def list_ports(self, **filters):
         uri = '%s/ports' % (self.uri_prefix)
+        filter_items = ["%s=%s" % (k, v) for (k, v) in filters.iteritems()]
+        querystring = "&".join(filter_items)
+        if querystring:
+            uri = "%s?%s" % (uri, querystring)
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
@@ -223,7 +227,7 @@ class NetworkClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
-    def update_router(self, router_id, **kwargs):
+    def _update_router(self, router_id, set_enable_snat, **kwargs):
         uri = '%s/routers/%s' % (self.uri_prefix, router_id)
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
@@ -231,14 +235,33 @@ class NetworkClientJSON(RestClient):
         update_body['name'] = kwargs.get('name', body['router']['name'])
         update_body['admin_state_up'] = kwargs.get(
             'admin_state_up', body['router']['admin_state_up'])
-        # Must uncomment/modify these lines once LP question#233187 is solved
-        # update_body['external_gateway_info'] = kwargs.get(
-        # 'external_gateway_info', body['router']['external_gateway_info'])
+        cur_gw_info = body['router']['external_gateway_info']
+        if cur_gw_info and not set_enable_snat:
+            cur_gw_info.pop('enable_snat', None)
+        update_body['external_gateway_info'] = kwargs.get(
+            'external_gateway_info', body['router']['external_gateway_info'])
         update_body = dict(router=update_body)
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body, self.headers)
         body = json.loads(body)
         return resp, body
+
+    def update_router(self, router_id, **kwargs):
+        """Update a router leaving enable_snat to its default value."""
+        # If external_gateway_info contains enable_snat the request will fail
+        # with 404 unless executed with admin client, and therefore we instruct
+        # _update_router to not set this attribute
+        # NOTE(salv-orlando): The above applies as long as Neutron's default
+        # policy is to restrict enable_snat usage to admins only.
+        return self._update_router(router_id, set_enable_snat=False, **kwargs)
+
+    def update_router_with_snat_gw_info(self, router_id, **kwargs):
+        """Update a router passing also the enable_snat attribute.
+
+        This method must be execute with admin credentials, otherwise the API
+        call will return a 404 error.
+        """
+        return self._update_router(router_id, set_enable_snat=True, **kwargs)
 
     def add_router_interface_with_subnet_id(self, router_id, subnet_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,

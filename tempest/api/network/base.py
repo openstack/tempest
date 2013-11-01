@@ -215,3 +215,19 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         vpnservice = body['vpnservice']
         cls.vpnservices.append(vpnservice)
         return vpnservice
+
+
+class BaseAdminNetworkTest(BaseNetworkTest):
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseAdminNetworkTest, cls).setUpClass()
+        admin_username = cls.config.compute_admin.username
+        admin_password = cls.config.compute_admin.password
+        admin_tenant = cls.config.compute_admin.tenant_name
+        if not (admin_username and admin_password and admin_tenant):
+            msg = ("Missing Administrative Network API credentials "
+                   "in configuration.")
+            raise cls.skipException(msg)
+        cls.admin_manager = clients.AdminManager(interface=cls._interface)
+        cls.admin_client = cls.admin_manager.network_client
