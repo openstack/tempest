@@ -80,13 +80,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['rxtx_factor'], self.rxtx)
         self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'],
                          self.ephemeral)
-        if self._interface == "xml":
-            XMLNS_OS_FLV_ACCESS = "http://docs.openstack.org/compute/ext/"\
-                "flavor_access/api/v2"
-            key = "{" + XMLNS_OS_FLV_ACCESS + "}is_public"
-            self.assertEqual(flavor[key], "True")
-        if self._interface == "json":
-            self.assertEqual(flavor['os-flavor-access:is_public'], True)
+        self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
         # Verify flavor is retrieved
         resp, flavor = self.client.get_flavor_details(new_flavor_id)
@@ -156,6 +150,14 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_create_list_flavor_without_extra_data(self):
         # Create a flavor and ensure it is listed
         # This operation requires the user to have 'admin' role
+
+        def verify_flavor_response_extension(flavor):
+            # check some extensions for the flavor create/show/detail response
+            self.assertEqual(flavor['swap'], '')
+            self.assertEqual(int(flavor['rxtx_factor']), 1)
+            self.assertEqual(int(flavor['OS-FLV-EXT-DATA:ephemeral']), 0)
+            self.assertEqual(flavor['os-flavor-access:is_public'], True)
+
         flavor_name = rand_name(self.flavor_name_prefix)
         new_flavor_id = rand_int_id(start=1000)
 
@@ -171,26 +173,20 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['vcpus'], self.vcpus)
         self.assertEqual(flavor['disk'], self.disk)
         self.assertEqual(int(flavor['id']), new_flavor_id)
-        self.assertEqual(flavor['swap'], '')
-        self.assertEqual(int(flavor['rxtx_factor']), 1)
-        self.assertEqual(int(flavor['OS-FLV-EXT-DATA:ephemeral']), 0)
-        if self._interface == "xml":
-            XMLNS_OS_FLV_ACCESS = "http://docs.openstack.org/compute/ext/"\
-                "flavor_access/api/v2"
-            key = "{" + XMLNS_OS_FLV_ACCESS + "}is_public"
-            self.assertEqual(flavor[key], "True")
-        if self._interface == "json":
-            self.assertEqual(flavor['os-flavor-access:is_public'], True)
+        verify_flavor_response_extension(flavor)
 
         # Verify flavor is retrieved
         resp, flavor = self.client.get_flavor_details(new_flavor_id)
         self.assertEqual(resp.status, 200)
         self.assertEqual(flavor['name'], flavor_name)
+        verify_flavor_response_extension(flavor)
+
         # Check if flavor is present in list
-        resp, flavors = self.client.list_flavors_with_detail()
+        resp, flavors = self.user_client.list_flavors_with_detail()
         self.assertEqual(resp.status, 200)
         for flavor in flavors:
             if flavor['name'] == flavor_name:
+                verify_flavor_response_extension(flavor)
                 flag = True
         self.assertTrue(flag)
 
