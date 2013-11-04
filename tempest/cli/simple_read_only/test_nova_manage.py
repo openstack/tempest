@@ -55,11 +55,11 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
                          self.nova_manage('', '--version', merge_stderr=True))
 
     def test_debug_flag(self):
-        self.assertNotEqual("", self.nova_manage('instance_type list',
+        self.assertNotEqual("", self.nova_manage('flavor list',
                             '--debug'))
 
     def test_verbose_flag(self):
-        self.assertNotEqual("", self.nova_manage('instance_type list',
+        self.assertNotEqual("", self.nova_manage('flavor list',
                             '--verbose'))
 
     # test actions
@@ -68,8 +68,6 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
 
     def test_flavor_list(self):
         self.assertNotEqual("", self.nova_manage('flavor list'))
-        self.assertEqual(self.nova_manage('instance_type list'),
-                         self.nova_manage('flavor list'))
 
     def test_db_archive_deleted_rows(self):
         # make sure command doesn't error out
