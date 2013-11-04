@@ -188,7 +188,9 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # changes-since returns all instances, including deleted.
         num_expected = (len(self.existing_fixtures) +
                         len(self.deleted_fixtures))
-        self.assertEqual(num_expected, len(body['servers']))
+        self.assertEqual(num_expected, len(body['servers']),
+                         "Number of servers %d is wrong in %s" %
+                         (num_expected, body['servers']))
 
     @attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_invalid_date(self):
