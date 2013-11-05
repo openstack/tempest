@@ -143,6 +143,10 @@ from tempest.services.object_storage.object_client import \
     ObjectClientCustomizedHeader
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
+from tempest.services.telemetry.json.telemetry_client import \
+    TelemetryClientJSON
+from tempest.services.telemetry.xml.telemetry_client import \
+    TelemetryClientXML
 from tempest.services.volume.json.admin.volume_hosts_client import \
     VolumeHostsClientJSON
 from tempest.services.volume.json.admin.volume_types_client import \
@@ -256,6 +260,8 @@ class Manager(object):
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientXML(
                     *client_args_v3_auth)
+            if CONF.service_available.ceilometer:
+                self.telemetry_client = TelemetryClientXML(*client_args)
 
         elif interface == 'json':
             self.certificates_client = CertificatesClientJSON(*client_args)
@@ -318,6 +324,8 @@ class Manager(object):
             self.volumes_extension_client = VolumeExtensionClientJSON(
                 *client_args)
             self.hosts_v3_client = HostsV3ClientJSON(*client_args)
+            if CONF.service_available.ceilometer:
+                self.telemetry_client = TelemetryClientJSON(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientJSON(
