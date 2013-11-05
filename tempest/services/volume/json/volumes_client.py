@@ -164,3 +164,24 @@ class VolumesClientJSON(RestClient):
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body, self.headers)
         return resp, body
+
+    def reset_volume_status(self, volume_id, status):
+        """Reset the Specified Volume's Status."""
+        post_body = json.dumps({'os-reset_status': {"status": status}})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body,
+                               self.headers)
+        return resp, body
+
+    def volume_begin_detaching(self, volume_id):
+        """Volume Begin Detaching."""
+        post_body = json.dumps({'os-begin_detaching': {}})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body,
+                               self.headers)
+        return resp, body
+
+    def volume_roll_detaching(self, volume_id):
+        """Volume Roll Detaching."""
+        post_body = json.dumps({'os-roll_detaching': {}})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body,
+                               self.headers)
+        return resp, body

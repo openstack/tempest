@@ -237,3 +237,32 @@ class VolumesClientXML(RestClientXML):
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def reset_volume_status(self, volume_id, status):
+        """Reset the Specified Volume's Status."""
+        post_body = Element("os-reset_status",
+                            status=status
+                            )
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def volume_begin_detaching(self, volume_id):
+        """Volume Begin Detaching."""
+        post_body = Element("os-begin_detaching")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def volume_roll_detaching(self, volume_id):
+        """Volume Roll Detaching."""
+        post_body = Element("os-roll_detaching")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
