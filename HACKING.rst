@@ -163,3 +163,26 @@ watch out for to try to avoid issues when running your tests in parallel.
 - If the execution of a set of tests is required to be serialized then locking
   can be used to perform this. See AggregatesAdminTest in
   tempest.api.compute.admin for an example of using locking.
+
+Stress Tests in Tempest
+-----------------------
+Any tempest test case can be flagged as a stress test. With this flag it will
+be automatically discovery and used in the stress test runs. The stress test
+framework itself is a facility to spawn and control worker processes in order
+to find race conditions (see ``tempest/stress/`` for more information). Please
+note that these stress tests can't be used for benchmarking purposes since they
+don't measure any performance characteristics.
+
+Example::
+
+  @stresstest(class_setup_per='process')
+  def test_this_and_that(self):
+    ...
+
+This will flag the test ``test_this_and_that`` as a stress test. The parameter
+``class_setup_per`` gives control when the setUpClass function should be called.
+
+Good candidates for stress tests are:
+
+- Scenario tests
+- API tests that have a wide focus
