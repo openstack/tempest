@@ -15,13 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
 
 
 class FixedIPsClientXML(RestClientXML):
@@ -30,10 +28,6 @@ class FixedIPsClientXML(RestClientXML):
         super(FixedIPsClientXML, self).__init__(config, username, password,
                                                 auth_url, tenant_name)
         self.service = self.config.compute.catalog_type
-
-    def _parse_fixed_ip_details(self, body):
-        body = xml_to_json(etree.fromstring(body))
-        return body
 
     def get_fixed_ip_details(self, fixed_ip):
         url = "os-fixed-ips/%s" % (fixed_ip)
