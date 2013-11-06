@@ -147,3 +147,26 @@ class SnapshotsClientXML(RestClientXML):
         except exceptions.NotFound:
             return True
         return False
+
+    def reset_snapshot_status(self, snapshot_id, status):
+        """Reset the specified snapshot's status."""
+        post_body = Element("os-reset_status",
+                            status=status
+                            )
+        url = 'snapshots/%s/action' % str(snapshot_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def update_snapshot_status(self, snapshot_id, status, progress):
+        """Update the specified snapshot's status."""
+        post_body = Element("os-update_snapshot_status",
+                            status=status,
+                            progress=progress
+                            )
+        url = 'snapshots/%s/action' % str(snapshot_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body

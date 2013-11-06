@@ -131,3 +131,21 @@ class SnapshotsClientJSON(RestClient):
         except exceptions.NotFound:
             return True
         return False
+
+    def reset_snapshot_status(self, snapshot_id, status):
+        """Reset the specified snapshot's status."""
+        post_body = json.dumps({'os-reset_status': {"status": status}})
+        resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body,
+                               self.headers)
+        return resp, body
+
+    def update_snapshot_status(self, snapshot_id, status, progress):
+        """Update the specified snapshot's status."""
+        post_body = {
+            'status': status,
+            'progress': progress
+        }
+        post_body = json.dumps({'os-update_snapshot_status': post_body})
+        url = 'snapshots/%s/action' % str(snapshot_id)
+        resp, body = self.post(url, post_body, self.headers)
+        return resp, body
