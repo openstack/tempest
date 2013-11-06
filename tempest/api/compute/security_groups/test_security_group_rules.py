@@ -15,12 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest import exceptions
 from tempest.test import attr
-from tempest.test import skip_because
 
 
 class SecurityGroupRulesTestJSON(base.BaseV2ComputeTest):
@@ -30,6 +30,7 @@ class SecurityGroupRulesTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(SecurityGroupRulesTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
+        cls.neutron_available = cls.config.service_available.neutron
 
     @attr(type='gate')
     def test_security_group_rules_create(self):
@@ -93,14 +94,14 @@ class SecurityGroupRulesTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.client.delete_security_group_rule, rule['id'])
         self.assertEqual(200, resp.status)
 
-    @skip_because(bug="1182384",
-                  condition=config.TempestConfig().service_available.neutron)
-    @attr(type=['negative', 'gate'])
+    @attr(type=['negative', 'smoke'])
     def test_security_group_rules_create_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid Parent group id
         # Adding rules to the invalid Security Group id
         parent_group_id = data_utils.rand_int_id(start=999)
+        if self.neutron_available:
+            parent_group_id = str(uuid.uuid4())
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
@@ -185,15 +186,16 @@ class SecurityGroupRulesTestJSON(base.BaseV2ComputeTest):
                           self.client.create_security_group_rule,
                           secgroup_id, ip_protocol, from_port, to_port)
 
-    @skip_because(bug="1182384",
-                  condition=config.TempestConfig().service_available.neutron)
-    @attr(type=['negative', 'gate'])
+    @attr(type=['negative', 'smoke'])
     def test_security_group_rules_delete_with_invalid_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with invalid rule id
+        group_rule_id = data_utils.rand_int_id(start=999)
+        if self.neutron_available:
+            group_rule_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_security_group_rule,
-                          data_utils.rand_int_id(start=999))
+                          group_rule_id)
 
     @attr(type='gate')
     def test_security_group_rules_list(self):

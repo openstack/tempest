@@ -16,6 +16,7 @@
 #    under the License.
 
 import testtools
+import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -32,6 +33,7 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(SecurityGroupsTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
+        cls.neutron_available = cls.config.service_available.neutron
 
     def _delete_security_group(self, securitygroup_id):
         resp, _ = self.client.delete_security_group(securitygroup_id)
@@ -108,9 +110,7 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
                          "The fetched Security Group is different "
                          "from the created Group")
 
-    @skip_because(bug="1182384",
-                  condition=config.TempestConfig().service_available.neutron)
-    @attr(type=['negative', 'gate'])
+    @attr(type=['negative', 'smoke'])
     def test_security_group_get_nonexistant_group(self):
         # Negative test:Should not be able to GET the details
         # of non-existent Security Group
@@ -121,6 +121,8 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
         # Creating a non-existent Security Group id
         while True:
             non_exist_id = data_utils.rand_int_id(start=999)
+            if self.neutron_available:
+                non_exist_id = str(uuid.uuid4())
             if non_exist_id not in security_group_id:
                 break
         self.assertRaises(exceptions.NotFound, self.client.get_security_group,
@@ -198,9 +200,7 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
                           self.client.delete_security_group,
                           default_security_group_id)
 
-    @skip_because(bug="1182384",
-                  condition=config.TempestConfig().service_available.neutron)
-    @attr(type=['negative', 'gate'])
+    @attr(type=['negative', 'smoke'])
     def test_delete_nonexistant_security_group(self):
         # Negative test:Deletion of a non-existent Security Group should Fail
         security_group_id = []
@@ -210,6 +210,8 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
         # Creating non-existent Security Group
         while True:
             non_exist_id = data_utils.rand_int_id(start=999)
+            if self.neutron_available:
+                non_exist_id = str(uuid.uuid4())
             if non_exist_id not in security_group_id:
                 break
         self.assertRaises(exceptions.NotFound,
