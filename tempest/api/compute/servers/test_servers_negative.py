@@ -359,6 +359,36 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.get_console_output,
                           nonexistent_server, 10)
 
+    @attr(type=['negative', 'gate'])
+    def test_force_delete_nonexistent_server_id(self):
+        non_existent_server_id = str(uuid.uuid4())
+
+        self.assertRaises(exceptions.NotFound,
+                          self.client.force_delete_server,
+                          non_existent_server_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_force_delete_server_invalid_state(self):
+        # we can only force-delete a server in 'soft-delete' state
+        self.assertRaises(exceptions.Conflict,
+                          self.client.force_delete_server,
+                          self.server_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_restore_nonexistent_server_id(self):
+        non_existent_server_id = str(uuid.uuid4())
+
+        self.assertRaises(exceptions.NotFound,
+                          self.client.restore_soft_deleted_server,
+                          non_existent_server_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_restore_server_invalid_state(self):
+        # we can only restore-delete a server in 'soft-delete' state
+        self.assertRaises(exceptions.Conflict,
+                          self.client.restore_soft_deleted_server,
+                          self.server_id)
+
 
 class ServersNegativeTestXML(ServersNegativeTestJSON):
     _interface = 'xml'
