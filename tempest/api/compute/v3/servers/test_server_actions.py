@@ -30,7 +30,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class ServerActionsTestJSON(base.BaseV2ComputeTest):
+class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
     resize_available = tempest.config.TempestConfig().\
         compute_feature_enabled.resize
@@ -39,7 +39,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
-        super(ServerActionsTestJSON, self).setUp()
+        super(ServerActionsV3TestJSON, self).setUp()
         # Check if the server is in a clean state after test
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
@@ -49,7 +49,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServerActionsTestJSON, cls).setUpClass()
+        super(ServerActionsV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.rebuild_server()
 
@@ -122,7 +122,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                                    name=new_name,
                                                    metadata=meta,
                                                    personality=personality,
-                                                   adminPass=password)
+                                                   admin_pass=password)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -274,5 +274,5 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
 
-class ServerActionsTestXML(ServerActionsTestJSON):
+class ServerActionsV3TestXML(ServerActionsV3TestJSON):
     _interface = 'xml'

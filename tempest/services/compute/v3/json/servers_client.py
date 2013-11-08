@@ -2,6 +2,7 @@
 
 # Copyright 2012 OpenStack Foundation
 # Copyright 2013 Hewlett-Packard Development Company, L.P.
+# Copyright 2013 IBM Corp
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -25,14 +26,14 @@ from tempest.common import waiters
 from tempest import exceptions
 
 
-class ServersClientJSON(RestClient):
+class ServersV3ClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None,
-                 auth_version='v2'):
-        super(ServersClientJSON, self).__init__(config, username, password,
-                                                auth_url, tenant_name,
-                                                auth_version=auth_version)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, config, username, password, auth_url,
+                 tenant_name=None, auth_version='v2'):
+        super(ServersV3ClientJSON, self).__init__(config, username, password,
+                                                  auth_url, tenant_name,
+                                                  auth_version=auth_version)
+        self.service = self.config.compute.catalog_v3_type
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
@@ -41,7 +42,7 @@ class ServersClientJSON(RestClient):
         image_ref (Required): Reference to the image used to build the server.
         flavor_ref (Required): The flavor used to build the server.
         Following optional keyword arguments are accepted:
-        adminPass: Sets the initial root password.
+        admin_pass: Sets the initial root password.
         key_name: Key name of keypair that was created earlier.
         meta: A dictionary of values to be used as metadata.
         personality: A list of dictionaries for files to be injected into
@@ -50,8 +51,8 @@ class ServersClientJSON(RestClient):
         networks: A list of network dicts with UUID and fixed_ip.
         user_data: User data for instance.
         availability_zone: Availability zone in which to launch instance.
-        accessIPv4: The IPv4 access address for the server.
-        accessIPv6: The IPv6 access address for the server.
+        access_ip_v4: The IPv4 access address for the server.
+        access_ip_v6: The IPv6 access address for the server.
         min_count: Count of minimum number of instances to launch.
         max_count: Count of maximum number of instances to launch.
         disk_config: Determines if user or admin controls disk configuration.
@@ -59,16 +60,22 @@ class ServersClientJSON(RestClient):
         """
         post_body = {
             'name': name,
-            'imageRef': image_ref,
-            'flavorRef': flavor_ref
+            'image_ref': image_ref,
+            'flavor_ref': flavor_ref
         }
 
-        for option in ['personality', 'adminPass', 'key_name',
-                       'security_groups', 'networks', 'user_data',
-                       'availability_zone', 'accessIPv4', 'accessIPv6',
-                       'min_count', 'max_count', ('metadata', 'meta'),
-                       ('OS-DCF:diskConfig', 'disk_config'),
-                       'return_reservation_id']:
+        for option in ['personality', 'admin_pass', 'key_name',
+                       'security_groups', 'networks',
+                       ('os-user-data:user_data', 'user_data'),
+                       ('os-availability-zone:availability_zone',
+                        'availability_zone'),
+                       'access_ip_v4', 'access_ip_v6',
+                       ('os-multiple-create:min_count', 'min_count'),
+                       ('os-multiple-create:max_count', 'max_count'),
+                       ('metadata', 'meta'),
+                       ('os-disk-config:disk_config', 'disk_config'),
+                       ('os-multiple-create:return_reservation_id',
+                       'return_reservation_id')]:
             if isinstance(option, tuple):
                 post_param = option[0]
                 key = option[1]
@@ -88,15 +95,15 @@ class ServersClientJSON(RestClient):
             return resp, body
         return resp, body['server']
 
-    def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
-                      accessIPv6=None, disk_config=None):
+    def update_server(self, server_id, name=None, meta=None, access_ip_v4=None,
+                      access_ip_v6=None, disk_config=None):
         """
         Updates the properties of an existing server.
         server_id: The id of an existing server.
         name: The name of the server.
         personality: A list of files to be injected into the server.
-        accessIPv4: The IPv4 access address for the server.
-        accessIPv6: The IPv6 access address for the server.
+        access_ip_v4: The IPv4 access address for the server.
+        access_ip_v6: The IPv6 access address for the server.
         """
 
         post_body = {}
@@ -107,11 +114,11 @@ class ServersClientJSON(RestClient):
         if name is not None:
             post_body['name'] = name
 
-        if accessIPv4 is not None:
-            post_body['accessIPv4'] = accessIPv4
+        if access_ip_v4 is not None:
+            post_body['access_ip_v4'] = access_ip_v4
 
-        if accessIPv6 is not None:
-            post_body['accessIPv6'] = accessIPv6
+        if access_ip_v6 is not None:
+            post_body['access_ip_v6'] = access_ip_v6
 
         if disk_config is not None:
             post_body['OS-DCF:diskConfig'] = disk_config
@@ -197,10 +204,10 @@ class ServersClientJSON(RestClient):
             body = json.loads(body)[response_key]
         return resp, body
 
-    def change_password(self, server_id, adminPass):
+    def change_password(self, server_id, admin_password):
         """Changes the root password for the server."""
-        return self.action(server_id, 'changePassword', None,
-                           adminPass=adminPass)
+        return self.action(server_id, 'change_password', None,
+                           admin_password=admin_password)
 
     def reboot(self, server_id, reboot_type):
         """Reboots a server."""
@@ -208,31 +215,44 @@ class ServersClientJSON(RestClient):
 
     def rebuild(self, server_id, image_ref, **kwargs):
         """Rebuilds a server with a new image."""
-        kwargs['imageRef'] = image_ref
+        kwargs['image_ref'] = image_ref
         if 'disk_config' in kwargs:
-            kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
+            kwargs['os-disk-config:disk_config'] = kwargs['disk_config']
             del kwargs['disk_config']
         return self.action(server_id, 'rebuild', 'server', **kwargs)
 
     def resize(self, server_id, flavor_ref, **kwargs):
         """Changes the flavor of a server."""
-        kwargs['flavorRef'] = flavor_ref
+        kwargs['flavor_ref'] = flavor_ref
         if 'disk_config' in kwargs:
-            kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
+            kwargs['os-disk-config:disk_config'] = kwargs['disk_config']
             del kwargs['disk_config']
         return self.action(server_id, 'resize', None, **kwargs)
 
     def confirm_resize(self, server_id, **kwargs):
         """Confirms the flavor change for a server."""
-        return self.action(server_id, 'confirmResize', None, **kwargs)
+        return self.action(server_id, 'confirm_resize', None, **kwargs)
 
     def revert_resize(self, server_id, **kwargs):
         """Reverts a server back to its original flavor."""
-        return self.action(server_id, 'revertResize', None, **kwargs)
+        return self.action(server_id, 'revert_resize', None, **kwargs)
 
-    def create_image(self, server_id, name):
-        """Creates an image of the given server."""
-        return self.action(server_id, 'createImage', None, name=name)
+    def create_image(self, server_id, name, meta=None):
+        """Creates an image of the original server."""
+
+        post_body = {
+            'create_image': {
+                'name': name,
+            }
+        }
+
+        if meta is not None:
+            post_body['create_image']['metadata'] = meta
+
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body, self.headers)
+        return resp, body
 
     def list_server_metadata(self, server_id):
         resp, body = self.get("servers/%s/metadata" % str(server_id))
@@ -259,14 +279,14 @@ class ServersClientJSON(RestClient):
     def get_server_metadata_item(self, server_id, key):
         resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key))
         body = json.loads(body)
-        return resp, body['meta']
+        return resp, body['metadata']
 
     def set_server_metadata_item(self, server_id, key, meta):
-        post_body = json.dumps({'meta': meta})
+        post_body = json.dumps({'metadata': meta})
         resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
                               post_body, self.headers)
         body = json.loads(body)
-        return resp, body['meta']
+        return resp, body['metadata']
 
     def delete_server_metadata_item(self, server_id, key):
         resp, body = self.delete("servers/%s/metadata/%s" %
@@ -274,36 +294,27 @@ class ServersClientJSON(RestClient):
         return resp, body
 
     def stop(self, server_id, **kwargs):
-        return self.action(server_id, 'os-stop', None, **kwargs)
+        return self.action(server_id, 'stop', None, **kwargs)
 
     def start(self, server_id, **kwargs):
-        return self.action(server_id, 'os-start', None, **kwargs)
+        return self.action(server_id, 'start', None, **kwargs)
 
     def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
         """Attaches a volume to a server instance."""
-        post_body = json.dumps({
-            'volumeAttachment': {
-                'volumeId': volume_id,
-                'device': device,
-            }
-        })
-        resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
-                               post_body, self.headers)
-        return resp, body
+        return self.action(server_id, 'attach', None, volume_id=volume_id,
+                           device=device)
 
     def detach_volume(self, server_id, volume_id):
         """Detaches a volume from a server instance."""
-        resp, body = self.delete('servers/%s/os-volume_attachments/%s' %
-                                 (server_id, volume_id))
-        return resp, body
+        return self.action(server_id, 'detach', None, volume_id=volume_id)
 
     def add_security_group(self, server_id, name):
         """Adds a security group to the server."""
-        return self.action(server_id, 'addSecurityGroup', None, name=name)
+        return self.action(server_id, 'add_security_group', None, name=name)
 
     def remove_security_group(self, server_id, name):
         """Removes a security group from the server."""
-        return self.action(server_id, 'removeSecurityGroup', None, name=name)
+        return self.action(server_id, 'remove_security_group', None, name=name)
 
     def live_migrate_server(self, server_id, dest_host, use_block_migration):
         """This should be called with administrator privileges ."""
@@ -314,7 +325,7 @@ class ServersClientJSON(RestClient):
             "host": dest_host
         }
 
-        req_body = json.dumps({'os-migrateLive': migrate_params})
+        req_body = json.dumps({'migrate_live': migrate_params})
 
         resp, body = self.post("servers/%s/action" % str(server_id),
                                req_body, self.headers)
@@ -350,23 +361,15 @@ class ServersClientJSON(RestClient):
 
     def reset_state(self, server_id, state='error'):
         """Resets the state of a server to active/error."""
-        return self.action(server_id, 'os-resetState', None, state=state)
+        return self.action(server_id, 'reset_state', None, state=state)
 
     def get_console_output(self, server_id, length):
-        return self.action(server_id, 'os-getConsoleOutput', 'output',
+        return self.action(server_id, 'get_console_output', 'output',
                            length=length)
-
-    def list_virtual_interfaces(self, server_id):
-        """
-        List the virtual interfaces used in an instance.
-        """
-        resp, body = self.get('/'.join(['servers', server_id,
-                              'os-virtual-interfaces']))
-        return resp, json.loads(body)
 
     def rescue_server(self, server_id, adminPass=None):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, adminPass=adminPass)
+        return self.action(server_id, 'rescue', None, admin_pass=adminPass)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
@@ -374,7 +377,8 @@ class ServersClientJSON(RestClient):
 
     def get_server_diagnostics(self, server_id):
         """Get the usage data for a server."""
-        resp, body = self.get("servers/%s/diagnostics" % str(server_id))
+        resp, body = self.get("servers/%s/os-server-diagnostics" %
+                              str(server_id))
         return resp, json.loads(body)
 
     def list_instance_actions(self, server_id):
@@ -382,11 +386,11 @@ class ServersClientJSON(RestClient):
         resp, body = self.get("servers/%s/os-instance-actions" %
                               str(server_id))
         body = json.loads(body)
-        return resp, body['instanceActions']
+        return resp, body['instance_actions']
 
     def get_instance_action(self, server_id, request_id):
         """Returns the action details of the provided server."""
         resp, body = self.get("servers/%s/os-instance-actions/%s" %
                               (str(server_id), str(request_id)))
         body = json.loads(body)
-        return resp, body['instanceAction']
+        return resp, body['instance_action']
