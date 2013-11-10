@@ -36,8 +36,6 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.identity_admin_client = cls._get_identity_admin_client()
         cls.sg_client = cls.security_groups_client
 
-        resp, tenants = cls.identity_admin_client.list_tenants()
-
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
         cls.demo_tenant_id = cls.isolated_creds.get_primary_user().get(
