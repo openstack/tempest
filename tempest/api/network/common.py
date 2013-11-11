@@ -61,6 +61,11 @@ class DeletableSubnet(DeletableResource):
         super(DeletableSubnet, self).__init__(*args, **kwargs)
         self._router_ids = set()
 
+    def update(self, *args, **kwargs):
+        body = dict(subnet=dict(*args, **kwargs))
+        result = self.client.update_subnet(subnet=self.id, body=body)
+        super(DeletableSubnet, self).update(**result['subnet'])
+
     def add_to_router(self, router_id):
         self._router_ids.add(router_id)
         body = dict(subnet_id=self.id)

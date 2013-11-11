@@ -276,24 +276,46 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         ipatxt = ssh_client.get_ip_list()
         return reg.findall(ipatxt)
 
-    def _check_network_internal_connectivity(self):
+    def _check_network_internal_connectivity(self, network):
         """
         via ssh check VM internal connectivity:
-        - ping internal DHCP port, implying in-tenant connectivty
+        - ping internal gateway and DHCP port, implying in-tenant connectivity
+        pinging both, because L3 and DHCP agents might be on different nodes
         """
         floating_ip, server = self.floating_ip_tuple
         # get internal ports' ips:
         # get all network ports in the new network
         internal_ips = (p['fixed_ips'][0]['ip_address'] for p in
                         self._list_ports(tenant_id=server.tenant_id,
-                                         network_id=self.new_net.id)
+                                         network_id=network.id)
                         if p['device_owner'].startswith('network'))
 
+        self._check_server_connectivity(floating_ip, internal_ips)
+
+    def _check_network_external_connectivity(self):
+        """
+        ping public network default gateway to imply external connectivity
+
+        """
+        if not CONF.network.public_network_id:
+            msg = 'public network not defined.'
+            LOG.info(msg)
+            return
+
+        subnet = self.network_client.list_subnets(
+            network_id=CONF.network.public_network_id)['subnets']
+        self.assertEqual(1, len(subnet), "Found %d subnets" % len(subnet))
+
+        external_ips = [subnet[0]['gateway_ip']]
+        self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
+                                        external_ips)
+
+    def _check_server_connectivity(self, floating_ip, address_list):
         ip_address = floating_ip.floating_ip_address
-        private_key = self.servers[server].private_key
+        private_key = self.servers[self.floating_ip_tuple.server].private_key
         ssh_source = self._ssh_to_server(ip_address, private_key)
 
-        for remote_ip in internal_ips:
+        for remote_ip in address_list:
             try:
                 self.assertTrue(self._check_remote_connectivity(ssh_source,
                                                                 remote_ip),
@@ -322,14 +344,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
          ssh server hosted at the IP address.  This check guarantees
          that the IP address is associated with the target VM.
 
-        - detach the floating-ip from the VM and verify that it becomes
-        unreachable
-
-        - associate detached floating ip to a new VM and verify connectivity.
-        VMs are created with unique keypair so connectivity also asserts that
-        floating IP is associated with the new VM instead of the old one
-
-        # TODO(mnewby) - Need to implement the following:
         - the Tempest host can ssh into the VM via the IP address and
          successfully execute the following:
 
@@ -341,8 +355,18 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
          - ping an internal IP address, implying connectivity to another
            VM on the same network.
 
+        - detach the floating-ip from the VM and verify that it becomes
+        unreachable
+
+        - associate detached floating ip to a new VM and verify connectivity.
+        VMs are created with unique keypair so connectivity also asserts that
+        floating IP is associated with the new VM instead of the old one
+
+
         """
         self._check_public_network_connectivity(should_connect=True)
+        self._check_network_internal_connectivity(network=self.network)
+        self._check_network_external_connectivity()
         self._disassociate_floating_ips()
         self._check_public_network_connectivity(should_connect=False,
                                                 msg="after disassociate "
@@ -367,4 +391,4 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_public_network_connectivity(should_connect=True)
         self._create_new_network()
         self._hotplug_server()
-        self._check_network_internal_connectivity()
+        self._check_network_internal_connectivity(network=self.new_net)
