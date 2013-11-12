@@ -17,15 +17,12 @@
 
 from tempest.api.compute import base
 from tempest.common.utils.data_utils import rand_name
-import tempest.config
 from tempest import exceptions
 from tempest.test import attr
 
 
 class ServerRescueTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
-
-    run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
     @classmethod
     def setUpClass(cls):
