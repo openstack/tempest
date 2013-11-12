@@ -36,7 +36,7 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_list_hosts(self):
         resp, hosts = self.client.list_hosts()
         self.assertEqual(200, resp.status)
-        self.assertTrue(len(hosts) >= 2)
+        self.assertTrue(len(hosts) >= 2, str(hosts))
 
     @attr(type='gate')
     def test_list_hosts_with_zone(self):

@@ -39,7 +39,7 @@ class InstanceActionsTestJSON(base.BaseV2ComputeTest):
 
         resp, body = self.client.list_instance_actions(self.server_id)
         self.assertEqual(200, resp.status)
-        self.assertTrue(len(body) == 2)
+        self.assertTrue(len(body) == 2, str(body))
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
 

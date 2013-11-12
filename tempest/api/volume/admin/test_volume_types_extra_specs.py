@@ -47,8 +47,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
             self.volume_type['id'])
         self.assertEqual(200, resp.status)
         self.assertIsInstance(body, dict)
-        self.assertTrue('spec1' in body, "Incorrect volume type extra"
-                        " spec returned")
+        self.assertIn('spec1', body)
 
     @attr(type='gate')
     def test_volume_type_extra_specs_update(self):
@@ -66,8 +65,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
             extra_spec.keys()[0],
             extra_spec)
         self.assertEqual(200, resp.status)
-        self.assertTrue('spec2' in body,
-                        "Volume type extra spec incorrectly updated")
+        self.assertIn('spec2', body)
         self.assertEqual(extra_spec['spec2'], body['spec2'],
                          "Volume type extra spec incorrectly updated")
 

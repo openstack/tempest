@@ -106,8 +106,8 @@ class RoutersTest(base.BaseAdminNetworkTest):
         self.assertEqual('200', resp['status'])
         self.addCleanup(self._remove_router_interface_with_subnet_id,
                         router['id'], subnet['id'])
-        self.assertTrue('subnet_id' in interface.keys())
-        self.assertTrue('port_id' in interface.keys())
+        self.assertIn('subnet_id', interface.keys())
+        self.assertIn('port_id', interface.keys())
         # Verify router id is equal to device id in port details
         resp, show_port_body = self.client.show_port(
             interface['port_id'])
@@ -126,8 +126,8 @@ class RoutersTest(base.BaseAdminNetworkTest):
         self.assertEqual('200', resp['status'])
         self.addCleanup(self._remove_router_interface_with_port_id,
                         router['id'], port_body['port']['id'])
-        self.assertTrue('subnet_id' in interface.keys())
-        self.assertTrue('port_id' in interface.keys())
+        self.assertIn('subnet_id', interface.keys())
+        self.assertIn('port_id', interface.keys())
         # Verify router id is equal to device id in port details
         resp, show_port_body = self.client.show_port(
             interface['port_id'])

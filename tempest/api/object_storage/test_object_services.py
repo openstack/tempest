@@ -96,7 +96,7 @@ class ObjectTest(base.BaseObjectTest):
             self.container_name, object_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
         actual_meta_key = 'x-object-meta-' + meta_key
-        self.assertTrue(actual_meta_key in resp)
+        self.assertIn(actual_meta_key, resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
 
     @attr(type='smoke')
@@ -220,7 +220,7 @@ class ObjectTest(base.BaseObjectTest):
                                                    object_name)
         self.assertEqual(body, data)
         actual_meta_key = 'x-object-meta-' + meta_key
-        self.assertTrue(actual_meta_key in resp)
+        self.assertIn(actual_meta_key, resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
 
     @attr(type='gate')
