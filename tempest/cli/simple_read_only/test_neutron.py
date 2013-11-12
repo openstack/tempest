@@ -76,6 +76,25 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
     def test_neutron_meter_label_rule_list(self):
         self.neutron('meter-label-rule-list')
 
+    def _test_neutron_lbaas_command(self, command):
+        try:
+            self.neutron(command)
+        except tempest.cli.CommandFailed as e:
+            if '404 Not Found' not in e.stderr:
+                self.fail('%s: Unexpected failure.' % command)
+
+    def test_neutron_lb_healthmonitor_list(self):
+        self._test_neutron_lbaas_command('lb-healthmonitor-list')
+
+    def test_neutron_lb_member_list(self):
+        self._test_neutron_lbaas_command('lb-member-list')
+
+    def test_neutron_lb_pool_list(self):
+        self._test_neutron_lbaas_command('lb-pool-list')
+
+    def test_neutron_lb_vip_list(self):
+        self._test_neutron_lbaas_command('lb-vip-list')
+
     def test_neutron_net_external_list(self):
         self.neutron('net-external-list')
 
