@@ -26,6 +26,16 @@ location of the log files:
 To activate logging on your console please make sure that you activate `use_stderr`
 in tempest.conf or use the default `logging.conf.sample` file.
 
+Running default stress test set
+-------------------------------
+
+The stress test framework can automatically discover test inside the tempest
+test suite. All test flag with the `@stresstest` decorator will be executed.
+In order to use this discovery you have to be in the tempest root directory
+and execute the following:
+
+	tempest/stress/run_stress.py -a -d 30
+
 Running the sample test
 -----------------------
 
