@@ -43,7 +43,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         cls.img_client = cls.images_client
         cls.alt_os = clients.AltManager()
         cls.alt_client = cls.alt_os.servers_client
-        resp, server = cls.create_server(wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     @attr(type=['negative', 'gate'])
@@ -51,7 +51,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Create a server with name parameter empty
 
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           name='')
 
     @attr(type=['negative', 'gate'])
@@ -63,7 +63,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                    'contents': file_contents}]
 
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           personality=person)
 
     @attr(type=['negative', 'gate'])
@@ -71,7 +71,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Create a server with an unknown image
 
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           image_id=-1)
 
     @attr(type=['negative', 'gate'])
@@ -79,7 +79,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Create a server with an unknown flavor
 
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           flavor=-1,)
 
     @attr(type=['negative', 'gate'])
@@ -88,7 +88,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         IPv4 = '1.1.1.1.1.1'
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server, accessIPv4=IPv4)
+                          self.create_test_server, accessIPv4=IPv4)
 
     @attr(type=['negative', 'gate'])
     def test_invalid_ip_v6_address(self):
@@ -97,7 +97,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         IPv6 = 'notvalid'
 
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server, accessIPv6=IPv6)
+                          self.create_test_server, accessIPv6=IPv6)
 
     @attr(type=['negative', 'gate'])
     def test_resize_server_with_non_existent_flavor(self):
@@ -133,7 +133,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_rebuild_reboot_deleted_server(self):
         # Rebuild and Reboot a deleted server
-        _, server = self.create_server()
+        _, server = self.create_test_server()
         self.client.delete_server(server['id'])
         self.client.wait_for_server_termination(server['id'])
 
@@ -168,7 +168,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         server_name = 12345
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           name=server_name)
 
     @attr(type=['negative', 'gate'])
@@ -177,7 +177,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         server_name = 'a' * 256
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           name=server_name)
 
     @attr(type=['negative', 'gate'])
@@ -187,7 +187,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         networks = [{'fixed_ip': '10.0.1.1', 'uuid': 'a-b-c-d-e-f-g-h-i-j'}]
 
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           networks=networks)
 
     @attr(type=['negative', 'gate'])
@@ -196,7 +196,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         key_name = rand_name('key')
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           key_name=key_name)
 
     @attr(type=['negative', 'gate'])
@@ -205,7 +205,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         metadata = {'a': 'b' * 260}
         self.assertRaises(exceptions.OverLimit,
-                          self.create_server,
+                          self.create_test_server,
                           meta=metadata)
 
     @attr(type=['negative', 'gate'])
@@ -280,7 +280,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         security_groups = [{'name': 'does_not_exist'}]
         self.assertRaises(exceptions.BadRequest,
-                          self.create_server,
+                          self.create_test_server,
                           security_groups=security_groups)
 
     @attr(type=['negative', 'gate'])

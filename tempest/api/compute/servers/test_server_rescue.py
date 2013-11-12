@@ -62,12 +62,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
             cls.volume_to_detach['id'], 'available')
 
         # Server for positive tests
-        resp, server = cls.create_server(image_id=cls.image_ref,
-                                         flavor=cls.flavor_ref,
-                                         wait_until='BUILD')
-        resp, resc_server = cls.create_server(image_id=cls.image_ref,
-                                              flavor=cls.flavor_ref,
-                                              wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='BUILD')
+        resp, resc_server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         cls.password = server['adminPass']
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')

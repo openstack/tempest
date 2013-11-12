@@ -59,7 +59,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         cls.alt_security_client = cls.alt_manager.security_groups_client
 
         cls.alt_security_client._set_auth()
-        resp, server = cls.create_server(wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
         resp, cls.server = cls.client.get_server(server['id'])
 
         name = rand_name('image')

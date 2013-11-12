@@ -34,7 +34,7 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
         created servers into the servers list to be cleaned up after all.
         """
         kwargs['name'] = kwargs.get('name', self._generate_name())
-        resp, body = self.create_server(**kwargs)
+        resp, body = self.create_test_server(**kwargs)
 
         return resp, body
 

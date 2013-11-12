@@ -92,7 +92,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         super(BaseComputeTest, cls).tearDownClass()
 
     @classmethod
-    def create_server(cls, **kwargs):
+    def create_test_server(cls, **kwargs):
         """Wrapper utility that returns a test server."""
         name = rand_name(cls.__name__ + "-instance")
         if 'name' in kwargs:
@@ -187,7 +187,7 @@ class BaseV2ComputeTest(BaseComputeTest):
         except Exception as exc:
             LOG.exception(exc)
             pass
-        resp, server = cls.create_server(wait_until='ACTIVE', **kwargs)
+        resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.server_id = server['id']
         cls.password = server['adminPass']
 
@@ -258,7 +258,7 @@ class BaseV3ComputeTest(BaseComputeTest):
         except Exception as exc:
             LOG.exception(exc)
             pass
-        resp, server = cls.create_server(wait_until='ACTIVE', **kwargs)
+        resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.server_id = server['id']
         cls.password = server['admin_pass']
 

@@ -255,11 +255,10 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
         server_name = rand_name('test_server_')
-        servers_client = self.servers_client
         admin_servers_client = self.os_adm.servers_client
-        resp, server = self.create_server(name=server_name,
-                                          availability_zone=az_name)
-        servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_test_server(name=server_name,
+                                               availability_zone=az_name,
+                                               wait_until='ACTIVE')
         resp, body = admin_servers_client.get_server(server['id'])
         self.assertEqual(self.host, body[self._host_key])
 

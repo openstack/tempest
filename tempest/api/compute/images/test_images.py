@@ -66,7 +66,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_image_from_deleted_server(self):
         # An image should not be created if the server instance is removed
-        resp, server = self.create_server(wait_until='ACTIVE')
+        resp, server = self.create_test_server(wait_until='ACTIVE')
 
         # Delete server before trying to create server
         self.servers_client.delete_server(server['id'])
@@ -91,7 +91,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
 
     @attr(type=['negative', 'gate'])
     def test_create_image_from_stopped_server(self):
-        resp, server = self.create_server(wait_until='ACTIVE')
+        resp, server = self.create_test_server(wait_until='ACTIVE')
         self.servers_client.stop(server['id'])
         self.servers_client.wait_for_server_status(server['id'],
                                                    'SHUTOFF')
@@ -106,7 +106,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_delete_saving_image(self):
         snapshot_name = rand_name('test-snap-')
-        resp, server = self.create_server(wait_until='ACTIVE')
+        resp, server = self.create_test_server(wait_until='ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
         resp, image = self.create_image_from_server(server['id'],
                                                     name=snapshot_name,

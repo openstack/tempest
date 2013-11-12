@@ -34,7 +34,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         cls.servers_client = cls.servers_client
         cls.client = cls.images_client
 
-        resp, server = cls.create_server(wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
         # Snapshot the server once to save time

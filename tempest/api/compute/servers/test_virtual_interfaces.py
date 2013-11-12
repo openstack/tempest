@@ -34,7 +34,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(VirtualInterfacesTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
-        resp, server = cls.create_server(wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
     @skip_because(bug="1183436",

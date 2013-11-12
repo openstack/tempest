@@ -44,12 +44,12 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         personality = [{'path': '/test.txt',
                        'contents': base64.b64encode(file_contents)}]
         cls.client = cls.servers_client
-        cli_resp = cls.create_server(name=cls.name,
-                                     meta=cls.meta,
-                                     accessIPv4=cls.accessIPv4,
-                                     accessIPv6=cls.accessIPv6,
-                                     personality=personality,
-                                     disk_config=cls.disk_config)
+        cli_resp = cls.create_test_server(name=cls.name,
+                                          meta=cls.meta,
+                                          accessIPv4=cls.accessIPv4,
+                                          accessIPv6=cls.accessIPv6,
+                                          personality=personality,
+                                          disk_config=cls.disk_config)
         cls.resp, cls.server_initial = cli_resp
         cls.password = cls.server_initial['adminPass']
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')

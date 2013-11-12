@@ -119,7 +119,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         cores=default_vcpu_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_server)
+        self.assertRaises(exceptions.OverLimit, self.create_test_server)
 
     @attr(type='gate')
     def test_create_server_when_memory_quota_is_full(self):
@@ -134,7 +134,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         ram=default_mem_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_server)
+        self.assertRaises(exceptions.OverLimit, self.create_test_server)
 
     @attr(type='gate')
     def test_update_quota_normal_user(self):
@@ -155,7 +155,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                                          instances=instances_quota)
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_server)
+        self.assertRaises(exceptions.OverLimit, self.create_test_server)
 
     @skip_because(bug="1186354",
                   condition=config.TempestConfig().service_available.neutron)

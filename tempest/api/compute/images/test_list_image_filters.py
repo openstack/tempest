@@ -38,8 +38,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         cls.image_ids = []
 
         try:
-            resp, cls.server1 = cls.create_server()
-            resp, cls.server2 = cls.create_server(wait_until='ACTIVE')
+            resp, cls.server1 = cls.create_test_server()
+            resp, cls.server2 = cls.create_test_server(wait_until='ACTIVE')
             # NOTE(sdague) this is faster than doing the sync wait_util on both
             cls.servers_client.wait_for_server_status(cls.server1['id'],
                                                       'ACTIVE')

@@ -28,7 +28,7 @@ class ServerAddressesTest(base.BaseV2ComputeTest):
         super(ServerAddressesTest, cls).setUpClass()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_server(wait_until='ACTIVE')
+        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
 
     @attr(type=['negative', 'gate'])
     def test_list_server_addresses_invalid_server_id(self):

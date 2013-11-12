@@ -40,8 +40,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
             self.assertEqual(iface['fixed_ips'][0]['ip_address'], fixed_ip)
 
     def _create_server_get_interfaces(self):
-        resp, server = self.create_server()
-        self.os.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.create_test_server(wait_until='ACTIVE')
         resp, ifs = self.client.list_interfaces(server['id'])
         resp, body = self.client.wait_for_interface_status(
             server['id'], ifs[0]['port_id'], 'ACTIVE')

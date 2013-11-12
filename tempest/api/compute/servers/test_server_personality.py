@@ -43,7 +43,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
                                 'contents': base64.b64encode(file_contents)})
-        self.assertRaises(exceptions.OverLimit, self.create_server,
+        self.assertRaises(exceptions.OverLimit, self.create_test_server,
                           personality=personality)
 
     @attr(type='gate')
@@ -60,8 +60,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
                 'path': path,
                 'contents': base64.b64encode(file_contents),
             })
-        resp, server = self.create_server(personality=person)
-        self.addCleanup(self.client.delete_server, server['id'])
+        resp, server = self.create_test_server(personality=person)
         self.assertEqual('202', resp['status'])
 
 

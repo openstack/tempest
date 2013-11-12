@@ -35,7 +35,7 @@ class FloatingIPsTestJSON(base.BaseV2ComputeTest):
         cls.servers_client = cls.servers_client
 
         # Server creation
-        resp, server = cls.create_server(wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         resp, body = cls.servers_client.get_server(server['id'])
         # Floating IP creation
