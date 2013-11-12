@@ -128,6 +128,22 @@ class VolumesClientJSON(RestClient):
         resp, body = self.post(url, post_body, self.headers)
         return resp, body
 
+    def reserve_volume(self, volume_id):
+        """Reserves a volume."""
+        post_body = {}
+        post_body = json.dumps({'os-reserve': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body, self.headers)
+        return resp, body
+
+    def unreserve_volume(self, volume_id):
+        """Restore a reserved volume ."""
+        post_body = {}
+        post_body = json.dumps({'os-unreserve': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body, self.headers)
+        return resp, body
+
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
         resp, body = self.get_volume(volume_id)

@@ -266,3 +266,21 @@ class VolumesClientXML(RestClientXML):
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def reserve_volume(self, volume_id):
+        """Reserves a volume."""
+        post_body = Element("os-reserve")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def unreserve_volume(self, volume_id):
+        """Restore a reserved volume ."""
+        post_body = Element("os-unreserve")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
