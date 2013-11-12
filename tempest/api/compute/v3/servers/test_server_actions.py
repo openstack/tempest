@@ -122,7 +122,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
                                                    name=new_name,
                                                    metadata=meta,
                                                    personality=personality,
-                                                   admin_pass=password)
+                                                   admin_password=password)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])

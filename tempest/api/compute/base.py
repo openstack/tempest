@@ -260,7 +260,7 @@ class BaseV3ComputeTest(BaseComputeTest):
             pass
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.server_id = server['id']
-        cls.password = server['admin_pass']
+        cls.password = server['admin_password']
 
 
 class BaseV3ComputeAdminTest(BaseV3ComputeTest):

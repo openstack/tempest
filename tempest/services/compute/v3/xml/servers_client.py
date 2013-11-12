@@ -295,7 +295,7 @@ class ServersV3ClientXML(RestClientXML):
                          flavor_ref=flavor_ref,
                          image_ref=image_ref,
                          name=name)
-        attrs = ["admin_pass", "access_ip_v4", "access_ip_v6", "key_name",
+        attrs = ["admin_password", "access_ip_v4", "access_ip_v6", "key_name",
                  ("os-user-data:user_data",
                   'user_data',
                   'xmlns:os-user-data',
@@ -438,7 +438,7 @@ class ServersV3ClientXML(RestClientXML):
 
     def change_password(self, server_id, password):
         return self.action(server_id, "change_password", None,
-                           admin_pass=password)
+                           admin_password=password)
 
     def reboot(self, server_id, reboot_type):
         return self.action(server_id, "reboot", None, type=reboot_type)
@@ -586,9 +586,10 @@ class ServersV3ClientXML(RestClientXML):
         return self.action(server_id, 'get_console_output', 'output',
                            length=length)
 
-    def rescue_server(self, server_id, admin_pass=None):
+    def rescue_server(self, server_id, admin_password=None):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, admin_pass=admin_pass)
+        return self.action(server_id, 'rescue', None,
+                           admin_password=admin_password)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
