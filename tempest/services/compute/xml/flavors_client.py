@@ -183,6 +183,13 @@ class FlavorsClientXML(RestClientXML):
     def _parse_array_access(self, node):
         return [xml_to_json(x) for x in node]
 
+    def list_flavor_access(self, flavor_id):
+        """Gets flavor access information given the flavor id."""
+        resp, body = self.get('flavors/%s/os-flavor-access' % str(flavor_id),
+                              self.headers)
+        body = self._parse_array(etree.fromstring(body))
+        return resp, body
+
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant."""
         doc = Document()

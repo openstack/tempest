@@ -122,6 +122,13 @@ class FlavorsClientJSON(RestClient):
         return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
                            key))
 
+    def list_flavor_access(self, flavor_id):
+        """Gets flavor access information given the flavor id."""
+        resp, body = self.get('flavors/%s/os-flavor-access' % flavor_id,
+                              self.headers)
+        body = json.loads(body)
+        return resp, body['flavor_access']
+
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant."""
         post_body = {
