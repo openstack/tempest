@@ -88,6 +88,7 @@ class OfficialClientManager(tempest.manager.Manager):
 
         auth_url = self.config.identity.uri
         dscv = self.config.identity.disable_ssl_certificate_validation
+        region = self.config.identity.region
 
         client_args = (username, password, tenant_name, auth_url)
 
@@ -96,13 +97,16 @@ class OfficialClientManager(tempest.manager.Manager):
         return novaclient.client.Client(self.NOVACLIENT_VERSION,
                                         *client_args,
                                         service_type=service_type,
+                                        region_name=region,
                                         no_cache=True,
                                         insecure=dscv,
                                         http_log_debug=True)
 
     def _get_image_client(self):
         token = self.identity_client.auth_token
+        region = self.config.identity.region
         endpoint = self.identity_client.service_catalog.url_for(
+            attr='region', filter_value=region,
             service_type='image', endpoint_type='publicURL')
         dscv = self.config.identity.disable_ssl_certificate_validation
         return glanceclient.Client('1', endpoint=endpoint, token=token,
@@ -110,11 +114,13 @@ class OfficialClientManager(tempest.manager.Manager):
 
     def _get_volume_client(self, username, password, tenant_name):
         auth_url = self.config.identity.uri
+        region = self.config.identity.region
         return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
                                           username,
                                           password,
                                           tenant_name,
                                           auth_url,
+                                          region_name=region,
                                           http_log_debug=True)
 
     def _get_orchestration_client(self, username=None, password=None,
@@ -129,9 +135,12 @@ class OfficialClientManager(tempest.manager.Manager):
         self._validate_credentials(username, password, tenant_name)
 
         keystone = self._get_identity_client(username, password, tenant_name)
+        region = self.config.identity.region
         token = keystone.auth_token
         try:
             endpoint = keystone.service_catalog.url_for(
+                attr='region',
+                filter_value=region,
                 service_type='orchestration',
                 endpoint_type='publicURL')
         except keystoneclient.exceptions.EndpointNotFound:
