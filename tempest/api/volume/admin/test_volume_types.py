@@ -99,31 +99,14 @@ class VolumeTypesTest(BaseVolumeTest):
                          'from the created Volume')
 
     @attr(type='smoke')
-    def test_volume_type_create_delete(self):
-        # Create/Delete volume type.
-        name = rand_name("volume-type-")
-        extra_specs = {"storage_protocol": "iSCSI",
-                       "vendor_name": "Open Source"}
-        resp, body = self.client.create_volume_type(
-            name,
-            extra_specs=extra_specs)
-        self.assertEqual(200, resp.status)
-        self.assertIn('id', body)
-        self.addCleanup(self._delete_volume_type, body['id'])
-        self.assertIn('name', body)
-        self.assertEqual(body['name'], name,
-                         "The created volume_type name is not equal "
-                         "to the requested name")
-        self.assertTrue(body['id'] is not None,
-                        "Field volume_type id is empty or not found.")
-
-    @attr(type='smoke')
-    def test_volume_type_create_get(self):
+    def test_volume_type_create_get_delete(self):
         # Create/get volume type.
         body = {}
         name = rand_name("volume-type-")
-        extra_specs = {"storage_protocol": "iSCSI",
-                       "vendor_name": "Open Source"}
+        proto = self.config.volume.storage_protocol
+        vendor = self.config.volume.vendor_name
+        extra_specs = {"storage_protocol": proto,
+                       "vendor_name": vendor}
         resp, body = self.client.create_volume_type(
             name,
             extra_specs=extra_specs)
