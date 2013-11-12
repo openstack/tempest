@@ -10,10 +10,13 @@ function. Complicated setups where one part might depend on completion
 of a previous part. They ideally involve the integration between
 multiple OpenStack services to exercise the touch points between them.
 
-An example would be: start with a blank environment, upload a glance
-image, deploy a vm from it, ssh to the guest, make changes, capture
-that vm's image back into glance as a snapshot, and launch a second vm
-from that snapshot.
+Any scenario test should have a real-life use case. An example would be:
+
+ - "As operator I want to start with a blank environment":
+    1. upload a glance image
+    2. deploy a vm from it
+    3. ssh to the guest
+    4. create a snapshot of the vm
 
 
 Why are these tests in tempest?
