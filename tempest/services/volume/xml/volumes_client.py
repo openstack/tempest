@@ -347,3 +347,12 @@ class VolumesClientXML(RestClientXML):
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def force_delete_volume(self, volume_id):
+        """Force Delete Volume."""
+        post_body = Element("os-force_delete")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
