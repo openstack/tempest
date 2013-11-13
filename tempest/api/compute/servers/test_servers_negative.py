@@ -100,6 +100,13 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.create_test_server, accessIPv6=IPv6)
 
     @attr(type=['negative', 'gate'])
+    def test_resize_nonexistent_server(self):
+        nonexistent_server = str(uuid.uuid4())
+        self.assertRaises(exceptions.NotFound,
+                          self.client.resize,
+                          nonexistent_server, self.flavor_ref)
+
+    @attr(type=['negative', 'gate'])
     def test_resize_server_with_non_existent_flavor(self):
         # Resize a server with non-existent flavor
         nonexistent_flavor = str(uuid.uuid4())
