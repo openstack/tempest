@@ -270,7 +270,7 @@ class ImageClientJSON(RestClient):
 
             if value == 'killed':
                 raise exceptions.ImageKilledException(image_id=image_id,
-                                                      status=value)
+                                                      status=status)
             if dtime > self.build_timeout:
                 message = ('Time Limit Exceeded! (%ds)'
                            'while waiting for %s, '
