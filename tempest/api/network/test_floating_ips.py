@@ -55,31 +55,17 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         for i in range(2):
             cls.create_port(cls.network)
 
-    def _delete_floating_ip(self, floating_ip_id):
-        # Deletes a floating IP and verifies if it is deleted or not
-        resp, _ = self.client.delete_floatingip(floating_ip_id)
-        self.assertEqual(204, resp.status)
-        # Asserting that the floating_ip is not found in list after deletion
-        resp, floating_ips = self.client.list_floatingips()
-        floatingip_id_list = list()
-        for f in floating_ips['floatingips']:
-            floatingip_id_list.append(f['id'])
-        self.assertNotIn(floating_ip_id, floatingip_id_list)
-
     @attr(type='smoke')
     def test_create_list_show_update_delete_floating_ip(self):
         # Creates a floating IP
-        resp, floating_ip = self.client.create_floating_ip(
+        created_floating_ip = self.create_floating_ip(
             self.ext_net_id, port_id=self.ports[0]['id'])
-        self.assertEqual('201', resp['status'])
-        created_floating_ip = floating_ip['floatingip']
         self.assertIsNotNone(created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['tenant_id'])
         self.assertIsNotNone(created_floating_ip['floating_ip_address'])
         self.assertEqual(created_floating_ip['port_id'], self.ports[0]['id'])
         self.assertEqual(created_floating_ip['floating_network_id'],
                          self.ext_net_id)
-        self.addCleanup(self._delete_floating_ip, created_floating_ip['id'])
         # Verifies the details of a floating_ip
         resp, floating_ip = self.client.show_floating_ip(
             created_floating_ip['id'])
