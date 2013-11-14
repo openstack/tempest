@@ -82,7 +82,7 @@ class BuildErrorException(TempestException):
 
 
 class ImageKilledException(TempestException):
-    message = "Image %(image_id)s 'killed' while waiting for %(status)s"
+    message = "Image %(image_id)s 'killed' while waiting for '%(status)s'"
 
 
 class AddImageException(TempestException):
