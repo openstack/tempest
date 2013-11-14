@@ -14,6 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import cStringIO as StringIO
+
 from tempest import clients
 from tempest.common import isolated_creds
 from tempest.common.utils.data_utils import rand_name
@@ -84,6 +86,36 @@ class BaseV1ImageTest(BaseImageTest):
         if not cls.config.image_feature_enabled.api_v1:
             msg = "Glance API v1 not supported"
             raise cls.skipException(msg)
+
+
+class BaseV1ImageMembersTest(BaseV1ImageTest):
+    @classmethod
+    def setUpClass(cls):
+        super(BaseV1ImageMembersTest, cls).setUpClass()
+        if cls.config.compute.allow_tenant_isolation:
+            creds = cls.isolated_creds.get_alt_creds()
+            username, tenant_name, password = creds
+            cls.os_alt = clients.Manager(username=username,
+                                         password=password,
+                                         tenant_name=tenant_name)
+            cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
+        else:
+            cls.os_alt = clients.AltManager()
+            identity_client = cls._get_identity_admin_client()
+            cls.alt_tenant_id = identity_client.get_tenant_by_name(
+                cls.os_alt.tenant_name)['id']
+
+        cls.alt_img_cli = cls.os_alt.image_client
+
+    def _create_image(self):
+        image_file = StringIO.StringIO('*' * 1024)
+        resp, image = self.create_image(container_format='bare',
+                                        disk_format='raw',
+                                        is_public=False,
+                                        data=image_file)
+        self.assertEqual(201, resp.status)
+        image_id = image['id']
+        return image_id
 
 
 class BaseV2ImageTest(BaseImageTest):
