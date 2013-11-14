@@ -245,6 +245,31 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
     @attr(type='gate')
+    def test_shelve_unshelve_server(self):
+        resp, server = self.client.shelve_server(self.server_id)
+        self.assertEqual(202, resp.status)
+
+        offload_time = self.config.compute.shelved_offload_time
+        if offload_time >= 0:
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED_OFFLOADED',
+                                               extra_timeout=offload_time)
+        else:
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED')
+
+        resp, server = self.client.get_server(self.server_id)
+        image_name = server['name'] + '-shelved'
+        params = {'name': image_name}
+        resp, images = self.images_client.list_images(params)
+        self.assertEqual(1, len(images))
+        self.assertEqual(image_name, images[0]['name'])
+
+        resp, server = self.client.unshelve_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+    @attr(type='gate')
     def test_stop_start_server(self):
         resp, server = self.servers_client.stop(self.server_id)
         self.assertEqual(202, resp.status)
