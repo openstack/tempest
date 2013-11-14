@@ -237,6 +237,36 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         resp, body = self.client.unreserve_volume(self.volume['id'])
         self.assertEqual(202, resp.status)
 
+    @attr(type=['negative', 'gate'])
+    def test_list_volumes_with_nonexistent_name(self):
+        v_name = rand_name('Volume-')
+        params = {'display_name': v_name}
+        resp, fetched_volume = self.client.list_volumes(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(fetched_volume))
+
+    @attr(type=['negative', 'gate'])
+    def test_list_volumes_detail_with_nonexistent_name(self):
+        v_name = rand_name('Volume-')
+        params = {'display_name': v_name}
+        resp, fetched_volume = self.client.list_volumes_with_detail(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(fetched_volume))
+
+    @attr(type=['negative', 'gate'])
+    def test_list_volumes_with_invalid_status(self):
+        params = {'status': 'null'}
+        resp, fetched_volume = self.client.list_volumes(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(fetched_volume))
+
+    @attr(type=['negative', 'gate'])
+    def test_list_volumes_detail_with_invalid_status(self):
+        params = {'status': 'null'}
+        resp, fetched_volume = self.client.list_volumes_with_detail(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(fetched_volume))
+
 
 class VolumesNegativeTestXML(VolumesNegativeTest):
     _interface = 'xml'
