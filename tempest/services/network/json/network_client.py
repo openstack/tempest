@@ -673,3 +673,21 @@ class NetworkClientJSON(RestClient):
         resp, body = self.get(uri, self.headers)
         body = json.loads(body)
         return resp, body
+
+    def list_agents(self):
+        uri = '%s/agents' % self.uri_prefix
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def list_routers_on_l3_agent(self, agent_id):
+        uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def list_l3_agents_hosting_router(self, router_id):
+        uri = '%s/routers/%s/l3-agents' % (self.uri_prefix, router_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
