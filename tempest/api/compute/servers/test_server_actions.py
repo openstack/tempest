@@ -128,7 +128,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.server_id, rebuilt_server['id'])
         rebuilt_image_id = rebuilt_server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
-        self.assertEqual(self.flavor_ref, int(rebuilt_server['flavor']['id']))
+        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
 
         # Verify the server properties after the rebuild completes
         self.client.wait_for_server_status(rebuilt_server['id'], 'ACTIVE')
@@ -147,8 +147,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(self.server_id)
         current_flavor = server['flavor']['id']
         new_flavor_ref = self.flavor_ref_alt \
-            if int(current_flavor) == self.flavor_ref else self.flavor_ref
-        return int(current_flavor), int(new_flavor_ref)
+            if current_flavor == self.flavor_ref else self.flavor_ref
+        return current_flavor, new_flavor_ref
 
     @testtools.skipIf(not resize_available, 'Resize not available.')
     @attr(type='smoke')
@@ -167,7 +167,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
         resp, server = self.client.get_server(self.server_id)
-        self.assertEqual(new_flavor_ref, int(server['flavor']['id']))
+        self.assertEqual(new_flavor_ref, server['flavor']['id'])
 
     @testtools.skipIf(not resize_available, 'Resize not available.')
     @attr(type='gate')
@@ -189,7 +189,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(self.server_id)
         start = int(time.time())
 
-        while int(server['flavor']['id']) != previous_flavor_ref:
+        while server['flavor']['id'] != previous_flavor_ref:
             time.sleep(self.build_interval)
             resp, server = self.client.get_server(self.server_id)
 

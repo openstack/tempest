@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
+
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -53,18 +55,16 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(resp.status, 202)
         self.client.wait_for_resource_deletion(flavor_id)
 
-    @attr(type='gate')
-    def test_create_flavor(self):
+    def _create_flavor(self, flavor_id):
         # Create a flavor and ensure it is listed
         # This operation requires the user to have 'admin' role
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
 
         # Create the flavor
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram, self.vcpus,
                                                  self.disk,
-                                                 new_flavor_id,
+                                                 flavor_id,
                                                  ephemeral=self.ephemeral,
                                                  swap=self.swap,
                                                  rxtx=self.rxtx)
@@ -74,7 +74,6 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['vcpus'], self.vcpus)
         self.assertEqual(flavor['disk'], self.disk)
         self.assertEqual(flavor['ram'], self.ram)
-        self.assertEqual(int(flavor['id']), new_flavor_id)
         self.assertEqual(flavor['swap'], self.swap)
         self.assertEqual(flavor['rxtx_factor'], self.rxtx)
         self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'],
@@ -82,9 +81,31 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['os-flavor-access:is_public'], True)
 
         # Verify flavor is retrieved
-        resp, flavor = self.client.get_flavor_details(new_flavor_id)
+        resp, flavor = self.client.get_flavor_details(flavor['id'])
         self.assertEqual(resp.status, 200)
         self.assertEqual(flavor['name'], flavor_name)
+
+        return flavor['id']
+
+    @attr(type='gate')
+    def test_create_flavor_with_int_id(self):
+        flavor_id = data_utils.rand_int_id(start=1000)
+        new_flavor_id = self._create_flavor(flavor_id)
+        self.assertEqual(new_flavor_id, str(flavor_id))
+
+    @attr(type='gate')
+    def test_create_flavor_with_uuid_id(self):
+        flavor_id = str(uuid.uuid4())
+        new_flavor_id = self._create_flavor(flavor_id)
+        self.assertEqual(new_flavor_id, flavor_id)
+
+    @attr(type='gate')
+    def test_create_flavor_with_none_id(self):
+        # If nova receives a request with None as flavor_id,
+        # nova generates flavor_id of uuid.
+        flavor_id = None
+        new_flavor_id = self._create_flavor(flavor_id)
+        self.assertEqual(new_flavor_id, str(uuid.UUID(new_flavor_id)))
 
     @attr(type='gate')
     def test_create_flavor_verify_entry_in_list_details(self):

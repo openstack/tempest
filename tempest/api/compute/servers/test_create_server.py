@@ -72,7 +72,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                          str(netaddr.IPAddress(self.accessIPv6)))
         self.assertEqual(self.name, self.server['name'])
         self.assertEqual(self.image_ref, self.server['image']['id'])
-        self.assertEqual(str(self.flavor_ref), self.server['flavor']['id'])
+        self.assertEqual(self.flavor_ref, self.server['flavor']['id'])
         self.assertEqual(self.meta, self.server['metadata'])
 
     @attr(type='smoke')
