@@ -22,6 +22,7 @@ import testtools
 
 from tempest.api import compute
 from tempest.api.compute import base
+from tempest.common.utils.data_utils import parse_image_id
 from tempest.common.utils.data_utils import rand_name
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
@@ -197,6 +198,74 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 message = 'Server %s failed to revert resize within the \
                 required time (%s s).' % (self.server_id, self.build_timeout)
                 raise exceptions.TimeoutException(message)
+
+    @attr(type='gate')
+    def test_create_backup(self):
+        # Positive test:create backup successfully and rotate backups correctly
+        # create the first and the second backup
+        backup1 = rand_name('backup')
+        resp, _ = self.servers_client.create_backup(self.server_id,
+                                                    'daily',
+                                                    2,
+                                                    backup1)
+        oldest_backup_exist = True
+
+        # the oldest one should be deleted automatically in this test
+        def _clean_oldest_backup(oldest_backup):
+            if oldest_backup_exist:
+                self.os.image_client.delete_image(oldest_backup)
+
+        image1_id = parse_image_id(resp['location'])
+        self.addCleanup(_clean_oldest_backup, image1_id)
+        self.assertEqual(202, resp.status)
+
+        backup2 = rand_name('backup')
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+        resp, _ = self.servers_client.create_backup(self.server_id,
+                                                    'daily',
+                                                    2,
+                                                    backup2)
+        image2_id = parse_image_id(resp['location'])
+        self.addCleanup(self.os.image_client.delete_image, image2_id)
+        self.assertEqual(202, resp.status)
+
+        # verify they have been created
+        properties = {
+            'image_type': 'backup',
+            'backup_type': "daily",
+            'instance_uuid': self.server_id,
+        }
+        resp, image_list = self.os.image_client.image_list_detail(
+            properties,
+            sort_key='created_at',
+            sort_dir='asc')
+        self.assertEqual(200, resp.status)
+        self.assertEqual(2, len(image_list))
+        self.assertEqual((backup1, backup2),
+                         (image_list[0]['name'], image_list[1]['name']))
+
+        # create the third one, due to the rotation is 2,
+        # the first one will be deleted
+        backup3 = rand_name('backup')
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+        resp, _ = self.servers_client.create_backup(self.server_id,
+                                                    'daily',
+                                                    2,
+                                                    backup3)
+        image3_id = parse_image_id(resp['location'])
+        self.addCleanup(self.os.image_client.delete_image, image3_id)
+        self.assertEqual(202, resp.status)
+        # the first back up should be deleted
+        self.os.image_client.wait_for_resource_deletion(image1_id)
+        oldest_backup_exist = False
+        resp, image_list = self.os.image_client.image_list_detail(
+            properties,
+            sort_key='created_at',
+            sort_dir='asc')
+        self.assertEqual(200, resp.status)
+        self.assertEqual(2, len(image_list))
+        self.assertEqual((backup2, backup3),
+                         (image_list[0]['name'], image_list[1]['name']))
 
     @attr(type='gate')
     def test_get_console_output(self):
