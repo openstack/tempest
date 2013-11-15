@@ -20,12 +20,13 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class ExtensionsClientJSON(RestClient):
+class ExtensionsV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ExtensionsClientJSON, self).__init__(config, username, password,
-                                                   auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(ExtensionsV3ClientJSON, self).__init__(config, username,
+                                                     password, auth_url,
+                                                     tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_extensions(self):
         url = 'extensions'
