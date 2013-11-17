@@ -16,7 +16,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.network import common as net_common
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
@@ -165,45 +164,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         cls.servers = []
         cls.floating_ips = {}
 
-    def _get_router(self, tenant_id):
-        """Retrieve a router for the given tenant id.
-
-        If a public router has been configured, it will be returned.
-
-        If a public router has not been configured, but a public
-        network has, a tenant router will be created and returned that
-        routes traffic to the public network.
-
-        """
-        router_id = self.config.network.public_router_id
-        network_id = self.config.network.public_network_id
-        if router_id:
-            result = self.network_client.show_router(router_id)
-            return net_common.AttributeDict(**result['router'])
-        elif network_id:
-            router = self._create_router(tenant_id)
-            router.add_gateway(network_id)
-            return router
-        else:
-            raise Exception("Neither of 'public_router_id' or "
-                            "'public_network_id' has been defined.")
-
-    def _create_router(self, tenant_id, namestart='router-smoke-'):
-        name = data_utils.rand_name(namestart)
-        body = dict(
-            router=dict(
-                name=name,
-                admin_state_up=True,
-                tenant_id=tenant_id,
-            ),
-        )
-        result = self.network_client.create_router(body=body)
-        router = net_common.DeletableRouter(client=self.network_client,
-                                            **result['router'])
-        self.assertEqual(router.name, name)
-        self.set_resource(name, router)
-        return router
-
     def _create_keypairs(self):
         self.keypairs[self.tenant_id] = self.create_keypair(
             name=data_utils.rand_name('keypair-smoke-'))
@@ -211,15 +171,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _create_security_groups(self):
         self.security_groups[self.tenant_id] =\
             self._create_security_group_neutron(tenant_id=self.tenant_id)
-
-    def _create_networks(self):
-        network = self._create_network(self.tenant_id)
-        router = self._get_router(self.tenant_id)
-        subnet = self._create_subnet(network)
-        subnet.add_to_router(router.id)
-        self.networks.append(network)
-        self.subnets.append(subnet)
-        self.routers.append(router)
 
     def _check_networks(self):
         # Checks that we see the newly created network/subnet/router via

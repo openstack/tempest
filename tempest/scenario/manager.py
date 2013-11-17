@@ -248,7 +248,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                 thing.delete()
             except Exception as e:
                 # If the resource is already missing, mission accomplished.
-                if e.__class__.__name__ == 'NotFound':
+                # add status code as workaround for bug 1247568
+                if e.__class__.__name__ == 'NotFound' or e.status_code == 404:
                     continue
                 raise
 
@@ -870,6 +871,60 @@ class NetworkScenarioTest(OfficialClientTest):
     def _show_quota_port(self, tenant_id):
         quota = self.network_client.show_quota(tenant_id)
         return quota['quota']['port']
+
+    def _get_router(self, tenant_id):
+        """Retrieve a router for the given tenant id.
+
+        If a public router has been configured, it will be returned.
+
+        If a public router has not been configured, but a public
+        network has, a tenant router will be created and returned that
+        routes traffic to the public network.
+        """
+        router_id = self.config.network.public_router_id
+        network_id = self.config.network.public_network_id
+        if router_id:
+            result = self.network_client.show_router(router_id)
+            return net_common.AttributeDict(**result['router'])
+        elif network_id:
+            router = self._create_router(tenant_id)
+            router.add_gateway(network_id)
+            return router
+        else:
+            raise Exception("Neither of 'public_router_id' or "
+                            "'public_network_id' has been defined.")
+
+    def _create_router(self, tenant_id, namestart='router-smoke-'):
+        name = data_utils.rand_name(namestart)
+        body = dict(
+            router=dict(
+                name=name,
+                admin_state_up=True,
+                tenant_id=tenant_id,
+            ),
+        )
+        result = self.network_client.create_router(body=body)
+        router = net_common.DeletableRouter(client=self.network_client,
+                                            **result['router'])
+        self.assertEqual(router.name, name)
+        self.set_resource(name, router)
+        return router
+
+    def _create_networks(self, tenant_id=None):
+        """Create a network with a subnet connected to a router.
+
+        :returns: network, subnet, router
+        """
+        if tenant_id is None:
+            tenant_id = self.tenant_id
+        network = self._create_network(tenant_id)
+        router = self._get_router(tenant_id)
+        subnet = self._create_subnet(network)
+        subnet.add_to_router(router.id)
+        self.networks.append(network)
+        self.subnets.append(subnet)
+        self.routers.append(router)
+        return network, subnet, router
 
 
 class OrchestrationScenarioTest(OfficialClientTest):
