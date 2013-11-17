@@ -42,7 +42,7 @@ class ServersV3ClientJSON(RestClient):
         image_ref (Required): Reference to the image used to build the server.
         flavor_ref (Required): The flavor used to build the server.
         Following optional keyword arguments are accepted:
-        admin_pass: Sets the initial root password.
+        admin_password: Sets the initial root password.
         key_name: Key name of keypair that was created earlier.
         meta: A dictionary of values to be used as metadata.
         personality: A list of dictionaries for files to be injected into
@@ -64,7 +64,7 @@ class ServersV3ClientJSON(RestClient):
             'flavor_ref': flavor_ref
         }
 
-        for option in ['personality', 'admin_pass', 'key_name',
+        for option in ['personality', 'admin_password', 'key_name',
                        'security_groups', 'networks',
                        ('os-user-data:user_data', 'user_data'),
                        ('os-availability-zone:availability_zone',
@@ -368,9 +368,10 @@ class ServersV3ClientJSON(RestClient):
         return self.action(server_id, 'get_console_output', 'output',
                            length=length)
 
-    def rescue_server(self, server_id, adminPass=None):
+    def rescue_server(self, server_id, admin_password=None):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, admin_pass=adminPass)
+        return self.action(server_id, 'rescue', None,
+                           admin_password=admin_password)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
