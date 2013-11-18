@@ -17,18 +17,31 @@
 
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
+import testtools
 
 
 class ExtensionsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
-    @attr(type='gate')
+    @testtools.skipIf(not test.is_extension_enabled('os-consoles', 'compute'),
+                      'os-consoles extension not enabled.')
+    @test.attr(type='gate')
     def test_list_extensions(self):
         # List of all extensions
         resp, extensions = self.extensions_client.list_extensions()
         self.assertIn("extensions", extensions)
         self.assertEqual(200, resp.status)
+        self.assertTrue(self.extensions_client.is_enabled("Consoles"))
+
+    @testtools.skipIf(not test.is_extension_enabled('os-consoles', 'compute'),
+                      'os-consoles extension not enabled.')
+    @test.attr(type='gate')
+    def test_get_extension(self):
+        # get the specified extensions
+        resp, extension = self.extensions_client.get_extension('os-consoles')
+        self.assertEqual(200, resp.status)
+        self.assertEqual('os-consoles', extension['alias'])
 
 
 class ExtensionsTestXML(ExtensionsTestJSON):
