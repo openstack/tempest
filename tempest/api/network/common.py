@@ -102,8 +102,7 @@ class DeletableFloatingIp(DeletableResource):
                                    self.floating_ip_address)
 
     def __str__(self):
-        return '<"FloatingIP" addr="%s" id="%s">' % (self.__class__.__name__,
-                                                     self.floating_ip_address,
+        return '<"FloatingIP" addr="%s" id="%s">' % (self.floating_ip_address,
                                                      self.id)
 
     def delete(self):

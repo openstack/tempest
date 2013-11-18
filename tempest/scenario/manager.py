@@ -608,12 +608,15 @@ class NetworkScenarioTest(OfficialClientTest):
         self.set_resource(name, port)
         return port
 
-    def _create_floating_ip(self, server, external_network_id):
+    def _get_server_port_id(self, server):
         result = self.network_client.list_ports(device_id=server.id)
         ports = result.get('ports', [])
         self.assertEqual(len(ports), 1,
                          "Unable to determine which port to target.")
-        port_id = ports[0]['id']
+        return ports[0]['id']
+
+    def _create_floating_ip(self, server, external_network_id):
+        port_id = self._get_server_port_id(server)
         body = dict(
             floatingip=dict(
                 floating_network_id=external_network_id,
@@ -626,6 +629,12 @@ class NetworkScenarioTest(OfficialClientTest):
             client=self.network_client,
             **result['floatingip'])
         self.set_resource(data_utils.rand_name('floatingip-'), floating_ip)
+        return floating_ip
+
+    def _associate_floating_ip(self, floating_ip, server):
+        port_id = self._get_server_port_id(server)
+        floating_ip.update(port_id=port_id)
+        self.assertEqual(port_id, floating_ip.port_id)
         return floating_ip
 
     def _disassociate_floating_ip(self, floating_ip):

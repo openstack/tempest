@@ -90,6 +90,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
        - detach the floating-ip from the VM and verify that it becomes
        unreachable
 
+       - associate detached floating ip to a new VM and verify connectivity.
+       VMs are created with unique keypair so connectivity also asserts that
+       floating IP is associated with the new VM instead of the old one
+
        # TODO(mnewby) - Need to implement the following:
        - the Tempest host can ssh into the VM via the IP address and
          successfully execute the following:
@@ -156,17 +160,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         cls.check_preconditions()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
-        cls.keypairs = {}
         cls.security_groups = {}
         cls.networks = []
         cls.subnets = []
         cls.routers = []
-        cls.servers = []
+        cls.servers = {}
         cls.floating_ips = {}
-
-    def _create_keypairs(self):
-        self.keypairs[self.tenant_id] = self.create_keypair(
-            name=data_utils.rand_name('keypair-smoke-'))
 
     def _create_security_groups(self):
         self.security_groups[self.tenant_id] =\
@@ -197,23 +196,23 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _create_server(self, name, network):
         tenant_id = network.tenant_id
-        keypair_name = self.keypairs[tenant_id].name
+        keypair = self.create_keypair(name='keypair-%s' % name)
         security_groups = [self.security_groups[tenant_id].name]
         create_kwargs = {
             'nics': [
                 {'net-id': network.id},
             ],
-            'key_name': keypair_name,
+            'key_name': keypair.name,
             'security_groups': security_groups,
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
+        self.servers[server] = keypair
         return server
 
     def _create_servers(self):
         for i, network in enumerate(self.networks):
             name = data_utils.rand_name('server-smoke-%d-' % i)
-            server = self._create_server(name, network)
-            self.servers.append(server)
+            self._create_server(name, network)
 
     def _check_tenant_network_connectivity(self):
         if not self.config.network.tenant_networks_reachable:
@@ -223,13 +222,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         ssh_login = self.config.compute.image_ssh_user
-        private_key = self.keypairs[self.tenant_id].private_key
         try:
-            for server in self.servers:
+            for server, key in self.servers.items():
                 for net_name, ip_addresses in server.networks.iteritems():
                     for ip_address in ip_addresses:
                         self._check_vm_connectivity(ip_address, ssh_login,
-                                                    private_key)
+                                                    key.private_key)
         except Exception as exc:
             LOG.exception(exc)
             debug.log_ip_ns()
@@ -248,7 +246,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _create_and_associate_floating_ips(self):
         public_network_id = self.config.network.public_network_id
-        for server in self.servers:
+        for server in self.servers.keys():
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips[floating_ip] = server
 
@@ -256,10 +254,12 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         ssh_login = self.config.compute.image_ssh_user
-        private_key = self.keypairs[self.tenant_id].private_key
         try:
             for floating_ip, server in self.floating_ips.iteritems():
                 ip_address = floating_ip.floating_ip_address
+                private_key = None
+                if should_connect:
+                    private_key = self.servers[server].private_key
                 self._check_vm_connectivity(ip_address,
                                             ssh_login,
                                             private_key,
@@ -274,10 +274,18 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self._disassociate_floating_ip(floating_ip)
             self.floating_ips[floating_ip] = None
 
+    def _reassociate_floating_ips(self):
+        network = self.networks[0]
+        for floating_ip in self.floating_ips.keys():
+            name = data_utils.rand_name('new_server-smoke-')
+            # create a new server for the floating ip
+            server = self._create_server(name, network)
+            self._associate_floating_ip(floating_ip, server)
+            self.floating_ips[floating_ip] = server
+
     @attr(type='smoke')
     @services('compute', 'network')
     def test_network_basic_ops(self):
-        self._create_keypairs()
         self._create_security_groups()
         self._create_networks()
         self._check_networks()
@@ -288,3 +296,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_public_network_connectivity(should_connect=True)
         self._disassociate_floating_ips()
         self._check_public_network_connectivity(should_connect=False)
+        self._reassociate_floating_ips()
+        self._wait_for_floating_ip_association()
+        self._check_public_network_connectivity(should_connect=True)
