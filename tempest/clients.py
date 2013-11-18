@@ -136,10 +136,14 @@ from tempest.services.object_storage.object_client import \
     ObjectClientCustomizedHeader
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
+from tempest.services.volume.json.admin.volume_hosts_client import \
+    VolumeHostsClientJSON
 from tempest.services.volume.json.admin.volume_types_client import \
     VolumeTypesClientJSON
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
+from tempest.services.volume.xml.admin.volume_hosts_client import \
+    VolumeHostsClientXML
 from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
 from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
@@ -239,6 +243,7 @@ class Manager(object):
             self.credentials_client = CredentialsClientXML(*client_args)
             self.instance_usages_audit_log_client = \
                 InstanceUsagesAuditLogClientXML(*client_args)
+            self.volume_hosts_client = VolumeHostsClientXML(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientXML(
@@ -287,6 +292,7 @@ class Manager(object):
             self.credentials_client = CredentialsClientJSON(*client_args)
             self.instance_usages_audit_log_client = \
                 InstanceUsagesAuditLogClientJSON(*client_args)
+            self.volume_hosts_client = VolumeHostsClientJSON(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientJSON(
