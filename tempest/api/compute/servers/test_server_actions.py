@@ -199,6 +199,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 required time (%s s).' % (self.server_id, self.build_timeout)
                 raise exceptions.TimeoutException(message)
 
+    @skip_because(bug="1251920")
     @attr(type='gate')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
