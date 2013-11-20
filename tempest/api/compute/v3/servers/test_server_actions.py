@@ -67,7 +67,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
             # Verify that the user can authenticate with the new password
             resp, server = self.client.get_server(self.server_id)
             linux_client = RemoteClient(server, self.ssh_user, new_password)
-            self.assertTrue(linux_client.can_authenticate())
+            linux_client.validate_authentication()
 
     @attr(type='smoke')
     def test_reboot_server_hard(self):
@@ -140,7 +140,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
             linux_client = RemoteClient(server, self.ssh_user, password)
-            self.assertTrue(linux_client.can_authenticate())
+            linux_client.validate_authentication()
 
     def _detect_server_image_flavor(self, server_id):
         # Detects the current server image flavor ref.

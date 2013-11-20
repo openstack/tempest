@@ -33,7 +33,6 @@ from novaclient import exceptions as nova_exceptions
 
 from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
-from tempest.common import ssh
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
@@ -649,13 +648,6 @@ class NetworkScenarioTest(OfficialClientTest):
         return tempest.test.call_until_true(
             ping, self.config.compute.ping_timeout, 1)
 
-    def _is_reachable_via_ssh(self, ip_address, username, private_key,
-                              timeout):
-        ssh_client = ssh.Client(ip_address, username,
-                                pkey=private_key,
-                                timeout=timeout)
-        return ssh_client.test_connection_auth()
-
     def _check_vm_connectivity(self, ip_address,
                                username=None,
                                private_key=None,
@@ -680,13 +672,9 @@ class NetworkScenarioTest(OfficialClientTest):
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
-            self.assertTrue(self._is_reachable_via_ssh(
-                ip_address,
-                username,
-                private_key,
-                timeout=self.config.compute.ssh_timeout),
-                'Auth failure in connecting to %s@%s via ssh' %
-                (username, ip_address))
+            linux_client = self.get_remote_client(ip_address, username,
+                                                  private_key)
+            linux_client.validate_authentication()
 
     def _create_security_group_nova(self, client=None,
                                     namestart='secgroup-smoke-',
