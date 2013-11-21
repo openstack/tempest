@@ -246,3 +246,13 @@ class VolumesClientJSON(RestClient):
         resp, body = self.post(url, post_body, self.headers)
         body = json.loads(body)
         return resp, body['transfer']
+
+    def update_volume_readonly(self, volume_id, readonly):
+        """Update the Specified Volume readonly."""
+        post_body = {
+            'readonly': readonly
+        }
+        post_body = json.dumps({'os-update_readonly_flag': post_body})
+        url = 'volumes/%s/action' % (volume_id)
+        resp, body = self.post(url, post_body, self.headers)
+        return resp, body
