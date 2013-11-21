@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
 import time
 
 import testtools
@@ -113,15 +112,11 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
         new_name = data_utils.rand_name('server')
-        file_contents = 'Test server rebuild.'
-        personality = [{'path': 'rebuild.txt',
-                       'contents': base64.b64encode(file_contents)}]
         password = 'rebuildPassw0rd'
         resp, rebuilt_server = self.client.rebuild(self.server_id,
                                                    self.image_ref_alt,
                                                    name=new_name,
                                                    metadata=meta,
-                                                   personality=personality,
                                                    admin_password=password)
         self.addCleanup(self.client.rebuild, self.server_id, self.image_ref)
 

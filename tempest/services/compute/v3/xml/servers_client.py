@@ -300,8 +300,6 @@ class ServersV3ClientXML(RestClientXML):
         admin_password: Sets the initial root password.
         key_name: Key name of keypair that was created earlier.
         meta: A dictionary of values to be used as metadata.
-        personality: A list of dictionaries for files to be injected into
-        the server.
         security_groups: A list of security group dicts.
         networks: A list of network dicts with UUID and fixed_ip.
         user_data: User data for instance.
@@ -399,14 +397,6 @@ class ServersV3ClientXML(RestClientXML):
                 meta = Element("meta", key=k)
                 meta.append(Text(v))
                 metadata.append(meta)
-
-        if 'personality' in kwargs:
-            personality = Element('personality')
-            server.append(personality)
-            for k in kwargs['personality']:
-                temp = Element('file', path=k['path'])
-                temp.append(Text(k['contents']))
-                personality.append(temp)
 
         resp, body = self.post('servers', str(Document(server)), self.headers)
         server = self._parse_server(etree.fromstring(body))
@@ -608,7 +598,7 @@ class ServersV3ClientXML(RestClientXML):
     def set_server_metadata_item(self, server_id, key, meta):
         doc = Document()
         for k, v in meta.items():
-            meta_element = Element("meta", key=k)
+            meta_element = Element("metadata", key=k)
             meta_element.append(Text(v))
             doc.append(meta_element)
         resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
