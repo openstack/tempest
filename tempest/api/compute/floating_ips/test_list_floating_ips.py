@@ -32,7 +32,6 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.floating_ips_client
         cls.floating_ip = []
         cls.floating_ip_id = []
-        cls.random_number = 0
         for i in range(3):
             resp, body = cls.client.create_floating_ip()
             cls.floating_ip.append(body)
