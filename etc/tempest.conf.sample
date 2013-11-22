@@ -309,7 +309,7 @@ container_sync_interval = 5
 # Set operator role for tests that require creating a container
 operator_role = Member
 
-[object-feature-enabled]
+[object-storage-feature-enabled]
 # Set to True if the Account Quota middleware is enabled
 accounts_quotas = True
 # Set to True if the Container Quota middleware is enabled
