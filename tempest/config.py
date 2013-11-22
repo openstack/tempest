@@ -411,6 +411,9 @@ ObjectStoreFeaturesGroup = [
     cfg.BoolOpt('accounts_quotas',
                 default=True,
                 help="Set to True if the Account Quota middleware is enabled"),
+    cfg.BoolOpt('crossdomain',
+                default=True,
+                help="Set to True if the Crossdomain middleware is enabled"),
 ]
 
 
