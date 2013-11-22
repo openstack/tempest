@@ -31,8 +31,6 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         cls.alt_user = data_utils.rand_name('test_user_')
         cls.alt_password = data_utils.rand_name('pass_')
         cls.alt_email = cls.alt_user + '@testmail.tm'
-        cls.alt_tenant = data_utils.rand_name('test_tenant_')
-        cls.alt_description = data_utils.rand_name('desc_')
 
     @attr(type='smoke')
     def test_create_user(self):
