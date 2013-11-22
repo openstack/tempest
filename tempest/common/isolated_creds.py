@@ -412,7 +412,11 @@ class IsolatedCreds(object):
                 resp_body = self.network_admin_client.list_ports()
             self.ports = resp_body['ports']
         ports_to_delete = [
-            port for port in self.ports if port['network_id'] == network_id]
+            port
+            for port in self.ports
+            if (port['network_id'] == network_id and
+                port['device_owner'] != 'network:router_interface')
+        ]
         for port in ports_to_delete:
             try:
                 LOG.info('Cleaning up port id %s, name %s' %
