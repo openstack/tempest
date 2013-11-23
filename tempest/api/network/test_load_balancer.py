@@ -134,7 +134,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
     @attr(type='smoke')
     def test_create_update_delete_member(self):
         # Creates a member
-        resp, body = self.client.create_member("10.0.9.46", 80,
+        resp, body = self.client.create_member("10.0.9.47", 80,
                                                self.pool['id'])
         self.assertEqual('201', resp['status'])
         member = body['member']
