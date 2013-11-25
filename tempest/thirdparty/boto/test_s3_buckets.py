@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import skip_because
 from tempest.thirdparty.boto.test import BotoTestCase
@@ -34,7 +34,7 @@ class S3BucketsTest(BotoTestCase):
     @attr(type='smoke')
     def test_create_and_get_delete_bucket(self):
         # S3 Create, get and delete bucket
-        bucket_name = rand_name("s3bucket-")
+        bucket_name = data_utils.rand_name("s3bucket-")
         cleanup_key = self.addResourceCleanUp(self.client.delete_bucket,
                                               bucket_name)
         bucket = self.client.create_bucket(bucket_name)

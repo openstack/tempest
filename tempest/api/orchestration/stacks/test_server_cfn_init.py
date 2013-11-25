@@ -16,7 +16,7 @@ import json
 import testtools
 
 from tempest.api.orchestration import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 import tempest.config
 from tempest.openstack.common import log as logging
@@ -132,7 +132,7 @@ Outputs:
             raise cls.skipException("No image available to test")
         cls.client = cls.orchestration_client
 
-        stack_name = rand_name('heat')
+        stack_name = data_utils.rand_name('heat')
         if cls.orchestration_cfg.keypair_name:
             keypair_name = cls.orchestration_cfg.keypair_name
         else:

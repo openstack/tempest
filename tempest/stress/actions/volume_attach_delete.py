@@ -11,7 +11,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 import tempest.stress.stressaction as stressaction
 
 
@@ -23,7 +23,7 @@ class VolumeAttachDeleteTest(stressaction.StressAction):
 
     def run(self):
         # Step 1: create volume
-        name = rand_name("volume")
+        name = data_utils.rand_name("volume")
         self.logger.info("creating volume: %s" % name)
         resp, volume = self.manager.volumes_client.create_volume(size=1,
                                                                  display_name=
@@ -34,7 +34,7 @@ class VolumeAttachDeleteTest(stressaction.StressAction):
         self.logger.info("created volume: %s" % volume['id'])
 
         # Step 2: create vm instance
-        vm_name = rand_name("instance")
+        vm_name = data_utils.rand_name("instance")
         self.logger.info("creating vm: %s" % vm_name)
         resp, server = self.manager.servers_client.create_server(
             vm_name, self.image, self.flavor)

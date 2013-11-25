@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.api.orchestration import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
@@ -39,7 +39,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @attr(type='smoke')
     def test_stack_crud_no_resources(self):
-        stack_name = rand_name('heat')
+        stack_name = data_utils.rand_name('heat')
 
         # create the stack
         stack_identifier = self.create_stack(

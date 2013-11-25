@@ -18,8 +18,7 @@
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
-from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
@@ -62,18 +61,18 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         resp, cls.server = cls.client.get_server(server['id'])
 
-        name = rand_name('image')
+        name = data_utils.rand_name('image')
         resp, body = cls.client.create_image(server['id'], name)
-        image_id = parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         cls.images_client.wait_for_image_status(image_id, 'ACTIVE')
         resp, cls.image = cls.images_client.get_image(image_id)
 
-        cls.keypairname = rand_name('keypair')
+        cls.keypairname = data_utils.rand_name('keypair')
         resp, keypair = \
             cls.keypairs_client.create_keypair(cls.keypairname)
 
-        name = rand_name('security')
-        description = rand_name('description')
+        name = data_utils.rand_name('security')
+        description = data_utils.rand_name('description')
         resp, cls.security_group = cls.security_client.create_security_group(
             name, description)
 
@@ -191,7 +190,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # A create keypair request should fail if the tenant id does not match
         # the current user
         # POST keypair with other user tenant
-        k_name = rand_name('keypair-')
+        k_name = data_utils.rand_name('keypair-')
         self.alt_keypairs_client._set_auth()
         self.saved_base_url = self.alt_keypairs_client.base_url
         try:
@@ -241,8 +240,8 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # A create security group request should fail if the tenant id does not
         # match the current user
         # POST security group with other user tenant
-        s_name = rand_name('security-')
-        s_description = rand_name('security')
+        s_name = data_utils.rand_name('security-')
+        s_description = data_utils.rand_name('security')
         self.saved_base_url = self.alt_security_client.base_url
         try:
             # Change the base URL to impersonate another user

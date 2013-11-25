@@ -12,7 +12,7 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 import tempest.stress.stressaction as stressaction
 
 
@@ -23,7 +23,7 @@ class ServerCreateDestroyTest(stressaction.StressAction):
         self.flavor = self.manager.config.compute.flavor_ref
 
     def run(self):
-        name = rand_name("instance")
+        name = data_utils.rand_name("instance")
         self.logger.info("creating %s" % name)
         resp, server = self.manager.servers_client.create_server(
             name, self.image, self.flavor)

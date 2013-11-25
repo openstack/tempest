@@ -18,8 +18,7 @@
 
 from tempest.api import compute
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_int_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -37,12 +36,12 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
             raise cls.skipException(msg)
 
         cls.client = cls.os_adm.flavors_client
-        flavor_name = rand_name('test_flavor')
+        flavor_name = data_utils.rand_name('test_flavor')
         ram = 512
         vcpus = 1
         disk = 10
         ephemeral = 10
-        cls.new_flavor_id = rand_int_id(start=1000)
+        cls.new_flavor_id = data_utils.rand_int_id(start=1000)
         swap = 1024
         rxtx = 1
         # Create a flavor
@@ -81,7 +80,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @attr(type=['negative', 'gate'])
     def test_flavor_unset_nonexistent_key(self):
-        nonexistent_key = rand_name('flavor_key')
+        nonexistent_key = data_utils.rand_name('flavor_key')
         self.assertRaises(exceptions.NotFound,
                           self.client.unset_flavor_extra_spec,
                           self.flavor['id'],

@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -38,7 +38,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         cls.server_id = server['id']
 
         # Snapshot the server once to save time
-        name = rand_name('image')
+        name = data_utils.rand_name('image')
         resp, _ = cls.client.create_image(cls.server_id, name, {})
         cls.image_id = resp['location'].rsplit('/', 1)[1]
 

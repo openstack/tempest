@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -36,7 +36,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         volume = None
-        v_name = rand_name('Volume-%s-') % self._interface
+        v_name = data_utils.rand_name('Volume-%s-') % self._interface
         metadata = {'Type': 'work'}
         # Create volume
         resp, volume = self.client.create_volume(size=1,
@@ -73,7 +73,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_volume_get_metadata_none(self):
         # CREATE, GET empty metadata dict
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         # Create volume
         resp, volume = self.client.create_volume(size=1,
                                                  display_name=v_name,

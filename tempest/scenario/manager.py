@@ -34,7 +34,7 @@ from novaclient import exceptions as nova_exceptions
 from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
 from tempest.common import ssh
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
 import tempest.manager
@@ -399,7 +399,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         if client is None:
             client = self.compute_client
         if name is None:
-            name = rand_name('scenario-server-')
+            name = data_utils.rand_name('scenario-server-')
         if image is None:
             image = self.config.compute.image_ref
         if flavor is None:
@@ -423,7 +423,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         if client is None:
             client = self.volume_client
         if name is None:
-            name = rand_name('scenario-volume-')
+            name = data_utils.rand_name('scenario-volume-')
         LOG.debug("Creating a volume (size: %s, name: %s)", size, name)
         volume = client.volumes.create(size=size, display_name=name,
                                        snapshot_id=snapshot_id,
@@ -441,7 +441,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         if image_client is None:
             image_client = self.image_client
         if name is None:
-            name = rand_name('scenario-snapshot-')
+            name = data_utils.rand_name('scenario-snapshot-')
         LOG.debug("Creating a snapshot image for server: %s", server.name)
         image_id = compute_client.servers.create_image(server, name)
         self.addCleanup(image_client.images.delete, image_id)
@@ -456,7 +456,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         if client is None:
             client = self.compute_client
         if name is None:
-            name = rand_name('scenario-keypair-')
+            name = data_utils.rand_name('scenario-keypair-')
         keypair = client.keypairs.create(name)
         self.assertEqual(keypair.name, name)
         self.set_resource(name, keypair)
@@ -510,7 +510,7 @@ class NetworkScenarioTest(OfficialClientTest):
         if client is None:
             client = self.compute_client
         # Create security group
-        sg_name = rand_name(namestart)
+        sg_name = data_utils.rand_name(namestart)
         sg_desc = sg_name + " description"
         secgroup = client.security_groups.create(sg_name, sg_desc)
         self.assertEqual(secgroup.name, sg_name)
@@ -523,7 +523,7 @@ class NetworkScenarioTest(OfficialClientTest):
         return secgroup
 
     def _create_network(self, tenant_id, namestart='network-smoke-'):
-        name = rand_name(namestart)
+        name = data_utils.rand_name(namestart)
         body = dict(
             network=dict(
                 name=name,
@@ -579,11 +579,11 @@ class NetworkScenarioTest(OfficialClientTest):
         subnet = net_common.DeletableSubnet(client=self.network_client,
                                             **result['subnet'])
         self.assertEqual(subnet.cidr, str(subnet_cidr))
-        self.set_resource(rand_name(namestart), subnet)
+        self.set_resource(data_utils.rand_name(namestart), subnet)
         return subnet
 
     def _create_port(self, network, namestart='port-quotatest-'):
-        name = rand_name(namestart)
+        name = data_utils.rand_name(namestart)
         body = dict(
             port=dict(name=name,
                       network_id=network.id,
@@ -612,7 +612,7 @@ class NetworkScenarioTest(OfficialClientTest):
         floating_ip = net_common.DeletableFloatingIp(
             client=self.network_client,
             **result['floatingip'])
-        self.set_resource(rand_name('floatingip-'), floating_ip)
+        self.set_resource(data_utils.rand_name('floatingip-'), floating_ip)
         return floating_ip
 
     def _ping_ip_address(self, ip_address):
@@ -675,7 +675,7 @@ class OrchestrationScenarioTest(OfficialClientTest):
 
     @classmethod
     def _stack_rand_name(cls):
-        return rand_name(cls.__name__ + '-')
+        return data_utils.rand_name(cls.__name__ + '-')
 
     @classmethod
     def _get_default_network(cls):

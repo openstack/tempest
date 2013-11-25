@@ -17,8 +17,7 @@
 
 from tempest.api import compute
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_int_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -55,8 +54,8 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_flavor_access_list_with_private_flavor(self):
         # Test to list flavor access successfully by querying private flavor
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,
@@ -74,8 +73,8 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_flavor_access_add_remove(self):
         # Test to add and remove flavor access to a given tenant.
-        flavor_name = rand_name(self.flavor_name_prefix)
-        new_flavor_id = rand_int_id(start=1000)
+        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
+        new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
                                                      self.ram, self.vcpus,
                                                      self.disk,

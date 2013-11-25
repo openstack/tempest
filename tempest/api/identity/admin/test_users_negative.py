@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 import uuid
@@ -28,8 +28,8 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
     @classmethod
     def setUpClass(cls):
         super(UsersNegativeTestJSON, cls).setUpClass()
-        cls.alt_user = rand_name('test_user_')
-        cls.alt_password = rand_name('pass_')
+        cls.alt_user = data_utils.rand_name('test_user_')
+        cls.alt_password = data_utils.rand_name('pass_')
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
     @attr(type=['negative', 'gate'])
@@ -91,7 +91,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
     def test_create_user_with_enabled_non_bool(self):
         # Attempt to create a user with valid enabled para should fail
         self.data.setup_test_tenant()
-        name = rand_name('test_user_')
+        name = data_utils.rand_name('test_user_')
         self.assertRaises(exceptions.BadRequest, self.client.create_user,
                           name, self.alt_password,
                           self.data.tenant['id'],
@@ -100,7 +100,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_update_user_for_non_existant_user(self):
         # Attempt to update a user non-existent user should fail
-        user_name = rand_name('user-')
+        user_name = data_utils.rand_name('user-')
         non_existent_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.update_user,
                           non_existent_id, name=user_name)
@@ -220,9 +220,9 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
         # users for a non-existent tenant
         # Assign invalid tenant ids
         invalid_id = list()
-        invalid_id.append(rand_name('999'))
+        invalid_id.append(data_utils.rand_name('999'))
         invalid_id.append('alpha')
-        invalid_id.append(rand_name("dddd@#%%^$"))
+        invalid_id.append(data_utils.rand_name("dddd@#%%^$"))
         invalid_id.append('!@#()$%^&*?<>{}[]')
         # List the users with invalid tenant id
         for invalid in invalid_id:

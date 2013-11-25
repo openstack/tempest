@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 
@@ -32,7 +32,7 @@ class EC2SecurityGroupTest(BotoTestCase):
     @attr(type='smoke')
     def test_create_authorize_security_group(self):
         # EC2 Create, authorize/revoke security group
-        group_name = rand_name("securty_group-")
+        group_name = data_utils.rand_name("securty_group-")
         group_description = group_name + " security group description "
         group = self.client.create_security_group(group_name,
                                                   group_description)

@@ -15,8 +15,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_int_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 from tempest.test import skip_because
@@ -41,23 +40,23 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
             cls.client.tenant_name)
         cls.tenant_id = tenant['id']
 
-        cls.s1_name = rand_name('server')
+        cls.s1_name = data_utils.rand_name('server')
         resp, server = cls.create_test_server(name=cls.s1_name,
                                               wait_until='ACTIVE')
         cls.s1_id = server['id']
 
-        cls.s2_name = rand_name('server')
+        cls.s2_name = data_utils.rand_name('server')
         resp, server = cls.create_test_server(name=cls.s2_name,
                                               wait_until='ACTIVE')
 
     def _get_unused_flavor_id(self):
-        flavor_id = rand_int_id(start=1000)
+        flavor_id = data_utils.rand_int_id(start=1000)
         while True:
             try:
                 resp, body = self.flavors_client.get_flavor_details(flavor_id)
             except exceptions.NotFound:
                 break
-            flavor_id = rand_int_id(start=1000)
+            flavor_id = data_utils.rand_int_id(start=1000)
         return flavor_id
 
     @attr(type='gate')
@@ -90,7 +89,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_ram(self):
-        flavor_name = rand_name("flavor-")
+        flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
         resp, quota_set = self.quotas_client.get_default_quota_set(
             self.tenant_id)
@@ -108,7 +107,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_vcpus(self):
-        flavor_name = rand_name("flavor-")
+        flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
         ram = 512
         resp, quota_set = self.quotas_client.get_default_quota_set(

@@ -15,7 +15,7 @@
 import logging
 
 from tempest.api.orchestration import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -41,7 +41,7 @@ Resources:
     def setUpClass(cls):
         super(TemplateYAMLTestJSON, cls).setUpClass()
         cls.client = cls.orchestration_client
-        cls.stack_name = rand_name('heat')
+        cls.stack_name = data_utils.rand_name('heat')
         cls.stack_identifier = cls.create_stack(cls.stack_name, cls.template)
         cls.client.wait_for_stack_status(cls.stack_identifier,
                                          'CREATE_COMPLETE')

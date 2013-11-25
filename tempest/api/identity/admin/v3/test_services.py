@@ -17,7 +17,7 @@
 
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -27,9 +27,9 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
     @attr(type='gate')
     def test_update_service(self):
         # Update description attribute of service
-        name = rand_name('service-')
-        type = rand_name('type--')
-        description = rand_name('description-')
+        name = data_utils.rand_name('service-')
+        type = data_utils.rand_name('type--')
+        description = data_utils.rand_name('description-')
         resp, body = self.client.create_service(
             name, type, description=description)
         self.assertEqual('200', resp['status'])
@@ -39,7 +39,7 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
         s_id = body['id']
         resp1_desc = body['description']
 
-        s_desc2 = rand_name('desc2-')
+        s_desc2 = data_utils.rand_name('desc2-')
         resp, body = self.service_client.update_service(
             s_id, description=s_desc2)
         resp2_desc = body['description']

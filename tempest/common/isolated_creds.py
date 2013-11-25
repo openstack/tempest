@@ -20,7 +20,7 @@ import keystoneclient.v2_0.client as keystoneclient
 import neutronclient.v2_0.client as neutronclient
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -147,17 +147,17 @@ class IsolatedCreds(object):
             self.identity_admin_client.tenants.delete(tenant)
 
     def _create_creds(self, suffix=None, admin=False):
-        rand_name_root = rand_name(self.name)
+        data_utils.rand_name_root = data_utils.rand_name(self.name)
         if suffix:
-            rand_name_root += suffix
-        tenant_name = rand_name_root + "-tenant"
+            data_utils.rand_name_root += suffix
+        tenant_name = data_utils.rand_name_root + "-tenant"
         tenant_desc = tenant_name + "-desc"
         tenant = self._create_tenant(name=tenant_name,
                                      description=tenant_desc)
         if suffix:
-            rand_name_root += suffix
-        username = rand_name_root + "-user"
-        email = rand_name_root + "@example.com"
+            data_utils.rand_name_root += suffix
+        username = data_utils.rand_name_root + "-user"
+        email = data_utils.rand_name_root + "@example.com"
         user = self._create_user(username, self.password,
                                  tenant, email)
         if admin:
@@ -197,13 +197,13 @@ class IsolatedCreds(object):
         network = None
         subnet = None
         router = None
-        rand_name_root = rand_name(self.name)
-        network_name = rand_name_root + "-network"
+        data_utils.rand_name_root = data_utils.rand_name(self.name)
+        network_name = data_utils.rand_name_root + "-network"
         network = self._create_network(network_name, tenant_id)
         try:
-            subnet_name = rand_name_root + "-subnet"
+            subnet_name = data_utils.rand_name_root + "-subnet"
             subnet = self._create_subnet(subnet_name, tenant_id, network['id'])
-            router_name = rand_name_root + "-router"
+            router_name = data_utils.rand_name_root + "-router"
             router = self._create_router(router_name, tenant_id)
             self._add_router_interface(router['id'], subnet['id'])
         except Exception:

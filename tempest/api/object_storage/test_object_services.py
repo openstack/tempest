@@ -18,8 +18,7 @@
 import hashlib
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
 
@@ -28,7 +27,7 @@ class ObjectTest(base.BaseObjectTest):
     @classmethod
     def setUpClass(cls):
         super(ObjectTest, cls).setUpClass()
-        cls.container_name = rand_name(name='TestContainer')
+        cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
         cls.containers = [cls.container_name]
 
@@ -51,13 +50,13 @@ class ObjectTest(base.BaseObjectTest):
     @attr(type='smoke')
     def test_create_object(self):
         # create object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         # create another object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertEqual(resp['status'], '201')
@@ -65,8 +64,8 @@ class ObjectTest(base.BaseObjectTest):
     @attr(type='smoke')
     def test_delete_object(self):
         # create object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         # delete object
@@ -79,13 +78,13 @@ class ObjectTest(base.BaseObjectTest):
         # add metadata to storage object, test if metadata is retrievable
 
         # create Object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         # set object metadata
-        meta_key = rand_name(name='test-')
-        meta_value = rand_name(name='MetaValue-')
+        meta_key = data_utils.rand_name(name='test-')
+        meta_value = data_utils.rand_name(name='MetaValue-')
         orig_metadata = {meta_key: meta_value}
         resp, _ = self.object_client.update_object_metadata(
             self.container_name, object_name, orig_metadata)
@@ -104,8 +103,8 @@ class ObjectTest(base.BaseObjectTest):
         # retrieve object's data (in response body)
 
         # create object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         # get object
@@ -117,16 +116,16 @@ class ObjectTest(base.BaseObjectTest):
     @attr(type='smoke')
     def test_copy_object_in_same_container(self):
         # create source object
-        src_object_name = rand_name(name='SrcObject')
-        src_data = arbitrary_string(size=len(src_object_name) * 2,
-                                    base_text=src_object_name)
+        src_object_name = data_utils.rand_name(name='SrcObject')
+        src_data = data_utils.arbitrary_string(size=len(src_object_name) * 2,
+                                               base_text=src_object_name)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    src_object_name,
                                                    src_data)
         # create destination object
-        dst_object_name = rand_name(name='DstObject')
-        dst_data = arbitrary_string(size=len(dst_object_name) * 3,
-                                    base_text=dst_object_name)
+        dst_object_name = data_utils.rand_name(name='DstObject')
+        dst_data = data_utils.arbitrary_string(size=len(dst_object_name) * 3,
+                                               base_text=dst_object_name)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    dst_object_name,
                                                    dst_data)
@@ -144,8 +143,8 @@ class ObjectTest(base.BaseObjectTest):
         # change the content type of an existing object
 
         # create object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         self.object_client.create_object(self.container_name,
                                          object_name, data)
         # get the old content type
@@ -165,15 +164,15 @@ class ObjectTest(base.BaseObjectTest):
     @attr(type='smoke')
     def test_copy_object_2d_way(self):
         # create source object
-        src_object_name = rand_name(name='SrcObject')
-        src_data = arbitrary_string(size=len(src_object_name) * 2,
-                                    base_text=src_object_name)
+        src_object_name = data_utils.rand_name(name='SrcObject')
+        src_data = data_utils.arbitrary_string(size=len(src_object_name) * 2,
+                                               base_text=src_object_name)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    src_object_name, src_data)
         # create destination object
-        dst_object_name = rand_name(name='DstObject')
-        dst_data = arbitrary_string(size=len(dst_object_name) * 3,
-                                    base_text=dst_object_name)
+        dst_object_name = data_utils.rand_name(name='DstObject')
+        dst_data = data_utils.arbitrary_string(size=len(dst_object_name) * 3,
+                                               base_text=dst_object_name)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    dst_object_name, dst_data)
         # copy source object to destination
@@ -189,22 +188,23 @@ class ObjectTest(base.BaseObjectTest):
     @attr(type='smoke')
     def test_copy_object_across_containers(self):
         # create a container to use as  asource container
-        src_container_name = rand_name(name='TestSourceContainer')
+        src_container_name = data_utils.rand_name(name='TestSourceContainer')
         self.container_client.create_container(src_container_name)
         self.containers.append(src_container_name)
         # create a container to use as a destination container
-        dst_container_name = rand_name(name='TestDestinationContainer')
+        dst_container_name = data_utils.rand_name(
+            name='TestDestinationContainer')
         self.container_client.create_container(dst_container_name)
         self.containers.append(dst_container_name)
         # create object in source container
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name) * 2,
-                                base_text=object_name)
+        object_name = data_utils.rand_name(name='Object')
+        data = data_utils.arbitrary_string(size=len(object_name) * 2,
+                                           base_text=object_name)
         resp, _ = self.object_client.create_object(src_container_name,
                                                    object_name, data)
         # set object metadata
-        meta_key = rand_name(name='test-')
-        meta_value = rand_name(name='MetaValue-')
+        meta_key = data_utils.rand_name(name='test-')
+        meta_value = data_utils.rand_name(name='MetaValue-')
         orig_metadata = {meta_key: meta_value}
         resp, _ = self.object_client.update_object_metadata(src_container_name,
                                                             object_name,
@@ -226,8 +226,8 @@ class ObjectTest(base.BaseObjectTest):
     @attr(type='gate')
     def test_object_upload_in_segments(self):
         # create object
-        object_name = rand_name(name='LObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='LObject')
+        data = data_utils.arbitrary_string()
         segments = 10
         data_segments = [data + str(i) for i in xrange(segments)]
         # uploading segments
@@ -259,8 +259,8 @@ class ObjectTest(base.BaseObjectTest):
         # Make a conditional request for an object using the If-None-Match
         # header, it should get downloaded only if the local file is different,
         # otherwise the response code should be 304 Not Modified
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         self.object_client.create_object(self.container_name,
                                          object_name, data)
         # local copy is identical, no download
@@ -281,7 +281,7 @@ class ObjectTest(base.BaseObjectTest):
 class PublicObjectTest(base.BaseObjectTest):
     def setUp(self):
         super(PublicObjectTest, self).setUp()
-        self.container_name = rand_name(name='TestContainer')
+        self.container_name = data_utils.rand_name(name='TestContainer')
         self.container_client.create_container(self.container_name)
 
     def tearDown(self):
@@ -299,9 +299,9 @@ class PublicObjectTest(base.BaseObjectTest):
             self.container_name, metadata=cont_headers, metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
         # create object
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name),
-                                base_text=object_name)
+        object_name = data_utils.rand_name(name='Object')
+        data = data_utils.arbitrary_string(size=len(object_name),
+                                           base_text=object_name)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertEqual(resp['status'], '201')
@@ -329,9 +329,9 @@ class PublicObjectTest(base.BaseObjectTest):
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
 
         # create object
-        object_name = rand_name(name='Object')
-        data = arbitrary_string(size=len(object_name) * 1,
-                                base_text=object_name)
+        object_name = data_utils.rand_name(name='Object')
+        data = data_utils.arbitrary_string(size=len(object_name) * 1,
+                                           base_text=object_name)
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertEqual(resp['status'], '201')

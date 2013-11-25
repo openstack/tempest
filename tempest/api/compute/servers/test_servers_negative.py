@@ -21,7 +21,7 @@ import uuid
 
 from tempest.api.compute import base
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -155,7 +155,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Rebuild a non existent server
         nonexistent_server = str(uuid.uuid4())
         meta = {'rebuild': 'server'}
-        new_name = rand_name('server')
+        new_name = data_utils.rand_name('server')
         file_contents = 'Test server rebuild.'
         personality = [{'path': '/etc/rebuild.txt',
                         'contents': base64.b64encode(file_contents)}]
@@ -201,7 +201,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_create_with_non_existant_keypair(self):
         # Pass a non-existent keypair while creating a server
 
-        key_name = rand_name('key')
+        key_name = data_utils.rand_name('key')
         self.assertRaises(exceptions.BadRequest,
                           self.create_test_server,
                           key_name=key_name)
@@ -219,8 +219,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_update_name_of_non_existent_server(self):
         # Update name of a non-existent server
 
-        server_name = rand_name('server')
-        new_name = rand_name('server') + '_updated'
+        server_name = data_utils.rand_name('server')
+        new_name = data_utils.rand_name('server') + '_updated'
 
         self.assertRaises(exceptions.NotFound, self.client.update_server,
                           server_name, name=new_name)
@@ -229,7 +229,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_update_server_set_empty_name(self):
         # Update name of the server to an empty string
 
-        server_name = rand_name('server')
+        server_name = data_utils.rand_name('server')
         new_name = ''
 
         self.assertRaises(exceptions.BadRequest, self.client.update_server,

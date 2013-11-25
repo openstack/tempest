@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -35,7 +35,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
         # Create 3 keypairs
         key_list = list()
         for i in range(3):
-            k_name = rand_name('keypair-')
+            k_name = data_utils.rand_name('keypair-')
             resp, keypair = self.client.create_keypair(k_name)
             # Need to pop these keys so that our compare doesn't fail later,
             # as the keypair dicts from list API doesn't have them.
@@ -66,7 +66,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_keypair_create_delete(self):
         # Keypair should be created, verified and deleted
-        k_name = rand_name('keypair-')
+        k_name = data_utils.rand_name('keypair-')
         resp, keypair = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
         private_key = keypair['private_key']
@@ -82,7 +82,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_get_keypair_detail(self):
         # Keypair should be created, Got details by name and deleted
-        k_name = rand_name('keypair-')
+        k_name = data_utils.rand_name('keypair-')
         resp, keypair = self.client.create_keypair(k_name)
         self.addCleanup(self.client.delete_keypair, k_name)
         resp, keypair_detail = self.client.get_keypair(k_name)
@@ -99,7 +99,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_keypair_create_with_pub_key(self):
         # Keypair should be created with a given public key
-        k_name = rand_name('keypair-')
+        k_name = data_utils.rand_name('keypair-')
         pub_key = ("ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCs"
                    "Ne3/1ILNCqFyfYWDeTKLD6jEXC2OQHLmietMWW+/vd"
                    "aZq7KZEwO0jhglaFjU1mpqq4Gz5RX156sCTNM9vRbw"
@@ -123,7 +123,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_keypair_create_with_invalid_pub_key(self):
         # Keypair should not be created with a non RSA public key
-        k_name = rand_name('keypair-')
+        k_name = data_utils.rand_name('keypair-')
         pub_key = "ssh-rsa JUNK nova@ubuntu"
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_keypair, k_name, pub_key)
@@ -131,14 +131,14 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_keypair_delete_nonexistant_key(self):
         # Non-existant key deletion should throw a proper error
-        k_name = rand_name("keypair-non-existant-")
+        k_name = data_utils.rand_name("keypair-non-existant-")
         self.assertRaises(exceptions.NotFound, self.client.delete_keypair,
                           k_name)
 
     @attr(type=['negative', 'gate'])
     def test_create_keypair_with_empty_public_key(self):
         # Keypair should not be created with an empty public key
-        k_name = rand_name("keypair-")
+        k_name = data_utils.rand_name("keypair-")
         pub_key = ' '
         self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
                           k_name, pub_key)
@@ -146,7 +146,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_keypair_when_public_key_bits_exceeds_maximum(self):
         # Keypair should not be created when public key bits are too long
-        k_name = rand_name("keypair-")
+        k_name = data_utils.rand_name("keypair-")
         pub_key = 'ssh-rsa ' + 'A' * 2048 + ' openstack@ubuntu'
         self.assertRaises(exceptions.BadRequest, self.client.create_keypair,
                           k_name, pub_key)
@@ -154,7 +154,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_keypair_with_duplicate_name(self):
         # Keypairs with duplicate names should not be created
-        k_name = rand_name('keypair-')
+        k_name = data_utils.rand_name('keypair-')
         resp, _ = self.client.create_keypair(k_name)
         self.assertEqual(200, resp.status)
         # Now try the same keyname to create another key

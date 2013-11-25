@@ -18,7 +18,7 @@
 import netaddr
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
@@ -58,7 +58,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     def test_list_virtual_interfaces_invalid_server_id(self):
         # Negative test: Should not be able to GET virtual interfaces
         # for an invalid server_id
-        invalid_server_id = rand_name('!@#$%^&*()')
+        invalid_server_id = data_utils.rand_name('!@#$%^&*()')
         self.assertRaises(exceptions.NotFound,
                           self.client.list_virtual_interfaces,
                           invalid_server_id)

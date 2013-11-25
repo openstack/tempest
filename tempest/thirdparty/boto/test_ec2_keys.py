@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import skip_because
 from tempest.thirdparty.boto.test import BotoTestCase
@@ -40,7 +40,7 @@ class EC2KeysTest(BotoTestCase):
     @attr(type='smoke')
     def test_create_ec2_keypair(self):
         # EC2 create KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertTrue(compare_key_pairs(keypair,
@@ -50,7 +50,7 @@ class EC2KeysTest(BotoTestCase):
     @attr(type='smoke')
     def test_delete_ec2_keypair(self):
         # EC2 delete KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.client.create_key_pair(key_name)
         self.client.delete_key_pair(key_name)
         self.assertEqual(None, self.client.get_key_pair(key_name))
@@ -58,7 +58,7 @@ class EC2KeysTest(BotoTestCase):
     @attr(type='smoke')
     def test_get_ec2_keypair(self):
         # EC2 get KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertTrue(compare_key_pairs(keypair,
@@ -67,7 +67,7 @@ class EC2KeysTest(BotoTestCase):
     @attr(type='smoke')
     def test_duplicate_ec2_keypair(self):
         # EC2 duplicate KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertBotoError(self.ec.client.InvalidKeyPair.Duplicate,

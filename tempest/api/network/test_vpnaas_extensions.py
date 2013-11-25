@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -39,7 +39,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         super(VPNaaSJSON, cls).setUpClass()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
-        cls.router = cls.create_router(rand_name("router-"))
+        cls.router = cls.create_router(data_utils.rand_name("router-"))
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         cls.vpnservice = cls.create_vpnservice(cls.subnet['id'],
                                                cls.router['id'])
@@ -55,7 +55,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
     @attr(type='smoke')
     def test_create_update_delete_vpn_service(self):
         # Creates a VPN service
-        name = rand_name('vpn-service-')
+        name = data_utils.rand_name('vpn-service-')
         resp, body = self.client.create_vpn_service(self.subnet['id'],
                                                     self.router['id'],
                                                     name=name,

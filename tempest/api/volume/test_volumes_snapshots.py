@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
@@ -40,7 +40,7 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
     @attr(type='gate')
     def test_snapshot_create_get_list_update_delete(self):
         # Create a snapshot
-        s_name = rand_name('snap')
+        s_name = data_utils.rand_name('snap')
         snapshot = self.create_snapshot(self.volume_origin['id'],
                                         display_name=s_name)
 
@@ -59,7 +59,7 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
         self.assertIn(tracking_data, snaps_data)
 
         # Updates snapshot with new values
-        new_s_name = rand_name('new-snap')
+        new_s_name = data_utils.rand_name('new-snap')
         new_desc = 'This is the new description of snapshot.'
         resp, update_snapshot = \
             self.snapshots_client.update_snapshot(snapshot['id'],

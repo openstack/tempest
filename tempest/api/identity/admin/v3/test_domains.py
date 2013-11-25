@@ -17,7 +17,7 @@
 
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -38,7 +38,8 @@ class DomainsTestJSON(base.BaseIdentityAdminTest):
         fetched_ids = list()
         for _ in range(3):
             _, domain = self.v3_client.create_domain(
-                rand_name('domain-'), description=rand_name('domain-desc-'))
+                data_utils.rand_name('domain-'),
+                description=data_utils.rand_name('domain-desc-'))
             # Delete the domain at the end of this method
             self.addCleanup(self._delete_domain, domain['id'])
             domain_ids.append(domain['id'])
@@ -52,8 +53,8 @@ class DomainsTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='smoke')
     def test_create_update_delete_domain(self):
-        d_name = rand_name('domain-')
-        d_desc = rand_name('domain-desc-')
+        d_name = data_utils.rand_name('domain-')
+        d_desc = data_utils.rand_name('domain-desc-')
         resp_1, domain = self.v3_client.create_domain(
             d_name, description=d_desc)
         self.assertEqual(resp_1['status'], '201')
@@ -70,8 +71,8 @@ class DomainsTestJSON(base.BaseIdentityAdminTest):
             self.assertEqual(True, domain['enabled'])
         else:
             self.assertEqual('true', str(domain['enabled']).lower())
-        new_desc = rand_name('new-desc-')
-        new_name = rand_name('new-name-')
+        new_desc = data_utils.rand_name('new-desc-')
+        new_name = data_utils.rand_name('new-name-')
 
         resp_2, updated_domain = self.v3_client.update_domain(
             domain['id'], name=new_name, description=new_desc)

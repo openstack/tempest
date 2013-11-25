@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -29,13 +29,14 @@ class CredentialsTestJSON(base.BaseIdentityAdminTest):
         cls.projects = list()
         cls.creds_list = [['project_id', 'user_id', 'id'],
                           ['access', 'secret']]
-        u_name = rand_name('user-')
+        u_name = data_utils.rand_name('user-')
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        u_password = rand_name('pass-')
+        u_password = data_utils.rand_name('pass-')
         for i in range(2):
             resp, cls.project = cls.v3_client.create_project(
-                rand_name('project-'), description=rand_name('project-desc-'))
+                data_utils.rand_name('project-'),
+                description=data_utils.rand_name('project-desc-'))
             assert resp['status'] == '201', "Expected %s" % resp['status']
             cls.projects.append(cls.project['id'])
 
@@ -59,7 +60,8 @@ class CredentialsTestJSON(base.BaseIdentityAdminTest):
 
     @attr(type='smoke')
     def test_credentials_create_get_update_delete(self):
-        keys = [rand_name('Access-'), rand_name('Secret-')]
+        keys = [data_utils.rand_name('Access-'),
+                data_utils.rand_name('Secret-')]
         resp, cred = self.creds_client.create_credential(
             keys[0], keys[1], self.user_body['id'],
             self.projects[0])
@@ -70,7 +72,8 @@ class CredentialsTestJSON(base.BaseIdentityAdminTest):
         for value2 in self.creds_list[1]:
             self.assertIn(value2, cred['blob'])
 
-        new_keys = [rand_name('NewAccess-'), rand_name('NewSecret-')]
+        new_keys = [data_utils.rand_name('NewAccess-'),
+                    data_utils.rand_name('NewSecret-')]
         resp, update_body = self.creds_client.update_credential(
             cred['id'], access_key=new_keys[0], secret_key=new_keys[1],
             project_id=self.projects[1])
@@ -97,7 +100,8 @@ class CredentialsTestJSON(base.BaseIdentityAdminTest):
 
         for i in range(2):
             resp, cred = self.creds_client.create_credential(
-                rand_name('Access-'), rand_name('Secret-'),
+                data_utils.rand_name('Access-'),
+                data_utils.rand_name('Secret-'),
                 self.user_body['id'], self.projects[0])
             self.assertEqual(resp['status'], '201')
             created_cred_ids.append(cred['id'])

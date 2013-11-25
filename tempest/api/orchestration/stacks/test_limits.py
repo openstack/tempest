@@ -15,7 +15,7 @@
 import logging
 
 from tempest.api.orchestration import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -30,7 +30,7 @@ class TestServerStackLimits(base.BaseOrchestrationTest):
     def setUpClass(cls):
         super(TestServerStackLimits, cls).setUpClass()
         cls.client = cls.orchestration_client
-        cls.stack_name = rand_name('heat')
+        cls.stack_name = data_utils.rand_name('heat')
 
     @attr(type='gate')
     def test_exceed_max_template_size_fails(self):

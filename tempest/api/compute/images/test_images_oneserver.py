@@ -20,8 +20,7 @@ import testtools
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
-from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
@@ -91,11 +90,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
     def test_create_delete_image(self):
 
         # Create a new image
-        name = rand_name('image')
+        name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
         resp, body = self.client.create_image(self.server_id, name, meta)
         self.assertEqual(202, resp.status)
-        image_id = parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         self.client.wait_for_image_status(image_id, 'ACTIVE')
 
         # Verify the image was created correctly

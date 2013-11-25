@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -26,7 +26,7 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
     _name = 'multiple-create-test'
 
     def _generate_name(self):
-        return rand_name(self._name)
+        return data_utils.rand_name(self._name)
 
     def _create_multiple_servers(self, name=None, wait_until=None, **kwargs):
         """

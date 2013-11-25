@@ -19,7 +19,7 @@ import time
 
 from cinderclient import exceptions as cinder_exceptions
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
@@ -75,7 +75,7 @@ class TestStampPattern(manager.OfficialClientTest):
         return linux_client.ssh_client
 
     def _create_volume_snapshot(self, volume):
-        snapshot_name = rand_name('scenario-snapshot-')
+        snapshot_name = data_utils.rand_name('scenario-snapshot-')
         volume_snapshots = self.volume_client.volume_snapshots
         snapshot = volume_snapshots.create(
             volume.id, display_name=snapshot_name)

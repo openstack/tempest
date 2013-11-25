@@ -21,8 +21,7 @@ import time
 import urlparse
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
@@ -33,7 +32,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @classmethod
     def setUpClass(cls):
         super(ObjectTempUrlTest, cls).setUpClass()
-        cls.container_name = rand_name(name='TestContainer')
+        cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
         cls.containers = [cls.container_name]
 
@@ -66,9 +65,9 @@ class ObjectTempUrlTest(base.BaseObjectTest):
             self.key)
 
         # create object
-        self.object_name = rand_name(name='ObjectTemp')
-        self.data = arbitrary_string(size=len(self.object_name),
-                                     base_text=self.object_name)
+        self.object_name = data_utils.rand_name(name='ObjectTemp')
+        self.data = data_utils.arbitrary_string(size=len(self.object_name),
+                                                base_text=self.object_name)
         self.object_client.create_object(self.container_name,
                                          self.object_name, self.data)
 
@@ -111,8 +110,9 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     @attr(type='gate')
     def test_put_object_using_temp_url(self):
         # make sure the metadata has been set
-        new_data = arbitrary_string(size=len(self.object_name),
-                                    base_text=rand_name(name="random"))
+        new_data = data_utils.arbitrary_string(
+            size=len(self.object_name),
+            base_text=data_utils.rand_name(name="random"))
 
         EXPIRATION_TIME = 10000  # high to ensure the test finishes.
         expires = int(time.time() + EXPIRATION_TIME)

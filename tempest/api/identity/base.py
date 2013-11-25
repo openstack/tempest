@@ -17,7 +17,7 @@
 
 
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 import tempest.test
 
 
@@ -94,8 +94,8 @@ class DataGenerator(object):
         def setup_test_user(self):
             """Set up a test user."""
             self.setup_test_tenant()
-            self.test_user = rand_name('test_user_')
-            self.test_password = rand_name('pass_')
+            self.test_user = data_utils.rand_name('test_user_')
+            self.test_password = data_utils.rand_name('pass_')
             self.test_email = self.test_user + '@testmail.tm'
             resp, self.user = self.client.create_user(self.test_user,
                                                       self.test_password,
@@ -105,8 +105,8 @@ class DataGenerator(object):
 
         def setup_test_tenant(self):
             """Set up a test tenant."""
-            self.test_tenant = rand_name('test_tenant_')
-            self.test_description = rand_name('desc_')
+            self.test_tenant = data_utils.rand_name('test_tenant_')
+            self.test_description = data_utils.rand_name('desc_')
             resp, self.tenant = self.client.create_tenant(
                 name=self.test_tenant,
                 description=self.test_description)
@@ -114,15 +114,15 @@ class DataGenerator(object):
 
         def setup_test_role(self):
             """Set up a test role."""
-            self.test_role = rand_name('role')
+            self.test_role = data_utils.rand_name('role')
             resp, self.role = self.client.create_role(self.test_role)
             self.roles.append(self.role)
 
         def setup_test_v3_user(self):
             """Set up a test v3 user."""
             self.setup_test_project()
-            self.test_user = rand_name('test_user_')
-            self.test_password = rand_name('pass_')
+            self.test_user = data_utils.rand_name('test_user_')
+            self.test_password = data_utils.rand_name('pass_')
             self.test_email = self.test_user + '@testmail.tm'
             resp, self.v3_user = self.client.create_user(self.test_user,
                                                          self.test_password,
@@ -132,8 +132,8 @@ class DataGenerator(object):
 
         def setup_test_project(self):
             """Set up a test project."""
-            self.test_project = rand_name('test_project_')
-            self.test_description = rand_name('desc_')
+            self.test_project = data_utils.rand_name('test_project_')
+            self.test_description = data_utils.rand_name('desc_')
             resp, self.project = self.client.create_project(
                 name=self.test_project,
                 description=self.test_description)
@@ -141,7 +141,7 @@ class DataGenerator(object):
 
         def setup_test_v3_role(self):
             """Set up a test v3 role."""
-            self.test_role = rand_name('role')
+            self.test_role = data_utils.rand_name('role')
             resp, self.v3_role = self.client.create_role(self.test_role)
             self.v3_roles.append(self.v3_role)
 

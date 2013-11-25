@@ -18,8 +18,7 @@ import testtools
 
 from tempest.api.object_storage import base
 from tempest import clients
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
@@ -32,7 +31,7 @@ class AccountQuotasTest(base.BaseObjectTest):
     @classmethod
     def setUpClass(cls):
         super(AccountQuotasTest, cls).setUpClass()
-        cls.container_name = rand_name(name="TestContainer")
+        cls.container_name = data_utils.rand_name(name="TestContainer")
         cls.container_client.create_container(cls.container_name)
 
         cls.data.setup_test_user()
@@ -102,8 +101,8 @@ class AccountQuotasTest(base.BaseObjectTest):
                       "Account Quotas middleware not available")
     @attr(type="smoke")
     def test_upload_valid_object(self):
-        object_name = rand_name(name="TestObject")
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name="TestObject")
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
 
@@ -113,8 +112,8 @@ class AccountQuotasTest(base.BaseObjectTest):
                       "Account Quotas middleware not available")
     @attr(type=["negative", "smoke"])
     def test_upload_large_object(self):
-        object_name = rand_name(name="TestObject")
-        data = arbitrary_string(30)
+        object_name = data_utils.rand_name(name="TestObject")
+        data = data_utils.arbitrary_string(30)
         self.assertRaises(exceptions.OverLimit,
                           self.object_client.create_object,
                           self.container_name, object_name, data)

@@ -16,8 +16,7 @@
 #    under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
 
@@ -35,7 +34,7 @@ class ContainerTest(base.BaseObjectTest):
 
     @attr(type='smoke')
     def test_create_container(self):
-        container_name = rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(name='TestContainer')
         resp, body = self.container_client.create_container(container_name)
         self.containers.append(container_name)
         self.assertIn(resp['status'], ('202', '201'))
@@ -43,7 +42,7 @@ class ContainerTest(base.BaseObjectTest):
     @attr(type='smoke')
     def test_delete_container(self):
         # create a container
-        container_name = rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
         self.containers.append(container_name)
         # delete container
@@ -56,17 +55,17 @@ class ContainerTest(base.BaseObjectTest):
         # add metadata to an object
 
         # create a container
-        container_name = rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
         self.containers.append(container_name)
         # create object
-        object_name = rand_name(name='TestObject')
-        data = arbitrary_string()
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(container_name,
                                                    object_name, data)
         # set object metadata
-        meta_key = rand_name(name='Meta-Test-')
-        meta_value = rand_name(name='MetaValue-')
+        meta_key = data_utils.rand_name(name='Meta-Test-')
+        meta_value = data_utils.rand_name(name='MetaValue-')
         orig_metadata = {meta_key: meta_value}
         resp, _ = self.object_client.update_object_metadata(container_name,
                                                             object_name,
@@ -87,7 +86,7 @@ class ContainerTest(base.BaseObjectTest):
         # update/retrieve/delete container metadata
 
         # create a container
-        container_name = rand_name(name='TestContainer')
+        container_name = data_utils.rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
         self.containers.append(container_name)
         # update container metadata

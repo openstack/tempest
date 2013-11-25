@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -46,7 +46,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Creating a server with a name that already exists is allowed
 
         # TODO(sdague): clear out try, we do cleanup one layer up
-        server_name = rand_name('server')
+        server_name = data_utils.rand_name('server')
         resp, server = self.create_test_server(name=server_name,
                                                wait_until='ACTIVE')
         id1 = server['id']
@@ -64,7 +64,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
     def test_create_specify_keypair(self):
         # Specify a keypair while creating a server
 
-        key_name = rand_name('key')
+        key_name = data_utils.rand_name('key')
         resp, keypair = self.keypairs_client.create_keypair(key_name)
         resp, body = self.keypairs_client.list_keypairs()
         resp, server = self.create_test_server(key_name=key_name)

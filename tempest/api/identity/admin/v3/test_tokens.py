@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -28,10 +28,10 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
     def test_tokens(self):
         # Valid user's token is authenticated
         # Create a User
-        u_name = rand_name('user-')
+        u_name = data_utils.rand_name('user-')
         u_desc = '%s-description' % u_name
         u_email = '%s@testmail.tm' % u_name
-        u_password = rand_name('pass-')
+        u_password = data_utils.rand_name('pass-')
         resp, user = self.v3_client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email)

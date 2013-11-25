@@ -18,7 +18,7 @@
 import uuid
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -32,7 +32,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         cls.client = cls.volumes_client
 
         # Create a test shared instance and volume for attach/detach tests
-        vol_name = rand_name('Volume-')
+        vol_name = data_utils.rand_name('Volume-')
 
         cls.volume = cls.create_volume(size=1, display_name=vol_name)
         cls.client.wait_for_volume_status(cls.volume['id'], 'available')
@@ -54,7 +54,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_invalid_size(self):
         # Should not be able to create volume with invalid size
         # in request
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
@@ -63,7 +63,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     def test_create_volume_with_out_passing_size(self):
         # Should not be able to create volume without passing size
         # in request
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
@@ -71,7 +71,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @attr(type=['negative', 'gate'])
     def test_create_volume_with_size_zero(self):
         # Should not be able to create volume with size zero
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
@@ -79,7 +79,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @attr(type=['negative', 'gate'])
     def test_create_volume_with_size_negative(self):
         # Should not be able to create volume with size negative
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='-1', display_name=v_name, metadata=metadata)
@@ -87,7 +87,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @attr(type=['negative', 'gate'])
     def test_create_volume_with_nonexistant_volume_type(self):
         # Should not be able to create volume with non-existant volume type
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.create_volume,
                           size='1', volume_type=str(uuid.uuid4()),
@@ -96,7 +96,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @attr(type=['negative', 'gate'])
     def test_create_volume_with_nonexistant_snapshot_id(self):
         # Should not be able to create volume with non-existant snapshot
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.create_volume,
                           size='1', snapshot_id=str(uuid.uuid4()),
@@ -105,7 +105,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
     @attr(type=['negative', 'gate'])
     def test_create_volume_with_nonexistant_source_volid(self):
         # Should not be able to create volume with non-existant source volume
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.create_volume,
                           size='1', source_volid=str(uuid.uuid4()),
@@ -113,7 +113,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @attr(type=['negative', 'gate'])
     def test_update_volume_with_nonexistant_volume_id(self):
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.update_volume,
                           volume_id=str(uuid.uuid4()), display_name=v_name,
@@ -121,7 +121,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @attr(type=['negative', 'gate'])
     def test_update_volume_with_invalid_volume_id(self):
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.update_volume,
                           volume_id='#$%%&^&^', display_name=v_name,
@@ -129,7 +129,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @attr(type=['negative', 'gate'])
     def test_update_volume_with_empty_volume_id(self):
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.update_volume,
                           volume_id='', display_name=v_name,
@@ -159,7 +159,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @attr(type=['negative', 'gate'])
     def test_attach_volumes_with_nonexistent_volume_id(self):
-        srv_name = rand_name('Instance-')
+        srv_name = data_utils.rand_name('Instance-')
         resp, server = self.servers_client.create_server(srv_name,
                                                          self.image_ref,
                                                          self.flavor_ref)
@@ -239,7 +239,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @attr(type=['negative', 'gate'])
     def test_list_volumes_with_nonexistent_name(self):
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         params = {'display_name': v_name}
         resp, fetched_volume = self.client.list_volumes(params)
         self.assertEqual(200, resp.status)
@@ -247,7 +247,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
 
     @attr(type=['negative', 'gate'])
     def test_list_volumes_detail_with_nonexistent_name(self):
-        v_name = rand_name('Volume-')
+        v_name = data_utils.rand_name('Volume-')
         params = {'display_name': v_name}
         resp, fetched_volume = self.client.list_volumes_with_detail(params)
         self.assertEqual(200, resp.status)

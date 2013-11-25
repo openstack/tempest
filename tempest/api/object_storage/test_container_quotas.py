@@ -18,8 +18,7 @@
 import testtools
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
@@ -46,7 +45,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
                      Maximum object count of the container.
         """
         super(ContainerQuotasTest, self).setUp()
-        self.container_name = rand_name(name="TestContainer")
+        self.container_name = data_utils.rand_name(name="TestContainer")
         self.container_client.create_container(self.container_name)
         metadata = {"quota-bytes": str(QUOTA_BYTES),
                     "quota-count": str(QUOTA_COUNT), }
@@ -62,8 +61,8 @@ class ContainerQuotasTest(base.BaseObjectTest):
     @attr(type="smoke")
     def test_upload_valid_object(self):
         """Attempts to uploads an object smaller than the bytes quota."""
-        object_name = rand_name(name="TestObject")
-        data = arbitrary_string(QUOTA_BYTES)
+        object_name = data_utils.rand_name(name="TestObject")
+        data = data_utils.arbitrary_string(QUOTA_BYTES)
 
         nbefore = self._get_bytes_used()
 
@@ -78,8 +77,8 @@ class ContainerQuotasTest(base.BaseObjectTest):
     @attr(type="smoke")
     def test_upload_large_object(self):
         """Attempts to upload an object lagger than the bytes quota."""
-        object_name = rand_name(name="TestObject")
-        data = arbitrary_string(QUOTA_BYTES + 1)
+        object_name = data_utils.rand_name(name="TestObject")
+        data = data_utils.arbitrary_string(QUOTA_BYTES + 1)
 
         nbefore = self._get_bytes_used()
 
@@ -95,7 +94,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
     def test_upload_too_many_objects(self):
         """Attempts to upload many objects that exceeds the count limit."""
         for _ in range(QUOTA_COUNT):
-            name = rand_name(name="TestObject")
+            name = data_utils.rand_name(name="TestObject")
             self.object_client.create_object(self.container_name, name, "")
 
         nbefore = self._get_object_count()

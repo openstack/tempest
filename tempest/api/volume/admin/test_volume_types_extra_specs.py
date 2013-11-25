@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -26,7 +26,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(VolumeTypesExtraSpecsTest, cls).setUpClass()
-        vol_type_name = rand_name('Volume-type-')
+        vol_type_name = data_utils.rand_name('Volume-type-')
         resp, cls.volume_type = cls.client.create_volume_type(vol_type_name)
 
     @classmethod

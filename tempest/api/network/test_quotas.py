@@ -18,7 +18,7 @@
 
 from tempest.api.network import base
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -55,8 +55,8 @@ class QuotasTest(base.BaseNetworkTest):
     @attr(type='gate')
     def test_quotas(self):
         # Add a tenant to conduct the test
-        test_tenant = rand_name('test_tenant_')
-        test_description = rand_name('desc_')
+        test_tenant = data_utils.rand_name('test_tenant_')
+        test_description = data_utils.rand_name('desc_')
         _, tenant = self.identity_admin_client.create_tenant(
             name=test_tenant,
             description=test_description)

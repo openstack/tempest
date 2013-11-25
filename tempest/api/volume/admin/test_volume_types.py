@@ -16,7 +16,7 @@
 #    under the License.
 
 from tempest.api.volume.base import BaseVolumeTest
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.services.volume.json.admin import volume_types_client
 from tempest.test import attr
 
@@ -58,8 +58,8 @@ class VolumeTypesTest(BaseVolumeTest):
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
         # Create/get/delete volume with volume_type and extra spec.
         volume = {}
-        vol_name = rand_name("volume-")
-        vol_type_name = rand_name("volume-type-")
+        vol_name = data_utils.rand_name("volume-")
+        vol_type_name = data_utils.rand_name("volume-type-")
         proto = self.config.volume.storage_protocol
         vendor = self.config.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
@@ -102,7 +102,7 @@ class VolumeTypesTest(BaseVolumeTest):
     def test_volume_type_create_get_delete(self):
         # Create/get volume type.
         body = {}
-        name = rand_name("volume-type-")
+        name = data_utils.rand_name("volume-type-")
         proto = self.config.volume.storage_protocol
         vendor = self.config.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
