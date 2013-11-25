@@ -17,71 +17,19 @@
 
 import datetime
 
-from tempest.api import compute
 from tempest.api.compute import base
-from tempest import clients
 from tempest import exceptions
 from tempest.test import attr
 
 
 class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
-
-    @classmethod
-    def _ensure_no_servers(cls, servers, username, tenant_name):
-        """
-        If there are servers and there is tenant isolation then a
-        skipException is raised to skip the test since it requires no servers
-        to already exist for the given user/tenant.
-        If there are servers and there is not tenant isolation then the test
-        blocks while the servers are being deleted.
-        """
-        if len(servers):
-            if not cls.config.compute.allow_tenant_isolation:
-                for srv in servers:
-                    cls.client.wait_for_server_termination(srv['id'],
-                                                           ignore_error=True)
-            else:
-                msg = ("User/tenant %(u)s/%(t)s already have "
-                       "existing server instances. Skipping test." %
-                       {'u': username, 't': tenant_name})
-                raise cls.skipException(msg)
+    force_tenant_isolation = True
 
     @classmethod
     def setUpClass(cls):
         super(ListServersNegativeTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
-        cls.servers = []
-
-        if compute.MULTI_USER:
-            if cls.config.compute.allow_tenant_isolation:
-                creds = cls.isolated_creds.get_alt_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.servers_client
-
-        # Under circumstances when there is not a tenant/user
-        # created for the test case, the test case checks
-        # to see if there are existing servers for the
-        # either the normal user/tenant or the alt user/tenant
-        # and if so, the whole test is skipped. We do this
-        # because we assume a baseline of no servers at the
-        # start of the test instead of destroying any existing
-        # servers.
-        resp, body = cls.client.list_servers()
-        cls._ensure_no_servers(body['servers'],
-                               cls.os.username,
-                               cls.os.tenant_name)
-
-        resp, body = cls.alt_client.list_servers()
-        cls._ensure_no_servers(body['servers'],
-                               cls.alt_manager.username,
-                               cls.alt_manager.tenant_name)
 
         # The following servers are created for use
         # by the test methods in this class. These
