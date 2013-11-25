@@ -17,7 +17,7 @@
 
 from tempest.api.compute import base
 from tempest.api import utils
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.test import attr
@@ -57,16 +57,16 @@ class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
 
-        cls.s1_name = rand_name(cls.__name__ + '-instance')
+        cls.s1_name = data_utils.rand_name(cls.__name__ + '-instance')
         resp, cls.s1 = cls.create_test_server(name=cls.s1_name,
                                               wait_until='ACTIVE')
 
-        cls.s2_name = rand_name(cls.__name__ + '-instance')
+        cls.s2_name = data_utils.rand_name(cls.__name__ + '-instance')
         resp, cls.s2 = cls.create_test_server(name=cls.s2_name,
                                               image_id=cls.image_ref_alt,
                                               wait_until='ACTIVE')
 
-        cls.s3_name = rand_name(cls.__name__ + '-instance')
+        cls.s3_name = data_utils.rand_name(cls.__name__ + '-instance')
         resp, cls.s3 = cls.create_test_server(name=cls.s3_name,
                                               flavor=cls.flavor_ref_alt,
                                               wait_until='ACTIVE')

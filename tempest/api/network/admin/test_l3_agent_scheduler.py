@@ -15,7 +15,7 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
@@ -50,7 +50,7 @@ class L3AgentSchedulerJSON(base.BaseAdminNetworkTest):
 
     @attr(type='smoke')
     def test_list_l3_agents_hosting_router(self):
-        name = rand_name('router-')
+        name = data_utils.rand_name('router-')
         resp, router = self.client.create_router(name)
         self.assertEqual('201', resp['status'])
         resp, body = self.admin_client.list_l3_agents_hosting_router(
