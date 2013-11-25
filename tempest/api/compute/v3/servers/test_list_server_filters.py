@@ -24,17 +24,17 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
+class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ListServerFiltersTestJSON, cls).setUpClass()
+        super(ListServerFiltersV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...
         images_client = cls.images_client
-        resp, images = images_client.list_images()
+        resp, images = images_client.image_list()
 
         if cls.image_ref != cls.image_ref_alt and \
             any([image for image in images
@@ -46,13 +46,13 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Do some sanity checks here. If one of the images does
         # not exist, fail early since the tests won't work...
         try:
-            cls.images_client.get_image(cls.image_ref)
+            cls.images_client.get_image_meta(cls.image_ref)
         except exceptions.NotFound:
             raise RuntimeError("Image %s (image_ref) was not found!" %
                                cls.image_ref)
 
         try:
-            cls.images_client.get_image(cls.image_ref_alt)
+            cls.images_client.get_image_meta(cls.image_ref_alt)
         except exceptions.NotFound:
             raise RuntimeError("Image %s (image_ref_alt) was not found!" %
                                cls.image_ref_alt)
@@ -165,7 +165,8 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         # Filter the detailed list of servers by server status
         params = {'status': 'active'}
         resp, body = self.client.list_servers_with_detail(params)
-        servers = body['servers']
+        expected_servers = (self.s1['id'], self.s2['id'], self.s3['id'])
+        servers = [x for x in body['servers'] if x['id'] in expected_servers]
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s2['id'], map(lambda x: x['id'], servers))
@@ -234,5 +235,5 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(1, len(servers['servers']))
 
 
-class ListServerFiltersTestXML(ListServerFiltersTestJSON):
+class ListServerFiltersV3TestXML(ListServerFiltersV3TestJSON):
     _interface = 'xml'

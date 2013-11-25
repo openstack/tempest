@@ -24,7 +24,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
+class ListServersNegativeV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
@@ -49,7 +49,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ListServersNegativeTestJSON, cls).setUpClass()
+        super(ListServersNegativeV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.servers = []
 
@@ -182,7 +182,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     @attr(type='gate')
     def test_list_servers_by_changes_since(self):
         # Servers are listed by specifying changes-since date
-        changes_since = {'changes-since': self.start_time.isoformat()}
+        changes_since = {'changes_since': self.start_time.isoformat()}
         resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
         # changes-since returns all instances, including deleted.
@@ -196,12 +196,12 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
     def test_list_servers_by_changes_since_invalid_date(self):
         # Return an error when invalid date format is passed
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
-                          {'changes-since': '2011/01/01'})
+                          {'changes_since': '2011/01/01'})
 
     @attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_future_date(self):
         # Return an empty list when a date in the future is passed
-        changes_since = {'changes-since': '2051-01-01T12:34:00Z'}
+        changes_since = {'changes_since': '2051-01-01T12:34:00Z'}
         resp, body = self.client.list_servers(changes_since)
         self.assertEqual('200', resp['status'])
         self.assertEqual(0, len(body['servers']))
@@ -218,5 +218,5 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual([], actual)
 
 
-class ListServersNegativeTestXML(ListServersNegativeTestJSON):
+class ListServersNegativeV3TestXML(ListServersNegativeV3TestJSON):
     _interface = 'xml'
