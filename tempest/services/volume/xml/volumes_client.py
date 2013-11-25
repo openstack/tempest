@@ -284,3 +284,56 @@ class VolumesClientXML(RestClientXML):
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def create_volume_transfer(self, vol_id, display_name=None):
+        """Create a volume transfer."""
+        post_body = Element("transfer",
+                            volume_id=vol_id)
+        if display_name:
+            post_body.add_attr('name', display_name)
+        resp, body = self.post('os-volume-transfer',
+                               str(Document(post_body)),
+                               self.headers)
+        volume = xml_to_json(etree.fromstring(body))
+        return resp, volume
+
+    def get_volume_transfer(self, transfer_id):
+        """Returns the details of a volume transfer."""
+        url = "os-volume-transfer/%s" % str(transfer_id)
+        resp, body = self.get(url, self.headers)
+        volume = xml_to_json(etree.fromstring(body))
+        return resp, volume
+
+    def list_volume_transfers(self, params=None):
+        """List all the volume transfers created."""
+        url = 'os-volume-transfer'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        resp, body = self.get(url, self.headers)
+        body = etree.fromstring(body)
+        volumes = []
+        if body is not None:
+            volumes += [self._parse_volume_transfer(vol) for vol in list(body)]
+        return resp, volumes
+
+    def _parse_volume_transfer(self, body):
+        vol = dict((attr, body.get(attr)) for attr in body.keys())
+        for child in body.getchildren():
+            tag = child.tag
+            if tag.startswith("{"):
+                tag = tag.split("}", 1)
+            vol[tag] = xml_to_json(child)
+        return vol
+
+    def delete_volume_transfer(self, transfer_id):
+        """Delete a volume transfer."""
+        return self.delete("os-volume-transfer/%s" % str(transfer_id))
+
+    def accept_volume_transfer(self, transfer_id, transfer_auth_key):
+        """Accept a volume transfer."""
+        post_body = Element("accept", auth_key=transfer_auth_key)
+        url = 'os-volume-transfer/%s/accept' % transfer_id
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        volume = xml_to_json(etree.fromstring(body))
+        return resp, volume
