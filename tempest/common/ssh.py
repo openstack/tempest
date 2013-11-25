@@ -66,7 +66,8 @@ class Client(object):
                 _timeout = False
                 break
             except (socket.error,
-                    paramiko.AuthenticationException):
+                    paramiko.AuthenticationException,
+                    paramiko.SSHException):
                 time.sleep(bsleep)
                 bsleep *= backoff
                 continue
