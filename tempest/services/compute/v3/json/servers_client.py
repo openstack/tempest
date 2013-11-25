@@ -93,8 +93,8 @@ class ServersV3ClientJSON(RestClient):
         body = json.loads(body)
         # NOTE(maurosr): this deals with the case of multiple server create
         # with return reservation id set True
-        if 'reservation_id' in body:
-            return resp, body
+        if 'servers_reservation' in body:
+            return resp, body['servers_reservation']
         return resp, body['server']
 
     def update_server(self, server_id, name=None, meta=None, access_ip_v4=None,
@@ -117,10 +117,10 @@ class ServersV3ClientJSON(RestClient):
             post_body['name'] = name
 
         if access_ip_v4 is not None:
-            post_body['access_ip_v4'] = access_ip_v4
+            post_body['os-access-ips:access_ip_v4'] = access_ip_v4
 
         if access_ip_v6 is not None:
-            post_body['access_ip_v6'] = access_ip_v6
+            post_body['os-access-ips:access_ip_v6'] = access_ip_v6
 
         if disk_config is not None:
             post_body['os-disk-config:disk_config'] = disk_config

@@ -266,6 +266,7 @@ class BaseV3ComputeTest(BaseComputeTest):
         cls.availability_zone_client = cls.os.availability_zone_v3_client
         cls.interfaces_client = cls.os.interfaces_v3_client
         cls.hypervisor_client = cls.os.hypervisor_v3_client
+        cls.keypairs_client = cls.os.keypairs_v3_client
         cls.tenant_usages_client = cls.os.tenant_usages_v3_client
         cls.volumes_client = cls.os.volumes_client
         cls.certificates_client = cls.os.certificates_v3_client

@@ -114,6 +114,10 @@ def _translate_server_xml_to_json(xml_dom):
                 '/compute/ext/extended_status/api/v3}vm_state')
     task_state = ('{http://docs.openstack.org'
                   '/compute/ext/extended_status/api/v3}task_state')
+    access_ip_v4 = ('{http://docs.openstack.org/compute/ext/'
+                    'os-access-ips/api/v3}access_ip_v4')
+    access_ip_v6 = ('{http://docs.openstack.org/compute/ext/'
+                    'os-access-ips/api/v3}access_ip_v6')
     if disk_config in json:
         json['os-disk-config:disk_config'] = json.pop(disk_config)
     if terminated_at in json:
@@ -129,6 +133,10 @@ def _translate_server_xml_to_json(xml_dom):
         json['os-extended-status:vm_state'] = json.pop(vm_state)
     if task_state in json:
         json['os-extended-status:task_state'] = json.pop(task_state)
+    if access_ip_v4 in json:
+        json['os-access-ips:access_ip_v4'] = json.pop(access_ip_v4)
+    if access_ip_v6 in json:
+        json['os-access-ips:access_ip_v6'] = json.pop(access_ip_v6)
     return json
 
 
@@ -258,10 +266,14 @@ class ServersV3ClientXML(RestClientXML):
 
         if name is not None:
             server.add_attr("name", name)
+        if access_ip_v4 or access_ip_v6:
+            server.add_attr('xmlns:os-access-ips',
+                            "http://docs.openstack.org/compute/ext/"
+                            "os-access-ips/api/v3")
         if access_ip_v4 is not None:
-            server.add_attr("access_ip_v4", access_ip_v4)
+            server.add_attr("os-access-ips:access_ip_v4", access_ip_v4)
         if access_ip_v6 is not None:
-            server.add_attr("access_ip_v6", access_ip_v6)
+            server.add_attr("os-access-ips:access_ip_v6", access_ip_v6)
         if disk_config is not None:
             server.add_attr('xmlns:os-disk-config', "http://docs.openstack.org"
                             "/compute/ext/disk_config/api/v3")
@@ -302,7 +314,6 @@ class ServersV3ClientXML(RestClientXML):
         return_reservation_id: Enable/Disable the return of reservation id.
         """
         server = Element("server",
-                         imageRef=image_ref,
                          xmlns=XMLNS_V3,
                          flavor_ref=flavor_ref,
                          image_ref=image_ref,
