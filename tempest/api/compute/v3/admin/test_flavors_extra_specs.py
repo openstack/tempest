@@ -15,10 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
@@ -34,7 +33,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FlavorsExtraSpecsTestJSON, cls).setUpClass()
-        if not compute.FLAVOR_EXTRA_DATA_ENABLED:
+        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
 
@@ -61,7 +60,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
         super(FlavorsExtraSpecsTestJSON, cls).tearDownClass()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_flavor_set_get_update_show_unset_keys(self):
         # Test to SET, GET, UPDATE, SHOW, UNSET flavor extra
         # spec as a user with admin privileges.
@@ -101,7 +100,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key2")
         self.assertEqual(unset_resp.status, 200)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_flavor_non_admin_get_all_keys(self):
         specs = {"key1": "value1", "key2": "value2"}
         set_resp, set_body = self.client.set_flavor_extra_spec(
@@ -113,7 +112,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         for key in specs:
             self.assertEqual(body[key], specs[key])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_flavor_non_admin_get_specific_key(self):
         specs = {"key1": "value1", "key2": "value2"}
         resp, body = self.client.set_flavor_extra_spec(

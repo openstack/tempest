@@ -123,6 +123,42 @@ def skip_because(*args, **kwargs):
     return decorator
 
 
+def requires_ext(*args, **kwargs):
+    """A decorator to skip tests if an extension is not enabled
+
+    @param extension
+    @param service
+    """
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*func_args, **func_kwargs):
+            if not is_extension_enabled(kwargs['extension'],
+                                        kwargs['service']):
+                msg = "Skipped because %s extension: %s is not enabled" % (
+                    kwargs['service'], kwargs['extension'])
+                raise testtools.TestCase.skipException(msg)
+            return func(*func_args, **func_kwargs)
+        return wrapper
+    return decorator
+
+
+def is_extension_enabled(extension_name, service):
+    """A function that will check the list of enabled extensions from config
+
+    """
+    configs = config.TempestConfig()
+    config_dict = {
+        'compute': configs.compute_feature_enabled.api_extensions,
+        'compute_v3': configs.compute_feature_enabled.api_v3_extensions,
+        'volume': configs.volume_feature_enabled.api_extensions,
+        'network': configs.network_feature_enabled.api_extensions,
+    }
+    if config_dict[service][0] == 'all':
+        return True
+    if extension_name in config_dict[service]:
+        return True
+    return False
+
 # there is a mis-match between nose and testtools for older pythons.
 # testtools will set skipException to be either
 # unittest.case.SkipTest, unittest2.case.SkipTest or an internal skip

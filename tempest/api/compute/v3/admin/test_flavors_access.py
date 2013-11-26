@@ -15,10 +15,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
@@ -33,7 +32,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FlavorsAccessTestJSON, cls).setUpClass()
-        if not compute.FLAVOR_EXTRA_DATA_ENABLED:
+        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
 
@@ -51,7 +50,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         cls.vcpus = 1
         cls.disk = 10
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_flavor_access_list_with_private_flavor(self):
         # Test to list flavor access successfully by querying private flavor
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -70,7 +69,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(str(new_flavor_id), str(first_flavor['flavor_id']))
         self.assertEqual(self.adm_tenant_id, first_flavor['tenant_id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_flavor_access_add_remove(self):
         # Test to add and remove flavor access to a given tenant.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
