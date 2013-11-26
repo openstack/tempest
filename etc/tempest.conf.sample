@@ -674,7 +674,7 @@
 #
 
 # If false, skip all nova v3 tests. (boolean value)
-#api_v3=false
+#api_v3=true
 
 # If false, skip disk config tests (boolean value)
 #disk_config=true
