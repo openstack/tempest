@@ -1,8 +1,8 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2013 OpenStack Foundation
+# Copyright 2013 IBM Corp
 # All Rights Reserved.
-# Copyright 2013 IBM Corp.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -21,26 +21,14 @@ import random
 
 from tempest.api.image import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest.test import attr
 
 
-class CreateRegisterImagesTest(base.BaseV2ImageTest):
+class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
     """
-    Here we test the registration and creation of images
+    Here we test the basic operations of images
     """
-
-    @attr(type='gate')
-    def test_register_with_invalid_container_format(self):
-        # Negative tests for invalid data supplied to POST /images
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          'test', 'wrong', 'vhd')
-
-    @attr(type='gate')
-    def test_register_with_invalid_disk_format(self):
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
-                          'test', 'bare', 'wrong')
 
     @attr(type='gate')
     def test_register_upload_get_image_file(self):
@@ -82,6 +70,28 @@ class CreateRegisterImagesTest(base.BaseV2ImageTest):
         resp, body = self.client.get_image_file(image_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(file_content, body)
+
+    @attr(type='gate')
+    def test_delete_image(self):
+        # Deletes a image by image_id
+
+        # Create image
+        image_name = data_utils.rand_name('image')
+        resp, body = self.client.create_image(name=image_name,
+                                              container_format='bare',
+                                              disk_format='raw',
+                                              visibility='public')
+        self.assertEqual(201, resp.status)
+        image_id = body['id']
+
+        # Delete Image
+        self.client.delete_image(image_id)
+        self.client.wait_for_resource_deletion(image_id)
+
+        # Verifying deletion
+        resp, images = self.client.image_list()
+        self.assertEqual(resp.status, 200)
+        self.assertNotIn(image_id, images)
 
 
 class ListImagesTest(base.BaseV2ImageTest):

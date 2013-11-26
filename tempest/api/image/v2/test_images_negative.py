@@ -82,3 +82,14 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         image_id = ""
         self.assertRaises(exceptions.NotFound, self.client.delete_image,
                           image_id)
+
+    @attr(type=['negative', 'gate'])
+    def test_register_with_invalid_container_format(self):
+        # Negative tests for invalid data supplied to POST /images
+        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+                          'test', 'wrong', 'vhd')
+
+    @attr(type=['negative', 'gate'])
+    def test_register_with_invalid_disk_format(self):
+        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+                          'test', 'bare', 'wrong')
