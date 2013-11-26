@@ -103,14 +103,14 @@ class FlavorsClientJSON(RestClient):
         return resp, body['extra_specs']
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
-        """Gets a specified key value for the mentioned flavor."""
+        """Gets extra Specs key-value of the mentioned flavor and key."""
         resp, body = self.get('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
                               key))
         body = json.loads(body)
-        return resp, body[key]
+        return resp, body
 
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
-        """Gets specified extra Specs details of the mentioned flavor."""
+        """Update specified extra Specs of the mentioned flavor and key."""
         resp, body = self.put('flavors/%s/os-extra_specs/%s' %
                               (flavor_id, key),
                               json.dumps(kwargs), self.headers)

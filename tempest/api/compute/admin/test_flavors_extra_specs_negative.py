@@ -24,7 +24,11 @@ from tempest.test import attr
 
 
 class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
-    """the Negative tests for FlavorsExtraSpecs."""
+
+    """
+    Negative Tests Flavor Extra Spec API extension.
+    SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
+    """
 
     _interface = 'json'
 
@@ -66,6 +70,21 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.flavors_client.set_flavor_extra_spec,
                           self.flavor['id'],
                           specs)
+
+    @attr(type=['negative', 'gate'])
+    def test_flavor_non_admin_update_specific_key(self):
+        # non admin user is not allowed to update flavor extra spec
+        specs = {"key1": "value1", "key2": "value2"}
+        resp, body = self.client.set_flavor_extra_spec(
+            self.flavor['id'], specs)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(body['key1'], 'value1')
+        self.assertRaises(exceptions.Unauthorized,
+                          self.flavors_client.
+                          update_flavor_extra_spec,
+                          self.flavor['id'],
+                          'key1',
+                          key1='value1_new')
 
     @attr(type=['negative', 'gate'])
     def test_flavor_non_admin_unset_keys(self):
