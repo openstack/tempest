@@ -19,8 +19,7 @@
 from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
-from tempest.common.utils.data_utils import parse_image_id
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
@@ -86,7 +85,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         # Return an error if the image name has multi-byte characters
-        snapshot_name = rand_name('\xef\xbb\xbf')
+        snapshot_name = data_utils.rand_name('\xef\xbb\xbf')
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_image, self.server_id,
                           snapshot_name)
@@ -94,7 +93,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         meta = {'': ''}
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
@@ -102,7 +101,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         meta = {'a' * 260: 'b' * 260}
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
@@ -112,15 +111,15 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         # Disallow creating another image when first image is being saved
 
         # Create first snapshot
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         resp, body = self.client.create_image(self.server_id,
                                               snapshot_name)
         self.assertEqual(202, resp.status)
-        image_id = parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
 
         # Create second snapshot
-        alt_snapshot_name = rand_name('test-snap-')
+        alt_snapshot_name = data_utils.rand_name('test-snap-')
         self.assertRaises(exceptions.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
         self.client.wait_for_image_status(image_id, 'ACTIVE')
@@ -129,7 +128,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
-        snapshot_name = rand_name('a' * 260)
+        snapshot_name = data_utils.rand_name('a' * 260)
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name)
 
@@ -137,10 +136,10 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 
-        snapshot_name = rand_name('test-snap-')
+        snapshot_name = data_utils.rand_name('test-snap-')
         resp, body = self.client.create_image(self.server_id, snapshot_name)
         self.assertEqual(202, resp.status)
-        image_id = parse_image_id(resp['location'])
+        image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
 
         # Do not wait, attempt to delete the image, ensure it's successful
