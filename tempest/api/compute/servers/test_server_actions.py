@@ -198,7 +198,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                 required time (%s s).' % (self.server_id, self.build_timeout)
                 raise exceptions.TimeoutException(message)
 
-    @skip_because(bug="1251920")
     @attr(type='gate')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
@@ -271,6 +270,16 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id and number of lines
+
+        # This reboot is necessary for outputting some console log after
+        # creating a instance backup. If a instance backup, the console
+        # log file is truncated and we cannot get any console log through
+        # "console-log" API.
+        # The detail is https://bugs.launchpad.net/nova/+bug/1251920
+        resp, body = self.servers_client.reboot(self.server_id, 'HARD')
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+
         def get_output():
             resp, output = self.servers_client.get_console_output(
                 self.server_id, 10)
