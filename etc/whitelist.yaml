@@ -38,6 +38,8 @@ g-api:
         running command"
     - module: "swiftclient"
       message: "Container HEAD failed: .*404 Not Found"
+    - module: "glance.api.middleware.cache"
+      message: "however the registry did not contain metadata for that image"
 
 ceilometer-acompute:
     - module: "ceilometer.compute.pollsters.disk"
@@ -81,10 +83,18 @@ n-api:
       message: "\\{u'kernel_id'.*u'ramdisk_id':"
     - module: "nova.api.openstack.wsgi"
       message: "takes exactly 4 arguments"
+    - module: "nova.api.openstack"
+      message: "Caught error: Instance .* could not be found"
 
 n-cond:
     - module: "nova.notifications"
       message: "Failed to send state update notification"
+    - module: "nova.openstack.common.rpc.amqp"
+      message: "Exception during message handling"
+    - module: "nova.openstack.common.rpc.common"
+      message: "but the actual state is deleting to caller"
+    - module: "nova.openstack.common.rpc.common"
+      message: "Traceback \\(most recent call last"
 
 n-sch:
     - module: "nova.scheduler.filter_scheduler"
@@ -95,6 +105,10 @@ c-api:
       message: "Caught error: Volume .* could not be found"
     - module: "cinder.api.middleware.fault"
       message: "Caught error: Snapshot .* could not be found"
+    - module: "cinder.api.openstack.wsgi"
+      message: "argument must be a string or a number, not 'NoneType'"
+    - module: "cinder.volume.api"
+      message: "Volume status must be available to reserve"
 
 c-vol:
     - module: "cinder.brick.iscsi.iscsi"
@@ -119,6 +133,12 @@ ceilometer-collector:
       message: "duplicate key value violates unique constraint"
     - module: "ceilometer.collector.dispatcher.database"
       message: "Failed to record metering data: QueuePool limit"
+    - module: "ceilometer.collector.dispatcher.database"
+      message: "Failed to record metering data: .* integer out of range"
+    - module: "ceilometer.collector.dispatcher.database"
+      message: "Failed to record metering data: .* integer out of range"
+    - module: "ceilometer.openstack.common.db.sqlalchemy.session"
+      message: "DB exception wrapped"
 
 q-agt:
     - module: "neutron.agent.linux.ovs_lib"
@@ -159,4 +179,6 @@ q-svc:
       message: "(Network|Pool|Subnet|Agent|Port) .* could not be found"
     - module: "neutron.api.v2.resource"
       message: ".* failed"
+    - module: ".*"
+      message: ".*"
 
