@@ -21,13 +21,13 @@ from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class AvailabilityZoneClientXML(RestClientXML):
+class AvailabilityZoneV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AvailabilityZoneClientXML, self).__init__(config, username,
-                                                        password, auth_url,
-                                                        tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(AvailabilityZoneV3ClientXML, self).__init__(config, username,
+                                                          password, auth_url,
+                                                          tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def _parse_array(self, node):
         return [xml_to_json(x) for x in node]

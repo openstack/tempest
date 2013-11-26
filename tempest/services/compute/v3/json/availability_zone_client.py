@@ -20,20 +20,20 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class AvailabilityZoneClientJSON(RestClient):
+class AvailabilityZoneV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AvailabilityZoneClientJSON, self).__init__(config, username,
-                                                         password, auth_url,
-                                                         tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(AvailabilityZoneV3ClientJSON, self).__init__(config, username,
+                                                           password, auth_url,
+                                                           tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def get_availability_zone_list(self):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
-        return resp, body['availabilityZoneInfo']
+        return resp, body['availability_zone_info']
 
     def get_availability_zone_list_detail(self):
         resp, body = self.get('os-availability-zone/detail')
         body = json.loads(body)
-        return resp, body['availabilityZoneInfo']
+        return resp, body['availability_zone_info']
