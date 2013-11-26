@@ -16,8 +16,10 @@
 #    under the License.
 
 import hashlib
+import re
 
 from tempest.api.object_storage import base
+from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
@@ -60,6 +62,7 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
 
     @attr(type='smoke')
     def test_delete_object(self):
@@ -72,6 +75,7 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.delete_object(self.container_name,
                                                    object_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'DELETE')
 
     @attr(type='smoke')
     def test_object_metadata(self):
@@ -89,11 +93,14 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.update_object_metadata(
             self.container_name, object_name, orig_metadata)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'POST')
 
         # get object metadata
         resp, resp_metadata = self.object_client.list_object_metadata(
             self.container_name, object_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'HEAD')
+
         actual_meta_key = 'x-object-meta-' + meta_key
         self.assertIn(actual_meta_key, resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
@@ -111,6 +118,8 @@ class ObjectTest(base.BaseObjectTest):
         resp, body = self.object_client.get_object(self.container_name,
                                                    object_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+
         self.assertEqual(body, data)
 
     @attr(type='smoke')
@@ -133,6 +142,8 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.copy_object_in_same_container(
             self.container_name, src_object_name, dst_object_name)
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
         # check data
         resp, body = self.object_client.get_object(self.container_name,
                                                    dst_object_name)
@@ -156,6 +167,8 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.copy_object_in_same_container(
             self.container_name, object_name, object_name, metadata)
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
         # check the content type
         resp, _ = self.object_client.list_object_metadata(self.container_name,
                                                           object_name)
@@ -180,6 +193,17 @@ class ObjectTest(base.BaseObjectTest):
                                                         src_object_name,
                                                         dst_object_name)
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'COPY')
+
+        self.assertIn('last-modified', resp)
+        self.assertIn('x-copied-from', resp)
+        self.assertIn('x-copied-from-last-modified', resp)
+        self.assertNotEqual(len(resp['last-modified']), 0)
+        self.assertEqual(
+            resp['x-copied-from'],
+            self.container_name + "/" + src_object_name)
+        self.assertNotEqual(len(resp['x-copied-from-last-modified']), 0)
+
         # check data
         resp, body = self.object_client.get_object(self.container_name,
                                                    dst_object_name)
@@ -210,11 +234,15 @@ class ObjectTest(base.BaseObjectTest):
                                                             object_name,
                                                             orig_metadata)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'POST')
+
         # copy object from source container to destination container
         resp, _ = self.object_client.copy_object_across_containers(
             src_container_name, object_name, dst_container_name,
             object_name)
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
         # check if object is present in destination container
         resp, body = self.object_client.get_object(dst_container_name,
                                                    object_name)
@@ -238,13 +266,34 @@ class ObjectTest(base.BaseObjectTest):
         # creating a manifest file
         metadata = {'X-Object-Manifest': '%s/%s/'
                     % (self.container_name, object_name)}
-        self.object_client.create_object(self.container_name,
-                                         object_name, data='')
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   object_name, data='')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
         resp, _ = self.object_client.update_object_metadata(
             self.container_name, object_name, metadata, metadata_prefix='')
+        self.assertHeaders(resp, 'Object', 'POST')
+
         resp, _ = self.object_client.list_object_metadata(
             self.container_name, object_name)
+
+        # Check only the existence of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
+                        'Object', 'HEAD'))
         self.assertIn('x-object-manifest', resp)
+
+        # Etag value of a large object is enclosed in double-quotations.
+        # This is a special case, therefore the formats of response headers
+        # are checked without a custom matcher.
+        self.assertTrue(resp['etag'].startswith('\"'))
+        self.assertTrue(resp['etag'].endswith('\"'))
+        self.assertTrue(resp['etag'].strip('\"').isalnum())
+        self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
+        self.assertNotEqual(len(resp['content-type']), 0)
+        self.assertTrue(re.match("^tx[0-9a-f]*-[0-9a-f]*$",
+                                 resp['x-trans-id']))
+        self.assertNotEqual(len(resp['date']), 0)
+        self.assertEqual(resp['accept-ranges'], 'bytes')
         self.assertEqual(resp['x-object-manifest'],
                          '%s/%s/' % (self.container_name, object_name))
 
@@ -270,12 +319,23 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.get(url, headers=headers)
         self.assertEqual(resp['status'], '304')
 
+        # When the file is not downloaded from Swift server, response does
+        # not contain 'X-Timestamp' header. This is the special case, therefore
+        # the existence of response headers is checked without custom matcher.
+        self.assertIn('content-type', resp)
+        self.assertIn('x-trans-id', resp)
+        self.assertIn('date', resp)
+        self.assertIn('accept-ranges', resp)
+        # Check only the format of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+
         # local copy is different, download
         local_data = "something different"
         md5 = hashlib.md5(local_data).hexdigest()
         headers = {'If-None-Match': md5}
         resp, body = self.object_client.get(url, headers=headers)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
 
 
 class PublicObjectTest(base.BaseObjectTest):
@@ -298,6 +358,8 @@ class PublicObjectTest(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers, metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
+
         # create object
         object_name = data_utils.rand_name(name='Object')
         data = data_utils.arbitrary_string(size=len(object_name),
@@ -305,17 +367,22 @@ class PublicObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
 
         # list container metadata
         resp_meta, _ = self.container_client.list_container_metadata(
             self.container_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'HEAD')
+
         self.assertIn('x-container-read', resp_meta)
         self.assertEqual(resp_meta['x-container-read'], '.r:*,.rlistings')
 
         # trying to get object with empty headers as it is public readable
         resp, body = self.custom_object_client.get_object(
             self.container_name, object_name, metadata={})
+        self.assertHeaders(resp, 'Object', 'GET')
+
         self.assertEqual(body, data)
 
     @attr(type='smoke')
@@ -327,6 +394,7 @@ class PublicObjectTest(base.BaseObjectTest):
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
 
         # create object
         object_name = data_utils.rand_name(name='Object')
@@ -335,11 +403,14 @@ class PublicObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, data)
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
 
         # list container metadata
         resp, _ = self.container_client.list_container_metadata(
             self.container_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Container', 'HEAD')
+
         self.assertIn('x-container-read', resp)
         self.assertEqual(resp['x-container-read'], '.r:*,.rlistings')
 
@@ -350,4 +421,6 @@ class PublicObjectTest(base.BaseObjectTest):
         resp, body = self.custom_object_client.get_object(
             self.container_name, object_name,
             metadata=headers)
+        self.assertHeaders(resp, 'Object', 'GET')
+
         self.assertEqual(body, data)

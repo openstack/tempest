@@ -38,6 +38,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, body = self.container_client.create_container(container_name)
         self.containers.append(container_name)
         self.assertIn(resp['status'], ('202', '201'))
+        self.assertHeaders(resp, 'Container', 'PUT')
 
     @attr(type='smoke')
     def test_delete_container(self):
@@ -48,6 +49,8 @@ class ContainerTest(base.BaseObjectTest):
         # delete container
         resp, _ = self.container_client.delete_container(container_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Container', 'DELETE')
+
         self.containers.remove(container_name)
 
     @attr(type='smoke')
@@ -76,6 +79,8 @@ class ContainerTest(base.BaseObjectTest):
             self.container_client.\
             list_container_contents(container_name, params=params)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Container', 'GET')
+
         self.assertIsNotNone(object_list)
 
         object_names = [obj['name'] for obj in object_list]
@@ -97,11 +102,14 @@ class ContainerTest(base.BaseObjectTest):
             self.container_client.update_container_metadata(container_name,
                                                             metadata=metadata)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Container', 'POST')
 
         # list container metadata
         resp, _ = self.container_client.list_container_metadata(
             container_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Container', 'HEAD')
+
         self.assertIn('x-container-meta-name', resp)
         self.assertIn('x-container-meta-description', resp)
         self.assertEqual(resp['x-container-meta-name'], 'Pictures')
@@ -112,9 +120,12 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             metadata=metadata.keys())
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Container', 'POST')
 
         # check if the metadata are no longer there
         resp, _ = self.container_client.list_container_metadata(container_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Container', 'HEAD')
+
         self.assertNotIn('x-container-meta-name', resp)
         self.assertNotIn('x-container-meta-description', resp)
