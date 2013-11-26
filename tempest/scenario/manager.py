@@ -670,13 +670,17 @@ class NetworkScenarioTest(OfficialClientTest):
                          "Unable to determine which port to target.")
         return ports[0]['id']
 
-    def _create_floating_ip(self, server, external_network_id):
-        port_id = self._get_server_port_id(server)
+    def _create_floating_ip(self, thing, external_network_id,
+                            port_filters=None):
+        if port_filters is None:
+            port_id = self._get_server_port_id(thing)
+        else:
+            port_id = port_filters
         body = dict(
             floatingip=dict(
                 floating_network_id=external_network_id,
                 port_id=port_id,
-                tenant_id=server.tenant_id,
+                tenant_id=thing.tenant_id,
             )
         )
         result = self.network_client.create_floatingip(body=body)
@@ -712,6 +716,58 @@ class NetworkScenarioTest(OfficialClientTest):
 
         return tempest.test.call_until_true(
             ping, CONF.compute.ping_timeout, 1)
+
+    def _create_pool(self, lb_method, protocol, subnet_id):
+        """Wrapper utility that returns a test pool."""
+        name = data_utils.rand_name('pool-')
+        body = {
+            "pool": {
+                "protocol": protocol,
+                "name": name,
+                "subnet_id": subnet_id,
+                "lb_method": lb_method
+            }
+        }
+        resp = self.network_client.create_pool(body=body)
+        pool = net_common.DeletablePool(client=self.network_client,
+                                        **resp['pool'])
+        self.assertEqual(pool['name'], name)
+        self.set_resource(name, pool)
+        return pool
+
+    def _create_member(self, address, protocol_port, pool_id):
+        """Wrapper utility that returns a test member."""
+        body = {
+            "member": {
+                "protocol_port": protocol_port,
+                "pool_id": pool_id,
+                "address": address
+            }
+        }
+        resp = self.network_client.create_member(body)
+        member = net_common.DeletableMember(client=self.network_client,
+                                            **resp['member'])
+        self.set_resource(data_utils.rand_name('member-'), member)
+        return member
+
+    def _create_vip(self, protocol, protocol_port, subnet_id, pool_id):
+        """Wrapper utility that returns a test vip."""
+        name = data_utils.rand_name('vip-')
+        body = {
+            "vip": {
+                "protocol": protocol,
+                "name": name,
+                "subnet_id": subnet_id,
+                "pool_id": pool_id,
+                "protocol_port": protocol_port
+            }
+        }
+        resp = self.network_client.create_vip(body)
+        vip = net_common.DeletableVip(client=self.network_client,
+                                      **resp['vip'])
+        self.assertEqual(vip['name'], name)
+        self.set_resource(name, vip)
+        return vip
 
     def _check_vm_connectivity(self, ip_address,
                                username=None,
