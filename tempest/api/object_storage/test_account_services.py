@@ -46,6 +46,7 @@ class AccountTest(base.BaseObjectTest):
         params = {'format': 'json'}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
+        self.assertHeaders(resp, 'Account', 'GET')
 
         self.assertIsNotNone(container_list)
         container_names = [c['name'] for c in container_list]
@@ -59,6 +60,8 @@ class AccountTest(base.BaseObjectTest):
             params = {'limit': limit}
             resp, container_list = \
                 self.account_client.list_account_containers(params=params)
+            self.assertHeaders(resp, 'Account', 'GET')
+
             self.assertEqual(len(container_list), limit)
 
     @attr(type='smoke')
@@ -70,10 +73,15 @@ class AccountTest(base.BaseObjectTest):
         params = {'marker': self.containers[-1]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
+        self.assertHeaders(resp, 'Account', 'GET')
+
         self.assertEqual(len(container_list), 0)
+
         params = {'marker': self.containers[self.containers_count / 2]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
+        self.assertHeaders(resp, 'Account', 'GET')
+
         self.assertEqual(len(container_list), self.containers_count / 2 - 1)
 
     @attr(type='smoke')
@@ -85,10 +93,13 @@ class AccountTest(base.BaseObjectTest):
         params = {'end_marker': self.containers[0]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
+        self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), 0)
+
         params = {'end_marker': self.containers[self.containers_count / 2]}
         resp, container_list = \
             self.account_client.list_account_containers(params=params)
+        self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), self.containers_count / 2)
 
     @attr(type='smoke')
@@ -101,6 +112,8 @@ class AccountTest(base.BaseObjectTest):
                       'limit': limit}
             resp, container_list = \
                 self.account_client.list_account_containers(params=params)
+            self.assertHeaders(resp, 'Account', 'GET')
+
             self.assertTrue(len(container_list) <= limit, str(container_list))
 
     @attr(type='smoke')
@@ -108,9 +121,7 @@ class AccountTest(base.BaseObjectTest):
         # list all account metadata
         resp, metadata = self.account_client.list_account_metadata()
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
-        self.assertIn('x-account-object-count', resp)
-        self.assertIn('x-account-container-count', resp)
-        self.assertIn('x-account-bytes-used', resp)
+        self.assertHeaders(resp, 'Account', 'HEAD')
 
     @attr(type='smoke')
     def test_create_and_delete_account_metadata(self):
@@ -120,8 +131,11 @@ class AccountTest(base.BaseObjectTest):
         resp, _ = self.account_client.create_account_metadata(
             metadata={header: data})
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
+        self.assertHeaders(resp, 'Account', 'HEAD')
+
         self.assertIn('x-account-meta-' + header, resp)
         self.assertEqual(resp['x-account-meta-' + header], data)
 
@@ -129,8 +143,10 @@ class AccountTest(base.BaseObjectTest):
         resp, _ = \
             self.account_client.delete_account_metadata(metadata=[header])
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
+        self.assertHeaders(resp, 'Account', 'HEAD')
         self.assertNotIn('x-account-meta-' + header, resp)
 
     @attr(type=['negative', 'gate'])

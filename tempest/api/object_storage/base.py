@@ -18,6 +18,7 @@
 
 from tempest.api.identity.base import DataGenerator
 from tempest import clients
+from tempest.common import custom_matchers
 from tempest.common import isolated_creds
 from tempest import exceptions
 import tempest.test
@@ -120,3 +121,12 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 container_client.delete_container(cont)
             except exceptions.NotFound:
                 pass
+
+    def assertHeaders(self, resp, target, method):
+        """
+        Common method to check the existence and the format of common response
+        headers
+        """
+        self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
+                        target, method))
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
