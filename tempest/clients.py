@@ -306,11 +306,12 @@ class AltManager(Manager):
     managed client objects
     """
 
-    def __init__(self):
+    def __init__(self, interface='json'):
         conf = config.TempestConfig()
         super(AltManager, self).__init__(conf.identity.alt_username,
                                          conf.identity.alt_password,
-                                         conf.identity.alt_tenant_name)
+                                         conf.identity.alt_tenant_name,
+                                         interface=interface)
 
 
 class AdminManager(Manager):
