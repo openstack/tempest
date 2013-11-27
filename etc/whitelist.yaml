@@ -31,6 +31,12 @@ n-cpu:
       message: "Getting disk size of instance"
     - module: "nova.virt.libvirt.driver"
       message: "No such file or directory: '/opt/stack/data/nova/instances"
+    - module: "nova.compute.manager"
+      message: "error during stop\\(\\) in sync_power_state"
+    - module: "nova.compute.manager"
+      message: "Instance failed network setup after 1 attempt"
+    - module: "nova.compute.manager"
+      message: "Periodic sync_power_state task had an error"
 
 g-api:
     - module: "glance.store.sheepdog"
@@ -43,11 +49,19 @@ g-api:
 
 ceilometer-acompute:
     - module: "ceilometer.compute.pollsters.disk"
+      message: "Unable to read from monitor: Connection reset by peer"
+    - module: "ceilometer.compute.pollsters.disk"
+      message: "Requested operation is not valid: domain is not running"
+    - module: "ceilometer.compute.pollsters.net"
       message: "Requested operation is not valid: domain is not running"
     - module: "ceilometer.compute.pollsters.disk"
       message: "Domain not found: no domain with matching uuid"
     - module: "ceilometer.compute.pollsters.net"
       message: "No module named libvirt"
+    - module: "ceilometer.compute.pollsters.net"
+      message: "Unable to write to monitor: Broken pipe"
+    - module: "ceilometer.compute.pollsters.cpu"
+      message: "Domain not found: no domain with matching uuid"
 
 ceilometer-alarm-evaluator:
     - module: "ceilometer.alarm.service"
@@ -85,6 +99,8 @@ n-api:
       message: "takes exactly 4 arguments"
     - module: "nova.api.openstack"
       message: "Caught error: Instance .* could not be found"
+    - module: "nova.api.metadata.handler"
+      message: "Failed to get metadata for instance id:"
 
 n-cond:
     - module: "nova.notifications"
@@ -99,6 +115,12 @@ n-cond:
 n-sch:
     - module: "nova.scheduler.filter_scheduler"
       message: "Error from last host: "
+
+n-net:
+    - module: "nova.openstack.common.rpc.amqp"
+      message: "Exception during message handling"
+    - module: "nova.openstack.common.rpc.common"
+      message: "'NoneType' object has no attribute '__getitem__'"
 
 c-api:
     - module: "cinder.api.middleware.fault"
@@ -115,6 +137,8 @@ c-vol:
       message: "Failed to create iscsi target for volume id"
     - module: "cinder.brick.local_dev.lvm"
       message: "/dev/dm-1: stat failed: No such file or directory"
+    - module: "cinder.brick.local_dev.lvm"
+      message: "LV stack-volumes.*in use: not deactivating"
     - module: "cinder.brick.local_dev.lvm"
       message: "Can't remove open logical volume"
 
