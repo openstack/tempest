@@ -32,7 +32,7 @@ class ExtensionsV3ClientJSON(RestClient):
         url = 'extensions'
         resp, body = self.get(url)
         body = json.loads(body)
-        return resp, body
+        return resp, body['extensions']
 
     def is_enabled(self, extension):
         _, extensions = self.list_extensions()
