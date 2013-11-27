@@ -62,7 +62,7 @@ class Client(object):
                             password=self.password,
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
-                            timeout=self.timeout, pkey=self.pkey)
+                            timeout=self.channel_timeout, pkey=self.pkey)
                 _timeout = False
                 break
             except (socket.error,
