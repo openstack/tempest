@@ -26,6 +26,10 @@ import urllib2
 import yaml
 
 
+is_neutron = os.environ.get('DEVSTACK_GATE_NEUTRON', "0") == "1"
+dump_all_errors = is_neutron
+
+
 def process_files(file_specs, url_specs, whitelists):
     regexp = re.compile(r"^.*(ERROR|CRITICAL).*\[.*\-.*\]")
     had_errors = False
@@ -48,6 +52,7 @@ def process_files(file_specs, url_specs, whitelists):
 
 def scan_content(name, content, regexp, whitelist):
     had_errors = False
+    print_log_name = True
     for line in content:
         if not line.startswith("Stderr:") and regexp.match(line):
             whitelisted = False
@@ -57,10 +62,12 @@ def scan_content(name, content, regexp, whitelist):
                 if re.match(pat, line):
                     whitelisted = True
                     break
-            if not whitelisted:
-                if not had_errors:
+            if not whitelisted or dump_all_errors:
+                if not print_log_name:
                     print("Log File: %s" % name)
-                had_errors = True
+                    print_log_name = False
+                if not whitelisted:
+                    had_errors = True
                 print(line)
     return had_errors
 
@@ -115,6 +122,9 @@ def main(opts):
             whitelists = loaded
     if process_files(files_to_process, urls_to_process, whitelists):
         print("Logs have errors")
+        if is_neutron:
+            print("Currently not failing neutron builds with errors")
+            return 0
         # Return non-zero to start failing builds
         return 0
     else:
