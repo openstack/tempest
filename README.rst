@@ -79,6 +79,9 @@ Detailed configuration of tempest is beyond the scope of this
 document. The etc/tempest.conf.sample attempts to be a self
 documenting version of the configuration.
 
+The sample config file is auto generated using the script:
+tools/generate_sample.sh
+
 The most important pieces that are needed are the user ids, openstack
 endpoints, and basic flavors and images needed to run tests.
 
