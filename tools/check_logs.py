@@ -125,8 +125,8 @@ def main(opts):
         if is_neutron:
             print("Currently not failing neutron builds with errors")
             return 0
-        # Return non-zero to start failing builds
-        return 0
+        print("FAILED")
+        return 1
     else:
         print("ok")
         return 0
