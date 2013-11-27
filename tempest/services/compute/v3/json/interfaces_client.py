@@ -20,21 +20,22 @@ from tempest.common.rest_client import RestClient
 from tempest import exceptions
 
 
-class InterfacesClientJSON(RestClient):
+class InterfacesV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(InterfacesClientJSON, self).__init__(config, username, password,
-                                                   auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(InterfacesV3ClientJSON, self).__init__(config, username,
+                                                     password, auth_url,
+                                                     tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_interfaces(self, server):
-        resp, body = self.get('servers/%s/os-interface' % server)
+        resp, body = self.get('servers/%s/os-attach-interfaces' % server)
         body = json.loads(body)
-        return resp, body['interfaceAttachments']
+        return resp, body['interface_attachments']
 
     def create_interface(self, server, port_id=None, network_id=None,
                          fixed_ip=None):
-        post_body = dict(interfaceAttachment=dict())
+        post_body = dict(interface_attachment=dict())
         if port_id:
             post_body['port_id'] = port_id
         if network_id:
@@ -42,20 +43,22 @@ class InterfacesClientJSON(RestClient):
         if fixed_ip:
             post_body['fixed_ips'] = [dict(ip_address=fixed_ip)]
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers/%s/os-interface' % server,
+        resp, body = self.post('servers/%s/os-attach-interfaces' % server,
                                headers=self.headers,
                                body=post_body)
         body = json.loads(body)
-        return resp, body['interfaceAttachment']
+        return resp, body['interface_attachment']
 
     def show_interface(self, server, port_id):
-        resp, body = self.get('servers/%s/os-interface/%s' % (server, port_id))
+        resp, body =\
+            self.get('servers/%s/os-attach-interfaces/%s' % (server, port_id))
         body = json.loads(body)
-        return resp, body['interfaceAttachment']
+        return resp, body['interface_attachment']
 
     def delete_interface(self, server, port_id):
-        resp, body = self.delete('servers/%s/os-interface/%s' % (server,
-                                                                 port_id))
+        resp, body =\
+            self.delete('servers/%s/os-attach-interfaces/%s' % (server,
+                                                                port_id))
         return resp, body
 
     def wait_for_interface_status(self, server, port_id, status):

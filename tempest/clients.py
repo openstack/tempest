@@ -54,6 +54,8 @@ from tempest.services.compute.v3.json.availability_zone_client import \
     AvailabilityZoneV3ClientJSON
 from tempest.services.compute.v3.json.extensions_client import \
     ExtensionsV3ClientJSON
+from tempest.services.compute.v3.json.interfaces_client import \
+    InterfacesV3ClientJSON
 from tempest.services.compute.v3.json.servers_client import \
     ServersV3ClientJSON
 from tempest.services.compute.v3.json.services_client import \
@@ -62,6 +64,8 @@ from tempest.services.compute.v3.xml.availability_zone_client import \
     AvailabilityZoneV3ClientXML
 from tempest.services.compute.v3.xml.extensions_client import \
     ExtensionsV3ClientXML
+from tempest.services.compute.v3.xml.interfaces_client import \
+    InterfacesV3ClientXML
 from tempest.services.compute.v3.xml.servers_client import ServersV3ClientXML
 from tempest.services.compute.v3.xml.services_client import \
     ServicesV3ClientXML
@@ -210,6 +214,7 @@ class Manager(object):
             self.token_client = TokenClientXML(self.config)
             self.security_groups_client = SecurityGroupsClientXML(
                 *client_args)
+            self.interfaces_v3_client = InterfacesV3ClientXML(*client_args)
             self.interfaces_client = InterfacesClientXML(*client_args)
             self.endpoints_client = EndPointClientXML(*client_args)
             self.fixed_ips_client = FixedIPsClientXML(*client_args)
@@ -256,6 +261,7 @@ class Manager(object):
             self.token_client = TokenClientJSON(self.config)
             self.security_groups_client = SecurityGroupsClientJSON(
                 *client_args)
+            self.interfaces_v3_client = InterfacesV3ClientJSON(*client_args)
             self.interfaces_client = InterfacesClientJSON(*client_args)
             self.endpoints_client = EndPointClientJSON(*client_args)
             self.fixed_ips_client = FixedIPsClientJSON(*client_args)

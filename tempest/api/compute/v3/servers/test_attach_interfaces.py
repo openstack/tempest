@@ -19,15 +19,15 @@ from tempest.test import attr
 import time
 
 
-class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
+class AttachInterfacesV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
         if not cls.config.service_available.neutron:
             raise cls.skipException("Neutron is required")
-        super(AttachInterfacesTestJSON, cls).setUpClass()
-        cls.client = cls.os.interfaces_client
+        super(AttachInterfacesV3TestJSON, cls).setUpClass()
+        cls.client = cls.interfaces_client
 
     def _check_interface(self, iface, port_id=None, network_id=None,
                          fixed_ip=None):
@@ -114,5 +114,5 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
 
-class AttachInterfacesTestXML(AttachInterfacesTestJSON):
+class AttachInterfacesV3TestXML(AttachInterfacesV3TestJSON):
     _interface = 'xml'
