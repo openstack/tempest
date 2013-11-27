@@ -16,7 +16,7 @@
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest.test import attr, HTTP_SUCCESS
 
 
 class StaticWebTest(base.BaseObjectTest):
@@ -59,7 +59,7 @@ class StaticWebTest(base.BaseObjectTest):
         # we should retrieve the self.object_name file
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertEqual(body, self.object_data)
 
         # clean up before exiting
@@ -81,7 +81,7 @@ class StaticWebTest(base.BaseObjectTest):
         # we should retrieve a listing of objects
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertIn(self.object_name, body)
 
         # clean up before exiting
@@ -91,3 +91,41 @@ class StaticWebTest(base.BaseObjectTest):
         _, body = self.container_client.list_container_metadata(
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
+
+    @attr('gate')
+    def test_web_listing_css(self):
+        headers = {'web-listings': 'true',
+                   'web-listings-css': 'listings.css'}
+
+        self.container_client.update_container_metadata(
+            self.container_name, metadata=headers)
+
+        # test GET on http://account_url/container_name
+        # we should retrieve a listing of objects
+        resp, body = self.custom_account_client.request("GET",
+                                                        self.container_name)
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(self.object_name, body)
+        css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
+        self.assertIn(css, body)
+
+    @attr('gate')
+    def test_web_error(self):
+        headers = {'web-listings': 'true',
+                   'web-error': self.object_name}
+
+        self.container_client.update_container_metadata(
+            self.container_name, metadata=headers)
+
+        # Create object to return when requested object not found
+        object_name_404 = "404" + self.object_name
+        object_data_404 = data_utils.arbitrary_string()
+        self.object_client.create_object(self.container_name,
+                                         object_name_404,
+                                         object_data_404)
+
+        # Request non-existing object
+        resp, body = self.custom_object_client.get_object(self.container_name,
+                                                          "notexisting")
+        self.assertEqual(resp['status'], '404')
+        self.assertEqual(body, object_data_404)
