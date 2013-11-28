@@ -133,6 +133,8 @@ class AreAllWellFormatted(object):
                 return InvalidFormat(key, value)
             elif key == 'etag' and not value.isalnum():
                 return InvalidFormat(key, value)
+            elif key == 'transfer-encoding' and not value == 'chunked':
+                return InvalidFormat(key, value)
 
         return None
 

@@ -30,6 +30,37 @@ class AccountClient(RestClient):
         self.service = self.config.object_storage.catalog_type
         self.format = 'json'
 
+    def create_account(self, data=None,
+                       params=None,
+                       metadata={},
+                       remove_metadata={},
+                       metadata_prefix='X-Account-Meta-',
+                       remove_metadata_prefix='X-Remove-Account-Meta-'):
+        """Create an account."""
+        url = ''
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        headers = {}
+        for key in metadata:
+            headers[metadata_prefix + key] = metadata[key]
+        for key in remove_metadata:
+            headers[remove_metadata_prefix + key] = remove_metadata[key]
+
+        resp, body = self.put(url, data, headers)
+        return resp, body
+
+    def delete_account(self, data=None, params=None):
+        """Delete an account."""
+        url = ''
+        if params:
+            if 'bulk-delete' in params:
+                url += 'bulk-delete&'
+            url = '?%s%s' % (url, urllib.urlencode(params))
+
+        resp, body = self.delete(url, headers=None, body=data)
+        return resp, body
+
     def list_account_metadata(self):
         """
         HEAD on the storage URL
@@ -92,7 +123,9 @@ class AccountClient(RestClient):
 
         url = '?' + urllib.urlencode(params)
         resp, body = self.get(url)
-        body = json.loads(body)
+
+        if params and params.get('format') == 'json':
+            body = json.loads(body)
         return resp, body
 
 

@@ -304,8 +304,8 @@ class RestClient(object):
     def get(self, url, headers=None):
         return self.request('GET', url, headers)
 
-    def delete(self, url, headers=None):
-        return self.request('DELETE', url, headers)
+    def delete(self, url, headers=None, body=None):
+        return self.request('DELETE', url, headers, body)
 
     def patch(self, url, body, headers):
         return self.request('PATCH', url, headers, body)
