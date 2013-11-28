@@ -24,7 +24,7 @@ from tempest.test import attr
 LOG = logging.getLogger(__name__)
 
 
-class VolumesListTest(base.BaseVolumeTest):
+class VolumesListTest(base.BaseVolumeV1Test):
 
     """
     This test creates a number of 1G volumes. To run successfully,

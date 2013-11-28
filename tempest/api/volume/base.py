@@ -36,25 +36,18 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        os = cls.get_client_manager()
+        cls.os = cls.get_client_manager()
 
-        cls.os = os
-        cls.volumes_client = os.volumes_client
-        cls.snapshots_client = os.snapshots_client
-        cls.servers_client = os.servers_client
-        cls.volumes_extension_client = os.volumes_extension_client
+        cls.volumes_client = cls.os.volumes_client
+        cls.snapshots_client = cls.os.snapshots_client
+        cls.servers_client = cls.os.servers_client
+        cls.volumes_extension_client = cls.os.volumes_extension_client
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.build_interval = cls.config.volume.build_interval
         cls.build_timeout = cls.config.volume.build_timeout
         cls.snapshots = []
         cls.volumes = []
-
-        cls.volumes_client.keystone_auth(cls.os.username,
-                                         cls.os.password,
-                                         cls.os.auth_url,
-                                         cls.volumes_client.service,
-                                         cls.os.tenant_name)
 
     @classmethod
     def tearDownClass(cls):
@@ -130,11 +123,26 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             time.sleep(self.build_interval)
 
 
-class BaseVolumeAdminTest(BaseVolumeTest):
+class BaseVolumeV1Test(BaseVolumeTest):
+    @classmethod
+    def setUpClass(cls):
+        if not cls.config.volume_feature_enabled.api_v1:
+            msg = "Volume API v1 not supported"
+            raise cls.skipException(msg)
+        super(BaseVolumeV1Test, cls).setUpClass()
+        cls.volumes_client = cls.os.volumes_client
+        cls.volumes_client.keystone_auth(cls.os.username,
+                                         cls.os.password,
+                                         cls.os.auth_url,
+                                         cls.volumes_client.service,
+                                         cls.os.tenant_name)
+
+
+class BaseVolumeV1AdminTest(BaseVolumeV1Test):
     """Base test case class for all Volume Admin API tests."""
     @classmethod
     def setUpClass(cls):
-        super(BaseVolumeAdminTest, cls).setUpClass()
+        super(BaseVolumeV1AdminTest, cls).setUpClass()
         cls.adm_user = cls.config.identity.admin_username
         cls.adm_pass = cls.config.identity.admin_password
         cls.adm_tenant = cls.config.identity.admin_tenant_name
