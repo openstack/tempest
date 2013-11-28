@@ -14,7 +14,7 @@
 
 import urllib
 
-# the folliwing map is used to construct proper URI
+# the following map is used to construct proper URI
 # for the given neutron resource
 service_resource_prefix_map = {
     'networks': '',

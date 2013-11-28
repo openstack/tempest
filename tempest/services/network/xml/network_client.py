@@ -19,11 +19,16 @@ from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import deep_dict_to_xml
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
+from tempest.services.compute.xml.common import parse_array
 from tempest.services.compute.xml.common import xml_to_json
 from tempest.services.network import network_client_base as client_base
 
 
 class NetworkClientXML(client_base.NetworkClientBase):
+
+    # list of plurals used for xml serialization
+    PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
+               'fixed_ips', 'extensions']
 
     def get_rest_client(self, config, username, password,
                         auth_url, tenant_name=None):
@@ -31,7 +36,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
                              auth_url, tenant_name)
 
     def deserialize_list(self, body):
-        return self._parse_array(etree.fromstring(body))
+        return parse_array(etree.fromstring(body), self.PLURALS)
 
     def deserialize_single(self, body):
         return _root_tag_fetcher_and_xml_to_json_parse(body)
@@ -54,7 +59,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
                 p1.append(p2)
                 post_body.append(p1)
         resp, body = self.post(uri, str(Document(post_body)))
-        networks = self._parse_array(etree.fromstring(body))
+        networks = parse_array(etree.fromstring(body))
         networks = {"networks": networks}
         return resp, networks
 
@@ -82,12 +87,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         resp, body = self.post(uri, str(Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
-
-    def _parse_array(self, node):
-        array = []
-        for child in node.getchildren():
-            array.append(xml_to_json(child))
-        return array
 
     def update_port(self, port_id, name):
         uri = '%s/ports/%s' % (self.uri_prefix, str(port_id))
@@ -151,7 +150,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
                 p1.append(p2)
             post_body.append(p1)
         resp, body = self.post(uri, str(Document(post_body)))
-        subnets = self._parse_array(etree.fromstring(body))
+        subnets = parse_array(etree.fromstring(body))
         subnets = {"subnets": subnets}
         return resp, subnets
 
@@ -166,7 +165,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
                 p1.append(p2)
             post_body.append(p1)
         resp, body = self.post(uri, str(Document(post_body)))
-        ports = self._parse_array(etree.fromstring(body))
+        ports = parse_array(etree.fromstring(body))
         ports = {"ports": ports}
         return resp, ports
 
@@ -366,7 +365,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
-        ports = self._parse_array(etree.fromstring(body))
+        ports = parse_array(etree.fromstring(body), self.PLURALS)
         ports = {"ports": ports}
         return resp, ports
 
@@ -395,14 +394,14 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
         resp, body = self.get(uri)
-        agents = self._parse_array(etree.fromstring(body))
+        agents = parse_array(etree.fromstring(body))
         body = {'agents': agents}
         return resp, body
 
     def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
-        networks = self._parse_array(etree.fromstring(body))
+        networks = parse_array(etree.fromstring(body))
         body = {'networks': networks}
         return resp, body
 
@@ -418,7 +417,8 @@ def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     root_tag = body.tag
     if root_tag.startswith("{"):
         ns, root_tag = root_tag.split("}", 1)
-    body = xml_to_json(etree.fromstring(xml_returned_body))
+    body = xml_to_json(etree.fromstring(xml_returned_body),
+                       NetworkClientXML.PLURALS)
     nil = '{http://www.w3.org/2001/XMLSchema-instance}nil'
     for key, val in body.iteritems():
         if isinstance(val, dict):
