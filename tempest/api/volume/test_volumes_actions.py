@@ -140,6 +140,35 @@ class VolumesActionsTest(BaseVolumeTest):
         self.assertEqual(200, resp.status)
         self.assertIn('available', body['status'])
 
+    def _is_true(self, val):
+        return val in ['true', 'True', True]
+
+    @attr(type='gate')
+    def test_volume_readonly_update(self):
+        # Update volume readonly true
+        readonly = True
+        resp, body = self.client.update_volume_readonly(self.volume['id'],
+                                                        readonly)
+        self.assertEqual(202, resp.status)
+
+        # Get Volume information
+        resp, fetched_volume = self.client.get_volume(self.volume['id'])
+        bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(True, bool_flag)
+
+        # Update volume readonly false
+        readonly = False
+        resp, body = self.client.update_volume_readonly(self.volume['id'],
+                                                        readonly)
+        self.assertEqual(202, resp.status)
+
+        # Get Volume information
+        resp, fetched_volume = self.client.get_volume(self.volume['id'])
+        bool_flag = self._is_true(fetched_volume['metadata']['readonly'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(False, bool_flag)
+
 
 class VolumesActionsTestXML(VolumesActionsTest):
     _interface = "xml"

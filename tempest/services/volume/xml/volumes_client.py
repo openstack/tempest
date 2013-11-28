@@ -337,3 +337,13 @@ class VolumesClientXML(RestClientXML):
         resp, body = self.post(url, str(Document(post_body)), self.headers)
         volume = xml_to_json(etree.fromstring(body))
         return resp, volume
+
+    def update_volume_readonly(self, volume_id, readonly):
+        """Update the Specified Volume readonly."""
+        post_body = Element("os-update_readonly_flag",
+                            readonly=readonly)
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
