@@ -29,6 +29,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
     def setUpClass(cls):
         super(VolumeMultiBackendTest, cls).setUpClass()
         if not cls.config.volume_feature_enabled.multi_backend:
+            cls.tearDownClass()
             raise cls.skipException("Cinder multi-backend feature disabled")
 
         cls.backend1_name = cls.config.volume.backend1_name
@@ -89,12 +90,14 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
     @classmethod
     def tearDownClass(cls):
         # volumes deletion
-        for volume_id in cls.volume_id_list:
+        volume_id_list = getattr(cls, 'volume_id_list', [])
+        for volume_id in volume_id_list:
             cls.volume_client.delete_volume(volume_id)
             cls.volume_client.wait_for_resource_deletion(volume_id)
 
         # volume types deletion
-        for volume_type_id in cls.volume_type_id_list:
+        volume_type_id_list = getattr(cls, 'volume_type_id_list', [])
+        for volume_type_id in volume_type_id_list:
             cls.type_client.delete_volume_type(volume_type_id)
 
         super(VolumeMultiBackendTest, cls).tearDownClass()

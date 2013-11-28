@@ -225,6 +225,7 @@ class BaseV3ComputeTest(BaseComputeTest):
     def setUpClass(cls):
         super(BaseV3ComputeTest, cls).setUpClass()
         if not cls.config.compute_feature_enabled.api_v3:
+            cls.tearDownClass()
             skip_msg = ("%s skipped as nova v3 api is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)
