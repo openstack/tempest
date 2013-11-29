@@ -31,6 +31,8 @@ n-cpu:
       message: "Getting disk size of instance"
     - module: "nova.virt.libvirt.driver"
       message: "No such file or directory: '/opt/stack/data/nova/instances"
+    - module: "nova.virt.libvirt.driver"
+      message: "Nova requires libvirt version 0\\.9\\.11 or greater"
     - module: "nova.compute.manager"
       message: "error during stop\\(\\) in sync_power_state"
     - module: "nova.compute.manager"
@@ -46,6 +48,8 @@ g-api:
       message: "Container HEAD failed: .*404 Not Found"
     - module: "glance.api.middleware.cache"
       message: "however the registry did not contain metadata for that image"
+    - module: "oslo.messaging.notify._impl_messaging"
+      message: ".*"
 
 ceilometer-acompute:
     - module: "ceilometer.compute.pollsters.disk"
@@ -57,15 +61,27 @@ ceilometer-acompute:
     - module: "ceilometer.compute.pollsters.disk"
       message: "Domain not found: no domain with matching uuid"
     - module: "ceilometer.compute.pollsters.net"
+      message: "Domain not found: no domain with matching uuid"
+    - module: "ceilometer.compute.pollsters.net"
       message: "No module named libvirt"
     - module: "ceilometer.compute.pollsters.net"
       message: "Unable to write to monitor: Broken pipe"
     - module: "ceilometer.compute.pollsters.cpu"
       message: "Domain not found: no domain with matching uuid"
+    - module: "ceilometer.compute.pollsters.net"
+      message: ".*"
+    - module: "ceilometer.compute.pollsters.disk"
+      message: ".*"
 
 ceilometer-alarm-evaluator:
     - module: "ceilometer.alarm.service"
       message: "alarm evaluation cycle failed"
+    - module: "ceilometer.alarm.evaluator.threshold"
+      message: ".*"
+
+ceilometer-api:
+    - module: "wsme.api"
+      message: ".*"
 
 h-api:
     - module: "root"
@@ -121,6 +137,8 @@ n-net:
       message: "Exception during message handling"
     - module: "nova.openstack.common.rpc.common"
       message: "'NoneType' object has no attribute '__getitem__'"
+    - module: "nova.openstack.common.rpc.common"
+      message: "Instance .* could not be found"
 
 c-api:
     - module: "cinder.api.middleware.fault"
@@ -136,7 +154,7 @@ c-vol:
     - module: "cinder.brick.iscsi.iscsi"
       message: "Failed to create iscsi target for volume id"
     - module: "cinder.brick.local_dev.lvm"
-      message: "/dev/dm-1: stat failed: No such file or directory"
+      message: "stat failed: No such file or directory"
     - module: "cinder.brick.local_dev.lvm"
       message: "LV stack-volumes.*in use: not deactivating"
     - module: "cinder.brick.local_dev.lvm"
@@ -157,6 +175,8 @@ ceilometer-collector:
       message: "duplicate key value violates unique constraint"
     - module: "ceilometer.collector.dispatcher.database"
       message: "Failed to record metering data: QueuePool limit"
+    - module: "ceilometer.dispatcher.database"
+      message: "\\(DataError\\) integer out of range"
     - module: "ceilometer.collector.dispatcher.database"
       message: "Failed to record metering data: .* integer out of range"
     - module: "ceilometer.collector.dispatcher.database"

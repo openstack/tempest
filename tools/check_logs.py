@@ -63,7 +63,7 @@ def scan_content(name, content, regexp, whitelist):
                     whitelisted = True
                     break
             if not whitelisted or dump_all_errors:
-                if not print_log_name:
+                if print_log_name:
                     print("Log File: %s" % name)
                     print_log_name = False
                 if not whitelisted:
