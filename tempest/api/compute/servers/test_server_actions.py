@@ -266,6 +266,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual((backup2, backup3),
                          (image_list[0]['name'], image_list[1]['name']))
 
+    def _get_output(self):
+        resp, output = self.servers_client.get_console_output(
+            self.server_id, 10)
+        self.assertEqual(200, resp.status)
+        self.assertTrue(output, "Console output was empty.")
+        lines = len(output.split('\n'))
+        self.assertEqual(lines, 10)
+
     @attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
@@ -280,29 +288,24 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        def get_output():
-            resp, output = self.servers_client.get_console_output(
-                self.server_id, 10)
-            self.assertEqual(200, resp.status)
-            self.assertTrue(output, "Console output was empty.")
-            lines = len(output.split('\n'))
-            self.assertEqual(lines, 10)
-        self.wait_for(get_output)
+        self.wait_for(self._get_output)
 
-    @skip_because(bug="1014683")
     @attr(type='gate')
-    def test_get_console_output_server_id_in_reboot_status(self):
+    def test_get_console_output_server_id_in_shutoff_status(self):
         # Positive test:Should be able to GET the console output
-        # for a given server_id in reboot status
-        resp, output = self.servers_client.reboot(self.server_id, 'SOFT')
-        self.servers_client.wait_for_server_status(self.server_id,
-                                                   'REBOOT')
-        resp, output = self.servers_client.get_console_output(self.server_id,
-                                                              10)
-        self.assertEqual(200, resp.status)
-        self.assertIsNotNone(output)
-        lines = len(output.split('\n'))
-        self.assertEqual(lines, 10)
+        # for a given server_id in SHUTOFF status
+
+        # NOTE: SHUTOFF is irregular status. To avoid test instability,
+        #       one server is created only for this test without using
+        #       the server that was created in setupClass.
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        temp_server_id = server['id']
+
+        resp, server = self.servers_client.stop(temp_server_id)
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(temp_server_id, 'SHUTOFF')
+
+        self.wait_for(self._get_output)
 
     @attr(type='gate')
     def test_pause_unpause_server(self):
