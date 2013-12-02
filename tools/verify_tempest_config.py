@@ -36,11 +36,11 @@ def verify_glance_api_versions(os):
     __, versions = os.image_client.get_versions()
     if CONF.image_feature_enabled.api_v1 != ('v1.1' in versions or 'v1.0' in
                                              versions):
-        print 'Config option image api_v1 should be change to: %s' % (
-            not CONF.image_feature_enabled.api_v1)
+        print('Config option image api_v1 should be change to: %s' % (
+            not CONF.image_feature_enabled.api_v1))
     if CONF.image_feature_enabled.api_v2 != ('v2.0' in versions):
-        print 'Config option image api_v2 should be change to: %s' % (
-            not CONF.image_feature_enabled.api_v2)
+        print('Config option image api_v2 should be change to: %s' % (
+            not CONF.image_feature_enabled.api_v2))
 
 
 def verify_extensions(os):
@@ -62,8 +62,8 @@ def display_results(results):
     for option in NOVA_EXTENSIONS.keys():
         config_value = getattr(CONF.compute_feature_enabled, option)
         if config_value != results['nova_features'][option]:
-            print "Config option: %s should be changed to: %s" % (
-                option, not config_value)
+            print("Config option: %s should be changed to: %s" % (
+                option, not config_value))
 
 
 def main(argv):
