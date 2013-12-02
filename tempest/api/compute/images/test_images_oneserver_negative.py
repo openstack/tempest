@@ -50,7 +50,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
             LOG.exception(exc)
             # Rebuild server if cannot reach the ACTIVE state
             # Usually it means the server had a serius accident
-            self.rebuild_server()
+            self.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
