@@ -11,7 +11,6 @@ function usage {
   echo "  -u, --update             Update the virtual environment with any newer package versions"
   echo "  -s, --smoke              Only run smoke tests"
   echo "  -t, --serial             Run testr serially"
-  echo "  -c, --nova-coverage      Enable Nova coverage collection"
   echo "  -C, --config             Config file location"
   echo "  -p, --pep8               Just run pep8"
   echo "  -h, --help               Print this usage message"
@@ -31,13 +30,12 @@ never_venv=0
 no_site_packages=0
 force=0
 wrapper=""
-nova_coverage=0
 config_file=""
 update=0
 logging=0
 logging_config=etc/logging.conf
 
-if ! options=$(getopt -o VNnfustcphdC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,nova-coverage,pep8,help,debug,config:,logging,logging-config: -- "$@")
+if ! options=$(getopt -o VNnfustphdC:lL: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,pep8,help,debug,config:,logging,logging-config: -- "$@")
 then
     # parse error
     usage
@@ -55,7 +53,6 @@ while [ $# -gt 0 ]; do
     -f|--force) force=1;;
     -u|--update) update=1;;
     -d|--debug) set -o xtrace;;
-    -c|--nova-coverage) let nova_coverage=1;;
     -C|--config) config_file=$2; shift;;
     -p|--pep8) let just_pep8=1;;
     -s|--smoke) testrargs+="smoke"; noseargs+="--attr=type=smoke";;
@@ -131,16 +128,6 @@ function run_pep8 {
   ${wrapper} flake8
 }
 
-function run_coverage_start {
-  echo "Starting nova-coverage"
-  ${wrapper} python tools/tempest_coverage.py -c start
-}
-
-function run_coverage_report {
-  echo "Generating nova-coverage report"
-  ${wrapper} python tools/tempest_coverage.py -c report
-}
-
 if [ $never_venv -eq 0 ]
 then
   # Remove the virtual environment if --force used
@@ -176,11 +163,6 @@ if [ $just_pep8 -eq 1 ]; then
     exit
 fi
 
-if [ $nova_coverage -eq 1 ]; then
-    run_coverage_start
-fi
-
-
 py_version=`${wrapper} python --version 2>&1`
 if [[ $py_version =~ "2.6" ]] ; then
     run_tests_nose
@@ -188,10 +170,6 @@ else
     run_tests
 fi
 retval=$?
-
-if [ $nova_coverage -eq 1 ]; then
-    run_coverage_report
-fi
 
 if [ -z "$testrargs" ]; then
     run_pep8
