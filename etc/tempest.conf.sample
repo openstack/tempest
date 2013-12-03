@@ -711,7 +711,7 @@
 # Options defined in tempest.config
 #
 
-# Set to True if the container quota middleware is enabled
+# Set to True if the Container Quota middleware is enabled
 # (boolean value)
 #container_quotas=true
 
@@ -722,6 +722,10 @@
 # Set to True if the Crossdomain middleware is enabled
 # (boolean value)
 #crossdomain=true
+
+# Set to True if the TempURL middleware is enabled (boolean
+# value)
+#tempurl=true
 
 
 [volume-feature-enabled]

@@ -406,7 +406,7 @@ object_storage_feature_group = cfg.OptGroup(
 ObjectStoreFeaturesGroup = [
     cfg.BoolOpt('container_quotas',
                 default=True,
-                help="Set to True if the container quota middleware "
+                help="Set to True if the Container Quota middleware "
                      "is enabled"),
     cfg.BoolOpt('accounts_quotas',
                 default=True,
@@ -414,6 +414,9 @@ ObjectStoreFeaturesGroup = [
     cfg.BoolOpt('crossdomain',
                 default=True,
                 help="Set to True if the Crossdomain middleware is enabled"),
+    cfg.BoolOpt('tempurl',
+                default=True,
+                help="Set to True if the TempURL middleware is enabled"),
 ]
 
 

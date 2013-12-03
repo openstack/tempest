@@ -22,6 +22,7 @@ import urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
@@ -29,9 +30,19 @@ from tempest.test import HTTP_SUCCESS
 
 class ObjectTempUrlTest(base.BaseObjectTest):
 
+    tempurl_available = \
+        config.TempestConfig().object_storage_feature_enabled.tempurl
+
     @classmethod
     def setUpClass(cls):
         super(ObjectTempUrlTest, cls).setUpClass()
+
+        # skip this test if CORS isn't enabled in the conf file.
+        if not cls.tempurl_available:
+            skip_msg = ("%s skipped as TempUrl middleware not available"
+                        % cls.__name__)
+            raise cls.skipException(skip_msg)
+
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
         cls.containers = [cls.container_name]
@@ -47,9 +58,9 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     def tearDownClass(cls):
         resp, _ = cls.account_client.delete_account_metadata(
             metadata=cls.metadata)
-        resp, _ = cls.account_client.list_account_metadata()
 
         cls.delete_containers(cls.containers)
+
         # delete the user setup created
         cls.data.teardown_all()
         super(ObjectTempUrlTest, cls).tearDownClass()
@@ -71,8 +82,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.object_client.create_object(self.container_name,
                                          self.object_name, self.data)
 
-    def get_temp_url(self, container, object_name, method, expires,
-                     key):
+    def _get_expiry_date(self, expiration_time=1000):
+        return int(time.time() + expiration_time)
+
+    def _get_temp_url(self, container, object_name, method, expires,
+                      key):
         """Create the temporary URL."""
 
         path = "%s/%s/%s" % (
@@ -90,22 +104,41 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
     @attr(type='gate')
     def test_get_object_using_temp_url(self):
-        EXPIRATION_TIME = 10000  # high to ensure the test finishes.
-        expires = int(time.time() + EXPIRATION_TIME)
+        expires = self._get_expiry_date()
 
         # get a temp URL for the created object
-        url = self.get_temp_url(self.container_name,
-                                self.object_name, "GET",
-                                expires, self.key)
+        url = self._get_temp_url(self.container_name,
+                                 self.object_name, "GET",
+                                 expires, self.key)
 
         # trying to get object using temp url within expiry time
-        _, body = self.object_client.get_object_using_temp_url(url)
+        resp, body = self.object_client.get_object_using_temp_url(url)
 
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertEqual(body, self.data)
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+
+    @attr(type='gate')
+    def test_get_object_using_temp_url_key_2(self):
+        key2 = 'Meta2-'
+        metadata = {'Temp-URL-Key-2': key2}
+        self.account_client.create_account_metadata(metadata=metadata)
+
+        self.account_client_metadata, _ = \
+            self.account_client.list_account_metadata()
+        self.assertIn('x-account-meta-temp-url-key-2',
+                      self.account_client_metadata)
+
+        expires = self._get_expiry_date()
+        url = self._get_temp_url(self.container_name,
+                                 self.object_name, "GET",
+                                 expires, key2)
+        resp, body = self.object_client.get_object_using_temp_url(url)
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertEqual(body, self.data)
 
     @attr(type='gate')
     def test_put_object_using_temp_url(self):
@@ -114,12 +147,10 @@ class ObjectTempUrlTest(base.BaseObjectTest):
             size=len(self.object_name),
             base_text=data_utils.rand_name(name="random"))
 
-        EXPIRATION_TIME = 10000  # high to ensure the test finishes.
-        expires = int(time.time() + EXPIRATION_TIME)
-
-        url = self.get_temp_url(self.container_name,
-                                self.object_name, "PUT",
-                                expires, self.key)
+        expires = self._get_expiry_date()
+        url = self._get_temp_url(self.container_name,
+                                 self.object_name, "PUT",
+                                 expires, self.key)
 
         # trying to put random data in the object using temp url
         resp, body = self.object_client.put_object_using_temp_url(
@@ -132,25 +163,24 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
 
         # Validate that the content of the object has been modified
-        url = self.get_temp_url(self.container_name,
-                                self.object_name, "GET",
-                                expires, self.key)
+        url = self._get_temp_url(self.container_name,
+                                 self.object_name, "GET",
+                                 expires, self.key)
 
         _, body = self.object_client.get_object_using_temp_url(url)
         self.assertEqual(body, new_data)
 
     @attr(type=['gate', 'negative'])
     def test_get_object_after_expiration_time(self):
-        EXPIRATION_TIME = 1
-        expires = int(time.time() + EXPIRATION_TIME)
 
+        expires = self._get_expiry_date(1)
         # get a temp URL for the created object
-        url = self.get_temp_url(self.container_name,
-                                self.object_name, "GET",
-                                expires, self.key)
+        url = self._get_temp_url(self.container_name,
+                                 self.object_name, "GET",
+                                 expires, self.key)
 
-        # temp URL is valid for 1 seconds, let's wait 3
-        time.sleep(EXPIRATION_TIME + 2)
+        # temp URL is valid for 1 seconds, let's wait 2
+        time.sleep(2)
 
         self.assertRaises(exceptions.Unauthorized,
                           self.object_client.get_object_using_temp_url,
