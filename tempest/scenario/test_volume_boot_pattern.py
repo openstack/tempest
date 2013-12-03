@@ -120,7 +120,7 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
     @services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
-        self.create_loginable_secgroup_rule()
+        self._create_loginable_secgroup_rule_nova()
 
         # create an instance from volume
         volume_origin = self._create_volume_from_image()

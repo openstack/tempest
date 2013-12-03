@@ -65,7 +65,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
     def test_snapshot_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self.create_loginable_secgroup_rule()
+        self._create_loginable_secgroup_rule_nova()
 
         # boot a instance and create a timestamp file in it
         server = self._boot_image(self.config.compute.image_ref)

@@ -146,7 +146,7 @@ class TestStampPattern(manager.OfficialClientTest):
     def test_stamp_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self.create_loginable_secgroup_rule()
+        self._create_loginable_secgroup_rule_nova()
 
         # boot an instance and create a timestamp file in it
         volume = self._create_volume()

@@ -161,7 +161,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
 
         self.nova_floating_ip_create()
         self.nova_floating_ip_add()
-        self.create_loginable_secgroup_rule()
+        self._create_loginable_secgroup_rule_nova()
         self.ssh_to_server()
         self.check_partitions()
 
