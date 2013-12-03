@@ -103,14 +103,6 @@ ComputeGroup = [
                      "users. This option enables isolated test cases and "
                      "better parallel execution, but also requires that "
                      "OpenStack Identity API admin credentials are known."),
-    cfg.BoolOpt('allow_tenant_reuse',
-                default=True,
-                help="If allow_tenant_isolation is True and a tenant that "
-                     "would be created for a given test already exists (such "
-                     "as from a previously-failed run), re-use that tenant "
-                     "instead of failing because of the conflict. Note that "
-                     "this would result in the tenant being deleted at the "
-                     "end of a subsequent successful run."),
     cfg.StrOpt('image_ref',
                default="{$IMAGE_ID}",
                help="Valid secondary image reference to be used in tests."),
