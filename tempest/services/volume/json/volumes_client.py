@@ -256,3 +256,10 @@ class VolumesClientJSON(RestClient):
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body, self.headers)
         return resp, body
+
+    def force_delete_volume(self, volume_id):
+        """Force Delete Volume."""
+        post_body = json.dumps({'os-force_delete': {}})
+        resp, body = self.post('volumes/%s/action' % volume_id, post_body,
+                               self.headers)
+        return resp, body
