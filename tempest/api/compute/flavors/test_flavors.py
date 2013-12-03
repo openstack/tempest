@@ -48,7 +48,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
     def test_get_flavor(self):
         # The expected flavor details should be returned
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
-        self.assertEqual(self.flavor_ref, int(flavor['id']))
+        self.assertEqual(self.flavor_ref, flavor['id'])
 
     @attr(type=['negative', 'gate'])
     def test_get_non_existant_flavor(self):

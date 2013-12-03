@@ -236,10 +236,10 @@
 # value)
 #image_ref_alt={$IMAGE_ID_ALT}
 
-# Valid primary flavor to use in tests. (integer value)
+# Valid primary flavor to use in tests. (string value)
 #flavor_ref=1
 
-# Valid secondary flavor to be used in tests. (integer value)
+# Valid secondary flavor to be used in tests. (string value)
 #flavor_ref_alt=2
 
 # User name used to authenticate to an instance. (string

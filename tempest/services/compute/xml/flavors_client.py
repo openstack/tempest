@@ -43,6 +43,10 @@ class FlavorsClientXML(RestClientXML):
     def _format_flavor(self, f):
         flavor = {'links': []}
         for k, v in f.items():
+            if k == 'id':
+                flavor['id'] = v
+                continue
+
             if k == 'link':
                 flavor['links'].append(v)
                 continue
