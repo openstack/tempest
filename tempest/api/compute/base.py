@@ -181,17 +181,18 @@ class BaseV2ComputeTest(BaseComputeTest):
         return resp, image
 
     @classmethod
-    def rebuild_server(cls, **kwargs):
+    def rebuild_server(cls, server_id, **kwargs):
         # Destroy an existing server and creates a new one
-        try:
-            cls.servers_client.delete_server(cls.server_id)
-            cls.servers_client.wait_for_server_termination(cls.server_id)
-        except Exception as exc:
-            LOG.exception(exc)
-            pass
+        if server_id:
+            try:
+                cls.servers_client.delete_server(server_id)
+                cls.servers_client.wait_for_server_termination(server_id)
+            except Exception as exc:
+                LOG.exception(exc)
+                pass
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
-        cls.server_id = server['id']
         cls.password = server['adminPass']
+        return server['id']
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
@@ -258,17 +259,17 @@ class BaseV3ComputeTest(BaseComputeTest):
         return resp, image
 
     @classmethod
-    def rebuild_server(cls, **kwargs):
+    def rebuild_server(cls, server_id, **kwargs):
         # Destroy an existing server and creates a new one
         try:
-            cls.servers_client.delete_server(cls.server_id)
-            cls.servers_client.wait_for_server_termination(cls.server_id)
+            cls.servers_client.delete_server(server_id)
+            cls.servers_client.wait_for_server_termination(server_id)
         except Exception as exc:
             LOG.exception(exc)
             pass
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
-        cls.server_id = server['id']
         cls.password = server['admin_password']
+        return server['id']
 
 
 class BaseV3ComputeAdminTest(BaseV3ComputeTest):

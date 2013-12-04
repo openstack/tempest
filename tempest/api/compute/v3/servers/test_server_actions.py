@@ -45,13 +45,13 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except Exception:
             # Rebuild server if something happened to it during a test
-            self.rebuild_server()
+            self.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
         super(ServerActionsV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
-        cls.rebuild_server()
+        cls.server_id = cls.rebuild_server(None)
 
     @testtools.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
                           'Change password not available.')
