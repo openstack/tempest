@@ -5,3 +5,4 @@ sphinx>=1.1.2
 python-subunit
 oslo.sphinx
 mox>=0.5.3
+mock>=1.0
