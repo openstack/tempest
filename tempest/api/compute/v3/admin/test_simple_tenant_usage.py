@@ -23,15 +23,15 @@ from tempest.test import attr
 import time
 
 
-class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
+class TenantUsagesV3TestJSON(base.BaseV3ComputeAdminTest):
 
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(TenantUsagesTestJSON, cls).setUpClass()
-        cls.adm_client = cls.os_adm.tenant_usages_client
-        cls.client = cls.os.tenant_usages_client
+        super(TenantUsagesV3TestJSON, cls).setUpClass()
+        cls.adm_client = cls.tenant_usages_admin_client
+        cls.client = cls.tenant_usages_client
         cls.identity_client = cls._get_identity_admin_client()
 
         resp, tenants = cls.identity_client.list_tenants()
@@ -111,5 +111,5 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.list_tenant_usages, params)
 
 
-class TenantUsagesTestXML(TenantUsagesTestJSON):
+class TenantUsagesV3TestXML(TenantUsagesV3TestJSON):
     _interface = 'xml'
