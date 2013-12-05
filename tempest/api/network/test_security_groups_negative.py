@@ -15,10 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
+
 from tempest.api.network import base_security_groups as base
 from tempest import exceptions
 from tempest.test import attr
-import uuid
 
 
 class NegativeSecGroupTest(base.BaseSecGroupTest):
@@ -73,6 +74,22 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                                    port_range_min=pmin,
                                    port_range_max=pmax)
             self.assertIn(msg, str(ex))
+
+    @attr(type=['negative', 'smoke'])
+    def test_create_additional_default_security_group_fails(self):
+        # Create security group named 'default', it should be failed.
+        name = 'default'
+        self.assertRaises(exceptions.Conflict,
+                          self.client.create_security_group,
+                          name)
+
+    @attr(type=['negative', 'smoke'])
+    def test_create_security_group_rule_with_non_existent_security_group(self):
+        # Create security group rules with not existing security group.
+        non_existent_sg = str(uuid.uuid4())
+        self.assertRaises(exceptions.NotFound,
+                          self.client.create_security_group_rule,
+                          non_existent_sg)
 
 
 class NegativeSecGroupTestXML(NegativeSecGroupTest):
