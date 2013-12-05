@@ -26,18 +26,18 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
-    _host_key = 'OS-EXT-SRV-ATTR:host'
+class LiveBlockMigrationV3TestJSON(base.BaseV3ComputeAdminTest):
+    _host_key = 'os-extended-server-attributes:host'
     _interface = 'json'
 
     CONF = config.CONF
 
     @classmethod
     def setUpClass(cls):
-        super(LiveBlockMigrationTestJSON, cls).setUpClass()
+        super(LiveBlockMigrationV3TestJSON, cls).setUpClass()
 
-        cls.admin_hosts_client = cls.os_adm.hosts_client
-        cls.admin_servers_client = cls.os_adm.servers_client
+        cls.admin_hosts_client = cls.hosts_admin_client
+        cls.admin_servers_client = cls.servers_admin_client
 
         cls.created_server_ids = []
 
@@ -86,7 +86,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         else:
             _, server = self.create_test_server(wait_until="ACTIVE")
             server_id = server['id']
-            self.password = server['adminPass']
+            self.password = server['admin_password']
             self.password = 'password'
             self.created_server_ids.append(server_id)
             return server_id
@@ -163,10 +163,11 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
         for server_id in cls.created_server_ids:
             cls.servers_client.delete_server(server_id)
 
-        super(LiveBlockMigrationTestJSON, cls).tearDownClass()
+        super(LiveBlockMigrationV3TestJSON, cls).tearDownClass()
 
 
-class LiveBlockMigrationTestXML(LiveBlockMigrationTestJSON):
+class LiveBlockMigrationV3TestXML(LiveBlockMigrationV3TestJSON):
     _host_key = (
-        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
+        '{http://docs.openstack.org/compute/ext/'
+        'extended_server_attributes/api/v3}host')
     _interface = 'xml'
