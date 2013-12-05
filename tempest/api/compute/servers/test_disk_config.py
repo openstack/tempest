@@ -80,7 +80,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
     def _get_alternative_flavor(self):
         resp, server = self.client.get_server(self.server_id)
 
-        if int(server['flavor']['id']) == self.flavor_ref:
+        if server['flavor']['id'] == self.flavor_ref:
             return self.flavor_ref_alt
         else:
             return self.flavor_ref
