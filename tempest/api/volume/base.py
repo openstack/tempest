@@ -151,3 +151,4 @@ class BaseVolumeAdminTest(BaseVolumeTest):
         else:
             cls.os_adm = clients.AdminManager(interface=cls._interface)
         cls.client = cls.os_adm.volume_types_client
+        cls.hosts_client = cls.os_adm.volume_hosts_client
