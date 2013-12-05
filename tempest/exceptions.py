@@ -184,3 +184,7 @@ class ResponseWithNonEmptyBody(RFCViolation):
 class ResponseWithEntity(RFCViolation):
     message = ("RFC Violation! Response with 205 HTTP Status Code "
                "MUST NOT have an entity")
+
+
+class InvalidHTTPResponseBody(RestClientException):
+    message = "HTTP response body is invalid json or xml"
