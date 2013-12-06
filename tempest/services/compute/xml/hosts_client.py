@@ -47,18 +47,16 @@ class HostsClientXML(RestClientXML):
 
         resp, body = self.get("os-hosts/%s" % str(hostname), self.headers)
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_to_json(node)]
         return resp, body
 
-    def update_host(self, hostname, status=None, maintenance_mode=None,
-                    **kwargs):
+    def update_host(self, hostname, **kwargs):
         """Update a host."""
 
-        request_body = Element(status=status,
-                               maintenance_mode=maintenance_mode)
+        request_body = Element("updates")
         if kwargs:
-            for k, v in kwargs.iteritem():
-                request_body.add_attr(k, v)
+            for k, v in kwargs.iteritems():
+                request_body.append(Element(k, v))
         resp, body = self.put("os-hosts/%s" % str(hostname),
                               str(Document(request_body)),
                               self.headers)
