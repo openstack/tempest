@@ -16,7 +16,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
@@ -45,24 +44,21 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
                                                       'ACTIVE')
 
             # Create images to be used in the filter tests
-            resp, body = cls.create_image_from_server(cls.server1['id'])
-            cls.image1_id = data_utils.parse_image_id(resp['location'])
-            cls.client.wait_for_image_status(cls.image1_id, 'ACTIVE')
-            resp, cls.image1 = cls.client.get_image(cls.image1_id)
+            resp, cls.image1 = cls.create_image_from_server(
+                cls.server1['id'], wait_until='ACTIVE')
+            cls.image1_id = cls.image1['id']
 
             # Servers have a hidden property for when they are being imaged
             # Performing back-to-back create image calls on a single
             # server will sometimes cause failures
-            resp, body = cls.create_image_from_server(cls.server2['id'])
-            cls.image3_id = data_utils.parse_image_id(resp['location'])
-            cls.client.wait_for_image_status(cls.image3_id, 'ACTIVE')
-            resp, cls.image3 = cls.client.get_image(cls.image3_id)
+            resp, cls.image3 = cls.create_image_from_server(
+                cls.server2['id'], wait_until='ACTIVE')
+            cls.image3_id = cls.image3['id']
 
-            resp, body = cls.create_image_from_server(cls.server1['id'])
-            cls.image2_id = data_utils.parse_image_id(resp['location'])
-
-            cls.client.wait_for_image_status(cls.image2_id, 'ACTIVE')
-            resp, cls.image2 = cls.client.get_image(cls.image2_id)
+            # Wait for the server to be active after the image upload
+            resp, cls.image2 = cls.create_image_from_server(
+                cls.server1['id'], wait_until='ACTIVE')
+            cls.image2_id = cls.image2['id']
         except Exception as exc:
             LOG.exception(exc)
             cls.tearDownClass()
