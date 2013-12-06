@@ -715,3 +715,42 @@ class NetworkClientJSON(RestClient):
                                                  network_id)
         resp, body = self.delete(uri, self.headers)
         return resp, body
+
+    def list_ike_policies(self):
+        uri = '%s/vpn/ikepolicies' % (self.uri_prefix)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def create_ike_policy(self, name, **kwargs):
+        post_body = {
+            "ikepolicy": {
+                "name": name,
+            }
+        }
+        for key, val in kwargs.items():
+            post_body['ikepolicy'][key] = val
+        body = json.dumps(post_body)
+        uri = '%s/vpn/ikepolicies' % (self.uri_prefix)
+        resp, body = self.post(uri, headers=self.headers, body=body)
+        body = json.loads(body)
+        return resp, body
+
+    def show_ike_policy(self, uuid):
+        uri = '%s/vpn/ikepolicies/%s' % (self.uri_prefix, uuid)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_ike_policy(self, uuid):
+        uri = '%s/vpn/ikepolicies/%s' % (self.uri_prefix, uuid)
+        resp, body = self.delete(uri, self.headers)
+        return resp, body
+
+    def update_ike_policy(self, uuid, **kwargs):
+        put_body = {'ikepolicy': kwargs}
+        body = json.dumps(put_body)
+        uri = '%s/vpn/ikepolicies/%s' % (self.uri_prefix, uuid)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
