@@ -65,9 +65,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.members = []
         cls.health_monitors = []
         cls.vpnservices = []
+        cls.ikepolicies = []
 
     @classmethod
     def tearDownClass(cls):
+        # Clean up ike policies
+        for ikepolicy in cls.ikepolicies:
+            cls.client.delete_ike_policy(ikepolicy['id'])
         # Clean up vpn services
         for vpnservice in cls.vpnservices:
             cls.client.delete_vpn_service(vpnservice['id'])
@@ -215,6 +219,14 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         vpnservice = body['vpnservice']
         cls.vpnservices.append(vpnservice)
         return vpnservice
+
+    @classmethod
+    def create_ike_policy(cls, name):
+        """Wrapper utility that returns a test ike policy."""
+        resp, body = cls.client.create_ike_policy(name)
+        ikepolicy = body['ikepolicy']
+        cls.ikepolicies.append(ikepolicy)
+        return ikepolicy
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):
