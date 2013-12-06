@@ -107,6 +107,7 @@ class AccountQuotasTest(base.BaseObjectTest):
                                                    object_name, data)
 
         self.assertEqual(resp["status"], "201")
+        self.assertHeaders(resp, 'Object', 'PUT')
 
     @testtools.skipIf(not accounts_quotas_available,
                       "Account Quotas middleware not available")
@@ -141,6 +142,7 @@ class AccountQuotasTest(base.BaseObjectTest):
                                                             headers, "")
 
             self.assertEqual(resp["status"], "204")
+            self.assertHeaders(resp, 'Account', 'POST')
 
     @testtools.skipIf(not accounts_quotas_available,
                       "Account Quotas middleware not available")

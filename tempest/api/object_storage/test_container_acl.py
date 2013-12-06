@@ -86,6 +86,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(
             self.container_name, object_name, 'data')
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
         # trying to get object with non authorized user token
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.get_object,
@@ -100,6 +101,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp, _ = self.object_client.create_object(
             self.container_name, object_name, 'data')
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
         # trying to delete object with non-authorized user token
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.delete_object,
@@ -115,11 +117,13 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, 'data')
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to read the object without rights
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.get_object,
@@ -135,6 +139,7 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without rights
         object_name = data_utils.rand_name(name='Object')
         self.assertRaises(exceptions.Unauthorized,
@@ -153,16 +158,19 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, 'data')
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to read the object with rights
         resp, _ = self.custom_object_client.get_object(
             self.container_name, object_name,
             metadata=self.custom_headers)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
 
     @attr(type='smoke')
     def test_write_object_with_rights(self):
@@ -174,6 +182,7 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object with rights
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.custom_object_client.create_object(
@@ -181,6 +190,7 @@ class ObjectTestACLs(base.BaseObjectTest):
             object_name, 'data',
             metadata=self.custom_headers)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'PUT')
 
     @attr(type=['negative', 'smoke'])
     def test_write_object_without_write_rights(self):
@@ -193,6 +203,7 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without write rights
         object_name = data_utils.rand_name(name='Object')
         self.assertRaises(exceptions.Unauthorized,
@@ -212,11 +223,13 @@ class ObjectTestACLs(base.BaseObjectTest):
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.object_client.create_object(self.container_name,
                                                    object_name, 'data')
         self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to delete the object without write rights
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.delete_object,

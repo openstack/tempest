@@ -18,6 +18,7 @@
 
 from tempest.api.object_storage import base
 from tempest import clients
+from tempest.common import custom_matchers
 from tempest import config
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
@@ -80,3 +81,12 @@ class CrossdomainTest(base.BaseObjectTest):
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertTrue(body.startswith(self.xml_start) and
                         body.endswith(self.xml_end))
+
+        # The target of the request is not any Swift resource. Therefore, the
+        # existence of response header is checked without a custom matcher.
+        self.assertIn('content-length', resp)
+        self.assertIn('content-type', resp)
+        self.assertIn('x-trans-id', resp)
+        self.assertIn('date', resp)
+        # Check only the format of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())

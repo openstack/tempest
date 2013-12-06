@@ -113,13 +113,14 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # trying to get object using temp url within expiry time
         resp, body = self.object_client.get_object_using_temp_url(url)
-
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.data)
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'HEAD')
 
     @attr(type='gate')
     def test_get_object_using_temp_url_key_2(self):
@@ -157,10 +158,12 @@ class ObjectTempUrlTest(base.BaseObjectTest):
             url, new_data)
 
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'PUT')
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'HEAD')
 
         # Validate that the content of the object has been modified
         url = self._get_temp_url(self.container_name,

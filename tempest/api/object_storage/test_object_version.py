@@ -34,6 +34,7 @@ class ContainerTest(base.BaseObjectTest):
     def assertContainer(self, container, count, byte, versioned):
         resp, _ = self.container_client.list_container_metadata(container)
         self.assertEqual(resp['status'], ('204'))
+        self.assertHeaders(resp, 'Container', 'HEAD')
         header_value = resp.get('x-container-object-count', 'Missing Header')
         self.assertEqual(header_value, count)
         header_value = resp.get('x-container-bytes-used', 'Missing Header')
@@ -49,6 +50,7 @@ class ContainerTest(base.BaseObjectTest):
             vers_container_name)
         self.containers.append(vers_container_name)
         self.assertIn(resp['status'], ('202', '201'))
+        self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(vers_container_name, '0', '0', 'Missing Header')
 
         base_container_name = data_utils.rand_name(name='TestBaseContainer')
@@ -59,6 +61,7 @@ class ContainerTest(base.BaseObjectTest):
             metadata_prefix='')
         self.containers.append(base_container_name)
         self.assertIn(resp['status'], ('202', '201'))
+        self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(base_container_name, '0', '0',
                              vers_container_name)
         object_name = data_utils.rand_name(name='TestObject')
