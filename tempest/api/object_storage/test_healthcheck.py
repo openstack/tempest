@@ -19,6 +19,7 @@
 
 from tempest.api.object_storage import base
 from tempest import clients
+from tempest.common import custom_matchers
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
 
@@ -63,3 +64,12 @@ class HealthcheckTest(base.BaseObjectTest):
 
         # The status is expected to be 200
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+
+        # The target of the request is not any Swift resource. Therefore, the
+        # existence of response header is checked without a custom matcher.
+        self.assertIn('content-length', resp)
+        self.assertIn('content-type', resp)
+        self.assertIn('x-trans-id', resp)
+        self.assertIn('date', resp)
+        # Check only the format of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())

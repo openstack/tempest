@@ -62,10 +62,13 @@ class ObjectExpiryTest(base.BaseObjectTest):
             self.object_client.list_object_metadata(self.container_name,
                                                     object_name)
         self.assertEqual(resp['status'], '200')
+        self.assertHeaders(resp, 'Object', 'HEAD')
         self.assertIn('x-delete-at', resp)
         resp, body = self.object_client.get_object(self.container_name,
                                                    object_name)
         self.assertEqual(resp['status'], '200')
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertIn('x-delete-at', resp)
         # check data
         self.assertEqual(body, data)
         # sleep for over 5 seconds, so that object expires

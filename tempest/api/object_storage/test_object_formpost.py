@@ -109,11 +109,13 @@ class ObjectFormPostTest(base.BaseObjectTest):
         resp, body = self.object_client.http_obj.request(url, "POST",
                                                          body, headers=headers)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, "Object", "POST")
 
         # Ensure object is available
         resp, body = self.object_client.get("%s/%s%s" % (
             self.container_name, self.object_name, "testfile"))
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, "Object", "GET")
         self.assertEqual(body, "hello world")
 
     @attr(type=['gate', 'negative'])

@@ -15,6 +15,7 @@
 # under the License.
 
 from tempest.api.object_storage import base
+from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import test
 
@@ -60,6 +61,8 @@ class StaticWebTest(base.BaseObjectTest):
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        # This request is equivalent to GET object
+        self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.object_data)
 
         # clean up before exiting
@@ -82,6 +85,15 @@ class StaticWebTest(base.BaseObjectTest):
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        # The target of the request is not any Swift resource. Therefore, the
+        # existence of response header is checked without a custom matcher.
+        self.assertIn('content-length', resp)
+        self.assertIn('content-type', resp)
+        self.assertIn('x-trans-id', resp)
+        self.assertIn('date', resp)
+        # Check only the format of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+
         self.assertIn(self.object_name, body)
 
         # clean up before exiting
