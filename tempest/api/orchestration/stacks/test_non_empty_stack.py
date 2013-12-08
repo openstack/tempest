@@ -78,6 +78,10 @@ Outputs:
         cls.resource_type = 'AWS::AutoScaling::LaunchConfiguration'
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
 
+    def assert_fields_in_dict(self, obj, *fields):
+        for field in fields:
+            self.assertIn(field, obj)
+
     @attr(type='gate')
     def test_stack_list(self):
         """Created stack should be on the list of existing stacks."""
@@ -93,8 +97,19 @@ Outputs:
         resp, stack = self.client.get_stack(self.stack_name)
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(stack, dict)
+        self.assert_fields_in_dict(stack, 'stack_name', 'id', 'links',
+                                   'parameters', 'outputs', 'disable_rollback',
+                                   'stack_status_reason', 'stack_status',
+                                   'creation_time', 'updated_time',
+                                   'capabilities', 'notification_topics',
+                                   'timeout_mins', 'template_description')
+        self.assert_fields_in_dict(stack['parameters'], 'AWS::StackId',
+                                   'trigger', 'AWS::Region', 'AWS::StackName')
+        self.assertEqual(True, stack['disable_rollback'],
+                         'disable_rollback should default to True')
         self.assertEqual(self.stack_name, stack['stack_name'])
         self.assertEqual(self.stack_id, stack['id'])
+        self.assertEqual('fluffy', stack['outputs'][0]['output_key'])
 
     @attr(type='gate')
     def test_list_resources(self):
@@ -103,6 +118,11 @@ Outputs:
         resp, resources = self.client.list_resources(self.stack_identifier)
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(resources, list)
+        for res in resources:
+            self.assert_fields_in_dict(res, 'logical_resource_id',
+                                       'resource_type', 'resource_status',
+                                       'updated_time')
+
         resources_names = map(lambda resource: resource['logical_resource_id'],
                               resources)
         self.assertIn(self.resource_name, resources_names)
@@ -116,6 +136,11 @@ Outputs:
         resp, resource = self.client.get_resource(self.stack_identifier,
                                                   self.resource_name)
         self.assertIsInstance(resource, dict)
+        self.assert_fields_in_dict(resource, 'resource_name', 'description',
+                                   'links', 'logical_resource_id',
+                                   'resource_status', 'updated_time',
+                                   'required_by', 'resource_status_reason',
+                                   'physical_resource_id', 'resource_type')
         self.assertEqual(self.resource_name, resource['logical_resource_id'])
         self.assertEqual(self.resource_type, resource['resource_type'])
 
@@ -135,6 +160,12 @@ Outputs:
         resp, events = self.client.list_events(self.stack_identifier)
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(events, list)
+
+        for event in events:
+            self.assert_fields_in_dict(event, 'logical_resource_id', 'id',
+                                       'resource_status_reason',
+                                       'resource_status', 'event_time')
+
         resource_statuses = map(lambda event: event['resource_status'], events)
         self.assertIn('CREATE_IN_PROGRESS', resource_statuses)
         self.assertIn('CREATE_COMPLETE', resource_statuses)
@@ -151,6 +182,11 @@ Outputs:
                                              self.resource_name, event_id)
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(event, dict)
+        self.assert_fields_in_dict(event, 'resource_name', 'event_time',
+                                   'links', 'logical_resource_id',
+                                   'resource_status', 'resource_status_reason',
+                                   'physical_resource_id', 'id',
+                                   'resource_properties', 'resource_type')
         self.assertEqual(self.resource_name, event['resource_name'])
         self.assertEqual('state changed', event['resource_status_reason'])
         self.assertEqual(self.resource_name, event['logical_resource_id'])
