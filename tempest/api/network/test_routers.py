@@ -15,6 +15,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
+
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest.test import attr
@@ -229,3 +231,22 @@ class RoutersTest(base.BaseAdminNetworkTest):
             {'network_id': self.network_cfg.public_network_id,
              'enable_snat': False})
         self._verify_gateway_port(router['id'])
+
+    @attr(type='smoke')
+    def test_update_extra_route(self):
+        self.network = self.create_network()
+        self.name = self.network['name']
+        self.subnet = self.create_subnet(self.network)
+        # Add router interface with subnet id
+        self.router = self.create_router(data_utils.rand_name('router-'), True)
+        self.create_router_interface(self.router['id'], self.subnet['id'])
+        self.addCleanup(
+            self._delete_extra_routes,
+            self.router['id'])
+        # Update router extra route
+        cidr = netaddr.IPNetwork(self.subnet['cidr'])
+        resp, extra_route = self.client.update_extra_routes(
+            self.router['id'], str(cidr[0]), str(self.subnet['cidr']))
+
+    def _delete_extra_routes(self, router_id):
+        resp, _ = self.client.delete_extra_routes(router_id)
