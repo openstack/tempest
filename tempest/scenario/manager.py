@@ -853,6 +853,12 @@ class NetworkScenarioTest(OfficialClientTest):
 
         return rules
 
+    def _ssh_to_server(self, server, private_key):
+        ssh_login = self.config.compute.image_ssh_user
+        return self.get_remote_client(server,
+                                      username=ssh_login,
+                                      private_key=private_key)
+
     def _show_quota_network(self, tenant_id):
         quota = self.network_client.show_quota(tenant_id)
         return quota['quota']['network']
