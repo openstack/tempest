@@ -15,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -31,12 +30,10 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        if not compute.MULTI_USER:
+        super(AuthorizationTestJSON, cls).setUpClass()
+        if not cls.multi_user:
             msg = "Need >1 user"
             raise cls.skipException(msg)
-
-        super(AuthorizationTestJSON, cls).setUpClass()
-
         cls.client = cls.os.servers_client
         cls.images_client = cls.os.images_client
         cls.keypairs_client = cls.os.keypairs_client
@@ -85,7 +82,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        if compute.MULTI_USER:
+        if cls.multi_user:
             cls.images_client.delete_image(cls.image['id'])
             cls.keypairs_client.delete_keypair(cls.keypairname)
             cls.security_client.delete_security_group(cls.security_group['id'])

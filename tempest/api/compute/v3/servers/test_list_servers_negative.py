@@ -17,7 +17,6 @@
 
 import datetime
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
 from tempest import exceptions
@@ -53,7 +52,7 @@ class ListServersNegativeV3TestJSON(base.BaseV3ComputeTest):
         cls.client = cls.servers_client
         cls.servers = []
 
-        if compute.MULTI_USER:
+        if cls.multi_user:
             if cls.config.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds

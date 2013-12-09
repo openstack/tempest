@@ -68,7 +68,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
         cls.image_ids = []
 
-        if compute.MULTI_USER:
+        if cls.multi_user:
             if cls.config.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds
