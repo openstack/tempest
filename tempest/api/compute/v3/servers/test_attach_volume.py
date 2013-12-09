@@ -23,19 +23,19 @@ import tempest.config
 from tempest.test import attr
 
 
-class AttachVolumeTestJSON(base.BaseV2ComputeTest):
+class AttachVolumeV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
     run_ssh = tempest.config.TempestConfig().compute.run_ssh
 
     def __init__(self, *args, **kwargs):
-        super(AttachVolumeTestJSON, self).__init__(*args, **kwargs)
+        super(AttachVolumeV3TestJSON, self).__init__(*args, **kwargs)
         self.server = None
         self.volume = None
         self.attached = False
 
     @classmethod
     def setUpClass(cls):
-        super(AttachVolumeTestJSON, cls).setUpClass()
+        super(AttachVolumeV3TestJSON, cls).setUpClass()
         cls.device = cls.config.compute.volume_device_name
         if not cls.config.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
@@ -55,7 +55,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         # Start a server and wait for it to become ready
         admin_pass = self.image_ssh_password
         resp, server = self.create_test_server(wait_until='ACTIVE',
-                                               adminPass=admin_pass)
+                                               admin_password=admin_pass)
         self.server = server
 
         # Record addresses so that we can ssh later
@@ -93,7 +93,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
         linux_client = RemoteClient(server,
-                                    self.image_ssh_user, server['adminPass'])
+                                    self.image_ssh_user,
+                                    server['admin_password'])
         partitions = linux_client.get_partitions()
         self.assertIn(self.device, partitions)
 
@@ -107,10 +108,11 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
         linux_client = RemoteClient(server,
-                                    self.image_ssh_user, server['adminPass'])
+                                    self.image_ssh_user,
+                                    server['admin_password'])
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 
 
-class AttachVolumeTestXML(AttachVolumeTestJSON):
+class AttachVolumeV3TestXML(AttachVolumeV3TestJSON):
     _interface = 'xml'
