@@ -132,6 +132,7 @@ log_opts = [
                     'boto=WARN',
                     'suds=INFO',
                     'keystone=INFO',
+                    'paramiko=INFO'
                 ],
                 help='list of logger=LEVEL pairs'),
     cfg.BoolOpt('publish_errors',
