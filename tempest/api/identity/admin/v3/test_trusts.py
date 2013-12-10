@@ -12,10 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import datetime
+import re
 from tempest.api.identity import base
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
+from tempest.openstack.common import timeutils
 from tempest.test import attr
 
 
@@ -115,7 +118,15 @@ class BaseTrustsV3Test(base.BaseIdentityAdminTest):
                        summary=False):
         self.assertIsNotNone(trust['id'])
         self.assertEqual(impersonate, trust['impersonation'])
-        self.assertEqual(expires, trust['expires_at'])
+        # FIXME(shardy): ref bug #1246383 we can't check the
+        # microsecond component of the expiry time, because mysql
+        # <5.6.4 doesn't support microseconds.
+        # expected format 2013-12-20T16:08:36.036987Z
+        if expires is not None:
+            expires_nousec = re.sub(r'\.([0-9]){6}Z', '', expires)
+            self.assertTrue(trust['expires_at'].startswith(expires_nousec))
+        else:
+            self.assertIsNone(trust['expires_at'])
         self.assertEqual(self.trustor_user_id, trust['trustor_user_id'])
         self.assertEqual(self.trustee_user_id, trust['trustee_user_id'])
         self.assertIn('v3/OS-TRUST/trusts', trust['links']['self'])
@@ -206,6 +217,24 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
 
         trust_get = self.get_trust()
         self.validate_trust(trust_get, impersonate=False)
+
+        self.check_trust_roles()
+
+        self.delete_trust()
+
+    @attr(type='smoke')
+    def test_trust_expire(self):
+        # Test case to check we can create, get and delete a trust
+        # with an expiry specified
+        expires_at = timeutils.utcnow() + datetime.timedelta(hours=1)
+        expires_str = timeutils.isotime(at=expires_at, subsecond=True)
+
+        trust = self.create_trust(expires=expires_str)
+        self.validate_trust(trust, expires=expires_str)
+
+        trust_get = self.get_trust()
+
+        self.validate_trust(trust_get, expires=expires_str)
 
         self.check_trust_roles()
 
