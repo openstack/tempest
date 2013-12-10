@@ -178,6 +178,11 @@ class BaseV2ComputeTest(BaseComputeTest):
                                                     kwargs['wait_until'])
             resp, image = cls.images_client.get_image(image_id)
 
+            if kwargs['wait_until'] == 'ACTIVE':
+                if kwargs.get('wait_for_server', True):
+                    cls.servers_client.wait_for_server_status(server_id,
+                                                              'ACTIVE')
+
         return resp, image
 
     @classmethod
