@@ -17,7 +17,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class KeyPairsTestJSON(base.BaseV2ComputeTest):
@@ -28,14 +28,23 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
         super(KeyPairsTestJSON, cls).setUpClass()
         cls.client = cls.keypairs_client
 
-    @attr(type='gate')
+    def _delete_keypair(self, keypair_name):
+        resp, _ = self.client.delete_keypair(keypair_name)
+        self.assertEqual(202, resp.status)
+
+    def _create_keypair(self, keypair_name, pub_key=None):
+        resp, body = self.client.create_keypair(keypair_name, pub_key)
+        self.addCleanup(self._delete_keypair, keypair_name)
+        return resp, body
+
+    @test.attr(type='gate')
     def test_keypairs_create_list_delete(self):
         # Keypairs created should be available in the response list
         # Create 3 keypairs
         key_list = list()
         for i in range(3):
             k_name = data_utils.rand_name('keypair-')
-            resp, keypair = self.client.create_keypair(k_name)
+            resp, keypair = self._create_keypair(k_name)
             # Need to pop these keys so that our compare doesn't fail later,
             # as the keypair dicts from list API doesn't have them.
             keypair.pop('private_key')
@@ -57,16 +66,12 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(missing_kps,
                          "Failed to find keypairs %s in fetched list"
                          % ', '.join(m_key['name'] for m_key in missing_kps))
-        # Delete all the keypairs created
-        for keypair in key_list:
-            resp, _ = self.client.delete_keypair(keypair['name'])
-            self.assertEqual(202, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_keypair_create_delete(self):
         # Keypair should be created, verified and deleted
         k_name = data_utils.rand_name('keypair-')
-        resp, keypair = self.client.create_keypair(k_name)
+        resp, keypair = self._create_keypair(k_name)
         self.assertEqual(200, resp.status)
         private_key = keypair['private_key']
         key_name = keypair['name']
@@ -75,15 +80,12 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
                          "to the requested name")
         self.assertTrue(private_key is not None,
                         "Field private_key is empty or not found.")
-        resp, _ = self.client.delete_keypair(k_name)
-        self.assertEqual(202, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_keypair_detail(self):
         # Keypair should be created, Got details by name and deleted
         k_name = data_utils.rand_name('keypair-')
-        resp, keypair = self.client.create_keypair(k_name)
-        self.addCleanup(self.client.delete_keypair, k_name)
+        resp, keypair = self._create_keypair(k_name)
         resp, keypair_detail = self.client.get_keypair(k_name)
         self.assertEqual(200, resp.status)
         self.assertIn('name', keypair_detail)
@@ -95,7 +97,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(public_key is not None,
                         "Field public_key is empty or not found.")
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_keypair_create_with_pub_key(self):
         # Keypair should be created with a given public key
         k_name = data_utils.rand_name('keypair-')
@@ -108,7 +110,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
                    "LOeB1kYMOBaiUPLQTWXR3JpckqFIQwhIH0zoHlJvZE8hh90"
                    "XcPojYN56tI0OlrGqojbediJYD0rUsJu4weZpbn8vilb3JuDY+jws"
                    "snSA8wzBx3A/8y9Pp1B nova@ubuntu")
-        resp, keypair = self.client.create_keypair(k_name, pub_key)
+        resp, keypair = self._create_keypair(k_name, pub_key)
         self.assertEqual(200, resp.status)
         self.assertFalse('private_key' in keypair,
                          "Field private_key is not empty!")
@@ -116,8 +118,6 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(key_name, k_name,
                          "The created keypair name is not equal "
                          "to the requested name!")
-        resp, _ = self.client.delete_keypair(k_name)
-        self.assertEqual(202, resp.status)
 
 
 class KeyPairsTestXML(KeyPairsTestJSON):
