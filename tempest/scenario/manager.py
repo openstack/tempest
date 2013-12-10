@@ -24,6 +24,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common import credentials
+from tempest.common import fixed_network
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
@@ -184,6 +185,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             flavor = CONF.compute.flavor_ref
         if create_kwargs is None:
             create_kwargs = {}
+        network = self.get_tenant_network()
+        fixed_network.set_networks_kwarg(network, create_kwargs)
 
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)

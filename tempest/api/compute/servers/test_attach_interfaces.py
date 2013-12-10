@@ -13,12 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
+
+from tempest_lib import exceptions as lib_exc
+
 from tempest.api.compute import base
 from tempest import config
 from tempest import exceptions
 from tempest import test
-
-import time
 
 CONF = config.CONF
 
@@ -125,8 +127,15 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(interface_count > 0)
         self._check_interface(ifs[0])
 
-        iface = self._test_create_interface(server)
-        ifs.append(iface)
+        try:
+            iface = self._test_create_interface(server)
+        except lib_exc.BadRequest as e:
+            msg = ('Multiple possible networks found, use a Network ID to be '
+                   'more specific.')
+            if not CONF.compute.fixed_network_name and e.message == msg:
+                raise
+        else:
+            ifs.append(iface)
 
         iface = self._test_create_interface_by_network_id(server, ifs)
         ifs.append(iface)

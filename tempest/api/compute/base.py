@@ -22,6 +22,7 @@ from tempest_lib import exceptions as lib_exc
 
 from tempest import clients
 from tempest.common import credentials
+from tempest.common import fixed_network
 from tempest import config
 from tempest import exceptions
 import tempest.test
@@ -212,6 +213,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         flavor = kwargs.get('flavor', cls.flavor_ref)
         image_id = kwargs.get('image_id', cls.image_ref)
 
+        kwargs = fixed_network.set_networks_kwarg(
+            cls.get_tenant_network(), kwargs) or {}
         body = cls.servers_client.create_server(
             name, image_id, flavor, **kwargs)
 
