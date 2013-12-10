@@ -160,14 +160,6 @@ c-vol:
     - module: "cinder.brick.local_dev.lvm"
       message: "Can't remove open logical volume"
 
-q-dhpc:
-    - module: "neutron.common.legacy"
-      message: "Skipping unknown group key: firewall_driver"
-    - module: "neutron.agent.dhcp_agent"
-      message: "Unable to enable dhcp"
-    - module: "neutron.agent.dhcp_agent"
-      message: " Network .* RPC info call failed"
-
 ceilometer-collector:
     - module: "stevedore.extension"
       message: ".*"
