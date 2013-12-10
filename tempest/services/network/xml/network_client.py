@@ -23,7 +23,8 @@ class NetworkClientXML(client_base.NetworkClientBase):
 
     # list of plurals used for xml serialization
     PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
-               'fixed_ips', 'extensions', 'extra_dhcp_opts']
+               'fixed_ips', 'extensions', 'extra_dhcp_opts', 'pools',
+               'health_monitors', 'vips']
 
     def get_rest_client(self, auth_provider):
         rc = rest_client.RestClient(auth_provider)
@@ -91,28 +92,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         for element in elements:
             root.add_attr('xmlns:%s' % element,
                           common.NEUTRON_NAMESPACES[element])
-
-    def create_member(self, address, protocol_port, pool_id):
-        uri = '%s/lb/members' % (self.uri_prefix)
-        post_body = common.Element("member")
-        p1 = common.Element("address", address)
-        p2 = common.Element("protocol_port", protocol_port)
-        p3 = common.Element("pool_id", pool_id)
-        post_body.append(p1)
-        post_body.append(p2)
-        post_body.append(p3)
-        resp, body = self.post(uri, str(common.Document(post_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_member(self, admin_state_up, member_id):
-        uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
-        put_body = common.Element("member")
-        p2 = common.Element("admin_state_up", admin_state_up)
-        put_body.append(p2)
-        resp, body = self.put(uri, str(common.Document(put_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
 
     def associate_health_monitor_with_pool(self, health_monitor_id,
                                            pool_id):

@@ -61,19 +61,50 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                                                        Type="TCP",
                                                        timeout=1)
 
+    def _check_list_with_filter(self, obj_name, attr_exceptions, **kwargs):
+        create_obj = getattr(self.client, 'create_' + obj_name)
+        delete_obj = getattr(self.client, 'delete_' + obj_name)
+        list_objs = getattr(self.client, 'list_' + obj_name + 's')
+
+        resp, body = create_obj(**kwargs)
+        self.assertEqual('201', resp['status'])
+        obj = body[obj_name]
+        self.addCleanup(delete_obj, obj['id'])
+        for key, value in obj.iteritems():
+            # It is not relevant to filter by all arguments. That is why
+            # there is a list of attr to except
+            if key not in attr_exceptions:
+                resp, body = list_objs(**{key: value})
+                self.assertEqual('200', resp['status'])
+                objs = [v[key] for v in body[obj_name + 's']]
+                self.assertIn(value, objs)
+
     @test.attr(type='smoke')
     def test_list_vips(self):
         # Verify the vIP exists in the list of all vIPs
         resp, body = self.client.list_vips()
         self.assertEqual('200', resp['status'])
         vips = body['vips']
-        found = None
-        for n in vips:
-            if (n['id'] == self.vip['id']):
-                found = n['id']
-        msg = "vIPs list doesn't contain created vip"
-        self.assertIsNotNone(found, msg)
+        self.assertIn(self.vip['id'], [v['id'] for v in vips])
 
+    @test.attr(type='smoke')
+    def test_list_vips_with_filter(self):
+        name = data_utils.rand_name('vip-')
+        resp, body = self.client.create_pool(
+            name=data_utils.rand_name("pool-"), lb_method="ROUND_ROBIN",
+            protocol="HTTPS", subnet_id=self.subnet['id'])
+        self.assertEqual('201', resp['status'])
+        pool = body['pool']
+        self.addCleanup(self.client.delete_pool, pool['id'])
+        attr_exceptions = ['status', 'session_persistence',
+                           'status_description']
+        self._check_list_with_filter(
+            'vip', attr_exceptions, name=name, protocol="HTTPS",
+            protocol_port=81, subnet_id=self.subnet['id'], pool_id=pool['id'],
+            description=data_utils.rand_name('description-'),
+            admin_state_up=False)
+
+    @test.attr(type='smoke')
     def test_create_update_delete_pool_vip(self):
         # Creates a vip
         name = data_utils.rand_name('vip-')
@@ -117,17 +148,30 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         resp, body = self.client.show_vip(self.vip['id'])
         self.assertEqual('200', resp['status'])
         vip = body['vip']
-        self.assertEqual(self.vip['id'], vip['id'])
-        self.assertEqual(self.vip['name'], vip['name'])
+        for key, value in vip.iteritems():
+            # 'status' should not be confirmed in api tests
+            if key != 'status':
+                self.assertEqual(self.vip[key], value)
 
     @test.attr(type='smoke')
     def test_show_pool(self):
-        # Verifies the details of a pool
-        resp, body = self.client.show_pool(self.pool['id'])
-        self.assertEqual('200', resp['status'])
+        # Here we need to new pool without any dependence with vips
+        resp, body = self.client.create_pool(
+            name=data_utils.rand_name("pool-"),
+            lb_method='ROUND_ROBIN',
+            protocol='HTTP',
+            subnet_id=self.subnet['id'])
+        self.assertEqual('201', resp['status'])
         pool = body['pool']
-        self.assertEqual(self.pool['id'], pool['id'])
-        self.assertEqual(self.pool['name'], pool['name'])
+        self.addCleanup(self.client.delete_pool, pool['id'])
+        # Verifies the details of a pool
+        resp, body = self.client.show_pool(pool['id'])
+        self.assertEqual('200', resp['status'])
+        shown_pool = body['pool']
+        for key, value in pool.iteritems():
+            # 'status' should not be confirmed in api tests
+            if key != 'status':
+                self.assertEqual(value, shown_pool[key])
 
     @test.attr(type='smoke')
     def test_list_pools(self):
@@ -138,6 +182,17 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertIn(self.pool['id'], [p['id'] for p in pools])
 
     @test.attr(type='smoke')
+    def test_list_pools_with_filters(self):
+        attr_exceptions = ['status', 'vip_id', 'members', 'provider',
+                           'status_description']
+        self._check_list_with_filter(
+            'pool', attr_exceptions, name=data_utils.rand_name("pool-"),
+            lb_method="ROUND_ROBIN", protocol="HTTPS",
+            subnet_id=self.subnet['id'],
+            description=data_utils.rand_name('description-'),
+            admin_state_up=False)
+
+    @test.attr(type='smoke')
     def test_list_members(self):
         # Verify the member exists in the list of all members
         resp, body = self.client.list_members()
@@ -146,14 +201,23 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertIn(self.member['id'], [m['id'] for m in members])
 
     @test.attr(type='smoke')
+    def test_list_members_with_filters(self):
+        attr_exceptions = ['status', 'status_description']
+        self._check_list_with_filter('member', attr_exceptions,
+                                     address="10.0.9.47", protocol_port=80,
+                                     pool_id=self.pool['id'])
+
+    @test.attr(type='smoke')
     def test_create_update_delete_member(self):
         # Creates a member
-        resp, body = self.client.create_member("10.0.9.47", 80,
-                                               self.pool['id'])
+        resp, body = self.client.create_member(address="10.0.9.47",
+                                               protocol_port=80,
+                                               pool_id=self.pool['id'])
         self.assertEqual('201', resp['status'])
         member = body['member']
         # Verification of member update
-        resp, body = self.client.update_member(False, member['id'])
+        resp, body = self.client.update_member(member['id'],
+                                               admin_state_up=False)
         self.assertEqual('200', resp['status'])
         updated_member = body['member']
         self.assertFalse(updated_member['admin_state_up'])
@@ -167,9 +231,10 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         resp, body = self.client.show_member(self.member['id'])
         self.assertEqual('200', resp['status'])
         member = body['member']
-        self.assertEqual(self.member['id'], member['id'])
-        self.assertEqual(self.member['admin_state_up'],
-                         member['admin_state_up'])
+        for key, value in member.iteritems():
+             # 'status' should not be confirmed in api tests
+            if key != 'status':
+                self.assertEqual(self.member[key], value)
 
     @test.attr(type='smoke')
     def test_list_health_monitors(self):
@@ -179,6 +244,13 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         health_monitors = body['health_monitors']
         self.assertIn(self.health_monitor['id'],
                       [h['id'] for h in health_monitors])
+
+    @test.attr(type='smoke')
+    def test_list_health_monitors_with_filters(self):
+        attr_exceptions = ['status', 'status_description', 'pools']
+        self._check_list_with_filter('health_monitor', attr_exceptions,
+                                     delay=5, max_retries=4, type="TCP",
+                                     timeout=2)
 
     @test.attr(type='smoke')
     def test_create_update_delete_health_monitor(self):
@@ -206,9 +278,10 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         resp, body = self.client.show_health_monitor(self.health_monitor['id'])
         self.assertEqual('200', resp['status'])
         health_monitor = body['health_monitor']
-        self.assertEqual(self.health_monitor['id'], health_monitor['id'])
-        self.assertEqual(self.health_monitor['admin_state_up'],
-                         health_monitor['admin_state_up'])
+        for key, value in health_monitor.iteritems():
+             # 'status' should not be confirmed in api tests
+            if key != 'status':
+                self.assertEqual(self.health_monitor[key], value)
 
     @test.attr(type='smoke')
     def test_associate_disassociate_health_monitor_with_pool(self):
@@ -216,10 +289,26 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         resp, body = (self.client.associate_health_monitor_with_pool
                      (self.health_monitor['id'], self.pool['id']))
         self.assertEqual('201', resp['status'])
+        resp, body = self.client.show_health_monitor(
+            self.health_monitor['id'])
+        health_monitor = body['health_monitor']
+        resp, body = self.client.show_pool(self.pool['id'])
+        pool = body['pool']
+        self.assertIn(pool['id'],
+                      [p['pool_id'] for p in health_monitor['pools']])
+        self.assertIn(health_monitor['id'], pool['health_monitors'])
         # Verify that a health monitor can be disassociated from a pool
         resp, body = (self.client.disassociate_health_monitor_with_pool
                      (self.health_monitor['id'], self.pool['id']))
         self.assertEqual('204', resp['status'])
+        resp, body = self.client.show_pool(self.pool['id'])
+        pool = body['pool']
+        resp, body = self.client.show_health_monitor(
+            self.health_monitor['id'])
+        health_monitor = body['health_monitor']
+        self.assertNotIn(health_monitor['id'], pool['health_monitors'])
+        self.assertNotIn(pool['id'],
+                         [p['pool_id'] for p in health_monitor['pools']])
 
     @test.attr(type='smoke')
     def test_get_lb_pool_stats(self):

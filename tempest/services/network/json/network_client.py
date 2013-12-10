@@ -163,32 +163,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.loads(body)
         return resp, body
 
-    def create_member(self, address, protocol_port, pool_id):
-        post_body = {
-            "member": {
-                "protocol_port": protocol_port,
-                "pool_id": pool_id,
-                "address": address
-            }
-        }
-        body = json.dumps(post_body)
-        uri = '%s/lb/members' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_member(self, admin_state_up, member_id):
-        put_body = {
-            "member": {
-                "admin_state_up": admin_state_up
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/lb/members/%s' % (self.uri_prefix, member_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
     def associate_health_monitor_with_pool(self, health_monitor_id,
                                            pool_id):
         post_body = {
