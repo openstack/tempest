@@ -19,7 +19,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
+class ServicesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Services API. List and Enable/Disable require admin privileges.
@@ -29,7 +29,7 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServicesAdminTestJSON, cls).setUpClass()
+        super(ServicesAdminNegativeTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.services_client
         cls.non_admin_client = cls.services_client
 
@@ -66,5 +66,5 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(0, len(services))
 
 
-class ServicesAdminTestXML(ServicesAdminTestJSON):
+class ServicesAdminNegativeTestXML(ServicesAdminNegativeTestJSON):
     _interface = 'xml'
