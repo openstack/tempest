@@ -94,6 +94,265 @@
 #syslog_log_facility=LOG_USER
 
 
+[image]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Image service. (string value)
+#catalog_type=image
+
+# The image region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
+# value)
+#region=
+
+# http accessible image (string value)
+#http_image=http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
+
+
+[object-storage]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Object-Storage service. (string value)
+#catalog_type=object-store
+
+# The object-storage region name to use. If empty, the value
+# of identity.region is used instead. If no such region is
+# found in the service catalog, the first found one is used.
+# (string value)
+#region=
+
+# Number of seconds to time on waiting for a containerto
+# container synchronization complete. (integer value)
+#container_sync_timeout=120
+
+# Number of seconds to wait while looping to check thestatus
+# of a container to container synchronization (integer value)
+#container_sync_interval=5
+
+# Role to add to users created for swift tests to enable
+# creating containers (string value)
+#operator_role=Member
+
+
+[network]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Neutron service. (string value)
+#catalog_type=network
+
+# The network region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
+# value)
+#region=
+
+# The cidr block to allocate tenant networks from (string
+# value)
+#tenant_network_cidr=10.100.0.0/16
+
+# The mask bits for tenant networks (integer value)
+#tenant_network_mask_bits=28
+
+# Whether tenant network connectivity should be evaluated
+# directly (boolean value)
+#tenant_networks_reachable=false
+
+# Id of the public network that provides external connectivity
+# (string value)
+#public_network_id=
+
+# Id of the public router that provides external connectivity
+# (string value)
+#public_router_id=
+
+
+[data_processing]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the data processing service. (string value)
+#catalog_type=data_processing
+
+
+[object-storage-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# Set to True if the Container Quota middleware is enabled
+# (boolean value)
+#container_quotas=true
+
+# Set to True if the Account Quota middleware is enabled
+# (boolean value)
+#accounts_quotas=true
+
+# Set to True if the Crossdomain middleware is enabled
+# (boolean value)
+#crossdomain=true
+
+# Set to True if the TempURL middleware is enabled (boolean
+# value)
+#tempurl=true
+
+
+[network-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
+
+
+[volume-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# Runs Cinder multi-backend test (requires 2 backends)
+# (boolean value)
+#multi_backend=false
+
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
+
+
+[image-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# Is the v2 image API enabled (boolean value)
+#api_v2=true
+
+# Is the v1 image API enabled (boolean value)
+#api_v1=true
+
+
+[compute-admin]
+
+#
+# Options defined in tempest.config
+#
+
+# Administrative Username to use for Nova API requests.
+# (string value)
+#username=admin
+
+# Administrative Tenant name to use for Nova API requests.
+# (string value)
+#tenant_name=admin
+
+# API key to use when authenticating as admin. (string value)
+#password=pass
+
+
+[volume]
+
+#
+# Options defined in tempest.config
+#
+
+# Time in seconds between volume availability checks. (integer
+# value)
+#build_interval=10
+
+# Timeout in seconds to wait for a volume to becomeavailable.
+# (integer value)
+#build_timeout=300
+
+# Catalog type of the Volume Service (string value)
+#catalog_type=volume
+
+# The volume region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
+# value)
+#region=
+
+# Name of the backend1 (must be declared in cinder.conf)
+# (string value)
+#backend1_name=BACKEND_1
+
+# Name of the backend2 (must be declared in cinder.conf)
+# (string value)
+#backend2_name=BACKEND_2
+
+# Backend protocol to target when creating volume types
+# (string value)
+#storage_protocol=iSCSI
+
+# Backend vendor to target when creating volume types (string
+# value)
+#vendor_name=Open Source
+
+# Disk format to use when copying a volume to image (string
+# value)
+#disk_format=raw
+
+
+[compute-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# If false, skip all nova v3 tests. (boolean value)
+#api_v3=true
+
+# If false, skip disk config tests (boolean value)
+#disk_config=true
+
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
+
+# A list of enabled v3 extensions with a special entry all
+# which indicates every extension is enabled (list value)
+#api_v3_extensions=all
+
+# Does the test environment support changing the admin
+# password? (boolean value)
+#change_password=false
+
+# Does the test environment support snapshots? (boolean value)
+#create_image=false
+
+# Does the test environment support resizing? (boolean value)
+#resize=false
+
+# Does the test environment support live migration available?
+# (boolean value)
+#live_migration=false
+
+# Does the test environment use block devices for live
+# migration (boolean value)
+#block_migration_for_live_migration=false
+
+# Does the test environment block migration support cinder
+# iSCSI volumes (boolean value)
+#block_migrate_cinder_iscsi=false
+
+
 [identity]
 
 #
@@ -157,6 +416,23 @@
 #admin_password=pass
 
 
+[cli]
+
+#
+# Options defined in tempest.cli
+#
+
+# enable cli tests (boolean value)
+#enabled=true
+
+# directory where python client binaries are located (string
+# value)
+#cli_dir=/usr/local/bin
+
+# Number of seconds to wait on a CLI timeout (integer value)
+#timeout=15
+
+
 [stress]
 
 #
@@ -193,19 +469,6 @@
 # The number of threads created while stress test. (integer
 # value)
 #default_thread_number_per_action=4
-
-
-[image-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# Is the v2 image API enabled (boolean value)
-#api_v2=true
-
-# Is the v1 image API enabled (boolean value)
-#api_v1=true
 
 
 [compute]
@@ -319,39 +582,30 @@
 #shelved_offload_time=0
 
 
-[network]
+[scenario]
 
 #
 # Options defined in tempest.config
 #
 
-# Catalog type of the Neutron service. (string value)
-#catalog_type=network
+# Directory containing image files (string value)
+#img_dir=/opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
 
-# The network region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
+# AMI image file name (string value)
+#ami_img_file=cirros-0.3.1-x86_64-blank.img
 
-# The cidr block to allocate tenant networks from (string
-# value)
-#tenant_network_cidr=10.100.0.0/16
+# ARI image file name (string value)
+#ari_img_file=cirros-0.3.1-x86_64-initrd
 
-# The mask bits for tenant networks (integer value)
-#tenant_network_mask_bits=28
+# AKI image file name (string value)
+#aki_img_file=cirros-0.3.1-x86_64-vmlinuz
 
-# Whether tenant network connectivity should be evaluated
-# directly (boolean value)
-#tenant_networks_reachable=false
+# ssh username for the image file (string value)
+#ssh_user=cirros
 
-# Id of the public network that provides external connectivity
-# (string value)
-#public_network_id=
-
-# Id of the public router that provides external connectivity
-# (string value)
-#public_router_id=
+# specifies how many resources to request at once. Used for
+# large operations testing. (integer value)
+#large_ops_number=0
 
 
 [boto]
@@ -398,140 +652,6 @@
 
 # Status Change Test Interval (integer value)
 #build_interval=1
-
-
-[scenario]
-
-#
-# Options defined in tempest.config
-#
-
-# Directory containing image files (string value)
-#img_dir=/opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
-
-# AMI image file name (string value)
-#ami_img_file=cirros-0.3.1-x86_64-blank.img
-
-# ARI image file name (string value)
-#ari_img_file=cirros-0.3.1-x86_64-initrd
-
-# AKI image file name (string value)
-#aki_img_file=cirros-0.3.1-x86_64-vmlinuz
-
-# ssh username for the image file (string value)
-#ssh_user=cirros
-
-# specifies how many resources to request at once. Used for
-# large operations testing. (integer value)
-#large_ops_number=0
-
-
-[image]
-
-#
-# Options defined in tempest.config
-#
-
-# Catalog type of the Image service. (string value)
-#catalog_type=image
-
-# The image region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
-
-# http accessible image (string value)
-#http_image=http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
-
-
-[compute-admin]
-
-#
-# Options defined in tempest.config
-#
-
-# Administrative Username to use for Nova API requests.
-# (string value)
-#username=admin
-
-# Administrative Tenant name to use for Nova API requests.
-# (string value)
-#tenant_name=admin
-
-# API key to use when authenticating as admin. (string value)
-#password=pass
-
-
-[cli]
-
-#
-# Options defined in tempest.cli
-#
-
-# enable cli tests (boolean value)
-#enabled=true
-
-# directory where python client binaries are located (string
-# value)
-#cli_dir=/usr/local/bin
-
-# Number of seconds to wait on a CLI timeout (integer value)
-#timeout=15
-
-
-[volume]
-
-#
-# Options defined in tempest.config
-#
-
-# Time in seconds between volume availability checks. (integer
-# value)
-#build_interval=10
-
-# Timeout in seconds to wait for a volume to becomeavailable.
-# (integer value)
-#build_timeout=300
-
-# Catalog type of the Volume Service (string value)
-#catalog_type=volume
-
-# The volume region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
-
-# Name of the backend1 (must be declared in cinder.conf)
-# (string value)
-#backend1_name=BACKEND_1
-
-# Name of the backend2 (must be declared in cinder.conf)
-# (string value)
-#backend2_name=BACKEND_2
-
-# Backend protocol to target when creating volume types
-# (string value)
-#storage_protocol=iSCSI
-
-# Backend vendor to target when creating volume types (string
-# value)
-#vendor_name=Open Source
-
-# Disk format to use when copying a volume to image (string
-# value)
-#disk_format=raw
-
-
-[debug]
-
-#
-# Options defined in tempest.config
-#
-
-# Enable diagnostic commands (boolean value)
-#enable=true
 
 
 [dashboard]
@@ -592,43 +712,14 @@
 #max_template_size=524288
 
 
-[object-storage]
+[debug]
 
 #
 # Options defined in tempest.config
 #
 
-# Catalog type of the Object-Storage service. (string value)
-#catalog_type=object-store
-
-# The object-storage region name to use. If empty, the value
-# of identity.region is used instead. If no such region is
-# found in the service catalog, the first found one is used.
-# (string value)
-#region=
-
-# Number of seconds to time on waiting for a containerto
-# container synchronization complete. (integer value)
-#container_sync_timeout=120
-
-# Number of seconds to wait while looping to check thestatus
-# of a container to container synchronization (integer value)
-#container_sync_interval=5
-
-# Role to add to users created for swift tests to enable
-# creating containers (string value)
-#operator_role=Member
-
-
-[network-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
+# Enable diagnostic commands (boolean value)
+#enable=true
 
 
 [service_available]
@@ -669,85 +760,8 @@
 # value)
 #horizon=true
 
-
-[compute-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# If false, skip all nova v3 tests. (boolean value)
-#api_v3=true
-
-# If false, skip disk config tests (boolean value)
-#disk_config=true
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
-
-# A list of enabled v3 extensions with a special entry all
-# which indicates every extension is enabled (list value)
-#api_v3_extensions=all
-
-# Does the test environment support changing the admin
-# password? (boolean value)
-#change_password=false
-
-# Does the test environment support snapshots? (boolean value)
-#create_image=false
-
-# Does the test environment support resizing? (boolean value)
-#resize=false
-
-# Does the test environment support live migration available?
-# (boolean value)
-#live_migration=false
-
-# Does the test environment use block devices for live
-# migration (boolean value)
-#block_migration_for_live_migration=false
-
-# Does the test environment block migration support cinder
-# iSCSI volumes (boolean value)
-#block_migrate_cinder_iscsi=false
-
-
-[object-storage-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# Set to True if the Container Quota middleware is enabled
-# (boolean value)
-#container_quotas=true
-
-# Set to True if the Account Quota middleware is enabled
-# (boolean value)
-#accounts_quotas=true
-
-# Set to True if the Crossdomain middleware is enabled
-# (boolean value)
-#crossdomain=true
-
-# Set to True if the TempURL middleware is enabled (boolean
+# Whether or not Savanna is expected to be available (boolean
 # value)
-#tempurl=true
-
-
-[volume-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# Runs Cinder multi-backend test (requires 2 backends)
-# (boolean value)
-#multi_backend=false
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
+#savanna=false
 
 
