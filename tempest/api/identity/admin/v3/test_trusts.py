@@ -220,3 +220,22 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.assertRaises(exceptions.BadRequest,
                           self.create_trust,
                           expires=expires_str)
+
+    @attr(type='smoke')
+    def test_get_trusts_query(self):
+        self.create_trust()
+        resp, trusts_get = self.trustor_v3_client.get_trusts(
+            trustor_user_id=self.trustor_user_id)
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(1, len(trusts_get))
+        self.validate_trust(trusts_get[0], summary=True)
+
+    @attr(type='smoke')
+    def test_get_trusts_all(self):
+        self.create_trust()
+        resp, trusts_get = self.v3_client.get_trusts()
+        self.assertEqual('200', resp['status'])
+        trusts = [t for t in trusts_get
+                  if t['id'] == self.trust_id]
+        self.assertEqual(1, len(trusts))
+        self.validate_trust(trusts[0], summary=True)
