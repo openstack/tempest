@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 # NOTE(afazekas): This function needs to know a token and a subject.
 def wait_for_server_status(client, server_id, status, ready_wait=True,
-                           extra_timeout=0):
+                           extra_timeout=0, raise_on_error=True):
     """Waits for a server to reach a given status."""
 
     def _get_task_state(body):
@@ -69,7 +69,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                      '/'.join((old_status, str(old_task_state))),
                      '/'.join((server_status, str(task_state))),
                      time.time() - start_time)
-        if server_status == 'ERROR':
+        if (server_status == 'ERROR') and raise_on_error:
             raise exceptions.BuildErrorException(server_id=server_id)
 
         timed_out = int(time.time()) - start_time >= timeout
