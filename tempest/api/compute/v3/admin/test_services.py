@@ -113,23 +113,6 @@ class ServicesAdminV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(0, len(services))
 
-    @attr(type='gate')
-    def test_service_enable_disable(self):
-        resp, services = self.client.list_services()
-        host_name = services[0]['host']
-        binary_name = services[0]['binary']
-
-        resp, service = self.client.disable_service(host_name, binary_name)
-        self.assertEqual(200, resp.status)
-        params = {'host': host_name, 'binary': binary_name}
-        resp, services = self.client.list_services(params)
-        self.assertEqual('disabled', services[0]['status'])
-
-        resp, service = self.client.enable_service(host_name, binary_name)
-        self.assertEqual(200, resp.status)
-        resp, services = self.client.list_services(params)
-        self.assertEqual('enabled', services[0]['status'])
-
 
 class ServicesAdminV3TestXML(ServicesAdminV3TestJSON):
     _interface = 'xml'
