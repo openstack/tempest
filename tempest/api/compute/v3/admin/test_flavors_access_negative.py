@@ -17,11 +17,10 @@
 
 import uuid
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -36,7 +35,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FlavorsAccessNegativeTestJSON, cls).setUpClass()
-        if not compute.FLAVOR_EXTRA_DATA_ENABLED:
+        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
 
@@ -54,7 +53,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.vcpus = 1
         cls.disk = 10
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_flavor_access_list_with_public_flavor(self):
         # Test to list flavor access with exceptions by querying public flavor
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -70,7 +69,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.list_flavor_access,
                           new_flavor_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_flavor_non_admin_add(self):
         # Test to add flavor access as a user without admin privileges.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -86,7 +85,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           new_flavor['id'],
                           self.tenant_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_flavor_non_admin_remove(self):
         # Test to remove flavor access as a user without admin privileges.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -106,7 +105,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           new_flavor['id'],
                           self.tenant_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_add_flavor_access_duplicate(self):
         # Create a new flavor.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -130,7 +129,7 @@ class FlavorsAccessNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           new_flavor['id'],
                           self.tenant_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_remove_flavor_access_not_found(self):
         # Create a new flavor.
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)

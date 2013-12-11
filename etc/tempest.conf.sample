@@ -524,6 +524,16 @@
 #disk_format=raw
 
 
+[debug]
+
+#
+# Options defined in tempest.config
+#
+
+# Enable diagnostic commands (boolean value)
+#enable=true
+
+
 [dashboard]
 
 #
@@ -610,14 +620,15 @@
 #operator_role=Member
 
 
-[debug]
+[network-feature-enabled]
 
 #
 # Options defined in tempest.config
 #
 
-# Enable diagnostic commands (boolean value)
-#enable=true
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
 
 
 [service_available]
@@ -671,8 +682,13 @@
 # If false, skip disk config tests (boolean value)
 #disk_config=true
 
-# If false, skip flavor extra data test (boolean value)
-#flavor_extra=true
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
+
+# A list of enabled v3 extensions with a special entry all
+# which indicates every extension is enabled (list value)
+#api_v3_extensions=all
 
 # Does the test environment support changing the admin
 # password? (boolean value)
@@ -729,5 +745,9 @@
 # Runs Cinder multi-backend test (requires 2 backends)
 # (boolean value)
 #multi_backend=false
+
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
 
 

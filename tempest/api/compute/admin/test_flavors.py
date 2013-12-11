@@ -17,12 +17,10 @@
 
 import uuid
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 
 class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -36,7 +34,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FlavorsAdminTestJSON, cls).setUpClass()
-        if not compute.FLAVOR_EXTRA_DATA_ENABLED:
+        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
             msg = "FlavorExtraData extension not enabled."
             raise cls.skipException(msg)
 
@@ -87,19 +85,19 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         return flavor['id']
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_flavor_with_int_id(self):
         flavor_id = data_utils.rand_int_id(start=1000)
         new_flavor_id = self._create_flavor(flavor_id)
         self.assertEqual(new_flavor_id, str(flavor_id))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_flavor_with_uuid_id(self):
         flavor_id = str(uuid.uuid4())
         new_flavor_id = self._create_flavor(flavor_id)
         self.assertEqual(new_flavor_id, flavor_id)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_flavor_with_none_id(self):
         # If nova receives a request with None as flavor_id,
         # nova generates flavor_id of uuid.
@@ -107,7 +105,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         new_flavor_id = self._create_flavor(flavor_id)
         self.assertEqual(new_flavor_id, str(uuid.UUID(new_flavor_id)))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_flavor_verify_entry_in_list_details(self):
         # Create a flavor and ensure it's details are listed
         # This operation requires the user to have 'admin' role
@@ -132,7 +130,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_flavor_details_for_deleted_flavor(self):
         # Delete a flavor and ensure it is not listed
         # Create a test flavor
@@ -166,7 +164,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = False
         self.assertTrue(flag)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_list_flavor_without_extra_data(self):
         # Create a flavor and ensure it is listed
         # This operation requires the user to have 'admin' role
@@ -210,8 +208,8 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @skip_because(bug="1209101")
-    @attr(type='gate')
+    @test.skip_because(bug="1209101")
+    @test.attr(type='gate')
     def test_list_non_public_flavor(self):
         # Create a flavor with os-flavor-access:is_public false should
         # be present in list_details.
@@ -244,7 +242,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertFalse(flag)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_server_with_non_public_flavor(self):
         # Create a flavor with os-flavor-access:is_public false
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -264,7 +262,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                           self.os.servers_client.create_server,
                           'test', self.image_ref, flavor['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_public_flavor_with_other_user(self):
         # Create a Flavor with public access.
         # Try to List/Get flavor with another user
@@ -288,7 +286,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_is_public_string_variations(self):
         flavor_id_not_public = data_utils.rand_int_id(start=1000)
         flavor_name_not_public = data_utils.rand_name(self.flavor_name_prefix)
@@ -331,7 +329,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         _test_string_variations(['t', 'true', 'yes', '1'],
                                 flavor_name_public)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_flavor_using_string_ram(self):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
@@ -349,13 +347,13 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['ram'], int(ram))
         self.assertEqual(int(flavor['id']), new_flavor_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_invalid_is_public_string(self):
         self.assertRaises(exceptions.BadRequest,
                           self.client.list_flavors_with_detail,
                           {'is_public': 'invalid'})
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_flavor_as_user(self):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
@@ -366,13 +364,13 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                           new_flavor_id, ephemeral=self.ephemeral,
                           swap=self.swap, rxtx=self.rxtx)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_flavor_as_user(self):
         self.assertRaises(exceptions.Unauthorized,
                           self.user_client.delete_flavor,
                           self.flavor_ref_alt)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_flavor_using_invalid_ram(self):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
@@ -382,7 +380,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                           flavor_name, -1, self.vcpus,
                           self.disk, new_flavor_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_flavor_using_invalid_vcpus(self):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)

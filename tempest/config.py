@@ -208,9 +208,14 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
-    cfg.BoolOpt('flavor_extra',
-                default=True,
-                help="If false, skip flavor extra data test"),
+    cfg.ListOpt('api_extensions',
+                default=['all'],
+                help='A list of enabled extensions with a special entry all '
+                     'which indicates every extension is enabled'),
+    cfg.ListOpt('api_v3_extensions',
+                default=['all'],
+                help='A list of enabled v3 extensions with a special entry all'
+                     ' which indicates every extension is enabled'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
@@ -317,6 +322,16 @@ NetworkGroup = [
                     "connectivity"),
 ]
 
+network_feature_group = cfg.OptGroup(name='network-feature-enabled',
+                                     title='Enabled network service features')
+
+NetworkFeaturesGroup = [
+    cfg.ListOpt('api_extensions',
+                default=['all'],
+                help='A list of enabled extensions with a special entry all '
+                     'which indicates every extension is enabled'),
+]
+
 volume_group = cfg.OptGroup(name='volume',
                             title='Block Storage Options')
 
@@ -360,7 +375,11 @@ volume_feature_group = cfg.OptGroup(name='volume-feature-enabled',
 VolumeFeaturesGroup = [
     cfg.BoolOpt('multi_backend',
                 default=False,
-                help="Runs Cinder multi-backend test (requires 2 backends)")
+                help="Runs Cinder multi-backend test (requires 2 backends)"),
+    cfg.ListOpt('api_extensions',
+                default=['all'],
+                help='A list of enabled extensions with a special entry all '
+                     'which indicates every extension is enabled'),
 ]
 
 
@@ -659,6 +678,8 @@ class TempestConfig:
         register_opt_group(cfg.CONF, image_group, ImageGroup)
         register_opt_group(cfg.CONF, image_feature_group, ImageFeaturesGroup)
         register_opt_group(cfg.CONF, network_group, NetworkGroup)
+        register_opt_group(cfg.CONF, network_feature_group,
+                           NetworkFeaturesGroup)
         register_opt_group(cfg.CONF, volume_group, VolumeGroup)
         register_opt_group(cfg.CONF, volume_feature_group,
                            VolumeFeaturesGroup)
@@ -680,6 +701,7 @@ class TempestConfig:
         self.images = cfg.CONF.image
         self.image_feature_enabled = cfg.CONF['image-feature-enabled']
         self.network = cfg.CONF.network
+        self.network_feature_enabled = cfg.CONF['network-feature-enabled']
         self.volume = cfg.CONF.volume
         self.volume_feature_enabled = cfg.CONF['volume-feature-enabled']
         self.object_storage = cfg.CONF['object-storage']
