@@ -34,7 +34,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except Exception:
-            self.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
