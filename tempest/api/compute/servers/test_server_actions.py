@@ -45,7 +45,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except Exception:
             # Rebuild server if something happened to it during a test
-            self.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
