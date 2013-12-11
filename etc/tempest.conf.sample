@@ -220,7 +220,7 @@
 # admin credentials are known. (boolean value)
 #allow_tenant_isolation=false
 
-# Valid secondary image reference to be used in tests. (string
+# Valid primary image reference to be used in tests. (string
 # value)
 #image_ref={$IMAGE_ID}
 
