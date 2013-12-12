@@ -31,7 +31,8 @@ class ImageClientV2JSON(rest_client.RestClient):
         super(ImageClientV2JSON, self).__init__(config, username, password,
                                                 auth_url, tenant_name)
         self.service = self.config.images.catalog_type
-        self.http = self._get_http()
+        if config.service_available.glance:
+            self.http = self._get_http()
 
     def _get_http(self):
         token, endpoint = self.keystone_auth(self.user, self.password,
