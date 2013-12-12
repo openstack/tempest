@@ -122,7 +122,6 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         alt_snapshot_name = data_utils.rand_name('test-snap-')
         self.assertRaises(exceptions.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
 
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_name_over_256_chars(self):
