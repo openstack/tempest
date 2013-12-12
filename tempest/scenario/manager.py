@@ -348,8 +348,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             # so case sensitive comparisons can really mess things
             # up.
             if new_status.lower() == error_status.lower():
-                message = "%s failed to get to expected status. \
-                          In %s state." % (thing, new_status)
+                message = ("%s failed to get to expected status. "
+                           "In %s state.") % (thing, new_status)
                 raise exceptions.BuildErrorException(message)
             elif new_status == expected_status and expected_status is not None:
                 return True  # All good.
@@ -360,8 +360,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             check_status,
             self.config.compute.build_timeout,
             self.config.compute.build_interval):
-            message = "Timed out waiting for thing %s \
-                      to become %s" % (thing_id, log_status)
+            message = ("Timed out waiting for thing %s "
+                       "to become %s") % (thing_id, log_status)
             raise exceptions.TimeoutException(message)
 
     def _create_loginable_secgroup_rule_nova(self, client=None,
