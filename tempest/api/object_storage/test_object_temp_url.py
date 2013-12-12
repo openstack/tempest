@@ -22,7 +22,6 @@ import urlparse
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -186,19 +185,3 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         resp, body = self.object_client.head(url)
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
-
-    @test.attr(type=['gate', 'negative'])
-    @test.requires_ext(extension='tempurl', service='object')
-    def test_get_object_after_expiration_time(self):
-
-        expires = self._get_expiry_date(1)
-        # get a temp URL for the created object
-        url = self._get_temp_url(self.container_name,
-                                 self.object_name, "GET",
-                                 expires, self.key)
-
-        # temp URL is valid for 1 seconds, let's wait 2
-        time.sleep(2)
-
-        self.assertRaises(exceptions.Unauthorized,
-                          self.object_client.get, url)
