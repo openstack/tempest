@@ -24,12 +24,14 @@ import subprocess
 import cinderclient.client
 import glanceclient
 import heatclient.client
+import keystoneclient.apiclient.exceptions
 import keystoneclient.v2_0.client
 import netaddr
 from neutronclient.common import exceptions as exc
 import neutronclient.v2_0.client
 import novaclient.client
 from novaclient import exceptions as nova_exceptions
+import swiftclient
 
 from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
@@ -75,6 +77,10 @@ class OfficialClientManager(tempest.manager.Manager):
         self.volume_client = self._get_volume_client(username,
                                                      password,
                                                      tenant_name)
+        self.object_storage_client = self._get_object_storage_client(
+            username,
+            password,
+            tenant_name)
         self.orchestration_client = self._get_orchestration_client(
             username,
             password,
@@ -116,6 +122,30 @@ class OfficialClientManager(tempest.manager.Manager):
                                           tenant_name,
                                           auth_url,
                                           http_log_debug=True)
+
+    def _get_object_storage_client(self, username, password, tenant_name):
+        auth_url = self.config.identity.uri
+        # add current tenant to Member group.
+        keystone_admin = self._get_identity_client(
+            self.config.identity.admin_username,
+            self.config.identity.admin_password,
+            self.config.identity.admin_tenant_name)
+
+        # enable test user to operate swift by adding Member role to him.
+        roles = keystone_admin.roles.list()
+        member_role = [role for role in roles if role.name == 'Member'][0]
+        # NOTE(maurosr): This is surrounded in the try-except block cause
+        # neutron tests doesn't have tenant isolation.
+        try:
+            keystone_admin.roles.add_user_role(self.identity_client.user_id,
+                                               member_role.id,
+                                               self.identity_client.tenant_id)
+        except keystoneclient.apiclient.exceptions.Conflict:
+            pass
+
+        return swiftclient.Connection(auth_url, username, password,
+                                      tenant_name=tenant_name,
+                                      auth_version='2')
 
     def _get_orchestration_client(self, username=None, password=None,
                                   tenant_name=None):
@@ -207,6 +237,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.identity_client = cls.manager.identity_client
         cls.network_client = cls.manager.network_client
         cls.volume_client = cls.manager.volume_client
+        cls.object_storage_client = cls.manager.object_storage_client
         cls.orchestration_client = cls.manager.orchestration_client
         cls.resource_keys = {}
         cls.os_resources = []
