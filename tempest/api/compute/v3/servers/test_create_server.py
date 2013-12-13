@@ -117,6 +117,104 @@ class ServersV3TestJSON(base.BaseV3ComputeTest):
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
 
+class ServersWithSpecificFlavorV3TestJSON(base.BaseV3ComputeAdminTest):
+    _interface = 'json'
+    run_ssh = CONF.compute.run_ssh
+    disk_config = 'AUTO'
+
+    @classmethod
+    def setUpClass(cls):
+        super(ServersWithSpecificFlavorV3TestJSON, cls).setUpClass()
+        cls.meta = {'hello': 'world'}
+        cls.accessIPv4 = '1.1.1.1'
+        cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
+        cls.name = data_utils.rand_name('server')
+        file_contents = 'This is a test file.'
+        personality = [{'path': '/test.txt',
+                       'contents': base64.b64encode(file_contents)}]
+        cls.client = cls.servers_client
+        cls.flavor_client = cls.flavors_admin_client
+        cli_resp = cls.create_test_server(name=cls.name,
+                                          meta=cls.meta,
+                                          access_ip_v4=cls.accessIPv4,
+                                          access_ip_v6=cls.accessIPv6,
+                                          personality=personality,
+                                          disk_config=cls.disk_config)
+        cls.resp, cls.server_initial = cli_resp
+        cls.password = cls.server_initial['admin_password']
+        cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
+        resp, cls.server = cls.client.get_server(cls.server_initial['id'])
+
+    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
+    @test.attr(type='gate')
+    def test_verify_created_server_ephemeral_disk(self):
+        # Verify that the ephemeral disk is created when creating server
+
+        def create_flavor_with_extra_specs(self):
+            flavor_with_eph_disk_name = data_utils.rand_name('eph_flavor')
+            flavor_with_eph_disk_id = data_utils.rand_int_id(start=1000)
+            ram = 512
+            vcpus = 1
+            disk = 10
+
+            # Create a flavor with extra specs
+            resp, flavor = (self.flavor_client.
+                            create_flavor(flavor_with_eph_disk_name,
+                                          ram, vcpus, disk,
+                                          flavor_with_eph_disk_id,
+                                          ephemeral=1, swap=1024, rxtx=1))
+            self.addCleanup(self.flavor_clean_up, flavor['id'])
+            self.assertEqual(200, resp.status)
+
+            return flavor['id']
+
+        def create_flavor_without_extra_specs(self):
+            flavor_no_eph_disk_name = data_utils.rand_name('no_eph_flavor')
+            flavor_no_eph_disk_id = data_utils.rand_int_id(start=1000)
+
+            ram = 512
+            vcpus = 1
+            disk = 10
+
+            # Create a flavor without extra specs
+            resp, flavor = (self.flavor_client.
+                            create_flavor(flavor_no_eph_disk_name,
+                                          ram, vcpus, disk,
+                                          flavor_no_eph_disk_id))
+            self.addCleanup(self.flavor_clean_up, flavor['id'])
+            self.assertEqual(200, resp.status)
+
+            return flavor['id']
+
+        def flavor_clean_up(self, flavor_id):
+            resp, body = self.flavor_client.delete_flavor(flavor_id)
+            self.assertEqual(resp.status, 202)
+            self.flavor_client.wait_for_resource_deletion(flavor_id)
+
+        flavor_with_eph_disk_id = self.create_flavor_with_extra_specs()
+        flavor_no_eph_disk_id = self.create_flavor_without_extra_specs()
+
+        admin_pass = self.image_ssh_password
+
+        resp, server_no_eph_disk = (self.
+                                    create_test_server(
+                                    wait_until='ACTIVE',
+                                    adminPass=admin_pass,
+                                    flavor=flavor_no_eph_disk_id))
+        resp, server_with_eph_disk = (self.create_test_server(
+                                      wait_until='ACTIVE',
+                                      adminPass=admin_pass,
+                                      flavor=flavor_with_eph_disk_id))
+        # Get partition number of server without extra specs.
+        linux_client = RemoteClient(server_no_eph_disk,
+                                    self.ssh_user, self.password)
+        partition_num = len(linux_client.get_partitions())
+
+        linux_client = RemoteClient(server_with_eph_disk,
+                                    self.ssh_user, self.password)
+        self.assertEqual(partition_num + 1, linux_client.get_partitions())
+
+
 class ServersV3TestManualDisk(ServersV3TestJSON):
     disk_config = 'MANUAL'
 
@@ -129,4 +227,8 @@ class ServersV3TestManualDisk(ServersV3TestJSON):
 
 
 class ServersV3TestXML(ServersV3TestJSON):
+    _interface = 'xml'
+
+
+class ServersWithSpecificFlavorV3TestXML(ServersWithSpecificFlavorV3TestJSON):
     _interface = 'xml'
