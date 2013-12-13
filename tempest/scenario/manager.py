@@ -22,6 +22,7 @@ import subprocess
 import time
 
 from cinderclient import exceptions as cinder_exceptions
+import glanceclient
 from heatclient import exc as heat_exceptions
 import netaddr
 from neutronclient.common import exceptions as exc
@@ -84,8 +85,6 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.orchestration_client = cls.manager.orchestration_client
         cls.data_processing_client = cls.manager.data_processing_client
         cls.ceilometer_client = cls.manager.ceilometer_client
-        cls.resource_keys = {}
-        cls.os_resources = []
 
     @classmethod
     def _get_credentials(cls, get_creds, ctype):
@@ -110,72 +109,85 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return cls._get_credentials(cls.isolated_creds.get_admin_creds,
                                     'identity_admin')
 
-    @staticmethod
-    def cleanup_resource(resource, test_name):
+    def setUp(self):
+        super(OfficialClientTest, self).setUp()
+        self.cleanup_waits = []
+        # NOTE(mtreinish) This is safe to do in setUp instead of setUp class
+        # because scenario tests in the same test class should not share
+        # resources. If resources were shared between test cases then it
+        # should be a single scenario test instead of multiples.
 
-        LOG.debug("Deleting %r from shared resources of %s" %
-                  (resource, test_name))
+        # NOTE(yfried): this list is cleaned at the end of test_methods and
+        # not at the end of the class
+        self.addCleanup(self._wait_for_cleanups)
+
+    @staticmethod
+    def not_found_exception(exception):
+        """
+        @return: True if exception is of NotFound type
+        """
+        NOT_FOUND_LIST = ['NotFound', 'HTTPNotFound']
+        return (exception.__class__.__name__ in NOT_FOUND_LIST
+                or
+                hasattr(exception, 'status_code') and
+                exception.status_code == 404)
+
+    def delete_wrapper(self, thing):
+        """Ignores NotFound exceptions for delete operations.
+
+        @param thing: object with delete() method.
+            OpenStack resources are assumed to have a delete() method which
+            destroys the resource
+        """
+
         try:
-            # OpenStack resources are assumed to have a delete()
-            # method which destroys the resource...
-            resource.delete()
+            thing.delete()
         except Exception as e:
             # If the resource is already missing, mission accomplished.
-            # - Status code tolerated as a workaround for bug 1247568
-            # - HTTPNotFound tolerated as this is currently raised when
-            # attempting to delete an already-deleted heat stack.
-            if (e.__class__.__name__ in ('NotFound', 'HTTPNotFound') or
-                    (hasattr(e, 'status_code') and e.status_code == 404)):
-                return
-            raise
-
-        def is_deletion_complete():
-            # Deletion testing is only required for objects whose
-            # existence cannot be checked via retrieval.
-            if isinstance(resource, dict):
-                return True
-            try:
-                resource.get()
-            except Exception as e:
-                # Clients are expected to return an exception
-                # called 'NotFound' if retrieval fails.
-                if e.__class__.__name__ == 'NotFound':
-                    return True
+            if not self.not_found_exception(e):
                 raise
-            return False
 
-        # Block until resource deletion has completed or timed-out
-        tempest.test.call_until_true(is_deletion_complete, 10, 1)
+    def _wait_for_cleanups(self):
+        """To handle async delete actions, a list of waits is added
+        which will be iterated over as the last step of clearing the
+        cleanup queue. That way all the delete calls are made up front
+        and the tests won't succeed unless the deletes are eventually
+        successful. This is the same basic approach used in the api tests to
+        limit cleanup execution time except here it is multi-resource,
+        because of the nature of the scenario tests.
+        """
+        for wait in self.cleanup_waits:
+            self.delete_timeout(**wait)
 
-    @classmethod
-    def tearDownClass(cls):
-        # NOTE(jaypipes): Because scenario tests are typically run in a
-        # specific order, and because test methods in scenario tests
-        # generally create resources in a particular order, we destroy
-        # resources in the reverse order in which resources are added to
-        # the scenario test class object
-        while cls.os_resources:
-            thing = cls.os_resources.pop()
-            cls.cleanup_resource(thing, cls.__name__)
-        cls.isolated_creds.clear_isolated_creds()
-        super(OfficialClientTest, cls).tearDownClass()
+    def addCleanup_with_wait(self, things, thing_id,
+                             error_status='ERROR',
+                             exc_type=nova_exceptions.NotFound,
+                             cleanup_callable=None, cleanup_args=[],
+                             cleanup_kwargs={}):
+        """Adds wait for ansyc resource deletion at the end of cleanups
 
-    @classmethod
-    def set_resource(cls, key, thing):
-        LOG.debug("Adding %r to shared resources of %s" %
-                  (thing, cls.__name__))
-        cls.resource_keys[key] = thing
-        cls.os_resources.append(thing)
-
-    @classmethod
-    def get_resource(cls, key):
-        return cls.resource_keys[key]
-
-    @classmethod
-    def remove_resource(cls, key):
-        thing = cls.resource_keys[key]
-        cls.os_resources.remove(thing)
-        del cls.resource_keys[key]
+        @param things: type of the resource to delete
+        @param thing_id:
+        @param error_status: see manager.delete_timeout()
+        @param exc_type: see manager.delete_timeout()
+        @param cleanup_callable: method to load pass to self.addCleanup with
+            the following *cleanup_args, **cleanup_kwargs.
+            usually a delete method. if not used, will try to use:
+            things.delete(thing_id)
+        """
+        if cleanup_callable is None:
+            LOG.debug("no delete method passed. using {rclass}.delete({id}) as"
+                      " default".format(rclass=things, id=thing_id))
+            self.addCleanup(things.delete, thing_id)
+        else:
+            self.addCleanup(cleanup_callable, *cleanup_args, **cleanup_kwargs)
+        wait_dict = {
+            'things': things,
+            'thing_id': thing_id,
+            'error_status': error_status,
+            'not_found_exception': exc_type,
+        }
+        self.cleanup_waits.append(wait_dict)
 
     def status_timeout(self, things, thing_id, expected_status,
                        error_status='ERROR',
@@ -227,8 +239,11 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             except not_found_exception:
                 if allow_notfound:
                     return True
-                else:
-                    raise
+                raise
+            except Exception as e:
+                if allow_notfound and self.not_found_exception(e):
+                    return True
+                raise
 
             new_status = thing.status
 
@@ -288,6 +303,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         for ruleset in rulesets:
             sg_rule = client.security_group_rules.create(secgroup_id,
                                                          **ruleset)
+            self.addCleanup(self.delete_wrapper, sg_rule)
             rules.append(sg_rule)
         return rules
 
@@ -301,7 +317,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         secgroup = client.security_groups.create(sg_name, sg_desc)
         self.assertEqual(secgroup.name, sg_name)
         self.assertEqual(secgroup.description, sg_desc)
-        self.set_resource(sg_name, secgroup)
+        self.addCleanup(self.delete_wrapper, secgroup)
 
         # Add rules to the security group
         self._create_loginable_secgroup_rule_nova(client, secgroup.id)
@@ -309,7 +325,17 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return secgroup
 
     def create_server(self, client=None, name=None, image=None, flavor=None,
-                      wait=True, create_kwargs={}):
+                      wait_on_boot=True, wait_on_delete=True,
+                      create_kwargs={}):
+        """Creates VM instance.
+
+        @param client: compute client to create the instance
+        @param image: image from which to create the instance
+        @param wait_on_boot: wait for status ACTIVE before continue
+        @param wait_on_delete: force synchronous delete on cleanup
+        @param create_kwargs: additional details for instance creation
+        @return: client.server object
+        """
         if client is None:
             client = self.compute_client
         if name is None:
@@ -343,19 +369,25 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                   name, image, flavor)
         server = client.servers.create(name, image, flavor, **create_kwargs)
         self.assertEqual(server.name, name)
-        self.set_resource(name, server)
-        if wait:
+        if wait_on_delete:
+            self.addCleanup(self.delete_timeout,
+                            self.compute_client.servers,
+                            server.id)
+        self.addCleanup_with_wait(self.compute_client.servers, server.id,
+                                  cleanup_callable=self.delete_wrapper,
+                                  cleanup_args=[server])
+        if wait_on_boot:
             self.status_timeout(client.servers, server.id, 'ACTIVE')
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
         server = client.servers.get(server.id)
-        self.set_resource(name, server)
         LOG.debug("Created server: %s", server)
         return server
 
     def create_volume(self, client=None, size=1, name=None,
-                      snapshot_id=None, imageRef=None, volume_type=None):
+                      snapshot_id=None, imageRef=None, volume_type=None,
+                      wait_on_delete=True):
         if client is None:
             client = self.volume_client
         if name is None:
@@ -365,7 +397,12 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                                        snapshot_id=snapshot_id,
                                        imageRef=imageRef,
                                        volume_type=volume_type)
-        self.set_resource(name, volume)
+        if wait_on_delete:
+            self.addCleanup(self.delete_timeout,
+                            self.volume_client.volumes,
+                            volume.id)
+        self.addCleanup_with_wait(self.volume_client.volumes, volume.id,
+                                  exc_type=cinder_exceptions.NotFound)
         self.assertEqual(name, volume.display_name)
         self.status_timeout(client.volumes, volume.id, 'available')
         LOG.debug("Created volume: %s", volume)
@@ -381,7 +418,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name('scenario-snapshot-')
         LOG.debug("Creating a snapshot image for server: %s", server.name)
         image_id = compute_client.servers.create_image(server, name)
-        self.addCleanup(image_client.images.delete, image_id)
+        self.addCleanup_with_wait(self.image_client.images, image_id,
+                                  exc_type=glanceclient.exc.HTTPNotFound)
         self.status_timeout(image_client.images, image_id, 'active')
         snapshot_image = image_client.images.get(image_id)
         self.assertEqual(name, snapshot_image.name)
@@ -396,7 +434,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             name = data_utils.rand_name('scenario-keypair-')
         keypair = client.keypairs.create(name)
         self.assertEqual(keypair.name, name)
-        self.set_resource(name, keypair)
+        self.addCleanup(self.delete_wrapper, keypair)
         return keypair
 
     def get_remote_client(self, server_or_ip, username=None, private_key=None):
@@ -590,9 +628,12 @@ class BaremetalScenarioTest(OfficialClientTest):
             'key_name': self.keypair.id
         }
         self.instance = self.create_server(
-            wait=False, create_kwargs=create_kwargs)
+            wait_on_boot=False, create_kwargs=create_kwargs)
 
-        self.set_resource('instance', self.instance)
+        self.addCleanup_with_wait(self.compute_client.servers,
+                                  self.instance.id,
+                                  cleanup_callable=self.delete_wrapper,
+                                  cleanup_args=[self.instance])
 
         self.wait_node(self.instance.id)
         self.node = self.get_node(instance_id=self.instance.id)
@@ -617,7 +658,6 @@ class BaremetalScenarioTest(OfficialClientTest):
 
     def terminate_instance(self):
         self.instance.delete()
-        self.remove_resource('instance')
         self.wait_power_state(self.node.uuid, BaremetalPowerStates.POWER_OFF)
         self.wait_provisioning_state(
             self.node.uuid,
@@ -642,11 +682,6 @@ class EncryptionScenarioTest(OfficialClientTest):
     def _wait_for_volume_status(self, status):
         self.status_timeout(
             self.volume_client.volumes, self.volume.id, status)
-
-    def _wait_for_volume_deletion(self):
-        self.delete_timeout(
-            self.volume_client.volumes, self.volume.id,
-            not_found_exception=cinder_exceptions.NotFound)
 
     def nova_boot(self):
         self.keypair = self.create_keypair()
@@ -698,10 +733,6 @@ class EncryptionScenarioTest(OfficialClientTest):
         volume = self.volume_client.volumes.get(self.volume.id)
         self.assertEqual('available', volume.status)
 
-    def cinder_delete_encrypted(self):
-        self.volume_client.volumes.delete(self.volume.id)
-        self._wait_for_volume_deletion()
-
 
 class NetworkScenarioTest(OfficialClientTest):
     """
@@ -740,7 +771,7 @@ class NetworkScenarioTest(OfficialClientTest):
         network = net_common.DeletableNetwork(client=self.network_client,
                                               **result['network'])
         self.assertEqual(network.name, name)
-        self.set_resource(name, network)
+        self.addCleanup(self.delete_wrapper, network)
         return network
 
     def _list_networks(self, **kwargs):
@@ -816,7 +847,7 @@ class NetworkScenarioTest(OfficialClientTest):
         subnet = net_common.DeletableSubnet(client=self.network_client,
                                             **result['subnet'])
         self.assertEqual(subnet.cidr, str_cidr)
-        self.set_resource(data_utils.rand_name(namestart), subnet)
+        self.addCleanup(self.delete_wrapper, subnet)
         return subnet
 
     def _create_port(self, network, namestart='port-quotatest-'):
@@ -829,7 +860,7 @@ class NetworkScenarioTest(OfficialClientTest):
         self.assertIsNotNone(result, 'Unable to allocate port')
         port = net_common.DeletablePort(client=self.network_client,
                                         **result['port'])
-        self.set_resource(name, port)
+        self.addCleanup(self.delete_wrapper, port)
         return port
 
     def _get_server_port_id(self, server, ip_addr=None):
@@ -852,7 +883,7 @@ class NetworkScenarioTest(OfficialClientTest):
         floating_ip = net_common.DeletableFloatingIp(
             client=self.network_client,
             **result['floatingip'])
-        self.set_resource(data_utils.rand_name('floatingip-'), floating_ip)
+        self.addCleanup(self.delete_wrapper, floating_ip)
         return floating_ip
 
     def _associate_floating_ip(self, floating_ip, server):
@@ -897,7 +928,7 @@ class NetworkScenarioTest(OfficialClientTest):
         pool = net_common.DeletablePool(client=self.network_client,
                                         **resp['pool'])
         self.assertEqual(pool['name'], name)
-        self.set_resource(name, pool)
+        self.addCleanup(self.delete_wrapper, pool)
         return pool
 
     def _create_member(self, address, protocol_port, pool_id):
@@ -912,7 +943,7 @@ class NetworkScenarioTest(OfficialClientTest):
         resp = self.network_client.create_member(body)
         member = net_common.DeletableMember(client=self.network_client,
                                             **resp['member'])
-        self.set_resource(data_utils.rand_name('member-'), member)
+        self.addCleanup(self.delete_wrapper, member)
         return member
 
     def _create_vip(self, protocol, protocol_port, subnet_id, pool_id):
@@ -931,7 +962,7 @@ class NetworkScenarioTest(OfficialClientTest):
         vip = net_common.DeletableVip(client=self.network_client,
                                       **resp['vip'])
         self.assertEqual(vip['name'], name)
-        self.set_resource(name, vip)
+        self.addCleanup(self.delete_wrapper, vip)
         return vip
 
     def _check_vm_connectivity(self, ip_address,
@@ -1073,7 +1104,7 @@ class NetworkScenarioTest(OfficialClientTest):
         self.assertEqual(secgroup.name, sg_name)
         self.assertEqual(tenant_id, secgroup.tenant_id)
         self.assertEqual(secgroup.description, sg_desc)
-        self.set_resource(sg_name, secgroup)
+        self.addCleanup(self.delete_wrapper, secgroup)
         return secgroup
 
     def _default_security_group(self, tenant_id, client=None):
@@ -1132,6 +1163,7 @@ class NetworkScenarioTest(OfficialClientTest):
             client=client,
             **sg_rule['security_group_rule']
         )
+        self.addCleanup(self.delete_wrapper, sg_rule)
         self.assertEqual(secgroup.tenant_id, sg_rule.tenant_id)
         self.assertEqual(secgroup.id, sg_rule.security_group_id)
 
@@ -1230,7 +1262,7 @@ class NetworkScenarioTest(OfficialClientTest):
         router = net_common.DeletableRouter(client=self.network_client,
                                             **result['router'])
         self.assertEqual(router.name, name)
-        self.set_resource(name, router)
+        self.addCleanup(self.delete_wrapper, router)
         return router
 
     def _create_networks(self, tenant_id=None):

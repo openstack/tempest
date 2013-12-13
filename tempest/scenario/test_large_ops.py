@@ -60,7 +60,13 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
         # needed because of bug 1199788
         self.servers = [x for x in client.servers.list() if name in x.name]
         for server in self.servers:
-            self.set_resource(server.name, server)
+            # after deleting all servers - wait for all servers to clear
+            # before cleanup continues
+            self.addCleanup(self.delete_timeout,
+                            self.compute_client.servers,
+                            server.id)
+        for server in self.servers:
+            self.addCleanup_with_wait(self.compute_client.servers, server.id)
         self._wait_for_server_status('ACTIVE')
 
     def _large_ops_scenario(self):

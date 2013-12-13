@@ -96,17 +96,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 raise cls.skipException(msg)
         cls.check_preconditions()
 
-    def cleanup_wrapper(self, resource):
-        self.cleanup_resource(resource, self.__class__.__name__)
-
     def setUp(self):
         super(TestNetworkBasicOps, self).setUp()
         self.security_group = \
             self._create_security_group_neutron(tenant_id=self.tenant_id)
-        self.addCleanup(self.cleanup_wrapper, self.security_group)
         self.network, self.subnet, self.router = self._create_networks()
-        for r in [self.network, self.router, self.subnet]:
-            self.addCleanup(self.cleanup_wrapper, r)
         self.check_networks()
         self.servers = {}
         name = data_utils.rand_name('server-smoke')
@@ -144,7 +138,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _create_server(self, name, network):
         keypair = self.create_keypair(name='keypair-%s' % name)
-        self.addCleanup(self.cleanup_wrapper, keypair)
         security_groups = [self.security_group.name]
         create_kwargs = {
             'nics': [
@@ -154,7 +147,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             'security_groups': security_groups,
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
-        self.addCleanup(self.cleanup_wrapper, server)
         return dict(server=server, keypair=keypair)
 
     def _check_tenant_network_connectivity(self):
@@ -171,7 +163,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         for server in self.servers.keys():
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
-            self.addCleanup(self.cleanup_wrapper, floating_ip)
 
     def _check_public_network_connectivity(self, should_connect=True,
                                            msg=None):
@@ -204,11 +195,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _create_new_network(self):
         self.new_net = self._create_network(self.tenant_id)
-        self.addCleanup(self.cleanup_wrapper, self.new_net)
         self.new_subnet = self._create_subnet(
             network=self.new_net,
             gateway_ip=None)
-        self.addCleanup(self.cleanup_wrapper, self.new_subnet)
 
     def _hotplug_server(self):
         old_floating_ip, server = self.floating_ip_tuple
@@ -226,7 +215,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                      port_id=None,
                                                      fixed_ip=None)
         # move server to the head of the cleanup list
-        self.addCleanup(self.cleanup_wrapper, server)
+        self.addCleanup(self.delete_timeout,
+                        self.compute_client.servers,
+                        server.id)
+        self.addCleanup(self.delete_wrapper, server)
 
         def check_ports():
             port_list = [port for port in

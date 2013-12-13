@@ -50,23 +50,15 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             cls.enabled = False
             raise cls.skipException(msg)
 
-    def cleanup_wrapper(self, resource):
-        self.cleanup_resource(resource, self.__class__.__name__)
-
     def setUp(self):
         super(TestNetworkAdvancedServerOps, self).setUp()
         key_name = data_utils.rand_name('keypair-smoke-')
         self.keypair = self.create_keypair(name=key_name)
-        self.addCleanup(self.cleanup_wrapper, self.keypair)
         security_group =\
             self._create_security_group_neutron(tenant_id=self.tenant_id)
-        self.addCleanup(self.cleanup_wrapper, security_group)
         network = self._create_network(self.tenant_id)
-        self.addCleanup(self.cleanup_wrapper, network)
         router = self._get_router(self.tenant_id)
-        self.addCleanup(self.cleanup_wrapper, router)
         subnet = self._create_subnet(network)
-        self.addCleanup(self.cleanup_wrapper, subnet)
         subnet.add_to_router(router.id)
         public_network_id = CONF.network.public_network_id
         create_kwargs = {
@@ -79,10 +71,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         server_name = data_utils.rand_name('server-smoke-%d-')
         self.server = self.create_server(name=server_name,
                                          create_kwargs=create_kwargs)
-        self.addCleanup(self.cleanup_wrapper, self.server)
         self.floating_ip = self._create_floating_ip(self.server,
                                                     public_network_id)
-        self.addCleanup(self.cleanup_wrapper, self.floating_ip)
 
     def _check_network_connectivity(self, should_connect=True):
         username = CONF.compute.image_ssh_user

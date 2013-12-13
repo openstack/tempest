@@ -29,7 +29,6 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         * Creates an encryption type (as admin)
         * Creates a volume of that encryption type (as a regular user)
         * Attaches and detaches the encrypted volume to the instance
-        * Deletes the encrypted volume
     """
 
     def launch_instance(self):
@@ -49,16 +48,12 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         self.nova_volume_attach()
         self.nova_volume_detach()
 
-    def delete_volume(self):
-        self.cinder_delete_encrypted()
-
     @test.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_luks(self):
         self.launch_instance()
         self.create_encrypted_volume('nova.volume.encryptors.'
                                      'luks.LuksEncryptor')
         self.attach_detach_volume()
-        self.delete_volume()
 
     @test.services('compute', 'volume', 'image')
     def test_encrypted_cinder_volumes_cryptsetup(self):
@@ -66,4 +61,3 @@ class TestEncryptedCinderVolumes(manager.EncryptionScenarioTest):
         self.create_encrypted_volume('nova.volume.encryptors.'
                                      'cryptsetup.CryptsetupEncryptor')
         self.attach_detach_volume()
-        self.delete_volume()

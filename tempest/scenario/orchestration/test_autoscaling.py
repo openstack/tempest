@@ -59,7 +59,7 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
         # if a keypair was set, do not delete the stack on exit to allow
         # for manual post-mortums
         if not CONF.orchestration.keypair_name:
-            self.set_resource('stack', self.stack)
+            self.addCleanup(self.client.stacks.delete, self.stack)
 
     @test.skip_because(bug="1257575")
     @test.attr(type='slow')

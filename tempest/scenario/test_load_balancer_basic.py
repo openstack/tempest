@@ -74,15 +74,11 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         self.server_fixed_ips = {}
         self._create_security_group()
 
-    def cleanup_wrapper(self, resource):
-        self.cleanup_resource(resource, self.__class__.__name__)
-
     def _create_security_group(self):
         self.security_group = self._create_security_group_neutron(
             tenant_id=self.tenant_id)
         self._create_security_group_rules_for_port(self.port1)
         self._create_security_group_rules_for_port(self.port2)
-        self.addCleanup(self.cleanup_wrapper, self.security_group)
 
     def _create_security_group_rules_for_port(self, port):
         rule = {
@@ -99,7 +95,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _create_server(self, name):
         keypair = self.create_keypair(name='keypair-%s' % name)
-        self.addCleanup(self.cleanup_wrapper, keypair)
         security_groups = [self.security_group.name]
         net = self._list_networks(tenant_id=self.tenant_id)[0]
         create_kwargs = {
@@ -111,14 +106,12 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         }
         server = self.create_server(name=name,
                                     create_kwargs=create_kwargs)
-        self.addCleanup(self.cleanup_wrapper, server)
         self.servers_keypairs[server.id] = keypair
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             public_network_id = config.network.public_network_id
             floating_ip = self._create_floating_ip(
                 server, public_network_id)
-            self.addCleanup(self.cleanup_wrapper, floating_ip)
             self.floating_ips[floating_ip] = server
             self.server_ips[server.id] = floating_ip.floating_ip_address
         else:
@@ -211,7 +204,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             lb_method='ROUND_ROBIN',
             protocol='HTTP',
             subnet_id=self.subnet.id)
-        self.addCleanup(self.cleanup_wrapper, self.pool)
         self.assertTrue(self.pool)
 
     def _create_members(self):
@@ -227,17 +219,14 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                 member1 = self._create_member(address=ip,
                                               protocol_port=self.port1,
                                               pool_id=self.pool.id)
-                self.addCleanup(self.cleanup_wrapper, member1)
                 member2 = self._create_member(address=ip,
                                               protocol_port=self.port2,
                                               pool_id=self.pool.id)
-                self.addCleanup(self.cleanup_wrapper, member2)
                 self.members.extend([member1, member2])
             else:
                 member = self._create_member(address=ip,
                                              protocol_port=self.port1,
                                              pool_id=self.pool.id)
-                self.addCleanup(self.cleanup_wrapper, member)
                 self.members.append(member)
         self.assertTrue(self.members)
 
@@ -246,7 +235,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         port_id = vip.port_id
         floating_ip = self._create_floating_ip(vip, public_network_id,
                                                port_id=port_id)
-        self.addCleanup(self.cleanup_wrapper, floating_ip)
         self.floating_ips.setdefault(vip.id, [])
         self.floating_ips[vip.id].append(floating_ip)
 
@@ -257,7 +245,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                                     protocol_port=80,
                                     subnet_id=self.subnet.id,
                                     pool_id=self.pool.id)
-        self.addCleanup(self.cleanup_wrapper, self.vip)
         self.status_timeout(NeutronRetriever(self.network_client,
                                              self.network_client.vip_path,
                                              net_common.DeletableVip),
