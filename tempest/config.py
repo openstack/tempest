@@ -415,19 +415,11 @@ object_storage_feature_group = cfg.OptGroup(
     title='Enabled object-storage features')
 
 ObjectStoreFeaturesGroup = [
-    cfg.BoolOpt('container_quotas',
-                default=True,
-                help="Set to True if the Container Quota middleware "
-                     "is enabled"),
-    cfg.BoolOpt('accounts_quotas',
-                default=True,
-                help="Set to True if the Account Quota middleware is enabled"),
-    cfg.BoolOpt('crossdomain',
-                default=True,
-                help="Set to True if the Crossdomain middleware is enabled"),
-    cfg.BoolOpt('tempurl',
-                default=True,
-                help="Set to True if the TempURL middleware is enabled"),
+    cfg.ListOpt('discoverable_apis',
+                default=['all'],
+                help="A list of the enabled optional discoverable apis. "
+                     "A single entry, all, indicates that all of these "
+                     "features are expected to be enabled"),
 ]
 
 
