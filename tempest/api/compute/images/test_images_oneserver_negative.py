@@ -16,7 +16,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -69,7 +68,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         cls.image_ids = []
 
-        if compute.MULTI_USER:
+        if cls.multi_user:
             if cls.config.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds

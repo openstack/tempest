@@ -17,7 +17,6 @@
 
 import time
 
-from tempest.api import compute
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -31,7 +30,6 @@ LOG = logging.getLogger(__name__)
 class BaseComputeTest(tempest.test.BaseTestCase):
     """Base test case class for all Compute API tests."""
 
-    conclusion = compute.generic_setup_package()
     force_tenant_isolation = False
 
     @classmethod
@@ -55,6 +53,30 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.image_ssh_password = cls.config.compute.image_ssh_password
         cls.servers = []
         cls.images = []
+        cls.multi_user = cls.get_multi_user()
+
+    @classmethod
+    def get_multi_user(cls):
+        multi_user = True
+        # Determine if there are two regular users that can be
+        # used in testing. If the test cases are allowed to create
+        # users (config.compute.allow_tenant_isolation is true,
+        # then we allow multi-user.
+        if not cls.config.compute.allow_tenant_isolation:
+            user1 = cls.config.identity.username
+            user2 = cls.config.identity.alt_username
+            if not user2 or user1 == user2:
+                multi_user = False
+            else:
+                user2_password = cls.config.identity.alt_password
+                user2_tenant_name = cls.config.identity.alt_tenant_name
+                if not user2_password or not user2_tenant_name:
+                    msg = ("Alternate user specified but not alternate "
+                           "tenant or password: alt_tenant_name=%s "
+                           "alt_password=%s"
+                           % (user2_tenant_name, user2_password))
+                    raise exceptions.InvalidConfiguration(msg)
+        return multi_user
 
     @classmethod
     def clear_servers(cls):

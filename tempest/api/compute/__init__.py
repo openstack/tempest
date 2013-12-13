@@ -16,7 +16,6 @@
 #    under the License.
 
 from tempest import config
-from tempest.exceptions import InvalidConfiguration
 from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -26,29 +25,3 @@ CREATE_IMAGE_ENABLED = CONFIG.compute_feature_enabled.create_image
 RESIZE_AVAILABLE = CONFIG.compute_feature_enabled.resize
 CHANGE_PASSWORD_AVAILABLE = CONFIG.compute_feature_enabled.change_password
 DISK_CONFIG_ENABLED = CONFIG.compute_feature_enabled.disk_config
-MULTI_USER = True
-
-
-# All compute tests -- single setup function
-def generic_setup_package():
-    LOG.debug("Entering tempest.api.compute.setup_package")
-
-    global MULTI_USER
-
-    # Determine if there are two regular users that can be
-    # used in testing. If the test cases are allowed to create
-    # users (config.compute.allow_tenant_isolation is true,
-    # then we allow multi-user.
-    if not CONFIG.compute.allow_tenant_isolation:
-        user1 = CONFIG.identity.username
-        user2 = CONFIG.identity.alt_username
-        if not user2 or user1 == user2:
-            MULTI_USER = False
-        else:
-            user2_password = CONFIG.identity.alt_password
-            user2_tenant_name = CONFIG.identity.alt_tenant_name
-            if not user2_password or not user2_tenant_name:
-                msg = ("Alternate user specified but not alternate "
-                       "tenant or password: alt_tenant_name=%s alt_password=%s"
-                       % (user2_tenant_name, user2_password))
-                raise InvalidConfiguration(msg)
