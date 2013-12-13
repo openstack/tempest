@@ -537,6 +537,27 @@ class NetworkScenarioTest(OfficialClientTest):
         routers = self.network_client.list_routers()
         return routers['routers']
 
+    def _list_ports(self):
+        ports = self.network_client.list_ports()
+        return ports['ports']
+
+    def _get_tenant_own_network_num(self, tenant_id):
+        nets = self._list_networks()
+        ownnets = [value for value in nets if tenant_id == value['tenant_id']]
+        return len(ownnets)
+
+    def _get_tenant_own_subnet_num(self, tenant_id):
+        subnets = self._list_subnets()
+        ownsubnets = ([value for value in subnets
+                      if tenant_id == value['tenant_id']])
+        return len(ownsubnets)
+
+    def _get_tenant_own_port_num(self, tenant_id):
+        ports = self._list_ports()
+        ownports = ([value for value in ports
+                    if tenant_id == value['tenant_id']])
+        return len(ownports)
+
     def _create_subnet(self, network, namestart='subnet-smoke-'):
         """
         Create a subnet for the given network within the cidr block
@@ -800,6 +821,18 @@ class NetworkScenarioTest(OfficialClientTest):
                     rules.append(sg_rule)
 
         return rules
+
+    def _show_quota_network(self, tenant_id):
+        quota = self.network_client.show_quota(tenant_id)
+        return quota['quota']['network']
+
+    def _show_quota_subnet(self, tenant_id):
+        quota = self.network_client.show_quota(tenant_id)
+        return quota['quota']['subnet']
+
+    def _show_quota_port(self, tenant_id):
+        quota = self.network_client.show_quota(tenant_id)
+        return quota['quota']['port']
 
 
 class OrchestrationScenarioTest(OfficialClientTest):

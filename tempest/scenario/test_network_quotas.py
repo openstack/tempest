@@ -20,8 +20,6 @@ from neutronclient.common import exceptions as exc
 from tempest.scenario.manager import NetworkScenarioTest
 from tempest.test import services
 
-MAX_REASONABLE_ITERATIONS = 51  # more than enough. Default for port is 50.
-
 
 class TestNetworkQuotaBasic(NetworkScenarioTest):
     """
@@ -46,7 +44,9 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
     @services('network')
     def test_create_network_until_quota_hit(self):
         hit_limit = False
-        for n in xrange(MAX_REASONABLE_ITERATIONS):
+        networknum = self._get_tenant_own_network_num(self.tenant_id)
+        max = self._show_quota_network(self.tenant_id) - networknum
+        for n in xrange(max):
             try:
                 self.networks.append(
                     self._create_network(self.tenant_id,
@@ -56,6 +56,16 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                     raise
                 hit_limit = True
                 break
+        self.assertFalse(hit_limit, "Failed: Hit quota limit !")
+
+        try:
+            self.networks.append(
+                self._create_network(self.tenant_id,
+                                     namestart='network-quotatest-'))
+        except exc.NeutronClientException as e:
+            if (e.status_code != 409):
+                raise
+            hit_limit = True
         self.assertTrue(hit_limit, "Failed: Did not hit quota limit !")
 
     @services('network')
@@ -65,7 +75,9 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                 self._create_network(self.tenant_id,
                                      namestart='network-quotatest-'))
         hit_limit = False
-        for n in xrange(MAX_REASONABLE_ITERATIONS):
+        subnetnum = self._get_tenant_own_subnet_num(self.tenant_id)
+        max = self._show_quota_subnet(self.tenant_id) - subnetnum
+        for n in xrange(max):
             try:
                 self.subnets.append(
                     self._create_subnet(self.networks[0],
@@ -75,6 +87,16 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                     raise
                 hit_limit = True
                 break
+        self.assertFalse(hit_limit, "Failed: Hit quota limit !")
+
+        try:
+            self.subnets.append(
+                self._create_subnet(self.networks[0],
+                                    namestart='subnet-quotatest-'))
+        except exc.NeutronClientException as e:
+            if (e.status_code != 409):
+                raise
+            hit_limit = True
         self.assertTrue(hit_limit, "Failed: Did not hit quota limit !")
 
     @services('network')
@@ -84,7 +106,9 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                 self._create_network(self.tenant_id,
                                      namestart='network-quotatest-'))
         hit_limit = False
-        for n in xrange(MAX_REASONABLE_ITERATIONS):
+        portnum = self._get_tenant_own_port_num(self.tenant_id)
+        max = self._show_quota_port(self.tenant_id) - portnum
+        for n in xrange(max):
             try:
                 self.ports.append(
                     self._create_port(self.networks[0],
@@ -94,4 +118,14 @@ class TestNetworkQuotaBasic(NetworkScenarioTest):
                     raise
                 hit_limit = True
                 break
+        self.assertFalse(hit_limit, "Failed: Hit quota limit !")
+
+        try:
+            self.ports.append(
+                self._create_port(self.networks[0],
+                                  namestart='port-quotatest-'))
+        except exc.NeutronClientException as e:
+            if (e.status_code != 409):
+                raise
+            hit_limit = True
         self.assertTrue(hit_limit, "Failed: Did not hit quota limit !")
