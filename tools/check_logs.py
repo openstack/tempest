@@ -27,6 +27,8 @@ import yaml
 
 
 is_neutron = os.environ.get('DEVSTACK_GATE_NEUTRON', "0") == "1"
+is_grenade = (os.environ.get('DEVSTACK_GATE_GRENADE', "0") == "1" or
+              os.environ.get('DEVSTACK_GATE_GRENADE_FORWARD', "0") == "1")
 dump_all_errors = is_neutron
 
 
@@ -124,6 +126,9 @@ def main(opts):
         print("Logs have errors")
         if is_neutron:
             print("Currently not failing neutron builds with errors")
+            return 0
+        if is_grenade:
+            print("Currently not failing grenade runs with errors")
             return 0
         print("FAILED")
         return 1
