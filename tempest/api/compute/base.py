@@ -260,6 +260,7 @@ class BaseV3ComputeTest(BaseComputeTest):
 
         cls.servers_client = cls.os.servers_v3_client
         cls.images_client = cls.os.image_client
+        cls.flavors_client = cls.os.flavors_v3_client
         cls.services_client = cls.os.services_v3_client
         cls.extensions_client = cls.os.extensions_v3_client
         cls.availability_zone_client = cls.os.availability_zone_v3_client
@@ -333,3 +334,4 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
             cls.os_adm.availability_zone_v3_client
         cls.hypervisor_admin_client = cls.os_adm.hypervisor_v3_client
         cls.tenant_usages_admin_client = cls.os_adm.tenant_usages_v3_client
+        cls.flavors_admin_client = cls.os_adm.flavors_v3_client

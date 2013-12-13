@@ -21,12 +21,12 @@ import urllib
 from tempest.common.rest_client import RestClient
 
 
-class FlavorsClientJSON(RestClient):
+class FlavorsV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(FlavorsClientJSON, self).__init__(config, username, password,
-                                                auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(FlavorsV3ClientJSON, self).__init__(config, username, password,
+                                                  auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_flavors(self, params=None):
         url = 'flavors'
@@ -67,7 +67,7 @@ class FlavorsClientJSON(RestClient):
         if kwargs.get('rxtx'):
             post_body['rxtx_factor'] = kwargs.get('rxtx')
         if kwargs.get('is_public'):
-            post_body['os-flavor-access:is_public'] = kwargs.get('is_public')
+            post_body['flavor-access:is_public'] = kwargs.get('is_public')
         post_body = json.dumps({'flavor': post_body})
         resp, body = self.post('flavors', post_body, self.headers)
 
@@ -91,27 +91,27 @@ class FlavorsClientJSON(RestClient):
     def set_flavor_extra_spec(self, flavor_id, specs):
         """Sets extra Specs to the mentioned flavor."""
         post_body = json.dumps({'extra_specs': specs})
-        resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
+        resp, body = self.post('flavors/%s/flavor-extra-specs' % flavor_id,
                                post_body, self.headers)
         body = json.loads(body)
         return resp, body['extra_specs']
 
     def get_flavor_extra_spec(self, flavor_id):
         """Gets extra Specs details of the mentioned flavor."""
-        resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id)
+        resp, body = self.get('flavors/%s/flavor-extra-specs' % flavor_id)
         body = json.loads(body)
         return resp, body['extra_specs']
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
         """Gets extra Specs key-value of the mentioned flavor and key."""
-        resp, body = self.get('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
-                              key))
+        resp, body = self.get('flavors/%s/flavor-extra-specs/%s' %
+                              (str(flavor_id), key))
         body = json.loads(body)
         return resp, body
 
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
         """Update specified extra Specs of the mentioned flavor and key."""
-        resp, body = self.put('flavors/%s/os-extra_specs/%s' %
+        resp, body = self.put('flavors/%s/flavor-extra-specs/%s' %
                               (flavor_id, key),
                               json.dumps(kwargs), self.headers)
         body = json.loads(body)
@@ -119,12 +119,12 @@ class FlavorsClientJSON(RestClient):
 
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets extra Specs from the mentioned flavor."""
-        return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
-                           key))
+        return self.delete('flavors/%s/flavor-extra-specs/%s' %
+                           (str(flavor_id), key))
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
-        resp, body = self.get('flavors/%s/os-flavor-access' % flavor_id,
+        resp, body = self.get('flavors/%s/flavor-access' % flavor_id,
                               self.headers)
         body = json.loads(body)
         return resp, body['flavor_access']
@@ -132,8 +132,8 @@ class FlavorsClientJSON(RestClient):
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant."""
         post_body = {
-            'addTenantAccess': {
-                'tenant': tenant_id
+            'add_tenant_access': {
+                'tenant_id': tenant_id
             }
         }
         post_body = json.dumps(post_body)
@@ -145,8 +145,8 @@ class FlavorsClientJSON(RestClient):
     def remove_flavor_access(self, flavor_id, tenant_id):
         """Remove flavor access from the specified tenant."""
         post_body = {
-            'removeTenantAccess': {
-                'tenant': tenant_id
+            'remove_tenant_access': {
+                'tenant_id': tenant_id
             }
         }
         post_body = json.dumps(post_body)
