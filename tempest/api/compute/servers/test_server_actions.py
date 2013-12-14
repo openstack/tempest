@@ -247,6 +247,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         image1_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)
         self.assertEqual(202, resp.status)
+        self.os.image_client.wait_for_image_status(image1_id, 'active')
 
         backup2 = data_utils.rand_name('backup')
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
@@ -257,6 +258,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         image2_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.os.image_client.delete_image, image2_id)
         self.assertEqual(202, resp.status)
+        self.os.image_client.wait_for_image_status(image2_id, 'active')
 
         # verify they have been created
         properties = {
