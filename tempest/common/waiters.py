@@ -75,10 +75,16 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
         timed_out = int(time.time()) - start_time >= timeout
 
         if timed_out:
-            message = ('Server %s failed to reach %s status within the '
-                       'required time (%s s).' %
-                       (server_id, status, timeout))
+            expected_task_state = 'None' if ready_wait else 'n/a'
+            message = ('Server %(server_id)s failed to reach %(status)s '
+                       'status and task state "%(expected_task_state)s" '
+                       'within the required time (%(timeout)s s).' %
+                       {'server_id': server_id,
+                        'status': status,
+                        'expected_task_state': expected_task_state,
+                        'timeout': timeout})
             message += ' Current status: %s.' % server_status
+            message += ' Current task state: %s.' % task_state
             raise exceptions.TimeoutException(message)
         old_status = server_status
         old_task_state = task_state
