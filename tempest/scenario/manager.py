@@ -343,7 +343,11 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                     raise
 
             new_status = thing.status
-            if new_status == error_status:
+
+            # Some components are reporting error status in lower case
+            # so case sensitive comparisons can really mess things
+            # up.
+            if new_status.lower() == error_status.lower():
                 message = "%s failed to get to expected status. \
                           In %s state." % (thing, new_status)
                 raise exceptions.BuildErrorException(message)

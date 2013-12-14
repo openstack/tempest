@@ -20,12 +20,59 @@ from tempest.api.network import common as net_common
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest.openstack.common import jsonutils
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+
+import tempest.test
 from tempest.test import attr
 from tempest.test import services
 
 LOG = logging.getLogger(__name__)
+
+
+class FloatingIPCheckTracker(object):
+    """
+    Checking VM connectivity through floating IP addresses is bound to fail
+    if the floating IP has not actually been associated with the VM yet.
+    This helper class facilitates checking for floating IP assignments on
+    VMs. It only checks for a given IP address once.
+    """
+
+    def __init__(self, compute_client, floating_ip_map):
+        self.compute_client = compute_client
+        self.unchecked = {}
+        for k in floating_ip_map.keys():
+            self.unchecked[k] = [f.floating_ip_address
+                                 for f in floating_ip_map[k]]
+
+    def run_checks(self):
+        """Check for any remaining unverified floating IPs
+
+        Gets VM details from nova and checks for floating IPs
+        within the returned information. Returns true when all
+        checks are complete and is suitable for use with
+        tempest.test.call_until_true()
+        """
+        to_delete = []
+        loggable_map = {}
+        for k, check_addrs in self.unchecked.iteritems():
+            serverdata = self.compute_client.servers.get(k.id)
+            for net_name, ip_addr in serverdata.networks.iteritems():
+                for addr in ip_addr:
+                    if addr in check_addrs:
+                        check_addrs.remove(addr)
+            if len(check_addrs) == 0:
+                to_delete.append(k)
+            else:
+                loggable_map[k.id] = check_addrs
+
+        for to_del in to_delete:
+            del self.unchecked[to_del]
+
+        LOG.debug('Unchecked floating IPs: %s',
+                  jsonutils.dumps(loggable_map))
+        return len(self.unchecked) == 0
 
 
 class TestNetworkBasicOps(manager.NetworkScenarioTest):
@@ -228,11 +275,27 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # key-based authentication by cloud-init.
         ssh_login = self.config.compute.image_ssh_user
         private_key = self.keypairs[self.tenant_id].private_key
-        for server in self.servers:
-            for net_name, ip_addresses in server.networks.iteritems():
-                for ip_address in ip_addresses:
-                    self._check_vm_connectivity(ip_address, ssh_login,
-                                                private_key)
+        try:
+            for server in self.servers:
+                for net_name, ip_addresses in server.networks.iteritems():
+                    for ip_address in ip_addresses:
+                        self._check_vm_connectivity(ip_address, ssh_login,
+                                                    private_key)
+        except Exception as exc:
+            LOG.exception(exc)
+            debug.log_ip_ns()
+            raise exc
+
+    def _wait_for_floating_ip_association(self):
+        ip_tracker = FloatingIPCheckTracker(self.compute_client,
+                                            self.floating_ips)
+
+        self.assertTrue(
+            tempest.test.call_until_true(
+                ip_tracker.run_checks, self.config.compute.build_timeout,
+                self.config.compute.build_interval),
+            "Timed out while waiting for the floating IP assignments "
+            "to propagate")
 
     def _assign_floating_ips(self):
         public_network_id = self.config.network.public_network_id
@@ -267,5 +330,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_networks()
         self._create_servers()
         self._assign_floating_ips()
-        self._check_public_network_connectivity()
+        self._wait_for_floating_ip_association()
         self._check_tenant_network_connectivity()
+        self._check_public_network_connectivity()
