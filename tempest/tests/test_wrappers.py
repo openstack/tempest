@@ -56,7 +56,7 @@ class TestWrappers(base.TestCase):
         # version or an sdist to work. so make the test directory a git repo
         # too.
         subprocess.call(['git', 'init'])
-        exit_code = subprocess.call('sh pretty_tox.sh tests.passing',
+        exit_code = subprocess.call('bash pretty_tox.sh tests.passing',
                                     shell=True, stdout=DEVNULL, stderr=DEVNULL)
         self.assertEqual(exit_code, 0)
 
@@ -71,7 +71,7 @@ class TestWrappers(base.TestCase):
         # version or an sdist to work. so make the test directory a git repo
         # too.
         subprocess.call(['git', 'init'])
-        exit_code = subprocess.call('sh pretty_tox.sh', shell=True,
+        exit_code = subprocess.call('bash pretty_tox.sh', shell=True,
                                     stdout=DEVNULL, stderr=DEVNULL)
         self.assertEqual(exit_code, 1)
 
@@ -82,7 +82,7 @@ class TestWrappers(base.TestCase):
         # Change directory, run wrapper and check result
         self.addCleanup(os.chdir, os.path.abspath(os.curdir))
         os.chdir(self.directory)
-        exit_code = subprocess.call('sh pretty_tox_serial.sh tests.passing',
+        exit_code = subprocess.call('bash pretty_tox_serial.sh tests.passing',
                                     shell=True, stdout=DEVNULL, stderr=DEVNULL)
         self.assertEqual(exit_code, 0)
 
@@ -93,6 +93,6 @@ class TestWrappers(base.TestCase):
         # Change directory, run wrapper and check result
         self.addCleanup(os.chdir, os.path.abspath(os.curdir))
         os.chdir(self.directory)
-        exit_code = subprocess.call('sh pretty_tox_serial.sh', shell=True,
+        exit_code = subprocess.call('bash pretty_tox_serial.sh', shell=True,
                                     stdout=DEVNULL, stderr=DEVNULL)
         self.assertEqual(exit_code, 1)
