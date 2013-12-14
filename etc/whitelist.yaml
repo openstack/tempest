@@ -218,3 +218,6 @@ q-svc:
     - module: ".*"
       message: ".*"
 
+s-proxy:
+    - module: "proxy-server"
+      message: "Timeout talking to memcached"
