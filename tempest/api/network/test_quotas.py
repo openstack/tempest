@@ -74,12 +74,13 @@ class QuotasTest(base.BaseNetworkTest):
         resp, non_default_quotas = self.admin_client.list_quotas()
         self.assertEqual('200', resp['status'])
         found = False
-        for qs in non_default_quotas:
+        for qs in non_default_quotas['quotas']:
             if qs['tenant_id'] == tenant_id:
                 found = True
         self.assertTrue(found)
         # Confirm from APi quotas were changed as requested for tenant
         resp, quota_set = self.admin_client.show_quotas(tenant_id)
+        quota_set = quota_set['quota']
         self.assertEqual('200', resp['status'])
         self.assertEqual(0, quota_set['network'])
         self.assertEqual(0, quota_set['security_group'])
@@ -88,5 +89,5 @@ class QuotasTest(base.BaseNetworkTest):
         self.assertEqual('204', resp['status'])
         resp, non_default_quotas = self.admin_client.list_quotas()
         self.assertEqual('200', resp['status'])
-        for q in non_default_quotas:
+        for q in non_default_quotas['quotas']:
             self.assertNotEqual(tenant_id, q['tenant_id'])

@@ -55,7 +55,7 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
             ext_name = ext['name']
             ext_alias = ext['alias']
             actual_alias.append(ext['alias'])
-            resp, ext_details = self.client.show_extension_details(ext_alias)
+            resp, ext_details = self.client.show_extension(ext_alias)
             self.assertEqual('200', resp['status'])
             ext_details = ext_details['extension']
 
