@@ -49,7 +49,10 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
             LOG.exception(exc)
             # Rebuild server if cannot reach the ACTIVE state
             # Usually it means the server had a serius accident
-            self.__class__.server_id = self.rebuild_server(self.server_id)
+            self._reset_server()
+
+    def _reset_server(self):
+        self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
@@ -116,6 +119,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
+        self.addCleanup(self._reset_server)
 
         # Create second snapshot
         alt_snapshot_name = data_utils.rand_name('test-snap-')
@@ -139,6 +143,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
+        self.addCleanup(self._reset_server)
 
         # Do not wait, attempt to delete the image, ensure it's successful
         resp, body = self.client.delete_image(image_id)
