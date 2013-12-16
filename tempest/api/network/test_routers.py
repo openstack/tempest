@@ -19,7 +19,7 @@ import netaddr
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class RoutersTest(base.BaseAdminNetworkTest):
@@ -54,7 +54,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
             router_id, port_id)
         self.assertEqual('200', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_show_list_update_delete_router(self):
         # Create a router
         # NOTE(salv-orlando): Do not invoke self.create_router
@@ -97,7 +97,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
             create_body['router']['id'])
         self.assertEqual(show_body['router']['name'], updated_name)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_add_remove_router_interface_with_subnet_id(self):
         network = self.create_network()
         subnet = self.create_subnet(network)
@@ -116,7 +116,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
         self.assertEqual(show_port_body['port']['device_id'],
                          router['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_add_remove_router_interface_with_port_id(self):
         network = self.create_network()
         self.create_subnet(network)
@@ -160,7 +160,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
         public_subnet_id = public_net_body['network']['subnets'][0]
         self.assertEqual(fixed_ips[0]['subnet_id'], public_subnet_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_router_set_gateway(self):
         router = self.create_router(data_utils.rand_name('router-'))
         self.client.update_router(
@@ -175,7 +175,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
             {'network_id': self.network_cfg.public_network_id})
         self._verify_gateway_port(router['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_router_set_gateway_with_snat_explicit(self):
         router = self.create_router(data_utils.rand_name('router-'))
         self.admin_client.update_router_with_snat_gw_info(
@@ -189,7 +189,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
              'enable_snat': True})
         self._verify_gateway_port(router['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_router_set_gateway_without_snat(self):
         router = self.create_router(data_utils.rand_name('router-'))
         self.admin_client.update_router_with_snat_gw_info(
@@ -203,7 +203,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
              'enable_snat': False})
         self._verify_gateway_port(router['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_router_unset_gateway(self):
         router = self.create_router(
             data_utils.rand_name('router-'),
@@ -216,7 +216,7 @@ class RoutersTest(base.BaseAdminNetworkTest):
             device_id=router['id'])
         self.assertFalse(list_body['ports'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_router_reset_gateway_without_snat(self):
         router = self.create_router(
             data_utils.rand_name('router-'),
@@ -232,7 +232,8 @@ class RoutersTest(base.BaseAdminNetworkTest):
              'enable_snat': False})
         self._verify_gateway_port(router['id'])
 
-    @attr(type='smoke')
+    @test.requires_ext(extension='extraroute', service='network')
+    @test.attr(type='smoke')
     def test_update_extra_route(self):
         self.network = self.create_network()
         self.name = self.network['name']
