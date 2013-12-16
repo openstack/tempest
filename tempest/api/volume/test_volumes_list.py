@@ -57,13 +57,13 @@ class VolumesListTest(base.BaseVolumeTest):
         # Create 3 test volumes
         cls.volume_list = []
         cls.volume_id_list = []
+        cls.metadata = {'Type': 'work'}
         for i in range(3):
             v_name = data_utils.rand_name('volume')
-            metadata = {'Type': 'work'}
             try:
                 resp, volume = cls.client.create_volume(size=1,
                                                         display_name=v_name,
-                                                        metadata=metadata)
+                                                        metadata=cls.metadata)
                 cls.client.wait_for_volume_status(volume['id'], 'available')
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
@@ -87,6 +87,25 @@ class VolumesListTest(base.BaseVolumeTest):
             resp, _ = cls.client.delete_volume(volid)
             cls.client.wait_for_resource_deletion(volid)
         super(VolumesListTest, cls).tearDownClass()
+
+    def _list_by_param_value_and_assert(self, params, with_detail=False):
+        """
+        Perform list or list_details action with given params
+        and validates result.
+        """
+        if with_detail:
+            resp, fetched_vol_list = \
+                self.client.list_volumes_with_detail(params=params)
+        else:
+            resp, fetched_vol_list = self.client.list_volumes(params=params)
+
+        self.assertEqual(200, resp.status)
+        # Validating params of fetched volumes
+        for volume in fetched_vol_list:
+            for key in params:
+                msg = "Failed to list volumes %s by %s" % \
+                      ('details' if with_detail else '', key)
+                self.assertEqual(params[key], volume[key], msg)
 
     @attr(type='smoke')
     def test_volume_list(self):
@@ -163,6 +182,34 @@ class VolumesListTest(base.BaseVolumeTest):
         for volume in fetched_list:
             self.assertEqual(zone, volume['availability_zone'])
         self.assertVolumesIn(fetched_list, self.volume_list)
+
+    @attr(type='gate')
+    def test_volume_list_with_param_metadata(self):
+        # Test to list volumes when metadata param is given
+        params = {'metadata': self.metadata}
+        self._list_by_param_value_and_assert(params)
+
+    @attr(type='gate')
+    def test_volume_list_with_detail_param_metadata(self):
+        # Test to list volumes details when metadata param is given
+        params = {'metadata': self.metadata}
+        self._list_by_param_value_and_assert(params, with_detail=True)
+
+    @attr(type='gate')
+    def test_volume_list_param_display_name_and_status(self):
+        # Test to list volume when display name and status param is given
+        volume = self.volume_list[data_utils.rand_int_id(0, 2)]
+        params = {'display_name': volume['display_name'],
+                  'status': 'available'}
+        self._list_by_param_value_and_assert(params)
+
+    @attr(type='gate')
+    def test_volume_list_with_detail_param_display_name_and_status(self):
+        # Test to list volume when name and status param is given
+        volume = self.volume_list[data_utils.rand_int_id(0, 2)]
+        params = {'display_name': volume['display_name'],
+                  'status': 'available'}
+        self._list_by_param_value_and_assert(params, with_detail=True)
 
 
 class VolumeListTestXML(VolumesListTest):
