@@ -33,7 +33,7 @@ dump_all_errors = is_neutron
 
 
 def process_files(file_specs, url_specs, whitelists):
-    regexp = re.compile(r"^.*(ERROR|CRITICAL).*\[.*\-.*\]")
+    regexp = re.compile(r"^.* (ERROR|CRITICAL) .*\[.*\-.*\]")
     had_errors = False
     for (name, filename) in file_specs:
         whitelist = whitelists.get(name, [])
