@@ -356,3 +356,57 @@ class VolumesClientXML(RestClientXML):
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def _metadata_body(self, meta):
+        post_body = Element('metadata')
+        for k, v in meta.items():
+            data = Element('meta', key=k)
+            data.append(Text(v))
+            post_body.append(data)
+        return post_body
+
+    def _parse_key_value(self, node):
+        """Parse <foo key='key'>value</foo> data into {'key': 'value'}."""
+        data = {}
+        for node in node.getchildren():
+            data[node.get('key')] = node.text
+        return data
+
+    def create_volume_metadata(self, volume_id, metadata):
+        """Create metadata for the volume."""
+        post_body = self._metadata_body(metadata)
+        resp, body = self.post('volumes/%s/metadata' % volume_id,
+                               str(Document(post_body)),
+                               self.headers)
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
+
+    def get_volume_metadata(self, volume_id):
+        """Get metadata of the volume."""
+        url = "volumes/%s/metadata" % str(volume_id)
+        resp, body = self.get(url, self.headers)
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
+
+    def update_volume_metadata(self, volume_id, metadata):
+        """Update metadata for the volume."""
+        put_body = self._metadata_body(metadata)
+        url = "volumes/%s/metadata" % str(volume_id)
+        resp, body = self.put(url, str(Document(put_body)), self.headers)
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
+
+    def update_volume_metadata_item(self, volume_id, id, meta_item):
+        """Update metadata item for the volume."""
+        for k, v in meta_item.items():
+            put_body = Element('meta', key=k)
+            put_body.append(Text(v))
+        url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
+        resp, body = self.put(url, str(Document(put_body)), self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def delete_volume_metadata_item(self, volume_id, id):
+        """Delete metadata item for the volume."""
+        url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
+        return self.delete(url)
