@@ -628,7 +628,15 @@ class NetworkScenarioTest(OfficialClientTest):
         self.set_resource(data_utils.rand_name('floatingip-'), floating_ip)
         return floating_ip
 
-    def _ping_ip_address(self, ip_address):
+    def _disassociate_floating_ip(self, floating_ip):
+        """
+        :param floating_ip: type DeletableFloatingIp
+        """
+        floating_ip.update(port_id=None)
+        self.assertEqual(None, floating_ip.port_id)
+        return floating_ip
+
+    def _ping_ip_address(self, ip_address, should_succeed=True):
         cmd = ['ping', '-c1', '-w1', ip_address]
 
         def ping():
@@ -636,8 +644,7 @@ class NetworkScenarioTest(OfficialClientTest):
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             proc.wait()
-            if proc.returncode == 0:
-                return True
+            return (proc.returncode == 0) == should_succeed
 
         return tempest.test.call_until_true(
             ping, self.config.compute.ping_timeout, 1)
@@ -649,17 +656,37 @@ class NetworkScenarioTest(OfficialClientTest):
                                 timeout=timeout)
         return ssh_client.test_connection_auth()
 
-    def _check_vm_connectivity(self, ip_address, username, private_key):
-        self.assertTrue(self._ping_ip_address(ip_address),
-                        "Timed out waiting for %s to become "
-                        "reachable" % ip_address)
-        self.assertTrue(self._is_reachable_via_ssh(
-            ip_address,
-            username,
-            private_key,
-            timeout=self.config.compute.ssh_timeout),
-            'Auth failure in connecting to %s@%s via ssh' %
-            (username, ip_address))
+    def _check_vm_connectivity(self, ip_address,
+                               username=None,
+                               private_key=None,
+                               should_connect=True):
+        """
+        :param ip_address: server to test against
+        :param username: server's ssh username
+        :param private_key: server's ssh private key to be used
+        :param should_connect: True/False indicates positive/negative test
+            positive - attempt ping and ssh
+            negative - attempt ping and fail if succeed
+
+        :raises: AssertError if the result of the connectivity check does
+            not match the value of the should_connect param
+        """
+        if should_connect:
+            msg = "Timed out waiting for %s to become reachable" % ip_address
+        else:
+            msg = "ip address %s is reachable" % ip_address
+        self.assertTrue(self._ping_ip_address(ip_address,
+                                              should_succeed=should_connect),
+                        msg=msg)
+        if should_connect:
+            # no need to check ssh for negative connectivity
+            self.assertTrue(self._is_reachable_via_ssh(
+                ip_address,
+                username,
+                private_key,
+                timeout=self.config.compute.ssh_timeout),
+                'Auth failure in connecting to %s@%s via ssh' %
+                (username, ip_address))
 
     def _create_security_group_nova(self, client=None,
                                     namestart='secgroup-smoke-',

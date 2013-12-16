@@ -41,10 +41,7 @@ class FloatingIPCheckTracker(object):
 
     def __init__(self, compute_client, floating_ip_map):
         self.compute_client = compute_client
-        self.unchecked = {}
-        for k in floating_ip_map.keys():
-            self.unchecked[k] = [f.floating_ip_address
-                                 for f in floating_ip_map[k]]
+        self.unchecked = floating_ip_map.copy()
 
     def run_checks(self):
         """Check for any remaining unverified floating IPs
@@ -56,16 +53,14 @@ class FloatingIPCheckTracker(object):
         """
         to_delete = []
         loggable_map = {}
-        for k, check_addrs in self.unchecked.iteritems():
-            serverdata = self.compute_client.servers.get(k.id)
-            for net_name, ip_addr in serverdata.networks.iteritems():
-                for addr in ip_addr:
-                    if addr in check_addrs:
-                        check_addrs.remove(addr)
-            if len(check_addrs) == 0:
-                to_delete.append(k)
+        for check_addr, server in self.unchecked.iteritems():
+            serverdata = self.compute_client.servers.get(server.id)
+            ip_addr = [addr for sublist in serverdata.networks.values() for
+                       addr in sublist]
+            if check_addr.floating_ip_address in ip_addr:
+                to_delete.append(check_addr)
             else:
-                loggable_map[k.id] = check_addrs
+                loggable_map[server.id] = check_addr
 
         for to_del in to_delete:
             del self.unchecked[to_del]
@@ -92,6 +87,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
        - the Tempest host can perform key-based authentication to an
          ssh server hosted at the IP address.  This check guarantees
          that the IP address is associated with the target VM.
+
+       - detach the floating-ip from the VM and verify that it becomes
+       unreachable
 
        # TODO(mnewby) - Need to implement the following:
        - the Tempest host can ssh into the VM via the IP address and
@@ -297,29 +295,33 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             "Timed out while waiting for the floating IP assignments "
             "to propagate")
 
-    def _assign_floating_ips(self):
+    def _create_and_associate_floating_ips(self):
         public_network_id = self.config.network.public_network_id
         for server in self.servers:
             floating_ip = self._create_floating_ip(server, public_network_id)
-            self.floating_ips.setdefault(server, [])
-            self.floating_ips[server].append(floating_ip)
+            self.floating_ips[floating_ip] = server
 
-    def _check_public_network_connectivity(self):
+    def _check_public_network_connectivity(self, should_connect=True):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         ssh_login = self.config.compute.image_ssh_user
         private_key = self.keypairs[self.tenant_id].private_key
         try:
-            for server, floating_ips in self.floating_ips.iteritems():
-                for floating_ip in floating_ips:
-                    ip_address = floating_ip.floating_ip_address
-                    self._check_vm_connectivity(ip_address,
-                                                ssh_login,
-                                                private_key)
+            for floating_ip, server in self.floating_ips.iteritems():
+                ip_address = floating_ip.floating_ip_address
+                self._check_vm_connectivity(ip_address,
+                                            ssh_login,
+                                            private_key,
+                                            should_connect=should_connect)
         except Exception as exc:
             LOG.exception(exc)
             debug.log_ip_ns()
             raise exc
+
+    def _disassociate_floating_ips(self):
+        for floating_ip, server in self.floating_ips.iteritems():
+            self._disassociate_floating_ip(floating_ip)
+            self.floating_ips[floating_ip] = None
 
     @attr(type='smoke')
     @services('compute', 'network')
@@ -329,7 +331,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._create_networks()
         self._check_networks()
         self._create_servers()
-        self._assign_floating_ips()
+        self._create_and_associate_floating_ips()
         self._wait_for_floating_ip_association()
         self._check_tenant_network_connectivity()
-        self._check_public_network_connectivity()
+        self._check_public_network_connectivity(should_connect=True)
+        self._disassociate_floating_ips()
+        self._check_public_network_connectivity(should_connect=False)
