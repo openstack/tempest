@@ -754,3 +754,29 @@ class NetworkClientJSON(RestClient):
         resp, body = self.put(uri, body=body, headers=self.headers)
         body = json.loads(body)
         return resp, body
+
+    def update_extra_routes(self, router_id, nexthop, destination):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        put_body = {
+            'router': {
+                'routes': [{'nexthop': nexthop,
+                            "destination": destination}]
+            }
+        }
+        body = json.dumps(put_body)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def delete_extra_routes(self, router_id):
+        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
+        null_routes = None
+        put_body = {
+            'router': {
+                'routes': null_routes
+            }
+        }
+        body = json.dumps(put_body)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
