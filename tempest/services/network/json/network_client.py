@@ -680,6 +680,24 @@ class NetworkClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
+    def show_agent(self, agent_id):
+        uri = '%s/agents/%s' % (self.uri_prefix, agent_id)
+        resp, body = self.get(uri, self.headers)
+        body = json.loads(body)
+        return resp, body
+
+    def update_agent(self, agent_id, agent_info):
+        """
+        :param agent_info: Agent update information.
+        E.g {"admin_state_up": True}
+        """
+        uri = '%s/agents/%s' % (self.uri_prefix, agent_id)
+        agent = {"agent": agent_info}
+        body = json.dumps(agent)
+        resp, body = self.put(uri, body=body, headers=self.headers)
+        body = json.loads(body)
+        return resp, body
+
     def list_routers_on_l3_agent(self, agent_id):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri, self.headers)
