@@ -335,8 +335,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         if should_succeed:
             msg = "Timed out waiting for %s to become reachable" % ip
         else:
-            # todo(yfried): remove this line when bug 1252620 is fixed
-            return True
             msg = "%s is reachable" % ip
         try:
             self.assertTrue(self._check_remote_connectivity(access_point, ip,
