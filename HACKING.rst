@@ -39,7 +39,7 @@ and ``finally`` block could replace the original exception,
 when the additional operations leads to another exception.
 
 Just letting an exception to propagate, is not bad idea in a test case,
- at all.
+at all.
 
 Try to avoid using any exception handling construct which can hide the errors
 origin.
@@ -53,10 +53,10 @@ exceptions and still ensure resources are correctly cleaned up if the
 test fails part way through.
 
 Use the ``self.assert*`` methods provided by the unit test framework
- the signal failures early.
+the signal failures early.
 
 Avoid using the ``self.fail`` alone, it's stack trace will signal
- the ``self.fail`` line as the origin of the error.
+the ``self.fail`` line as the origin of the error.
 
 Avoid constructing complex boolean expressions for assertion.
 The ``self.assertTrue`` or ``self.assertFalse`` without a ``msg`` argument,
