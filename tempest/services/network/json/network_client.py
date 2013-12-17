@@ -46,6 +46,9 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         # {'resources': [ res1, res2] }
         return res[res.keys()[0]]
 
+    def serialize(self, data):
+        return json.dumps(data)
+
     def create_network(self, name, **kwargs):
         post_body = {'network': kwargs}
         post_body['network']['name'] = name
@@ -303,21 +306,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.loads(body)
         return resp, body
 
-    def create_pool(self, name, lb_method, protocol, subnet_id):
-        post_body = {
-            "pool": {
-                "protocol": protocol,
-                "name": name,
-                "subnet_id": subnet_id,
-                "lb_method": lb_method
-            }
-        }
-        body = json.dumps(post_body)
-        uri = '%s/lb/pools' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
     def update_vip(self, vip_id, new_name):
         put_body = {
             "vip": {
@@ -326,18 +314,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         }
         body = json.dumps(put_body)
         uri = '%s/lb/vips/%s' % (self.uri_prefix, vip_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_pool(self, pool_id, new_name):
-        put_body = {
-            "pool": {
-                "name": new_name,
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/lb/pools/%s' % (self.uri_prefix, pool_id)
         resp, body = self.put(uri, body)
         body = json.loads(body)
         return resp, body
