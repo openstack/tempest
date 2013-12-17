@@ -256,7 +256,7 @@
 # (integer value)
 #build_timeout=300
 
-# Does the test environment support snapshots? (boolean value)
+# Should the tests ssh to instances? (boolean value)
 #run_ssh=false
 
 # User name used to authenticate to an instance. (string
