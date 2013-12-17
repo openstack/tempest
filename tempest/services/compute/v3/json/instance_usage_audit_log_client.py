@@ -20,21 +20,18 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class InstanceUsagesAuditLogClientJSON(RestClient):
+class InstanceUsagesAuditLogV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(InstanceUsagesAuditLogClientJSON, self).__init__(
+        super(InstanceUsagesAuditLogV3ClientJSON, self).__init__(
             config, username, password, auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = self.config.compute.catalog_v3_type
 
-    def list_instance_usage_audit_logs(self):
-        url = 'os-instance_usage_audit_log'
-        resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body["instance_usage_audit_logs"]
-
-    def get_instance_usage_audit_log(self, time_before):
-        url = 'os-instance_usage_audit_log/%s' % time_before
+    def list_instance_usage_audit_logs(self, time_before=None):
+        if time_before:
+            url = 'os-instance-usage-audit-log?before=%s' % time_before
+        else:
+            url = 'os-instance-usage-audit-log'
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body["instance_usage_audit_log"]

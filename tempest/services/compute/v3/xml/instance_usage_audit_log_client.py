@@ -21,21 +21,18 @@ from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class InstanceUsagesAuditLogClientXML(RestClientXML):
+class InstanceUsagesAuditLogV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(InstanceUsagesAuditLogClientXML, self).__init__(
+        super(InstanceUsagesAuditLogV3ClientXML, self).__init__(
             config, username, password, auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = self.config.compute.catalog_v3_type
 
-    def list_instance_usage_audit_logs(self):
-        url = 'os-instance_usage_audit_log'
+    def list_instance_usage_audit_logs(self, time_before=None):
+        if time_before:
+            url = 'os-instance-usage-audit-log?before=%s' % time_before
+        else:
+            url = 'os-instance-usage-audit-log'
         resp, body = self.get(url, self.headers)
         instance_usage_audit_logs = xml_to_json(etree.fromstring(body))
         return resp, instance_usage_audit_logs
-
-    def get_instance_usage_audit_log(self, time_before):
-        url = 'os-instance_usage_audit_log/%s' % time_before
-        resp, body = self.get(url, self.headers)
-        instance_usage_audit_log = xml_to_json(etree.fromstring(body))
-        return resp, instance_usage_audit_log
