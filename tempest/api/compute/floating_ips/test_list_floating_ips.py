@@ -54,25 +54,23 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         # Creating a floating IP for which details are to be checked
-        try:
-            resp, body = self.client.create_floating_ip()
-            floating_ip_instance_id = body['instance_id']
-            floating_ip_ip = body['ip']
-            floating_ip_fixed_ip = body['fixed_ip']
-            floating_ip_id = body['id']
-            resp, body = \
-                self.client.get_floating_ip_details(floating_ip_id)
-            self.assertEqual(200, resp.status)
-            # Comparing the details of floating IP
-            self.assertEqual(floating_ip_instance_id,
-                             body['instance_id'])
-            self.assertEqual(floating_ip_ip, body['ip'])
-            self.assertEqual(floating_ip_fixed_ip,
-                             body['fixed_ip'])
-            self.assertEqual(floating_ip_id, body['id'])
-        # Deleting the floating IP created in this method
-        finally:
-            self.client.delete_floating_ip(floating_ip_id)
+        resp, body = self.client.create_floating_ip()
+        floating_ip_id = body['id']
+        self.addCleanup(self.client.delete_floating_ip,
+                        floating_ip_id)
+        floating_ip_instance_id = body['instance_id']
+        floating_ip_ip = body['ip']
+        floating_ip_fixed_ip = body['fixed_ip']
+        resp, body = \
+            self.client.get_floating_ip_details(floating_ip_id)
+        self.assertEqual(200, resp.status)
+        # Comparing the details of floating IP
+        self.assertEqual(floating_ip_instance_id,
+                         body['instance_id'])
+        self.assertEqual(floating_ip_ip, body['ip'])
+        self.assertEqual(floating_ip_fixed_ip,
+                         body['fixed_ip'])
+        self.assertEqual(floating_ip_id, body['id'])
 
     @attr(type='gate')
     def test_list_floating_ip_pools(self):
