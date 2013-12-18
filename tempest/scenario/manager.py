@@ -220,14 +220,27 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.os_resources = []
 
     @classmethod
-    def credentials(cls):
+    def _get_credentials(cls, get_creds, prefix):
         if cls.config.compute.allow_tenant_isolation:
-            return cls.isolated_creds.get_primary_creds()
+            return get_creds()
 
-        username = cls.config.identity.username
-        password = cls.config.identity.password
-        tenant_name = cls.config.identity.tenant_name
+        username = getattr(cls.config.identity, prefix + 'username')
+        password = getattr(cls.config.identity, prefix + 'password')
+        tenant_name = getattr(cls.config.identity, prefix + 'tenant_name')
         return username, tenant_name, password
+
+    @classmethod
+    def credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_primary_creds, '')
+
+    @classmethod
+    def alt_credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_alt_creds, 'alt_')
+
+    @classmethod
+    def admin_credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_admin_creds,
+                                    'admin_')
 
     @classmethod
     def tearDownClass(cls):
