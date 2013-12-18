@@ -68,10 +68,10 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
 
     def _delete_floating_ip(self, floating_ip_id):
         # Deletes a floating IP and verifies if it is deleted or not
-        resp, _ = self.client.delete_floating_ip(floating_ip_id)
+        resp, _ = self.client.delete_floatingip(floating_ip_id)
         self.assertEqual(204, resp.status)
         # Asserting that the floating_ip is not found in list after deletion
-        resp, floating_ips = self.client.list_floating_ips()
+        resp, floating_ips = self.client.list_floatingips()
         floatingip_id_list = list()
         for f in floating_ips['floatingips']:
             floatingip_id_list.append(f['id'])
@@ -106,7 +106,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(show_floating_ip['port_id'], self.port[0]['id'])
 
         # Verify the floating ip exists in the list of all floating_ips
-        resp, floating_ips = self.client.list_floating_ips()
+        resp, floating_ips = self.client.list_floatingips()
         self.assertEqual('200', resp['status'])
         floatingip_id_list = list()
         for f in floating_ips['floatingips']:
