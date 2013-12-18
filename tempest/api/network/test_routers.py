@@ -96,7 +96,8 @@ class RoutersTest(base.BaseRouterTest):
         network = self.create_network()
         self.create_subnet(network)
         router = self.create_router(data_utils.rand_name('router-'))
-        resp, port_body = self.client.create_port(network['id'])
+        resp, port_body = self.client.create_port(
+            network_id=network['id'])
         # add router interface to port created above
         resp, interface = self.client.add_router_interface_with_port_id(
             router['id'], port_body['port']['id'])

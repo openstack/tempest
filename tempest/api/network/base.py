@@ -117,13 +117,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         """Wrapper utility that returns a test network."""
         network_name = network_name or data_utils.rand_name('test-network-')
 
-        resp, body = cls.client.create_network(network_name)
+        resp, body = cls.client.create_network(name=network_name)
         network = body['network']
         cls.networks.append(network)
         return network
 
     @classmethod
-    def create_subnet(cls, network):
+    def create_subnet(cls, network, ip_version=4):
         """Wrapper utility that returns a test subnet."""
         cidr = netaddr.IPNetwork(cls.network_cfg.tenant_network_cidr)
         mask_bits = cls.network_cfg.tenant_network_mask_bits
@@ -132,8 +132,10 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         failure = None
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
-                resp, body = cls.client.create_subnet(network['id'],
-                                                      str(subnet_cidr))
+                resp, body = cls.client.create_subnet(
+                    network_id=network['id'],
+                    cidr=str(subnet_cidr),
+                    ip_version=ip_version)
                 break
             except exceptions.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
@@ -152,7 +154,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_port(cls, network):
         """Wrapper utility that returns a test port."""
-        resp, body = cls.client.create_port(network['id'])
+        resp, body = cls.client.create_port(network_id=network['id'])
         port = body['port']
         cls.ports.append(port)
         return port

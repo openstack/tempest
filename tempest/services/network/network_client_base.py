@@ -158,3 +158,31 @@ class NetworkClientBase(object):
             if name[:prefix_len] == prefix:
                 return method_functors[index](name[prefix_len:])
         raise AttributeError(name)
+
+    # Common methods that are hard to automate
+    def create_bulk_network(self, count, names):
+        network_list = list()
+        for i in range(count):
+            network_list.append({'name': names[i]})
+        post_data = {'networks': network_list}
+        body = self.serialize_list(post_data, "networks", "network")
+        uri = self.get_uri("networks")
+        resp, body = self.post(uri, body)
+        body = {'networks': self.deserialize_list(body)}
+        return resp, body
+
+    def create_bulk_subnet(self, subnet_list):
+        post_data = {'subnets': subnet_list}
+        body = self.serialize_list(post_data, 'subnets', 'subnet')
+        uri = self.get_uri('subnets')
+        resp, body = self.post(uri, body)
+        body = {'subnets': self.deserialize_list(body)}
+        return resp, body
+
+    def create_bulk_port(self, port_list):
+        post_data = {'ports': port_list}
+        body = self.serialize_list(post_data, 'ports', 'port')
+        uri = self.get_uri('ports')
+        resp, body = self.post(uri, body)
+        body = {'ports': self.deserialize_list(body)}
+        return resp, body
