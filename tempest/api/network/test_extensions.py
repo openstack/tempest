@@ -17,7 +17,7 @@
 
 
 from tempest.api.network import base
-from tempest.test import attr
+from tempest import test
 
 
 class ExtensionsTestJSON(base.BaseNetworkTest):
@@ -38,7 +38,7 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
     def setUpClass(cls):
         super(ExtensionsTestJSON, cls).setUpClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_show_extensions(self):
         # List available extensions for the tenant
         expected_alias = ['security-group', 'l3_agent_scheduler',
@@ -70,9 +70,11 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
             self.assertEqual(ext_details['alias'], ext_alias)
             self.assertEqual(ext_details, ext)
         # Verify if expected extensions are present in the actual list
-        # of extensions returned
+        # of extensions returned, but only for those that have been
+        # enabled via configuration
         for e in expected_alias:
-            self.assertIn(e, actual_alias)
+            if test.is_extension_enabled(e, 'network'):
+                self.assertIn(e, actual_alias)
 
 
 class ExtensionsTestXML(ExtensionsTestJSON):
