@@ -91,3 +91,7 @@ class RemoteClient():
     def ping_host(self, host):
         cmd = 'ping -c1 -w1 %s' % host
         return self.ssh_client.exec_command(cmd)
+
+    def get_mac_address(self):
+        cmd = "/sbin/ifconfig | awk '/HWaddr/ {print $5}'"
+        return self.ssh_client.exec_command(cmd)
