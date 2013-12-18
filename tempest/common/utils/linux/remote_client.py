@@ -19,7 +19,6 @@ from tempest.common.ssh import Client
 from tempest.common import utils
 from tempest.config import TempestConfig
 from tempest.exceptions import ServerUnreachable
-from tempest.exceptions import SSHTimeout
 
 
 class RemoteClient():
@@ -40,16 +39,15 @@ class RemoteClient():
                     break
             else:
                 raise ServerUnreachable()
-
         self.ssh_client = Client(ip_address, username, password, ssh_timeout,
                                  pkey=pkey,
                                  channel_timeout=ssh_channel_timeout)
-        if not self.ssh_client.test_connection_auth():
-            raise SSHTimeout()
 
-    def can_authenticate(self):
-        # Re-authenticate
-        return self.ssh_client.test_connection_auth()
+    def validate_authentication(self):
+        """Validate ssh connection and authentication
+           This method raises an Exception when the validation fails.
+        """
+        self.ssh_client.test_connection_auth()
 
     def hostname_equals_servername(self, expected_hostname):
         # Get host name using command "hostname"

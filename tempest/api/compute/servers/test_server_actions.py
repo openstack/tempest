@@ -67,7 +67,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # Verify that the user can authenticate with the new password
             resp, server = self.client.get_server(self.server_id)
             linux_client = RemoteClient(server, self.ssh_user, new_password)
-            self.assertTrue(linux_client.can_authenticate())
+            linux_client.validate_authentication()
 
     @attr(type='smoke')
     def test_reboot_server_hard(self):
@@ -141,7 +141,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
             linux_client = RemoteClient(server, self.ssh_user, password)
-            self.assertTrue(linux_client.can_authenticate())
+            linux_client.validate_authentication()
 
     @attr(type='gate')
     def test_rebuild_server_in_stop_state(self):

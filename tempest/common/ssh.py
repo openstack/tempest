@@ -23,11 +23,15 @@ import time
 import warnings
 
 from tempest import exceptions
+from tempest.openstack.common import log as logging
 
 
 with warnings.catch_warnings():
     warnings.simplefilter("ignore")
     import paramiko
+
+
+LOG = logging.getLogger(__name__)
 
 
 class Client(object):
@@ -49,33 +53,44 @@ class Client(object):
 
     def _get_ssh_connection(self, sleep=1.5, backoff=1.01):
         """Returns an ssh connection to the specified host."""
-        _timeout = True
         bsleep = sleep
         ssh = paramiko.SSHClient()
         ssh.set_missing_host_key_policy(
             paramiko.AutoAddPolicy())
         _start_time = time.time()
-
-        while not self._is_timed_out(_start_time):
+        if self.pkey is not None:
+            LOG.info("Creating ssh connection to '%s' as '%s'"
+                     " with public key authentication",
+                     self.host, self.username)
+        else:
+            LOG.info("Creating ssh connection to '%s' as '%s'"
+                     " with password %s",
+                     self.host, self.username, str(self.password))
+        attempts = 0
+        while True:
             try:
                 ssh.connect(self.host, username=self.username,
                             password=self.password,
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
                             timeout=self.channel_timeout, pkey=self.pkey)
-                _timeout = False
-                break
+                LOG.info("ssh connection to %s@%s sucessfuly created",
+                         self.username, self.host)
+                return ssh
             except (socket.error,
-                    paramiko.AuthenticationException,
                     paramiko.SSHException):
+                attempts += 1
                 time.sleep(bsleep)
                 bsleep *= backoff
-                continue
-        if _timeout:
-            raise exceptions.SSHTimeout(host=self.host,
-                                        user=self.username,
-                                        password=self.password)
-        return ssh
+                if not self._is_timed_out(_start_time):
+                    continue
+                else:
+                    LOG.exception("Failed to establish authenticated ssh"
+                                  " connection to %s@%s after %d attempts",
+                                  self.username, self.host, attempts)
+                    raise exceptions.SSHTimeout(host=self.host,
+                                                user=self.username,
+                                                password=self.password)
 
     def _is_timed_out(self, start_time):
         return (time.time() - self.timeout) > start_time
@@ -144,11 +159,6 @@ class Client(object):
         return ''.join(out_data)
 
     def test_connection_auth(self):
-        """Returns true if ssh can connect to server."""
-        try:
-            connection = self._get_ssh_connection()
-            connection.close()
-        except paramiko.AuthenticationException:
-            return False
-
-        return True
+        """Raises an exception when we can not connect to server via ssh."""
+        connection = self._get_ssh_connection()
+        connection.close()

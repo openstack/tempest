@@ -169,9 +169,9 @@ Outputs:
             body['physical_resource_id'])
 
         # Check that the user can authenticate with the generated password
-        linux_client = RemoteClient(
-            server, 'ec2-user', pkey=self.keypair['private_key'])
-        self.assertTrue(linux_client.can_authenticate())
+        linux_client = RemoteClient(server, 'ec2-user',
+                                    pkey=self.keypair['private_key'])
+        linux_client.validate_authentication()
 
     @attr(type='slow')
     def test_stack_wait_condition_data(self):
