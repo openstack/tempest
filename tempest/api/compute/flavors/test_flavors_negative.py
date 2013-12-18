@@ -18,7 +18,6 @@
 import uuid
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
@@ -30,14 +29,6 @@ class FlavorsNegativeTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(FlavorsNegativeTestJSON, cls).setUpClass()
         cls.client = cls.flavors_client
-
-        # Generating a nonexistent flavor id
-        resp, flavors = cls.client.list_flavors()
-        flavor_ids = [flavor['id'] for flavor in flavors]
-        while True:
-            cls.nonexistent_flavor_id = data_utils.rand_int_id(start=999)
-            if cls.nonexistent_flavor_id not in flavor_ids:
-                break
 
     @attr(type=['negative', 'gate'])
     def test_invalid_minRam_filter(self):
@@ -52,17 +43,11 @@ class FlavorsNegativeTestJSON(base.BaseV2ComputeTest):
                           {'minDisk': 'invalid'})
 
     @attr(type=['negative', 'gate'])
-    def test_get_flavor_details_for_invalid_flavor_id(self):
-        # Ensure 404 returned for invalid flavor ID
-        invalid_flavor_id = str(uuid.uuid4())
-        self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
-                          invalid_flavor_id)
-
-    @attr(type=['negative', 'gate'])
     def test_non_existent_flavor_id(self):
         # flavor details are not returned for non-existent flavors
+        nonexistent_flavor_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
-                          self.nonexistent_flavor_id)
+                          nonexistent_flavor_id)
 
 
 class FlavorsNegativeTestXML(FlavorsNegativeTestJSON):
