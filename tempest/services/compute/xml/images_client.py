@@ -15,12 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
 import urllib
 
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest.common import waiters
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
@@ -140,17 +140,7 @@ class ImagesClientXML(RestClientXML):
 
     def wait_for_image_status(self, image_id, status):
         """Waits for an image to reach a given status."""
-        resp, image = self.get_image(image_id)
-        start = int(time.time())
-
-        while image['status'] != status:
-            time.sleep(self.build_interval)
-            resp, image = self.get_image(image_id)
-            if image['status'] == 'ERROR':
-                raise exceptions.AddImageException(image_id=image_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                raise exceptions.TimeoutException
+        waiters.wait_for_image_status(self, image_id, status)
 
     def _metadata_body(self, meta):
         post_body = Element('metadata')
