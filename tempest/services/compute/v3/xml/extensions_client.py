@@ -43,3 +43,8 @@ class ExtensionsV3ClientXML(RestClientXML):
         _, extensions = self.list_extensions()
         exts = extensions['extensions']
         return any([e for e in exts if e['name'] == extension])
+
+    def get_extension(self, extension_alias):
+        resp, body = self.get('extensions/%s' % extension_alias, self.headers)
+        body = xml_to_json(etree.fromstring(body))
+        return resp, body
