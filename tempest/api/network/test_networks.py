@@ -184,24 +184,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
                 found = n['id']
         self.assertIsNotNone(found, "Port list doesn't contain created port")
 
-    @attr(type=['negative', 'smoke'])
-    def test_show_non_existent_network(self):
-        non_exist_id = data_utils.rand_name('network')
-        self.assertRaises(exceptions.NotFound, self.client.show_network,
-                          non_exist_id)
-
-    @attr(type=['negative', 'smoke'])
-    def test_show_non_existent_subnet(self):
-        non_exist_id = data_utils.rand_name('subnet')
-        self.assertRaises(exceptions.NotFound, self.client.show_subnet,
-                          non_exist_id)
-
-    @attr(type=['negative', 'smoke'])
-    def test_show_non_existent_port(self):
-        non_exist_id = data_utils.rand_name('port')
-        self.assertRaises(exceptions.NotFound, self.client.show_port,
-                          non_exist_id)
-
 
 class NetworksTestXML(NetworksTestJSON):
     _interface = 'xml'
