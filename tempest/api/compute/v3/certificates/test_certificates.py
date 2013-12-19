@@ -19,14 +19,14 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class CertificatesTestJSON(base.BaseV2ComputeTest):
+class CertificatesV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @attr(type='gate')
     def test_create_and_get_root_certificate(self):
         # create certificates
         resp, create_body = self.certificates_client.create_certificate()
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
         self.assertIn('data', create_body)
         self.assertIn('private_key', create_body)
         # get the root certificate
@@ -36,5 +36,5 @@ class CertificatesTestJSON(base.BaseV2ComputeTest):
         self.assertIn('private_key', body)
 
 
-class CertificatesTestXML(CertificatesTestJSON):
+class CertificatesV3TestXML(CertificatesV3TestJSON):
     _interface = 'xml'

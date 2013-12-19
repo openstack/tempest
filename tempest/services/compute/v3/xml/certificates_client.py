@@ -19,12 +19,13 @@
 from tempest.common.rest_client import RestClientXML
 
 
-class CertificatesClientXML(RestClientXML):
+class CertificatesV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(CertificatesClientXML, self).__init__(config, username, password,
-                                                    auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(CertificatesV3ClientXML, self).__init__(config, username,
+                                                      password,
+                                                      auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def get_certificate(self, id):
         url = "os-certificates/%s" % (id)

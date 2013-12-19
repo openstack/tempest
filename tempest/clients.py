@@ -52,6 +52,8 @@ from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
 from tempest.services.compute.v3.json.availability_zone_client import \
     AvailabilityZoneV3ClientJSON
+from tempest.services.compute.v3.json.certificates_client import \
+    CertificatesV3ClientJSON
 from tempest.services.compute.v3.json.extensions_client import \
     ExtensionsV3ClientJSON
 from tempest.services.compute.v3.json.hypervisor_client import \
@@ -66,6 +68,8 @@ from tempest.services.compute.v3.json.tenant_usages_client import \
     TenantUsagesV3ClientJSON
 from tempest.services.compute.v3.xml.availability_zone_client import \
     AvailabilityZoneV3ClientXML
+from tempest.services.compute.v3.xml.certificates_client import \
+    CertificatesV3ClientXML
 from tempest.services.compute.v3.xml.extensions_client import \
     ExtensionsV3ClientXML
 from tempest.services.compute.v3.xml.hypervisor_client import \
@@ -206,6 +210,7 @@ class Manager(object):
 
         if interface == 'xml':
             self.certificates_client = CertificatesClientXML(*client_args)
+            self.certificates_v3_client = CertificatesV3ClientXML(*client_args)
             self.servers_client = ServersClientXML(*client_args)
             self.servers_v3_client = ServersV3ClientXML(*client_args)
             self.limits_client = LimitsClientXML(*client_args)
@@ -257,6 +262,8 @@ class Manager(object):
 
         elif interface == 'json':
             self.certificates_client = CertificatesClientJSON(*client_args)
+            self.certificates_v3_client = CertificatesV3ClientJSON(
+                *client_args)
             self.servers_client = ServersClientJSON(*client_args)
             self.servers_v3_client = ServersV3ClientJSON(*client_args)
             self.limits_client = LimitsClientJSON(*client_args)
