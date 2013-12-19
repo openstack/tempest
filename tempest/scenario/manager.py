@@ -248,7 +248,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             except Exception as e:
                 # If the resource is already missing, mission accomplished.
                 # add status code as workaround for bug 1247568
-                if e.__class__.__name__ == 'NotFound' or e.status_code == 404:
+                if (e.__class__.__name__ == 'NotFound' or
+                    hasattr(e, 'status_code') and e.status_code == 404):
                     continue
                 raise
 
