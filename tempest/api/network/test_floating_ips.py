@@ -78,6 +78,8 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(created_floating_ip['port_id'], self.ports[0]['id'])
         self.assertEqual(created_floating_ip['floating_network_id'],
                          self.ext_net_id)
+        self.assertIn(created_floating_ip['fixed_ip_address'],
+                      [ip['ip_address'] for ip in self.ports[0]['fixed_ips']])
         # Verifies the details of a floating_ip
         resp, floating_ip = self.client.show_floatingip(
             created_floating_ip['id'])
@@ -171,6 +173,24 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(updated_floating_ip['port_id'],
                          port_other_router['id'])
         self.assertIsNotNone(updated_floating_ip['fixed_ip_address'])
+
+    @test.attr(type='smoke')
+    def test_create_floating_ip_specifying_a_fixed_ip_address(self):
+        resp, body = self.client.create_floatingip(
+            floating_network_id=self.ext_net_id,
+            port_id=self.ports[1]['id'],
+            fixed_ip_address=self.ports[1]['fixed_ips'][0]['ip_address'])
+        self.assertEqual('201', resp['status'])
+        created_floating_ip = body['floatingip']
+        self.addCleanup(self.client.delete_floatingip,
+                        created_floating_ip['id'])
+        self.assertIsNotNone(created_floating_ip['id'])
+        self.assertEqual(created_floating_ip['fixed_ip_address'],
+                         self.ports[1]['fixed_ips'][0]['ip_address'])
+        resp, floating_ip = self.client.update_floatingip(
+            created_floating_ip['id'], port_id=None)
+        self.assertEqual('200', resp['status'])
+        self.assertIsNone(floating_ip['floatingip']['port_id'])
 
 
 class FloatingIPTestXML(FloatingIPTestJSON):
