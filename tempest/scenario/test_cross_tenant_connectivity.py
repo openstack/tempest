@@ -143,10 +143,9 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
     @classmethod
     def setUpClass(cls):
         super(TestNetworkCrossTenant, cls).setUpClass()
+        alt_creds = cls.alt_credentials()
         cls.alt_tenant_id = cls.manager._get_identity_client(
-            cls.config.identity.alt_username,
-            cls.config.identity.alt_password,
-            cls.config.identity.alt_tenant_name
+            *alt_creds
         ).tenant_id
         cls.check_preconditions()
         # TODO(mnewby) Consider looking up entities as needed instead
@@ -161,15 +160,11 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
         cls.tenants = {}
         cls.demo_tenant = cls.TenantProperties(
             cls.tenant_id,
-            cls.config.identity.username,
-            cls.config.identity.password,
-            cls.config.identity.tenant_name
+            *cls.credentials()
         )
         cls.alt_tenant = cls.TenantProperties(
             cls.alt_tenant_id,
-            cls.config.identity.alt_username,
-            cls.config.identity.alt_password,
-            cls.config.identity.alt_tenant_name
+            *alt_creds
         )
         for tenant in [cls.demo_tenant, cls.alt_tenant]:
             cls.tenants[tenant.tenant_id] = tenant

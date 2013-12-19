@@ -207,7 +207,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             __name__, tempest_client=False)
 
-        username, tenant_name, password = cls.credentials()
+        username, password, tenant_name = cls.credentials()
 
         cls.manager = OfficialClientManager(username, password, tenant_name)
         cls.compute_client = cls.manager.compute_client
@@ -222,12 +222,12 @@ class OfficialClientTest(tempest.test.BaseTestCase):
     @classmethod
     def _get_credentials(cls, get_creds, prefix):
         if cls.config.compute.allow_tenant_isolation:
-            return get_creds()
-
-        username = getattr(cls.config.identity, prefix + 'username')
-        password = getattr(cls.config.identity, prefix + 'password')
-        tenant_name = getattr(cls.config.identity, prefix + 'tenant_name')
-        return username, tenant_name, password
+            username, tenant_name, password = get_creds()
+        else:
+            username = getattr(cls.config.identity, prefix + 'username')
+            password = getattr(cls.config.identity, prefix + 'password')
+            tenant_name = getattr(cls.config.identity, prefix + 'tenant_name')
+        return username, password, tenant_name
 
     @classmethod
     def credentials(cls):
