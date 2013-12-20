@@ -24,6 +24,8 @@ from tempest import exceptions
 from tempest.test import attr
 from tempest.test import skip_because
 
+CONF = config.CONF
+
 
 class SecurityGroupRulesNegativeTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
@@ -34,7 +36,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.security_groups_client
 
     @skip_because(bug="1182384",
-                  condition=config.TempestConfig().service_available.neutron)
+                  condition=CONF.service_available.neutron)
     @attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_non_existent_id(self):
         # Negative test: Creation of Security Group rule should FAIL
@@ -48,7 +50,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+    @testtools.skipIf(CONF.service_available.neutron,
                       "Neutron not check the security_group_id")
     @attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_invalid_id(self):
@@ -168,7 +170,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseV2ComputeTest):
                           secgroup_id, ip_protocol, from_port, to_port)
 
     @skip_because(bug="1182384",
-                  condition=config.TempestConfig().service_available.neutron)
+                  condition=CONF.service_available.neutron)
     @attr(type=['negative', 'smoke'])
     def test_delete_security_group_rule_with_non_existent_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL

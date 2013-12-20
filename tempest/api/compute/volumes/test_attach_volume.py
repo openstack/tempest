@@ -19,13 +19,15 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils.linux.remote_client import RemoteClient
-import tempest.config
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
-    run_ssh = tempest.config.TempestConfig().compute.run_ssh
+    run_ssh = CONF.compute.run_ssh
 
     def __init__(self, *args, **kwargs):
         super(AttachVolumeTestJSON, self).__init__(*args, **kwargs)

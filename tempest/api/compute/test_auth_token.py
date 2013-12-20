@@ -18,6 +18,8 @@ import testtools
 from tempest.api.compute import base
 import tempest.config as config
 
+CONF = config.CONF
+
 
 class AuthTokenTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
@@ -37,7 +39,7 @@ class AuthTokenTestJSON(base.BaseV2ComputeTest):
         # picking list_servers because it's easy.
         self.servers_v2.list_servers()
 
-    @testtools.skipIf(not config.TempestConfig().identity.uri_v3,
+    @testtools.skipIf(not CONF.identity.uri_v3,
                       'v3 auth client not configured')
     def test_v3_token(self):
         # Can get a token using v3 of the identity API and use that to perform

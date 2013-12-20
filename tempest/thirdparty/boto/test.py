@@ -29,7 +29,7 @@ import keystoneclient.exceptions
 
 import tempest.clients
 from tempest.common.utils.file_utils import have_effective_read_access
-import tempest.config
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -37,6 +37,7 @@ from tempest.thirdparty.boto.utils.wait import re_search_wait
 from tempest.thirdparty.boto.utils.wait import state_wait
 from tempest.thirdparty.boto.utils.wait import wait_exception
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -50,11 +51,10 @@ def decision_maker():
     def all_read(*args):
         return all(map(have_effective_read_access, args))
 
-    config = tempest.config.TempestConfig()
-    materials_path = config.boto.s3_materials_path
-    ami_path = materials_path + os.sep + config.boto.ami_manifest
-    aki_path = materials_path + os.sep + config.boto.aki_manifest
-    ari_path = materials_path + os.sep + config.boto.ari_manifest
+    materials_path = CONF.boto.s3_materials_path
+    ami_path = materials_path + os.sep + CONF.boto.ami_manifest
+    aki_path = materials_path + os.sep + CONF.boto.aki_manifest
+    ari_path = materials_path + os.sep + CONF.boto.ari_manifest
 
     A_I_IMAGES_READY = all_read(ami_path, aki_path, ari_path)
     boto_logger = logging.getLogger('boto')
@@ -70,7 +70,7 @@ def decision_maker():
         raise Exception("Unknown (Authentication?) Error")
     openstack = tempest.clients.Manager()
     try:
-        if urlparse.urlparse(config.boto.ec2_url).hostname is None:
+        if urlparse.urlparse(CONF.boto.ec2_url).hostname is None:
             raise Exception("Failed to get hostname from the ec2_url")
         ec2client = openstack.ec2api_client
         try:
@@ -87,7 +87,7 @@ def decision_maker():
         EC2_CAN_CONNECT_ERROR = str(exc)
 
     try:
-        if urlparse.urlparse(config.boto.s3_url).hostname is None:
+        if urlparse.urlparse(CONF.boto.s3_url).hostname is None:
             raise Exception("Failed to get hostname from the s3_url")
         s3client = openstack.s3_client
         try:

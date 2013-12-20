@@ -24,6 +24,7 @@ from tempest import exceptions
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
 
+CONF = config.CONF
 QUOTA_BYTES = 10
 QUOTA_COUNT = 3
 SKIP_MSG = "Container quotas middleware not available."
@@ -32,7 +33,7 @@ SKIP_MSG = "Container quotas middleware not available."
 class ContainerQuotasTest(base.BaseObjectTest):
     """Attemps to test the perfect behavior of quotas in a container."""
     container_quotas_available = \
-        config.TempestConfig().object_storage_feature_enabled.container_quotas
+        CONF.object_storage_feature_enabled.container_quotas
 
     def setUp(self):
         """Creates and sets a container with quotas.

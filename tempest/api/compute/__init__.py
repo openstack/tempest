@@ -15,13 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import config
+# from tempest import config
 from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
-CONFIG = config.TempestConfig()
-CREATE_IMAGE_ENABLED = CONFIG.compute_feature_enabled.create_image
-RESIZE_AVAILABLE = CONFIG.compute_feature_enabled.resize
-CHANGE_PASSWORD_AVAILABLE = CONFIG.compute_feature_enabled.change_password
-DISK_CONFIG_ENABLED = CONFIG.compute_feature_enabled.disk_config
+# CONFIG = config.CONF
+# CREATE_IMAGE_ENABLED = CONFIG.compute_feature_enabled.create_image
+# RESIZE_AVAILABLE = CONFIG.compute_feature_enabled.resize
+# CHANGE_PASSWORD_AVAILABLE = CONFIG.compute_feature_enabled.change_password
+# DISK_CONFIG_ENABLED = CONFIG.compute_feature_enabled.disk_config

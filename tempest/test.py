@@ -33,6 +33,8 @@ from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
+CONF = config.CONF
+
 # All the successful HTTP status codes from RFC 2616
 HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
 
@@ -146,7 +148,7 @@ def is_extension_enabled(extension_name, service):
     """A function that will check the list of enabled extensions from config
 
     """
-    configs = config.TempestConfig()
+    configs = CONF
     config_dict = {
         'compute': configs.compute_feature_enabled.api_extensions,
         'compute_v3': configs.compute_feature_enabled.api_v3_extensions,
@@ -214,7 +216,7 @@ class BaseTestCase(testtools.TestCase,
                    testtools.testcase.WithAttributes,
                    testresources.ResourcedTestCase):
 
-    config = config.TempestConfig()
+    config = CONF
 
     setUpClassCalled = False
 

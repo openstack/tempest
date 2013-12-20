@@ -27,11 +27,13 @@ from tempest import exceptions
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
 
+CONF = config.CONF
+
 
 class ObjectTempUrlTest(base.BaseObjectTest):
 
     tempurl_available = \
-        config.TempestConfig().object_storage_feature_enabled.tempurl
+        CONF.object_storage_feature_enabled.tempurl
 
     @classmethod
     def setUpClass(cls):

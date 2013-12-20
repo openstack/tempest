@@ -17,13 +17,14 @@
 
 import testtools
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -84,7 +85,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
-    @testtools.skipUnless(compute.CREATE_IMAGE_ENABLED,
+    @testtools.skipUnless(CONF.compute_feature_enabled.create_image,
                           'Environment unable to create images.')
     @attr(type='smoke')
     def test_create_delete_image(self):

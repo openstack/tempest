@@ -22,6 +22,8 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.test import attr
 
+CONF = config.CONF
+
 
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
     _interface = 'json'
@@ -40,7 +42,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
         self.assertEqual(202, resp.status)
 
-    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+    @testtools.skipIf(CONF.service_available.neutron,
                       "Skipped because neutron do not support all_tenants"
                       "search filter.")
     @attr(type='smoke')

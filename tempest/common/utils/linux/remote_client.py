@@ -17,18 +17,20 @@ import time
 
 from tempest.common.ssh import Client
 from tempest.common import utils
-from tempest.config import TempestConfig
+from tempest import config
 from tempest.exceptions import ServerUnreachable
+
+CONF = config.CONF
 
 
 class RemoteClient():
 
     # NOTE(afazekas): It should always get an address instead of server
     def __init__(self, server, username, password=None, pkey=None):
-        ssh_timeout = TempestConfig().compute.ssh_timeout
-        network = TempestConfig().compute.network_for_ssh
-        ip_version = TempestConfig().compute.ip_version_for_ssh
-        ssh_channel_timeout = TempestConfig().compute.ssh_channel_timeout
+        ssh_timeout = CONF.compute.ssh_timeout
+        network = CONF.compute.network_for_ssh
+        ip_version = CONF.compute.ip_version_for_ssh
+        ssh_channel_timeout = CONF.compute.ssh_channel_timeout
         if isinstance(server, basestring):
             ip_address = server
         else:

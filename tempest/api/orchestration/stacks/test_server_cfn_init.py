@@ -18,18 +18,17 @@ import testtools
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
-import tempest.config
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
-
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
 class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
     _interface = 'json'
-    existing_keypair = (tempest.config.TempestConfig().
-                        orchestration.keypair_name is not None)
+    existing_keypair = CONF.orchestration.keypair_name is not None
 
     template = """
 HeatTemplateFormatVersion: '2012-12-12'

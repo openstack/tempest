@@ -19,7 +19,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 
-CONFIG = config.TempestConfig()
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -55,7 +55,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                 # responses
                 if str(task_state) == "None":
                     # without state api extension 3 sec usually enough
-                    time.sleep(CONFIG.compute.ready_wait)
+                    time.sleep(CONF.compute.ready_wait)
                     return
             else:
                 return

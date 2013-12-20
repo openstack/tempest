@@ -20,10 +20,8 @@ from __future__ import print_function
 import os
 import sys
 
-
 from oslo.config import cfg
 
-from tempest.common.utils.misc import singleton
 from tempest.openstack.common import log as logging
 
 
@@ -646,8 +644,7 @@ DebugGroup = [
 ]
 
 
-@singleton
-class TempestConfig:
+class TempestConfig(object):
     """Provides OpenStack configuration information."""
 
     DEFAULT_CONFIG_DIR = os.path.join(
@@ -658,6 +655,7 @@ class TempestConfig:
 
     def __init__(self):
         """Initialize a configuration from a conf directory and conf file."""
+        super(TempestConfig, self).__init__()
         config_files = []
         failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
 
@@ -735,3 +733,16 @@ class TempestConfig:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
             self.compute_admin.tenant_name = self.identity.admin_tenant_name
+
+
+class TempestConfigProxy(object):
+    _config = None
+
+    def __getattr__(self, attr):
+        if not self._config:
+            self._config = TempestConfig()
+
+        return getattr(self._config, attr)
+
+
+CONF = TempestConfigProxy()

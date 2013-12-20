@@ -162,6 +162,7 @@ from tempest.services.volume.xml.extensions_client import \
 from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -182,13 +183,12 @@ class Manager(object):
         :param password: Override of the password
         :param tenant_name: Override of the tenant name
         """
-        self.config = config.TempestConfig()
-
+        self.config = CONF
         # If no creds are provided, we fall back on the defaults
         # in the config file for the Compute API.
-        self.username = username or self.config.identity.username
-        self.password = password or self.config.identity.password
-        self.tenant_name = tenant_name or self.config.identity.tenant_name
+        self.username = username or CONF.identity.username
+        self.password = password or CONF.identity.password
+        self.tenant_name = tenant_name or CONF.identity.tenant_name
 
         if None in (self.username, self.password, self.tenant_name):
             msg = ("Missing required credentials. "
@@ -197,15 +197,15 @@ class Manager(object):
                    {'u': username, 'p': password, 't': tenant_name})
             raise exceptions.InvalidConfiguration(msg)
 
-        self.auth_url = self.config.identity.uri
-        self.auth_url_v3 = self.config.identity.uri_v3
+        self.auth_url = CONF.identity.uri
+        self.auth_url_v3 = CONF.identity.uri_v3
 
-        client_args = (self.config, self.username, self.password,
+        client_args = (CONF, self.username, self.password,
                        self.auth_url, self.tenant_name)
 
         if self.auth_url_v3:
             auth_version = 'v3'
-            client_args_v3_auth = (self.config, self.username,
+            client_args_v3_auth = (CONF, self.username,
                                    self.password, self.auth_url_v3,
                                    self.tenant_name, auth_version)
         else:
@@ -233,7 +233,7 @@ class Manager(object):
             self.volume_types_client = VolumeTypesClientXML(*client_args)
             self.identity_client = IdentityClientXML(*client_args)
             self.identity_v3_client = IdentityV3ClientXML(*client_args)
-            self.token_client = TokenClientXML(self.config)
+            self.token_client = TokenClientXML(CONF)
             self.security_groups_client = SecurityGroupsClientXML(
                 *client_args)
             self.interfaces_v3_client = InterfacesV3ClientXML(*client_args)
@@ -288,7 +288,7 @@ class Manager(object):
             self.volume_types_client = VolumeTypesClientJSON(*client_args)
             self.identity_client = IdentityClientJSON(*client_args)
             self.identity_v3_client = IdentityV3ClientJSON(*client_args)
-            self.token_client = TokenClientJSON(self.config)
+            self.token_client = TokenClientJSON(CONF)
             self.security_groups_client = SecurityGroupsClientJSON(
                 *client_args)
             self.interfaces_v3_client = InterfacesV3ClientJSON(*client_args)
@@ -328,7 +328,7 @@ class Manager(object):
         # common clients
         self.hosts_client = HostsClientJSON(*client_args)
         self.account_client = AccountClient(*client_args)
-        if self.config.service_available.glance:
+        if CONF.service_available.glance:
             self.image_client = ImageClientJSON(*client_args)
             self.image_client_v2 = ImageClientV2JSON(*client_args)
         self.container_client = ContainerClient(*client_args)
@@ -350,10 +350,9 @@ class AltManager(Manager):
     """
 
     def __init__(self, interface='json'):
-        conf = config.TempestConfig()
-        super(AltManager, self).__init__(conf.identity.alt_username,
-                                         conf.identity.alt_password,
-                                         conf.identity.alt_tenant_name,
+        super(AltManager, self).__init__(CONF.identity.alt_username,
+                                         CONF.identity.alt_password,
+                                         CONF.identity.alt_tenant_name,
                                          interface=interface)
 
 
@@ -365,10 +364,9 @@ class AdminManager(Manager):
     """
 
     def __init__(self, interface='json'):
-        conf = config.TempestConfig()
-        super(AdminManager, self).__init__(conf.identity.admin_username,
-                                           conf.identity.admin_password,
-                                           conf.identity.admin_tenant_name,
+        super(AdminManager, self).__init__(CONF.identity.admin_username,
+                                           CONF.identity.admin_password,
+                                           CONF.identity.admin_tenant_name,
                                            interface=interface)
 
 
@@ -380,11 +378,10 @@ class ComputeAdminManager(Manager):
     """
 
     def __init__(self, interface='json'):
-        conf = config.TempestConfig()
         base = super(ComputeAdminManager, self)
-        base.__init__(conf.compute_admin.username,
-                      conf.compute_admin.password,
-                      conf.compute_admin.tenant_name,
+        base.__init__(CONF.compute_admin.username,
+                      CONF.compute_admin.password,
+                      CONF.compute_admin.tenant_name,
                       interface=interface)
 
 
@@ -394,9 +391,8 @@ class OrchestrationManager(Manager):
     so that heat templates can create users
     """
     def __init__(self, interface='json'):
-        conf = config.TempestConfig()
         base = super(OrchestrationManager, self)
-        base.__init__(conf.identity.admin_username,
-                      conf.identity.admin_password,
-                      conf.identity.tenant_name,
+        base.__init__(CONF.identity.admin_username,
+                      CONF.identity.admin_password,
+                      CONF.identity.tenant_name,
                       interface=interface)

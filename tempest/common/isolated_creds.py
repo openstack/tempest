@@ -25,6 +25,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -36,7 +37,7 @@ class IsolatedCreds(object):
         self.isolated_net_resources = {}
         self.ports = []
         self.name = name
-        self.config = config.TempestConfig()
+        self.config = CONF
         self.tempest_client = tempest_client
         self.interface = interface
         self.password = password
@@ -44,11 +45,11 @@ class IsolatedCreds(object):
             self._get_admin_clients())
 
     def _get_official_admin_clients(self):
-        username = self.config.identity.admin_username
-        password = self.config.identity.admin_password
-        tenant_name = self.config.identity.admin_tenant_name
-        auth_url = self.config.identity.uri
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        username = CONF.identity.admin_username
+        password = CONF.identity.admin_password
+        tenant_name = CONF.identity.admin_tenant_name
+        auth_url = CONF.identity.uri
+        dscv = CONF.identity.disable_ssl_certificate_validation
         identity_client = keystoneclient.Client(username=username,
                                                 password=password,
                                                 tenant_name=tenant_name,
@@ -164,7 +165,7 @@ class IsolatedCreds(object):
             role = None
             try:
                 roles = self._list_roles()
-                admin_role = self.config.identity.admin_role
+                admin_role = CONF.identity.admin_role
                 if self.tempest_client:
                     role = next(r for r in roles if r['name'] == admin_role)
                 else:
@@ -229,8 +230,8 @@ class IsolatedCreds(object):
         if not self.tempest_client:
             body = {'subnet': {'name': subnet_name, 'tenant_id': tenant_id,
                                'network_id': network_id, 'ip_version': 4}}
-        base_cidr = netaddr.IPNetwork(self.config.network.tenant_network_cidr)
-        mask_bits = self.config.network.tenant_network_mask_bits
+        base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        mask_bits = CONF.network.tenant_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.tempest_client:
@@ -252,7 +253,7 @@ class IsolatedCreds(object):
 
     def _create_router(self, router_name, tenant_id):
         external_net_id = dict(
-            network_id=self.config.network.public_network_id)
+            network_id=CONF.network.public_network_id)
         if self.tempest_client:
             resp, resp_body = self.network_admin_client.create_router(
                 router_name,
@@ -328,7 +329,7 @@ class IsolatedCreds(object):
             self.isolated_creds['primary'] = (user, tenant)
             LOG.info("Acquired isolated creds:\n user: %s, tenant: %s"
                      % (username, tenant_name))
-            if self.config.service_available.neutron:
+            if CONF.service_available.neutron:
                 network, subnet, router = self._create_network_resources(
                     self._get_tenant_id(tenant))
                 self.isolated_net_resources['primary'] = (
@@ -347,7 +348,7 @@ class IsolatedCreds(object):
             self.isolated_creds['admin'] = (user, tenant)
             LOG.info("Acquired admin isolated creds:\n user: %s, tenant: %s"
                      % (username, tenant_name))
-            if self.config.service_available.neutron:
+            if CONF.service_available.neutron:
                 network, subnet, router = self._create_network_resources(
                     self._get_tenant_id(tenant))
                 self.isolated_net_resources['admin'] = (
@@ -366,7 +367,7 @@ class IsolatedCreds(object):
             self.isolated_creds['alt'] = (user, tenant)
             LOG.info("Acquired alt isolated creds:\n user: %s, tenant: %s"
                      % (username, tenant_name))
-            if self.config.service_available.neutron:
+            if CONF.service_available.neutron:
                 network, subnet, router = self._create_network_resources(
                     self._get_tenant_id(tenant))
                 self.isolated_net_resources['alt'] = (

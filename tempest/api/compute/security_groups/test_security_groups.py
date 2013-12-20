@@ -25,6 +25,8 @@ from tempest import exceptions
 from tempest.test import attr
 from tempest.test import skip_because
 
+CONF = config.CONF
+
 
 class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
@@ -129,7 +131,7 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
                           non_exist_id)
 
     @skip_because(bug="1161411",
-                  condition=config.TempestConfig().service_available.neutron)
+                  condition=CONF.service_available.neutron)
     @attr(type=['negative', 'gate'])
     def test_security_group_create_with_invalid_group_name(self):
         # Negative test: Security Group should not be created with group name
@@ -149,7 +151,7 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
                           s_description)
 
     @skip_because(bug="1161411",
-                  condition=config.TempestConfig().service_available.neutron)
+                  condition=CONF.service_available.neutron)
     @attr(type=['negative', 'gate'])
     def test_security_group_create_with_invalid_group_description(self):
         # Negative test:Security Group should not be created with description
@@ -167,7 +169,7 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
                           self.client.create_security_group, s_name,
                           s_description)
 
-    @testtools.skipIf(config.TempestConfig().service_available.neutron,
+    @testtools.skipIf(CONF.service_available.neutron,
                       "Neutron allows duplicate names for security groups")
     @attr(type=['negative', 'gate'])
     def test_security_group_create_with_duplicate_name(self):

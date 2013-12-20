@@ -17,9 +17,11 @@
 
 import testtools
 
-from tempest.api import compute
 from tempest.api.compute import base
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
@@ -27,7 +29,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        if not compute.DISK_CONFIG_ENABLED:
+        if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
         super(ServerDiskConfigTestJSON, cls).setUpClass()
@@ -85,7 +87,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         else:
             return self.flavor_ref
 
-    @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @attr(type='gate')
     def test_resize_server_from_manual_to_auto(self):
         # A server should be resized from manual to auto disk config
@@ -101,7 +104,8 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual('AUTO', server['OS-DCF:diskConfig'])
 
-    @testtools.skipUnless(compute.RESIZE_AVAILABLE, 'Resize not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @attr(type='gate')
     def test_resize_server_from_auto_to_manual(self):
         # A server should be resized from auto to manual disk config

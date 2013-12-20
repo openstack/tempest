@@ -30,7 +30,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
     _interface = 'json'
 
-    CONF = config.TempestConfig()
+    CONF = config.CONF
 
     @classmethod
     def setUpClass(cls):

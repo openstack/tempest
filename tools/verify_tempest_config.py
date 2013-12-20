@@ -21,7 +21,7 @@ from tempest import clients
 from tempest import config
 
 
-CONF = config.TempestConfig()
+CONF = config.CONF
 
 #Dicts matching extension names to config options
 NOVA_EXTENSIONS = {

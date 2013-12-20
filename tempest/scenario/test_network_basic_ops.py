@@ -27,6 +27,7 @@ import tempest.test
 from tempest.test import attr
 from tempest.test import services
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -142,8 +143,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     """
 
-    CONF = config.TempestConfig()
-
     @classmethod
     def check_preconditions(cls):
         super(TestNetworkBasicOps, cls).check_preconditions()
@@ -215,13 +214,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self._create_server(name, network)
 
     def _check_tenant_network_connectivity(self):
-        if not self.config.network.tenant_networks_reachable:
+        if not CONF.network.tenant_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
             LOG.info(msg)
             return
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
-        ssh_login = self.config.compute.image_ssh_user
+        ssh_login = CONF.compute.image_ssh_user
         try:
             for server, key in self.servers.items():
                 for net_name, ip_addresses in server.networks.iteritems():
@@ -239,13 +238,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
         self.assertTrue(
             tempest.test.call_until_true(
-                ip_tracker.run_checks, self.config.compute.build_timeout,
-                self.config.compute.build_interval),
+                ip_tracker.run_checks, CONF.compute.build_timeout,
+                CONF.compute.build_interval),
             "Timed out while waiting for the floating IP assignments "
             "to propagate")
 
     def _create_and_associate_floating_ips(self):
-        public_network_id = self.config.network.public_network_id
+        public_network_id = CONF.network.public_network_id
         for server in self.servers.keys():
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips[floating_ip] = server
@@ -253,7 +252,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     def _check_public_network_connectivity(self, should_connect=True):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
-        ssh_login = self.config.compute.image_ssh_user
+        ssh_login = CONF.compute.image_ssh_user
         try:
             for floating_ip, server in self.floating_ips.iteritems():
                 ip_address = floating_ip.floating_ip_address

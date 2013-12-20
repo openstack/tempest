@@ -28,7 +28,7 @@ from tempest.test import skip_because
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
-    CONF = config.TempestConfig()
+    CONF = config.CONF
 
     @classmethod
     def setUpClass(cls):

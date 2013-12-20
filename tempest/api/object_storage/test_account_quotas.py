@@ -23,10 +23,12 @@ from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
+CONF = config.CONF
+
 
 class AccountQuotasTest(base.BaseObjectTest):
     accounts_quotas_available = \
-        config.TempestConfig().object_storage_feature_enabled.accounts_quotas
+        CONF.object_storage_feature_enabled.accounts_quotas
 
     @classmethod
     def setUpClass(cls):

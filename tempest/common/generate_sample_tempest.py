@@ -18,7 +18,7 @@
 
 import sys
 
-from tempest import config
+import tempest.config
 from tempest.openstack.common.config import generator
 
 # NOTE(mtreinish): This hack is needed because of how oslo config is used in
@@ -31,5 +31,7 @@ from tempest.openstack.common.config import generator
 # the issue by manually loading the config file (which may or may not exist)
 # which will populate all the options before running the generator.
 
-config.TempestConfig()
-generator.generate(sys.argv[1:])
+
+if __name__ == "__main__":
+    CONF = tempest.config.TempestConfig()
+    generator.generate(sys.argv[1:])
