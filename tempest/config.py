@@ -486,6 +486,16 @@ DashboardGroup = [
 ]
 
 
+data_processing_group = cfg.OptGroup(name="data_processing",
+                                     title="Data Processing options")
+
+DataProcessingGroup = [
+    cfg.StrOpt('catalog_type',
+               default='data_processing',
+               help="Catalog type of the data processing service.")
+]
+
+
 boto_group = cfg.OptGroup(name='boto',
                           title='EC2/S3 options')
 BotoGroup = [
@@ -621,6 +631,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('horizon',
                 default=True,
                 help="Whether or not Horizon is expected to be available"),
+    cfg.BoolOpt('savanna',
+                default=False,
+                help="Whether or not Savanna is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -688,6 +701,8 @@ class TempestConfig:
                            ObjectStoreFeaturesGroup)
         register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
         register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
+        register_opt_group(cfg.CONF, data_processing_group,
+                           DataProcessingGroup)
         register_opt_group(cfg.CONF, boto_group, BotoGroup)
         register_opt_group(cfg.CONF, compute_admin_group, ComputeAdminGroup)
         register_opt_group(cfg.CONF, stress_group, StressGroup)
@@ -709,6 +724,7 @@ class TempestConfig:
             'object-storage-feature-enabled']
         self.orchestration = cfg.CONF.orchestration
         self.dashboard = cfg.CONF.dashboard
+        self.data_processing = cfg.CONF.data_processing
         self.boto = cfg.CONF.boto
         self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
