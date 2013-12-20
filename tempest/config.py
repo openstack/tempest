@@ -644,7 +644,8 @@ DebugGroup = [
 ]
 
 
-class TempestConfig(object):
+# this should never be called outside of this class
+class TempestConfigPrivate(object):
     """Provides OpenStack configuration information."""
 
     DEFAULT_CONFIG_DIR = os.path.join(
@@ -655,7 +656,7 @@ class TempestConfig(object):
 
     def __init__(self):
         """Initialize a configuration from a conf directory and conf file."""
-        super(TempestConfig, self).__init__()
+        super(TempestConfigPrivate, self).__init__()
         config_files = []
         failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
 
@@ -740,7 +741,7 @@ class TempestConfigProxy(object):
 
     def __getattr__(self, attr):
         if not self._config:
-            self._config = TempestConfig()
+            self._config = TempestConfigPrivate()
 
         return getattr(self._config, attr)
 
