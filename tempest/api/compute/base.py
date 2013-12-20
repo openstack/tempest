@@ -130,12 +130,22 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             r, b = cls.servers_client.list_servers()
             servers = [s for s in b['servers'] if s['name'].startswith(name)]
 
-        cls.servers.extend(servers)
-
         if 'wait_until' in kwargs:
             for server in servers:
-                cls.servers_client.wait_for_server_status(
-                    server['id'], kwargs['wait_until'])
+                try:
+                    cls.servers_client.wait_for_server_status(
+                        server['id'], kwargs['wait_until'])
+                except Exception as ex:
+                    if ('preserve_server_on_error' not in kwargs
+                        or kwargs['preserve_server_on_error'] is False):
+                        for server in servers:
+                            try:
+                                cls.servers_client.delete_server(server['id'])
+                            except Exception:
+                                pass
+                    raise ex
+
+        cls.servers.extend(servers)
 
         return resp, body
 
