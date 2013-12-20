@@ -123,9 +123,7 @@ class SecurityGroupsTestJSON(base.BaseV2ComputeTest):
         # Create server and add the security group created
         # above to the server we just created
         server_name = data_utils.rand_name('server')
-        resp, server = self.servers_client.create_server(server_name,
-                                                         self.image_ref,
-                                                         self.flavor_ref)
+        resp, server = self.create_test_server(name=server_name)
         server_id = server['id']
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         resp, body = self.servers_client.add_security_group(server_id,
