@@ -108,6 +108,7 @@ from tempest.services.compute.xml.tenant_usages_client import \
     TenantUsagesClientXML
 from tempest.services.compute.xml.volumes_extensions_client import \
     VolumesExtensionsClientXML
+from tempest.services.data_processing.v1_1.client import DataProcessingClient
 from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
@@ -338,6 +339,7 @@ class Manager(object):
         self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
         self.custom_account_client = \
             AccountClientCustomizedHeader(*client_args)
+        self.data_processing_client = DataProcessingClient(*client_args)
 
 
 class AltManager(Manager):
