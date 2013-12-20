@@ -17,7 +17,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest.test import attr
 
 
@@ -33,18 +32,12 @@ class ServicesAdminV3TestJSON(base.BaseV3ComputeAdminTest):
     def setUpClass(cls):
         super(ServicesAdminV3TestJSON, cls).setUpClass()
         cls.client = cls.services_admin_client
-        cls.non_admin_client = cls.services_client
 
     @attr(type='gate')
     def test_list_services(self):
         resp, services = self.client.list_services()
         self.assertEqual(200, resp.status)
         self.assertNotEqual(0, len(services))
-
-    @attr(type=['negative', 'gate'])
-    def test_list_services_with_non_admin_user(self):
-        self.assertRaises(exceptions.Unauthorized,
-                          self.non_admin_client.list_services)
 
     @attr(type='gate')
     def test_get_service_by_service_binary_name(self):
@@ -74,15 +67,6 @@ class ServicesAdminV3TestJSON(base.BaseV3ComputeAdminTest):
         # on order.
         self.assertEqual(sorted(s1), sorted(s2))
 
-    @attr(type=['negative', 'gate'])
-    def test_get_service_by_invalid_params(self):
-        # return all services if send the request with invalid parameter
-        resp, services = self.client.list_services()
-        params = {'xxx': 'nova-compute'}
-        resp, services_xxx = self.client.list_services(params)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(len(services), len(services_xxx))
-
     @attr(type='gate')
     def test_get_service_by_service_and_host_name(self):
         resp, services = self.client.list_services()
@@ -94,24 +78,6 @@ class ServicesAdminV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertEqual(1, len(services))
         self.assertEqual(host_name, services[0]['host'])
         self.assertEqual(binary_name, services[0]['binary'])
-
-    @attr(type=['negative', 'gate'])
-    def test_get_service_by_invalid_service_and_valid_host(self):
-        resp, services = self.client.list_services()
-        host_name = services[0]['host']
-        params = {'host': host_name, 'binary': 'xxx'}
-        resp, services = self.client.list_services(params)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(0, len(services))
-
-    @attr(type=['negative', 'gate'])
-    def test_get_service_with_valid_service_and_invalid_host(self):
-        resp, services = self.client.list_services()
-        binary_name = services[0]['binary']
-        params = {'host': 'xxx', 'binary': binary_name}
-        resp, services = self.client.list_services(params)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(0, len(services))
 
 
 class ServicesAdminV3TestXML(ServicesAdminV3TestJSON):
