@@ -137,7 +137,7 @@ ComputeGroup = [
                help="Timeout in seconds to wait for an instance to build."),
     cfg.BoolOpt('run_ssh',
                 default=False,
-                help="Does the test environment support snapshots?"),
+                help="Should the tests ssh to instances?"),
     cfg.StrOpt('ssh_user',
                default='root',
                help="User name used to authenticate to an instance."),
