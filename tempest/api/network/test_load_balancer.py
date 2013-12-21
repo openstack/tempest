@@ -17,7 +17,7 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class LoadBalancerJSON(base.BaseNetworkTest):
@@ -42,6 +42,9 @@ class LoadBalancerJSON(base.BaseNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(LoadBalancerJSON, cls).setUpClass()
+        if not test.is_extension_enabled('lbaas', 'network'):
+            msg = "lbaas extension not enabled."
+            raise cls.skipException(msg)
         cls.network = cls.create_network()
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)
@@ -53,7 +56,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         cls.member = cls.create_member(80, cls.pool)
         cls.health_monitor = cls.create_health_monitor(4, 3, "TCP", 1)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_vips(self):
         # Verify the vIP exists in the list of all vIPs
         resp, body = self.client.list_vips()
@@ -97,7 +100,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         resp, body = self.client.delete_pool(pool['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_vip(self):
         # Verifies the details of a vip
         resp, body = self.client.show_vip(self.vip['id'])
@@ -106,7 +109,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertEqual(self.vip['id'], vip['id'])
         self.assertEqual(self.vip['name'], vip['name'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_pool(self):
         # Verifies the details of a pool
         resp, body = self.client.show_pool(self.pool['id'])
@@ -115,7 +118,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertEqual(self.pool['id'], pool['id'])
         self.assertEqual(self.pool['name'], pool['name'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_pools(self):
         # Verify the pool exists in the list of all pools
         resp, body = self.client.list_pools()
@@ -123,7 +126,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         pools = body['pools']
         self.assertIn(self.pool['id'], [p['id'] for p in pools])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_members(self):
         # Verify the member exists in the list of all members
         resp, body = self.client.list_members()
@@ -131,7 +134,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         members = body['members']
         self.assertIn(self.member['id'], [m['id'] for m in members])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_member(self):
         # Creates a member
         resp, body = self.client.create_member("10.0.9.47", 80,
@@ -148,7 +151,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         resp, body = self.client.delete_member(member['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_member(self):
         # Verifies the details of a member
         resp, body = self.client.show_member(self.member['id'])
@@ -158,7 +161,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertEqual(self.member['admin_state_up'],
                          member['admin_state_up'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_health_monitors(self):
         # Verify the health monitor exists in the list of all health monitors
         resp, body = self.client.list_health_monitors()
@@ -167,7 +170,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertIn(self.health_monitor['id'],
                       [h['id'] for h in health_monitors])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_health_monitor(self):
         # Creates a health_monitor
         resp, body = self.client.create_health_monitor(4, 3, "TCP", 1)
@@ -184,7 +187,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         resp, body = self.client.delete_health_monitor(health_monitor['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_health_monitor(self):
         # Verifies the details of a health_monitor
         resp, body = self.client.show_health_monitor(self.health_monitor['id'])
@@ -194,7 +197,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertEqual(self.health_monitor['admin_state_up'],
                          health_monitor['admin_state_up'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_associate_disassociate_health_monitor_with_pool(self):
         # Verify that a health monitor can be associated with a pool
         resp, body = (self.client.associate_health_monitor_with_pool
