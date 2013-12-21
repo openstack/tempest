@@ -92,7 +92,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         self.assertEqual(sorted(list1), sorted(list2))
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
