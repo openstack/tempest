@@ -49,3 +49,6 @@ class SimpleReadOnlyCeilometerClientTest(tempest.cli.ClientTestBase):
 
     def test_ceilometermeter_alarm_list(self):
         self.ceilometer('alarm-list')
+
+    def test_ceilometer_version(self):
+        self.ceilometer('', flags='--version')
