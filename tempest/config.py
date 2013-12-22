@@ -18,7 +18,6 @@
 from __future__ import print_function
 
 import os
-import sys
 
 from oslo.config import cfg
 
@@ -654,7 +653,7 @@ class TempestConfigPrivate(object):
 
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
-    def __init__(self):
+    def __init__(self, parse_conf=True):
         """Initialize a configuration from a conf directory and conf file."""
         super(TempestConfigPrivate, self).__init__()
         config_files = []
@@ -672,10 +671,9 @@ class TempestConfigPrivate(object):
                 'TEMPEST_CONFIG' in os.environ):
             path = failsafe_path
 
-        if not os.path.exists(path):
-            msg = "Config file %s not found" % path
-            print(RuntimeError(msg), file=sys.stderr)
-        else:
+        # only parse the config file if we expect one to exist. This is needed
+        # to remove an issue with the config file up to date checker.
+        if parse_conf:
             config_files.append(path)
 
         cfg.CONF([], project='tempest', default_config_files=config_files)
