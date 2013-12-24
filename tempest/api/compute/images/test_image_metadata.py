@@ -17,7 +17,6 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest.test import attr
 
 
@@ -109,49 +108,6 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
-
-    @attr(type=['negative', 'gate'])
-    def test_list_nonexistant_image_metadata(self):
-        # Negative test: List on nonexistant image
-        # metadata should not happen
-        self.assertRaises(exceptions.NotFound, self.client.list_image_metadata,
-                          999)
-
-    @attr(type=['negative', 'gate'])
-    def test_update_nonexistant_image_metadata(self):
-        # Negative test:An update should not happen for a non-existent image
-        meta = {'key1': 'alt1', 'key2': 'alt2'}
-        self.assertRaises(exceptions.NotFound,
-                          self.client.update_image_metadata, 999, meta)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_nonexistant_image_metadata_item(self):
-        # Negative test: Get on non-existent image should not happen
-        self.assertRaises(exceptions.NotFound,
-                          self.client.get_image_metadata_item, 999, 'key2')
-
-    @attr(type=['negative', 'gate'])
-    def test_set_nonexistant_image_metadata(self):
-        # Negative test: Metadata should not be set to a non-existent image
-        meta = {'key1': 'alt1', 'key2': 'alt2'}
-        self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
-                          999, meta)
-
-    @attr(type=['negative', 'gate'])
-    def test_set_nonexistant_image_metadata_item(self):
-        # Negative test: Metadata item should not be set to a
-        # nonexistant image
-        meta = {'key1': 'alt'}
-        self.assertRaises(exceptions.NotFound,
-                          self.client.set_image_metadata_item, 999, 'key1',
-                          meta)
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_nonexistant_image_metadata_item(self):
-        # Negative test: Shouldn't be able to delete metadata
-        # item from non-existent image
-        self.assertRaises(exceptions.NotFound,
-                          self.client.delete_image_metadata_item, 999, 'key1')
 
 
 class ImagesMetadataTestXML(ImagesMetadataTestJSON):
