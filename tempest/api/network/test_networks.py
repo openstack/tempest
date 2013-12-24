@@ -67,7 +67,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
         cls.name = cls.network['name']
         cls.subnet = cls.create_subnet(cls.network)
         cls.cidr = cls.subnet['cidr']
-        cls.port = cls.create_port(cls.network)
 
     @attr(type='smoke')
     def test_create_update_delete_network_subnet(self):
@@ -183,90 +182,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
         for subnet in subnets:
             self.assertEqual(len(subnet), 1)
             self.assertIn('id', subnet)
-
-    @attr(type='smoke')
-    def test_create_update_delete_port(self):
-        # Verify port creation
-        resp, body = self.client.create_port(network_id=self.network['id'])
-        self.assertEqual('201', resp['status'])
-        port = body['port']
-        self.assertTrue(port['admin_state_up'])
-        # Verify port update
-        new_name = "New_Port"
-        resp, body = self.client.update_port(
-            port['id'],
-            name=new_name,
-            admin_state_up=False)
-        self.assertEqual('200', resp['status'])
-        updated_port = body['port']
-        self.assertEqual(updated_port['name'], new_name)
-        self.assertFalse(updated_port['admin_state_up'])
-        # Verify port deletion
-        resp, body = self.client.delete_port(port['id'])
-        self.assertEqual('204', resp['status'])
-
-    @attr(type='smoke')
-    def test_show_port(self):
-        # Verify the details of port
-        resp, body = self.client.show_port(self.port['id'])
-        self.assertEqual('200', resp['status'])
-        port = body['port']
-        self.assertIn('id', port)
-        self.assertEqual(port['id'], self.port['id'])
-
-    @attr(type='smoke')
-    def test_show_port_fields(self):
-        # Verify specific fields of a port
-        field_list = [('fields', 'id'), ]
-        resp, body = self.client.show_port(self.port['id'],
-                                           field_list=field_list)
-        self.assertEqual('200', resp['status'])
-        port = body['port']
-        self.assertEqual(len(port), len(field_list))
-        for label, field_name in field_list:
-            self.assertEqual(port[field_name], self.port[field_name])
-
-    @attr(type='smoke')
-    def test_list_ports(self):
-        # Verify the port exists in the list of all ports
-        resp, body = self.client.list_ports()
-        self.assertEqual('200', resp['status'])
-        ports = [port['id'] for port in body['ports']
-                 if port['id'] == self.port['id']]
-        self.assertNotEmpty(ports, "Created port not found in the list")
-
-    @attr(type='smoke')
-    def test_port_list_filter_by_router_id(self):
-        # Create a router
-        network = self.create_network()
-        self.create_subnet(network)
-        router = self.create_router(data_utils.rand_name('router-'))
-        resp, port = self.client.create_port(network_id=network['id'])
-        # Add router interface to port created above
-        resp, interface = self.client.add_router_interface_with_port_id(
-            router['id'], port['port']['id'])
-        self.addCleanup(self.client.remove_router_interface_with_port_id,
-                        router['id'], port['port']['id'])
-        # List ports filtered by router_id
-        resp, port_list = self.client.list_ports(
-            device_id=router['id'])
-        self.assertEqual('200', resp['status'])
-        ports = port_list['ports']
-        self.assertEqual(len(ports), 1)
-        self.assertEqual(ports[0]['id'], port['port']['id'])
-        self.assertEqual(ports[0]['device_id'], router['id'])
-
-    @attr(type='smoke')
-    def test_list_ports_fields(self):
-        # Verify specific fields of ports
-        resp, body = self.client.list_ports(fields='id')
-        self.assertEqual('200', resp['status'])
-        ports = body['ports']
-        self.assertNotEmpty(ports, "Port list returned is empty")
-        # Asserting the fields returned are correct
-        for port in ports:
-            self.assertEqual(len(port), 1)
-            self.assertIn('id', port)
 
 
 class NetworksTestXML(NetworksTestJSON):

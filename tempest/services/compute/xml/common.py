@@ -19,6 +19,7 @@ XMLNS_11 = "http://docs.openstack.org/compute/api/v1.1"
 XMLNS_V3 = "http://docs.openstack.org/compute/api/v1.1"
 
 NEUTRON_NAMESPACES = {
+    'binding': "http://docs.openstack.org/ext/binding/api/v1.0",
     'router': "http://docs.openstack.org/ext/neutron/router/api/v1.0",
     'provider': 'http://docs.openstack.org/ext/provider/api/v1.0',
 }
