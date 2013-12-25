@@ -20,17 +20,17 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class KeyPairsTestJSON(base.BaseV2ComputeTest):
+class KeyPairsV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(KeyPairsTestJSON, cls).setUpClass()
+        super(KeyPairsV3TestJSON, cls).setUpClass()
         cls.client = cls.keypairs_client
 
     def _delete_keypair(self, keypair_name):
         resp, _ = self.client.delete_keypair(keypair_name)
-        self.assertEqual(202, resp.status)
+        self.assertEqual(204, resp.status)
 
     def _create_keypair(self, keypair_name, pub_key=None):
         resp, body = self.client.create_keypair(keypair_name, pub_key)
@@ -49,7 +49,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
             # as the keypair dicts from list API doesn't have them.
             keypair.pop('private_key')
             keypair.pop('user_id')
-            self.assertEqual(200, resp.status)
+            self.assertEqual(201, resp.status)
             key_list.append(keypair)
         # Fetch all keypairs and verify the list
         # has all created keypairs
@@ -72,7 +72,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
         # Keypair should be created, verified and deleted
         k_name = data_utils.rand_name('keypair-')
         resp, keypair = self._create_keypair(k_name)
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
         private_key = keypair['private_key']
         key_name = keypair['name']
         self.assertEqual(key_name, k_name,
@@ -111,7 +111,7 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
                    "XcPojYN56tI0OlrGqojbediJYD0rUsJu4weZpbn8vilb3JuDY+jws"
                    "snSA8wzBx3A/8y9Pp1B nova@ubuntu")
         resp, keypair = self._create_keypair(k_name, pub_key)
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
         self.assertFalse('private_key' in keypair,
                          "Field private_key is not empty!")
         key_name = keypair['name']
@@ -120,5 +120,5 @@ class KeyPairsTestJSON(base.BaseV2ComputeTest):
                          "to the requested name!")
 
 
-class KeyPairsTestXML(KeyPairsTestJSON):
+class KeyPairsV3TestXML(KeyPairsV3TestJSON):
     _interface = 'xml'

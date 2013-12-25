@@ -22,12 +22,12 @@ from tempest import exceptions
 from tempest import test
 
 
-class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
+class KeyPairsNegativeV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(KeyPairsNegativeTestJSON, cls).setUpClass()
+        super(KeyPairsNegativeV3TestJSON, cls).setUpClass()
         cls.client = cls.keypairs_client
 
     def _create_keypair(self, keypair_name, pub_key=None):
@@ -70,12 +70,11 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
         # Keypairs with duplicate names should not be created
         k_name = data_utils.rand_name('keypair-')
         resp, _ = self.client.create_keypair(k_name)
-        self.assertEqual(200, resp.status)
+        self.addCleanup(self.client.delete_keypair, k_name)
+        self.assertEqual(201, resp.status)
         # Now try the same keyname to create another key
         self.assertRaises(exceptions.Conflict, self._create_keypair,
                           k_name)
-        resp, _ = self.client.delete_keypair(k_name)
-        self.assertEqual(202, resp.status)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_keypair_with_empty_name_string(self):
@@ -98,5 +97,5 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
                           k_name)
 
 
-class KeyPairsNegativeTestXML(KeyPairsNegativeTestJSON):
+class KeyPairsNegativeV3TestXML(KeyPairsNegativeV3TestJSON):
     _interface = 'xml'

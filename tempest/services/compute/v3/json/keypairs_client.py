@@ -20,15 +20,15 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class KeyPairsClientJSON(RestClient):
+class KeyPairsV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(KeyPairsClientJSON, self).__init__(config, username, password,
-                                                 auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(KeyPairsV3ClientJSON, self).__init__(config, username, password,
+                                                   auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_keypairs(self):
-        resp, body = self.get("os-keypairs")
+        resp, body = self.get("keypairs")
         body = json.loads(body)
         # Each returned keypair is embedded within an unnecessary 'keypair'
         # element which is a deviation from other resources like floating-ips,
@@ -38,7 +38,7 @@ class KeyPairsClientJSON(RestClient):
         return resp, body['keypairs']
 
     def get_keypair(self, key_name):
-        resp, body = self.get("os-keypairs/%s" % str(key_name))
+        resp, body = self.get("keypairs/%s" % str(key_name))
         body = json.loads(body)
         return resp, body['keypair']
 
@@ -47,10 +47,10 @@ class KeyPairsClientJSON(RestClient):
         if pub_key:
             post_body['keypair']['public_key'] = pub_key
         post_body = json.dumps(post_body)
-        resp, body = self.post("os-keypairs",
+        resp, body = self.post("keypairs",
                                headers=self.headers, body=post_body)
         body = json.loads(body)
         return resp, body['keypair']
 
     def delete_keypair(self, key_name):
-        return self.delete("os-keypairs/%s" % str(key_name))
+        return self.delete("keypairs/%s" % str(key_name))

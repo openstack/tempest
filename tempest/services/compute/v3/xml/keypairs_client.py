@@ -24,21 +24,21 @@ from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 
 
-class KeyPairsClientXML(RestClientXML):
+class KeyPairsV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(KeyPairsClientXML, self).__init__(config, username, password,
-                                                auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(KeyPairsV3ClientXML, self).__init__(config, username, password,
+                                                  auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_keypairs(self):
-        resp, body = self.get("os-keypairs", self.headers)
+        resp, body = self.get("keypairs", self.headers)
         node = etree.fromstring(body)
         body = [{'keypair': xml_to_json(x)} for x in node.getchildren()]
         return resp, body
 
     def get_keypair(self, key_name):
-        resp, body = self.get("os-keypairs/%s" % str(key_name), self.headers)
+        resp, body = self.get("keypairs/%s" % str(key_name), self.headers)
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -60,10 +60,10 @@ class KeyPairsClientXML(RestClientXML):
 
         doc.append(keypair_element)
 
-        resp, body = self.post("os-keypairs",
+        resp, body = self.post("keypairs",
                                headers=self.headers, body=str(doc))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_keypair(self, key_name):
-        return self.delete("os-keypairs/%s" % str(key_name))
+        return self.delete("keypairs/%s" % str(key_name))
