@@ -94,6 +94,7 @@ from tempest.services.compute.xml.fixed_ips_client import FixedIPsClientXML
 from tempest.services.compute.xml.flavors_client import FlavorsClientXML
 from tempest.services.compute.xml.floating_ips_client import \
     FloatingIPsClientXML
+from tempest.services.compute.xml.hosts_client import HostsClientXML
 from tempest.services.compute.xml.hypervisor_client import HypervisorClientXML
 from tempest.services.compute.xml.images_client import ImagesClientXML
 from tempest.services.compute.xml.instance_usage_audit_log_client import \
@@ -256,6 +257,7 @@ class Manager(object):
                 *client_args)
             self.tenant_usages_client = TenantUsagesClientXML(*client_args)
             self.policy_client = PolicyClientXML(*client_args)
+            self.hosts_client = HostsClientXML(*client_args)
             self.hypervisor_v3_client = HypervisorV3ClientXML(*client_args)
             self.hypervisor_client = HypervisorClientXML(*client_args)
             self.token_v3_client = V3TokenClientXML(*client_args)
@@ -312,6 +314,7 @@ class Manager(object):
                 *client_args)
             self.tenant_usages_client = TenantUsagesClientJSON(*client_args)
             self.policy_client = PolicyClientJSON(*client_args)
+            self.hosts_client = HostsClientJSON(*client_args)
             self.hypervisor_v3_client = HypervisorV3ClientJSON(*client_args)
             self.hypervisor_client = HypervisorClientJSON(*client_args)
             self.token_v3_client = V3TokenClientJSON(*client_args)
@@ -331,7 +334,6 @@ class Manager(object):
             raise exceptions.InvalidConfiguration(msg)
 
         # common clients
-        self.hosts_client = HostsClientJSON(*client_args)
         self.account_client = AccountClient(*client_args)
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(*client_args)

@@ -112,15 +112,24 @@ def skip_because(*args, **kwargs):
 
     @param bug: bug number causing the test to skip
     @param condition: optional condition to be True for the skip to have place
+    @param interface: skip the test if it is the same as self._interface
     """
     def decorator(f):
         @functools.wraps(f)
-        def wrapper(*func_args, **func_kwargs):
-            if "bug" in kwargs:
-                if "condition" not in kwargs or kwargs["condition"] is True:
-                    msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
-                    raise testtools.TestCase.skipException(msg)
-            return f(*func_args, **func_kwargs)
+        def wrapper(self, *func_args, **func_kwargs):
+            skip = False
+            if "condition" in kwargs:
+                if kwargs["condition"] is True:
+                    skip = True
+            elif "interface" in kwargs:
+                if kwargs["interface"] == self._interface:
+                    skip = True
+            else:
+                skip = True
+            if "bug" in kwargs and skip is True:
+                msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
+                raise testtools.TestCase.skipException(msg)
+            return f(self, *func_args, **func_kwargs)
         return wrapper
     return decorator
 
