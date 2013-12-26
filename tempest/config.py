@@ -633,6 +633,10 @@ TelemetryGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the telemetry service."),
+    cfg.BoolOpt('too_slow_to_test',
+                default=True,
+                help="This variable is used as flag to enable "
+                     "notification tests")
 ]
 
 

@@ -971,6 +971,10 @@
 # value)
 #endpoint_type=publicURL
 
+# This variable is used as flag to enable notification tests
+# (boolean value)
+#too_slow_to_test=true
+
 
 [volume]
 
