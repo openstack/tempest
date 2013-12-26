@@ -24,21 +24,18 @@ from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
+from tempest.services.compute.xml.common import XMLNS_V3
 
-
-XMLNS_OS_FLV_EXT_DATA = \
-    "http://docs.openstack.org/compute/ext/flavor_extra_data/api/v1.1"
 XMLNS_OS_FLV_ACCESS = \
-    "http://docs.openstack.org/compute/ext/flavor_access/api/v2"
+    "http://docs.openstack.org/compute/core/flavor-access/api/v3"
 
 
-class FlavorsClientXML(RestClientXML):
+class FlavorsV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(FlavorsClientXML, self).__init__(config, username, password,
-                                               auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(FlavorsV3ClientXML, self).__init__(config, username, password,
+                                                 auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def _format_flavor(self, f):
         flavor = {'links': []}
@@ -51,15 +48,12 @@ class FlavorsClientXML(RestClientXML):
                 flavor['links'].append(v)
                 continue
 
-            if k == '{%s}ephemeral' % XMLNS_OS_FLV_EXT_DATA:
-                k = 'OS-FLV-EXT-DATA:ephemeral'
-
             if k == '{%s}is_public' % XMLNS_OS_FLV_ACCESS:
-                k = 'os-flavor-access:is_public'
+                k = 'flavor-access:is_public'
                 v = True if v == 'True' else False
 
             if k == 'extra_specs':
-                k = 'OS-FLV-WITH-EXT-SPECS:extra_specs'
+                k = 'flavor-extra-specs:extra_specs'
                 flavor[k] = dict(v)
                 continue
 
@@ -103,7 +97,7 @@ class FlavorsClientXML(RestClientXML):
     def create_flavor(self, name, ram, vcpus, disk, flavor_id, **kwargs):
         """Creates a new flavor or instance type."""
         flavor = Element("flavor",
-                         xmlns=XMLNS_11,
+                         xmlns=XMLNS_V3,
                          ram=ram,
                          vcpus=vcpus,
                          disk=disk,
@@ -114,13 +108,11 @@ class FlavorsClientXML(RestClientXML):
         if kwargs.get('swap'):
             flavor.add_attr('swap', kwargs.get('swap'))
         if kwargs.get('ephemeral'):
-            flavor.add_attr('OS-FLV-EXT-DATA:ephemeral',
-                            kwargs.get('ephemeral'))
+            flavor.add_attr('ephemeral', kwargs.get('ephemeral'))
         if kwargs.get('is_public'):
-            flavor.add_attr('os-flavor-access:is_public',
+            flavor.add_attr('flavor-access:is_public',
                             kwargs.get('is_public'))
-        flavor.add_attr('xmlns:OS-FLV-EXT-DATA', XMLNS_OS_FLV_EXT_DATA)
-        flavor.add_attr('xmlns:os-flavor-access', XMLNS_OS_FLV_ACCESS)
+        flavor.add_attr('xmlns:flavor-access', XMLNS_OS_FLV_ACCESS)
         resp, body = self.post('flavors', str(Document(flavor)), self.headers)
         body = xml_to_json(etree.fromstring(body))
         flavor = self._format_flavor(body)
@@ -145,21 +137,21 @@ class FlavorsClientXML(RestClientXML):
         extra_specs = Element("extra_specs")
         for key in specs.keys():
             extra_specs.add_attr(key, specs[key])
-        resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
+        resp, body = self.post('flavors/%s/flavor-extra-specs' % flavor_id,
                                str(Document(extra_specs)), self.headers)
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_flavor_extra_spec(self, flavor_id):
         """Gets extra Specs of the mentioned flavor."""
-        resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id,
+        resp, body = self.get('flavors/%s/flavor-extra-specs' % flavor_id,
                               self.headers)
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
         """Gets extra Specs key-value of the mentioned flavor and key."""
-        resp, xml_body = self.get('flavors/%s/os-extra_specs/%s' %
+        resp, xml_body = self.get('flavors/%s/flavor-extra-specs/%s' %
                                   (str(flavor_id), key), self.headers)
         body = {}
         element = etree.fromstring(xml_body)
@@ -176,7 +168,7 @@ class FlavorsClientXML(RestClientXML):
             value = Text(v)
             element.append(value)
 
-        resp, body = self.put('flavors/%s/os-extra_specs/%s' %
+        resp, body = self.put('flavors/%s/flavor-extra-specs/%s' %
                               (flavor_id, key),
                               str(doc), self.headers)
         body = xml_to_json(etree.fromstring(body))
@@ -184,15 +176,15 @@ class FlavorsClientXML(RestClientXML):
 
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets an extra spec based on the mentioned flavor and key."""
-        return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
-                           key))
+        return self.delete('flavors/%s/flavor-extra-specs/%s' %
+                           (str(flavor_id), key))
 
     def _parse_array_access(self, node):
         return [xml_to_json(x) for x in node]
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
-        resp, body = self.get('flavors/%s/os-flavor-access' % str(flavor_id),
+        resp, body = self.get('flavors/%s/flavor-access' % str(flavor_id),
                               self.headers)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
@@ -200,9 +192,9 @@ class FlavorsClientXML(RestClientXML):
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant."""
         doc = Document()
-        server = Element("addTenantAccess")
+        server = Element("add_tenant_access")
         doc.append(server)
-        server.add_attr("tenant", tenant_id)
+        server.add_attr("tenant_id", tenant_id)
         resp, body = self.post('flavors/%s/action' % str(flavor_id),
                                str(doc), self.headers)
         body = self._parse_array_access(etree.fromstring(body))
@@ -211,9 +203,9 @@ class FlavorsClientXML(RestClientXML):
     def remove_flavor_access(self, flavor_id, tenant_id):
         """Remove flavor access from the specified tenant."""
         doc = Document()
-        server = Element("removeTenantAccess")
+        server = Element("remove_tenant_access")
         doc.append(server)
-        server.add_attr("tenant", tenant_id)
+        server.add_attr("tenant_id", tenant_id)
         resp, body = self.post('flavors/%s/action' % str(flavor_id),
                                str(doc), self.headers)
         body = self._parse_array_access(etree.fromstring(body))

@@ -20,7 +20,7 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
+class FlavorsAccessV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests Flavor Access API extension.
@@ -31,19 +31,15 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsAccessTestJSON, cls).setUpClass()
-        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
-            msg = "FlavorExtraData extension not enabled."
-            raise cls.skipException(msg)
+        super(FlavorsAccessV3TestJSON, cls).setUpClass()
 
-        cls.client = cls.os_adm.flavors_client
+        cls.client = cls.flavors_admin_client
         admin_client = cls._get_identity_admin_client()
         cls.tenant = admin_client.get_tenant_by_name(cls.flavors_client.
                                                      tenant_name)
         cls.tenant_id = cls.tenant['id']
-        cls.adm_tenant = admin_client.get_tenant_by_name(cls.os_adm.
-                                                         flavors_client.
-                                                         tenant_name)
+        cls.adm_tenant = admin_client.get_tenant_by_name(
+            cls.flavors_admin_client.tenant_name)
         cls.adm_tenant_id = cls.adm_tenant['id']
         cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
@@ -61,7 +57,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
                                                      new_flavor_id,
                                                      is_public='False')
         self.addCleanup(self.client.delete_flavor, new_flavor['id'])
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(resp.status, 201)
         resp, flavor_access = self.client.list_flavor_access(new_flavor_id)
         self.assertEqual(resp.status, 200)
         self.assertEqual(len(flavor_access), 1, str(flavor_access))
@@ -107,5 +103,5 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotIn(new_flavor['id'], map(lambda x: x['id'], flavors))
 
 
-class FlavorsAdminTestXML(FlavorsAccessTestJSON):
+class FlavorsAdminV3TestXML(FlavorsAccessV3TestJSON):
     _interface = 'xml'
