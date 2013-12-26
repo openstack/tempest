@@ -31,24 +31,19 @@ class VolumesActionsTest(BaseVolumeTest):
         cls.client = cls.volumes_client
         cls.image_client = cls.os.image_client
 
-        # Create a test shared instance and volume for attach/detach tests
+        # Create a test shared instance
         srv_name = data_utils.rand_name(cls.__name__ + '-Instance-')
-        vol_name = data_utils.rand_name(cls.__name__ + '-Volume-')
         resp, cls.server = cls.servers_client.create_server(srv_name,
                                                             cls.image_ref,
                                                             cls.flavor_ref)
         cls.servers_client.wait_for_server_status(cls.server['id'], 'ACTIVE')
 
-        resp, cls.volume = cls.client.create_volume(size=1,
-                                                    display_name=vol_name)
-        cls.client.wait_for_volume_status(cls.volume['id'], 'available')
+        # Create a test shared volume for attach/detach tests
+        cls.volume = cls.create_volume()
 
     @classmethod
     def tearDownClass(cls):
-        # Delete the test instance and volume
-        cls.client.delete_volume(cls.volume['id'])
-        cls.client.wait_for_resource_deletion(cls.volume['id'])
-
+        # Delete the test instance
         cls.servers_client.delete_server(cls.server['id'])
         cls.client.wait_for_resource_deletion(cls.server['id'])
 

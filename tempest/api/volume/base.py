@@ -18,6 +18,7 @@
 import time
 
 from tempest import clients
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -80,7 +81,10 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     @classmethod
     def create_volume(cls, size=1, **kwargs):
         """Wrapper utility that returns a test volume."""
-        resp, volume = cls.volumes_client.create_volume(size, **kwargs)
+        vol_name = data_utils.rand_name('Volume')
+        resp, volume = cls.volumes_client.create_volume(size,
+                                                        display_name=vol_name,
+                                                        **kwargs)
         assert 200 == resp.status
         cls.volumes.append(volume)
         cls.volumes_client.wait_for_volume_status(volume['id'], 'available')

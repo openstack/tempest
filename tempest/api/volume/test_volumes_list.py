@@ -66,12 +66,9 @@ class VolumesListTest(base.BaseVolumeTest):
         cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
         for i in range(3):
-            v_name = data_utils.rand_name('volume')
             try:
-                resp, volume = cls.client.create_volume(size=1,
-                                                        display_name=v_name,
-                                                        metadata=cls.metadata)
-                cls.client.wait_for_volume_status(volume['id'], 'available')
+                volume = cls.create_volume(metadata=cls.metadata)
+
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])
