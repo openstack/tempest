@@ -15,8 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from tempest import clients
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -113,21 +111,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 cls.snapshots_client.wait_for_resource_deletion(snapshot['id'])
             except Exception:
                 pass
-
-    def wait_for(self, condition):
-        """Repeatedly calls condition() until a timeout."""
-        start_time = int(time.time())
-        while True:
-            try:
-                condition()
-            except Exception:
-                pass
-            else:
-                return
-            if int(time.time()) - start_time >= self.build_timeout:
-                condition()
-                return
-            time.sleep(self.build_interval)
 
 
 class BaseVolumeAdminTest(BaseVolumeTest):
