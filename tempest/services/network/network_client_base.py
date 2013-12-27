@@ -124,11 +124,35 @@ class NetworkClientBase(object):
 
         return _show
 
+    def _creater(self, resource_name):
+        def _create(**kwargs):
+            plural = self.pluralize(resource_name)
+            uri = self.get_uri(plural)
+            post_data = self.serialize({resource_name: kwargs})
+            resp, body = self.post(uri, post_data)
+            body = self.deserialize_single(body)
+            return resp, body
+
+        return _create
+
+    def _updater(self, resource_name):
+        def _update(res_id, **kwargs):
+            plural = self.pluralize(resource_name)
+            uri = '%s/%s' % (self.get_uri(plural), res_id)
+            post_data = self.serialize({resource_name: kwargs})
+            resp, body = self.put(uri, post_data)
+            body = self.deserialize_single(body)
+            return resp, body
+
+        return _update
+
     def __getattr__(self, name):
-        method_prefixes = ["list_", "delete_", "show_"]
+        method_prefixes = ["list_", "delete_", "show_", "create_", "update_"]
         method_functors = [self._lister,
                            self._deleter,
-                           self._shower]
+                           self._shower,
+                           self._creater,
+                           self._updater]
         for index, prefix in enumerate(method_prefixes):
             prefix_len = len(prefix)
             if name[:prefix_len] == prefix:

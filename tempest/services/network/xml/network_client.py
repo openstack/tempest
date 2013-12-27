@@ -41,6 +41,16 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def deserialize_single(self, body):
         return _root_tag_fetcher_and_xml_to_json_parse(body)
 
+    def serialize(self, body):
+        #TODO(enikanorov): implement better json to xml conversion
+        # expecting the dict with single key
+        root = body.keys()[0]
+        post_body = Element(root)
+        for name, attr in body[root].items():
+            elt = Element(name, attr)
+            post_body.append(elt)
+        return str(Document(post_body))
+
     def create_network(self, name):
         uri = '%s/networks' % (self.uri_prefix)
         post_body = Element("network")
@@ -189,28 +199,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def update_vip(self, vip_id, new_name):
         uri = '%s/lb/vips/%s' % (self.uri_prefix, str(vip_id))
         put_body = Element("vip")
-        p2 = Element("name", new_name)
-        put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def create_pool(self, name, lb_method, protocol, subnet_id):
-        uri = '%s/lb/pools' % (self.uri_prefix)
-        post_body = Element("pool")
-        p1 = Element("lb_method", lb_method)
-        p2 = Element("protocol", protocol)
-        p3 = Element("subnet_id", subnet_id)
-        post_body.append(p1)
-        post_body.append(p2)
-        post_body.append(p3)
-        resp, body = self.post(uri, str(Document(post_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_pool(self, pool_id, new_name):
-        uri = '%s/lb/pools/%s' % (self.uri_prefix, str(pool_id))
-        put_body = Element("pool")
         p2 = Element("name", new_name)
         put_body.append(p2)
         resp, body = self.put(uri, str(Document(put_body)))

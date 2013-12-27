@@ -169,10 +169,20 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_pool(cls, name, lb_method, protocol, subnet):
         """Wrapper utility that returns a test pool."""
-        resp, body = cls.client.create_pool(name, lb_method, protocol,
-                                            subnet['id'])
+        resp, body = cls.client.create_pool(
+            name=name,
+            lb_method=lb_method,
+            protocol=protocol,
+            subnet_id=subnet['id'])
         pool = body['pool']
         cls.pools.append(pool)
+        return pool
+
+    @classmethod
+    def update_pool(cls, name):
+        """Wrapper utility that returns a test pool."""
+        resp, body = cls.client.update_pool(name=name)
+        pool = body['pool']
         return pool
 
     @classmethod

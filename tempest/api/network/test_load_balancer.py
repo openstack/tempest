@@ -69,9 +69,11 @@ class LoadBalancerJSON(base.BaseNetworkTest):
     def test_create_update_delete_pool_vip(self):
         # Creates a vip
         name = data_utils.rand_name('vip-')
-        resp, body = self.client.create_pool(data_utils.rand_name("pool-"),
-                                             "ROUND_ROBIN", "HTTP",
-                                             self.subnet['id'])
+        resp, body = self.client.create_pool(
+            name=data_utils.rand_name("pool-"),
+            lb_method='ROUND_ROBIN',
+            protocol='HTTP',
+            subnet_id=self.subnet['id'])
         pool = body['pool']
         resp, body = self.client.create_vip(name, "HTTP", 80,
                                             self.subnet['id'], pool['id'])
@@ -89,7 +91,8 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertEqual('204', resp['status'])
         # Verification of pool update
         new_name = "New_pool"
-        resp, body = self.client.update_pool(pool['id'], new_name)
+        resp, body = self.client.update_pool(pool['id'],
+                                             name=new_name)
         self.assertEqual('200', resp['status'])
         updated_pool = body['pool']
         self.assertEqual(updated_pool['name'], new_name)
