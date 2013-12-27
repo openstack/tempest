@@ -141,39 +141,32 @@
 #operator_role=Member
 
 
-[network]
+[volume-feature-enabled]
 
 #
 # Options defined in tempest.config
 #
 
-# Catalog type of the Neutron service. (string value)
-#catalog_type=network
+# Runs Cinder multi-backend test (requires 2 backends)
+# (boolean value)
+#multi_backend=false
 
-# The network region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
 
-# The cidr block to allocate tenant networks from (string
-# value)
-#tenant_network_cidr=10.100.0.0/16
+# Is the v1 volume API enabled (boolean value)
+#api_v1=true
 
-# The mask bits for tenant networks (integer value)
-#tenant_network_mask_bits=28
 
-# Whether tenant network connectivity should be evaluated
-# directly (boolean value)
-#tenant_networks_reachable=false
+[telemetry]
 
-# Id of the public network that provides external connectivity
-# (string value)
-#public_network_id=
+#
+# Options defined in tempest.config
+#
 
-# Id of the public router that provides external connectivity
-# (string value)
-#public_router_id=
+# Catalog type of the Telemetry service. (string value)
+#catalog_type=metering
 
 
 [data_processing]
@@ -218,24 +211,6 @@
 # A list of enabled extensions with a special entry all which
 # indicates every extension is enabled (list value)
 #api_extensions=all
-
-
-[volume-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# Runs Cinder multi-backend test (requires 2 backends)
-# (boolean value)
-#multi_backend=false
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
-
-# Is the v1 volume API enabled (boolean value)
-#api_v1=true
 
 
 [image-feature-enabled]
@@ -419,21 +394,39 @@
 #admin_password=pass
 
 
-[cli]
+[network]
 
 #
-# Options defined in tempest.cli
+# Options defined in tempest.config
 #
 
-# enable cli tests (boolean value)
-#enabled=true
+# Catalog type of the Neutron service. (string value)
+#catalog_type=network
 
-# directory where python client binaries are located (string
+# The network region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
 # value)
-#cli_dir=/usr/local/bin
+#region=
 
-# Number of seconds to wait on a CLI timeout (integer value)
-#timeout=15
+# The cidr block to allocate tenant networks from (string
+# value)
+#tenant_network_cidr=10.100.0.0/16
+
+# The mask bits for tenant networks (integer value)
+#tenant_network_mask_bits=28
+
+# Whether tenant network connectivity should be evaluated
+# directly (boolean value)
+#tenant_networks_reachable=false
+
+# Id of the public network that provides external connectivity
+# (string value)
+#public_network_id=
+
+# Id of the public router that provides external connectivity
+# (string value)
+#public_router_id=
 
 
 [stress]
@@ -655,6 +648,23 @@
 
 # Status Change Test Interval (integer value)
 #build_interval=1
+
+
+[cli]
+
+#
+# Options defined in tempest.cli
+#
+
+# enable cli tests (boolean value)
+#enabled=true
+
+# directory where python client binaries are located (string
+# value)
+#cli_dir=/usr/local/bin
+
+# Number of seconds to wait on a CLI timeout (integer value)
+#timeout=15
 
 
 [dashboard]
