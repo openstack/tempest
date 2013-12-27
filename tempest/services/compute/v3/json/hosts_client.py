@@ -20,12 +20,12 @@ import urllib
 from tempest.common.rest_client import RestClient
 
 
-class HostsClientJSON(RestClient):
+class HostsV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(HostsClientJSON, self).__init__(config, username, password,
-                                              auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(HostsV3ClientJSON, self).__init__(config, username, password,
+                                                auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def list_hosts(self, params=None):
         """Lists all hosts."""
@@ -53,7 +53,7 @@ class HostsClientJSON(RestClient):
             'maintenance_mode': None,
         }
         request_body.update(**kwargs)
-        request_body = json.dumps(request_body)
+        request_body = json.dumps({'host': request_body})
 
         resp, body = self.put("os-hosts/%s" % str(hostname), request_body,
                               self.headers)
