@@ -17,8 +17,12 @@
 
 
 from tempest.api.compute import base
+from tempest.openstack.common import log as logging
 from tempest import test
 import testtools
+
+
+LOG = logging.getLogger(__name__)
 
 
 class ExtensionsTestJSON(base.BaseV2ComputeTest):
@@ -31,6 +35,9 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
         # List of all extensions
         resp, extensions = self.extensions_client.list_extensions()
         self.assertIn("extensions", extensions)
+        extension_list = [extension.get('alias')
+                          for extension in extensions.get('extensions', {})]
+        LOG.debug("Nova extensions: %s" % ','.join(extension_list))
         self.assertEqual(200, resp.status)
         self.assertTrue(self.extensions_client.is_enabled("Consoles"))
 
