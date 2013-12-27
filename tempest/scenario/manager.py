@@ -985,7 +985,7 @@ class OrchestrationScenarioTest(OfficialClientTest):
         username = cls.config.identity.admin_username
         password = cls.config.identity.admin_password
         tenant_name = cls.config.identity.tenant_name
-        return username, tenant_name, password
+        return username, password, tenant_name
 
     def _load_template(self, base_file, file_name):
         filepath = os.path.join(os.path.dirname(os.path.realpath(base_file)),
