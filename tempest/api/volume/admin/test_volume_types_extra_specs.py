@@ -20,7 +20,7 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
+class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod

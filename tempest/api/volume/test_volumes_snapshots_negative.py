@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class VolumesSnapshotNegativeTest(base.BaseVolumeTest):
+class VolumesSnapshotNegativeTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @attr(type=['negative', 'gate'])

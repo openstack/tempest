@@ -21,7 +21,7 @@ from tempest.test import attr
 from tempest.test import services
 
 
-class VolumesGetTest(base.BaseVolumeTest):
+class VolumesGetTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod

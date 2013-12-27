@@ -20,7 +20,7 @@ from tempest.test import attr
 LOG = logging.getLogger(__name__)
 
 
-class VolumesSnapshotTest(base.BaseVolumeTest):
+class VolumesSnapshotTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod

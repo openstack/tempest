@@ -23,7 +23,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class VolumesNegativeTest(base.BaseVolumeTest):
+class VolumesNegativeTest(base.BaseVolumeV1Test):
     _interface = 'json'
 
     @classmethod

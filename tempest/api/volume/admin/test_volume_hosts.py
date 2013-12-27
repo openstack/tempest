@@ -19,7 +19,7 @@ from tempest.api.volume import base
 from tempest.test import attr
 
 
-class VolumeHostsAdminTestsJSON(base.BaseVolumeAdminTest):
+class VolumeHostsAdminTestsJSON(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @attr(type='gate')

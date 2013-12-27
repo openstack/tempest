@@ -377,6 +377,9 @@ VolumeFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled extensions with a special entry all '
                      'which indicates every extension is enabled'),
+    cfg.BoolOpt('api_v1',
+                default=True,
+                help="Is the v1 volume API enabled"),
 ]
 
 
