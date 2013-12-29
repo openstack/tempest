@@ -20,15 +20,14 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
-class ImagesOneServerNegativeTest(base.BaseV2ComputeTest):
+class ImagesOneServerNegativeV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     def tearDown(self):
@@ -36,12 +35,12 @@ class ImagesOneServerNegativeTest(base.BaseV2ComputeTest):
         for image_id in self.image_ids:
             self.client.delete_image(image_id)
             self.image_ids.remove(image_id)
-        super(ImagesOneServerNegativeTest, self).tearDown()
+        super(ImagesOneServerNegativeV3Test, self).tearDown()
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
-        super(ImagesOneServerNegativeTest, self).setUp()
+        super(ImagesOneServerNegativeV3Test, self).setUp()
         # Check if the server is in a clean state after test
         try:
             self.servers_client.wait_for_server_status(self.server_id,
@@ -58,7 +57,7 @@ class ImagesOneServerNegativeTest(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesOneServerNegativeTest, cls).setUpClass()
+        super(ImagesOneServerNegativeV3Test, cls).setUpClass()
         cls.client = cls.images_client
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
@@ -85,41 +84,44 @@ class ImagesOneServerNegativeTest(base.BaseV2ComputeTest):
                 cls.alt_manager = clients.AltManager()
             cls.alt_client = cls.alt_manager.images_client
 
-    @skip_because(bug="1006725")
-    @attr(type=['negative', 'gate'])
+    @test.skip_because(bug="1006725")
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         # invalid multibyte sequence from:
         # http://stackoverflow.com/questions/1301402/
         #     example-invalid-utf8-string
         invalid_name = data_utils.rand_name(u'\xc3\x28')
         self.assertRaises(exceptions.BadRequest,
-                          self.client.create_image, self.server_id,
+                          self.servers_client.create_image,
+                          self.server_id,
                           invalid_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
         snapshot_name = data_utils.rand_name('test-snap-')
         meta = {'': ''}
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(exceptions.BadRequest,
+                          self.servers_client.create_image,
                           self.server_id, snapshot_name, meta)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
         snapshot_name = data_utils.rand_name('test-snap-')
         meta = {'a' * 260: 'b' * 260}
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(exceptions.BadRequest,
+                          self.servers_client.create_image,
                           self.server_id, snapshot_name, meta)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
 
         # Create first snapshot
         snapshot_name = data_utils.rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server_id,
-                                              snapshot_name)
+        resp, body = self.servers_client.create_image(self.server_id,
+                                                      snapshot_name)
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
@@ -127,23 +129,26 @@ class ImagesOneServerNegativeTest(base.BaseV2ComputeTest):
 
         # Create second snapshot
         alt_snapshot_name = data_utils.rand_name('test-snap-')
-        self.assertRaises(exceptions.Conflict, self.client.create_image,
+        self.assertRaises(exceptions.Conflict,
+                          self.servers_client.create_image,
                           self.server_id, alt_snapshot_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
         snapshot_name = data_utils.rand_name('a' * 260)
-        self.assertRaises(exceptions.BadRequest, self.client.create_image,
+        self.assertRaises(exceptions.BadRequest,
+                          self.servers_client.create_image,
                           self.server_id, snapshot_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 
         snapshot_name = data_utils.rand_name('test-snap-')
-        resp, body = self.client.create_image(self.server_id, snapshot_name)
+        resp, body = self.servers_client.create_image(self.server_id,
+                                                      snapshot_name)
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
@@ -151,7 +156,7 @@ class ImagesOneServerNegativeTest(base.BaseV2ComputeTest):
 
         # Do not wait, attempt to delete the image, ensure it's successful
         resp, body = self.client.delete_image(image_id)
-        self.assertEqual('204', resp['status'])
+        self.assertEqual('200', resp['status'])
         self.image_ids.remove(image_id)
 
         self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
