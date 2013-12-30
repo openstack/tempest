@@ -17,31 +17,31 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
-class ServersTestJSON(base.BaseV2ComputeTest):
+class ServersV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServersTestJSON, cls).setUpClass()
+        super(ServersV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 
     def tearDown(self):
         self.clear_servers()
-        super(ServersTestJSON, self).tearDown()
+        super(ServersV3TestJSON, self).tearDown()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_server_with_admin_password(self):
         # If an admin password is provided on server creation, the server's
         # root password should be set to that password.
-        resp, server = self.create_test_server(adminPass='testpassword')
+        resp, server = self.create_test_server(admin_password='testpassword')
 
         # Verify the password is set correctly in the response
-        self.assertEqual('testpassword', server['adminPass'])
+        self.assertEqual('testpassword', server['admin_password'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_with_existing_server_name(self):
         # Creating a server with a name that already exists is allowed
 
@@ -60,7 +60,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         name2 = server['name']
         self.assertEqual(name1, name2)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_specify_keypair(self):
         # Specify a keypair while creating a server
 
@@ -73,7 +73,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual(key_name, server['key_name'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_server_name(self):
         # The server name should be changed to the the provided value
         resp, server = self.create_test_server(wait_until='ACTIVE')
@@ -88,46 +88,47 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('newname', server['name'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_access_server_address(self):
         # The server's access addresses should reflect the provided values
         resp, server = self.create_test_server(wait_until='ACTIVE')
 
         # Update the IPv4 and IPv6 access addresses
         resp, body = self.client.update_server(server['id'],
-                                               accessIPv4='1.1.1.1',
-                                               accessIPv6='::babe:202:202')
+                                               access_ip_v4='1.1.1.1',
+                                               access_ip_v6='::babe:202:202')
         self.assertEqual(200, resp.status)
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         # Verify the access addresses have been updated
         resp, server = self.client.get_server(server['id'])
-        self.assertEqual('1.1.1.1', server['accessIPv4'])
-        self.assertEqual('::babe:202:202', server['accessIPv6'])
+        self.assertEqual('1.1.1.1', server['os-access-ips:access_ip_v4'])
+        self.assertEqual('::babe:202:202',
+                         server['os-access-ips:access_ip_v6'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_delete_server_while_in_building_state(self):
         # Delete a server while it's VM state is Building
         resp, server = self.create_test_server(wait_until='BUILD')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_delete_active_server(self):
         # Delete a server while it's VM state is Active
         resp, server = self.create_test_server(wait_until='ACTIVE')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_server_with_ipv6_addr_only(self):
         # Create a server without an IPv4 address(only IPv6 address).
-        resp, server = self.create_test_server(accessIPv6='2001:2001::3')
+        resp, server = self.create_test_server(access_ip_v6='2001:2001::3')
         self.assertEqual('202', resp['status'])
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
         resp, server = self.client.get_server(server['id'])
-        self.assertEqual('2001:2001::3', server['accessIPv6'])
+        self.assertEqual('2001:2001::3', server['os-access-ips:access_ip_v6'])
 
 
-class ServersTestXML(ServersTestJSON):
+class ServersV3TestXML(ServersV3TestJSON):
     _interface = 'xml'
