@@ -21,15 +21,15 @@ from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
+from tempest.services.compute.xml.common import XMLNS_V3
 
 
-class QuotasClientXML(RestClientXML):
+class QuotasV3ClientXML(RestClientXML):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(QuotasClientXML, self).__init__(config, username, password,
-                                              auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(QuotasV3ClientXML, self).__init__(config, username, password,
+                                                auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def _format_quota(self, q):
         quota = {}
@@ -65,24 +65,18 @@ class QuotasClientXML(RestClientXML):
         return resp, body
 
     def update_quota_set(self, tenant_id, force=None,
-                         injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
                          fixed_ips=None, key_pairs=None, instances=None,
-                         security_group_rules=None, injected_files=None,
-                         cores=None, injected_file_path_bytes=None,
+                         security_group_rules=None, cores=None,
                          security_groups=None):
         """
         Updates the tenant's quota limits for one or more resources
         """
         post_body = Element("quota_set",
-                            xmlns=XMLNS_11)
+                            xmlns=XMLNS_V3)
 
         if force is not None:
             post_body.add_attr('force', force)
-
-        if injected_file_content_bytes is not None:
-            post_body.add_attr('injected_file_content_bytes',
-                               injected_file_content_bytes)
 
         if metadata_items is not None:
             post_body.add_attr('metadata_items', metadata_items)
@@ -105,15 +99,8 @@ class QuotasClientXML(RestClientXML):
         if security_group_rules is not None:
             post_body.add_attr('security_group_rules', security_group_rules)
 
-        if injected_files is not None:
-            post_body.add_attr('injected_files', injected_files)
-
         if cores is not None:
             post_body.add_attr('cores', cores)
-
-        if injected_file_path_bytes is not None:
-            post_body.add_attr('injected_file_path_bytes',
-                               injected_file_path_bytes)
 
         if security_groups is not None:
             post_body.add_attr('security_groups', security_groups)

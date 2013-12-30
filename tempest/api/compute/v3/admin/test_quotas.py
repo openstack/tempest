@@ -1,6 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2012 OpenStack Foundation
+# Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,41 +17,34 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
-
-CONF = config.CONF
+from tempest import test
 
 
-class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
+class QuotasAdminV3TestJSON(base.BaseV3ComputeAdminTest):
     _interface = 'json'
     force_tenant_isolation = True
 
     @classmethod
     def setUpClass(cls):
-        super(QuotasAdminTestJSON, cls).setUpClass()
+        super(QuotasAdminV3TestJSON, cls).setUpClass()
         cls.auth_url = cls.config.identity.uri
-        cls.client = cls.os.quotas_client
-        cls.adm_client = cls.os_adm.quotas_client
+        cls.client = cls.quotas_client
+        cls.adm_client = cls.quotas_admin_client
         cls.identity_admin_client = cls._get_identity_admin_client()
-        cls.sg_client = cls.security_groups_client
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
         cls.demo_tenant_id = cls.isolated_creds.get_primary_user().get(
             'tenantId')
 
-        cls.default_quota_set = set(('injected_file_content_bytes',
-                                     'metadata_items', 'injected_files',
+        cls.default_quota_set = set(('metadata_items',
                                      'ram', 'floating_ips',
                                      'fixed_ips', 'key_pairs',
-                                     'injected_file_path_bytes',
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set | set(['id'])
@@ -62,15 +55,14 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
         resp, default_quota_set = self.client.get_default_quota_set(
             self.demo_tenant_id)
-        new_quota_set = {'injected_file_content_bytes': 20480,
-                         'metadata_items': 256, 'injected_files': 10,
+        new_quota_set = {'metadata_items': 256,
                          'ram': 10240, 'floating_ips': 20, 'fixed_ips': 10,
-                         'key_pairs': 200, 'injected_file_path_bytes': 512,
+                         'key_pairs': 200,
                          'instances': 20, 'security_group_rules': 20,
                          'cores': 2, 'security_groups': 20}
         # Update limits for all quota resources
@@ -83,10 +75,11 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self.adm_client.update_quota_set,
                         self.demo_tenant_id, **default_quota_set)
         self.assertEqual(200, resp.status)
+        quota_set.pop('id')
         self.assertEqual(new_quota_set, quota_set)
 
     # TODO(afazekas): merge these test cases
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_updated_quotas(self):
         # Verify that GET shows the updated quota set
         tenant_name = data_utils.rand_name('cpu_quota_tenant_')
@@ -106,7 +99,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     # TODO(afazekas): Add dedicated tenant to the skiped quota tests
     # it can be moved into the setUpClass as well
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
@@ -121,7 +114,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                         cores=default_vcpu_quota)
         self.assertRaises(exceptions.OverLimit, self.create_test_server)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
@@ -136,14 +129,14 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                         ram=default_mem_quota)
         self.assertRaises(exceptions.OverLimit, self.create_test_server)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_quota_normal_user(self):
         self.assertRaises(exceptions.Unauthorized,
                           self.client.update_quota_set,
                           self.demo_tenant_id,
                           ram=0)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
         resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
@@ -157,66 +150,6 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
                         instances=default_instances_quota)
         self.assertRaises(exceptions.OverLimit, self.create_test_server)
 
-    @skip_because(bug="1186354",
-                  condition=CONF.service_available.neutron)
-    @attr(type=['negative', 'gate'])
-    def test_security_groups_exceed_limit(self):
-        # Negative test: Creation Security Groups over limit should FAIL
 
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-        default_sg_quota = quota_set['security_groups']
-        sg_quota = 0  # Set the quota to zero to conserve resources
-
-        resp, quota_set =\
-            self.adm_client.update_quota_set(self.demo_tenant_id,
-                                             force=True,
-                                             security_groups=sg_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id,
-                        security_groups=default_sg_quota)
-
-        # Check we cannot create anymore
-        self.assertRaises(exceptions.OverLimit,
-                          self.sg_client.create_security_group,
-                          "sg-overlimit", "sg-desc")
-
-    @skip_because(bug="1186354",
-                  condition=CONF.service_available.neutron)
-    @attr(type=['negative', 'gate'])
-    def test_security_groups_rules_exceed_limit(self):
-        # Negative test: Creation of Security Group Rules should FAIL
-        # when we reach limit maxSecurityGroupRules
-
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-        default_sg_rules_quota = quota_set['security_group_rules']
-        sg_rules_quota = 0  # Set the quota to zero to conserve resources
-
-        resp, quota_set =\
-            self.adm_client.update_quota_set(
-                self.demo_tenant_id,
-                force=True,
-                security_group_rules=sg_rules_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id,
-                        security_group_rules=default_sg_rules_quota)
-
-        s_name = data_utils.rand_name('securitygroup-')
-        s_description = data_utils.rand_name('description-')
-        resp, securitygroup =\
-            self.sg_client.create_security_group(s_name, s_description)
-        self.addCleanup(self.sg_client.delete_security_group,
-                        securitygroup['id'])
-
-        secgroup_id = securitygroup['id']
-        ip_protocol = 'tcp'
-
-        # Check we cannot create SG rule anymore
-        self.assertRaises(exceptions.OverLimit,
-                          self.sg_client.create_security_group_rule,
-                          secgroup_id, ip_protocol, 1025, 1025)
-
-
-class QuotasAdminTestXML(QuotasAdminTestJSON):
+class QuotasAdminV3TestXML(QuotasAdminV3TestJSON):
     _interface = 'xml'

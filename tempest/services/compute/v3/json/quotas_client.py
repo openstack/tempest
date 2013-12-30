@@ -20,12 +20,12 @@ import json
 from tempest.common.rest_client import RestClient
 
 
-class QuotasClientJSON(RestClient):
+class QuotasV3ClientJSON(RestClient):
 
     def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(QuotasClientJSON, self).__init__(config, username, password,
-                                               auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        super(QuotasV3ClientJSON, self).__init__(config, username, password,
+                                                 auth_url, tenant_name)
+        self.service = self.config.compute.catalog_v3_type
 
     def get_quota_set(self, tenant_id):
         """List the quota set for a tenant."""
@@ -44,11 +44,9 @@ class QuotasClientJSON(RestClient):
         return resp, body['quota_set']
 
     def update_quota_set(self, tenant_id, force=None,
-                         injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
                          fixed_ips=None, key_pairs=None, instances=None,
-                         security_group_rules=None, injected_files=None,
-                         cores=None, injected_file_path_bytes=None,
+                         security_group_rules=None, cores=None,
                          security_groups=None):
         """
         Updates the tenant's quota limits for one or more resources
@@ -57,10 +55,6 @@ class QuotasClientJSON(RestClient):
 
         if force is not None:
             post_body['force'] = force
-
-        if injected_file_content_bytes is not None:
-            post_body['injected_file_content_bytes'] = \
-                injected_file_content_bytes
 
         if metadata_items is not None:
             post_body['metadata_items'] = metadata_items
@@ -83,14 +77,8 @@ class QuotasClientJSON(RestClient):
         if security_group_rules is not None:
             post_body['security_group_rules'] = security_group_rules
 
-        if injected_files is not None:
-            post_body['injected_files'] = injected_files
-
         if cores is not None:
             post_body['cores'] = cores
-
-        if injected_file_path_bytes is not None:
-            post_body['injected_file_path_bytes'] = injected_file_path_bytes
 
         if security_groups is not None:
             post_body['security_groups'] = security_groups

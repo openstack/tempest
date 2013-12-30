@@ -273,6 +273,7 @@ class BaseV3ComputeTest(BaseComputeTest):
         cls.keypairs_client = cls.os.keypairs_v3_client
         cls.aggregates_client = cls.os.aggregates_v3_client
         cls.hosts_client = cls.os.hosts_v3_client
+        cls.quotas_client = cls.os.quotas_v3_client
 
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
@@ -340,3 +341,4 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
         cls.flavors_admin_client = cls.os_adm.flavors_v3_client
         cls.aggregates_admin_client = cls.os_adm.aggregates_v3_client
         cls.hosts_admin_client = cls.os_adm.hosts_v3_client
+        cls.quotas_admin_client = cls.os_adm.quotas_v3_client

@@ -16,29 +16,27 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
-class QuotasTestJSON(base.BaseV2ComputeTest):
+class QuotasV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(QuotasTestJSON, cls).setUpClass()
+        super(QuotasV3TestJSON, cls).setUpClass()
         cls.client = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
         resp, tenants = cls.admin_client.list_tenants()
         cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
                          cls.client.tenant_name][0]
-        cls.default_quota_set = set(('injected_file_content_bytes',
-                                     'metadata_items', 'injected_files',
+        cls.default_quota_set = set(('metadata_items',
                                      'ram', 'floating_ips',
                                      'fixed_ips', 'key_pairs',
-                                     'injected_file_path_bytes',
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_quotas(self):
         # User can get the quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
@@ -48,7 +46,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.tenant_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_default_quotas(self):
         # User can get the default quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
@@ -58,7 +56,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.tenant_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_compare_tenant_quotas_with_default_quotas(self):
         # Tenants are created with the default quota values
         resp, defualt_quota_set = \
@@ -69,5 +67,5 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(defualt_quota_set, tenant_quota_set)
 
 
-class QuotasTestXML(QuotasTestJSON):
+class QuotasV3TestXML(QuotasV3TestJSON):
     _interface = 'xml'
