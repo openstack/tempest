@@ -134,9 +134,9 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         # Verify the server properties after the rebuild completes
         self.client.wait_for_server_status(rebuilt_server['id'], 'ACTIVE')
         resp, server = self.client.get_server(rebuilt_server['id'])
-        rebuilt_image_id = rebuilt_server['image']['id']
+        rebuilt_image_id = server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
-        self.assertEqual(new_name, rebuilt_server['name'])
+        self.assertEqual(new_name, server['name'])
 
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password

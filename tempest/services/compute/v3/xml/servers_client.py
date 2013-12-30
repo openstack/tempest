@@ -194,6 +194,10 @@ class ServersV3ClientXML(RestClientXML):
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
+    def migrate_server(self, server_id, **kwargs):
+        """Migrates the given server ."""
+        return self.action(server_id, 'migrate', None, **kwargs)
+
     def lock_server(self, server_id, **kwargs):
         """Locks the given server."""
         return self.action(server_id, 'lock', None, **kwargs)
@@ -412,10 +416,12 @@ class ServersV3ClientXML(RestClientXML):
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
-    def wait_for_server_status(self, server_id, status, extra_timeout=0):
+    def wait_for_server_status(self, server_id, status, extra_timeout=0,
+                               raise_on_error=True):
         """Waits for a server to reach a given status."""
         return waiters.wait_for_server_status(self, server_id, status,
-                                              extra_timeout=extra_timeout)
+                                              extra_timeout=extra_timeout,
+                                              raise_on_error=raise_on_error)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination."""

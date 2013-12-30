@@ -21,7 +21,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
+class ServersAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests Servers API using admin privileges
@@ -31,10 +31,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServersAdminTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.servers_client
+        super(ServersAdminV3TestJSON, cls).setUpClass()
+        cls.client = cls.servers_admin_client
         cls.non_admin_client = cls.servers_client
-        cls.flavors_client = cls.os_adm.flavors_client
+        cls.flavors_client = cls.flavors_admin_client
 
         cls.s1_name = data_utils.rand_name('server')
         resp, server = cls.create_test_server(name=cls.s1_name,
@@ -142,5 +142,5 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 
 
-class ServersAdminTestXML(ServersAdminTestJSON):
+class ServersAdminV3TestXML(ServersAdminV3TestJSON):
     _interface = 'xml'
