@@ -39,27 +39,36 @@ class ObjectTempUrlTest(base.BaseObjectTest):
     def setUpClass(cls):
         super(ObjectTempUrlTest, cls).setUpClass()
 
-        # skip this test if CORS isn't enabled in the conf file.
+        # skip this test if TempUrl isn't enabled in the conf file.
         if not cls.tempurl_available:
             skip_msg = ("%s skipped as TempUrl middleware not available"
                         % cls.__name__)
             raise cls.skipException(skip_msg)
 
+        # create a container
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
         cls.containers = [cls.container_name]
 
         # update account metadata
         cls.key = 'Meta'
+        cls.metadatas = []
         cls.metadata = {'Temp-URL-Key': cls.key}
+        cls.metadatas.append(cls.metadata)
         cls.account_client.create_account_metadata(metadata=cls.metadata)
-        cls.account_client_metadata, _ = \
-            cls.account_client.list_account_metadata()
+
+        # create an object
+        cls.object_name = data_utils.rand_name(name='ObjectTemp')
+        cls.content = data_utils.arbitrary_string(size=len(cls.object_name),
+                                                  base_text=cls.object_name)
+        cls.object_client.create_object(cls.container_name,
+                                        cls.object_name, cls.content)
 
     @classmethod
     def tearDownClass(cls):
-        resp, _ = cls.account_client.delete_account_metadata(
-            metadata=cls.metadata)
+        for metadata in cls.metadata:
+            cls.account_client.delete_account_metadata(
+                metadata=metadata)
 
         cls.delete_containers(cls.containers)
 
@@ -69,20 +78,15 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
     def setUp(self):
         super(ObjectTempUrlTest, self).setUp()
+
         # make sure the metadata has been set
+        account_client_metadata, _ = \
+            self.account_client.list_account_metadata()
         self.assertIn('x-account-meta-temp-url-key',
-                      self.account_client_metadata)
-
+                      account_client_metadata)
         self.assertEqual(
-            self.account_client_metadata['x-account-meta-temp-url-key'],
+            account_client_metadata['x-account-meta-temp-url-key'],
             self.key)
-
-        # create object
-        self.object_name = data_utils.rand_name(name='ObjectTemp')
-        self.data = data_utils.arbitrary_string(size=len(self.object_name),
-                                                base_text=self.object_name)
-        self.object_client.create_object(self.container_name,
-                                         self.object_name, self.data)
 
     def _get_expiry_date(self, expiration_time=1000):
         return int(time.time() + expiration_time)
@@ -114,10 +118,10 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  expires, self.key)
 
         # trying to get object using temp url within expiry time
-        resp, body = self.object_client.get_object_using_temp_url(url)
+        resp, body = self.object_client.get(url)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
-        self.assertEqual(body, self.data)
+        self.assertEqual(body, self.content)
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
@@ -129,23 +133,27 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         key2 = 'Meta2-'
         metadata = {'Temp-URL-Key-2': key2}
         self.account_client.create_account_metadata(metadata=metadata)
+        self.metadatas.append(metadata)
 
-        self.account_client_metadata, _ = \
+        # make sure the metadata has been set
+        account_client_metadata, _ = \
             self.account_client.list_account_metadata()
         self.assertIn('x-account-meta-temp-url-key-2',
-                      self.account_client_metadata)
+                      account_client_metadata)
+        self.assertEqual(
+            account_client_metadata['x-account-meta-temp-url-key-2'],
+            key2)
 
         expires = self._get_expiry_date()
         url = self._get_temp_url(self.container_name,
                                  self.object_name, "GET",
                                  expires, key2)
-        resp, body = self.object_client.get_object_using_temp_url(url)
+        resp, body = self.object_client.get(url)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
-        self.assertEqual(body, self.data)
+        self.assertEqual(body, self.content)
 
     @attr(type='gate')
     def test_put_object_using_temp_url(self):
-        # make sure the metadata has been set
         new_data = data_utils.arbitrary_string(
             size=len(self.object_name),
             base_text=data_utils.rand_name(name="random"))
@@ -156,9 +164,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  expires, self.key)
 
         # trying to put random data in the object using temp url
-        resp, body = self.object_client.put_object_using_temp_url(
-            url, new_data)
-
+        resp, body = self.object_client.put(url, new_data, None)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'PUT')
 
@@ -172,8 +178,22 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  self.object_name, "GET",
                                  expires, self.key)
 
-        _, body = self.object_client.get_object_using_temp_url(url)
+        _, body = self.object_client.get(url)
         self.assertEqual(body, new_data)
+
+    @attr(type='gate')
+    def test_head_object_using_temp_url(self):
+        expires = self._get_expiry_date()
+
+        # get a temp URL for the created object
+        url = self._get_temp_url(self.container_name,
+                                 self.object_name, "HEAD",
+                                 expires, self.key)
+
+        # Testing a HEAD on this Temp URL
+        resp, body = self.object_client.head(url)
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'HEAD')
 
     @attr(type=['gate', 'negative'])
     def test_get_object_after_expiration_time(self):
@@ -188,5 +208,4 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         time.sleep(2)
 
         self.assertRaises(exceptions.Unauthorized,
-                          self.object_client.get_object_using_temp_url,
-                          url)
+                          self.object_client.get, url)
