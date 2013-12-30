@@ -117,17 +117,10 @@ class VolumesGetTest(base.BaseVolumeV1Test):
     @attr(type='gate')
     def test_volume_get_metadata_none(self):
         # Create a volume without passing metadata, get details, and delete
-        volume = {}
-        v_name = data_utils.rand_name('Volume-')
+
         # Create a volume without metadata
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
-                                                 metadata={})
-        self.assertEqual(200, resp.status)
-        self.assertIn('id', volume)
-        self.addCleanup(self._delete_volume, volume['id'])
-        self.assertIn('display_name', volume)
-        self.client.wait_for_volume_status(volume['id'], 'available')
+        volume = self.create_volume(metadata={})
+
         # GET Volume
         resp, fetched_volume = self.client.get_volume(volume['id'])
         self.assertEqual(200, resp.status)
@@ -145,8 +138,7 @@ class VolumesGetTest(base.BaseVolumeV1Test):
 
     @attr(type='gate')
     def test_volume_create_get_update_delete_as_clone(self):
-        origin = self.create_volume(size=1,
-                                    display_name="Volume Origin")
+        origin = self.create_volume()
         self._volume_create_get_update_delete(source_volid=origin['id'])
 
 

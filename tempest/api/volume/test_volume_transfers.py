@@ -17,7 +17,6 @@
 
 from tempest.api.volume import base
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
 from tempest.test import attr
 
 
@@ -61,10 +60,7 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
     @attr(type='gate')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
-        vol_name = rand_name('-Volume-')
-        _, volume = self.client.create_volume(size=1, display_name=vol_name)
-        self.addCleanup(self.adm_client.delete_volume, volume['id'])
-        self.client.wait_for_volume_status(volume['id'], 'available')
+        volume = self.create_volume()
 
         # Create a volume transfer
         resp, transfer = self.client.create_volume_transfer(volume['id'])
@@ -93,10 +89,7 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
 
     def test_create_list_delete_volume_transfer(self):
         # Create a volume first
-        vol_name = rand_name('-Volume-')
-        _, volume = self.client.create_volume(size=1, display_name=vol_name)
-        self.addCleanup(self.adm_client.delete_volume, volume['id'])
-        self.client.wait_for_volume_status(volume['id'], 'available')
+        volume = self.create_volume()
 
         # Create a volume transfer
         resp, body = self.client.create_volume_transfer(volume['id'])
