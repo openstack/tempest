@@ -36,6 +36,12 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         agents = body['agents']
         self.assertIn(self.agent, agents)
 
+    @attr(type=['smoke'])
+    def test_list_agents_non_admin(self):
+        resp, body = self.client.list_agents()
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(len(body["agents"]), 0)
+
     @attr(type='smoke')
     def test_show_agent(self):
         resp, body = self.admin_client.show_agent(self.agent['id'])
