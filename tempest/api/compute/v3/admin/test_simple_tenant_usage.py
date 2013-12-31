@@ -18,7 +18,6 @@
 import datetime
 
 from tempest.api.compute import base
-from tempest import exceptions
 from tempest.test import attr
 import time
 
@@ -82,33 +81,6 @@ class TenantUsagesV3TestJSON(base.BaseV3ComputeAdminTest):
 
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_usage_tenant_with_empty_tenant_id(self):
-        # Get usage for a specific tenant empty
-        params = {'start': self.start,
-                  'end': self.end}
-        self.assertRaises(exceptions.NotFound,
-                          self.adm_client.get_tenant_usage,
-                          '', params)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_usage_tenant_with_invalid_date(self):
-        # Get usage for tenant with invalid date
-        params = {'start': self.end,
-                  'end': self.start}
-        self.assertRaises(exceptions.BadRequest,
-                          self.adm_client.get_tenant_usage,
-                          self.tenant_id, params)
-
-    @attr(type=['negative', 'gate'])
-    def test_list_usage_all_tenants_with_non_admin_user(self):
-        # Get usage for all tenants with non admin user
-        params = {'start': self.start,
-                  'end': self.end,
-                  'detailed': int(bool(True))}
-        self.assertRaises(exceptions.Unauthorized,
-                          self.client.list_tenant_usages, params)
 
 
 class TenantUsagesV3TestXML(TenantUsagesV3TestJSON):
