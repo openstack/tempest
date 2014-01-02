@@ -51,17 +51,15 @@ class FloatingIPsTestJSON(base.BaseV2ComputeTest):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
         resp, body = self.client.create_floating_ip()
-        self.assertEqual(200, resp.status)
         floating_ip_id_allocated = body['id']
-        try:
-            resp, floating_ip_details = \
-                self.client.get_floating_ip_details(floating_ip_id_allocated)
-            # Checking if the details of allocated IP is in list of floating IP
-            resp, body = self.client.list_floating_ips()
-            self.assertIn(floating_ip_details, body)
-        finally:
-            # Deleting the floating IP which is created in this method
-            self.client.delete_floating_ip(floating_ip_id_allocated)
+        self.addCleanup(self.client.delete_floating_ip,
+                        floating_ip_id_allocated)
+        self.assertEqual(200, resp.status)
+        resp, floating_ip_details = \
+            self.client.get_floating_ip_details(floating_ip_id_allocated)
+        # Checking if the details of allocated IP is in list of floating IP
+        resp, body = self.client.list_floating_ips()
+        self.assertIn(floating_ip_details, body)
 
     @attr(type='gate')
     def test_delete_floating_ip(self):
