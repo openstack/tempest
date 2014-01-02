@@ -134,14 +134,6 @@ class ObjectClient(RestClient):
         resp, body = self.put(url, data, self.headers)
         return resp, body
 
-    def get_object_using_temp_url(self, url):
-        """Retrieve object's data using temp URL."""
-        return self.get(url)
-
-    def put_object_using_temp_url(self, url, data):
-        """Put data in an object using temp URL."""
-        return self.put(url, data, None)
-
 
 class ObjectClientCustomizedHeader(RestClient):
 
