@@ -19,6 +19,7 @@ import datetime
 
 from tempest.api.compute import base
 from tempest import exceptions
+from tempest import test
 from tempest.test import attr
 
 
@@ -50,6 +51,7 @@ class TenantUsagesNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
                           self.adm_client.get_tenant_usage,
                           '', params)
 
+    @test.skip_because(bug='1265416')
     @attr(type=['negative', 'gate'])
     def test_get_usage_tenant_with_invalid_date(self):
         # Get usage for tenant with invalid date
@@ -62,6 +64,7 @@ class TenantUsagesNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
                           self.adm_client.get_tenant_usage,
                           tenant_id, params)
 
+    @test.skip_because(bug='1265416')
     @attr(type=['negative', 'gate'])
     def test_list_usage_all_tenants_with_non_admin_user(self):
         # Get usage for all tenants with non admin user
