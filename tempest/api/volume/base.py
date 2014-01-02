@@ -37,10 +37,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 
         cls.os = cls.get_client_manager()
 
-        cls.volumes_client = cls.os.volumes_client
-        cls.snapshots_client = cls.os.snapshots_client
         cls.servers_client = cls.os.servers_client
-        cls.volumes_extension_client = cls.os.volumes_extension_client
         cls.image_ref = cls.config.compute.image_ref
         cls.flavor_ref = cls.config.compute.flavor_ref
         cls.build_interval = cls.config.volume.build_interval
@@ -117,12 +114,9 @@ class BaseVolumeV1Test(BaseVolumeTest):
             msg = "Volume API v1 not supported"
             raise cls.skipException(msg)
         super(BaseVolumeV1Test, cls).setUpClass()
+        cls.snapshots_client = cls.os.snapshots_client
         cls.volumes_client = cls.os.volumes_client
-        cls.volumes_client.keystone_auth(cls.os.username,
-                                         cls.os.password,
-                                         cls.os.auth_url,
-                                         cls.volumes_client.service,
-                                         cls.os.tenant_name)
+        cls.volumes_extension_client = cls.os.volumes_extension_client
 
 
 class BaseVolumeV1AdminTest(BaseVolumeV1Test):

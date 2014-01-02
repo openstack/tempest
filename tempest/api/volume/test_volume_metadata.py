@@ -15,11 +15,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.volume.base import BaseVolumeTest
+from tempest.api.volume import base
 from tempest import test
 
 
-class VolumeMetadataTest(BaseVolumeTest):
+class VolumeMetadataTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod
