@@ -72,8 +72,9 @@ class VolumesListTest(base.BaseVolumeV1Test):
                 resp, volume = cls.client.get_volume(volume['id'])
                 cls.volume_list.append(volume)
                 cls.volume_id_list.append(volume['id'])
-            except Exception as exc:
-                LOG.exception(exc)
+            except Exception:
+                LOG.exception('Failed to create volume. %d volumes were '
+                              'created' % len(cls.volume_id_list))
                 if cls.volume_list:
                     # We could not create all the volumes, though we were able
                     # to create *some* of the volumes. This is typically
@@ -82,7 +83,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
                     for volid in cls.volume_id_list:
                         cls.client.delete_volume(volid)
                         cls.client.wait_for_resource_deletion(volid)
-                raise exc
+                raise
 
     @classmethod
     def tearDownClass(cls):

@@ -100,9 +100,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             except exceptions.NotFound:
                 # The image may have already been deleted which is OK.
                 pass
-            except Exception as exc:
-                LOG.info('Exception raised deleting image %s', image_id)
-                LOG.exception(exc)
+            except Exception:
+                LOG.exception('Exception raised deleting image %s' % image_id)
                 pass
 
     @classmethod
@@ -214,8 +213,8 @@ class BaseV2ComputeTest(BaseComputeTest):
             try:
                 cls.servers_client.delete_server(server_id)
                 cls.servers_client.wait_for_server_termination(server_id)
-            except Exception as exc:
-                LOG.exception(exc)
+            except Exception:
+                LOG.exception('Failed to delete server %s' % server_id)
                 pass
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.password = server['adminPass']
@@ -300,8 +299,8 @@ class BaseV3ComputeTest(BaseComputeTest):
         try:
             cls.servers_client.delete_server(server_id)
             cls.servers_client.wait_for_server_termination(server_id)
-        except Exception as exc:
-            LOG.exception(exc)
+        except Exception:
+            LOG.exception('Failed to delete server %s' % server_id)
             pass
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.password = server['admin_password']

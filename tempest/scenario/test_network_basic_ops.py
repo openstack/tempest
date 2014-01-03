@@ -227,10 +227,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                     for ip_address in ip_addresses:
                         self._check_vm_connectivity(ip_address, ssh_login,
                                                     key.private_key)
-        except Exception as exc:
-            LOG.exception(exc)
+        except Exception:
+            LOG.exception('Tenant connectivity check failed')
             debug.log_ip_ns()
-            raise exc
+            raise
 
     def _wait_for_floating_ip_association(self):
         ip_tracker = FloatingIPCheckTracker(self.compute_client,
@@ -263,10 +263,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                             ssh_login,
                                             private_key,
                                             should_connect=should_connect)
-        except Exception as exc:
-            LOG.exception(exc)
+        except Exception:
+            LOG.exception('Public network connectivity check failed')
             debug.log_ip_ns()
-            raise exc
+            raise
 
     def _disassociate_floating_ips(self):
         for floating_ip, server in self.floating_ips.iteritems():

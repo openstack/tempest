@@ -46,10 +46,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         try:
             self.servers_client.wait_for_server_status(self.server_id,
                                                        'ACTIVE')
-        except Exception as exc:
-            LOG.exception(exc)
+        except Exception:
+            LOG.exception('server %s timed out to become ACTIVE. rebuilding'
+                          % self.server_id)
             # Rebuild server if cannot reach the ACTIVE state
-            # Usually it means the server had a serius accident
+            # Usually it means the server had a serious accident
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
