@@ -473,6 +473,16 @@ OrchestrationGroup = [
 ]
 
 
+telemetry_group = cfg.OptGroup(name='telemetry',
+                               title='Telemetry Service Options')
+
+TelemetryGroup = [
+    cfg.StrOpt('catalog_type',
+               default='metering',
+               help="Catalog type of the Telemetry service."),
+]
+
+
 dashboard_group = cfg.OptGroup(name="dashboard",
                                title="Dashboard options")
 
@@ -700,6 +710,7 @@ class TempestConfigPrivate(object):
         register_opt_group(cfg.CONF, object_storage_feature_group,
                            ObjectStoreFeaturesGroup)
         register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
+        register_opt_group(cfg.CONF, telemetry_group, TelemetryGroup)
         register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
         register_opt_group(cfg.CONF, data_processing_group,
                            DataProcessingGroup)
@@ -723,6 +734,7 @@ class TempestConfigPrivate(object):
         self.object_storage_feature_enabled = cfg.CONF[
             'object-storage-feature-enabled']
         self.orchestration = cfg.CONF.orchestration
+        self.telemetry = cfg.CONF.telemetry
         self.dashboard = cfg.CONF.dashboard
         self.data_processing = cfg.CONF.data_processing
         self.boto = cfg.CONF.boto
