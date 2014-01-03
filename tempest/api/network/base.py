@@ -66,6 +66,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.health_monitors = []
         cls.vpnservices = []
         cls.ikepolicies = []
+        cls.floating_ips = []
 
     @classmethod
     def tearDownClass(cls):
@@ -75,6 +76,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         # Clean up vpn services
         for vpnservice in cls.vpnservices:
             cls.client.delete_vpnservice(vpnservice['id'])
+        # Clean up floating IPs
+        for floating_ip in cls.floating_ips:
+            cls.client.delete_floating_ip(floating_ip['id'])
         # Clean up routers
         for router in cls.routers:
             resp, body = cls.client.list_router_interfaces(router['id'])
@@ -165,6 +169,16 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         router = body['router']
         cls.routers.append(router)
         return router
+
+    @classmethod
+    def create_floating_ip(cls, external_network_id, **kwargs):
+        """Wrapper utility that returns a test floating IP."""
+        resp, body = cls.client.create_floating_ip(
+            external_network_id,
+            **kwargs)
+        fip = body['floatingip']
+        cls.floating_ips.append(fip)
+        return fip
 
     @classmethod
     def create_pool(cls, name, lb_method, protocol, subnet):
