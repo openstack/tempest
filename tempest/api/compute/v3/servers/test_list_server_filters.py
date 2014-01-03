@@ -128,6 +128,22 @@ class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
         # when _interface='xml', one element for servers_links in servers
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
+    @attr(type='gate')
+    def test_list_servers_filter_by_zero_limit(self):
+        # Verify only the expected number of servers are returned
+        params = {'limit': 0}
+        resp, servers = self.client.list_servers(params)
+        self.assertEqual(0, len(servers['servers']))
+
+    @attr(type='gate')
+    def test_list_servers_filter_by_exceed_limit(self):
+        # Verify only the expected number of servers are returned
+        params = {'limit': 100000}
+        resp, servers = self.client.list_servers(params)
+        resp, all_servers = self.client.list_servers()
+        self.assertEqual(len([x for x in all_servers['servers'] if 'id' in x]),
+                         len([x for x in servers['servers'] if 'id' in x]))
+
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='gate')
     def test_list_servers_detailed_filter_by_image(self):
