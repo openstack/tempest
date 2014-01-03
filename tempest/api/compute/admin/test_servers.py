@@ -44,6 +44,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.s2_name = data_utils.rand_name('server')
         resp, server = cls.create_test_server(name=cls.s2_name,
                                               wait_until='ACTIVE')
+        cls.s2_id = server['id']
 
     def _get_unused_flavor_id(self):
         flavor_id = data_utils.rand_int_id(start=1000)
@@ -62,6 +63,22 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         servers = body['servers']
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
+
+    @attr(type='gate')
+    def test_list_servers_filter_by_error_status(self):
+        # Filter the list of servers by server error status
+        params = {'status': 'error'}
+        resp, server = self.client.reset_state(self.s1_id, state='error')
+        resp, body = self.non_admin_client.list_servers(params)
+        # Reset server's state to 'active'
+        resp, server = self.client.reset_state(self.s1_id, state='active')
+        # Verify server's state
+        resp, server = self.client.get_server(self.s1_id)
+        self.assertEqual(server['status'], 'ACTIVE')
+        servers = body['servers']
+        # Verify error server in list result
+        self.assertIn(self.s1_id, map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s2_id, map(lambda x: x['id'], servers))
 
     @attr(type='gate')
     def test_list_servers_by_admin_with_all_tenants(self):

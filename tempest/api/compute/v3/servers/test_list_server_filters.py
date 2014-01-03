@@ -176,6 +176,23 @@ class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
         self.assertEqual(['ACTIVE'] * 3, [x['status'] for x in servers])
 
     @attr(type='gate')
+    def test_list_servers_filter_by_shutoff_status(self):
+        # Filter the list of servers by server shutoff status
+        params = {'status': 'shutoff'}
+        self.client.stop(self.s1['id'])
+        self.client.wait_for_server_status(self.s1['id'],
+                                           'SHUTOFF')
+        resp, body = self.client.list_servers(params)
+        self.client.start(self.s1['id'])
+        self.client.wait_for_server_status(self.s1['id'],
+                                           'ACTIVE')
+        servers = body['servers']
+
+        self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s3['id'], map(lambda x: x['id'], servers))
+
+    @attr(type='gate')
     def test_list_servers_filtered_by_name_wildcard(self):
         # List all servers that contains '-instance' in name
         params = {'name': '-instance'}
