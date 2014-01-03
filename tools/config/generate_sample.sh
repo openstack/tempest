@@ -91,3 +91,9 @@ DEFAULT_MODULEPATH=tempest.openstack.common.config.generator
 MODULEPATH=${MODULEPATH:-$DEFAULT_MODULEPATH}
 OUTPUTFILE=$OUTPUTDIR/$PACKAGENAME.conf.sample
 python -m $MODULEPATH $FILES > $OUTPUTFILE
+
+# Hook to allow projects to append custom config file snippets
+CONCAT_FILES=$(ls $BASEDIR/tools/config/*.conf.sample 2>/dev/null)
+for CONCAT_FILE in $CONCAT_FILES; do
+    cat $CONCAT_FILE >> $OUTPUTFILE
+done
