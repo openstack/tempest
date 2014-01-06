@@ -18,18 +18,17 @@
 import re
 import subprocess
 
-from oslo.config import cfg
-
-import tempest.cli
+from tempest import cli
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest import test
 
-CONF = cfg.CONF
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     """Basic, read-only tests for Neutron CLI client.
 
     Checks return values and output of read-only commands.
@@ -87,7 +86,7 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
     def _test_neutron_lbaas_command(self, command):
         try:
             self.neutron(command)
-        except tempest.cli.CommandFailed as e:
+        except cli.CommandFailed as e:
             if '404 Not Found' not in e.stderr:
                 self.fail('%s: Unexpected failure.' % command)
 
@@ -154,7 +153,7 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
                                'router-show', 'agent-update', 'help'))
         self.assertFalse(wanted_commands - commands)
 
-     # Optional arguments:
+    # Optional arguments:
 
     @test.attr(type='smoke')
     def test_neutron_version(self):
