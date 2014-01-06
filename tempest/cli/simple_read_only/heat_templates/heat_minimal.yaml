@@ -1,0 +1,18 @@
+HeatTemplateFormatVersion: '2012-12-12'
+Description: Minimal template to test validation
+Parameters:
+  InstanceImage:
+    Description: Glance image name
+    Type: String
+  InstanceType:
+    Description: Nova instance type
+    Type: String
+    Default: m1.small
+    AllowedValues: [m1.tiny, m1.small, m1.medium, m1.large, m1.nano, m1.xlarge, m1.micro]
+    ConstraintDescription: must be a valid nova instance type.
+Resources:
+    InstanceResource:
+        Type: OS::Nova::Server
+        Properties:
+          flavor: {Ref: InstanceType}
+          image: {Ref: InstanceImage}
