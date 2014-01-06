@@ -33,10 +33,10 @@ class TenantsNegativeTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_list_tenant_request_without_token(self):
         # Request to list tenants without a valid token should fail
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.list_tenants)
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_tenant_delete_by_unauthorized_user(self):
@@ -55,11 +55,11 @@ class TenantsNegativeTestJSON(base.BaseIdentityAdminTest):
         resp, tenant = self.client.create_tenant(tenant_name)
         self.assertEqual(200, resp.status)
         self.data.tenants.append(tenant)
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.delete_tenant,
                           tenant['id'])
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_delete_non_existent_tenant(self):
@@ -93,11 +93,11 @@ class TenantsNegativeTestJSON(base.BaseIdentityAdminTest):
     def test_create_tenant_request_without_token(self):
         # Create tenant request without a token should not be authorized
         tenant_name = data_utils.rand_name(name='tenant-')
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.create_tenant,
                           tenant_name)
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_create_tenant_with_empty_name(self):
@@ -135,11 +135,11 @@ class TenantsNegativeTestJSON(base.BaseIdentityAdminTest):
         resp, tenant = self.client.create_tenant(tenant_name)
         self.assertEqual(200, resp.status)
         self.data.tenants.append(tenant)
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.update_tenant,
                           tenant['id'])
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
 
 class TenantsNegativeTestXML(TenantsNegativeTestJSON):

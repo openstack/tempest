@@ -23,9 +23,8 @@ CONF = config.CONF
 
 class HostsClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(HostsClientJSON, self).__init__(username, password,
-                                              auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(HostsClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def list_hosts(self, params=None):

@@ -24,14 +24,17 @@ CONF = config.CONF
 
 
 class ContainerClient(RestClient):
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ContainerClient, self).__init__(username, password,
-                                              auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(ContainerClient, self).__init__(auth_provider)
 
         # Overwrites json-specific header encoding in RestClient
         self.headers = {}
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
+
+    @property
+    def token(self):
+        return self.auth_provider.auth_data[0]
 
     def create_container(
             self, container_name,

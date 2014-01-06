@@ -35,17 +35,15 @@ class TelemetryClientBase(object):
     statistics
     """
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        self.rest_client = self.get_rest_client(username, password,
-                                                auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        self.rest_client = self.get_rest_client(auth_provider)
         self.rest_client.service = CONF.telemetry.catalog_type
         self.headers = self.rest_client.headers
         self.version = '2'
         self.uri_prefix = "v%s" % self.version
 
     @abc.abstractmethod
-    def get_rest_client(self, username, password,
-                        auth_url, tenant_name):
+    def get_rest_client(self, auth_provider):
         """
         :param config:
         :param username:

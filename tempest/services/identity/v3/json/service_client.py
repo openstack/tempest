@@ -14,7 +14,6 @@
 #    under the License.
 
 import json
-from urlparse import urlparse
 
 from tempest.common.rest_client import RestClient
 from tempest import config
@@ -24,20 +23,11 @@ CONF = config.CONF
 
 class ServiceClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ServiceClientJSON, self).__init__(username, password,
-                                                auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(ServiceClientJSON, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(ServiceClientJSON, self).request(method, url,
-                                                      headers=headers,
-                                                      body=body)
+        self.api_version = "v3"
 
     def update_service(self, service_id, **kwargs):
         """Updates a service."""

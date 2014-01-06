@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import auth
 from tempest.common.rest_client import NegativeRestClient
 from tempest import config
 from tempest import exceptions
@@ -185,172 +186,208 @@ class Manager(object):
         :param password: Override of the password
         :param tenant_name: Override of the tenant name
         """
-        # If no creds are provided, we fall back on the defaults
-        # in the config file for the Compute API.
-        self.username = username or CONF.identity.username
-        self.password = password or CONF.identity.password
-        self.tenant_name = tenant_name or CONF.identity.tenant_name
-
-        if None in (self.username, self.password, self.tenant_name):
-            msg = ("Missing required credentials. "
-                   "username: %(u)s, password: %(p)s, "
-                   "tenant_name: %(t)s" %
-                   {'u': username, 'p': password, 't': tenant_name})
-            raise exceptions.InvalidConfiguration(msg)
-
-        self.auth_url = CONF.identity.uri
-        self.auth_url_v3 = CONF.identity.uri_v3
-
-        client_args = (self.username, self.password,
-                       self.auth_url, self.tenant_name)
-
-        if self.auth_url_v3:
-            auth_version = 'v3'
-            client_args_v3_auth = (self.username,
-                                   self.password, self.auth_url_v3,
-                                   self.tenant_name, auth_version)
+        self.interface = interface
+        self.auth_version = CONF.identity.auth_version
+        # FIXME(andreaf) Change Manager __init__ to accept a credentials dict
+        if username is None or password is None:
+            # Tenant None is a valid use case
+            self.credentials = self.get_default_credentials()
         else:
-            client_args_v3_auth = None
+            self.credentials = dict(username=username, password=password,
+                                    tenant_name=tenant_name)
+        if self.auth_version == 'v3':
+            self.credentials['domain_name'] = 'Default'
+        # Setup an auth provider
+        auth_provider = self.get_auth_provider(self.credentials)
 
-        self.servers_client_v3_auth = None
-
-        if interface == 'xml':
-            self.certificates_client = CertificatesClientXML(*client_args)
-            self.servers_client = ServersClientXML(*client_args)
-            self.limits_client = LimitsClientXML(*client_args)
-            self.images_client = ImagesClientXML(*client_args)
-            self.keypairs_client = KeyPairsClientXML(*client_args)
-            self.quotas_client = QuotasClientXML(*client_args)
-            self.flavors_client = FlavorsClientXML(*client_args)
-            self.extensions_client = ExtensionsClientXML(*client_args)
+        if self.interface == 'xml':
+            self.certificates_client = CertificatesClientXML(
+                auth_provider)
+            self.servers_client = ServersClientXML(auth_provider)
+            self.limits_client = LimitsClientXML(auth_provider)
+            self.images_client = ImagesClientXML(auth_provider)
+            self.keypairs_client = KeyPairsClientXML(auth_provider)
+            self.quotas_client = QuotasClientXML(auth_provider)
+            self.flavors_client = FlavorsClientXML(auth_provider)
+            self.extensions_client = ExtensionsClientXML(auth_provider)
             self.volumes_extensions_client = VolumesExtensionsClientXML(
-                *client_args)
-            self.floating_ips_client = FloatingIPsClientXML(*client_args)
-            self.snapshots_client = SnapshotsClientXML(*client_args)
-            self.volumes_client = VolumesClientXML(*client_args)
-            self.volume_types_client = VolumeTypesClientXML(*client_args)
-            self.identity_client = IdentityClientXML(*client_args)
-            self.identity_v3_client = IdentityV3ClientXML(*client_args)
-            self.token_client = TokenClientXML()
+                auth_provider)
+            self.floating_ips_client = FloatingIPsClientXML(
+                auth_provider)
+            self.snapshots_client = SnapshotsClientXML(auth_provider)
+            self.volumes_client = VolumesClientXML(auth_provider)
+            self.volume_types_client = VolumeTypesClientXML(
+                auth_provider)
+            self.identity_client = IdentityClientXML(auth_provider)
+            self.identity_v3_client = IdentityV3ClientXML(
+                auth_provider)
             self.security_groups_client = SecurityGroupsClientXML(
-                *client_args)
-            self.interfaces_client = InterfacesClientXML(*client_args)
-            self.endpoints_client = EndPointClientXML(*client_args)
-            self.fixed_ips_client = FixedIPsClientXML(*client_args)
+                auth_provider)
+            self.interfaces_client = InterfacesClientXML(auth_provider)
+            self.endpoints_client = EndPointClientXML(auth_provider)
+            self.fixed_ips_client = FixedIPsClientXML(auth_provider)
             self.availability_zone_client = AvailabilityZoneClientXML(
-                *client_args)
-            self.service_client = ServiceClientXML(*client_args)
-            self.aggregates_client = AggregatesClientXML(*client_args)
-            self.services_client = ServicesClientXML(*client_args)
-            self.tenant_usages_client = TenantUsagesClientXML(*client_args)
-            self.policy_client = PolicyClientXML(*client_args)
-            self.hosts_client = HostsClientXML(*client_args)
-            self.hypervisor_client = HypervisorClientXML(*client_args)
-            self.token_v3_client = V3TokenClientXML(*client_args)
-            self.network_client = NetworkClientXML(*client_args)
-            self.credentials_client = CredentialsClientXML(*client_args)
+                auth_provider)
+            self.service_client = ServiceClientXML(auth_provider)
+            self.aggregates_client = AggregatesClientXML(auth_provider)
+            self.services_client = ServicesClientXML(auth_provider)
+            self.tenant_usages_client = TenantUsagesClientXML(
+                auth_provider)
+            self.policy_client = PolicyClientXML(auth_provider)
+            self.hosts_client = HostsClientXML(auth_provider)
+            self.hypervisor_client = HypervisorClientXML(auth_provider)
+            self.network_client = NetworkClientXML(auth_provider)
+            self.credentials_client = CredentialsClientXML(
+                auth_provider)
             self.instance_usages_audit_log_client = \
-                InstanceUsagesAuditLogClientXML(*client_args)
-            self.volume_hosts_client = VolumeHostsClientXML(*client_args)
+                InstanceUsagesAuditLogClientXML(auth_provider)
+            self.volume_hosts_client = VolumeHostsClientXML(
+                auth_provider)
             self.volumes_extension_client = VolumeExtensionClientXML(
-                *client_args)
-
-            if client_args_v3_auth:
-                self.servers_client_v3_auth = ServersClientXML(
-                    *client_args_v3_auth)
+                auth_provider)
             if CONF.service_available.ceilometer:
-                self.telemetry_client = TelemetryClientXML(*client_args)
+                self.telemetry_client = TelemetryClientXML(
+                    auth_provider)
+            self.token_client = TokenClientXML()
+            self.token_v3_client = V3TokenClientXML()
 
-        elif interface == 'json':
-            self.certificates_client = CertificatesClientJSON(*client_args)
+        elif self.interface == 'json':
+            self.certificates_client = CertificatesClientJSON(
+                auth_provider)
             self.certificates_v3_client = CertificatesV3ClientJSON(
-                *client_args)
-            self.baremetal_client = BaremetalClientJSON(*client_args)
-            self.servers_client = ServersClientJSON(*client_args)
-            self.servers_v3_client = ServersV3ClientJSON(*client_args)
-            self.limits_client = LimitsClientJSON(*client_args)
-            self.images_client = ImagesClientJSON(*client_args)
-            self.keypairs_v3_client = KeyPairsV3ClientJSON(*client_args)
-            self.keypairs_client = KeyPairsClientJSON(*client_args)
-            self.keypairs_v3_client = KeyPairsV3ClientJSON(*client_args)
-            self.quotas_client = QuotasClientJSON(*client_args)
-            self.quotas_v3_client = QuotasV3ClientJSON(*client_args)
-            self.flavors_client = FlavorsClientJSON(*client_args)
-            self.flavors_v3_client = FlavorsV3ClientJSON(*client_args)
-            self.extensions_v3_client = ExtensionsV3ClientJSON(*client_args)
-            self.extensions_client = ExtensionsClientJSON(*client_args)
+                auth_provider)
+            self.baremetal_client = BaremetalClientJSON(auth_provider)
+            self.servers_client = ServersClientJSON(auth_provider)
+            self.servers_v3_client = ServersV3ClientJSON(auth_provider)
+            self.limits_client = LimitsClientJSON(auth_provider)
+            self.images_client = ImagesClientJSON(auth_provider)
+            self.keypairs_v3_client = KeyPairsV3ClientJSON(
+                auth_provider)
+            self.keypairs_client = KeyPairsClientJSON(auth_provider)
+            self.keypairs_v3_client = KeyPairsV3ClientJSON(
+                auth_provider)
+            self.quotas_client = QuotasClientJSON(auth_provider)
+            self.quotas_v3_client = QuotasV3ClientJSON(auth_provider)
+            self.flavors_client = FlavorsClientJSON(auth_provider)
+            self.flavors_v3_client = FlavorsV3ClientJSON(auth_provider)
+            self.extensions_v3_client = ExtensionsV3ClientJSON(
+                auth_provider)
+            self.extensions_client = ExtensionsClientJSON(
+                auth_provider)
             self.volumes_extensions_client = VolumesExtensionsClientJSON(
-                *client_args)
-            self.floating_ips_client = FloatingIPsClientJSON(*client_args)
-            self.snapshots_client = SnapshotsClientJSON(*client_args)
-            self.volumes_client = VolumesClientJSON(*client_args)
-            self.volume_types_client = VolumeTypesClientJSON(*client_args)
-            self.identity_client = IdentityClientJSON(*client_args)
-            self.identity_v3_client = IdentityV3ClientJSON(*client_args)
-            self.token_client = TokenClientJSON()
+                auth_provider)
+            self.floating_ips_client = FloatingIPsClientJSON(
+                auth_provider)
+            self.snapshots_client = SnapshotsClientJSON(auth_provider)
+            self.volumes_client = VolumesClientJSON(auth_provider)
+            self.volume_types_client = VolumeTypesClientJSON(
+                auth_provider)
+            self.identity_client = IdentityClientJSON(auth_provider)
+            self.identity_v3_client = IdentityV3ClientJSON(
+                auth_provider)
             self.security_groups_client = SecurityGroupsClientJSON(
-                *client_args)
-            self.interfaces_v3_client = InterfacesV3ClientJSON(*client_args)
-            self.interfaces_client = InterfacesClientJSON(*client_args)
-            self.endpoints_client = EndPointClientJSON(*client_args)
-            self.fixed_ips_client = FixedIPsClientJSON(*client_args)
+                auth_provider)
+            self.interfaces_v3_client = InterfacesV3ClientJSON(
+                auth_provider)
+            self.interfaces_client = InterfacesClientJSON(
+                auth_provider)
+            self.endpoints_client = EndPointClientJSON(auth_provider)
+            self.fixed_ips_client = FixedIPsClientJSON(auth_provider)
             self.availability_zone_v3_client = AvailabilityZoneV3ClientJSON(
-                *client_args)
+                auth_provider)
             self.availability_zone_client = AvailabilityZoneClientJSON(
-                *client_args)
-            self.services_v3_client = ServicesV3ClientJSON(*client_args)
-            self.service_client = ServiceClientJSON(*client_args)
-            self.aggregates_v3_client = AggregatesV3ClientJSON(*client_args)
-            self.aggregates_client = AggregatesClientJSON(*client_args)
-            self.services_client = ServicesClientJSON(*client_args)
+                auth_provider)
+            self.services_v3_client = ServicesV3ClientJSON(
+                auth_provider)
+            self.service_client = ServiceClientJSON(auth_provider)
+            self.aggregates_v3_client = AggregatesV3ClientJSON(
+                auth_provider)
+            self.aggregates_client = AggregatesClientJSON(
+                auth_provider)
+            self.services_client = ServicesClientJSON(auth_provider)
             self.tenant_usages_v3_client = TenantUsagesV3ClientJSON(
-                *client_args)
-            self.tenant_usages_client = TenantUsagesClientJSON(*client_args)
-            self.version_v3_client = VersionV3ClientJSON(*client_args)
-            self.policy_client = PolicyClientJSON(*client_args)
-            self.hosts_client = HostsClientJSON(*client_args)
-            self.hypervisor_v3_client = HypervisorV3ClientJSON(*client_args)
-            self.hypervisor_client = HypervisorClientJSON(*client_args)
-            self.token_v3_client = V3TokenClientJSON(*client_args)
-            self.network_client = NetworkClientJSON(*client_args)
-            self.credentials_client = CredentialsClientJSON(*client_args)
+                auth_provider)
+            self.tenant_usages_client = TenantUsagesClientJSON(
+                auth_provider)
+            self.version_v3_client = VersionV3ClientJSON(auth_provider)
+            self.policy_client = PolicyClientJSON(auth_provider)
+            self.hosts_client = HostsClientJSON(auth_provider)
+            self.hypervisor_v3_client = HypervisorV3ClientJSON(
+                auth_provider)
+            self.hypervisor_client = HypervisorClientJSON(
+                auth_provider)
+            self.network_client = NetworkClientJSON(auth_provider)
+            self.credentials_client = CredentialsClientJSON(
+                auth_provider)
             self.instance_usages_audit_log_client = \
-                InstanceUsagesAuditLogClientJSON(*client_args)
+                InstanceUsagesAuditLogClientJSON(auth_provider)
             self.instance_usages_audit_log_v3_client = \
-                InstanceUsagesAuditLogV3ClientJSON(*client_args)
-            self.volume_hosts_client = VolumeHostsClientJSON(*client_args)
+                InstanceUsagesAuditLogV3ClientJSON(auth_provider)
+            self.volume_hosts_client = VolumeHostsClientJSON(
+                auth_provider)
             self.volumes_extension_client = VolumeExtensionClientJSON(
-                *client_args)
-            self.hosts_v3_client = HostsV3ClientJSON(*client_args)
+                auth_provider)
+            self.hosts_v3_client = HostsV3ClientJSON(auth_provider)
             if CONF.service_available.ceilometer:
-                self.telemetry_client = TelemetryClientJSON(*client_args)
-            self.negative_client = NegativeRestClient(*client_args)
+                self.telemetry_client = TelemetryClientJSON(
+                    auth_provider)
+            self.token_client = TokenClientJSON()
+            self.token_v3_client = V3TokenClientJSON()
+            self.negative_client = NegativeRestClient(auth_provider)
             self.negative_client.service = service
 
-            if client_args_v3_auth:
-                self.servers_client_v3_auth = ServersClientJSON(
-                    *client_args_v3_auth)
-                self.negative_v3_client = NegativeRestClient(
-                    *client_args_v3_auth)
-                self.negative_v3_client.service = service
         else:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
 
+        # TODO(andreaf) EC2 client still do their auth, v2 only
+        ec2_client_args = (self.credentials.get('username'),
+                           self.credentials.get('password'),
+                           CONF.identity.uri,
+                           self.credentials.get('tenant_name'))
+
         # common clients
-        self.account_client = AccountClient(*client_args)
+        self.account_client = AccountClient(auth_provider)
         if CONF.service_available.glance:
-            self.image_client = ImageClientJSON(*client_args)
-            self.image_client_v2 = ImageClientV2JSON(*client_args)
-        self.container_client = ContainerClient(*client_args)
-        self.object_client = ObjectClient(*client_args)
-        self.orchestration_client = OrchestrationClient(*client_args)
-        self.ec2api_client = botoclients.APIClientEC2(*client_args)
-        self.s3_client = botoclients.ObjectClientS3(*client_args)
-        self.custom_object_client = ObjectClientCustomizedHeader(*client_args)
+            self.image_client = ImageClientJSON(auth_provider)
+            self.image_client_v2 = ImageClientV2JSON(auth_provider)
+        self.container_client = ContainerClient(auth_provider)
+        self.object_client = ObjectClient(auth_provider)
+        self.orchestration_client = OrchestrationClient(
+            auth_provider)
+        self.ec2api_client = botoclients.APIClientEC2(*ec2_client_args)
+        self.s3_client = botoclients.ObjectClientS3(*ec2_client_args)
+        self.custom_object_client = ObjectClientCustomizedHeader(
+            auth_provider)
         self.custom_account_client = \
-            AccountClientCustomizedHeader(*client_args)
-        self.data_processing_client = DataProcessingClient(*client_args)
+            AccountClientCustomizedHeader(auth_provider)
+        self.data_processing_client = DataProcessingClient(
+            auth_provider)
+
+    @classmethod
+    def get_auth_provider_class(cls, auth_version):
+        if auth_version == 'v2':
+            return auth.KeystoneV2AuthProvider
+        else:
+            return auth.KeystoneV3AuthProvider
+
+    def get_default_credentials(self):
+        return dict(
+            username=CONF.identity.username,
+            password=CONF.identity.password,
+            tenant_name=CONF.identity.tenant_name
+        )
+
+    def get_auth_provider(self, credentials=None):
+        auth_params = dict(client_type='tempest',
+                           interface=self.interface)
+        auth_provider_class = self.get_auth_provider_class(self.auth_version)
+        # If invalid / incomplete credentials are provided, use default ones
+        if credentials is None or \
+                not auth_provider_class.check_credentials(credentials):
+            credentials = self.credentials
+        auth_params['credentials'] = credentials
+        return auth_provider_class(**auth_params)
 
 
 class AltManager(Manager):

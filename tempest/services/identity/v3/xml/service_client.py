@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from urlparse import urlparse
-
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
@@ -30,11 +28,11 @@ XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 class ServiceClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ServiceClientXML, self).__init__(username, password,
-                                               auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(ServiceClientXML, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
+        self.api_version = "v3"
 
     def _parse_array(self, node):
         array = []
@@ -45,15 +43,6 @@ class ServiceClientXML(RestClientXML):
     def _parse_body(self, body):
         data = xml_to_json(body)
         return data
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(ServiceClientXML, self).request(method, url,
-                                                     headers=headers,
-                                                     body=body)
 
     def update_service(self, service_id, **kwargs):
         """Updates a service_id."""

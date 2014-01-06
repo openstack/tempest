@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.object_storage import base
+from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
@@ -24,10 +25,10 @@ class ObjectTestACLs(base.BaseObjectTest):
     def setUpClass(cls):
         super(ObjectTestACLs, cls).setUpClass()
         cls.data.setup_test_user()
-        cls.new_token = cls.token_client.get_token(cls.data.test_user,
-                                                   cls.data.test_password,
-                                                   cls.data.test_tenant)
-        cls.custom_headers = {'X-Auth-Token': cls.new_token}
+        test_os = clients.Manager(cls.data.test_user,
+                                  cls.data.test_password,
+                                  cls.data.test_tenant)
+        cls.test_auth_data = test_os.get_auth_provider().auth_data
 
     @classmethod
     def tearDownClass(cls):
@@ -61,9 +62,12 @@ class ObjectTestACLs(base.BaseObjectTest):
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to read the object with rights
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         resp, _ = self.custom_object_client.get_object(
-            self.container_name, object_name,
-            metadata=self.custom_headers)
+            self.container_name, object_name)
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
 
@@ -79,10 +83,13 @@ class ObjectTestACLs(base.BaseObjectTest):
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object with rights
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         object_name = data_utils.rand_name(name='Object')
         resp, _ = self.custom_object_client.create_object(
             self.container_name,
-            object_name, 'data',
-            metadata=self.custom_headers)
+            object_name, 'data')
         self.assertIn(int(resp['status']), HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'PUT')

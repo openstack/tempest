@@ -40,12 +40,12 @@ def verify_glance_api_versions(os):
 
 
 def verify_nova_api_versions(os):
-    # Check nova api versions
-    os.servers_client._set_auth()
-    v2_endpoint = os.servers_client.base_url
-    endpoint = 'http://' + v2_endpoint.split('/')[2]
-    __, body = RAW_HTTP.request(endpoint, 'GET')
+    # Check nova api versions - only get base URL without PATH
+    os.servers_client.skip_path = True
+    __, body = RAW_HTTP.request(os.servers_client.base_url, 'GET')
     body = json.loads(body)
+    # Restore full base_url
+    os.servers_client.skip_path = False
     versions = map(lambda x: x['id'], body['versions'])
     if CONF.compute_feature_enabled.api_v3 != ('v3.0' in versions):
         print('Config option compute api_v3 should be change to: %s' % (

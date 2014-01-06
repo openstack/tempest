@@ -14,7 +14,6 @@
 #    under the License.
 
 import json
-from urlparse import urlparse
 
 from tempest.common.rest_client import RestClient
 from tempest import config
@@ -24,20 +23,11 @@ CONF = config.CONF
 
 class PolicyClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(PolicyClientJSON, self).__init__(username, password,
-                                               auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(PolicyClientJSON, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(PolicyClientJSON, self).request(method, url,
-                                                     headers=headers,
-                                                     body=body)
+        self.api_version = "v3"
 
     def create_policy(self, blob, type):
         """Creates a Policy."""

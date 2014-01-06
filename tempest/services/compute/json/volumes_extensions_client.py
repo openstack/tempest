@@ -26,10 +26,9 @@ CONF = config.CONF
 
 class VolumesExtensionsClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(VolumesExtensionsClientJSON, self).__init__(username,
-                                                          password, auth_url,
-                                                          tenant_name)
+    def __init__(self, auth_provider):
+        super(VolumesExtensionsClientJSON, self).__init__(
+            auth_provider)
         self.service = CONF.compute.catalog_type
         self.build_interval = CONF.volume.build_interval
         self.build_timeout = CONF.volume.build_timeout

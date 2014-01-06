@@ -57,7 +57,6 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         cls.alt_keypairs_client = cls.alt_manager.keypairs_client
         cls.alt_security_client = cls.alt_manager.security_groups_client
 
-        cls.alt_security_client._set_auth()
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         resp, cls.server = cls.client.get_server(server['id'])
 
@@ -174,16 +173,14 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
     def test_create_server_fails_when_tenant_incorrect(self):
         # A create server request should fail if the tenant id does not match
         # the current user
-        saved_base_url = self.alt_client.base_url
-        try:
-            # Change the base URL to impersonate another user
-            self.alt_client.base_url = self.client.base_url
-            self.assertRaises(exceptions.BadRequest,
-                              self.alt_client.create_server, 'test',
-                              self.image['id'], self.flavor_ref)
-        finally:
-            # Reset the base_url...
-            self.alt_client.base_url = saved_base_url
+        # Change the base URL to impersonate another user
+        self.alt_client.auth_provider.set_alt_auth_data(
+            request_part='url',
+            auth_data=self.client.auth_provider.auth_data
+        )
+        self.assertRaises(exceptions.BadRequest,
+                          self.alt_client.create_server, 'test',
+                          self.image['id'], self.flavor_ref)
 
     @attr(type='gate')
     def test_create_keypair_in_analt_user_tenant(self):
@@ -191,18 +188,18 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # the current user
         # POST keypair with other user tenant
         k_name = data_utils.rand_name('keypair-')
-        self.alt_keypairs_client._set_auth()
-        self.saved_base_url = self.alt_keypairs_client.base_url
         try:
             # Change the base URL to impersonate another user
-            self.alt_keypairs_client.base_url = self.keypairs_client.base_url
+            self.alt_keypairs_client.auth_provider.set_alt_auth_data(
+                request_part='url',
+                auth_data=self.keypairs_client.auth_provider.auth_data
+            )
             resp = {}
             resp['status'] = None
             self.assertRaises(exceptions.BadRequest,
                               self.alt_keypairs_client.create_keypair, k_name)
         finally:
-            # Reset the base_url...
-            self.alt_keypairs_client.base_url = self.saved_base_url
+            # Next request the base_url is back to normal
             if (resp['status'] is not None):
                 resp, _ = self.alt_keypairs_client.delete_keypair(k_name)
                 LOG.error("Create keypair request should not happen "
@@ -242,18 +239,19 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         # POST security group with other user tenant
         s_name = data_utils.rand_name('security-')
         s_description = data_utils.rand_name('security')
-        self.saved_base_url = self.alt_security_client.base_url
         try:
             # Change the base URL to impersonate another user
-            self.alt_security_client.base_url = self.security_client.base_url
+            self.alt_security_client.auth_provider.set_alt_auth_data(
+                request_part='url',
+                auth_data=self.security_client.auth_provider.auth_data
+            )
             resp = {}
             resp['status'] = None
             self.assertRaises(exceptions.BadRequest,
                               self.alt_security_client.create_security_group,
                               s_name, s_description)
         finally:
-            # Reset the base_url...
-            self.alt_security_client.base_url = self.saved_base_url
+            # Next request the base_url is back to normal
             if resp['status'] is not None:
                 self.alt_security_client.delete_security_group(resp['id'])
                 LOG.error("Create Security Group request should not happen if"
@@ -282,10 +280,12 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         ip_protocol = 'icmp'
         from_port = -1
         to_port = -1
-        self.saved_base_url = self.alt_security_client.base_url
         try:
             # Change the base URL to impersonate another user
-            self.alt_security_client.base_url = self.security_client.base_url
+            self.alt_security_client.auth_provider.set_alt_auth_data(
+                request_part='url',
+                auth_data=self.security_client.auth_provider.auth_data
+            )
             resp = {}
             resp['status'] = None
             self.assertRaises(exceptions.BadRequest,
@@ -294,8 +294,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
                               parent_group_id, ip_protocol, from_port,
                               to_port)
         finally:
-            # Reset the base_url...
-            self.alt_security_client.base_url = self.saved_base_url
+            # Next request the base_url is back to normal
             if resp['status'] is not None:
                 self.alt_security_client.delete_security_group_rule(resp['id'])
                 LOG.error("Create security group rule request should not "

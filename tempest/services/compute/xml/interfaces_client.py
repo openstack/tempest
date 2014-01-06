@@ -30,9 +30,8 @@ CONF = config.CONF
 
 class InterfacesClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(InterfacesClientXML, self).__init__(username, password,
-                                                  auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(InterfacesClientXML, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def _process_xml_interface(self, node):

@@ -56,6 +56,12 @@ class StaticWebTest(base.BaseObjectTest):
         self.container_client.update_container_metadata(
             self.container_name, metadata=headers)
 
+        # Maintain original headers, no auth added
+        self.custom_account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
+
         # test GET on http://account_url/container_name
         # we should retrieve the self.object_name file
         resp, body = self.custom_account_client.request("GET",
@@ -112,6 +118,12 @@ class StaticWebTest(base.BaseObjectTest):
         self.container_client.update_container_metadata(
             self.container_name, metadata=headers)
 
+        # Maintain original headers, no auth added
+        self.custom_account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
+
         # test GET on http://account_url/container_name
         # we should retrieve a listing of objects
         resp, body = self.custom_account_client.request("GET",
@@ -135,6 +147,12 @@ class StaticWebTest(base.BaseObjectTest):
         self.object_client.create_object(self.container_name,
                                          object_name_404,
                                          object_data_404)
+
+        # Do not set auth in HTTP headers for next request
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
 
         # Request non-existing object
         resp, body = self.custom_object_client.get_object(self.container_name,

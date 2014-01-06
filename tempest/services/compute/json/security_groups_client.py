@@ -25,10 +25,8 @@ CONF = config.CONF
 
 class SecurityGroupsClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(SecurityGroupsClientJSON, self).__init__(username,
-                                                       password, auth_url,
-                                                       tenant_name)
+    def __init__(self, auth_provider):
+        super(SecurityGroupsClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def list_security_groups(self, params=None):

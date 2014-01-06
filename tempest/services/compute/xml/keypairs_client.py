@@ -28,9 +28,8 @@ CONF = config.CONF
 
 class KeyPairsClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(KeyPairsClientXML, self).__init__(username, password,
-                                                auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(KeyPairsClientXML, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def list_keypairs(self):

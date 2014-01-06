@@ -24,9 +24,9 @@ CONF = config.CONF
 
 class InstanceUsagesAuditLogClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
+    def __init__(self, auth_provider):
         super(InstanceUsagesAuditLogClientXML, self).__init__(
-            username, password, auth_url, tenant_name)
+            auth_provider)
         self.service = CONF.compute.catalog_type
 
     def list_instance_usage_audit_logs(self):

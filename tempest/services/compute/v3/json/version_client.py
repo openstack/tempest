@@ -23,10 +23,8 @@ CONF = config.CONF
 
 class VersionV3ClientJSON(rest_client.RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(VersionV3ClientJSON, self).__init__(username,
-                                                  password, auth_url,
-                                                  tenant_name)
+    def __init__(self, auth_provider):
+        super(VersionV3ClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_v3_type
 
     def get_version(self):

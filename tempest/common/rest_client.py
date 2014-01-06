@@ -41,29 +41,14 @@ class RestClient(object):
     TYPE = "json"
     LOG = logging.getLogger(__name__)
 
-    def __init__(self, user, password, auth_url, tenant_name=None,
-                 auth_version='v2'):
-        self.user = user
-        self.password = password
-        self.auth_url = auth_url
-        self.tenant_name = tenant_name
-        self.auth_version = auth_version
+    def __init__(self, auth_provider):
+        self.auth_provider = auth_provider
 
-        self.service = None
-        self.token = None
-        self.base_url = None
-        self.region = {}
-        for cfgname in dir(CONF):
-            # Find all config.FOO.catalog_type and assume FOO is a service.
-            cfg = getattr(CONF, cfgname)
-            catalog_type = getattr(cfg, 'catalog_type', None)
-            if not catalog_type:
-                continue
-            service_region = getattr(cfg, 'region', None)
-            if not service_region:
-                service_region = CONF.identity.region
-            self.region[catalog_type] = service_region
         self.endpoint_url = 'publicURL'
+        self.service = None
+        # The version of the API this client implements
+        self.api_version = None
+        self._skip_path = False
         self.headers = {'Content-Type': 'application/%s' % self.TYPE,
                         'Accept': 'application/%s' % self.TYPE}
         self.build_interval = CONF.compute.build_interval
@@ -82,194 +67,70 @@ class RestClient(object):
 
     def __str__(self):
         STRING_LIMIT = 80
-        str_format = ("user:%s, password:%s, "
-                      "auth_url:%s, tenant_name:%s, auth_version:%s, "
-                      "service:%s, base_url:%s, region:%s, "
-                      "endpoint_url:%s, build_interval:%s, build_timeout:%s"
+        str_format = ("config:%s, service:%s, base_url:%s, "
+                      "filters: %s, build_interval:%s, build_timeout:%s"
                       "\ntoken:%s..., \nheaders:%s...")
-        return str_format % (self.user, self.password,
-                             self.auth_url, self.tenant_name,
-                             self.auth_version, self.service,
-                             self.base_url, self.region, self.endpoint_url,
-                             self.build_interval, self.build_timeout,
+        return str_format % (CONF, self.service, self.base_url,
+                             self.filters, self.build_interval,
+                             self.build_timeout,
                              str(self.token)[0:STRING_LIMIT],
                              str(self.headers)[0:STRING_LIMIT])
 
-    def _set_auth(self):
+    def _get_region(self, service):
         """
-        Sets the token and base_url used in requests based on the strategy type
+        Returns the region for a specific service
         """
+        service_region = None
+        for cfgname in dir(CONF._config):
+            # Find all config.FOO.catalog_type and assume FOO is a service.
+            cfg = getattr(CONF, cfgname)
+            catalog_type = getattr(cfg, 'catalog_type', None)
+            if catalog_type == service:
+                service_region = getattr(cfg, 'region', None)
+        if not service_region:
+            service_region = CONF.identity.region
+        return service_region
 
-        if self.auth_version == 'v3':
-            auth_func = self.identity_auth_v3
-        else:
-            auth_func = self.keystone_auth
+    @property
+    def user(self):
+        return self.auth_provider.credentials.get('username', None)
 
-        self.token, self.base_url = (
-            auth_func(self.user, self.password, self.auth_url,
-                      self.service, self.tenant_name))
+    @property
+    def tenant_name(self):
+        return self.auth_provider.credentials.get('tenant_name', None)
 
-    def clear_auth(self):
+    @property
+    def password(self):
+        return self.auth_provider.credentials.get('password', None)
+
+    @property
+    def base_url(self):
+        return self.auth_provider.base_url(filters=self.filters)
+
+    @property
+    def filters(self):
+        _filters = dict(
+            service=self.service,
+            endpoint_type=self.endpoint_url,
+            region=self._get_region(self.service)
+        )
+        if self.api_version is not None:
+            _filters['api_version'] = self.api_version
+        if self._skip_path:
+            _filters['skip_path'] = self._skip_path
+        return _filters
+
+    def skip_path(self):
         """
-        Can be called to clear the token and base_url so that the next request
-        will fetch a new token and base_url.
+        When set, ignore the path part of the base URL from the catalog
         """
+        self._skip_path = True
 
-        self.token = None
-        self.base_url = None
-
-    def get_auth(self):
-        """Returns the token of the current request or sets the token if
-        none.
+    def reset_path(self):
         """
-
-        if not self.token:
-            self._set_auth()
-
-        return self.token
-
-    def keystone_auth(self, user, password, auth_url, service, tenant_name):
+        When reset, use the base URL from the catalog as-is
         """
-        Provides authentication via Keystone using v2 identity API.
-        """
-
-        # Normalize URI to ensure /tokens is in it.
-        if 'tokens' not in auth_url:
-            auth_url = auth_url.rstrip('/') + '/tokens'
-
-        creds = {
-            'auth': {
-                'passwordCredentials': {
-                    'username': user,
-                    'password': password,
-                },
-                'tenantName': tenant_name,
-            }
-        }
-
-        headers = {'Content-Type': 'application/json'}
-        body = json.dumps(creds)
-        self._log_request('POST', auth_url, headers, body)
-        resp, resp_body = self.http_obj.request(auth_url, 'POST',
-                                                headers=headers, body=body)
-        self._log_response(resp, resp_body)
-
-        if resp.status == 200:
-            try:
-                auth_data = json.loads(resp_body)['access']
-                token = auth_data['token']['id']
-            except Exception as e:
-                print("Failed to obtain token for user: %s" % e)
-                raise
-
-            mgmt_url = None
-            for ep in auth_data['serviceCatalog']:
-                if ep["type"] == service:
-                    for _ep in ep['endpoints']:
-                        if service in self.region and \
-                                _ep['region'] == self.region[service]:
-                            mgmt_url = _ep[self.endpoint_url]
-                    if not mgmt_url:
-                        mgmt_url = ep['endpoints'][0][self.endpoint_url]
-                    break
-
-            if mgmt_url is None:
-                raise exceptions.EndpointNotFound(service)
-
-            return token, mgmt_url
-
-        elif resp.status == 401:
-            raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password,
-                                                   tenant=tenant_name)
-        raise exceptions.IdentityError('Unexpected status code {0}'.format(
-            resp.status))
-
-    def identity_auth_v3(self, user, password, auth_url, service,
-                         project_name, domain_id='default'):
-        """Provides authentication using Identity API v3."""
-
-        req_url = auth_url.rstrip('/') + '/auth/tokens'
-
-        creds = {
-            "auth": {
-                "identity": {
-                    "methods": ["password"],
-                    "password": {
-                        "user": {
-                            "name": user, "password": password,
-                            "domain": {"id": domain_id}
-                        }
-                    }
-                },
-                "scope": {
-                    "project": {
-                        "domain": {"id": domain_id},
-                        "name": project_name
-                    }
-                }
-            }
-        }
-
-        headers = {'Content-Type': 'application/json'}
-        body = json.dumps(creds)
-        resp, body = self.http_obj.request(req_url, 'POST',
-                                           headers=headers, body=body)
-
-        if resp.status == 201:
-            try:
-                token = resp['x-subject-token']
-            except Exception:
-                self.LOG.exception("Failed to obtain token using V3"
-                                   " authentication (auth URL is '%s')" %
-                                   req_url)
-                raise
-
-            catalog = json.loads(body)['token']['catalog']
-
-            mgmt_url = None
-            for service_info in catalog:
-                if service_info['type'] != service:
-                    continue  # this isn't the entry for us.
-
-                endpoints = service_info['endpoints']
-
-                # Look for an endpoint in the region if configured.
-                if service in self.region:
-                    region = self.region[service]
-
-                    for ep in endpoints:
-                        if ep['region'] != region:
-                            continue
-
-                        mgmt_url = ep['url']
-                        # FIXME(blk-u): this isn't handling endpoint type
-                        # (public, internal, admin).
-                        break
-
-                if not mgmt_url:
-                    # Didn't find endpoint for region, use the first.
-
-                    ep = endpoints[0]
-                    mgmt_url = ep['url']
-                    # FIXME(blk-u): this isn't handling endpoint type
-                    # (public, internal, admin).
-
-                break
-
-            return token, mgmt_url
-
-        elif resp.status == 401:
-            raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password,
-                                                   tenant=project_name)
-        else:
-            self.LOG.error("Failed to obtain token using V3 authentication"
-                           " (auth URL is '%s'), the response status is %s" %
-                           (req_url, resp.status))
-            raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password,
-                                                   tenant=project_name)
+        self._skip_path = False
 
     def expected_success(self, expected_code, read_code):
         assert_msg = ("This function only allowed to use for HTTP status"
@@ -386,25 +247,26 @@ class RestClient(object):
     def _request(self, method, url,
                  headers=None, body=None):
         """A simple HTTP request interface."""
-
-        req_url = "%s/%s" % (self.base_url, url)
-        self._log_request(method, req_url, headers, body)
-        resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=headers, body=body)
+        # Authenticate the request with the auth provider
+        req_url, req_headers, req_body = self.auth_provider.auth_request(
+            method, url, headers, body, self.filters)
+        self._log_request(method, req_url, req_headers, req_body)
+        # Do the actual request
+        resp, resp_body = self.http_obj.request(
+            req_url, method, headers=req_headers, body=req_body)
         self._log_response(resp, resp_body)
-        self.response_checker(method, url, headers, body, resp, resp_body)
+        # Verify HTTP response codes
+        self.response_checker(method, url, req_headers, req_body, resp,
+                              resp_body)
 
         return resp, resp_body
 
     def request(self, method, url,
                 headers=None, body=None):
         retry = 0
-        if (self.token is None) or (self.base_url is None):
-            self._set_auth()
 
         if headers is None:
             headers = {}
-        headers['X-Auth-Token'] = self.token
 
         resp, resp_body = self._request(method, url,
                                         headers=headers, body=body)

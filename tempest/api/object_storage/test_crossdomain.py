@@ -50,13 +50,12 @@ class CrossdomainTest(base.BaseObjectTest):
         super(CrossdomainTest, self).setUp()
 
         client = self.os_test_user.account_client
-        client._set_auth()
         # Turning http://.../v1/foobar into http://.../
-        client.base_url = "/".join(client.base_url.split("/")[:-2])
+        client.skip_path()
 
     def tearDown(self):
         # clear the base_url for subsequent requests
-        self.os_test_user.account_client.base_url = None
+        self.os_test_user.account_client.reset_path()
 
         super(CrossdomainTest, self).tearDown()
 

@@ -28,9 +28,8 @@ CONF = config.CONF
 
 
 class FloatingIPsClientXML(RestClientXML):
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(FloatingIPsClientXML, self).__init__(username, password,
-                                                   auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(FloatingIPsClientXML, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):

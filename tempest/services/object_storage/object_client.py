@@ -24,9 +24,8 @@ CONF = config.CONF
 
 
 class ObjectClient(RestClient):
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ObjectClient, self).__init__(username, password,
-                                           auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(ObjectClient, self).__init__(auth_provider)
 
         self.service = CONF.object_storage.catalog_type
 
@@ -138,10 +137,11 @@ class ObjectClient(RestClient):
 
 class ObjectClientCustomizedHeader(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ObjectClientCustomizedHeader, self).__init__(username,
-                                                           password, auth_url,
-                                                           tenant_name)
+    # TODO(andreaf) This class is now redundant, to be removed in next patch
+
+    def __init__(self, auth_provider):
+        super(ObjectClientCustomizedHeader, self).__init__(
+            auth_provider)
         # Overwrites json-specific header encoding in RestClient
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
@@ -153,13 +153,17 @@ class ObjectClientCustomizedHeader(RestClient):
             disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
-        if self.base_url is None:
-            self._set_auth()
 
-        req_url = "%s/%s" % (self.base_url, url)
+        # Authorize the request
+        req_url, req_headers, req_body = self.auth_provider.auth_request(
+            method=method, url=url, headers=headers, body=body,
+            filters=self.filters
+        )
+        # Use original method
         self._log_request(method, req_url, headers, body)
         resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=headers, body=body)
+                                                headers=req_headers,
+                                                body=req_body)
         self._log_response(resp, resp_body)
         if resp.status == 401 or resp.status == 403:
             raise exceptions.Unauthorized()

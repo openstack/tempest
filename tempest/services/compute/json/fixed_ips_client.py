@@ -23,9 +23,8 @@ CONF = config.CONF
 
 class FixedIPsClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(FixedIPsClientJSON, self).__init__(username, password,
-                                                 auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(FixedIPsClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def get_fixed_ip_details(self, fixed_ip):

@@ -29,10 +29,8 @@ class HealthcheckTest(base.BaseObjectTest):
 
     def setUp(self):
         super(HealthcheckTest, self).setUp()
-        self.account_client._set_auth()
         # Turning http://.../v1/foobar into http://.../
-        self.account_client.base_url = "/".join(
-            self.account_client.base_url.split("/")[:-2])
+        self.account_client.skip_path()
 
     @attr('gate')
     def test_get_healthcheck(self):

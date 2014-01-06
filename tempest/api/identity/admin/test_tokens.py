@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.test import attr
@@ -42,12 +40,11 @@ class TokensTestJSON(base.BaseIdentityAdminTest):
         rsp, body = self.token_client.auth(user_name,
                                            user_password,
                                            tenant['name'])
-        access_data = json.loads(body)['access']
         self.assertEqual(rsp['status'], '200')
-        self.assertEqual(access_data['token']['tenant']['name'],
+        self.assertEqual(body['token']['tenant']['name'],
                          tenant['name'])
         # then delete the token
-        token_id = access_data['token']['id']
+        token_id = body['token']['id']
         resp, body = self.client.delete_token(token_id)
         self.assertEqual(resp['status'], '204')
 

@@ -23,9 +23,8 @@ CONF = config.CONF
 
 class QuotasV3ClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(QuotasV3ClientJSON, self).__init__(username, password,
-                                                 auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(QuotasV3ClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_v3_type
 
     def get_quota_set(self, tenant_id):

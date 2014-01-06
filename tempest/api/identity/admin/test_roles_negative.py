@@ -41,10 +41,10 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_list_roles_request_without_token(self):
         # Request to list roles without a valid token should fail
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.list_roles)
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_role_create_blank_name(self):
@@ -61,12 +61,12 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_create_role_request_without_token(self):
         # Request to create role without a valid token should fail
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         role_name = data_utils.rand_name(name='role-')
         self.assertRaises(exceptions.Unauthorized,
                           self.client.create_role, role_name)
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_role_create_duplicate(self):
@@ -99,12 +99,12 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
         self.assertEqual(200, resp.status)
         self.data.roles.append(body)
         role_id = body.get('id')
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized,
                           self.client.delete_role,
                           role_id)
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_delete_role_non_existent(self):
@@ -126,12 +126,12 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
     def test_assign_user_role_request_without_token(self):
         # Request to assign a role to a user without a valid token
         (user, tenant, role) = self._get_role_params()
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized,
                           self.client.assign_user_role, tenant['id'],
                           user['id'], role['id'])
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_assign_user_role_for_non_existent_role(self):
@@ -176,12 +176,12 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
         resp, user_role = self.client.assign_user_role(tenant['id'],
                                                        user['id'],
                                                        role['id'])
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized,
                           self.client.remove_user_role, tenant['id'],
                           user['id'], role['id'])
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_remove_user_role_non_existent_role(self):
@@ -219,14 +219,14 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
     def test_list_user_roles_request_without_token(self):
         # Request to list user's roles without a valid token should fail
         (user, tenant, role) = self._get_role_params()
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         try:
             self.assertRaises(exceptions.Unauthorized,
                               self.client.list_user_roles, tenant['id'],
                               user['id'])
         finally:
-            self.client.clear_auth()
+            self.client.auth_provider.clear_auth()
 
 
 class RolesTestXML(RolesNegativeTestJSON):

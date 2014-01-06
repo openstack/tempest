@@ -19,23 +19,24 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
+from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
 from tempest.tests import fake_http
 
 
 class BaseRestClientTestClass(base.TestCase):
 
-    def _set_token(self):
-        self.rest_client.token = 'fake token'
+    def _get_region(self):
+        return 'fake region'
 
     def setUp(self):
         super(BaseRestClientTestClass, self).setUp()
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakeConfig)
-        self.rest_client = rest_client.RestClient('fake_user', 'fake_pass',
-                                                  'http://fake_url/v2.0')
+        self.rest_client = rest_client.RestClient(
+            fake_auth_provider.FakeAuthProvider())
         self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
-        self.useFixture(mockpatch.PatchObject(self.rest_client, '_set_auth',
-                                              side_effect=self._set_token()))
+        self.useFixture(mockpatch.PatchObject(self.rest_client, '_get_region',
+                                              side_effect=self._get_region()))
         self.useFixture(mockpatch.PatchObject(self.rest_client,
                                               '_log_response'))
 

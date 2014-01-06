@@ -43,6 +43,11 @@ IdentityGroup = [
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
     cfg.StrOpt('uri_v3',
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
+    cfg.StrOpt('auth_version',
+               default='v2',
+               help="Identity API version to be used for authentication "
+                    "for API tests. Planned to extend to tenant isolation, "
+                    "scenario tests and CLI tests."),
     cfg.StrOpt('region',
                default='RegionOne',
                help="The identity region name to use. Also used as the other "

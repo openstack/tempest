@@ -15,6 +15,7 @@
 #    under the License.
 
 from tempest.api.object_storage import base
+from tempest import clients
 from tempest import exceptions
 from tempest.test import attr
 
@@ -27,18 +28,26 @@ class AccountNegativeTest(base.BaseObjectTest):
 
         # create user
         self.data.setup_test_user()
-        self.token_client.auth(self.data.test_user,
-                               self.data.test_password,
-                               self.data.test_tenant)
-        new_token = \
-            self.token_client.get_token(self.data.test_user,
-                                        self.data.test_password,
-                                        self.data.test_tenant)
-        custom_headers = {'X-Auth-Token': new_token}
+        test_os = clients.Manager(self.data.test_user,
+                                  self.data.test_password,
+                                  self.data.test_tenant)
+        test_auth_provider = test_os.get_auth_provider()
+        # Get auth for the test user
+        test_auth_provider.auth_data
+
+        # Get fresh auth for test user and set it to next auth request for
+        # custom_account_client
+        delattr(test_auth_provider, 'auth_data')
+        test_auth_new_data = test_auth_provider.auth_data
+        self.custom_account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=test_auth_new_data
+        )
+
         params = {'format': 'json'}
         # list containers with non-authorized user token
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_account_client.list_account_containers,
-                          params=params, metadata=custom_headers)
+                          params=params)
         # delete the user which was created
         self.data.teardown_all()

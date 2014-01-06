@@ -24,10 +24,8 @@ CONF = config.CONF
 
 class AggregatesV3ClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(AggregatesV3ClientJSON, self).__init__(username,
-                                                     password, auth_url,
-                                                     tenant_name)
+    def __init__(self, auth_provider):
+        super(AggregatesV3ClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_v3_type
 
     def list_aggregates(self):

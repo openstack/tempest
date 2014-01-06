@@ -27,9 +27,8 @@ class VolumeHostsClientJSON(RestClient):
     Client class to send CRUD Volume Hosts API requests to a Cinder endpoint
     """
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(VolumeHostsClientJSON, self).__init__(username, password,
-                                                    auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(VolumeHostsClientJSON, self).__init__(auth_provider)
 
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval

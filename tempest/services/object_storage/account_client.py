@@ -25,11 +25,14 @@ CONF = config.CONF
 
 
 class AccountClient(RestClient):
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(AccountClient, self).__init__(username, password,
-                                            auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(AccountClient, self).__init__(auth_provider)
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
+
+    @property
+    def token(self):
+        return self.auth_provider.auth_data[0]
 
     def create_account(self, data=None,
                        params=None,
@@ -128,20 +131,20 @@ class AccountClient(RestClient):
         return resp, body
 
     def list_extensions(self):
-        _base_url = self.base_url
-        self.base_url = "/".join(self.base_url.split("/")[:-2])
+        self.skip_path()
         resp, body = self.get('info')
-        self.base_url = _base_url
+        self.reset_path()
         body = json.loads(body)
         return resp, body
 
 
 class AccountClientCustomizedHeader(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(AccountClientCustomizedHeader, self).__init__(username,
-                                                            password, auth_url,
-                                                            tenant_name)
+    # TODO(andreaf) This class is now redundant, to be removed in next patch
+
+    def __init__(self, auth_provider):
+        super(AccountClientCustomizedHeader, self).__init__(
+            auth_provider)
         # Overwrites json-specific header encoding in RestClient
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
@@ -151,14 +154,17 @@ class AccountClientCustomizedHeader(RestClient):
         self.http_obj = http.ClosingHttp()
         if headers is None:
             headers = {}
-        if self.base_url is None:
-            self._set_auth()
 
-        req_url = "%s/%s" % (self.base_url, url)
-
+        # Authorize the request
+        req_url, req_headers, req_body = self.auth_provider.auth_request(
+            method=method, url=url, headers=headers, body=body,
+            filters=self.filters
+        )
         self._log_request(method, req_url, headers, body)
+        # use original body
         resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=headers, body=body)
+                                                headers=req_headers,
+                                                body=req_body)
         self._log_response(resp, resp_body)
 
         if resp.status == 401 or resp.status == 403:

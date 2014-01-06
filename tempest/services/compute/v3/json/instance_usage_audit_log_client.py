@@ -23,9 +23,9 @@ CONF = config.CONF
 
 class InstanceUsagesAuditLogV3ClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
+    def __init__(self, auth_provider):
         super(InstanceUsagesAuditLogV3ClientJSON, self).__init__(
-            username, password, auth_url, tenant_name)
+            auth_provider)
         self.service = CONF.compute.catalog_v3_type
 
     def list_instance_usage_audit_logs(self, time_before=None):

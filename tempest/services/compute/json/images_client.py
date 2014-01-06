@@ -26,9 +26,8 @@ CONF = config.CONF
 
 class ImagesClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ImagesClientJSON, self).__init__(username, password,
-                                               auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(ImagesClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout

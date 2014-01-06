@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from urlparse import urlparse
-
 from lxml import etree
 
 from tempest.common import http
@@ -31,11 +29,11 @@ XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 class PolicyClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(PolicyClientXML, self).__init__(username, password,
-                                              auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(PolicyClientXML, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
+        self.api_version = "v3"
 
     def _parse_array(self, node):
         array = []
@@ -54,9 +52,6 @@ class PolicyClientXML(RestClientXML):
         dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
         return super(PolicyClientXML, self).request(method, url,
                                                     headers=headers,
                                                     body=body)

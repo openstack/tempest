@@ -75,7 +75,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
         # Request to create a user without a valid token should fail
         self.data.setup_test_tenant()
         # Get the token of the current client
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.create_user,
@@ -83,7 +83,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
                           self.data.tenant['id'], self.alt_email)
 
         # Unset the token to allow further tests to generate a new token
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_create_user_with_enabled_non_bool(self):
@@ -108,14 +108,14 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
         # Request to update a user without a valid token should fail
 
         # Get the token of the current client
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.update_user,
                           self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_update_user_by_unauthorized_user(self):
@@ -143,14 +143,14 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
         # Request to delete a user without a valid token should fail
 
         # Get the token of the current client
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.delete_user,
                           self.alt_user)
 
         # Unset the token to allow further tests to generate a new token
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_authentication_for_disabled_user(self):
@@ -207,10 +207,10 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_get_users_request_without_token(self):
         # Request to get list of users without a valid token should fail
-        token = self.client.get_auth()
+        token = self.client.auth_provider.auth_data[0]
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.get_users)
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type=['negative', 'gate'])
     def test_list_users_with_invalid_tenant(self):

@@ -12,7 +12,6 @@
 
 import json
 
-from tempest.common import http
 from tempest.common.rest_client import RestClient
 from tempest import config
 from tempest import exceptions
@@ -22,9 +21,8 @@ CONF = config.CONF
 
 class IdentityClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(IdentityClientJSON, self).__init__(username, password,
-                                                 auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(IdentityClientJSON, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
@@ -243,9 +241,9 @@ class IdentityClientJSON(RestClient):
 class TokenClientJSON(RestClient):
 
     def __init__(self):
+        super(TokenClientJSON, self).__init__(None)
         auth_url = CONF.identity.uri
 
-        # TODO(jaypipes) Why is this all repeated code in here?
         # Normalize URI to ensure /tokens is in it.
         if 'tokens' not in auth_url:
             auth_url = auth_url.rstrip('/') + '/tokens'
@@ -262,16 +260,13 @@ class TokenClientJSON(RestClient):
                 'tenantName': tenant,
             }
         }
-        headers = {'Content-Type': 'application/json'}
         body = json.dumps(creds)
-        resp, body = self.post(self.auth_url, headers=headers, body=body)
-        return resp, body
+        resp, body = self.post(self.auth_url, headers=self.headers, body=body)
+
+        return resp, body['access']
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
 
@@ -280,16 +275,22 @@ class TokenClientJSON(RestClient):
                                                 headers=headers, body=body)
         self._log_response(resp, resp_body)
 
-        if resp.status in (401, 403):
+        if resp.status in [401, 403]:
             resp_body = json.loads(resp_body)
             raise exceptions.Unauthorized(resp_body['error']['message'])
+        elif resp.status not in [200, 201]:
+            raise exceptions.IdentityError(
+                'Unexpected status code {0}'.format(resp.status))
 
-        return resp, resp_body
+        return resp, json.loads(resp_body)
 
-    def get_token(self, user, password, tenant):
+    def get_token(self, user, password, tenant, auth_data=False):
+        """
+        Returns (token id, token data) for supplied credentials
+        """
         resp, body = self.auth(user, password, tenant)
-        if resp['status'] != '202':
-            body = json.loads(body)
-            access = body['access']
-            token = access['token']
-            return token['id']
+
+        if auth_data:
+            return body['token']['id'], body
+        else:
+            return body['token']['id']

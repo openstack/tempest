@@ -15,6 +15,7 @@
 #    under the License.
 
 from tempest.api.object_storage import base
+from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
@@ -26,10 +27,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def setUpClass(cls):
         super(ObjectACLsNegativeTest, cls).setUpClass()
         cls.data.setup_test_user()
-        cls.new_token = cls.token_client.get_token(cls.data.test_user,
-                                                   cls.data.test_password,
-                                                   cls.data.test_tenant)
-        cls.custom_headers = {'X-Auth-Token': cls.new_token}
+        test_os = clients.Manager(cls.data.test_user,
+                                  cls.data.test_password,
+                                  cls.data.test_tenant)
+        cls.test_auth_data = test_os.get_auth_provider().auth_data
 
     @classmethod
     def tearDownClass(cls):
@@ -50,6 +51,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         # trying to create object with empty headers
         # X-Auth-Token is not provided
         object_name = data_utils.rand_name(name='Object')
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.create_object,
                           self.container_name, object_name, 'data')
@@ -62,6 +67,10 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                                                    object_name, 'data')
         # trying to delete object with empty headers
         # X-Auth-Token is not provided
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.delete_object,
                           self.container_name, object_name)
@@ -72,10 +81,13 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         # User provided token is forbidden. ACL are not set
         object_name = data_utils.rand_name(name='Object')
         # trying to create object with non-authorized user
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.create_object,
-                          self.container_name, object_name, 'data',
-                          metadata=self.custom_headers)
+                          self.container_name, object_name, 'data')
 
     @attr(type=['negative', 'gate'])
     def test_read_object_with_non_authorized_user(self):
@@ -87,10 +99,13 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
         # trying to get object with non authorized user token
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.get_object,
-                          self.container_name, object_name,
-                          metadata=self.custom_headers)
+                          self.container_name, object_name)
 
     @attr(type=['negative', 'gate'])
     def test_delete_object_with_non_authorized_user(self):
@@ -102,10 +117,13 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
         # trying to delete object with non-authorized user token
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.delete_object,
-                          self.container_name, object_name,
-                          metadata=self.custom_headers)
+                          self.container_name, object_name)
 
     @attr(type=['negative', 'smoke'])
     def test_read_object_without_rights(self):
@@ -124,10 +142,13 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to read the object without rights
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.get_object,
-                          self.container_name, object_name,
-                          metadata=self.custom_headers)
+                          self.container_name, object_name)
 
     @attr(type=['negative', 'smoke'])
     def test_write_object_without_rights(self):
@@ -140,12 +161,15 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without rights
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         object_name = data_utils.rand_name(name='Object')
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.create_object,
                           self.container_name,
-                          object_name, 'data',
-                          metadata=self.custom_headers)
+                          object_name, 'data')
 
     @attr(type=['negative', 'smoke'])
     def test_write_object_without_write_rights(self):
@@ -160,12 +184,15 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without write rights
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         object_name = data_utils.rand_name(name='Object')
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.create_object,
                           self.container_name,
-                          object_name, 'data',
-                          metadata=self.custom_headers)
+                          object_name, 'data')
 
     @attr(type=['negative', 'smoke'])
     def test_delete_object_without_write_rights(self):
@@ -186,8 +213,11 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
         # Trying to delete the object without write rights
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.test_auth_data
+        )
         self.assertRaises(exceptions.Unauthorized,
                           self.custom_object_client.delete_object,
                           self.container_name,
-                          object_name,
-                          metadata=self.custom_headers)
+                          object_name)

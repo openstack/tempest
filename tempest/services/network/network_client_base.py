@@ -46,16 +46,14 @@ resource_plural_map = {
 
 
 class NetworkClientBase(object):
-    def __init__(self, username, password,
-                 auth_url, tenant_name=None):
+    def __init__(self, auth_provider):
         self.rest_client = self.get_rest_client(
-            username, password, auth_url, tenant_name)
+            auth_provider)
         self.rest_client.service = CONF.network.catalog_type
         self.version = '2.0'
         self.uri_prefix = "v%s" % (self.version)
 
-    def get_rest_client(self, username, password,
-                        auth_url, tenant_name):
+    def get_rest_client(self, auth_provider):
         raise NotImplementedError
 
     def post(self, uri, body, headers=None):

@@ -27,9 +27,8 @@ LOG = logging.getLogger(__name__)
 class SnapshotsClientJSON(RestClient):
     """Client class to send CRUD Volume API requests."""
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(SnapshotsClientJSON, self).__init__(username, password,
-                                                  auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(SnapshotsClientJSON, self).__init__(auth_provider)
 
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval

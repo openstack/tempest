@@ -74,6 +74,15 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.container_client_alt = cls.os_alt.container_client
         cls.identity_client_alt = cls.os_alt.identity_client
 
+        # Make sure we get fresh auth data after assigning swift role
+        cls.object_client.auth_provider.clear_auth()
+        cls.container_client.auth_provider.clear_auth()
+        cls.account_client.auth_provider.clear_auth()
+        cls.custom_object_client.auth_provider.clear_auth()
+        cls.custom_account_client.auth_provider.clear_auth()
+        cls.object_client_alt.auth_provider.clear_auth()
+        cls.container_client_alt.auth_provider.clear_auth()
+
         cls.data = DataGenerator(cls.identity_admin_client)
 
     @classmethod

@@ -23,9 +23,8 @@ CONF = config.CONF
 
 class KeyPairsV3ClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(KeyPairsV3ClientJSON, self).__init__(username, password,
-                                                   auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(KeyPairsV3ClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_v3_type
 
     def list_keypairs(self):

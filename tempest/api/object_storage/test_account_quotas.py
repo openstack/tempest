@@ -62,26 +62,34 @@ class AccountQuotasTest(base.BaseObjectTest):
             reseller_user_id,
             reseller_role_id)
 
-        # Retrieve a ResellerAdmin auth token and use it to set a quota
+        # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account
-        cls.reselleradmin_token = cls.token_client.get_token(
-            cls.data.test_user,
-            cls.data.test_password,
-            cls.data.test_tenant)
+        cls.reselleradmin_auth_data = \
+            cls.os_reselleradmin.get_auth_provider().auth_data
 
     def setUp(self):
         super(AccountQuotasTest, self).setUp()
 
+        # Set the reselleradmin auth in headers for next custom_account_client
+        # request
+        self.custom_account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.reselleradmin_auth_data
+        )
         # Set a quota of 20 bytes on the user's account before each test
-        headers = {"X-Auth-Token": self.reselleradmin_token,
-                   "X-Account-Meta-Quota-Bytes": "20"}
+        headers = {"X-Account-Meta-Quota-Bytes": "20"}
 
         self.os.custom_account_client.request("POST", "", headers, "")
 
     def tearDown(self):
+        # Set the reselleradmin auth in headers for next custom_account_client
+        # request
+        self.custom_account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=self.reselleradmin_auth_data
+        )
         # remove the quota from the container
-        headers = {"X-Auth-Token": self.reselleradmin_token,
-                   "X-Remove-Account-Meta-Quota-Bytes": "x"}
+        headers = {"X-Remove-Account-Meta-Quota-Bytes": "x"}
 
         self.os.custom_account_client.request("POST", "", headers, "")
         super(AccountQuotasTest, self).tearDown()
@@ -118,8 +126,11 @@ class AccountQuotasTest(base.BaseObjectTest):
         """
         for quota in ("25", "", "20"):
 
-            headers = {"X-Auth-Token": self.reselleradmin_token,
-                       "X-Account-Meta-Quota-Bytes": quota}
+            self.custom_account_client.auth_provider.set_alt_auth_data(
+                request_part='headers',
+                auth_data=self.reselleradmin_auth_data
+            )
+            headers = {"X-Account-Meta-Quota-Bytes": quota}
 
             resp, _ = self.os.custom_account_client.request("POST", "",
                                                             headers, "")

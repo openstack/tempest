@@ -33,12 +33,10 @@ LOG = logging.getLogger(__name__)
 
 class ImageClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ImageClientJSON, self).__init__(username, password,
-                                              auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(ImageClientJSON, self).__init__(auth_provider)
         self.service = CONF.images.catalog_type
-        if CONF.service_available.glance:
-            self.http = self._get_http()
+        self._http = None
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
@@ -106,13 +104,9 @@ class ImageClientJSON(RestClient):
             return None
 
     def _get_http(self):
-        token, endpoint = self.keystone_auth(self.user,
-                                             self.password,
-                                             self.auth_url,
-                                             self.service,
-                                             self.tenant_name)
         dscv = CONF.identity.disable_ssl_certificate_validation
-        return glance_http.HTTPClient(endpoint=endpoint, token=token,
+        return glance_http.HTTPClient(auth_provider=self.auth_provider,
+                                      filters=self.filters,
                                       insecure=dscv)
 
     def _create_with_data(self, headers, data):
@@ -131,6 +125,13 @@ class ImageClientJSON(RestClient):
                             resp, body_iter)
         body = json.loads(''.join([c for c in body_iter]))
         return resp, body['image']
+
+    @property
+    def http(self):
+        if self._http is None:
+            if CONF.service_available.glance:
+                self._http = self._get_http()
+        return self._http
 
     def create_image(self, name, container_format, disk_format, **kwargs):
         params = {

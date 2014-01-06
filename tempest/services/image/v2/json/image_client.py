@@ -28,19 +28,15 @@ CONF = config.CONF
 
 class ImageClientV2JSON(rest_client.RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(ImageClientV2JSON, self).__init__(username, password,
-                                                auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(ImageClientV2JSON, self).__init__(auth_provider)
         self.service = CONF.images.catalog_type
-        if CONF.service_available.glance:
-            self.http = self._get_http()
+        self._http = None
 
     def _get_http(self):
-        token, endpoint = self.keystone_auth(self.user, self.password,
-                                             self.auth_url, self.service,
-                                             self.tenant_name)
         dscv = CONF.identity.disable_ssl_certificate_validation
-        return glance_http.HTTPClient(endpoint=endpoint, token=token,
+        return glance_http.HTTPClient(auth_provider=self.auth_provider,
+                                      filters=self.filters,
                                       insecure=dscv)
 
     def get_images_schema(self):
@@ -64,6 +60,13 @@ class ImageClientV2JSON(rest_client.RestClient):
             raise ValueError("%s is not a valid schema type" % type)
 
         jsonschema.validate(body, schema)
+
+    @property
+    def http(self):
+        if self._http is None:
+            if CONF.service_available.glance:
+                self._http = self._get_http()
+        return self._http
 
     def create_image(self, name, container_format, disk_format, **kwargs):
         params = {

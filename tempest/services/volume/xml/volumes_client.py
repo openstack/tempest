@@ -35,9 +35,8 @@ class VolumesClientXML(RestClientXML):
     Client class to send CRUD Volume API requests to a Cinder endpoint
     """
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(VolumesClientXML, self).__init__(username, password,
-                                               auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(VolumesClientXML, self).__init__(auth_provider)
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout

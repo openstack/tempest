@@ -25,9 +25,8 @@ CONF = config.CONF
 
 class InterfacesClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(InterfacesClientJSON, self).__init__(username, password,
-                                                   auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(InterfacesClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def list_interfaces(self, server):

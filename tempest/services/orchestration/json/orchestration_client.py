@@ -27,9 +27,8 @@ CONF = config.CONF
 
 class OrchestrationClient(rest_client.RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(OrchestrationClient, self).__init__(username, password,
-                                                  auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(OrchestrationClient, self).__init__(auth_provider)
         self.service = CONF.orchestration.catalog_type
         self.build_interval = CONF.orchestration.build_interval
         self.build_timeout = CONF.orchestration.build_timeout

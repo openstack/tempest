@@ -188,7 +188,6 @@ class BaseV2ComputeTest(BaseComputeTest):
         cls.instance_usages_audit_log_client = \
             cls.os.instance_usages_audit_log_client
         cls.hypervisor_client = cls.os.hypervisor_client
-        cls.servers_client_v3_auth = cls.os.servers_client_v3_auth
         cls.certificates_client = cls.os.certificates_client
 
     @classmethod

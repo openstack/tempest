@@ -12,7 +12,6 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import urlparse
 
 from lxml import etree
 
@@ -30,11 +29,11 @@ XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 class EndPointClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(EndPointClientXML, self).__init__(username, password,
-                                                auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(EndPointClientXML, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
+        self.api_version = "v3"
 
     def _parse_array(self, node):
         array = []
@@ -53,9 +52,6 @@ class EndPointClientXML(RestClientXML):
         dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
-        self._set_auth()
-        self.base_url = self.base_url.replace(
-            urlparse.urlparse(self.base_url).path, "/v3")
         return super(EndPointClientXML, self).request(method, url,
                                                       headers=headers,
                                                       body=body)

@@ -115,7 +115,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
         self.token_client.auth(self.data.test_user, self.data.test_password,
                                self.data.test_tenant)
         # Get the token of the current client
-        token = self.client.get_auth()
+        token = self.client.auth_provider.get_token()
         # Delete the token from database
         self.client.delete_token(token)
         # Re-auth
@@ -123,7 +123,7 @@ class UsersTestJSON(base.BaseIdentityAdminTest):
                                             self.data.test_password,
                                             self.data.test_tenant)
         self.assertEqual('200', resp['status'])
-        self.client.clear_auth()
+        self.client.auth_provider.clear_auth()
 
     @attr(type='smoke')
     def test_get_users(self):

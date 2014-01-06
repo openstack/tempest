@@ -14,30 +14,22 @@
 #    under the License.
 
 import json
-from urlparse import urlparse
+import urlparse
 
 from tempest.common.rest_client import RestClient
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
 
 class IdentityV3ClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(IdentityV3ClientJSON, self).__init__(username, password,
-                                                   auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(IdentityV3ClientJSON, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(IdentityV3ClientJSON, self).request(method, url,
-                                                         headers=headers,
-                                                         body=body)
+        self.api_version = "v3"
 
     def create_user(self, user_name, **kwargs):
         """Creates a user."""
@@ -462,43 +454,89 @@ class IdentityV3ClientJSON(RestClient):
 
 class V3TokenClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(V3TokenClientJSON, self).__init__(username, password,
-                                                auth_url, tenant_name)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
+    def __init__(self):
+        super(V3TokenClientJSON, self).__init__(None)
+        auth_url = CONF.identity.uri_v3
+        # If the v3 url is not set, get it from the v2 one
+        if auth_url is None:
+            auth_url = CONF.identity.uri.replace(urlparse.urlparse(
+                CONF.identity.uri).path, "/v3")
 
-        auth_url = CONF.identity.uri
-
-        if 'tokens' not in auth_url:
-            auth_url = auth_url.rstrip('/') + '/tokens'
+        if 'auth/tokens' not in auth_url:
+            auth_url = auth_url.rstrip('/') + '/auth/tokens'
 
         self.auth_url = auth_url
 
-    def auth(self, user_id, password):
+    def auth(self, user, password, tenant=None, user_type='id', domain=None):
+        """
+        :param user: user id or name, as specified in user_type
+        :param domain: the user and tenant domain
+
+        Accepts different combinations of credentials. Restrictions:
+        - tenant and domain are only name (no id)
+        - user domain and tenant domain are assumed identical
+        - domain scope is not supported here
+        Sample sample valid combinations:
+        - user_id, password
+        - username, password, domain
+        - username, password, tenant, domain
+        Validation is left to the server side.
+        """
         creds = {
             'auth': {
                 'identity': {
                     'methods': ['password'],
                     'password': {
                         'user': {
-                            'id': user_id,
-                            'password': password
+                            'password': password,
                         }
                     }
                 }
             }
         }
-        headers = {'Content-Type': 'application/json'}
+        if user_type == 'id':
+            creds['auth']['identity']['password']['user']['id'] = user
+        else:
+            creds['auth']['identity']['password']['user']['name'] = user
+        if domain is not None:
+            _domain = dict(name=domain)
+            creds['auth']['identity']['password']['user']['domain'] = _domain
+        if tenant is not None:
+            project = dict(name=tenant, domain=_domain)
+            scope = dict(project=project)
+            creds['auth']['scope'] = scope
+
         body = json.dumps(creds)
-        resp, body = self.post("auth/tokens", headers=headers, body=body)
+        resp, body = self.post(self.auth_url, headers=self.headers, body=body)
         return resp, body
 
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(V3TokenClientJSON, self).request(method, url,
-                                                      headers=headers,
-                                                      body=body)
+    def request(self, method, url, headers=None, body=None):
+        """A simple HTTP request interface."""
+        self._log_request(method, url, headers, body)
+        resp, resp_body = self.http_obj.request(url, method,
+                                                headers=headers, body=body)
+        self._log_response(resp, resp_body)
+
+        if resp.status in [401, 403]:
+            resp_body = json.loads(resp_body)
+            raise exceptions.Unauthorized(resp_body['error']['message'])
+        elif resp.status not in [200, 201, 204]:
+            raise exceptions.IdentityError(
+                'Unexpected status code {0}'.format(resp.status))
+
+        return resp, json.loads(resp_body)
+
+    def get_token(self, user, password, tenant, domain='Default',
+                  auth_data=False):
+        """
+        :param user: username
+        Returns (token id, token data) for supplied credentials
+        """
+        resp, body = self.auth(user, password, tenant, user_type='name',
+                               domain=domain)
+
+        token = resp.get('x-subject-token')
+        if auth_data:
+            return token, body['token']
+        else:
+            return token

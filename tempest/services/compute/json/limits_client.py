@@ -23,9 +23,8 @@ CONF = config.CONF
 
 class LimitsClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(LimitsClientJSON, self).__init__(username, password,
-                                               auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(LimitsClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
     def get_absolute_limits(self):

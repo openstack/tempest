@@ -17,7 +17,6 @@ import json
 
 from lxml import etree
 
-from tempest.common import http
 from tempest.common.rest_client import RestClientXML
 from tempest import config
 from tempest import exceptions
@@ -32,9 +31,8 @@ XMLNS = "http://docs.openstack.org/identity/api/v2.0"
 
 class IdentityClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(IdentityClientXML, self).__init__(username, password,
-                                                auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(IdentityClientXML, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
@@ -266,9 +264,9 @@ class IdentityClientXML(RestClientXML):
 class TokenClientXML(RestClientXML):
 
     def __init__(self):
+        super(TokenClientXML, self).__init__(None)
         auth_url = CONF.identity.uri
 
-        # TODO(jaypipes) Why is this all repeated code in here?
         # Normalize URI to ensure /tokens is in it.
         if 'tokens' not in auth_url:
             auth_url = auth_url.rstrip('/') + '/tokens'
@@ -281,33 +279,38 @@ class TokenClientXML(RestClientXML):
                                 password=password)
         auth = Element("auth", tenantName=tenant)
         auth.append(passwordCreds)
-        headers = {'Content-Type': 'application/xml'}
-        resp, body = self.post(self.auth_url, headers=headers,
+        resp, body = self.post(self.auth_url, headers=self.headers,
                                body=str(Document(auth)))
-        return resp, body
+        return resp, body['access']
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
+        # Send XML, accept JSON. XML response is not easily
+        # converted to the corresponding JSON one
+        headers['Accept'] = 'application/json'
         self._log_request(method, url, headers, body)
         resp, resp_body = self.http_obj.request(url, method,
                                                 headers=headers, body=body)
         self._log_response(resp, resp_body)
 
-        if resp.status in (401, 403):
+        if resp.status in [401, 403]:
             resp_body = json.loads(resp_body)
             raise exceptions.Unauthorized(resp_body['error']['message'])
+        elif resp.status not in [200, 201]:
+            raise exceptions.IdentityError(
+                'Unexpected status code {0}'.format(resp.status))
 
-        return resp, resp_body
+        return resp, json.loads(resp_body)
 
-    def get_token(self, user, password, tenant):
+    def get_token(self, user, password, tenant, auth_data=False):
+        """
+        Returns (token id, token data) for supplied credentials
+        """
         resp, body = self.auth(user, password, tenant)
-        if resp['status'] != '202':
-            body = json.loads(body)
-            access = body['access']
-            token = access['token']
-            return token['id']
+
+        if auth_data:
+            return body['token']['id'], body
+        else:
+            return body['token']['id']

@@ -29,11 +29,8 @@ CONF = config.CONF
 
 class ServersV3ClientJSON(RestClient):
 
-    def __init__(self, username, password, auth_url,
-                 tenant_name=None, auth_version='v2'):
-        super(ServersV3ClientJSON, self).__init__(username, password,
-                                                  auth_url, tenant_name,
-                                                  auth_version=auth_version)
+    def __init__(self, auth_provider):
+        super(ServersV3ClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_v3_type
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):

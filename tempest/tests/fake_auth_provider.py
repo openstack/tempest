@@ -1,4 +1,4 @@
-# Copyright 2012 OpenStack Foundation
+# Copyright 2014 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,22 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
 
-from tempest.common.rest_client import RestClient
-from tempest import config
+class FakeAuthProvider(object):
 
-CONF = config.CONF
-
-
-class ExtensionsClientJSON(RestClient):
-
-    def __init__(self, auth_provider):
-        super(ExtensionsClientJSON, self).__init__(auth_provider)
-        self.service = CONF.volume.catalog_type
-
-    def list_extensions(self):
-        url = 'extensions'
-        resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body['extensions']
+    def auth_request(self, method, url, headers=None, body=None, filters=None):
+        return url, headers, body

@@ -23,9 +23,8 @@ import tempest.services.telemetry.telemetry_client_base as client
 
 class TelemetryClientXML(client.TelemetryClientBase):
 
-    def get_rest_client(self, username,
-                        password, auth_url, tenant_name=None):
-        return RestClientXML(username, password, auth_url, tenant_name)
+    def get_rest_client(self, auth_provider):
+        return RestClientXML(auth_provider)
 
     def _parse_array(self, body):
         array = []

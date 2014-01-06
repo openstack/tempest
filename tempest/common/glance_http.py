@@ -45,8 +45,10 @@ TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
 class HTTPClient(object):
 
-    def __init__(self, endpoint, **kwargs):
-        self.endpoint = endpoint
+    def __init__(self, auth_provider, filters, **kwargs):
+        self.auth_provider = auth_provider
+        self.filters = filters
+        self.endpoint = auth_provider.base_url(filters)
         endpoint_parts = self.parse_endpoint(self.endpoint)
         self.endpoint_scheme = endpoint_parts.scheme
         self.endpoint_hostname = endpoint_parts.hostname
@@ -56,8 +58,6 @@ class HTTPClient(object):
         self.connection_class = self.get_connection_class(self.endpoint_scheme)
         self.connection_kwargs = self.get_connection_kwargs(
             self.endpoint_scheme, **kwargs)
-
-        self.auth_token = kwargs.get('token')
 
     @staticmethod
     def parse_endpoint(endpoint):
@@ -100,15 +100,15 @@ class HTTPClient(object):
         # Copy the kwargs so we can reuse the original in case of redirects
         kwargs['headers'] = copy.deepcopy(kwargs.get('headers', {}))
         kwargs['headers'].setdefault('User-Agent', USER_AGENT)
-        if self.auth_token:
-            kwargs['headers'].setdefault('X-Auth-Token', self.auth_token)
 
         self._log_request(method, url, kwargs['headers'])
 
         conn = self.get_connection()
 
         try:
-            conn_url = posixpath.normpath('%s/%s' % (self.endpoint_path, url))
+            url_parts = self.parse_endpoint(url)
+            conn_url = posixpath.normpath(url_parts.path)
+            LOG.debug('Actual Path: {path}'.format(path=conn_url))
             if kwargs['headers'].get('Transfer-Encoding') == 'chunked':
                 conn.putrequest(method, conn_url)
                 for header, value in kwargs['headers'].items():
@@ -198,7 +198,13 @@ class HTTPClient(object):
                 # We use 'Transfer-Encoding: chunked' because
                 # body size may not always be known in advance.
                 kwargs['headers']['Transfer-Encoding'] = 'chunked'
-        return self._http_request(url, method, **kwargs)
+
+        # Decorate the request with auth
+        req_url, kwargs['headers'], kwargs['body'] = \
+            self.auth_provider.auth_request(
+                method=method, url=url, headers=kwargs['headers'],
+                body=kwargs.get('body', None), filters=self.filters)
+        return self._http_request(req_url, method, **kwargs)
 
 
 class OpenSSLConnectionDelegator(object):

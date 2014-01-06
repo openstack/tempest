@@ -13,12 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from urlparse import urlparse
+import json
+import urlparse
 
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
 from tempest import config
+from tempest import exceptions
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
@@ -31,11 +33,11 @@ XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 class IdentityV3ClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(IdentityV3ClientXML, self).__init__(username, password,
-                                                  auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(IdentityV3ClientXML, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
+        self.api_version = "v3"
 
     def _parse_projects(self, node):
         array = []
@@ -76,17 +78,8 @@ class IdentityV3ClientXML(RestClientXML):
         return array
 
     def _parse_body(self, body):
-        json = xml_to_json(body)
-        return json
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class RestClient."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(IdentityV3ClientXML, self).request(method, url,
-                                                        headers=headers,
-                                                        body=body)
+        _json = xml_to_json(body)
+        return _json
 
     def create_user(self, user_name, **kwargs):
         """Creates a user."""
@@ -454,25 +447,41 @@ class IdentityV3ClientXML(RestClientXML):
 
 class V3TokenClientXML(RestClientXML):
 
-    def __init__(self, username, password, auth_url, tenant_name=None):
-        super(V3TokenClientXML, self).__init__(username, password,
-                                               auth_url, tenant_name)
-        self.service = CONF.identity.catalog_type
-        self.endpoint_url = 'adminURL'
-
-        auth_url = CONF.identity.uri
-
-        if 'tokens' not in auth_url:
-            auth_url = auth_url.rstrip('/') + '/tokens'
+    def __init__(self):
+        super(V3TokenClientXML, self).__init__(None)
+        auth_url = CONF.identity.uri_v3
+        # If the v3 url is not set, get it from the v2 one
+        if auth_url is None:
+            auth_url = CONF.identity.uri.replace(urlparse.urlparse(
+                CONF.identity.uri).path, "/v3")
+        if 'auth/tokens' not in auth_url:
+            auth_url = auth_url.rstrip('/') + '/auth/tokens'
 
         self.auth_url = auth_url
 
-    def auth(self, user_id, password):
-        user = Element('user',
-                       id=user_id,
-                       password=password)
+    def auth(self, user, password, tenant=None, user_type='id', domain=None):
+        """
+        :param user: user id or name, as specified in user_type
+
+        Accepts different combinations of credentials. Restrictions:
+        - tenant and domain are only name (no id)
+        - user domain and tenant domain are assumed identical
+        Sample sample valid combinations:
+        - user_id, password
+        - username, password, domain
+        - username, password, tenant, domain
+        Validation is left to the server side.
+        """
+        if user_type == 'id':
+            _user = Element('user', id=user, password=password)
+        else:
+            _user = Element('user', name=user, password=password)
+        if domain is not None:
+            _domain = Element('domain', name=domain)
+            _user.append(_domain)
+
         password = Element('password')
-        password.append(user)
+        password.append(_user)
 
         method = Element('method')
         method.append(Text('password'))
@@ -481,18 +490,51 @@ class V3TokenClientXML(RestClientXML):
         identity = Element('identity')
         identity.append(methods)
         identity.append(password)
+
         auth = Element('auth')
         auth.append(identity)
-        headers = {'Content-Type': 'application/xml'}
-        resp, body = self.post("auth/tokens", headers=headers,
+
+        if tenant is not None:
+            project = Element('project', name=tenant)
+            project.append(_domain)
+            scope = Element('scope')
+            scope.append(project)
+            auth.append(scope)
+
+        resp, body = self.post(self.auth_url, headers=self.headers,
                                body=str(Document(auth)))
         return resp, body
 
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(V3TokenClientXML, self).request(method, url,
-                                                     headers=headers,
-                                                     body=body)
+    def request(self, method, url, headers=None, body=None):
+        """A simple HTTP request interface."""
+        # Send XML, accept JSON. XML response is not easily
+        # converted to the corresponding JSON one
+        headers['Accept'] = 'application/json'
+        self._log_request(method, url, headers, body)
+        resp, resp_body = self.http_obj.request(url, method,
+                                                headers=headers, body=body)
+        self._log_response(resp, resp_body)
+
+        if resp.status in [401, 403]:
+            resp_body = json.loads(resp_body)
+            raise exceptions.Unauthorized(resp_body['error']['message'])
+        elif resp.status not in [200, 201, 204]:
+            raise exceptions.IdentityError(
+                'Unexpected status code {0}'.format(resp.status))
+
+        return resp, json.loads(resp_body)
+
+    def get_token(self, user, password, tenant, domain='Default',
+                  auth_data=False):
+        """
+        :param user: username
+        Returns (token id, token data) for supplied credentials
+        """
+        resp, body = self.auth(user, password, tenant, user_type='name',
+                               domain=domain)
+
+        token = resp.get('x-subject-token')
+        if auth_data:
+            return token, body['token']
+        else:
+            return token
