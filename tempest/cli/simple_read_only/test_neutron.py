@@ -40,7 +40,7 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
     @classmethod
     def setUpClass(cls):
         if (not CONF.service_available.neutron):
-            msg = "Skiping all Neutron cli tests because it is not available"
+            msg = "Skipping all Neutron cli tests because it is not available"
             raise cls.skipException(msg)
         super(SimpleReadOnlyNeutronClientTest, cls).setUpClass()
 

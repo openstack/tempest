@@ -36,7 +36,7 @@ class SimpleReadOnlyCeilometerClientTest(tempest.cli.ClientTestBase):
     @classmethod
     def setUpClass(cls):
         if (not CONF.service_available.ceilometer):
-            msg = ("Skiping all Ceilometer cli tests because it is"
+            msg = ("Skipping all Ceilometer cli tests because it is "
                    "not available")
             raise cls.skipException(msg)
         super(SimpleReadOnlyCeilometerClientTest, cls).setUpClass()
