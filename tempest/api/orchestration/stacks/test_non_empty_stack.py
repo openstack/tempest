@@ -112,6 +112,18 @@ Outputs:
         self.assertEqual('fluffy', stack['outputs'][0]['output_key'])
 
     @attr(type='gate')
+    def test_suspend_resume_stack(self):
+        """suspend and resume a stack."""
+        resp, suspend_stack = self.client.suspend_stack(self.stack_identifier)
+        self.assertEqual('200', resp['status'])
+        self.client.wait_for_stack_status(self.stack_identifier,
+                                          'SUSPEND_COMPLETE')
+        resp, resume_stack = self.client.resume_stack(self.stack_identifier)
+        self.assertEqual('200', resp['status'])
+        self.client.wait_for_stack_status(self.stack_identifier,
+                                          'RESUME_COMPLETE')
+
+    @attr(type='gate')
     def test_list_resources(self):
         """Getting list of created resources for the stack should be possible.
         """
