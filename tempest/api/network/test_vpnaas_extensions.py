@@ -17,7 +17,7 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class VPNaaSJSON(base.BaseNetworkTest):
@@ -38,6 +38,9 @@ class VPNaaSJSON(base.BaseNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(VPNaaSJSON, cls).setUpClass()
+        if not test.is_extension_enabled('vpnaas', 'network'):
+            msg = "vpnaas extension not enabled."
+            raise cls.skipException(msg)
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.router = cls.create_router(
@@ -65,7 +68,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
                 ike_id_list.append(i['id'])
             self.assertNotIn(ike_policy_id, ike_id_list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_vpn_services(self):
         # Verify the VPN service exists in the list of all VPN services
         resp, body = self.client.list_vpnservices()
@@ -73,7 +76,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         vpnservices = body['vpnservices']
         self.assertIn(self.vpnservice['id'], [v['id'] for v in vpnservices])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_vpn_service(self):
         # Creates a VPN service
         name = data_utils.rand_name('vpn-service-')
@@ -102,7 +105,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         vpn_services = [vs['id'] for vs in body['vpnservices']]
         self.assertNotIn(vpnservice['id'], vpn_services)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_vpn_service(self):
         # Verifies the details of a vpn service
         resp, body = self.client.show_vpnservice(self.vpnservice['id'])
@@ -116,7 +119,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         self.assertEqual(self.vpnservice['subnet_id'], vpnservice['subnet_id'])
         self.assertEqual(self.vpnservice['tenant_id'], vpnservice['tenant_id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_ike_policies(self):
         # Verify the ike policy exists in the list of all IKE policies
         resp, body = self.client.list_ikepolicies()
@@ -124,7 +127,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         ikepolicies = body['ikepolicies']
         self.assertIn(self.ikepolicy['id'], [i['id'] for i in ikepolicies])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_ike_policy(self):
         # Creates a IKE policy
         name = data_utils.rand_name('ike-policy-')
@@ -149,7 +152,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         resp, body = self.client.delete_ikepolicy(ikepolicy['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_ike_policy(self):
         # Verifies the details of a ike policy
         resp, body = self.client.show_ikepolicy(self.ikepolicy['id'])
