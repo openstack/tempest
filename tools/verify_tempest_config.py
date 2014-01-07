@@ -15,13 +15,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import sys
+
+import httplib2
 
 from tempest import clients
 from tempest import config
 
 
 CONF = config.CONF
+RAW_HTTP = httplib2.Http()
 
 
 def verify_glance_api_versions(os):
@@ -34,6 +38,19 @@ def verify_glance_api_versions(os):
     if CONF.image_feature_enabled.api_v2 != ('v2.0' in versions):
         print('Config option image api_v2 should be change to: %s' % (
             not CONF.image_feature_enabled.api_v2))
+
+
+def verify_nova_api_versions(os):
+    # Check nova api versions
+    os.servers_client._set_auth()
+    v2_endpoint = os.servers_client.base_url
+    endpoint = 'http://' + v2_endpoint.split('/')[2]
+    __, body = RAW_HTTP.request(endpoint, 'GET')
+    body = json.loads(body)
+    versions = map(lambda x: x['id'], body['versions'])
+    if CONF.compute_feature_enabled.api_v3 != ('v3.0' in versions):
+        print('Config option compute api_v3 should be change to: %s' % (
+              not CONF.compute_feature_enabled.api_v3))
 
 
 def get_extension_client(os, service):
@@ -118,6 +135,7 @@ def main(argv):
     for service in ['nova', 'nova_v3', 'cinder', 'neutron']:
         results = verify_extensions(os, service, results)
     verify_glance_api_versions(os)
+    verify_nova_api_versions(os)
     display_results(results)
 
 
