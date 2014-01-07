@@ -31,7 +31,14 @@ class BaseTrustsV3Test(base.BaseIdentityAdminTest):
 
         self.trust_id = None
         self.create_trustor_and_roles()
-        self.addCleanup(self.cleanup_trust_user_and_roles)
+        self.addCleanup(self.cleanup_user_and_roles)
+
+    def tearDown(self):
+        if self.trust_id:
+            # Do the delete in tearDown not addCleanup - we want the test to
+            # fail in the event there is a bug which causes undeletable trusts
+            self.delete_trust()
+        super(BaseTrustsV3Test, self).tearDown()
 
     def create_trustor_and_roles(self):
         # Get trustor project ID, use the admin project
@@ -86,14 +93,7 @@ class BaseTrustsV3Test(base.BaseIdentityAdminTest):
                              interface=self._interface)
         self.trustor_v3_client = os.identity_v3_client
 
-    def cleanup_trust_user_and_roles(self):
-        if self.trust_id:
-            try:
-                self.trustor_v3_client.delete_trust(self.trust_id)
-            except exceptions.NotFound:
-                pass
-            self.trust_id = None
-
+    def cleanup_user_and_roles(self):
         if self.trustor_user_id:
             self.v3_client.delete_user(self.trustor_user_id)
         if self.delegated_role_id:
@@ -206,8 +206,6 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
 
         self.check_trust_roles()
 
-        self.delete_trust()
-
     @attr(type='smoke')
     def test_trust_noimpersonate(self):
         # Test case to check we can create, get and delete a trust
@@ -219,8 +217,6 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.validate_trust(trust_get, impersonate=False)
 
         self.check_trust_roles()
-
-        self.delete_trust()
 
     @attr(type='smoke')
     def test_trust_expire(self):
@@ -237,8 +233,6 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.validate_trust(trust_get, expires=expires_str)
 
         self.check_trust_roles()
-
-        self.delete_trust()
 
     @attr(type='smoke')
     def test_trust_expire_invalid(self):
