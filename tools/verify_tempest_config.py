@@ -41,6 +41,7 @@ def get_extension_client(os, service):
         'nova': os.extensions_client,
         'nova_v3': os.extensions_v3_client,
         'cinder': os.volumes_extension_client,
+        'neutron': os.network_client,
     }
     if service not in extensions_client:
         print('No tempest extensions client for %s' % service)
@@ -53,6 +54,7 @@ def get_enabled_extensions(service):
         'nova': CONF.compute_feature_enabled.api_extensions,
         'nova_v3': CONF.compute_feature_enabled.api_v3_extensions,
         'cinder': CONF.volume_feature_enabled.api_extensions,
+        'neutron': CONF.network_feature_enabled.api_extensions,
     }
     if service not in extensions_options:
         print('No supported extensions list option for %s' % service)
@@ -64,7 +66,15 @@ def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
     __, resp = extensions_client.list_extensions()
     if isinstance(resp, dict):
-        extensions = map(lambda x: x['name'], resp['extensions'])
+        # Neutron's extension 'name' field has is not a single word (it has
+        # spaces in the string) Since that can't be used for list option the
+        # api_extension option in the network-feature-enabled group uses alias
+        # instead of name.
+        if service == 'neutron':
+            extensions = map(lambda x: x['alias'], resp['extensions'])
+        else:
+            extensions = map(lambda x: x['name'], resp['extensions'])
+
     else:
         extensions = map(lambda x: x['name'], resp)
     if not results.get(service):
@@ -105,7 +115,7 @@ def main(argv):
     print('Running config verification...')
     os = clients.ComputeAdminManager(interface='json')
     results = {}
-    for service in ['nova', 'nova_v3', 'cinder']:
+    for service in ['nova', 'nova_v3', 'cinder', 'neutron']:
         results = verify_extensions(os, service, results)
     verify_glance_api_versions(os)
     display_results(results)
