@@ -127,6 +127,21 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertIsNotNone(found, msg)
 
     @attr(type='smoke')
+    def test_list_networks_fields(self):
+        # Verify listing some fields of the networks
+        resp, body = self.client.list_networks(fields='id')
+        self.assertEqual('200', resp['status'])
+        networks = body['networks']
+        found = None
+        for n in networks:
+            self.assertEqual(len(n), 1)
+            self.assertIn('id', n)
+            if (n['id'] == self.network['id']):
+                found = n['id']
+        self.assertIsNotNone(found,
+                             "Created network id not found in the list")
+
+    @attr(type='smoke')
     def test_show_subnet(self):
         # Verifies the details of a subnet
         resp, body = self.client.show_subnet(self.subnet['id'])
@@ -147,6 +162,21 @@ class NetworksTestJSON(base.BaseNetworkTest):
                 found = n['id']
         msg = "Subnet list doesn't contain created subnet"
         self.assertIsNotNone(found, msg)
+
+    @attr(type='smoke')
+    def test_list_subnets_fields(self):
+        # Verify listing some fields of the subnets
+        resp, body = self.client.list_subnets(fields='id')
+        self.assertEqual('200', resp['status'])
+        subnets = body['subnets']
+        found = None
+        for n in subnets:
+            self.assertEqual(len(n), 1)
+            self.assertIn('id', n)
+            if (n['id'] == self.subnet['id']):
+                found = n['id']
+        self.assertIsNotNone(found,
+                             "Created subnet id not found in the list")
 
     @attr(type='smoke')
     def test_create_update_delete_port(self):
@@ -183,6 +213,21 @@ class NetworksTestJSON(base.BaseNetworkTest):
             if (n['id'] == self.port['id']):
                 found = n['id']
         self.assertIsNotNone(found, "Port list doesn't contain created port")
+
+    @attr(type='smoke')
+    def test_list_ports_fields(self):
+        # Verify listing some fields of the ports
+        resp, body = self.client.list_ports(fields='id')
+        self.assertEqual('200', resp['status'])
+        ports_list = body['ports']
+        found = None
+        for n in ports_list:
+            self.assertEqual(len(n), 1)
+            self.assertIn('id', n)
+            if (n['id'] == self.port['id']):
+                found = n['id']
+        self.assertIsNotNone(found,
+                             "Created port id not found in the list")
 
 
 class NetworksTestXML(NetworksTestJSON):
