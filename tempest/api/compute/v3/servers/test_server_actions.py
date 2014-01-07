@@ -174,7 +174,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
 
     def _detect_server_image_flavor(self, server_id):
         # Detects the current server image flavor ref.
-        resp, server = self.client.get_server(self.server_id)
+        resp, server = self.client.get_server(server_id)
         current_flavor = server['flavor']['id']
         new_flavor_ref = self.flavor_ref_alt \
             if current_flavor == self.flavor_ref else self.flavor_ref
