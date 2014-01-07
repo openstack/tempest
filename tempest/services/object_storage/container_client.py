@@ -84,8 +84,7 @@ class ContainerClient(RestClient):
         Retrieves container metadata headers
         """
         url = str(container_name)
-        headers = {"X-Storage-Token": self.token}
-        resp, body = self.head(url, headers=headers)
+        resp, body = self.head(url)
         return resp, body
 
     def list_all_container_objects(self, container, params=None):
