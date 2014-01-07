@@ -23,13 +23,6 @@ from tempest import config
 
 CONF = config.CONF
 
-#Dicts matching extension names to config options
-NOVA_EXTENSIONS = {
-    'disk_config': 'DiskConfig',
-    'change_password': 'ServerPassword',
-    'flavor_extra': 'FlavorExtraSpecs'
-}
-
 
 def verify_glance_api_versions(os):
     # Check glance api versions
@@ -43,32 +36,77 @@ def verify_glance_api_versions(os):
             not CONF.image_feature_enabled.api_v2))
 
 
-def verify_extensions(os):
-    results = {}
-    extensions_client = os.extensions_client
+def get_extension_client(os, service):
+    extensions_client = {
+        'nova': os.extensions_client,
+        'nova_v3': os.extensions_v3_client,
+        'cinder': os.volumes_extension_client,
+    }
+    if service not in extensions_client:
+        print('No tempest extensions client for %s' % service)
+        exit(1)
+    return extensions_client[service]
+
+
+def get_enabled_extensions(service):
+    extensions_options = {
+        'nova': CONF.compute_feature_enabled.api_extensions,
+        'nova_v3': CONF.compute_feature_enabled.api_v3_extensions,
+        'cinder': CONF.volume_feature_enabled.api_extensions,
+    }
+    if service not in extensions_options:
+        print('No supported extensions list option for %s' % service)
+        exit(1)
+    return extensions_options[service]
+
+
+def verify_extensions(os, service, results):
+    extensions_client = get_extension_client(os, service)
     __, resp = extensions_client.list_extensions()
-    resp = resp['extensions']
-    extensions = map(lambda x: x['name'], resp)
-    results['nova_features'] = {}
-    for extension in NOVA_EXTENSIONS.keys():
-        if NOVA_EXTENSIONS[extension] in extensions:
-            results['nova_features'][extension] = True
-        else:
-            results['nova_features'][extension] = False
+    if isinstance(resp, dict):
+        extensions = map(lambda x: x['name'], resp['extensions'])
+    else:
+        extensions = map(lambda x: x['name'], resp)
+    if not results.get(service):
+        results[service] = {}
+    extensions_opt = get_enabled_extensions(service)
+    if extensions_opt[0] == 'all':
+        results[service]['extensions'] = 'all'
+        return results
+    # Verify that all configured extensions are actually enabled
+    for extension in extensions_opt:
+        results[service][extension] = extension in extensions
+    # Verify that there aren't additional extensions enabled that aren't
+    # specified in the config list
+    for extension in extensions:
+        if extension not in extensions_opt:
+            results[service][extension] = False
     return results
 
 
 def display_results(results):
-    for option in NOVA_EXTENSIONS.keys():
-        config_value = getattr(CONF.compute_feature_enabled, option)
-        if config_value != results['nova_features'][option]:
-            print("Config option: %s should be changed to: %s" % (
-                option, not config_value))
+    for service in results:
+        # If all extensions are specified as being enabled there is no way to
+        # verify this so we just assume this to be true
+        if results[service].get('extensions'):
+            continue
+        extension_list = get_enabled_extensions(service)
+        for extension in results[service]:
+            if not results[service][extension]:
+                if extension in extension_list:
+                    print("%s extension: %s should not be included in the list"
+                          " of enabled extensions" % (service, extension))
+                else:
+                    print("%s extension: %s should be included in the list of "
+                          "enabled extensions" % (service, extension))
 
 
 def main(argv):
+    print('Running config verification...')
     os = clients.ComputeAdminManager(interface='json')
-    results = verify_extensions(os)
+    results = {}
+    for service in ['nova', 'nova_v3', 'cinder']:
+        results = verify_extensions(os, service, results)
     verify_glance_api_versions(os)
     display_results(results)
 
