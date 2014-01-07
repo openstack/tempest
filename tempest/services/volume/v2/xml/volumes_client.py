@@ -30,13 +30,15 @@ from tempest.services.compute.xml.common import XMLNS_11
 CONF = config.CONF
 
 
-class VolumesClientXML(RestClientXML):
+class VolumesV2ClientXML(RestClientXML):
     """
     Client class to send CRUD Volume API requests to a Cinder endpoint
     """
 
     def __init__(self, auth_provider):
-        super(VolumesClientXML, self).__init__(auth_provider)
+        super(VolumesV2ClientXML, self).__init__(auth_provider)
+
+        self.api_version = "v2"
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout
@@ -92,8 +94,6 @@ class VolumesClientXML(RestClientXML):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
-        for v in volumes:
-            v = self._check_if_bootable(v)
         return resp, volumes
 
     def list_volumes_with_detail(self, params=None):
@@ -124,7 +124,7 @@ class VolumesClientXML(RestClientXML):
         """Creates a new Volume.
 
         :param size: Size of volume in GB. (Required)
-        :param display_name: Optional Volume Name.
+        :param name: Optional Volume Name.
         :param metadata: An optional dictionary of values for metadata.
         :param volume_type: Optional Name of volume_type for the volume
         :param snapshot_id: When specified the volume is created from
@@ -285,12 +285,12 @@ class VolumesClientXML(RestClientXML):
             body = xml_to_json(etree.fromstring(body))
         return resp, body
 
-    def create_volume_transfer(self, vol_id, display_name=None):
+    def create_volume_transfer(self, vol_id, name=None):
         """Create a volume transfer."""
         post_body = Element("transfer",
                             volume_id=vol_id)
-        if display_name:
-            post_body.add_attr('name', display_name)
+        if name:
+            post_body.add_attr('name', name)
         resp, body = self.post('os-volume-transfer',
                                str(Document(post_body)),
                                self.headers)

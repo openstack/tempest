@@ -69,18 +69,6 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     # only in a single location in the source, and could be more general.
 
     @classmethod
-    def create_volume(cls, size=1, **kwargs):
-        """Wrapper utility that returns a test volume."""
-        vol_name = data_utils.rand_name('Volume')
-        resp, volume = cls.volumes_client.create_volume(size,
-                                                        display_name=vol_name,
-                                                        **kwargs)
-        assert 200 == resp.status
-        cls.volumes.append(volume)
-        cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
-        return volume
-
-    @classmethod
     def clear_volumes(cls):
         for volume in cls.volumes:
             try:
@@ -120,6 +108,18 @@ class BaseVolumeV1Test(BaseVolumeTest):
         cls.volumes_client = cls.os.volumes_client
         cls.volumes_extension_client = cls.os.volumes_extension_client
 
+    @classmethod
+    def create_volume(cls, size=1, **kwargs):
+        """Wrapper utility that returns a test volume."""
+        vol_name = data_utils.rand_name('Volume')
+        resp, volume = cls.volumes_client.create_volume(size,
+                                                        display_name=vol_name,
+                                                        **kwargs)
+        assert 200 == resp.status
+        cls.volumes.append(volume)
+        cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        return volume
+
 
 class BaseVolumeV1AdminTest(BaseVolumeV1Test):
     """Base test case class for all Volume Admin API tests."""
@@ -144,3 +144,25 @@ class BaseVolumeV1AdminTest(BaseVolumeV1Test):
             cls.os_adm = clients.AdminManager(interface=cls._interface)
         cls.client = cls.os_adm.volume_types_client
         cls.hosts_client = cls.os_adm.volume_hosts_client
+
+
+class BaseVolumeV2Test(BaseVolumeTest):
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.volume_feature_enabled.api_v2:
+            msg = "Volume API v2 not supported"
+            raise cls.skipException(msg)
+        super(BaseVolumeV2Test, cls).setUpClass()
+        cls.volumes_client = cls.os.volumes_v2_client
+
+    @classmethod
+    def create_volume(cls, size=1, **kwargs):
+        """Wrapper utility that returns a test volume."""
+        vol_name = data_utils.rand_name('Volume')
+        resp, volume = cls.volumes_client.create_volume(size,
+                                                        name=vol_name,
+                                                        **kwargs)
+        assert 202 == resp.status
+        cls.volumes.append(volume)
+        cls.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        return volume

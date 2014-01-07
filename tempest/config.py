@@ -393,6 +393,9 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('api_v1',
                 default=True,
                 help="Is the v1 volume API enabled"),
+    cfg.BoolOpt('api_v2',
+                default=True,
+                help="Is the v2 volume API enabled"),
 ]
 
 
