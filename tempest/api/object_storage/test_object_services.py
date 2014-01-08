@@ -16,7 +16,6 @@
 #    under the License.
 
 import hashlib
-import re
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
@@ -277,23 +276,15 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.list_object_metadata(
             self.container_name, object_name)
 
-        # Check only the existence of common headers with custom matcher
-        self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
-                        'Object', 'HEAD'))
-        self.assertIn('x-object-manifest', resp)
-
         # Etag value of a large object is enclosed in double-quotations.
-        # This is a special case, therefore the formats of response headers
-        # are checked without a custom matcher.
+        # After etag quotes are checked they are removed and the response is
+        # checked if all common headers are present and well formatted
         self.assertTrue(resp['etag'].startswith('\"'))
         self.assertTrue(resp['etag'].endswith('\"'))
-        self.assertTrue(resp['etag'].strip('\"').isalnum())
-        self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
-        self.assertNotEqual(len(resp['content-type']), 0)
-        self.assertTrue(re.match("^tx[0-9a-f]*-[0-9a-f]*$",
-                                 resp['x-trans-id']))
-        self.assertNotEqual(len(resp['date']), 0)
-        self.assertEqual(resp['accept-ranges'], 'bytes')
+        resp['etag'] = resp['etag'].strip('"')
+        self.assertHeaders(resp, 'Object', 'HEAD')
+
+        self.assertIn('x-object-manifest', resp)
         self.assertEqual(resp['x-object-manifest'],
                          '%s/%s/' % (self.container_name, object_name))
 

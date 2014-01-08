@@ -45,6 +45,7 @@ class ContainerTest(base.BaseObjectTest):
         # create a container
         container_name = data_utils.rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
+        self.assertHeaders(resp, 'Container', 'PUT')
         self.containers.append(container_name)
         # delete container
         resp, _ = self.container_client.delete_container(container_name)
@@ -60,12 +61,14 @@ class ContainerTest(base.BaseObjectTest):
         # create a container
         container_name = data_utils.rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
+        self.assertHeaders(resp, 'Container', 'PUT')
         self.containers.append(container_name)
         # create object
         object_name = data_utils.rand_name(name='TestObject')
         data = data_utils.arbitrary_string()
         resp, _ = self.object_client.create_object(container_name,
                                                    object_name, data)
+        self.assertHeaders(resp, 'Object', 'PUT')
         # set object metadata
         meta_key = data_utils.rand_name(name='Meta-Test-')
         meta_value = data_utils.rand_name(name='MetaValue-')
@@ -73,6 +76,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.object_client.update_object_metadata(container_name,
                                                             object_name,
                                                             orig_metadata)
+        self.assertHeaders(resp, 'Object', 'POST')
         # get container contents list
         params = {'format': 'json'}
         resp, object_list = \
@@ -93,6 +97,7 @@ class ContainerTest(base.BaseObjectTest):
         # create a container
         container_name = data_utils.rand_name(name='TestContainer')
         resp, _ = self.container_client.create_container(container_name)
+        self.assertHeaders(resp, 'Container', 'PUT')
         self.containers.append(container_name)
         # update container metadata
         metadata = {'name': 'Pictures',
