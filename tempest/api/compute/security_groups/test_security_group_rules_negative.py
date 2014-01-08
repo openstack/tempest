@@ -19,8 +19,7 @@ from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 CONF = config.CONF
 
@@ -33,9 +32,9 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         super(SecurityGroupRulesNegativeTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
 
-    @skip_because(bug="1182384",
-                  condition=CONF.service_available.neutron)
-    @attr(type=['negative', 'smoke'])
+    @test.skip_because(bug="1182384",
+                       condition=CONF.service_available.neutron)
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_non_existent_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with non existent Parent group id
@@ -50,7 +49,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @testtools.skipIf(CONF.service_available.neutron,
                       "Neutron not check the security_group_id")
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with Parent group id which is not integer
@@ -63,21 +62,17 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_duplicate(self):
         # Negative test: Create Security Group rule duplicate should fail
         # Creating a Security Group to add rule to it
-        s_name = data_utils.rand_name('securitygroup-')
-        s_description = data_utils.rand_name('description-')
-        resp, sg = self.client.create_security_group(s_name, s_description)
-        self.assertEqual(200, resp.status)
+        resp, sg = self.create_security_group()
         # Adding rules to the created Security Group
         parent_group_id = sg['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 22
 
-        self.addCleanup(self.client.delete_security_group, sg['id'])
         resp, rule = \
             self.client.create_security_group_rule(parent_group_id,
                                                    ip_protocol,
@@ -90,86 +85,70 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_invalid_ip_protocol(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid ip_protocol
         # Creating a Security Group to add rule to it
-        s_name = data_utils.rand_name('securitygroup-')
-        s_description = data_utils.rand_name('description-')
-        resp, securitygroup = self.client.create_security_group(s_name,
-                                                                s_description)
+        resp, sg = self.create_security_group()
         # Adding rules to the created Security Group
-        parent_group_id = securitygroup['id']
+        parent_group_id = sg['id']
         ip_protocol = data_utils.rand_name('999')
         from_port = 22
         to_port = 22
 
-        self.addCleanup(self.client.delete_security_group, securitygroup['id'])
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_invalid_from_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
         # Creating a Security Group to add rule to it
-        s_name = data_utils.rand_name('securitygroup-')
-        s_description = data_utils.rand_name('description-')
-        resp, securitygroup = self.client.create_security_group(s_name,
-                                                                s_description)
+        resp, sg = self.create_security_group()
         # Adding rules to the created Security Group
-        parent_group_id = securitygroup['id']
+        parent_group_id = sg['id']
         ip_protocol = 'tcp'
         from_port = data_utils.rand_int_id(start=65536)
         to_port = 22
-        self.addCleanup(self.client.delete_security_group, securitygroup['id'])
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_invalid_to_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid to_port
         # Creating a Security Group to add rule to it
-        s_name = data_utils.rand_name('securitygroup-')
-        s_description = data_utils.rand_name('description-')
-        resp, securitygroup = self.client.create_security_group(s_name,
-                                                                s_description)
+        resp, sg = self.create_security_group()
         # Adding rules to the created Security Group
-        parent_group_id = securitygroup['id']
+        parent_group_id = sg['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = data_utils.rand_int_id(start=65536)
-        self.addCleanup(self.client.delete_security_group, securitygroup['id'])
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group_rule,
                           parent_group_id, ip_protocol, from_port, to_port)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_invalid_port_range(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid port range.
         # Creating a Security Group to add rule to it.
-        s_name = data_utils.rand_name('securitygroup-')
-        s_description = data_utils.rand_name('description-')
-        resp, securitygroup = self.client.create_security_group(s_name,
-                                                                s_description)
+        resp, sg = self.create_security_group()
         # Adding a rule to the created Security Group
-        secgroup_id = securitygroup['id']
+        secgroup_id = sg['id']
         ip_protocol = 'tcp'
         from_port = 22
         to_port = 21
-        self.addCleanup(self.client.delete_security_group, securitygroup['id'])
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group_rule,
                           secgroup_id, ip_protocol, from_port, to_port)
 
-    @skip_because(bug="1182384",
-                  condition=CONF.service_available.neutron)
-    @attr(type=['negative', 'smoke'])
+    @test.skip_because(bug="1182384",
+                       condition=CONF.service_available.neutron)
+    @test.attr(type=['negative', 'smoke'])
     def test_delete_security_group_rule_with_non_existent_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with non existent id
