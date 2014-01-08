@@ -63,6 +63,25 @@ class SecurityGroupsClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['security_group']
 
+    def update_security_group(self, security_group_id, name=None,
+                              description=None):
+        """
+        Update a security group.
+        security_group_id: a security_group to update
+        name: new name of security group
+        description: new description of security group
+        """
+        post_body = {}
+        if name:
+            post_body['name'] = name
+        if description:
+            post_body['description'] = description
+        post_body = json.dumps({'security_group': post_body})
+        resp, body = self.put('os-security-groups/%s' % str(security_group_id),
+                              post_body, self.headers)
+        body = json.loads(body)
+        return resp, body['security_group']
+
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
         return self.delete('os-security-groups/%s' % str(security_group_id))

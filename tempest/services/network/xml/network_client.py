@@ -19,31 +19,44 @@ from tempest.common.rest_client import RestClientXML
 from tempest.services.compute.xml.common import deep_dict_to_xml
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
+from tempest.services.compute.xml.common import parse_array
 from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.network import network_client_base as client_base
 
 
-class NetworkClientXML(RestClientXML):
+class NetworkClientXML(client_base.NetworkClientBase):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(NetworkClientXML, self).__init__(config, username, password,
-                                               auth_url, tenant_name)
-        self.service = self.config.network.catalog_type
-        self.version = '2.0'
-        self.uri_prefix = "v%s" % (self.version)
+    # list of plurals used for xml serialization
+    PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
+               'fixed_ips', 'extensions']
 
-    def list_networks(self):
-        uri = '%s/networks' % (self.uri_prefix)
-        resp, body = self.get(uri, self.headers)
-        networks = self._parse_array(etree.fromstring(body))
-        networks = {"networks": networks}
-        return resp, networks
+    def get_rest_client(self, config, username, password,
+                        auth_url, tenant_name=None):
+        return RestClientXML(config, username, password,
+                             auth_url, tenant_name)
+
+    def deserialize_list(self, body):
+        return parse_array(etree.fromstring(body), self.PLURALS)
+
+    def deserialize_single(self, body):
+        return _root_tag_fetcher_and_xml_to_json_parse(body)
+
+    def serialize(self, body):
+        #TODO(enikanorov): implement better json to xml conversion
+        # expecting the dict with single key
+        root = body.keys()[0]
+        post_body = Element(root)
+        for name, attr in body[root].items():
+            elt = Element(name, attr)
+            post_body.append(elt)
+        return str(Document(post_body))
 
     def create_network(self, name):
         uri = '%s/networks' % (self.uri_prefix)
         post_body = Element("network")
         p2 = Element("name", name)
         post_body.append(p2)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        resp, body = self.post(uri, str(Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -55,20 +68,10 @@ class NetworkClientXML(RestClientXML):
                 p2 = Element("name", names[i])
                 p1.append(p2)
                 post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
-        networks = self._parse_array(etree.fromstring(body))
+        resp, body = self.post(uri, str(Document(post_body)))
+        networks = parse_array(etree.fromstring(body))
         networks = {"networks": networks}
         return resp, networks
-
-    def delete_network(self, uuid):
-        uri = '%s/networks/%s' % (self.uri_prefix, str(uuid))
-        return self.delete(uri, self.headers)
-
-    def show_network(self, uuid):
-        uri = '%s/networks/%s' % (self.uri_prefix, str(uuid))
-        resp, body = self.get(uri, self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
 
     def create_subnet(self, net_uuid, cidr):
         uri = '%s/subnets' % (self.uri_prefix)
@@ -79,24 +82,7 @@ class NetworkClientXML(RestClientXML):
         subnet.append(p2)
         subnet.append(p3)
         subnet.append(p4)
-        resp, body = self.post(uri, str(Document(subnet)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_subnet(self, subnet_id):
-        uri = '%s/subnets/%s' % (self.uri_prefix, str(subnet_id))
-        return self.delete(uri, self.headers)
-
-    def list_subnets(self):
-        uri = '%s/subnets' % (self.uri_prefix)
-        resp, body = self.get(uri, self.headers)
-        subnets = self._parse_array(etree.fromstring(body))
-        subnets = {"subnets": subnets}
-        return resp, subnets
-
-    def show_subnet(self, uuid):
-        uri = '%s/subnets/%s' % (self.uri_prefix, str(uuid))
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.post(uri, str(Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -108,30 +94,7 @@ class NetworkClientXML(RestClientXML):
         for key, val in kwargs.items():
             key = Element(key, val)
             port.append(key)
-        resp, body = self.post(uri, str(Document(port)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_port(self, port_id):
-        uri = '%s/ports/%s' % (self.uri_prefix, str(port_id))
-        return self.delete(uri, self.headers)
-
-    def _parse_array(self, node):
-        array = []
-        for child in node.getchildren():
-            array.append(xml_to_json(child))
-        return array
-
-    def list_ports(self):
-        url = '%s/ports' % (self.uri_prefix)
-        resp, body = self.get(url, self.headers)
-        ports = self._parse_array(etree.fromstring(body))
-        ports = {"ports": ports}
-        return resp, ports
-
-    def show_port(self, port_id):
-        uri = '%s/ports/%s' % (self.uri_prefix, str(port_id))
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.post(uri, str(Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -140,7 +103,7 @@ class NetworkClientXML(RestClientXML):
         port = Element("port")
         p2 = Element("name", name)
         port.append(p2)
-        resp, body = self.put(uri, str(Document(port)), self.headers)
+        resp, body = self.put(uri, str(Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -149,7 +112,7 @@ class NetworkClientXML(RestClientXML):
         subnet = Element("subnet")
         p2 = Element("name", name)
         subnet.append(p2)
-        resp, body = self.put(uri, str(Document(subnet)), self.headers)
+        resp, body = self.put(uri, str(Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -158,7 +121,7 @@ class NetworkClientXML(RestClientXML):
         network = Element("network")
         p2 = Element("name", name)
         network.append(p2)
-        resp, body = self.put(uri, str(Document(network)), self.headers)
+        resp, body = self.put(uri, str(Document(network)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -167,33 +130,9 @@ class NetworkClientXML(RestClientXML):
         post_body = Element("security_group")
         p2 = Element("name", name)
         post_body.append(p2)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        resp, body = self.post(uri, str(Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
-
-    def list_security_groups(self):
-        url = '%s/security-groups' % (self.uri_prefix)
-        resp, body = self.get(url, self.headers)
-        secgroups = self._parse_array(etree.fromstring(body))
-        secgroups = {"security_groups": secgroups}
-        return resp, secgroups
-
-    def delete_security_group(self, secgroup_id):
-        uri = '%s/security-groups/%s' % (self.uri_prefix, str(secgroup_id))
-        return self.delete(uri, self.headers)
-
-    def show_security_group(self, secgroup_id):
-        uri = '%s/security-groups/%s' % (self.uri_prefix, str(secgroup_id))
-        resp, body = self.get(uri, self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def list_security_group_rules(self):
-        url = '%s/security-group-rules' % (self.uri_prefix)
-        resp, body = self.get(url, self.headers)
-        rules = self._parse_array(etree.fromstring(body))
-        rules = {"security_group_rules": rules}
-        return resp, rules
 
     def create_security_group_rule(self, secgroup_id,
                                    direction='ingress', **kwargs):
@@ -206,17 +145,7 @@ class NetworkClientXML(RestClientXML):
         for key, val in kwargs.items():
             key = Element(key, val)
             rule.append(key)
-        resp, body = self.post(uri, str(Document(rule)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_security_group_rule(self, rule_id):
-        uri = '%s/security-group-rules/%s' % (self.uri_prefix, str(rule_id))
-        return self.delete(uri, self.headers)
-
-    def show_security_group_rule(self, rule_id):
-        uri = '%s/security-group-rules/%s' % (self.uri_prefix, str(rule_id))
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.post(uri, str(Document(rule)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -230,8 +159,8 @@ class NetworkClientXML(RestClientXML):
                 p2 = Element(k, kv)
                 p1.append(p2)
             post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
-        subnets = self._parse_array(etree.fromstring(body))
+        resp, body = self.post(uri, str(Document(post_body)))
+        subnets = parse_array(etree.fromstring(body))
         subnets = {"subnets": subnets}
         return resp, subnets
 
@@ -245,17 +174,10 @@ class NetworkClientXML(RestClientXML):
                 p2 = Element(k, kv)
                 p1.append(p2)
             post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
-        ports = self._parse_array(etree.fromstring(body))
+        resp, body = self.post(uri, str(Document(post_body)))
+        ports = parse_array(etree.fromstring(body))
         ports = {"ports": ports}
         return resp, ports
-
-    def list_vips(self):
-        url = '%s/lb/vips' % (self.uri_prefix)
-        resp, body = self.get(url, self.headers)
-        vips = self._parse_array(etree.fromstring(body))
-        vips = {"vips": vips}
-        return resp, vips
 
     def create_vip(self, name, protocol, protocol_port, subnet_id, pool_id):
         uri = '%s/lb/vips' % (self.uri_prefix)
@@ -270,17 +192,7 @@ class NetworkClientXML(RestClientXML):
         post_body.append(p3)
         post_body.append(p4)
         post_body.append(p5)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_vip(self, vip_id):
-        uri = '%s/lb/vips/%s' % (self.uri_prefix, str(vip_id))
-        return self.delete(uri, self.headers)
-
-    def show_vip(self, vip_id):
-        uri = '%s/lb/vips/%s' % (self.uri_prefix, str(vip_id))
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.post(uri, str(Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -289,55 +201,9 @@ class NetworkClientXML(RestClientXML):
         put_body = Element("vip")
         p2 = Element("name", new_name)
         put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)), self.headers)
+        resp, body = self.put(uri, str(Document(put_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
-
-    def list_pools(self):
-        url = '%s/lb/pools' % (self.uri_prefix)
-        resp, body = self.get(url, self.headers)
-        pools = self._parse_array(etree.fromstring(body))
-        pools = {"pools": pools}
-        return resp, pools
-
-    def create_pool(self, name, lb_method, protocol, subnet_id):
-        uri = '%s/lb/pools' % (self.uri_prefix)
-        post_body = Element("pool")
-        p1 = Element("lb_method", lb_method)
-        p2 = Element("protocol", protocol)
-        p3 = Element("subnet_id", subnet_id)
-        post_body.append(p1)
-        post_body.append(p2)
-        post_body.append(p3)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_pool(self, pool_id):
-        uri = '%s/lb/pools/%s' % (self.uri_prefix, str(pool_id))
-        return self.delete(uri, self.headers)
-
-    def show_pool(self, pool_id):
-        uri = '%s/lb/pools/%s' % (self.uri_prefix, str(pool_id))
-        resp, body = self.get(uri, self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_pool(self, pool_id, new_name):
-        uri = '%s/lb/pools/%s' % (self.uri_prefix, str(pool_id))
-        put_body = Element("pool")
-        p2 = Element("name", new_name)
-        put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def list_members(self):
-        url = '%s/lb/members' % (self.uri_prefix)
-        resp, body = self.get(url, self.headers)
-        members = self._parse_array(etree.fromstring(body))
-        members = {"members": members}
-        return resp, members
 
     def create_member(self, address, protocol_port, pool_id):
         uri = '%s/lb/members' % (self.uri_prefix)
@@ -348,17 +214,7 @@ class NetworkClientXML(RestClientXML):
         post_body.append(p1)
         post_body.append(p2)
         post_body.append(p3)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_member(self, member_id):
-        uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
-        return self.delete(uri, self.headers)
-
-    def show_member(self, member_id):
-        uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.post(uri, str(Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -367,15 +223,8 @@ class NetworkClientXML(RestClientXML):
         put_body = Element("member")
         p2 = Element("admin_state_up", admin_state_up)
         put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)), self.headers)
+        resp, body = self.put(uri, str(Document(put_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def list_health_monitors(self):
-        uri = '%s/lb/health_monitors' % (self.uri_prefix)
-        resp, body = self.get(uri, self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        body = {"health_monitors": body}
         return resp, body
 
     def create_health_monitor(self, delay, max_retries, Type, timeout):
@@ -389,17 +238,7 @@ class NetworkClientXML(RestClientXML):
         post_body.append(p2)
         post_body.append(p3)
         post_body.append(p4)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_health_monitor(self, uuid):
-        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, str(uuid))
-        return self.delete(uri, self.headers)
-
-    def show_health_monitor(self, uuid):
-        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, str(uuid))
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.post(uri, str(Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -408,7 +247,7 @@ class NetworkClientXML(RestClientXML):
         put_body = Element("health_monitor")
         p2 = Element("admin_state_up", admin_state_up)
         put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)), self.headers)
+        resp, body = self.put(uri, str(Document(put_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -419,7 +258,7 @@ class NetworkClientXML(RestClientXML):
         post_body = Element("health_monitor")
         p1 = Element("id", health_monitor_id,)
         post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)), self.headers)
+        resp, body = self.post(uri, str(Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -427,18 +266,11 @@ class NetworkClientXML(RestClientXML):
                                               pool_id):
         uri = '%s/lb/pools/%s/health_monitors/%s' % (self.uri_prefix, pool_id,
                                                      health_monitor_id)
-        return self.delete(uri, self.headers)
-
-    def list_extensions(self):
-        url = '%s/extensions' % (self.uri_prefix)
-        resp, body = self.get(url, self.headers)
-        extensions = self._parse_array(etree.fromstring(body))
-        extensions = {"extensions": extensions}
-        return resp, extensions
+        return self.delete(uri)
 
     def show_extension_details(self, ext_alias):
         uri = '%s/extensions/%s' % (self.uri_prefix, str(ext_alias))
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.get(uri)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -447,18 +279,7 @@ class NetworkClientXML(RestClientXML):
         router = Element("router")
         router.append(Element("name", name))
         deep_dict_to_xml(router, kwargs)
-        resp, body = self.post(uri, str(Document(router)), self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def delete_router(self, router_id):
-        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
-        resp, body = self.delete(uri, self.headers)
-        return resp, body
-
-    def show_router(self, router_id):
-        uri = '%s/routers/%s' % (self.uri_prefix, router_id)
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.post(uri, str(Document(router)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -467,7 +288,7 @@ class NetworkClientXML(RestClientXML):
         router = Element("router")
         for element, content in kwargs.iteritems():
             router.append(Element(element, content))
-        resp, body = self.put(uri, str(Document(router)), self.headers)
+        resp, body = self.put(uri, str(Document(router)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -475,7 +296,7 @@ class NetworkClientXML(RestClientXML):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
               router_id)
         subnet = Element("subnet_id", subnet_id)
-        resp, body = self.put(uri, str(Document(subnet)), self.headers)
+        resp, body = self.put(uri, str(Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -483,7 +304,7 @@ class NetworkClientXML(RestClientXML):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
               router_id)
         port = Element("port_id", port_id)
-        resp, body = self.put(uri, str(Document(port)), self.headers)
+        resp, body = self.put(uri, str(Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -491,7 +312,7 @@ class NetworkClientXML(RestClientXML):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
               router_id)
         subnet = Element("subnet_id", subnet_id)
-        resp, body = self.put(uri, str(Document(subnet)), self.headers)
+        resp, body = self.put(uri, str(Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -499,7 +320,7 @@ class NetworkClientXML(RestClientXML):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
               router_id)
         port = Element("port_id", port_id)
-        resp, body = self.put(uri, str(Document(port)), self.headers)
+        resp, body = self.put(uri, str(Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -509,26 +330,8 @@ class NetworkClientXML(RestClientXML):
         floatingip.append(Element("floating_network_id", ext_network_id))
         for element, content in kwargs.iteritems():
             floatingip.append(Element(element, content))
-        resp, body = self.post(uri, str(Document(floatingip)), self.headers)
+        resp, body = self.post(uri, str(Document(floatingip)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def show_floating_ip(self, floating_ip_id):
-        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
-        resp, body = self.get(uri, self.headers)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def list_floating_ips(self):
-        uri = '%s/floatingips' % (self.uri_prefix)
-        resp, body = self.get(uri, self.headers)
-        floatingips = self._parse_array(etree.fromstring(body))
-        floatingips = {"floatingips": floatingips}
-        return resp, floatingips
-
-    def delete_floating_ip(self, floating_ip_id):
-        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
-        resp, body = self.delete(uri, self.headers)
         return resp, body
 
     def update_floating_ip(self, floating_ip_id, **kwargs):
@@ -543,61 +346,57 @@ class NetworkClientXML(RestClientXML):
                 floatingip.append(xml_elem)
             else:
                 floatingip.append(Element(element, content))
-        resp, body = self.put(uri, str(Document(floatingip)), self.headers)
+        resp, body = self.put(uri, str(Document(floatingip)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
-        resp, body = self.get(uri, self.headers)
-        ports = self._parse_array(etree.fromstring(body))
+        resp, body = self.get(uri)
+        ports = parse_array(etree.fromstring(body), self.PLURALS)
         ports = {"ports": ports}
         return resp, ports
 
-    def list_agents(self):
-        uri = '%s/agents' % self.uri_prefix
-        resp, body = self.get(uri, self.headers)
-        agents = self._parse_array(etree.fromstring(body))
-        agents = {'agents': agents}
-        return resp, agents
+    def update_agent(self, agent_id, agent_info):
+        uri = '%s/agents/%s' % (self.uri_prefix, agent_id)
+        agent = Element('agent')
+        for (key, value) in agent_info.items():
+            p = Element(key, value)
+            agent.append(p)
+        resp, body = self.put(uri, str(Document(agent)))
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
 
     def list_routers_on_l3_agent(self, agent_id):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.get(uri)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def list_l3_agents_hosting_router(self, router_id):
         uri = '%s/routers/%s/l3-agents' % (self.uri_prefix, router_id)
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.get(uri)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def list_service_providers(self):
-        uri = '%s/service-providers' % self.uri_prefix
-        resp, body = self.get(uri, self.headers)
-        providers = self._parse_array(etree.fromstring(body))
-        body = {'service_providers': providers}
         return resp, body
 
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
-        resp, body = self.get(uri, self.headers)
-        agents = self._parse_array(etree.fromstring(body))
+        resp, body = self.get(uri)
+        agents = parse_array(etree.fromstring(body))
         body = {'agents': agents}
         return resp, body
 
     def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
-        resp, body = self.get(uri, self.headers)
-        networks = self._parse_array(etree.fromstring(body))
+        resp, body = self.get(uri)
+        networks = parse_array(etree.fromstring(body))
         body = {'networks': networks}
         return resp, body
 
     def remove_network_from_dhcp_agent(self, agent_id, network_id):
         uri = '%s/agents/%s/dhcp-networks/%s' % (self.uri_prefix, agent_id,
                                                  network_id)
-        resp, body = self.delete(uri, self.headers)
+        resp, body = self.delete(uri)
         return resp, body
 
 
@@ -606,7 +405,8 @@ def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     root_tag = body.tag
     if root_tag.startswith("{"):
         ns, root_tag = root_tag.split("}", 1)
-    body = xml_to_json(etree.fromstring(xml_returned_body))
+    body = xml_to_json(etree.fromstring(xml_returned_body),
+                       NetworkClientXML.PLURALS)
     nil = '{http://www.w3.org/2001/XMLSchema-instance}nil'
     for key, val in body.iteritems():
         if isinstance(val, dict):

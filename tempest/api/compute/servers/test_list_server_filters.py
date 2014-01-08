@@ -23,6 +23,8 @@ from tempest import exceptions
 from tempest.test import attr
 from tempest.test import skip_because
 
+CONF = config.CONF
+
 
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
@@ -210,7 +212,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @skip_because(bug="1182883",
-                  condition=config.TempestConfig().service_available.neutron)
+                  condition=CONF.service_available.neutron)
     @attr(type='gate')
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip

@@ -59,8 +59,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             resp, cls.image2 = cls.create_image_from_server(
                 cls.server1['id'], wait_until='ACTIVE')
             cls.image2_id = cls.image2['id']
-        except Exception as exc:
-            LOG.exception(exc)
+        except Exception:
+            LOG.exception('setUpClass failed')
             cls.tearDownClass()
             raise
 

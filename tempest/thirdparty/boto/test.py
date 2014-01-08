@@ -29,7 +29,7 @@ import keystoneclient.exceptions
 
 import tempest.clients
 from tempest.common.utils.file_utils import have_effective_read_access
-import tempest.config
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -37,6 +37,7 @@ from tempest.thirdparty.boto.utils.wait import re_search_wait
 from tempest.thirdparty.boto.utils.wait import state_wait
 from tempest.thirdparty.boto.utils.wait import wait_exception
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -50,11 +51,10 @@ def decision_maker():
     def all_read(*args):
         return all(map(have_effective_read_access, args))
 
-    config = tempest.config.TempestConfig()
-    materials_path = config.boto.s3_materials_path
-    ami_path = materials_path + os.sep + config.boto.ami_manifest
-    aki_path = materials_path + os.sep + config.boto.aki_manifest
-    ari_path = materials_path + os.sep + config.boto.ari_manifest
+    materials_path = CONF.boto.s3_materials_path
+    ami_path = materials_path + os.sep + CONF.boto.ami_manifest
+    aki_path = materials_path + os.sep + CONF.boto.aki_manifest
+    ari_path = materials_path + os.sep + CONF.boto.ari_manifest
 
     A_I_IMAGES_READY = all_read(ami_path, aki_path, ari_path)
     boto_logger = logging.getLogger('boto')
@@ -70,7 +70,7 @@ def decision_maker():
         raise Exception("Unknown (Authentication?) Error")
     openstack = tempest.clients.Manager()
     try:
-        if urlparse.urlparse(config.boto.ec2_url).hostname is None:
+        if urlparse.urlparse(CONF.boto.ec2_url).hostname is None:
             raise Exception("Failed to get hostname from the ec2_url")
         ec2client = openstack.ec2api_client
         try:
@@ -87,7 +87,7 @@ def decision_maker():
         EC2_CAN_CONNECT_ERROR = str(exc)
 
     try:
-        if urlparse.urlparse(config.boto.s3_url).hostname is None:
+        if urlparse.urlparse(CONF.boto.s3_url).hostname is None:
             raise Exception("Failed to get hostname from the s3_url")
         s3client = openstack.s3_client
         try:
@@ -245,20 +245,20 @@ class BotoTestCase(tempest.test.BaseTestCase):
     @classmethod
     def tearDownClass(cls):
         """Calls the callables added by addResourceCleanUp,
-        when you overwire this function dont't forget to call this too.
+        when you overwrite this function don't forget to call this too.
         """
         fail_count = 0
         trash_keys = sorted(cls._resource_trash_bin, reverse=True)
         for key in trash_keys:
             (function, pos_args, kw_args) = cls._resource_trash_bin[key]
             try:
-                LOG.debug("Cleaning up: %s" %
-                          friendly_function_call_str(function, *pos_args,
-                                                     **kw_args))
+                func_name = friendly_function_call_str(function, *pos_args,
+                                                       **kw_args)
+                LOG.debug("Cleaning up: %s" % func_name)
                 function(*pos_args, **kw_args)
-            except BaseException as exc:
+            except BaseException:
                 fail_count += 1
-                LOG.exception(exc)
+                LOG.exception("Cleanup failed %s" % func_name)
             finally:
                 del cls._resource_trash_bin[key]
         super(BotoTestCase, cls).tearDownClass()
@@ -428,12 +428,12 @@ class BotoTestCase(tempest.test.BaseTestCase):
                     try:
                         bucket.delete_key(obj.key)
                         obj.close()
-                    except BaseException as exc:
-                        LOG.exception(exc)
+                    except BaseException:
+                        LOG.exception("Failed to delete key %s " % obj.key)
                         exc_num += 1
             conn.delete_bucket(bucket)
-        except BaseException as exc:
-            LOG.exception(exc)
+        except BaseException:
+            LOG.exception("Failed to destroy bucket %s " % bucket)
             exc_num += 1
         if exc_num:
             raise exceptions.TearDownException(num=exc_num)
@@ -463,8 +463,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
             try:
                 instance.terminate()
                 re_search_wait(_instance_state, "_GONE")
-            except BaseException as exc:
-                LOG.exception(exc)
+            except BaseException:
+                LOG.exception("Failed to terminate instance %s " % instance)
                 exc_num += 1
         if exc_num:
             raise exceptions.TearDownException(num=exc_num)
@@ -497,8 +497,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
             try:
                 if volume.status != "available":
                     volume.detach(force=True)
-            except BaseException as exc:
-                LOG.exception(exc)
+            except BaseException:
+                LOG.exception("Failed to detach volume %s" % volume)
                 # exc_num += 1 "nonlocal" not in python2
             return volume.status
 
@@ -506,8 +506,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
             re_search_wait(_volume_state, "available")  # not validates status
             LOG.info(_volume_state())
             volume.delete()
-        except BaseException as exc:
-            LOG.exception(exc)
+        except BaseException:
+            LOG.exception("Failed to delete volume %s" % volume)
             exc_num += 1
         if exc_num:
             raise exceptions.TearDownException(num=exc_num)

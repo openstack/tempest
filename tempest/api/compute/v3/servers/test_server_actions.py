@@ -20,21 +20,21 @@ import time
 
 import testtools
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
-import tempest.config
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 from tempest.test import skip_because
 
+CONF = config.CONF
+
 
 class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
-    resize_available = tempest.config.TempestConfig().\
-        compute_feature_enabled.resize
-    run_ssh = tempest.config.TempestConfig().compute.run_ssh
+    resize_available = CONF.compute_feature_enabled.resize
+    run_ssh = CONF.compute.run_ssh
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
@@ -45,7 +45,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except Exception:
             # Rebuild server if something happened to it during a test
-            self.server_id = self.rebuild_server(self.server_id)
+            self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
@@ -53,7 +53,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         cls.client = cls.servers_client
         cls.server_id = cls.rebuild_server(None)
 
-    @testtools.skipUnless(compute.CHANGE_PASSWORD_AVAILABLE,
+    @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
     @attr(type='gate')
     def test_change_server_password(self):
@@ -67,7 +67,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
             # Verify that the user can authenticate with the new password
             resp, server = self.client.get_server(self.server_id)
             linux_client = RemoteClient(server, self.ssh_user, new_password)
-            self.assertTrue(linux_client.can_authenticate())
+            linux_client.validate_authentication()
 
     @attr(type='smoke')
     def test_reboot_server_hard(self):
@@ -123,6 +123,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
                                                    metadata=meta,
                                                    personality=personality,
                                                    admin_password=password)
+        self.addCleanup(self.client.rebuild, self.server_id, self.image_ref)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -140,7 +141,36 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
             linux_client = RemoteClient(server, self.ssh_user, password)
-            self.assertTrue(linux_client.can_authenticate())
+            linux_client.validate_authentication()
+
+    @attr(type='gate')
+    def test_rebuild_server_in_stop_state(self):
+        # The server in stop state  should be rebuilt using the provided
+        # image and remain in SHUTOFF state
+        resp, server = self.client.get_server(self.server_id)
+        old_image = server['image']['id']
+        new_image = self.image_ref_alt \
+            if old_image == self.image_ref else self.image_ref
+        resp, server = self.client.stop(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
+        self.addCleanup(self.client.start, self.server_id)
+        resp, rebuilt_server = self.client.rebuild(self.server_id, new_image)
+        self.addCleanup(self.client.wait_for_server_status, self.server_id,
+                        'SHUTOFF')
+        self.addCleanup(self.client.rebuild, self.server_id, old_image)
+
+        # Verify the properties in the initial response are correct
+        self.assertEqual(self.server_id, rebuilt_server['id'])
+        rebuilt_image_id = rebuilt_server['image']['id']
+        self.assertEqual(new_image, rebuilt_image_id)
+        self.assertEqual(self.flavor_ref, rebuilt_server['flavor']['id'])
+
+        # Verify the server properties after the rebuild completes
+        self.client.wait_for_server_status(rebuilt_server['id'], 'SHUTOFF')
+        resp, server = self.client.get_server(rebuilt_server['id'])
+        rebuilt_image_id = server['image']['id']
+        self.assertEqual(new_image, rebuilt_image_id)
 
     def _detect_server_image_flavor(self, server_id):
         # Detects the current server image flavor ref.
@@ -199,32 +229,115 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
                 raise exceptions.TimeoutException(message)
 
     @attr(type='gate')
+    def test_create_backup(self):
+        # Positive test:create backup successfully and rotate backups correctly
+        # create the first and the second backup
+        backup1 = data_utils.rand_name('backup')
+        resp, _ = self.servers_client.create_backup(self.server_id,
+                                                    'daily',
+                                                    2,
+                                                    backup1)
+        oldest_backup_exist = True
+
+        # the oldest one should be deleted automatically in this test
+        def _clean_oldest_backup(oldest_backup):
+            if oldest_backup_exist:
+                self.images_client.delete_image(oldest_backup)
+
+        image1_id = data_utils.parse_image_id(resp['location'])
+        self.addCleanup(_clean_oldest_backup, image1_id)
+        self.assertEqual(202, resp.status)
+        self.images_client.wait_for_image_status(image1_id, 'active')
+
+        backup2 = data_utils.rand_name('backup')
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+        resp, _ = self.servers_client.create_backup(self.server_id,
+                                                    'daily',
+                                                    2,
+                                                    backup2)
+        image2_id = data_utils.parse_image_id(resp['location'])
+        self.addCleanup(self.images_client.delete_image, image2_id)
+        self.assertEqual(202, resp.status)
+        self.images_client.wait_for_image_status(image2_id, 'active')
+
+        # verify they have been created
+        properties = {
+            'image_type': 'backup',
+            'backup_type': "daily",
+            'instance_uuid': self.server_id,
+        }
+        resp, image_list = self.images_client.image_list_detail(
+            properties,
+            sort_key='created_at',
+            sort_dir='asc')
+        self.assertEqual(200, resp.status)
+        self.assertEqual(2, len(image_list))
+        self.assertEqual((backup1, backup2),
+                         (image_list[0]['name'], image_list[1]['name']))
+
+        # create the third one, due to the rotation is 2,
+        # the first one will be deleted
+        backup3 = data_utils.rand_name('backup')
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+        resp, _ = self.servers_client.create_backup(self.server_id,
+                                                    'daily',
+                                                    2,
+                                                    backup3)
+        image3_id = data_utils.parse_image_id(resp['location'])
+        self.addCleanup(self.images_client.delete_image, image3_id)
+        self.assertEqual(202, resp.status)
+        # the first back up should be deleted
+        self.images_client.wait_for_resource_deletion(image1_id)
+        oldest_backup_exist = False
+        resp, image_list = self.images_client.image_list_detail(
+            properties,
+            sort_key='created_at',
+            sort_dir='asc')
+        self.assertEqual(200, resp.status)
+        self.assertEqual(2, len(image_list))
+        self.assertEqual((backup2, backup3),
+                         (image_list[0]['name'], image_list[1]['name']))
+
+    def _get_output(self):
+        resp, output = self.servers_client.get_console_output(
+            self.server_id, 10)
+        self.assertEqual(200, resp.status)
+        self.assertTrue(output, "Console output was empty.")
+        lines = len(output.split('\n'))
+        self.assertEqual(lines, 10)
+
+    @attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id and number of lines
-        def get_output():
-            resp, output = self.servers_client.get_console_output(
-                self.server_id, 10)
-            self.assertEqual(200, resp.status)
-            self.assertTrue(output, "Console output was empty.")
-            lines = len(output.split('\n'))
-            self.assertEqual(lines, 10)
-        self.wait_for(get_output)
 
-    @skip_because(bug="1014683")
+        # This reboot is necessary for outputting some console log after
+        # creating a instance backup. If a instance backup, the console
+        # log file is truncated and we cannot get any console log through
+        # "console-log" API.
+        # The detail is https://bugs.launchpad.net/nova/+bug/1251920
+        resp, body = self.servers_client.reboot(self.server_id, 'HARD')
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+        self.wait_for(self._get_output)
+
     @attr(type='gate')
-    def test_get_console_output_server_id_in_reboot_status(self):
+    def test_get_console_output_server_id_in_shutoff_status(self):
         # Positive test:Should be able to GET the console output
-        # for a given server_id in reboot status
-        resp, output = self.servers_client.reboot(self.server_id, 'SOFT')
-        self.servers_client.wait_for_server_status(self.server_id,
-                                                   'REBOOT')
-        resp, output = self.servers_client.get_console_output(self.server_id,
-                                                              10)
-        self.assertEqual(200, resp.status)
-        self.assertIsNotNone(output)
-        lines = len(output.split('\n'))
-        self.assertEqual(lines, 10)
+        # for a given server_id in SHUTOFF status
+
+        # NOTE: SHUTOFF is irregular status. To avoid test instability,
+        #       one server is created only for this test without using
+        #       the server that was created in setupClass.
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        temp_server_id = server['id']
+
+        resp, server = self.servers_client.stop(temp_server_id)
+        self.assertEqual(202, resp.status)
+        self.servers_client.wait_for_server_status(temp_server_id, 'SHUTOFF')
+
+        self.wait_for(self._get_output)
 
     @attr(type='gate')
     def test_pause_unpause_server(self):
@@ -241,6 +354,30 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
         resp, server = self.client.resume_server(self.server_id)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+    @attr(type='gate')
+    def test_shelve_unshelve_server(self):
+        resp, server = self.client.shelve_server(self.server_id)
+        self.assertEqual(202, resp.status)
+
+        offload_time = self.config.compute.shelved_offload_time
+        if offload_time >= 0:
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED_OFFLOADED',
+                                               extra_timeout=offload_time)
+        else:
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED')
+
+        resp, server = self.client.get_server(self.server_id)
+        image_name = server['name'] + '-shelved'
+        resp, images = self.images_client.image_list(name=image_name)
+        self.assertEqual(1, len(images))
+        self.assertEqual(image_name, images[0]['name'])
+
+        resp, server = self.client.unshelve_server(self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 

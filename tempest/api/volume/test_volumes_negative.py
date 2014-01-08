@@ -23,7 +23,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class VolumesNegativeTest(base.BaseVolumeTest):
+class VolumesNegativeTest(base.BaseVolumeV1Test):
     _interface = 'json'
 
     @classmethod
@@ -32,10 +32,7 @@ class VolumesNegativeTest(base.BaseVolumeTest):
         cls.client = cls.volumes_client
 
         # Create a test shared instance and volume for attach/detach tests
-        vol_name = data_utils.rand_name('Volume-')
-
-        cls.volume = cls.create_volume(size=1, display_name=vol_name)
-        cls.client.wait_for_volume_status(cls.volume['id'], 'available')
+        cls.volume = cls.create_volume()
         cls.mountpoint = "/dev/vdc"
 
     @attr(type=['negative', 'gate'])

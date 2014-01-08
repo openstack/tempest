@@ -20,7 +20,7 @@ from tempest.test import attr
 LOG = logging.getLogger(__name__)
 
 
-class VolumesSnapshotTest(base.BaseVolumeTest):
+class VolumesSnapshotTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod
@@ -36,6 +36,27 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
     @classmethod
     def tearDownClass(cls):
         super(VolumesSnapshotTest, cls).tearDownClass()
+
+    def _list_by_param_values_and_assert(self, params, with_detail=False):
+        """
+        Perform list or list_details action with given params
+        and validates result.
+        """
+        if with_detail:
+            resp, fetched_snap_list = \
+                self.snapshots_client.\
+                list_snapshots_with_detail(params=params)
+        else:
+            resp, fetched_snap_list = \
+                self.snapshots_client.list_snapshots(params=params)
+
+        self.assertEqual(200, resp.status)
+        # Validating params of fetched snapshots
+        for snap in fetched_snap_list:
+            for key in params:
+                msg = "Failed to list snapshots %s by %s" % \
+                      ('details' if with_detail else '', key)
+                self.assertEqual(params[key], snap[key], msg)
 
     @attr(type='gate')
     def test_snapshot_create_get_list_update_delete(self):
@@ -81,6 +102,46 @@ class VolumesSnapshotTest(base.BaseVolumeTest):
         self.assertEqual(200, resp.status)
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
         self.snapshots.remove(snapshot)
+
+    @attr(type='gate')
+    def test_snapshots_list_with_params(self):
+        """list snapshots with params."""
+        # Create a snapshot
+        display_name = data_utils.rand_name('snap')
+        snapshot = self.create_snapshot(self.volume_origin['id'],
+                                        display_name=display_name)
+
+        # Verify list snapshots by display_name filter
+        params = {'display_name': snapshot['display_name']}
+        self._list_by_param_values_and_assert(params)
+
+        # Verify list snapshots by status filter
+        params = {'status': 'available'}
+        self._list_by_param_values_and_assert(params)
+
+        # Verify list snapshots by status and display name filter
+        params = {'status': 'available',
+                  'display_name': snapshot['display_name']}
+        self._list_by_param_values_and_assert(params)
+
+    @attr(type='gate')
+    def test_snapshots_list_details_with_params(self):
+        """list snapshot details with params."""
+        # Create a snapshot
+        display_name = data_utils.rand_name('snap')
+        snapshot = self.create_snapshot(self.volume_origin['id'],
+                                        display_name=display_name)
+
+        # Verify list snapshot details by display_name filter
+        params = {'display_name': snapshot['display_name']}
+        self._list_by_param_values_and_assert(params, with_detail=True)
+        # Verify list snapshot details by status filter
+        params = {'status': 'available'}
+        self._list_by_param_values_and_assert(params, with_detail=True)
+        # Verify list snapshot details by status and display name filter
+        params = {'status': 'available',
+                  'display_name': snapshot['display_name']}
+        self._list_by_param_values_and_assert(params, with_detail=True)
 
     @attr(type='gate')
     def test_volume_from_snapshot(self):

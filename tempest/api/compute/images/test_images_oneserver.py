@@ -17,13 +17,14 @@
 
 import testtools
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -45,11 +46,12 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         try:
             self.servers_client.wait_for_server_status(self.server_id,
                                                        'ACTIVE')
-        except Exception as exc:
-            LOG.exception(exc)
+        except Exception:
+            LOG.exception('server %s timed out to become ACTIVE. rebuilding'
+                          % self.server_id)
             # Rebuild server if cannot reach the ACTIVE state
-            # Usually it means the server had a serius accident
-            self.server_id = self.rebuild_server(self.server_id)
+            # Usually it means the server had a serious accident
+            self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
@@ -68,7 +70,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
         cls.image_ids = []
 
-        if compute.MULTI_USER:
+        if cls.multi_user:
             if cls.config.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds
@@ -84,7 +86,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
-    @testtools.skipUnless(compute.CREATE_IMAGE_ENABLED,
+    @testtools.skipUnless(CONF.compute_feature_enabled.create_image,
                           'Environment unable to create images.')
     @attr(type='smoke')
     def test_create_delete_image(self):
@@ -116,6 +118,20 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         resp, body = self.client.delete_image(image_id)
         self.assertEqual('204', resp['status'])
         self.client.wait_for_resource_deletion(image_id)
+
+    @attr(type=['gate'])
+    def test_create_image_specify_multibyte_character_image_name(self):
+        if self.__class__._interface == "xml":
+            # NOTE(sdague): not entirely accurage, but we'd need a ton of work
+            # in our XML client to make this good
+            raise self.skipException("Not testable in XML")
+        # prefix character is:
+        # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm
+        utf8_name = data_utils.rand_name(u'\xF0\x9F\x92\xA9')
+        resp, body = self.client.create_image(self.server_id, utf8_name)
+        image_id = data_utils.parse_image_id(resp['location'])
+        self.addCleanup(self.client.delete_image, image_id)
+        self.assertEqual('202', resp['status'])
 
 
 class ImagesOneServerTestXML(ImagesOneServerTestJSON):

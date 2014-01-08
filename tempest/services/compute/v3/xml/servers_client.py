@@ -114,6 +114,10 @@ def _translate_server_xml_to_json(xml_dom):
                 '/compute/ext/extended_status/api/v3}vm_state')
     task_state = ('{http://docs.openstack.org'
                   '/compute/ext/extended_status/api/v3}task_state')
+    access_ip_v4 = ('{http://docs.openstack.org/compute/ext/'
+                    'os-access-ips/api/v3}access_ip_v4')
+    access_ip_v6 = ('{http://docs.openstack.org/compute/ext/'
+                    'os-access-ips/api/v3}access_ip_v6')
     if disk_config in json:
         json['os-disk-config:disk_config'] = json.pop(disk_config)
     if terminated_at in json:
@@ -129,6 +133,10 @@ def _translate_server_xml_to_json(xml_dom):
         json['os-extended-status:vm_state'] = json.pop(vm_state)
     if task_state in json:
         json['os-extended-status:task_state'] = json.pop(task_state)
+    if access_ip_v4 in json:
+        json['os-access-ips:access_ip_v4'] = json.pop(access_ip_v4)
+    if access_ip_v6 in json:
+        json['os-access-ips:access_ip_v6'] = json.pop(access_ip_v6)
     return json
 
 
@@ -214,6 +222,14 @@ class ServersV3ClientXML(RestClientXML):
         """Resets the state of a server to active/error."""
         return self.action(server_id, 'reset_state', None, state=state)
 
+    def shelve_server(self, server_id, **kwargs):
+        """Shelves the provided server."""
+        return self.action(server_id, 'shelve', None, **kwargs)
+
+    def unshelve_server(self, server_id, **kwargs):
+        """Un-shelves the provided server."""
+        return self.action(server_id, 'unshelve', None, **kwargs)
+
     def delete_server(self, server_id):
         """Deletes the given server."""
         return self.delete("servers/%s" % str(server_id))
@@ -250,10 +266,14 @@ class ServersV3ClientXML(RestClientXML):
 
         if name is not None:
             server.add_attr("name", name)
+        if access_ip_v4 or access_ip_v6:
+            server.add_attr('xmlns:os-access-ips',
+                            "http://docs.openstack.org/compute/ext/"
+                            "os-access-ips/api/v3")
         if access_ip_v4 is not None:
-            server.add_attr("access_ip_v4", access_ip_v4)
+            server.add_attr("os-access-ips:access_ip_v4", access_ip_v4)
         if access_ip_v6 is not None:
-            server.add_attr("access_ip_v6", access_ip_v6)
+            server.add_attr("os-access-ips:access_ip_v6", access_ip_v6)
         if disk_config is not None:
             server.add_attr('xmlns:os-disk-config', "http://docs.openstack.org"
                             "/compute/ext/disk_config/api/v3")
@@ -294,12 +314,21 @@ class ServersV3ClientXML(RestClientXML):
         return_reservation_id: Enable/Disable the return of reservation id.
         """
         server = Element("server",
-                         imageRef=image_ref,
                          xmlns=XMLNS_V3,
                          flavor_ref=flavor_ref,
                          image_ref=image_ref,
                          name=name)
-        attrs = ["admin_password", "access_ip_v4", "access_ip_v6", "key_name",
+        attrs = ["admin_password", "key_name",
+                 ('os-access-ips:access_ip_v4',
+                  'access_ip_v4',
+                  'xmlns:os-access-ips',
+                  "http://docs.openstack.org/compute/ext/"
+                  "os-access-ips/api/v3"),
+                 ('os-access-ips:access_ip_v6',
+                  'access_ip_v6',
+                  'xmlns:os-access-ips',
+                  "http://docs.openstack.org/compute/ext/"
+                  "os-access-ips/api/v3"),
                  ("os-user-data:user_data",
                   'user_data',
                   'xmlns:os-user-data',
@@ -346,7 +375,10 @@ class ServersV3ClientXML(RestClientXML):
                     server.add_attr(post_param, value)
 
         if 'security_groups' in kwargs:
-            secgroups = Element("security_groups")
+            server.add_attr("xmlns:os-security-groups",
+                            "http://docs.openstack.org/compute/ext/"
+                            "securitygroups/api/v3")
+            secgroups = Element("os-security-groups:security_groups")
             server.append(secgroups)
             for secgroup in kwargs['security_groups']:
                 s = Element("security_group", name=secgroup['name'])
@@ -440,6 +472,13 @@ class ServersV3ClientXML(RestClientXML):
         if response_key is not None:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def create_backup(self, server_id, backup_type, rotation, name):
+        """Backup a server instance."""
+        return self.action(server_id, "create_backup", None,
+                           backup_type=backup_type,
+                           rotation=rotation,
+                           name=name)
 
     def change_password(self, server_id, password):
         return self.action(server_id, "change_password", None,
@@ -621,3 +660,11 @@ class ServersV3ClientXML(RestClientXML):
                               (server_id, request_id), self.headers)
         body = xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def force_delete_server(self, server_id, **kwargs):
+        """Force delete a server."""
+        return self.action(server_id, 'force_delete', None, **kwargs)
+
+    def restore_soft_deleted_server(self, server_id, **kwargs):
+        """Restore a soft-deleted server."""
+        return self.action(server_id, 'restore', None, **kwargs)

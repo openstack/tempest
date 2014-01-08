@@ -15,12 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.volume.base import BaseVolumeAdminTest
+from tempest.api.volume import base
 from tempest.common.utils import data_utils as utils
 from tempest.test import attr
 
 
-class VolumesActionsTest(BaseVolumeAdminTest):
+class VolumesActionsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod

@@ -22,7 +22,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class VolumeTypesNegativeTest(base.BaseVolumeAdminTest):
+class VolumeTypesNegativeTest(base.BaseVolumeV1AdminTest):
     _interface = 'json'
 
     @attr(type='gate')

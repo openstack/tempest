@@ -44,35 +44,45 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
             raise cls.skipException(msg)
         super(SimpleReadOnlyNeutronClientTest, cls).setUpClass()
 
+    @test.attr(type='smoke')
     def test_neutron_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
                           self.neutron,
                           'this-does-not-exist')
 
+    @test.attr(type='smoke')
     def test_neutron_net_list(self):
         self.neutron('net-list')
 
+    @test.attr(type='smoke')
     def test_neutron_ext_list(self):
         ext = self.parser.listing(self.neutron('ext-list'))
         self.assertTableStruct(ext, ['alias', 'name'])
 
+    @test.attr(type='smoke')
     def test_neutron_dhcp_agent_list_hosting_net(self):
         self.neutron('dhcp-agent-list-hosting-net',
                      params=CONF.compute.fixed_network_name)
 
+    @test.attr(type='smoke')
     def test_neutron_agent_list(self):
         agents = self.parser.listing(self.neutron('agent-list'))
         field_names = ['id', 'agent_type', 'host', 'alive', 'admin_state_up']
         self.assertTableStruct(agents, field_names)
 
+    @test.attr(type='smoke')
     def test_neutron_floatingip_list(self):
         self.neutron('floatingip-list')
 
     @test.skip_because(bug="1240694")
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='metering', service='network')
     def test_neutron_meter_label_list(self):
         self.neutron('meter-label-list')
 
     @test.skip_because(bug="1240694")
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='metering', service='network')
     def test_neutron_meter_label_rule_list(self):
         self.neutron('meter-label-rule-list')
 
@@ -83,40 +93,52 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
             if '404 Not Found' not in e.stderr:
                 self.fail('%s: Unexpected failure.' % command)
 
+    @test.attr(type='smoke')
     def test_neutron_lb_healthmonitor_list(self):
         self._test_neutron_lbaas_command('lb-healthmonitor-list')
 
+    @test.attr(type='smoke')
     def test_neutron_lb_member_list(self):
         self._test_neutron_lbaas_command('lb-member-list')
 
+    @test.attr(type='smoke')
     def test_neutron_lb_pool_list(self):
         self._test_neutron_lbaas_command('lb-pool-list')
 
+    @test.attr(type='smoke')
     def test_neutron_lb_vip_list(self):
         self._test_neutron_lbaas_command('lb-vip-list')
 
+    @test.attr(type='smoke')
     def test_neutron_net_external_list(self):
         self.neutron('net-external-list')
 
+    @test.attr(type='smoke')
     def test_neutron_port_list(self):
         self.neutron('port-list')
 
+    @test.attr(type='smoke')
     def test_neutron_quota_list(self):
         self.neutron('quota-list')
 
+    @test.attr(type='smoke')
     def test_neutron_router_list(self):
         self.neutron('router-list')
 
+    @test.attr(type='smoke')
     def test_neutron_security_group_list(self):
         security_grp = self.parser.listing(self.neutron('security-group-list'))
         self.assertTableStruct(security_grp, ['id', 'name', 'description'])
 
+    @test.attr(type='smoke')
     def test_neutron_security_group_rule_list(self):
         self.neutron('security-group-rule-list')
 
+    @test.attr(type='smoke')
     def test_neutron_subnet_list(self):
         self.neutron('subnet-list')
 
+    @test.attr(type='smoke')
     def test_neutron_help(self):
         help_text = self.neutron('help')
         lines = help_text.split('\n')
@@ -136,11 +158,14 @@ class SimpleReadOnlyNeutronClientTest(tempest.cli.ClientTestBase):
 
      # Optional arguments:
 
+    @test.attr(type='smoke')
     def test_neutron_version(self):
         self.neutron('', flags='--version')
 
+    @test.attr(type='smoke')
     def test_neutron_debug_net_list(self):
         self.neutron('net-list', flags='--debug')
 
+    @test.attr(type='smoke')
     def test_neutron_quiet_net_list(self):
         self.neutron('net-list', flags='--quiet')

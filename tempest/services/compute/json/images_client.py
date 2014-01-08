@@ -16,10 +16,10 @@
 #    under the License.
 
 import json
-import time
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest.common import waiters
 from tempest import exceptions
 
 
@@ -82,18 +82,7 @@ class ImagesClientJSON(RestClient):
 
     def wait_for_image_status(self, image_id, status):
         """Waits for an image to reach a given status."""
-        resp, image = self.get_image(image_id)
-        start = int(time.time())
-
-        while image['status'] != status:
-            time.sleep(self.build_interval)
-            resp, image = self.get_image(image_id)
-
-            if image['status'] == 'ERROR':
-                raise exceptions.AddImageException(image_id=image_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                raise exceptions.TimeoutException
+        waiters.wait_for_image_status(self, image_id, status)
 
     def list_image_metadata(self, image_id):
         """Lists all metadata items for an image."""

@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2011 OpenStack Foundation.
 # All Rights Reserved.
 #
@@ -22,7 +20,7 @@ import os
 import tempfile
 
 from tempest.openstack.common import excutils
-from tempest.openstack.common.gettextutils import _  # noqa
+from tempest.openstack.common.gettextutils import _
 from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)

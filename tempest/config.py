@@ -18,12 +18,9 @@
 from __future__ import print_function
 
 import os
-import sys
-
 
 from oslo.config import cfg
 
-from tempest.common.utils.misc import singleton
 from tempest.openstack.common import log as logging
 
 
@@ -137,7 +134,7 @@ ComputeGroup = [
                help="Timeout in seconds to wait for an instance to build."),
     cfg.BoolOpt('run_ssh',
                 default=False,
-                help="Does the test environment support snapshots?"),
+                help="Should the tests ssh to instances?"),
     cfg.StrOpt('ssh_user',
                default='root',
                help="User name used to authenticate to an instance."),
@@ -380,6 +377,9 @@ VolumeFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled extensions with a special entry all '
                      'which indicates every extension is enabled'),
+    cfg.BoolOpt('api_v1',
+                default=True,
+                help="Is the v1 volume API enabled"),
 ]
 
 
@@ -473,6 +473,16 @@ OrchestrationGroup = [
 ]
 
 
+telemetry_group = cfg.OptGroup(name='telemetry',
+                               title='Telemetry Service Options')
+
+TelemetryGroup = [
+    cfg.StrOpt('catalog_type',
+               default='metering',
+               help="Catalog type of the Telemetry service."),
+]
+
+
 dashboard_group = cfg.OptGroup(name="dashboard",
                                title="Dashboard options")
 
@@ -483,6 +493,16 @@ DashboardGroup = [
     cfg.StrOpt('login_url',
                default='http://localhost/auth/login/',
                help="Login page for the dashboard"),
+]
+
+
+data_processing_group = cfg.OptGroup(name="data_processing",
+                                     title="Data Processing options")
+
+DataProcessingGroup = [
+    cfg.StrOpt('catalog_type',
+               default='data_processing',
+               help="Catalog type of the data processing service.")
 ]
 
 
@@ -621,6 +641,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('horizon',
                 default=True,
                 help="Whether or not Horizon is expected to be available"),
+    cfg.BoolOpt('savanna',
+                default=False,
+                help="Whether or not Savanna is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -633,8 +656,8 @@ DebugGroup = [
 ]
 
 
-@singleton
-class TempestConfig:
+# this should never be called outside of this class
+class TempestConfigPrivate(object):
     """Provides OpenStack configuration information."""
 
     DEFAULT_CONFIG_DIR = os.path.join(
@@ -643,8 +666,9 @@ class TempestConfig:
 
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
-    def __init__(self):
+    def __init__(self, parse_conf=True):
         """Initialize a configuration from a conf directory and conf file."""
+        super(TempestConfigPrivate, self).__init__()
         config_files = []
         failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
 
@@ -660,10 +684,9 @@ class TempestConfig:
                 'TEMPEST_CONFIG' in os.environ):
             path = failsafe_path
 
-        if not os.path.exists(path):
-            msg = "Config file %s not found" % path
-            print(RuntimeError(msg), file=sys.stderr)
-        else:
+        # only parse the config file if we expect one to exist. This is needed
+        # to remove an issue with the config file up to date checker.
+        if parse_conf:
             config_files.append(path)
 
         cfg.CONF([], project='tempest', default_config_files=config_files)
@@ -687,7 +710,10 @@ class TempestConfig:
         register_opt_group(cfg.CONF, object_storage_feature_group,
                            ObjectStoreFeaturesGroup)
         register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
+        register_opt_group(cfg.CONF, telemetry_group, TelemetryGroup)
         register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
+        register_opt_group(cfg.CONF, data_processing_group,
+                           DataProcessingGroup)
         register_opt_group(cfg.CONF, boto_group, BotoGroup)
         register_opt_group(cfg.CONF, compute_admin_group, ComputeAdminGroup)
         register_opt_group(cfg.CONF, stress_group, StressGroup)
@@ -708,7 +734,9 @@ class TempestConfig:
         self.object_storage_feature_enabled = cfg.CONF[
             'object-storage-feature-enabled']
         self.orchestration = cfg.CONF.orchestration
+        self.telemetry = cfg.CONF.telemetry
         self.dashboard = cfg.CONF.dashboard
+        self.data_processing = cfg.CONF.data_processing
         self.boto = cfg.CONF.boto
         self.compute_admin = cfg.CONF['compute-admin']
         self.stress = cfg.CONF.stress
@@ -719,3 +747,16 @@ class TempestConfig:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
             self.compute_admin.tenant_name = self.identity.admin_tenant_name
+
+
+class TempestConfigProxy(object):
+    _config = None
+
+    def __getattr__(self, attr):
+        if not self._config:
+            self._config = TempestConfigPrivate()
+
+        return getattr(self._config, attr)
+
+
+CONF = TempestConfigProxy()

@@ -19,17 +19,20 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 
-CONFIG = config.TempestConfig()
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
 # NOTE(afazekas): This function needs to know a token and a subject.
 def wait_for_server_status(client, server_id, status, ready_wait=True,
-                           extra_timeout=0):
+                           extra_timeout=0, raise_on_error=True):
     """Waits for a server to reach a given status."""
 
     def _get_task_state(body):
-        task_state = body.get('OS-EXT-STS:task_state', None)
+        if client.service == CONF.compute.catalog_v3_type:
+            task_state = body.get("os-extended-status:task_state", None)
+        else:
+            task_state = body.get('OS-EXT-STS:task_state', None)
         return task_state
 
     # NOTE(afazekas): UNKNOWN status possible on ERROR
@@ -55,7 +58,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                 # responses
                 if str(task_state) == "None":
                     # without state api extension 3 sec usually enough
-                    time.sleep(CONFIG.compute.ready_wait)
+                    time.sleep(CONF.compute.ready_wait)
                     return
             else:
                 return
@@ -69,16 +72,53 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                      '/'.join((old_status, str(old_task_state))),
                      '/'.join((server_status, str(task_state))),
                      time.time() - start_time)
-        if server_status == 'ERROR':
+        if (server_status == 'ERROR') and raise_on_error:
             raise exceptions.BuildErrorException(server_id=server_id)
 
         timed_out = int(time.time()) - start_time >= timeout
 
         if timed_out:
-            message = ('Server %s failed to reach %s status within the '
-                       'required time (%s s).' %
-                       (server_id, status, timeout))
+            expected_task_state = 'None' if ready_wait else 'n/a'
+            message = ('Server %(server_id)s failed to reach %(status)s '
+                       'status and task state "%(expected_task_state)s" '
+                       'within the required time (%(timeout)s s).' %
+                       {'server_id': server_id,
+                        'status': status,
+                        'expected_task_state': expected_task_state,
+                        'timeout': timeout})
             message += ' Current status: %s.' % server_status
+            message += ' Current task state: %s.' % task_state
             raise exceptions.TimeoutException(message)
         old_status = server_status
         old_task_state = task_state
+
+
+def wait_for_image_status(client, image_id, status):
+    """Waits for an image to reach a given status.
+
+    The client should have a get_image(image_id) method to get the image.
+    The client should also have build_interval and build_timeout attributes.
+    """
+    resp, image = client.get_image(image_id)
+    start = int(time.time())
+
+    while image['status'] != status:
+        time.sleep(client.build_interval)
+        resp, image = client.get_image(image_id)
+        if image['status'] == 'ERROR':
+            raise exceptions.AddImageException(image_id=image_id)
+
+        # check the status again to avoid a false negative where we hit
+        # the timeout at the same time that the image reached the expected
+        # status
+        if image['status'] == status:
+            return
+
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Image %(image_id)s failed to reach %(status)s '
+                       'status within the required time (%(timeout)s s).' %
+                       {'image_id': image_id,
+                        'status': status,
+                        'timeout': client.build_timeout})
+            message += ' Current status: %s.' % image['status']
+            raise exceptions.TimeoutException(message)

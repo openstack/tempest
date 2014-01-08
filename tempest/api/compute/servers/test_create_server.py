@@ -20,17 +20,18 @@ import base64
 import netaddr
 import testtools
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
-import tempest.config
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
-    run_ssh = tempest.config.TempestConfig().compute.run_ssh
+    run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
     @classmethod
@@ -93,13 +94,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     @attr(type='gate')
-    def test_can_log_into_created_server(self):
-        # Check that the user can authenticate with the generated password
-        linux_client = RemoteClient(self.server, self.ssh_user, self.password)
-        self.assertTrue(linux_client.can_authenticate())
-
-    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @attr(type='gate')
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
@@ -120,7 +114,7 @@ class ServersTestManualDisk(ServersTestJSON):
 
     @classmethod
     def setUpClass(cls):
-        if not compute.DISK_CONFIG_ENABLED:
+        if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
         super(ServersTestManualDisk, cls).setUpClass()

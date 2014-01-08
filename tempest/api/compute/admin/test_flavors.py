@@ -130,40 +130,6 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @test.attr(type=['negative', 'gate'])
-    def test_get_flavor_details_for_deleted_flavor(self):
-        # Delete a flavor and ensure it is not listed
-        # Create a test flavor
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-
-        resp, flavor = self.client.create_flavor(flavor_name,
-                                                 self.ram,
-                                                 self.vcpus, self.disk,
-                                                 new_flavor_id,
-                                                 ephemeral=self.ephemeral,
-                                                 swap=self.swap,
-                                                 rxtx=self.rxtx)
-        # Delete the flavor
-        new_flavor_id = flavor['id']
-        resp_delete, body = self.client.delete_flavor(new_flavor_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(202, resp_delete.status)
-
-        # Deleted flavors can be seen via detailed GET
-        resp, flavor = self.client.get_flavor_details(new_flavor_id)
-        self.assertEqual(resp.status, 200)
-        self.assertEqual(flavor['name'], flavor_name)
-
-        # Deleted flavors should not show up in a list however
-        resp, flavors = self.client.list_flavors_with_detail()
-        self.assertEqual(resp.status, 200)
-        flag = True
-        for flavor in flavors:
-            if flavor['name'] == flavor_name:
-                flag = False
-        self.assertTrue(flag)
-
     @test.attr(type='gate')
     def test_create_list_flavor_without_extra_data(self):
         # Create a flavor and ensure it is listed
@@ -346,49 +312,6 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(flavor['disk'], self.disk)
         self.assertEqual(flavor['ram'], int(ram))
         self.assertEqual(int(flavor['id']), new_flavor_id)
-
-    @test.attr(type=['negative', 'gate'])
-    def test_invalid_is_public_string(self):
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.list_flavors_with_detail,
-                          {'is_public': 'invalid'})
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_as_user(self):
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-
-        self.assertRaises(exceptions.Unauthorized,
-                          self.user_client.create_flavor,
-                          flavor_name, self.ram, self.vcpus, self.disk,
-                          new_flavor_id, ephemeral=self.ephemeral,
-                          swap=self.swap, rxtx=self.rxtx)
-
-    @test.attr(type=['negative', 'gate'])
-    def test_delete_flavor_as_user(self):
-        self.assertRaises(exceptions.Unauthorized,
-                          self.user_client.delete_flavor,
-                          self.flavor_ref_alt)
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_using_invalid_ram(self):
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          flavor_name, -1, self.vcpus,
-                          self.disk, new_flavor_id)
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_using_invalid_vcpus(self):
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = data_utils.rand_int_id(start=1000)
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          flavor_name, self.ram, 0,
-                          self.disk, new_flavor_id)
 
 
 class FlavorsAdminTestXML(FlavorsAdminTestJSON):

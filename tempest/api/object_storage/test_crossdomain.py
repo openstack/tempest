@@ -23,10 +23,12 @@ from tempest import config
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
 
+CONF = config.CONF
+
 
 class CrossdomainTest(base.BaseObjectTest):
     crossdomain_available = \
-        config.TempestConfig().object_storage_feature_enabled.crossdomain
+        CONF.object_storage_feature_enabled.crossdomain
 
     @classmethod
     def setUpClass(cls):

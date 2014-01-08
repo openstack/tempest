@@ -18,7 +18,6 @@ testresources>=0.2.4
 keyring>=1.6.1,<2.0
 testrepository>=0.0.17
 oslo.config>=1.2.0
-eventlet>=0.13.0
 six>=1.4.1
 iso8601>=0.1.8
 fixtures>=0.3.14

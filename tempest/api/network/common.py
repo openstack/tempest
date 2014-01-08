@@ -47,6 +47,9 @@ class DeletableResource(AttributeDict):
     def delete(self):
         raise NotImplemented()
 
+    def __hash__(self):
+        return id(self)
+
 
 class DeletableNetwork(DeletableResource):
 
@@ -85,6 +88,22 @@ class DeletableRouter(DeletableResource):
 
 
 class DeletableFloatingIp(DeletableResource):
+
+    def update(self, *args, **kwargs):
+        result = self.client.update_floatingip(floatingip=self.id,
+                                               body=dict(
+                                                   floatingip=dict(*args,
+                                                                   **kwargs)
+                                               ))
+        super(DeletableFloatingIp, self).update(**result['floatingip'])
+
+    def __repr__(self):
+        return '<%s addr="%s">' % (self.__class__.__name__,
+                                   self.floating_ip_address)
+
+    def __str__(self):
+        return '<"FloatingIP" addr="%s" id="%s">' % (self.floating_ip_address,
+                                                     self.id)
 
     def delete(self):
         self.client.delete_floatingip(self.id)

@@ -17,19 +17,20 @@ import time
 
 from tempest.common.ssh import Client
 from tempest.common import utils
-from tempest.config import TempestConfig
+from tempest import config
 from tempest.exceptions import ServerUnreachable
-from tempest.exceptions import SSHTimeout
+
+CONF = config.CONF
 
 
 class RemoteClient():
 
     # NOTE(afazekas): It should always get an address instead of server
     def __init__(self, server, username, password=None, pkey=None):
-        ssh_timeout = TempestConfig().compute.ssh_timeout
-        network = TempestConfig().compute.network_for_ssh
-        ip_version = TempestConfig().compute.ip_version_for_ssh
-        ssh_channel_timeout = TempestConfig().compute.ssh_channel_timeout
+        ssh_timeout = CONF.compute.ssh_timeout
+        network = CONF.compute.network_for_ssh
+        ip_version = CONF.compute.ip_version_for_ssh
+        ssh_channel_timeout = CONF.compute.ssh_channel_timeout
         if isinstance(server, basestring):
             ip_address = server
         else:
@@ -40,16 +41,15 @@ class RemoteClient():
                     break
             else:
                 raise ServerUnreachable()
-
         self.ssh_client = Client(ip_address, username, password, ssh_timeout,
                                  pkey=pkey,
                                  channel_timeout=ssh_channel_timeout)
-        if not self.ssh_client.test_connection_auth():
-            raise SSHTimeout()
 
-    def can_authenticate(self):
-        # Re-authenticate
-        return self.ssh_client.test_connection_auth()
+    def validate_authentication(self):
+        """Validate ssh connection and authentication
+           This method raises an Exception when the validation fails.
+        """
+        self.ssh_client.test_connection_auth()
 
     def hostname_equals_servername(self, expected_hostname):
         # Get host name using command "hostname"
@@ -88,4 +88,12 @@ class RemoteClient():
         message = re.sub("([$\\`])", "\\\\\\\\\\1", message)
         # usually to /dev/ttyS0
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
+        return self.ssh_client.exec_command(cmd)
+
+    def ping_host(self, host):
+        cmd = 'ping -c1 -w1 %s' % host
+        return self.ssh_client.exec_command(cmd)
+
+    def get_mac_address(self):
+        cmd = "/sbin/ifconfig | awk '/HWaddr/ {print $5}'"
         return self.ssh_client.exec_command(cmd)

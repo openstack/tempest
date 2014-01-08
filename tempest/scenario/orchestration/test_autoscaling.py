@@ -19,6 +19,7 @@ from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import call_until_true
 from tempest.test import services
+from tempest.test import skip_because
 
 
 class AutoScalingTest(manager.OrchestrationScenarioTest):
@@ -62,6 +63,7 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
         if not self.config.orchestration.keypair_name:
             self.set_resource('stack', self.stack)
 
+    @skip_because(bug="1257575")
     @attr(type='slow')
     @services('orchestration', 'compute')
     def test_scale_up_then_down(self):

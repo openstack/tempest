@@ -16,7 +16,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -46,11 +45,15 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         try:
             self.servers_client.wait_for_server_status(self.server_id,
                                                        'ACTIVE')
-        except Exception as exc:
-            LOG.exception(exc)
+        except Exception:
+            LOG.exception('server %s timed out to become ACTIVE. rebuilding'
+                          % self.server_id)
             # Rebuild server if cannot reach the ACTIVE state
-            # Usually it means the server had a serius accident
-            self.server_id = self.rebuild_server(self.server_id)
+            # Usually it means the server had a serious accident
+            self._reset_server()
+
+    def _reset_server(self):
+        self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
     def setUpClass(cls):
@@ -69,7 +72,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         cls.image_ids = []
 
-        if compute.MULTI_USER:
+        if cls.multi_user:
             if cls.config.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds
@@ -84,11 +87,15 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @skip_because(bug="1006725")
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
-        # Return an error if the image name has multi-byte characters
-        snapshot_name = data_utils.rand_name('\xef\xbb\xbf')
+        if self.__class__._interface == "xml":
+            raise self.skipException("Not testable in XML")
+        # invalid multibyte sequence from:
+        # http://stackoverflow.com/questions/1301402/
+        #     example-invalid-utf8-string
+        invalid_name = data_utils.rand_name(u'\xc3\x28')
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_image, self.server_id,
-                          snapshot_name)
+                          invalid_name)
 
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_invalid_metadata(self):
@@ -117,12 +124,12 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
+        self.addCleanup(self._reset_server)
 
         # Create second snapshot
         alt_snapshot_name = data_utils.rand_name('test-snap-')
         self.assertRaises(exceptions.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
 
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_name_over_256_chars(self):
@@ -141,6 +148,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
         self.image_ids.append(image_id)
+        self.addCleanup(self._reset_server)
 
         # Do not wait, attempt to delete the image, ensure it's successful
         resp, body = self.client.delete_image(image_id)

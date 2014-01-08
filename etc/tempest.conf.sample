@@ -28,7 +28,7 @@
 
 # format string to use for log messages with context (string
 # value)
-#logging_context_format_string=%(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user)s %(tenant)s] %(instance)s%(message)s
+#logging_context_format_string=%(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user_identity)s] %(instance)s%(message)s
 
 # format string to use for log messages without context
 # (string value)
@@ -43,7 +43,7 @@
 #logging_exception_prefix=%(asctime)s.%(msecs)03d %(process)d TRACE %(name)s %(instance)s
 
 # list of logger=LEVEL pairs (list value)
-#default_log_levels=amqplib=WARN,sqlalchemy=WARN,boto=WARN,suds=INFO,keystone=INFO,paramiko=INFO
+#default_log_levels=amqp=WARN,amqplib=WARN,boto=WARN,qpid=WARN,sqlalchemy=WARN,suds=INFO,iso8601=WARN
 
 # publish error events (boolean value)
 #publish_errors=false
@@ -59,12 +59,13 @@
 # it like this (string value)
 #instance_uuid_format="[instance: %(uuid)s] "
 
-# If this option is specified, the logging configuration file
-# specified is used and overrides any other logging options
-# specified. Please see the Python logging module
-# documentation for details on logging configuration files.
-# (string value)
-#log_config=<None>
+# The name of logging configuration file. It does not disable
+# existing loggers, but just appends specified logging
+# configuration to any other existing logging options. Please
+# see the Python logging module documentation for details on
+# logging configuration files. (string value)
+# Deprecated group/name - [DEFAULT]/log_config
+#log_config_append=<None>
 
 # DEPRECATED. A logging.Formatter log message format string
 # which may use any of the available logging.LogRecord
@@ -92,6 +93,276 @@
 
 # syslog facility to receive log lines (string value)
 #syslog_log_facility=LOG_USER
+
+
+[boto]
+
+#
+# Options defined in tempest.config
+#
+
+# EC2 URL (string value)
+#ec2_url=http://localhost:8773/services/Cloud
+
+# S3 URL (string value)
+#s3_url=http://localhost:8080
+
+# AWS Secret Key (string value)
+#aws_secret=<None>
+
+# AWS Access Key (string value)
+#aws_access=<None>
+
+# S3 Materials Path (string value)
+#s3_materials_path=/opt/stack/devstack/files/images/s3-materials/cirros-0.3.0
+
+# ARI Ramdisk Image manifest (string value)
+#ari_manifest=cirros-0.3.0-x86_64-initrd.manifest.xml
+
+# AMI Machine Image manifest (string value)
+#ami_manifest=cirros-0.3.0-x86_64-blank.img.manifest.xml
+
+# AKI Kernel Image manifest (string value)
+#aki_manifest=cirros-0.3.0-x86_64-vmlinuz.manifest.xml
+
+# Instance type (string value)
+#instance_type=m1.tiny
+
+# boto Http socket timeout (integer value)
+#http_socket_timeout=3
+
+# boto num_retries on error (integer value)
+#num_retries=1
+
+# Status Change Timeout (integer value)
+#build_timeout=60
+
+# Status Change Test Interval (integer value)
+#build_interval=1
+
+
+[cli]
+
+#
+# Options defined in tempest.cli
+#
+
+# enable cli tests (boolean value)
+#enabled=true
+
+# directory where python client binaries are located (string
+# value)
+#cli_dir=/usr/local/bin
+
+# Number of seconds to wait on a CLI timeout (integer value)
+#timeout=15
+
+
+[compute]
+
+#
+# Options defined in tempest.config
+#
+
+# Allows test cases to create/destroy tenants and users. This
+# option enables isolated test cases and better parallel
+# execution, but also requires that OpenStack Identity API
+# admin credentials are known. (boolean value)
+#allow_tenant_isolation=false
+
+# Valid primary image reference to be used in tests. (string
+# value)
+#image_ref={$IMAGE_ID}
+
+# Valid secondary image reference to be used in tests. (string
+# value)
+#image_ref_alt={$IMAGE_ID_ALT}
+
+# Valid primary flavor to use in tests. (string value)
+#flavor_ref=1
+
+# Valid secondary flavor to be used in tests. (string value)
+#flavor_ref_alt=2
+
+# User name used to authenticate to an instance. (string
+# value)
+#image_ssh_user=root
+
+# Password used to authenticate to an instance. (string value)
+#image_ssh_password=password
+
+# User name used to authenticate to an instance using the
+# alternate image. (string value)
+#image_alt_ssh_user=root
+
+# Password used to authenticate to an instance using the
+# alternate image. (string value)
+#image_alt_ssh_password=password
+
+# Time in seconds between build status checks. (integer value)
+#build_interval=10
+
+# Timeout in seconds to wait for an instance to build.
+# (integer value)
+#build_timeout=300
+
+# Should the tests ssh to instances? (boolean value)
+#run_ssh=false
+
+# User name used to authenticate to an instance. (string
+# value)
+#ssh_user=root
+
+# Timeout in seconds to wait for ping to succeed. (integer
+# value)
+#ping_timeout=60
+
+# Timeout in seconds to wait for authentication to succeed.
+# (integer value)
+#ssh_timeout=300
+
+# Additional wait time for clean state, when there is no OS-
+# EXT-STS extension available (integer value)
+#ready_wait=0
+
+# Timeout in seconds to wait for output from ssh channel.
+# (integer value)
+#ssh_channel_timeout=60
+
+# Visible fixed network name  (string value)
+#fixed_network_name=private
+
+# Network used for SSH connections. (string value)
+#network_for_ssh=public
+
+# IP version used for SSH connections. (integer value)
+#ip_version_for_ssh=4
+
+# Dose the SSH uses Floating IP? (boolean value)
+#use_floatingip_for_ssh=true
+
+# Catalog type of the Compute service. (string value)
+#catalog_type=compute
+
+# The compute region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
+# value)
+#region=
+
+# Catalog type of the Compute v3 service. (string value)
+#catalog_v3_type=computev3
+
+# Path to a private key file for SSH access to remote hosts
+# (string value)
+#path_to_private_key=<None>
+
+# Expected device name when a volume is attached to an
+# instance (string value)
+#volume_device_name=vdb
+
+# Time in seconds before a shelved instance is eligible for
+# removing from a host.  -1 never offload, 0 offload when
+# shelved. This time should be the same as the time of
+# nova.conf, and some tests will run for as long as the time.
+# (integer value)
+#shelved_offload_time=0
+
+# Allows test cases to create/destroy tenants and users. This
+# option enables isolated test cases and better parallel
+# execution, but also requires that OpenStack Identity API
+# admin credentials are known. (boolean value)
+#allow_tenant_isolation=false
+
+
+[compute-admin]
+
+#
+# Options defined in tempest.config
+#
+
+# Administrative Username to use for Nova API requests.
+# (string value)
+#username=admin
+
+# Administrative Tenant name to use for Nova API requests.
+# (string value)
+#tenant_name=admin
+
+# API key to use when authenticating as admin. (string value)
+#password=pass
+
+
+[compute-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# If false, skip all nova v3 tests. (boolean value)
+#api_v3=true
+
+# If false, skip disk config tests (boolean value)
+#disk_config=true
+
+# A list of enabled v3 extensions with a special entry all
+# which indicates every extension is enabled (list value)
+#api_v3_extensions=all
+
+# Does the test environment support changing the admin
+# password? (boolean value)
+#change_password=false
+
+# Does the test environment support snapshots? (boolean value)
+#create_image=false
+
+# Does the test environment support resizing? (boolean value)
+#resize=false
+
+# Does the test environment support live migration available?
+# (boolean value)
+#live_migration=false
+
+# Does the test environment use block devices for live
+# migration (boolean value)
+#block_migration_for_live_migration=false
+
+# Does the test environment block migration support cinder
+# iSCSI volumes (boolean value)
+#block_migrate_cinder_iscsi=false
+
+
+[dashboard]
+
+#
+# Options defined in tempest.config
+#
+
+# Where the dashboard can be found (string value)
+#dashboard_url=http://localhost/
+
+# Login page for the dashboard (string value)
+#login_url=http://localhost/auth/login/
+
+
+[data_processing]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the data processing service. (string value)
+#catalog_type=data_processing
+
+
+[debug]
+
+#
+# Options defined in tempest.config
+#
+
+# Enable diagnostic commands (boolean value)
+#enable=true
 
 
 [identity]
@@ -157,6 +428,251 @@
 #admin_password=pass
 
 
+[image]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Image service. (string value)
+#catalog_type=image
+
+# The image region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
+# value)
+#region=
+
+# http accessible image (string value)
+#http_image=http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
+
+
+[image-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# Is the v2 image API enabled (boolean value)
+#api_v2=true
+
+# Is the v1 image API enabled (boolean value)
+#api_v1=true
+
+
+[network]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Neutron service. (string value)
+#catalog_type=network
+
+# The network region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
+# value)
+#region=
+
+# The cidr block to allocate tenant networks from (string
+# value)
+#tenant_network_cidr=10.100.0.0/16
+
+# The mask bits for tenant networks (integer value)
+#tenant_network_mask_bits=28
+
+# Whether tenant network connectivity should be evaluated
+# directly (boolean value)
+#tenant_networks_reachable=false
+
+# Id of the public network that provides external connectivity
+# (string value)
+#public_network_id=
+
+# Id of the public router that provides external connectivity
+# (string value)
+#public_router_id=
+
+
+[network-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
+
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
+
+# A list of enabled extensions with a special entry all which
+# indicates every extension is enabled (list value)
+#api_extensions=all
+
+
+[object-storage]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Object-Storage service. (string value)
+#catalog_type=object-store
+
+# The object-storage region name to use. If empty, the value
+# of identity.region is used instead. If no such region is
+# found in the service catalog, the first found one is used.
+# (string value)
+#region=
+
+# Number of seconds to time on waiting for a containerto
+# container synchronization complete. (integer value)
+#container_sync_timeout=120
+
+# Number of seconds to wait while looping to check thestatus
+# of a container to container synchronization (integer value)
+#container_sync_interval=5
+
+# Role to add to users created for swift tests to enable
+# creating containers (string value)
+#operator_role=Member
+
+
+[object-storage-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# Set to True if the Container Quota middleware is enabled
+# (boolean value)
+#container_quotas=true
+
+# Set to True if the Account Quota middleware is enabled
+# (boolean value)
+#accounts_quotas=true
+
+# Set to True if the Crossdomain middleware is enabled
+# (boolean value)
+#crossdomain=true
+
+# Set to True if the TempURL middleware is enabled (boolean
+# value)
+#tempurl=true
+
+
+[orchestration]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Orchestration service. (string value)
+#catalog_type=orchestration
+
+# The orchestration region name to use. If empty, the value of
+# identity.region is used instead. If no such region is found
+# in the service catalog, the first found one is used. (string
+# value)
+#region=
+
+# Time in seconds between build status checks. (integer value)
+#build_interval=1
+
+# Timeout in seconds to wait for a stack to build. (integer
+# value)
+#build_timeout=300
+
+# Instance type for tests. Needs to be big enough for a full
+# OS plus the test workload (string value)
+#instance_type=m1.micro
+
+# Name of heat-cfntools enabled image to use when launching
+# test instances. (string value)
+#image_ref=<None>
+
+# Name of existing keypair to launch servers with. (string
+# value)
+#keypair_name=<None>
+
+# Value must match heat configuration of the same name.
+# (integer value)
+#max_template_size=524288
+
+
+[scenario]
+
+#
+# Options defined in tempest.config
+#
+
+# Directory containing image files (string value)
+#img_dir=/opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
+
+# AMI image file name (string value)
+#ami_img_file=cirros-0.3.1-x86_64-blank.img
+
+# ARI image file name (string value)
+#ari_img_file=cirros-0.3.1-x86_64-initrd
+
+# AKI image file name (string value)
+#aki_img_file=cirros-0.3.1-x86_64-vmlinuz
+
+# ssh username for the image file (string value)
+#ssh_user=cirros
+
+# specifies how many resources to request at once. Used for
+# large operations testing. (integer value)
+#large_ops_number=0
+
+
+[service_available]
+
+#
+# Options defined in tempest.config
+#
+
+# Whether or not cinder is expected to be available (boolean
+# value)
+#cinder=true
+
+# Whether or not neutron is expected to be available (boolean
+# value)
+#neutron=false
+
+# Whether or not glance is expected to be available (boolean
+# value)
+#glance=true
+
+# Whether or not swift is expected to be available (boolean
+# value)
+#swift=true
+
+# Whether or not nova is expected to be available (boolean
+# value)
+#nova=true
+
+# Whether or not Heat is expected to be available (boolean
+# value)
+#heat=false
+
+# Whether or not Ceilometer is expected to be available
+# (boolean value)
+#ceilometer=true
+
+# Whether or not Horizon is expected to be available (boolean
+# value)
+#horizon=true
+
+# Whether or not Savanna is expected to be available (boolean
+# value)
+#savanna=false
+
+
 [stress]
 
 #
@@ -195,289 +711,14 @@
 #default_thread_number_per_action=4
 
 
-[image-feature-enabled]
+[telemetry]
 
 #
 # Options defined in tempest.config
 #
 
-# Is the v2 image API enabled (boolean value)
-#api_v2=true
-
-# Is the v1 image API enabled (boolean value)
-#api_v1=true
-
-
-[compute]
-
-#
-# Options defined in tempest.config
-#
-
-# Allows test cases to create/destroy tenants and users. This
-# option enables isolated test cases and better parallel
-# execution, but also requires that OpenStack Identity API
-# admin credentials are known. (boolean value)
-#allow_tenant_isolation=false
-
-# Valid primary image reference to be used in tests. (string
-# value)
-#image_ref={$IMAGE_ID}
-
-# Valid secondary image reference to be used in tests. (string
-# value)
-#image_ref_alt={$IMAGE_ID_ALT}
-
-# Valid primary flavor to use in tests. (string value)
-#flavor_ref=1
-
-# Valid secondary flavor to be used in tests. (string value)
-#flavor_ref_alt=2
-
-# User name used to authenticate to an instance. (string
-# value)
-#image_ssh_user=root
-
-# Password used to authenticate to an instance. (string value)
-#image_ssh_password=password
-
-# User name used to authenticate to an instance using the
-# alternate image. (string value)
-#image_alt_ssh_user=root
-
-# Password used to authenticate to an instance using the
-# alternate image. (string value)
-#image_alt_ssh_password=password
-
-# Time in seconds between build status checks. (integer value)
-#build_interval=10
-
-# Timeout in seconds to wait for an instance to build.
-# (integer value)
-#build_timeout=300
-
-# Does the test environment support snapshots? (boolean value)
-#run_ssh=false
-
-# User name used to authenticate to an instance. (string
-# value)
-#ssh_user=root
-
-# Timeout in seconds to wait for ping to succeed. (integer
-# value)
-#ping_timeout=60
-
-# Timeout in seconds to wait for authentication to succeed.
-# (integer value)
-#ssh_timeout=300
-
-# Additional wait time for clean state, when there is no OS-
-# EXT-STS extension available (integer value)
-#ready_wait=0
-
-# Timeout in seconds to wait for output from ssh channel.
-# (integer value)
-#ssh_channel_timeout=60
-
-# Visible fixed network name  (string value)
-#fixed_network_name=private
-
-# Network used for SSH connections. (string value)
-#network_for_ssh=public
-
-# IP version used for SSH connections. (integer value)
-#ip_version_for_ssh=4
-
-# Dose the SSH uses Floating IP? (boolean value)
-#use_floatingip_for_ssh=true
-
-# Catalog type of the Compute service. (string value)
-#catalog_type=compute
-
-# The compute region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
-
-# Catalog type of the Compute v3 service. (string value)
-#catalog_v3_type=computev3
-
-# Path to a private key file for SSH access to remote hosts
-# (string value)
-#path_to_private_key=<None>
-
-# Expected device name when a volume is attached to an
-# instance (string value)
-#volume_device_name=vdb
-
-# Time in seconds before a shelved instance is eligible for
-# removing from a host.  -1 never offload, 0 offload when
-# shelved. This time should be the same as the time of
-# nova.conf, and some tests will run for as long as the time.
-# (integer value)
-#shelved_offload_time=0
-
-
-[network]
-
-#
-# Options defined in tempest.config
-#
-
-# Catalog type of the Neutron service. (string value)
-#catalog_type=network
-
-# The network region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
-
-# The cidr block to allocate tenant networks from (string
-# value)
-#tenant_network_cidr=10.100.0.0/16
-
-# The mask bits for tenant networks (integer value)
-#tenant_network_mask_bits=28
-
-# Whether tenant network connectivity should be evaluated
-# directly (boolean value)
-#tenant_networks_reachable=false
-
-# Id of the public network that provides external connectivity
-# (string value)
-#public_network_id=
-
-# Id of the public router that provides external connectivity
-# (string value)
-#public_router_id=
-
-
-[boto]
-
-#
-# Options defined in tempest.config
-#
-
-# EC2 URL (string value)
-#ec2_url=http://localhost:8773/services/Cloud
-
-# S3 URL (string value)
-#s3_url=http://localhost:8080
-
-# AWS Secret Key (string value)
-#aws_secret=<None>
-
-# AWS Access Key (string value)
-#aws_access=<None>
-
-# S3 Materials Path (string value)
-#s3_materials_path=/opt/stack/devstack/files/images/s3-materials/cirros-0.3.0
-
-# ARI Ramdisk Image manifest (string value)
-#ari_manifest=cirros-0.3.0-x86_64-initrd.manifest.xml
-
-# AMI Machine Image manifest (string value)
-#ami_manifest=cirros-0.3.0-x86_64-blank.img.manifest.xml
-
-# AKI Kernel Image manifest (string value)
-#aki_manifest=cirros-0.3.0-x86_64-vmlinuz.manifest.xml
-
-# Instance type (string value)
-#instance_type=m1.tiny
-
-# boto Http socket timeout (integer value)
-#http_socket_timeout=3
-
-# boto num_retries on error (integer value)
-#num_retries=1
-
-# Status Change Timeout (integer value)
-#build_timeout=60
-
-# Status Change Test Interval (integer value)
-#build_interval=1
-
-
-[scenario]
-
-#
-# Options defined in tempest.config
-#
-
-# Directory containing image files (string value)
-#img_dir=/opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
-
-# AMI image file name (string value)
-#ami_img_file=cirros-0.3.1-x86_64-blank.img
-
-# ARI image file name (string value)
-#ari_img_file=cirros-0.3.1-x86_64-initrd
-
-# AKI image file name (string value)
-#aki_img_file=cirros-0.3.1-x86_64-vmlinuz
-
-# ssh username for the image file (string value)
-#ssh_user=cirros
-
-# specifies how many resources to request at once. Used for
-# large operations testing. (integer value)
-#large_ops_number=0
-
-
-[image]
-
-#
-# Options defined in tempest.config
-#
-
-# Catalog type of the Image service. (string value)
-#catalog_type=image
-
-# The image region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
-
-# http accessible image (string value)
-#http_image=http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
-
-
-[compute-admin]
-
-#
-# Options defined in tempest.config
-#
-
-# Administrative Username to use for Nova API requests.
-# (string value)
-#username=admin
-
-# Administrative Tenant name to use for Nova API requests.
-# (string value)
-#tenant_name=admin
-
-# API key to use when authenticating as admin. (string value)
-#password=pass
-
-
-[cli]
-
-#
-# Options defined in tempest.cli
-#
-
-# enable cli tests (boolean value)
-#enabled=true
-
-# directory where python client binaries are located (string
-# value)
-#cli_dir=/usr/local/bin
-
-# Number of seconds to wait on a CLI timeout (integer value)
-#timeout=15
+# Catalog type of the Telemetry service. (string value)
+#catalog_type=metering
 
 
 [volume]
@@ -524,218 +765,6 @@
 #disk_format=raw
 
 
-[debug]
-
-#
-# Options defined in tempest.config
-#
-
-# Enable diagnostic commands (boolean value)
-#enable=true
-
-
-[dashboard]
-
-#
-# Options defined in tempest.config
-#
-
-# Where the dashboard can be found (string value)
-#dashboard_url=http://localhost/
-
-# Login page for the dashboard (string value)
-#login_url=http://localhost/auth/login/
-
-
-[orchestration]
-
-#
-# Options defined in tempest.config
-#
-
-# Catalog type of the Orchestration service. (string value)
-#catalog_type=orchestration
-
-# The orchestration region name to use. If empty, the value of
-# identity.region is used instead. If no such region is found
-# in the service catalog, the first found one is used. (string
-# value)
-#region=
-
-# Allows test cases to create/destroy tenants and users. This
-# option enables isolated test cases and better parallel
-# execution, but also requires that OpenStack Identity API
-# admin credentials are known. (boolean value)
-#allow_tenant_isolation=false
-
-# Time in seconds between build status checks. (integer value)
-#build_interval=1
-
-# Timeout in seconds to wait for a stack to build. (integer
-# value)
-#build_timeout=300
-
-# Instance type for tests. Needs to be big enough for a full
-# OS plus the test workload (string value)
-#instance_type=m1.micro
-
-# Name of heat-cfntools enabled image to use when launching
-# test instances. (string value)
-#image_ref=<None>
-
-# Name of existing keypair to launch servers with. (string
-# value)
-#keypair_name=<None>
-
-# Value must match heat configuration of the same name.
-# (integer value)
-#max_template_size=524288
-
-
-[object-storage]
-
-#
-# Options defined in tempest.config
-#
-
-# Catalog type of the Object-Storage service. (string value)
-#catalog_type=object-store
-
-# The object-storage region name to use. If empty, the value
-# of identity.region is used instead. If no such region is
-# found in the service catalog, the first found one is used.
-# (string value)
-#region=
-
-# Number of seconds to time on waiting for a containerto
-# container synchronization complete. (integer value)
-#container_sync_timeout=120
-
-# Number of seconds to wait while looping to check thestatus
-# of a container to container synchronization (integer value)
-#container_sync_interval=5
-
-# Role to add to users created for swift tests to enable
-# creating containers (string value)
-#operator_role=Member
-
-
-[network-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
-
-
-[service_available]
-
-#
-# Options defined in tempest.config
-#
-
-# Whether or not cinder is expected to be available (boolean
-# value)
-#cinder=true
-
-# Whether or not neutron is expected to be available (boolean
-# value)
-#neutron=false
-
-# Whether or not glance is expected to be available (boolean
-# value)
-#glance=true
-
-# Whether or not swift is expected to be available (boolean
-# value)
-#swift=true
-
-# Whether or not nova is expected to be available (boolean
-# value)
-#nova=true
-
-# Whether or not Heat is expected to be available (boolean
-# value)
-#heat=false
-
-# Whether or not Ceilometer is expected to be available
-# (boolean value)
-#ceilometer=true
-
-# Whether or not Horizon is expected to be available (boolean
-# value)
-#horizon=true
-
-
-[compute-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# If false, skip all nova v3 tests. (boolean value)
-#api_v3=true
-
-# If false, skip disk config tests (boolean value)
-#disk_config=true
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
-
-# A list of enabled v3 extensions with a special entry all
-# which indicates every extension is enabled (list value)
-#api_v3_extensions=all
-
-# Does the test environment support changing the admin
-# password? (boolean value)
-#change_password=false
-
-# Does the test environment support snapshots? (boolean value)
-#create_image=false
-
-# Does the test environment support resizing? (boolean value)
-#resize=false
-
-# Does the test environment support live migration available?
-# (boolean value)
-#live_migration=false
-
-# Does the test environment use block devices for live
-# migration (boolean value)
-#block_migration_for_live_migration=false
-
-# Does the test environment block migration support cinder
-# iSCSI volumes (boolean value)
-#block_migrate_cinder_iscsi=false
-
-
-[object-storage-feature-enabled]
-
-#
-# Options defined in tempest.config
-#
-
-# Set to True if the Container Quota middleware is enabled
-# (boolean value)
-#container_quotas=true
-
-# Set to True if the Account Quota middleware is enabled
-# (boolean value)
-#accounts_quotas=true
-
-# Set to True if the Crossdomain middleware is enabled
-# (boolean value)
-#crossdomain=true
-
-# Set to True if the TempURL middleware is enabled (boolean
-# value)
-#tempurl=true
-
-
 [volume-feature-enabled]
 
 #
@@ -746,8 +775,7 @@
 # (boolean value)
 #multi_backend=false
 
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
+# Is the v1 volume API enabled (boolean value)
+#api_v1=true
 
 

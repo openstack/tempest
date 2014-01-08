@@ -13,13 +13,20 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.test import attr
+from tempest import test
 
 
 class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
-    @attr(type='smoke')
+    @classmethod
+    def setUpClass(cls):
+        super(ServiceTypeManagementTestJSON, cls).setUpClass()
+        if not test.is_extension_enabled('service-type', 'network'):
+            msg = "Neutron Service Type Management not enabled."
+            raise cls.skipException(msg)
+
+    @test.attr(type='smoke')
     def test_service_provider_list(self):
         resp, body = self.client.list_service_providers()
         self.assertEqual(resp['status'], '200')

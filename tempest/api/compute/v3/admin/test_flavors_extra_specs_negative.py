@@ -22,7 +22,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class FlavorsExtraSpecsNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Negative Tests Flavor Extra Spec API extension.
@@ -33,12 +33,9 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsExtraSpecsNegativeTestJSON, cls).setUpClass()
-        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
-            msg = "FlavorExtraData extension not enabled."
-            raise cls.skipException(msg)
+        super(FlavorsExtraSpecsNegativeV3TestJSON, cls).setUpClass()
 
-        cls.client = cls.os_adm.flavors_client
+        cls.client = cls.flavors_admin_client
         flavor_name = data_utils.rand_name('test_flavor')
         ram = 512
         vcpus = 1
@@ -59,7 +56,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
     def tearDownClass(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsNegativeTestJSON, cls).tearDownClass()
+        super(FlavorsExtraSpecsNegativeV3TestJSON, cls).tearDownClass()
 
     @test.attr(type=['negative', 'gate'])
     def test_flavor_non_admin_set_keys(self):
@@ -76,7 +73,7 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
         specs = {"key1": "value1", "key2": "value2"}
         resp, body = self.client.set_flavor_extra_spec(
             self.flavor['id'], specs)
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(resp.status, 201)
         self.assertEqual(body['key1'], 'value1')
         self.assertRaises(exceptions.Unauthorized,
                           self.flavors_client.
@@ -131,5 +128,5 @@ class FlavorsExtraSpecsNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           key2="value")
 
 
-class FlavorsExtraSpecsNegativeTestXML(FlavorsExtraSpecsNegativeTestJSON):
+class FlavorsExtraSpecsNegativeV3TestXML(FlavorsExtraSpecsNegativeV3TestJSON):
     _interface = 'xml'

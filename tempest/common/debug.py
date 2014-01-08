@@ -19,13 +19,14 @@ from tempest import config
 
 from tempest.openstack.common import log as logging
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 tables = ['filter', 'nat', 'mangle']
 
 
 def log_ip_ns():
-    if not config.TempestConfig().debug.enable:
+    if not CONF.debug.enable:
         return
     LOG.info("Host Addr:\n" + commands.ip_addr_raw())
     LOG.info("Host Route:\n" + commands.ip_route_raw())

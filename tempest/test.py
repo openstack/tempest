@@ -33,6 +33,8 @@ from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 
+CONF = config.CONF
+
 # All the successful HTTP status codes from RFC 2616
 HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
 
@@ -110,15 +112,24 @@ def skip_because(*args, **kwargs):
 
     @param bug: bug number causing the test to skip
     @param condition: optional condition to be True for the skip to have place
+    @param interface: skip the test if it is the same as self._interface
     """
     def decorator(f):
         @functools.wraps(f)
-        def wrapper(*func_args, **func_kwargs):
-            if "bug" in kwargs:
-                if "condition" not in kwargs or kwargs["condition"] is True:
-                    msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
-                    raise testtools.TestCase.skipException(msg)
-            return f(*func_args, **func_kwargs)
+        def wrapper(self, *func_args, **func_kwargs):
+            skip = False
+            if "condition" in kwargs:
+                if kwargs["condition"] is True:
+                    skip = True
+            elif "interface" in kwargs:
+                if kwargs["interface"] == self._interface:
+                    skip = True
+            else:
+                skip = True
+            if "bug" in kwargs and skip is True:
+                msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
+                raise testtools.TestCase.skipException(msg)
+            return f(self, *func_args, **func_kwargs)
         return wrapper
     return decorator
 
@@ -146,7 +157,7 @@ def is_extension_enabled(extension_name, service):
     """A function that will check the list of enabled extensions from config
 
     """
-    configs = config.TempestConfig()
+    configs = CONF
     config_dict = {
         'compute': configs.compute_feature_enabled.api_extensions,
         'compute_v3': configs.compute_feature_enabled.api_v3_extensions,
@@ -214,7 +225,7 @@ class BaseTestCase(testtools.TestCase,
                    testtools.testcase.WithAttributes,
                    testresources.ResourcedTestCase):
 
-    config = config.TempestConfig()
+    config = CONF
 
     setUpClassCalled = False
 

@@ -17,7 +17,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -41,18 +41,18 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         hostname = hosts[0]['host_name']
         return hostname
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_hosts_with_non_admin_user(self):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.list_hosts)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_show_host_detail_with_nonexistent_hostname(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
         self.assertRaises(exceptions.NotFound,
                           self.client.show_host_detail, nonexitent_hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_show_host_detail_with_non_admin_user(self):
         hostname = self._get_host_name()
 
@@ -60,7 +60,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.non_admin_client.show_host_detail,
                           hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
@@ -68,7 +68,8 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.non_admin_client.update_host,
                           hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.skip_because(bug="1261964", interface="xml")
+    @test.attr(type=['negative', 'gate'])
     def test_update_host_with_extra_param(self):
         # only 'status' and 'maintenance_mode' are the valid params.
         hostname = self._get_host_name()
@@ -80,7 +81,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           maintenance_mode='enable',
                           param='XXX')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_host_with_invalid_status(self):
         # 'status' can only be 'enable' or 'disable'
         hostname = self._get_host_name()
@@ -91,7 +92,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           status='invalid',
                           maintenance_mode='enable')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_host_with_invalid_maintenance_mode(self):
         # 'maintenance_mode' can only be 'enable' or 'disable'
         hostname = self._get_host_name()
@@ -102,7 +103,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           status='enable',
                           maintenance_mode='invalid')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_host_without_param(self):
         # 'status' or 'maintenance_mode' needed for host update
         hostname = self._get_host_name()
@@ -111,7 +112,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.update_host,
                           hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
@@ -121,7 +122,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           status='enable',
                           maintenance_mode='enable')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_startup_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
@@ -129,7 +130,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.startup_host,
                           nonexitent_hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_startup_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
@@ -137,7 +138,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.non_admin_client.startup_host,
                           hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_shutdown_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
@@ -145,7 +146,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.shutdown_host,
                           nonexitent_hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_shutdown_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 
@@ -153,7 +154,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.non_admin_client.shutdown_host,
                           hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_reboot_nonexistent_host(self):
         nonexitent_hostname = data_utils.rand_name('rand_hostname')
 
@@ -161,7 +162,7 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.reboot_host,
                           nonexitent_hostname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_reboot_host_with_non_admin_user(self):
         hostname = self._get_host_name()
 

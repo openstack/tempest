@@ -38,24 +38,27 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         return hypers
 
+    def assertHypervisors(self, hypers):
+        self.assertTrue(len(hypers) > 0, "No hypervisors found: %s" % hypers)
+
     @attr(type='gate')
     def test_get_hypervisor_list(self):
         # List of hypervisor and available hypervisors hostname
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
     @attr(type='gate')
     def test_get_hypervisor_list_details(self):
         # Display the details of the all hypervisor
         resp, hypers = self.client.get_hypervisor_list_details()
         self.assertEqual(200, resp.status)
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
     @attr(type='gate')
     def test_get_hypervisor_show_details(self):
         # Display the details of the specified hypervisor
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
         resp, details = (self.client.
                          get_hypervisor_show_details(hypers[0]['id']))
@@ -68,7 +71,7 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_hypervisor_show_servers(self):
         # Show instances about the specific hypervisors
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
         hostname = hypers[0]['hypervisor_hostname']
         resp, hypervisors = self.client.get_hypervisor_servers(hostname)
@@ -87,18 +90,29 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Verify that GET shows the specified hypervisor uptime
         hypers = self._list_hypervisors()
 
-        resp, uptime = self.client.get_hypervisor_uptime(hypers[0]['id'])
-        self.assertEqual(200, resp.status)
-        self.assertTrue(len(uptime) > 0)
+        has_valid_uptime = False
+        for hyper in hypers:
+            # because hypervisors might be disabled, this loops looking
+            # for any good hit.
+            try:
+                resp, uptime = self.client.get_hypervisor_uptime(hyper['id'])
+                if (resp.status == 200) and (len(uptime) > 0):
+                    has_valid_uptime = True
+                    break
+            except Exception:
+                pass
+        self.assertTrue(
+            has_valid_uptime,
+            "None of the hypervisors had a valid uptime: %s" % hypers)
 
     @attr(type='gate')
     def test_search_hypervisor(self):
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
         resp, hypers = self.client.search_hypervisor(
             hypers[0]['hypervisor_hostname'])
         self.assertEqual(200, resp.status)
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
 
 class HypervisorAdminTestXML(HypervisorAdminTestJSON):

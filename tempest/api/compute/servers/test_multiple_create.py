@@ -17,8 +17,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class MultipleCreateTestJSON(base.BaseV2ComputeTest):
@@ -38,7 +37,7 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
 
         return resp, body
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_multiple_create(self):
         resp, body = self._create_multiple_servers(wait_until='ACTIVE',
                                                    min_count=1,
@@ -49,39 +48,7 @@ class MultipleCreateTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('202', resp['status'])
         self.assertNotIn('reservation_id', body)
 
-    @attr(type=['negative', 'gate'])
-    def test_min_count_less_than_one(self):
-        invalid_min_count = 0
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
-                          min_count=invalid_min_count)
-
-    @attr(type=['negative', 'gate'])
-    def test_min_count_non_integer(self):
-        invalid_min_count = 2.5
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
-                          min_count=invalid_min_count)
-
-    @attr(type=['negative', 'gate'])
-    def test_max_count_less_than_one(self):
-        invalid_max_count = 0
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
-                          max_count=invalid_max_count)
-
-    @attr(type=['negative', 'gate'])
-    def test_max_count_non_integer(self):
-        invalid_max_count = 2.5
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
-                          max_count=invalid_max_count)
-
-    @attr(type=['negative', 'gate'])
-    def test_max_count_less_than_min_count(self):
-        min_count = 3
-        max_count = 2
-        self.assertRaises(exceptions.BadRequest, self._create_multiple_servers,
-                          min_count=min_count,
-                          max_count=max_count)
-
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_multiple_create_with_reservation_return(self):
         resp, body = self._create_multiple_servers(wait_until='ACTIVE',
                                                    min_count=1,

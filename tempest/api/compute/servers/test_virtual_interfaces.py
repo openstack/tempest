@@ -18,17 +18,14 @@
 import netaddr
 
 from tempest.api.compute import base
-from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
-    CONF = config.TempestConfig()
+    CONF = config.CONF
 
     @classmethod
     def setUpClass(cls):
@@ -37,9 +34,9 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @skip_because(bug="1183436",
-                  condition=CONF.service_available.neutron)
-    @attr(type='gate')
+    @test.skip_because(bug="1183436",
+                       condition=CONF.service_available.neutron)
+    @test.attr(type='gate')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
@@ -53,15 +50,6 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
             mac_address = virt_iface['mac_address']
             self.assertTrue(netaddr.valid_mac(mac_address),
                             "Invalid mac address detected.")
-
-    @attr(type=['negative', 'gate'])
-    def test_list_virtual_interfaces_invalid_server_id(self):
-        # Negative test: Should not be able to GET virtual interfaces
-        # for an invalid server_id
-        invalid_server_id = data_utils.rand_name('!@#$%^&*()')
-        self.assertRaises(exceptions.NotFound,
-                          self.client.list_virtual_interfaces,
-                          invalid_server_id)
 
 
 class VirtualInterfacesTestXML(VirtualInterfacesTestJSON):

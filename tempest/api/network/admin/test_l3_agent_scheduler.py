@@ -16,7 +16,7 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class L3AgentSchedulerJSON(base.BaseAdminNetworkTest):
@@ -36,8 +36,11 @@ class L3AgentSchedulerJSON(base.BaseAdminNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(L3AgentSchedulerJSON, cls).setUpClass()
+        if not test.is_extension_enabled('l3_agent_scheduler', 'network'):
+            msg = "L3 Agent Scheduler Extension not enabled."
+            raise cls.skipException(msg)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_routers_on_l3_agent(self):
         resp, body = self.admin_client.list_agents()
         agents = body['agents']
@@ -48,7 +51,7 @@ class L3AgentSchedulerJSON(base.BaseAdminNetworkTest):
             agent['id'])
         self.assertEqual('200', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_l3_agents_hosting_router(self):
         name = data_utils.rand_name('router-')
         resp, router = self.client.create_router(name)

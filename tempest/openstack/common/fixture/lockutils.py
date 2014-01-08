@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2011 OpenStack Foundation.
 # All Rights Reserved.
 #
@@ -17,7 +15,7 @@
 
 import fixtures
 
-from tempest.openstack.common.lockutils import lock
+from tempest.openstack.common import lockutils
 
 
 class LockFixture(fixtures.Fixture):
@@ -45,7 +43,7 @@ class LockFixture(fixtures.Fixture):
     test method exits. (either by completing or raising an exception)
     """
     def __init__(self, name, lock_file_prefix=None):
-        self.mgr = lock(name, lock_file_prefix, True)
+        self.mgr = lockutils.lock(name, lock_file_prefix, True)
 
     def setUp(self):
         super(LockFixture, self).setUp()

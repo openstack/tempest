@@ -20,22 +20,23 @@ import base64
 import netaddr
 import testtools
 
-from tempest.api import compute
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
-import tempest.config
-from tempest.test import attr
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
-class ServersTestJSON(base.BaseV2ComputeTest):
+class ServersV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
-    run_ssh = tempest.config.TempestConfig().compute.run_ssh
+    run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
     @classmethod
     def setUpClass(cls):
-        super(ServersTestJSON, cls).setUpClass()
+        super(ServersV3TestJSON, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -46,36 +47,37 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
         cli_resp = cls.create_test_server(name=cls.name,
                                           meta=cls.meta,
-                                          accessIPv4=cls.accessIPv4,
-                                          accessIPv6=cls.accessIPv6,
+                                          access_ip_v4=cls.accessIPv4,
+                                          access_ip_v6=cls.accessIPv6,
                                           personality=personality,
                                           disk_config=cls.disk_config)
         cls.resp, cls.server_initial = cli_resp
-        cls.password = cls.server_initial['adminPass']
+        cls.password = cls.server_initial['admin_password']
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_server_response(self):
         # Check that the required fields are returned with values
         self.assertEqual(202, self.resp.status)
         self.assertTrue(self.server_initial['id'] is not None)
-        self.assertTrue(self.server_initial['adminPass'] is not None)
+        self.assertTrue(self.server_initial['admin_password'] is not None)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_verify_server_details(self):
         # Verify the specified server attributes are set correctly
-        self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
+        self.assertEqual(self.accessIPv4,
+                         self.server['os-access-ips:access_ip_v4'])
         # NOTE(maurosr): See http://tools.ietf.org/html/rfc5952 (section 4)
         # Here we compare directly with the canonicalized format.
-        self.assertEqual(self.server['accessIPv6'],
+        self.assertEqual(self.server['os-access-ips:access_ip_v6'],
                          str(netaddr.IPAddress(self.accessIPv6)))
         self.assertEqual(self.name, self.server['name'])
         self.assertEqual(self.image_ref, self.server['image']['id'])
         self.assertEqual(self.flavor_ref, self.server['flavor']['id'])
         self.assertEqual(self.meta, self.server['metadata'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_servers(self):
         # The created server should be in the list of all servers
         resp, body = self.client.list_servers()
@@ -83,7 +85,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         found = any([i for i in servers if i['id'] == self.server['id']])
         self.assertTrue(found)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_servers_with_detail(self):
         # The created server should be in the detailed list of all servers
         resp, body = self.client.list_servers_with_detail()
@@ -92,14 +94,14 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(found)
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_can_log_into_created_server(self):
         # Check that the user can authenticate with the generated password
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertTrue(linux_client.can_authenticate())
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
@@ -108,23 +110,23 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
         linux_client = RemoteClient(self.server, self.ssh_user, self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
 
-class ServersTestManualDisk(ServersTestJSON):
+class ServersV3TestManualDisk(ServersV3TestJSON):
     disk_config = 'MANUAL'
 
     @classmethod
     def setUpClass(cls):
-        if not compute.DISK_CONFIG_ENABLED:
+        if not CONF.compute_feature_enabled.disk_config:
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
-        super(ServersTestManualDisk, cls).setUpClass()
+        super(ServersV3TestManualDisk, cls).setUpClass()
 
 
-class ServersTestXML(ServersTestJSON):
+class ServersV3TestXML(ServersV3TestJSON):
     _interface = 'xml'

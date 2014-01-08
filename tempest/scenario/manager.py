@@ -24,16 +24,17 @@ import subprocess
 import cinderclient.client
 import glanceclient
 import heatclient.client
+import keystoneclient.apiclient.exceptions
 import keystoneclient.v2_0.client
 import netaddr
 from neutronclient.common import exceptions as exc
 import neutronclient.v2_0.client
 import novaclient.client
 from novaclient import exceptions as nova_exceptions
+import swiftclient
 
 from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
-from tempest.common import ssh
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import exceptions
@@ -75,6 +76,10 @@ class OfficialClientManager(tempest.manager.Manager):
         self.volume_client = self._get_volume_client(username,
                                                      password,
                                                      tenant_name)
+        self.object_storage_client = self._get_object_storage_client(
+            username,
+            password,
+            tenant_name)
         self.orchestration_client = self._get_orchestration_client(
             username,
             password,
@@ -122,6 +127,30 @@ class OfficialClientManager(tempest.manager.Manager):
                                           auth_url,
                                           region_name=region,
                                           http_log_debug=True)
+
+    def _get_object_storage_client(self, username, password, tenant_name):
+        auth_url = self.config.identity.uri
+        # add current tenant to Member group.
+        keystone_admin = self._get_identity_client(
+            self.config.identity.admin_username,
+            self.config.identity.admin_password,
+            self.config.identity.admin_tenant_name)
+
+        # enable test user to operate swift by adding Member role to him.
+        roles = keystone_admin.roles.list()
+        member_role = [role for role in roles if role.name == 'Member'][0]
+        # NOTE(maurosr): This is surrounded in the try-except block cause
+        # neutron tests doesn't have tenant isolation.
+        try:
+            keystone_admin.roles.add_user_role(self.identity_client.user_id,
+                                               member_role.id,
+                                               self.identity_client.tenant_id)
+        except keystoneclient.apiclient.exceptions.Conflict:
+            pass
+
+        return swiftclient.Connection(auth_url, username, password,
+                                      tenant_name=tenant_name,
+                                      auth_version='2')
 
     def _get_orchestration_client(self, username=None, password=None,
                                   tenant_name=None):
@@ -208,7 +237,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             __name__, tempest_client=False)
 
-        username, tenant_name, password = cls.credentials()
+        username, password, tenant_name = cls.credentials()
 
         cls.manager = OfficialClientManager(username, password, tenant_name)
         cls.compute_client = cls.manager.compute_client
@@ -216,19 +245,33 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.identity_client = cls.manager.identity_client
         cls.network_client = cls.manager.network_client
         cls.volume_client = cls.manager.volume_client
+        cls.object_storage_client = cls.manager.object_storage_client
         cls.orchestration_client = cls.manager.orchestration_client
         cls.resource_keys = {}
         cls.os_resources = []
 
     @classmethod
-    def credentials(cls):
+    def _get_credentials(cls, get_creds, prefix):
         if cls.config.compute.allow_tenant_isolation:
-            return cls.isolated_creds.get_primary_creds()
+            username, tenant_name, password = get_creds()
+        else:
+            username = getattr(cls.config.identity, prefix + 'username')
+            password = getattr(cls.config.identity, prefix + 'password')
+            tenant_name = getattr(cls.config.identity, prefix + 'tenant_name')
+        return username, password, tenant_name
 
-        username = cls.config.identity.username
-        password = cls.config.identity.password
-        tenant_name = cls.config.identity.tenant_name
-        return username, tenant_name, password
+    @classmethod
+    def credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_primary_creds, '')
+
+    @classmethod
+    def alt_credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_alt_creds, 'alt_')
+
+    @classmethod
+    def admin_credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_admin_creds,
+                                    'admin_')
 
     @classmethod
     def tearDownClass(cls):
@@ -248,7 +291,9 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                 thing.delete()
             except Exception as e:
                 # If the resource is already missing, mission accomplished.
-                if e.__class__.__name__ == 'NotFound':
+                # add status code as workaround for bug 1247568
+                if (e.__class__.__name__ == 'NotFound' or
+                    hasattr(e, 'status_code') and e.status_code == 404):
                     continue
                 raise
 
@@ -343,9 +388,13 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                     raise
 
             new_status = thing.status
-            if new_status == error_status:
-                message = "%s failed to get to expected status. \
-                          In %s state." % (thing, new_status)
+
+            # Some components are reporting error status in lower case
+            # so case sensitive comparisons can really mess things
+            # up.
+            if new_status.lower() == error_status.lower():
+                message = ("%s failed to get to expected status. "
+                           "In %s state.") % (thing, new_status)
                 raise exceptions.BuildErrorException(message)
             elif new_status == expected_status and expected_status is not None:
                 return True  # All good.
@@ -356,8 +405,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             check_status,
             self.config.compute.build_timeout,
             self.config.compute.build_interval):
-            message = "Timed out waiting for thing %s \
-                      to become %s" % (thing_id, log_status)
+            message = ("Timed out waiting for thing %s "
+                       "to become %s") % (thing_id, log_status)
             raise exceptions.TimeoutException(message)
 
     def _create_loginable_secgroup_rule_nova(self, client=None,
@@ -537,6 +586,27 @@ class NetworkScenarioTest(OfficialClientTest):
         routers = self.network_client.list_routers()
         return routers['routers']
 
+    def _list_ports(self):
+        ports = self.network_client.list_ports()
+        return ports['ports']
+
+    def _get_tenant_own_network_num(self, tenant_id):
+        nets = self._list_networks()
+        ownnets = [value for value in nets if tenant_id == value['tenant_id']]
+        return len(ownnets)
+
+    def _get_tenant_own_subnet_num(self, tenant_id):
+        subnets = self._list_subnets()
+        ownsubnets = ([value for value in subnets
+                      if tenant_id == value['tenant_id']])
+        return len(ownsubnets)
+
+    def _get_tenant_own_port_num(self, tenant_id):
+        ports = self._list_ports()
+        ownports = ([value for value in ports
+                    if tenant_id == value['tenant_id']])
+        return len(ownports)
+
     def _create_subnet(self, network, namestart='subnet-smoke-'):
         """
         Create a subnet for the given network within the cidr block
@@ -583,12 +653,15 @@ class NetworkScenarioTest(OfficialClientTest):
         self.set_resource(name, port)
         return port
 
-    def _create_floating_ip(self, server, external_network_id):
+    def _get_server_port_id(self, server):
         result = self.network_client.list_ports(device_id=server.id)
         ports = result.get('ports', [])
         self.assertEqual(len(ports), 1,
                          "Unable to determine which port to target.")
-        port_id = ports[0]['id']
+        return ports[0]['id']
+
+    def _create_floating_ip(self, server, external_network_id):
+        port_id = self._get_server_port_id(server)
         body = dict(
             floatingip=dict(
                 floating_network_id=external_network_id,
@@ -603,7 +676,21 @@ class NetworkScenarioTest(OfficialClientTest):
         self.set_resource(data_utils.rand_name('floatingip-'), floating_ip)
         return floating_ip
 
-    def _ping_ip_address(self, ip_address):
+    def _associate_floating_ip(self, floating_ip, server):
+        port_id = self._get_server_port_id(server)
+        floating_ip.update(port_id=port_id)
+        self.assertEqual(port_id, floating_ip.port_id)
+        return floating_ip
+
+    def _disassociate_floating_ip(self, floating_ip):
+        """
+        :param floating_ip: type DeletableFloatingIp
+        """
+        floating_ip.update(port_id=None)
+        self.assertEqual(None, floating_ip.port_id)
+        return floating_ip
+
+    def _ping_ip_address(self, ip_address, should_succeed=True):
         cmd = ['ping', '-c1', '-w1', ip_address]
 
         def ping():
@@ -611,30 +698,38 @@ class NetworkScenarioTest(OfficialClientTest):
                                     stdout=subprocess.PIPE,
                                     stderr=subprocess.PIPE)
             proc.wait()
-            if proc.returncode == 0:
-                return True
+            return (proc.returncode == 0) == should_succeed
 
         return tempest.test.call_until_true(
             ping, self.config.compute.ping_timeout, 1)
 
-    def _is_reachable_via_ssh(self, ip_address, username, private_key,
-                              timeout):
-        ssh_client = ssh.Client(ip_address, username,
-                                pkey=private_key,
-                                timeout=timeout)
-        return ssh_client.test_connection_auth()
+    def _check_vm_connectivity(self, ip_address,
+                               username=None,
+                               private_key=None,
+                               should_connect=True):
+        """
+        :param ip_address: server to test against
+        :param username: server's ssh username
+        :param private_key: server's ssh private key to be used
+        :param should_connect: True/False indicates positive/negative test
+            positive - attempt ping and ssh
+            negative - attempt ping and fail if succeed
 
-    def _check_vm_connectivity(self, ip_address, username, private_key):
-        self.assertTrue(self._ping_ip_address(ip_address),
-                        "Timed out waiting for %s to become "
-                        "reachable" % ip_address)
-        self.assertTrue(self._is_reachable_via_ssh(
-            ip_address,
-            username,
-            private_key,
-            timeout=self.config.compute.ssh_timeout),
-            'Auth failure in connecting to %s@%s via ssh' %
-            (username, ip_address))
+        :raises: AssertError if the result of the connectivity check does
+            not match the value of the should_connect param
+        """
+        if should_connect:
+            msg = "Timed out waiting for %s to become reachable" % ip_address
+        else:
+            msg = "ip address %s is reachable" % ip_address
+        self.assertTrue(self._ping_ip_address(ip_address,
+                                              should_succeed=should_connect),
+                        msg=msg)
+        if should_connect:
+            # no need to check ssh for negative connectivity
+            linux_client = self.get_remote_client(ip_address, username,
+                                                  private_key)
+            linux_client.validate_authentication()
 
     def _create_security_group_nova(self, client=None,
                                     namestart='secgroup-smoke-',
@@ -801,6 +896,78 @@ class NetworkScenarioTest(OfficialClientTest):
 
         return rules
 
+    def _ssh_to_server(self, server, private_key):
+        ssh_login = self.config.compute.image_ssh_user
+        return self.get_remote_client(server,
+                                      username=ssh_login,
+                                      private_key=private_key)
+
+    def _show_quota_network(self, tenant_id):
+        quota = self.network_client.show_quota(tenant_id)
+        return quota['quota']['network']
+
+    def _show_quota_subnet(self, tenant_id):
+        quota = self.network_client.show_quota(tenant_id)
+        return quota['quota']['subnet']
+
+    def _show_quota_port(self, tenant_id):
+        quota = self.network_client.show_quota(tenant_id)
+        return quota['quota']['port']
+
+    def _get_router(self, tenant_id):
+        """Retrieve a router for the given tenant id.
+
+        If a public router has been configured, it will be returned.
+
+        If a public router has not been configured, but a public
+        network has, a tenant router will be created and returned that
+        routes traffic to the public network.
+        """
+        router_id = self.config.network.public_router_id
+        network_id = self.config.network.public_network_id
+        if router_id:
+            result = self.network_client.show_router(router_id)
+            return net_common.AttributeDict(**result['router'])
+        elif network_id:
+            router = self._create_router(tenant_id)
+            router.add_gateway(network_id)
+            return router
+        else:
+            raise Exception("Neither of 'public_router_id' or "
+                            "'public_network_id' has been defined.")
+
+    def _create_router(self, tenant_id, namestart='router-smoke-'):
+        name = data_utils.rand_name(namestart)
+        body = dict(
+            router=dict(
+                name=name,
+                admin_state_up=True,
+                tenant_id=tenant_id,
+            ),
+        )
+        result = self.network_client.create_router(body=body)
+        router = net_common.DeletableRouter(client=self.network_client,
+                                            **result['router'])
+        self.assertEqual(router.name, name)
+        self.set_resource(name, router)
+        return router
+
+    def _create_networks(self, tenant_id=None):
+        """Create a network with a subnet connected to a router.
+
+        :returns: network, subnet, router
+        """
+        if tenant_id is None:
+            tenant_id = self.tenant_id
+        network = self._create_network(tenant_id)
+        router = self._get_router(tenant_id)
+        subnet = self._create_subnet(network)
+        subnet.add_to_router(router.id)
+        self.networks.append(network)
+        self.subnets.append(subnet)
+        self.routers.append(router)
+        return network, subnet, router
+
 
 class OrchestrationScenarioTest(OfficialClientTest):
     """
@@ -818,7 +985,7 @@ class OrchestrationScenarioTest(OfficialClientTest):
         username = cls.config.identity.admin_username
         password = cls.config.identity.admin_password
         tenant_name = cls.config.identity.tenant_name
-        return username, tenant_name, password
+        return username, password, tenant_name
 
     def _load_template(self, base_file, file_name):
         filepath = os.path.join(os.path.dirname(os.path.realpath(base_file)),

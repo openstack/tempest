@@ -66,15 +66,19 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.health_monitors = []
         cls.vpnservices = []
         cls.ikepolicies = []
+        cls.floating_ips = []
 
     @classmethod
     def tearDownClass(cls):
         # Clean up ike policies
         for ikepolicy in cls.ikepolicies:
-            cls.client.delete_ike_policy(ikepolicy['id'])
+            cls.client.delete_ikepolicy(ikepolicy['id'])
         # Clean up vpn services
         for vpnservice in cls.vpnservices:
-            cls.client.delete_vpn_service(vpnservice['id'])
+            cls.client.delete_vpnservice(vpnservice['id'])
+        # Clean up floating IPs
+        for floating_ip in cls.floating_ips:
+            cls.client.delete_floating_ip(floating_ip['id'])
         # Clean up routers
         for router in cls.routers:
             resp, body = cls.client.list_router_interfaces(router['id'])
@@ -167,12 +171,32 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return router
 
     @classmethod
+    def create_floating_ip(cls, external_network_id, **kwargs):
+        """Wrapper utility that returns a test floating IP."""
+        resp, body = cls.client.create_floating_ip(
+            external_network_id,
+            **kwargs)
+        fip = body['floatingip']
+        cls.floating_ips.append(fip)
+        return fip
+
+    @classmethod
     def create_pool(cls, name, lb_method, protocol, subnet):
         """Wrapper utility that returns a test pool."""
-        resp, body = cls.client.create_pool(name, lb_method, protocol,
-                                            subnet['id'])
+        resp, body = cls.client.create_pool(
+            name=name,
+            lb_method=lb_method,
+            protocol=protocol,
+            subnet_id=subnet['id'])
         pool = body['pool']
         cls.pools.append(pool)
+        return pool
+
+    @classmethod
+    def update_pool(cls, name):
+        """Wrapper utility that returns a test pool."""
+        resp, body = cls.client.update_pool(name=name)
+        pool = body['pool']
         return pool
 
     @classmethod
@@ -213,7 +237,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_vpnservice(cls, subnet_id, router_id):
         """Wrapper utility that returns a test vpn service."""
-        resp, body = cls.client.create_vpn_service(
+        resp, body = cls.client.create_vpnservice(
             subnet_id, router_id, admin_state_up=True,
             name=data_utils.rand_name("vpnservice-"))
         vpnservice = body['vpnservice']
@@ -221,9 +245,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return vpnservice
 
     @classmethod
-    def create_ike_policy(cls, name):
+    def create_ikepolicy(cls, name):
         """Wrapper utility that returns a test ike policy."""
-        resp, body = cls.client.create_ike_policy(name)
+        resp, body = cls.client.create_ikepolicy(name)
         ikepolicy = body['ikepolicy']
         cls.ikepolicies.append(ikepolicy)
         return ikepolicy

@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
@@ -117,21 +115,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.clear_stacks()
         cls.clear_keypairs()
         super(BaseOrchestrationTest, cls).tearDownClass()
-
-    def wait_for(self, condition):
-        """Repeatedly calls condition() until a timeout."""
-        start_time = int(time.time())
-        while True:
-            try:
-                condition()
-            except Exception:
-                pass
-            else:
-                return
-            if int(time.time()) - start_time >= self.build_timeout:
-                condition()
-                return
-            time.sleep(self.build_interval)
 
     @staticmethod
     def stack_output(stack, output_key):

@@ -154,10 +154,12 @@ class ServersClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
-    def wait_for_server_status(self, server_id, status, extra_timeout=0):
+    def wait_for_server_status(self, server_id, status, extra_timeout=0,
+                               raise_on_error=True):
         """Waits for a server to reach a given status."""
         return waiters.wait_for_server_status(self, server_id, status,
-                                              extra_timeout=extra_timeout)
+                                              extra_timeout=extra_timeout,
+                                              raise_on_error=raise_on_error)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination."""

@@ -64,12 +64,14 @@ class ServersV3ClientJSON(RestClient):
             'flavor_ref': flavor_ref
         }
 
-        for option in ['personality', 'admin_password', 'key_name',
-                       'security_groups', 'networks',
+        for option in ['personality', 'admin_password', 'key_name', 'networks',
+                       ('os-security-groups:security_groups',
+                        'security_groups'),
                        ('os-user-data:user_data', 'user_data'),
                        ('os-availability-zone:availability_zone',
                         'availability_zone'),
-                       'access_ip_v4', 'access_ip_v6',
+                       ('os-access-ips:access_ip_v4', 'access_ip_v4'),
+                       ('os-access-ips:access_ip_v6', 'access_ip_v6'),
                        ('os-multiple-create:min_count', 'min_count'),
                        ('os-multiple-create:max_count', 'max_count'),
                        ('metadata', 'meta'),
@@ -91,8 +93,8 @@ class ServersV3ClientJSON(RestClient):
         body = json.loads(body)
         # NOTE(maurosr): this deals with the case of multiple server create
         # with return reservation id set True
-        if 'reservation_id' in body:
-            return resp, body
+        if 'servers_reservation' in body:
+            return resp, body['servers_reservation']
         return resp, body['server']
 
     def update_server(self, server_id, name=None, meta=None, access_ip_v4=None,
@@ -115,10 +117,10 @@ class ServersV3ClientJSON(RestClient):
             post_body['name'] = name
 
         if access_ip_v4 is not None:
-            post_body['access_ip_v4'] = access_ip_v4
+            post_body['os-access-ips:access_ip_v4'] = access_ip_v4
 
         if access_ip_v6 is not None:
-            post_body['access_ip_v6'] = access_ip_v6
+            post_body['os-access-ips:access_ip_v6'] = access_ip_v6
 
         if disk_config is not None:
             post_body['os-disk-config:disk_config'] = disk_config
@@ -204,6 +206,13 @@ class ServersV3ClientJSON(RestClient):
         if response_key is not None:
             body = json.loads(body)[response_key]
         return resp, body
+
+    def create_backup(self, server_id, backup_type, rotation, name):
+        """Backup a server instance."""
+        return self.action(server_id, "create_backup", None,
+                           backup_type=backup_type,
+                           rotation=rotation,
+                           name=name)
 
     def change_password(self, server_id, admin_password):
         """Changes the root password for the server."""
@@ -356,6 +365,14 @@ class ServersV3ClientJSON(RestClient):
         """Resets the state of a server to active/error."""
         return self.action(server_id, 'reset_state', None, state=state)
 
+    def shelve_server(self, server_id, **kwargs):
+        """Shelves the provided server."""
+        return self.action(server_id, 'shelve', None, **kwargs)
+
+    def unshelve_server(self, server_id, **kwargs):
+        """Un-shelves the provided server."""
+        return self.action(server_id, 'unshelve', None, **kwargs)
+
     def get_console_output(self, server_id, length):
         return self.action(server_id, 'get_console_output', 'output',
                            length=length)
@@ -388,3 +405,11 @@ class ServersV3ClientJSON(RestClient):
                               (str(server_id), str(request_id)))
         body = json.loads(body)
         return resp, body['instance_action']
+
+    def force_delete_server(self, server_id, **kwargs):
+        """Force delete a server."""
+        return self.action(server_id, 'force_delete', None, **kwargs)
+
+    def restore_soft_deleted_server(self, server_id, **kwargs):
+        """Restore a soft-deleted server."""
+        return self.action(server_id, 'restore', None, **kwargs)

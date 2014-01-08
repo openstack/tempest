@@ -20,7 +20,7 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
+class FlavorsExtraSpecsV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests Flavor Extra Spec API extension.
@@ -32,12 +32,9 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsExtraSpecsTestJSON, cls).setUpClass()
-        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
-            msg = "FlavorExtraData extension not enabled."
-            raise cls.skipException(msg)
+        super(FlavorsExtraSpecsV3TestJSON, cls).setUpClass()
 
-        cls.client = cls.os_adm.flavors_client
+        cls.client = cls.flavors_admin_client
         flavor_name = data_utils.rand_name('test_flavor')
         ram = 512
         vcpus = 1
@@ -58,7 +55,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     def tearDownClass(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsTestJSON, cls).tearDownClass()
+        super(FlavorsExtraSpecsV3TestJSON, cls).tearDownClass()
 
     @test.attr(type='gate')
     def test_flavor_set_get_update_show_unset_keys(self):
@@ -69,7 +66,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         # SET extra specs to the flavor created in setUp
         set_resp, set_body = \
             self.client.set_flavor_extra_spec(self.flavor['id'], specs)
-        self.assertEqual(set_resp.status, 200)
+        self.assertEqual(set_resp.status, 201)
         self.assertEqual(set_body, specs)
         # GET extra specs and verify
         get_resp, get_body = \
@@ -95,10 +92,10 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         # UNSET extra specs that were set in this test
         unset_resp, _ = \
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key1")
-        self.assertEqual(unset_resp.status, 200)
+        self.assertEqual(unset_resp.status, 204)
         unset_resp, _ = \
             self.client.unset_flavor_extra_spec(self.flavor['id'], "key2")
-        self.assertEqual(unset_resp.status, 200)
+        self.assertEqual(unset_resp.status, 204)
 
     @test.attr(type='gate')
     def test_flavor_non_admin_get_all_keys(self):
@@ -117,7 +114,7 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         specs = {"key1": "value1", "key2": "value2"}
         resp, body = self.client.set_flavor_extra_spec(
             self.flavor['id'], specs)
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(resp.status, 201)
         self.assertEqual(body['key1'], 'value1')
         self.assertIn('key2', body)
         resp, body = self.flavors_client.get_flavor_extra_spec_with_key(
@@ -127,5 +124,5 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
         self.assertNotIn('key2', body)
 
 
-class FlavorsExtraSpecsTestXML(FlavorsExtraSpecsTestJSON):
+class FlavorsExtraSpecsV3TestXML(FlavorsExtraSpecsV3TestJSON):
     _interface = 'xml'
