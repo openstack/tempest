@@ -287,6 +287,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self.os.image_client.delete_image, image3_id)
         self.assertEqual(202, resp.status)
         # the first back up should be deleted
+        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         self.os.image_client.wait_for_resource_deletion(image1_id)
         oldest_backup_exist = False
         resp, image_list = self.os.image_client.image_list_detail(
