@@ -428,6 +428,17 @@
 #admin_password=pass
 
 
+[identity-feature-enabled]
+
+#
+# Options defined in tempest.config
+#
+
+# Does the identity service have delegation and impersonation
+# enabled (boolean value)
+#trust=true
+
+
 [image]
 
 #

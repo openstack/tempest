@@ -90,6 +90,16 @@ IdentityGroup = [
                secret=True),
 ]
 
+identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
+                                      title='Enabled Identity Features')
+
+IdentityFeatureGroup = [
+    cfg.BoolOpt('trust',
+                default=True,
+                help='Does the identity service have delegation and '
+                     'impersonation enabled')
+]
+
 compute_group = cfg.OptGroup(name='compute',
                              title='Compute Service Options')
 
@@ -690,6 +700,8 @@ class TempestConfigPrivate(object):
         register_opt_group(cfg.CONF, compute_features_group,
                            ComputeFeaturesGroup)
         register_opt_group(cfg.CONF, identity_group, IdentityGroup)
+        register_opt_group(cfg.CONF, identity_feature_group,
+                           IdentityFeatureGroup)
         register_opt_group(cfg.CONF, image_group, ImageGroup)
         register_opt_group(cfg.CONF, image_feature_group, ImageFeaturesGroup)
         register_opt_group(cfg.CONF, network_group, NetworkGroup)
@@ -716,6 +728,7 @@ class TempestConfigPrivate(object):
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity
+        self.identity_feature_enabled = cfg.CONF['identity-feature-enabled']
         self.images = cfg.CONF.image
         self.image_feature_enabled = cfg.CONF['image-feature-enabled']
         self.network = cfg.CONF.network
