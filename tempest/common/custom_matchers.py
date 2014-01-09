@@ -125,7 +125,7 @@ class AreAllWellFormatted(object):
             elif key == 'content-type' and not value:
                 return InvalidFormat(key, value)
             elif key == 'x-trans-id' and \
-                not re.match("^tx[0-9a-f]*-[0-9a-f]*$", value):
+                not re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*", value):
                 return InvalidFormat(key, value)
             elif key == 'date' and not value:
                 return InvalidFormat(key, value)
