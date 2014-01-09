@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from testtools.matchers import ContainsAll
+
 from tempest.api.volume import base
 from tempest import test
 
@@ -49,7 +51,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(metadata, body)
+        self.assertThat(body.items(), ContainsAll(metadata.items()))
         # Delete one item metadata of the volume
         rsp, body = self.volumes_client.delete_volume_metadata_item(
             self.volume_id,
@@ -76,7 +78,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(metadata, body)
+        self.assertThat(body.items(), ContainsAll(metadata.items()))
         # Update metadata
         resp, body = self.volumes_client.update_volume_metadata(
             self.volume_id,
@@ -85,7 +87,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(update, body)
+        self.assertThat(body.items(), ContainsAll(update.items()))
 
     @test.attr(type='gate')
     def test_update_volume_metadata_item(self):
@@ -93,9 +95,6 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         metadata = {"key1": "value1",
                     "key2": "value2",
                     "key3": "value3"}
-        create_expect = {"key1": "value1",
-                         "key2": "value2",
-                         "key3": "value3"}
         update_item = {"key3": "value3_update"}
         expect = {"key1": "value1",
                   "key2": "value2",
@@ -105,7 +104,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
             self.volume_id,
             metadata)
         self.assertEqual(200, resp.status)
-        self.assertEqual(create_expect, body)
+        self.assertThat(body.items(), ContainsAll(metadata.items()))
         # Update metadata item
         resp, body = self.volumes_client.update_volume_metadata_item(
             self.volume_id,
@@ -115,7 +114,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(expect, body)
+        self.assertThat(body.items(), ContainsAll(expect.items()))
 
 
 class VolumeMetadataTestXML(VolumeMetadataTest):
