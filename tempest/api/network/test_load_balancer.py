@@ -156,10 +156,14 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         # Verification of pool update
         new_name = "New_pool"
         resp, body = self.client.update_pool(pool['id'],
-                                             name=new_name)
+                                             name=new_name,
+                                             description="new_description",
+                                             lb_method='LEAST_CONNECTIONS')
         self.assertEqual('200', resp['status'])
         updated_pool = body['pool']
-        self.assertEqual(updated_pool['name'], new_name)
+        self.assertEqual(new_name, updated_pool['name'])
+        self.assertEqual('new_description', updated_pool['description'])
+        self.assertEqual('LEAST_CONNECTIONS', updated_pool['lb_method'])
         # Verification of pool delete
         resp, body = self.client.delete_pool(pool['id'])
         self.assertEqual('204', resp['status'])
@@ -376,6 +380,58 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertIn("total_connections", stats)
         self.assertIn("active_connections", stats)
         self.assertIn("bytes_out", stats)
+
+    @test.attr(type='smoke')
+    def test_update_list_of_health_monitors_associated_with_pool(self):
+        resp, _ = (self.client.associate_health_monitor_with_pool
+                   (self.health_monitor['id'], self.pool['id']))
+        self.assertEqual('201', resp['status'])
+        resp, _ = self.client.update_health_monitor(
+            self.health_monitor['id'], admin_state_up=False)
+        self.assertEqual('200', resp['status'])
+        resp, body = self.client.show_pool(self.pool['id'])
+        self.assertEqual('200', resp['status'])
+        health_monitors = body['pool']['health_monitors']
+        for health_monitor_id in health_monitors:
+            resp, body = self.client.show_health_monitor(health_monitor_id)
+            self.assertEqual('200', resp['status'])
+            self.assertFalse(body['health_monitor']['admin_state_up'])
+        resp, _ = (self.client.disassociate_health_monitor_with_pool
+                   (self.health_monitor['id'], self.pool['id']))
+        self.assertEqual('204', resp['status'])
+
+    @test.attr(type='smoke')
+    def test_update_admin_state_up_of_pool(self):
+        resp, _ = self.client.update_pool(self.pool['id'],
+                                          admin_state_up=False)
+        self.assertEqual('200', resp['status'])
+        resp, body = self.client.show_pool(self.pool['id'])
+        self.assertEqual('200', resp['status'])
+        pool = body['pool']
+        self.assertFalse(pool['admin_state_up'])
+
+    @test.attr(type='smoke')
+    def test_show_vip_associated_with_pool(self):
+        resp, body = self.client.show_pool(self.pool['id'])
+        self.assertEqual('200', resp['status'])
+        pool = body['pool']
+        resp, body = self.client.show_vip(pool['vip_id'])
+        self.assertEqual('200', resp['status'])
+        vip = body['vip']
+        self.assertEqual(self.vip['name'], vip['name'])
+        self.assertEqual(self.vip['id'], vip['id'])
+
+    @test.attr(type='smoke')
+    def test_show_members_associated_with_pool(self):
+        resp, body = self.client.show_pool(self.pool['id'])
+        self.assertEqual('200', resp['status'])
+        members = body['pool']['members']
+        for member_id in members:
+            resp, body = self.client.show_member(member_id)
+            self.assertEqual('200', resp['status'])
+            self.assertIsNotNone(body['member']['status'])
+            self.assertEqual(member_id, body['member']['id'])
+            self.assertIsNotNone(body['member']['admin_state_up'])
 
 
 class LoadBalancerTestXML(LoadBalancerTestJSON):

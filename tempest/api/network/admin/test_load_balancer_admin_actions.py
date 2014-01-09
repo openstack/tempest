@@ -89,6 +89,18 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         show_health_monitor = body['health_monitor']
         self.assertEqual(health_monitor['id'], show_health_monitor['id'])
 
+    @test.attr(type='smoke')
+    def test_create_pool_from_admin_user_other_tenant(self):
+        resp, body = self.admin_client.create_pool(
+            name=data_utils.rand_name('pool-'), lb_method="ROUND_ROBIN",
+            protocol="HTTP", subnet_id=self.subnet['id'],
+            tenant_id=self.tenant_id)
+        self.assertEqual('201', resp['status'])
+        pool = body['pool']
+        self.addCleanup(self.admin_client.delete_pool, pool['id'])
+        self.assertIsNotNone(pool['id'])
+        self.assertEqual(self.tenant_id, pool['tenant_id'])
+
 
 class LoadBalancerAdminTestXML(LoadBalancerAdminTestJSON):
     _interface = 'xml'
