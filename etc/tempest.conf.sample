@@ -95,6 +95,17 @@
 #syslog_log_facility=LOG_USER
 
 
+[baremetal]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the baremetal provisioning service. (string
+# value)
+#catalog_type=baremetal
+
+
 [boto]
 
 #
@@ -671,6 +682,10 @@
 # Whether or not Savanna is expected to be available (boolean
 # value)
 #savanna=false
+
+# Whether or not Ironic is expected to be available (boolean
+# value)
+#ironic=false
 
 
 [stress]
