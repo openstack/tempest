@@ -149,3 +149,40 @@ class SnapshotsClientJSON(RestClient):
         url = 'snapshots/%s/action' % str(snapshot_id)
         resp, body = self.post(url, post_body, self.headers)
         return resp, body
+
+    def create_snapshot_metadata(self, snapshot_id, metadata):
+        """Create metadata for the snapshot."""
+        put_body = json.dumps({'metadata': metadata})
+        url = "snapshots/%s/metadata" % str(snapshot_id)
+        resp, body = self.post(url, put_body, self.headers)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def get_snapshot_metadata(self, snapshot_id):
+        """Get metadata of the snapshot."""
+        url = "snapshots/%s/metadata" % str(snapshot_id)
+        resp, body = self.get(url, self.headers)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def update_snapshot_metadata(self, snapshot_id, metadata):
+        """Update metadata for the snapshot."""
+        put_body = json.dumps({'metadata': metadata})
+        url = "snapshots/%s/metadata" % str(snapshot_id)
+        resp, body = self.put(url, put_body, self.headers)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def update_snapshot_metadata_item(self, snapshot_id, id, meta_item):
+        """Update metadata item for the snapshot."""
+        put_body = json.dumps({'meta': meta_item})
+        url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
+        resp, body = self.put(url, put_body, self.headers)
+        body = json.loads(body)
+        return resp, body['meta']
+
+    def delete_snapshot_metadata_item(self, snapshot_id, id):
+        """Delete metadata item for the snapshot."""
+        url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
+        resp, body = self.delete(url, self.headers)
+        return resp, body
