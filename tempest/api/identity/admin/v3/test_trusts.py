@@ -28,10 +28,7 @@ class BaseTrustsV3Test(base.BaseIdentityAdminTest):
         super(BaseTrustsV3Test, self).setUp()
         # Use alt_username as the trustee
         self.trustee_username = self.config.identity.alt_username
-
         self.trust_id = None
-        self.create_trustor_and_roles()
-        self.addCleanup(self.cleanup_user_and_roles)
 
     def tearDown(self):
         if self.trust_id:
@@ -50,7 +47,7 @@ class BaseTrustsV3Test(base.BaseIdentityAdminTest):
         # Create a trustor User
         self.trustor_username = rand_name('user-')
         u_desc = self.trustor_username + 'description'
-        u_email = self.trustor_username + '@testmail.tm'
+        u_email = self.trustor_username + '@testmail.xx'
         self.trustor_password = rand_name('pass-')
         resp, user = self.v3_client.create_user(
             self.trustor_username,
@@ -193,6 +190,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     def setUp(self):
         super(TrustsV3TestJSON, self).setUp()
         self.create_trustor_and_roles()
+        self.addCleanup(self.cleanup_user_and_roles)
 
     @attr(type='smoke')
     def test_trust_impersonate(self):
