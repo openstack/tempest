@@ -124,9 +124,9 @@ def xml_to_json(node, plurals=None):
         if tag.startswith("{"):
             ns, tag = tag.split("}", 1)
         if plurals is not None and tag in plurals:
-                json[tag] = parse_array(child)
+                json[tag] = parse_array(child, plurals)
         else:
-            json[tag] = xml_to_json(child)
+            json[tag] = xml_to_json(child, plurals)
     return json
 
 
