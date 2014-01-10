@@ -107,6 +107,24 @@ class ServersV3TestJSON(base.BaseV3ComputeTest):
                          server['os-access-ips:access_ip_v6'])
 
     @test.attr(type='gate')
+    def test_delete_server_while_in_shutoff_state(self):
+        # Delete a server while it's VM state is Shutoff
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        resp, body = self.client.stop(server['id'])
+        self.client.wait_for_server_status(server['id'], 'SHUTOFF')
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+
+    @test.attr(type='gate')
+    def test_delete_server_while_in_pause_state(self):
+        # Delete a server while it's VM state is Pause
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        resp, body = self.client.pause_server(server['id'])
+        self.client.wait_for_server_status(server['id'], 'PAUSED')
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+
+    @test.attr(type='gate')
     def test_delete_server_while_in_building_state(self):
         # Delete a server while it's VM state is Building
         resp, server = self.create_test_server(wait_until='BUILD')
