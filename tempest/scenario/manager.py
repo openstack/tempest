@@ -125,15 +125,16 @@ class OfficialClientManager(tempest.manager.Manager):
 
     def _get_object_storage_client(self, username, password, tenant_name):
         auth_url = self.config.identity.uri
-        # add current tenant to Member group.
+        # add current tenant to swift operator role group.
         keystone_admin = self._get_identity_client(
             self.config.identity.admin_username,
             self.config.identity.admin_password,
             self.config.identity.admin_tenant_name)
 
-        # enable test user to operate swift by adding Member role to him.
+        # enable test user to operate swift by adding operator role to him.
         roles = keystone_admin.roles.list()
-        member_role = [role for role in roles if role.name == 'Member'][0]
+        operator_role = self.config.object_storage.operator_role
+        member_role = [role for role in roles if role.name == operator_role][0]
         # NOTE(maurosr): This is surrounded in the try-except block cause
         # neutron tests doesn't have tenant isolation.
         try:
