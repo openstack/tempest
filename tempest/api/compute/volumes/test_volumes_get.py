@@ -18,6 +18,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest.test import attr
+from testtools.matchers import ContainsAll
 
 
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
@@ -65,29 +66,10 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
                          fetched_volume['id'],
                          'The fetched Volume is different '
                          'from the created Volume')
-        self.assertEqual(metadata,
-                         fetched_volume['metadata'],
-                         'The fetched Volume is different '
-                         'from the created Volume')
-
-    @attr(type='gate')
-    def test_volume_get_metadata_none(self):
-        # CREATE, GET empty metadata dict
-        v_name = data_utils.rand_name('Volume-')
-        # Create volume
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
-                                                 metadata={})
-        self.addCleanup(self._delete_volume, volume)
-        self.assertEqual(200, resp.status)
-        self.assertIn('id', volume)
-        self.assertIn('displayName', volume)
-        # Wait for Volume status to become ACTIVE
-        self.client.wait_for_volume_status(volume['id'], 'available')
-        # GET Volume
-        resp, fetched_volume = self.client.get_volume(volume['id'])
-        self.assertEqual(200, resp.status)
-        self.assertEqual(fetched_volume['metadata'], {})
+        self.assertThat(fetched_volume['metadata'].items(),
+                        ContainsAll(metadata.items()),
+                        'The fetched Volume metadata misses data '
+                        'from the created Volume')
 
     def _delete_volume(self, volume):
         # Delete the Volume created in this method
