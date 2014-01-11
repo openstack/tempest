@@ -101,6 +101,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
 
         The containers should be visible from the container_client given.
         Will not throw any error if the containers don't exist.
+        Will not check that object and container deletions succeed.
 
         :param containers: list of container names to remove
         :param container_client: if None, use cls.container_client, this means
