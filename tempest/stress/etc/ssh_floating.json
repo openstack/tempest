@@ -8,7 +8,7 @@
              "new_floating": true,
              "verify": ["check_icmp_echo", "check_port_ssh"],
              "check_timeout": 120,
-             "check_inerval": 1,
+             "check_interval": 1,
              "wait_after_vm_create": true,
              "wait_for_disassociate": true,
              "reboot": false}
