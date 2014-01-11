@@ -262,10 +262,25 @@ class RoutersTest(base.BaseRouterTest):
         self.addCleanup(
             self._delete_extra_routes,
             self.router['id'])
-        # Update router extra route
+        # Update router extra route, second ip of the range is
+        # used as next hop
         cidr = netaddr.IPNetwork(self.subnet['cidr'])
+        next_hop = str(cidr[2])
+        destination = str(self.subnet['cidr'])
         resp, extra_route = self.client.update_extra_routes(
-            self.router['id'], str(cidr[0]), str(self.subnet['cidr']))
+            self.router['id'], next_hop, destination)
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(1, len(extra_route['router']['routes']))
+        self.assertEqual(destination,
+                         extra_route['router']['routes'][0]['destination'])
+        self.assertEqual(next_hop,
+                         extra_route['router']['routes'][0]['nexthop'])
+        resp, show_body = self.client.show_router(self.router['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(destination,
+                         show_body['router']['routes'][0]['destination'])
+        self.assertEqual(next_hop,
+                         show_body['router']['routes'][0]['nexthop'])
 
     def _delete_extra_routes(self, router_id):
         resp, _ = self.client.delete_extra_routes(router_id)
