@@ -75,6 +75,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.vpnservices = []
         cls.ikepolicies = []
         cls.floating_ips = []
+        cls.metering_labels = []
+        cls.metering_label_rules = []
 
     @classmethod
     def tearDownClass(cls):
@@ -107,6 +109,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         # Clean up pools
         for pool in cls.pools:
             cls.client.delete_pool(pool['id'])
+        # Clean up metering label rules
+        for metering_label_rule in cls.metering_label_rules:
+            cls.admin_client.delete_metering_label_rule(
+                metering_label_rule['id'])
+        # Clean up metering labels
+        for metering_label in cls.metering_labels:
+            cls.admin_client.delete_metering_label(metering_label['id'])
         # Clean up ports
         for port in cls.ports:
             cls.client.delete_port(port['id'])
@@ -287,3 +296,24 @@ class BaseAdminNetworkTest(BaseNetworkTest):
         else:
             cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
         cls.admin_client = cls.os_adm.network_client
+
+    @classmethod
+    def create_metering_label(cls, name, description):
+        """Wrapper utility that returns a test metering label."""
+        resp, body = cls.admin_client.create_metering_label(
+            description=description,
+            name=data_utils.rand_name("metering-label"))
+        metering_label = body['metering_label']
+        cls.metering_labels.append(metering_label)
+        return metering_label
+
+    @classmethod
+    def create_metering_label_rule(cls, remote_ip_prefix, direction,
+                                   metering_label_id):
+        """Wrapper utility that returns a test metering label rule."""
+        resp, body = cls.admin_client.create_metering_label_rule(
+            remote_ip_prefix=remote_ip_prefix, direction=direction,
+            metering_label_id=metering_label_id)
+        metering_label_rule = body['metering_label_rule']
+        cls.metering_label_rules.append(metering_label_rule)
+        return metering_label_rule

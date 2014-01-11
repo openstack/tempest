@@ -27,7 +27,9 @@ service_resource_prefix_map = {
     'health_monitors': 'lb',
     'members': 'lb',
     'vpnservices': 'vpn',
-    'ikepolicies': 'vpn'
+    'ikepolicies': 'vpn',
+    'metering_labels': 'metering',
+    'metering_label_rules': 'metering'
 }
 
 # The following list represents resource names that do not require
