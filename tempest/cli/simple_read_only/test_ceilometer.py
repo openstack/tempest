@@ -15,17 +15,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo.config import cfg
-
-import tempest.cli
+from tempest import cli
+from tempest import config
 from tempest.openstack.common import log as logging
 
-CONF = cfg.CONF
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyCeilometerClientTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlyCeilometerClientTest(cli.ClientTestBase):
     """Basic, read-only tests for Ceilometer CLI client.
 
     Checks return values and output of read-only commands.
