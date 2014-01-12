@@ -213,6 +213,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             name = data_utils.rand_name('server-smoke-%d-' % i)
             self._create_server(name, network)
 
+    def _log_console_output(self):
+        for server, key in self.servers.items():
+            LOG.debug('Console output for %s', server.id)
+            LOG.debug(server.get_console_output())
+
     def _check_tenant_network_connectivity(self):
         if not CONF.network.tenant_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
@@ -229,6 +234,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                     key.private_key)
         except Exception:
             LOG.exception('Tenant connectivity check failed')
+            self._log_console_output()
             debug.log_ip_ns()
             raise
 
@@ -253,6 +259,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         ssh_login = CONF.compute.image_ssh_user
+        LOG.debug('checking network connections')
         try:
             for floating_ip, server in self.floating_ips.iteritems():
                 ip_address = floating_ip.floating_ip_address
@@ -265,6 +272,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                             should_connect=should_connect)
         except Exception:
             LOG.exception('Public network connectivity check failed')
+            self._log_console_output()
             debug.log_ip_ns()
             raise
 
