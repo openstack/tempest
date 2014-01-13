@@ -24,7 +24,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
     # list of plurals used for xml serialization
     PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
                'fixed_ips', 'extensions', 'extra_dhcp_opts', 'pools',
-               'health_monitors', 'vips', 'members']
+               'health_monitors', 'vips', 'members', 'allowed_address_pairs']
 
     def get_rest_client(self, auth_provider):
         rc = rest_client.RestClient(auth_provider)
