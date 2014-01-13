@@ -433,6 +433,40 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             self.assertEqual(member_id, body['member']['id'])
             self.assertIsNotNone(body['member']['admin_state_up'])
 
+    @test.attr(type='smoke')
+    def test_update_pool_related_to_member(self):
+        # Create new pool
+        resp, body = self.client.create_pool(
+            name=data_utils.rand_name("pool-"),
+            lb_method='ROUND_ROBIN',
+            protocol='HTTP',
+            subnet_id=self.subnet['id'])
+        self.assertEqual('201', resp['status'])
+        new_pool = body['pool']
+        self.addCleanup(self.client.delete_pool, new_pool['id'])
+        # Update member with new pool's id
+        resp, body = self.client.update_member(self.member['id'],
+                                               pool_id=new_pool['id'])
+        self.assertEqual('200', resp['status'])
+        # Confirm with show that pool_id change
+        resp, body = self.client.show_member(self.member['id'])
+        member = body['member']
+        self.assertEqual(member['pool_id'], new_pool['id'])
+        # Update member with old pool id, this is needed for clean up
+        resp, body = self.client.update_member(self.member['id'],
+                                               pool_id=self.pool['id'])
+        self.assertEqual('200', resp['status'])
+
+    @test.attr(type='smoke')
+    def test_update_member_weight(self):
+        resp, _ = self.client.update_member(self.member['id'],
+                                            weight=2)
+        self.assertEqual('200', resp['status'])
+        resp, body = self.client.show_member(self.member['id'])
+        self.assertEqual('200', resp['status'])
+        member = body['member']
+        self.assertEqual(2, member['weight'])
+
 
 class LoadBalancerTestXML(LoadBalancerTestJSON):
     _interface = 'xml'
