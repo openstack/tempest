@@ -82,6 +82,36 @@ class SecGroupTest(base.BaseSecGroupTest):
                      for rule in rule_list_body['security_group_rules']]
         self.assertIn(rule_create_body['security_group_rule']['id'], rule_list)
 
+    @attr(type='smoke')
+    def test_create_security_group_rule_with_additional_args(self):
+        # Verify creating security group rule with the following
+        # arguments works: "protocol": "tcp", "port_range_max": 77,
+        # "port_range_min": 77, "direction":"ingress".
+        group_create_body, _ = self._create_security_group()
+
+        direction = 'ingress'
+        protocol = 'tcp'
+        port_range_min = 77
+        port_range_max = 77
+        resp, rule_create_body = self.client.create_security_group_rule(
+            group_create_body['security_group']['id'],
+            direction=direction,
+            protocol=protocol,
+            port_range_min=port_range_min,
+            port_range_max=port_range_max
+        )
+
+        self.assertEqual('201', resp['status'])
+        sec_group_rule = rule_create_body['security_group_rule']
+        self.addCleanup(self._delete_security_group_rule,
+                        sec_group_rule['id']
+                        )
+
+        self.assertEqual(sec_group_rule['direction'], direction)
+        self.assertEqual(sec_group_rule['protocol'], protocol)
+        self.assertEqual(int(sec_group_rule['port_range_min']), port_range_min)
+        self.assertEqual(int(sec_group_rule['port_range_max']), port_range_max)
+
 
 class SecGroupTestXML(SecGroupTest):
     _interface = 'xml'
