@@ -11,6 +11,7 @@ function usage {
   echo "  -u, --update             Update the virtual environment with any newer package versions"
   echo "  -t, --serial             Run testr serially"
   echo "  -p, --pep8               Just run pep8"
+  echo "  -c, --coverage           Generate coverage report"
   echo "  -h, --help               Print this usage message"
   echo "  -d, --debug              Debug this script -- set -o xtrace"
   echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
@@ -25,11 +26,12 @@ always_venv=0
 never_venv=0
 no_site_packages=0
 force=0
+coverage=0
 wrapper=""
 config_file=""
 update=0
 
-if ! options=$(getopt -o VNnfutphd -l virtual-env,no-virtual-env,no-site-packages,force,update,serial,pep8,help,debug -- "$@")
+if ! options=$(getopt -o VNnfuctphd -l virtual-env,no-virtual-env,no-site-packages,force,update,serial,coverage,pep8,help,debug -- "$@")
 then
     # parse error
     usage
@@ -48,6 +50,7 @@ while [ $# -gt 0 ]; do
     -u|--update) update=1;;
     -d|--debug) set -o xtrace;;
     -p|--pep8) let just_pep8=1;;
+    -c|--coverage) coverage=1;;
     -t|--serial) serial=1;;
     --) [ "yes" == "$first_uu" ] || testrargs="$testrargs $1"; first_uu=no  ;;
     *) testrargs="$testrargs $1"; noseargs+=" $1" ;;
@@ -121,6 +124,10 @@ fi
 if [ $just_pep8 -eq 1 ]; then
     run_pep8
     exit
+fi
+
+if [$coverage -eq 1] ; then
+    $testrargs = "--coverage $testrargs"
 fi
 
 run_tests
