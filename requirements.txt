@@ -22,3 +22,4 @@ oslo.config>=1.2.0
 six>=1.4.1
 iso8601>=0.1.8
 fixtures>=0.3.14
+testscenarios>=0.4

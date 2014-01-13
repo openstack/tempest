@@ -471,6 +471,29 @@
 #api_v1=true
 
 
+[input-scenario]
+
+#
+# Options defined in tempest.config
+#
+
+# Matching images become parameters for scenario tests (string
+# value)
+#image_regex=^cirros-0.3.1-x86_64-uec$
+
+# Matching flavors become parameters for scenario tests
+# (string value)
+#flavor_regex=^m1.(micro|nano|tiny)$
+
+# SSH verification in tests is skippedfor matching images
+# (string value)
+#non_ssh_image_regex=^.*[Ww]in.*$
+
+# List of user mapped to regex to matching image names.
+# (string value)
+#ssh_user_regex=[["^.*[Cc]irros.*$", "root"]]
+
+
 [network]
 
 #

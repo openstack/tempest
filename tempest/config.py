@@ -658,6 +658,27 @@ DebugGroup = [
                 help="Enable diagnostic commands"),
 ]
 
+input_scenario_group = cfg.OptGroup(name="input-scenario",
+                                    title="Filters and values for"
+                                          " input scenarios")
+
+InputScenarioGroup = [
+    cfg.StrOpt('image_regex',
+               default='^cirros-0.3.1-x86_64-uec$',
+               help="Matching images become parameters for scenario tests"),
+    cfg.StrOpt('flavor_regex',
+               default='^m1.(micro|nano|tiny)$',
+               help="Matching flavors become parameters for scenario tests"),
+    cfg.StrOpt('non_ssh_image_regex',
+               default='^.*[Ww]in.*$',
+               help="SSH verification in tests is skipped"
+                    "for matching images"),
+    cfg.StrOpt('ssh_user_regex',
+               default="[[\"^.*[Cc]irros.*$\", \"root\"]]",
+               help="List of user mapped to regex "
+                    "to matching image names."),
+]
+
 
 baremetal_group = cfg.OptGroup(name='baremetal',
                                title='Baremetal provisioning service options')
@@ -735,7 +756,7 @@ class TempestConfigPrivate(object):
                            ServiceAvailableGroup)
         register_opt_group(cfg.CONF, debug_group, DebugGroup)
         register_opt_group(cfg.CONF, baremetal_group, BaremetalGroup)
-
+        register_opt_group(cfg.CONF, input_scenario_group, InputScenarioGroup)
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity
@@ -759,7 +780,7 @@ class TempestConfigPrivate(object):
         self.service_available = cfg.CONF.service_available
         self.debug = cfg.CONF.debug
         self.baremetal = cfg.CONF.baremetal
-
+        self.input_scenario = cfg.CONF['input-scenario']
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
