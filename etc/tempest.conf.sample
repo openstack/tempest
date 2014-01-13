@@ -540,11 +540,11 @@
 # (string value)
 #region=
 
-# Number of seconds to time on waiting for a containerto
+# Number of seconds to time on waiting for a container to
 # container synchronization complete. (integer value)
 #container_sync_timeout=120
 
-# Number of seconds to wait while looping to check thestatus
+# Number of seconds to wait while looping to check the status
 # of a container to container synchronization (integer value)
 #container_sync_interval=5
 

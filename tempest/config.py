@@ -398,11 +398,11 @@ ObjectStoreGroup = [
                     "one is used."),
     cfg.IntOpt('container_sync_timeout',
                default=120,
-               help="Number of seconds to time on waiting for a container"
+               help="Number of seconds to time on waiting for a container "
                     "to container synchronization complete."),
     cfg.IntOpt('container_sync_interval',
                default=5,
-               help="Number of seconds to wait while looping to check the"
+               help="Number of seconds to wait while looping to check the "
                     "status of a container to container synchronization"),
     cfg.StrOpt('operator_role',
                default='Member',
