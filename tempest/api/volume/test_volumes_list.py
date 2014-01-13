@@ -21,6 +21,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.test import attr
+from testtools.matchers import ContainsAll
 
 LOG = logging.getLogger(__name__)
 
@@ -110,7 +111,12 @@ class VolumesListTest(base.BaseVolumeV1Test):
             for key in params:
                 msg = "Failed to list volumes %s by %s" % \
                       ('details' if with_detail else '', key)
-                self.assertEqual(params[key], volume[key], msg)
+                if key == 'metadata':
+                    self.assertThat(volume[key].items(),
+                                    ContainsAll(params[key].items()),
+                                    msg)
+                else:
+                    self.assertEqual(params[key], volume[key], msg)
 
     @attr(type='smoke')
     def test_volume_list(self):
