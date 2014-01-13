@@ -21,7 +21,11 @@ import inspect
 import json
 import sys
 from testtools.testsuite import iterate_tests
-from unittest import loader
+try:
+    from unittest import loader
+except ImportError:
+    # unittest in python 2.6 does not contain loader, so uses unittest2
+    from unittest2 import loader
 
 from tempest.openstack.common import log as logging
 from tempest.stress import driver
