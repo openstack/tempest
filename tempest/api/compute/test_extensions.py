@@ -19,7 +19,6 @@
 from tempest.api.compute import base
 from tempest.openstack.common import log as logging
 from tempest import test
-import testtools
 
 
 LOG = logging.getLogger(__name__)
@@ -28,21 +27,25 @@ LOG = logging.getLogger(__name__)
 class ExtensionsTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
 
-    @testtools.skipIf(not test.is_extension_enabled('os-consoles', 'compute'),
-                      'os-consoles extension not enabled.')
     @test.attr(type='gate')
     def test_list_extensions(self):
         # List of all extensions
+        if len(self.config.compute_feature_enabled.api_extensions) == 0:
+            raise self.skipException('There are not any extensions configured')
         resp, extensions = self.extensions_client.list_extensions()
-        self.assertIn("extensions", extensions)
-        extension_list = [extension.get('alias')
-                          for extension in extensions.get('extensions', {})]
-        LOG.debug("Nova extensions: %s" % ','.join(extension_list))
         self.assertEqual(200, resp.status)
-        self.assertTrue(self.extensions_client.is_enabled("Consoles"))
+        ext = self.config.compute_feature_enabled.api_extensions[0]
+        if ext == 'all':
+            self.assertIn('Hosts', map(lambda x: x['name'], extensions))
+        elif ext:
+            self.assertIn(ext, map(lambda x: x['name'], extensions))
+        else:
+            raise self.skipException('There are not any extensions configured')
+        # Log extensions list
+        extension_list = map(lambda x: x['name'], extensions)
+        LOG.debug("Nova extensions: %s" % ','.join(extension_list))
 
-    @testtools.skipIf(not test.is_extension_enabled('os-consoles', 'compute'),
-                      'os-consoles extension not enabled.')
+    @test.requires_ext(extension='os-consoles', service='compute')
     @test.attr(type='gate')
     def test_get_extension(self):
         # get the specified extensions

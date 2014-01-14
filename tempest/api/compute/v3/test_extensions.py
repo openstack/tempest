@@ -30,13 +30,20 @@ class ExtensionsV3TestJSON(base.BaseV3ComputeTest):
     @test.attr(type='gate')
     def test_list_extensions(self):
         # List of all extensions
+        if len(self.config.compute_feature_enabled.api_v3_extensions) == 0:
+            raise self.skipException('There are not any extensions configured')
         resp, extensions = self.extensions_client.list_extensions()
-        self.assertIn("extensions", extensions)
-        extension_list = [extension.get('alias')
-                          for extension in extensions.get('extensions', {})]
-        LOG.debug("Nova extensions: %s" % ','.join(extension_list))
         self.assertEqual(200, resp.status)
-        self.assertTrue(self.extensions_client.is_enabled("Consoles"))
+        ext = self.config.compute_feature_enabled.api_v3_extensions[0]
+        if ext == 'all':
+            self.assertIn('Hosts', map(lambda x: x['name'], extensions))
+        elif ext:
+            self.assertIn(ext, map(lambda x: x['name'], extensions))
+        else:
+            raise self.skipException('There are not any extensions configured')
+        # Log extensions list
+        extension_list = map(lambda x: x['name'], extensions)
+        LOG.debug("Nova extensions: %s" % ','.join(extension_list))
 
     @test.attr(type='gate')
     def test_get_extension(self):

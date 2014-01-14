@@ -37,7 +37,7 @@ class ExtensionsV3ClientXML(RestClientXML):
         url = 'extensions'
         resp, body = self.get(url, self.headers)
         body = self._parse_array(etree.fromstring(body))
-        return resp, {'extensions': body}
+        return resp, body
 
     def is_enabled(self, extension):
         _, extensions = self.list_extensions()
