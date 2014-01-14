@@ -40,9 +40,9 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         # update account metadata
         cls.key = 'Meta'
         cls.metadatas = []
-        cls.metadata = {'Temp-URL-Key': cls.key}
-        cls.metadatas.append(cls.metadata)
-        cls.account_client.create_account_metadata(metadata=cls.metadata)
+        metadata = {'Temp-URL-Key': cls.key}
+        cls.metadatas.append(metadata)
+        cls.account_client.create_account_metadata(metadata=metadata)
 
         # create an object
         cls.object_name = data_utils.rand_name(name='ObjectTemp')
@@ -53,7 +53,7 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
     @classmethod
     def tearDownClass(cls):
-        for metadata in cls.metadata:
+        for metadata in cls.metadatas:
             cls.account_client.delete_account_metadata(
                 metadata=metadata)
 

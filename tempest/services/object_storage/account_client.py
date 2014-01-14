@@ -20,6 +20,7 @@ from tempest.common import http
 from tempest.common.rest_client import RestClient
 from tempest import config
 from tempest import exceptions
+from xml.etree import ElementTree as etree
 
 CONF = config.CONF
 
@@ -28,7 +29,6 @@ class AccountClient(RestClient):
     def __init__(self, auth_provider):
         super(AccountClient, self).__init__(auth_provider)
         self.service = CONF.object_storage.catalog_type
-        self.format = 'json'
 
     def create_account(self, data=None,
                        params=None,
@@ -87,7 +87,25 @@ class AccountClient(RestClient):
 
         headers = {}
         for item in metadata:
-            headers[metadata_prefix + item] = 'x'
+            headers[metadata_prefix + item] = metadata[item]
+        resp, body = self.post('', headers=headers, body=None)
+        return resp, body
+
+    def create_and_delete_account_metadata(
+            self,
+            create_metadata=None,
+            delete_metadata=None,
+            create_metadata_prefix='X-Account-Meta-',
+            delete_metadata_prefix='X-Remove-Account-Meta-'):
+        """
+        Creates and deletes an account metadata entry.
+        """
+        headers = {}
+        for key in create_metadata:
+            headers[create_metadata_prefix + key] = create_metadata[key]
+        for key in delete_metadata:
+            headers[delete_metadata_prefix + key] = delete_metadata[key]
+
         resp, body = self.post('', headers=headers, body=None)
         return resp, body
 
@@ -112,24 +130,23 @@ class AccountClient(RestClient):
             response.
             DEFAULT:  Python-List returned in response body
         """
+        url = '?%s' % urllib.urlencode(params) if params else ''
 
-        if params:
-            if 'format' not in params:
-                params['format'] = self.format
-        else:
-            params = {'format': self.format}
-
-        url = '?' + urllib.urlencode(params)
-        resp, body = self.get(url)
-
+        resp, body = self.get(url, headers={})
         if params and params.get('format') == 'json':
             body = json.loads(body)
+        elif params and params.get('format') == 'xml':
+            body = etree.fromstring(body)
+        else:
+            body = body.strip().splitlines()
         return resp, body
 
     def list_extensions(self):
         self.skip_path()
-        resp, body = self.get('info')
-        self.reset_path()
+        try:
+            resp, body = self.get('info')
+        finally:
+            self.reset_path()
         body = json.loads(body)
         return resp, body
 
