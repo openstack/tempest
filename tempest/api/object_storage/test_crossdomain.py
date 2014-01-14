@@ -19,27 +19,14 @@
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common import custom_matchers
-from tempest import config
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
-
-CONF = config.CONF
+from tempest import test
 
 
 class CrossdomainTest(base.BaseObjectTest):
-    crossdomain_available = \
-        CONF.object_storage_feature_enabled.crossdomain
 
     @classmethod
     def setUpClass(cls):
         super(CrossdomainTest, cls).setUpClass()
-
-        # skip this test if CORS isn't enabled in the conf file.
-        if not cls.crossdomain_available:
-            skip_msg = ("%s skipped as Crossdomain middleware not available"
-                        % cls.__name__)
-            raise cls.skipException(skip_msg)
-
         # creates a test user. The test user will set its base_url to the Swift
         # endpoint and test the healthcheck feature.
         cls.data.setup_test_user()
@@ -75,12 +62,13 @@ class CrossdomainTest(base.BaseObjectTest):
 
         super(CrossdomainTest, self).tearDown()
 
-    @attr('gate')
+    @test.attr('gate')
+    @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
         resp, body = self.os_test_user.account_client.get("crossdomain.xml",
                                                           {})
 
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertTrue(body.startswith(self.xml_start) and
                         body.endswith(self.xml_end))
 

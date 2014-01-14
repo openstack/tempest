@@ -582,21 +582,10 @@
 # Options defined in tempest.config
 #
 
-# Set to True if the Container Quota middleware is enabled
-# (boolean value)
-#container_quotas=true
-
-# Set to True if the Account Quota middleware is enabled
-# (boolean value)
-#accounts_quotas=true
-
-# Set to True if the Crossdomain middleware is enabled
-# (boolean value)
-#crossdomain=true
-
-# Set to True if the TempURL middleware is enabled (boolean
-# value)
-#tempurl=true
+# A list of the enabled optional discoverable apis. A single
+# entry, all, indicates that all of these features are
+# expected to be enabled (list value)
+#discoverable_apis=all
 
 
 [orchestration]

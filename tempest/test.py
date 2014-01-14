@@ -163,6 +163,7 @@ def is_extension_enabled(extension_name, service):
         'compute_v3': configs.compute_feature_enabled.api_v3_extensions,
         'volume': configs.volume_feature_enabled.api_extensions,
         'network': configs.network_feature_enabled.api_extensions,
+        'object': configs.object_storage_feature_enabled.discoverable_apis,
     }
     if config_dict[service][0] == 'all':
         return True

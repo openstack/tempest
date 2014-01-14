@@ -24,27 +24,16 @@ from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 CONF = config.CONF
 
 
 class ObjectTempUrlTest(base.BaseObjectTest):
 
-    tempurl_available = \
-        CONF.object_storage_feature_enabled.tempurl
-
     @classmethod
     def setUpClass(cls):
         super(ObjectTempUrlTest, cls).setUpClass()
-
-        # skip this test if TempUrl isn't enabled in the conf file.
-        if not cls.tempurl_available:
-            skip_msg = ("%s skipped as TempUrl middleware not available"
-                        % cls.__name__)
-            raise cls.skipException(skip_msg)
-
         # create a container
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
@@ -108,7 +97,8 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         return url
 
-    @attr(type='gate')
+    @test.attr(type='gate')
+    @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url(self):
         expires = self._get_expiry_date()
 
@@ -119,16 +109,17 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # trying to get object using temp url within expiry time
         resp, body = self.object_client.get(url)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.content)
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
+    @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_using_temp_url_key_2(self):
         key2 = 'Meta2-'
         metadata = {'Temp-URL-Key-2': key2}
@@ -149,10 +140,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
                                  self.object_name, "GET",
                                  expires, key2)
         resp, body = self.object_client.get(url)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertEqual(body, self.content)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
+    @test.requires_ext(extension='tempurl', service='object')
     def test_put_object_using_temp_url(self):
         new_data = data_utils.arbitrary_string(
             size=len(self.object_name),
@@ -165,12 +157,12 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # trying to put random data in the object using temp url
         resp, body = self.object_client.put(url, new_data, None)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'PUT')
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
         # Validate that the content of the object has been modified
@@ -181,7 +173,8 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         _, body = self.object_client.get(url)
         self.assertEqual(body, new_data)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
+    @test.requires_ext(extension='tempurl', service='object')
     def test_head_object_using_temp_url(self):
         expires = self._get_expiry_date()
 
@@ -192,10 +185,11 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         # Testing a HEAD on this Temp URL
         resp, body = self.object_client.head(url)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
-    @attr(type=['gate', 'negative'])
+    @test.attr(type=['gate', 'negative'])
+    @test.requires_ext(extension='tempurl', service='object')
     def test_get_object_after_expiration_time(self):
 
         expires = self._get_expiry_date(1)
