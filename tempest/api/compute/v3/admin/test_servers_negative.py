@@ -22,7 +22,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class ServersAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     """
     Tests Servers API using admin privileges
@@ -32,10 +32,10 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServersAdminNegativeTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.servers_client
+        super(ServersAdminNegativeV3TestJSON, cls).setUpClass()
+        cls.client = cls.servers_admin_client
         cls.non_adm_client = cls.servers_client
-        cls.flavors_client = cls.os_adm.flavors_client
+        cls.flavors_client = cls.flavors_admin_client
         cls.identity_client = cls._get_identity_admin_client()
         tenant = cls.identity_client.get_tenant_by_name(
             cls.client.tenant_name)
@@ -139,5 +139,5 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           server_id)
 
 
-class ServersAdminNegativeTestXML(ServersAdminNegativeTestJSON):
+class ServersAdminNegativeV3TestXML(ServersAdminNegativeV3TestJSON):
     _interface = 'xml'

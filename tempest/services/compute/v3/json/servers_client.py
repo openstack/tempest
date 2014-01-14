@@ -163,10 +163,12 @@ class ServersV3ClientJSON(RestClient):
         body = json.loads(body)
         return resp, body
 
-    def wait_for_server_status(self, server_id, status, extra_timeout=0):
+    def wait_for_server_status(self, server_id, status, extra_timeout=0,
+                               raise_on_error=True):
         """Waits for a server to reach a given status."""
         return waiters.wait_for_server_status(self, server_id, status,
-                                              extra_timeout=extra_timeout)
+                                              extra_timeout=extra_timeout,
+                                              raise_on_error=raise_on_error)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination."""
@@ -346,19 +348,19 @@ class ServersV3ClientJSON(RestClient):
         return self.action(server_id, 'unlock', None, **kwargs)
 
     def suspend_server(self, server_id, **kwargs):
-        """Suspends the provded server."""
+        """Suspends the provided server."""
         return self.action(server_id, 'suspend', None, **kwargs)
 
     def resume_server(self, server_id, **kwargs):
-        """Un-suspends the provded server."""
+        """Un-suspends the provided server."""
         return self.action(server_id, 'resume', None, **kwargs)
 
     def pause_server(self, server_id, **kwargs):
-        """Pauses the provded server."""
+        """Pauses the provided server."""
         return self.action(server_id, 'pause', None, **kwargs)
 
     def unpause_server(self, server_id, **kwargs):
-        """Un-pauses the provded server."""
+        """Un-pauses the provided server."""
         return self.action(server_id, 'unpause', None, **kwargs)
 
     def reset_state(self, server_id, state='error'):
