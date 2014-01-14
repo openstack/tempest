@@ -126,7 +126,7 @@ if [ $just_pep8 -eq 1 ]; then
     exit
 fi
 
-if [$coverage -eq 1] ; then
+if [ $coverage -eq 1 ]; then
     $testrargs = "--coverage $testrargs"
 fi
 
