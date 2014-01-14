@@ -50,9 +50,16 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         vip_name = data_utils.rand_name('vip-')
         cls.pool = cls.create_pool(pool_name, "ROUND_ROBIN",
                                    "HTTP", cls.subnet)
-        cls.vip = cls.create_vip(vip_name, "HTTP", 80, cls.subnet, cls.pool)
+        cls.vip = cls.create_vip(name=vip_name,
+                                 protocol="HTTP",
+                                 protocol_port=80,
+                                 subnet=cls.subnet,
+                                 pool=cls.pool)
         cls.member = cls.create_member(80, cls.pool)
-        cls.health_monitor = cls.create_health_monitor(4, 3, "TCP", 1)
+        cls.health_monitor = cls.create_health_monitor(delay=4,
+                                                       max_retries=3,
+                                                       Type="TCP",
+                                                       timeout=1)
 
     @test.attr(type='smoke')
     def test_list_vips(self):
@@ -76,14 +83,17 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
             protocol='HTTP',
             subnet_id=self.subnet['id'])
         pool = body['pool']
-        resp, body = self.client.create_vip(name, "HTTP", 80,
-                                            self.subnet['id'], pool['id'])
+        resp, body = self.client.create_vip(name=name,
+                                            protocol="HTTP",
+                                            protocol_port=80,
+                                            subnet_id=self.subnet['id'],
+                                            pool_id=pool['id'])
         self.assertEqual('201', resp['status'])
         vip = body['vip']
         vip_id = vip['id']
         # Verification of vip update
         new_name = "New_vip"
-        resp, body = self.client.update_vip(vip_id, new_name)
+        resp, body = self.client.update_vip(vip_id, name=new_name)
         self.assertEqual('200', resp['status'])
         updated_vip = body['vip']
         self.assertEqual(updated_vip['name'], new_name)
@@ -143,11 +153,10 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual('201', resp['status'])
         member = body['member']
         # Verification of member update
-        admin_state = [False, 'False']
-        resp, body = self.client.update_member(admin_state[0], member['id'])
+        resp, body = self.client.update_member(False, member['id'])
         self.assertEqual('200', resp['status'])
         updated_member = body['member']
-        self.assertIn(updated_member['admin_state_up'], admin_state)
+        self.assertFalse(updated_member['admin_state_up'])
         # Verification of member delete
         resp, body = self.client.delete_member(member['id'])
         self.assertEqual('204', resp['status'])
@@ -174,16 +183,19 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_create_update_delete_health_monitor(self):
         # Creates a health_monitor
-        resp, body = self.client.create_health_monitor(4, 3, "TCP", 1)
+        resp, body = self.client.create_health_monitor(delay=4,
+                                                       max_retries=3,
+                                                       type="TCP",
+                                                       timeout=1)
         self.assertEqual('201', resp['status'])
         health_monitor = body['health_monitor']
         # Verification of health_monitor update
-        admin_state = [False, 'False']
-        resp, body = self.client.update_health_monitor(admin_state[0],
-                                                       health_monitor['id'])
+        resp, body = (self.client.update_health_monitor
+                     (health_monitor['id'],
+                      admin_state_up=False))
         self.assertEqual('200', resp['status'])
         updated_health_monitor = body['health_monitor']
-        self.assertIn(updated_health_monitor['admin_state_up'], admin_state)
+        self.assertFalse(updated_health_monitor['admin_state_up'])
         # Verification of health_monitor delete
         resp, body = self.client.delete_health_monitor(health_monitor['id'])
         self.assertEqual('204', resp['status'])

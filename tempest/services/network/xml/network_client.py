@@ -101,32 +101,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
-    def create_vip(self, name, protocol, protocol_port, subnet_id, pool_id):
-        uri = '%s/lb/vips' % (self.uri_prefix)
-        post_body = Element("vip")
-        p1 = Element("name", name)
-        p2 = Element("protocol", protocol)
-        p3 = Element("protocol_port", protocol_port)
-        p4 = Element("subnet_id", subnet_id)
-        p5 = Element("pool_id", pool_id)
-        post_body.append(p1)
-        post_body.append(p2)
-        post_body.append(p3)
-        post_body.append(p4)
-        post_body.append(p5)
-        resp, body = self.post(uri, str(Document(post_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_vip(self, vip_id, new_name):
-        uri = '%s/lb/vips/%s' % (self.uri_prefix, str(vip_id))
-        put_body = Element("vip")
-        p2 = Element("name", new_name)
-        put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
     def create_member(self, address, protocol_port, pool_id):
         uri = '%s/lb/members' % (self.uri_prefix)
         post_body = Element("member")
@@ -143,30 +117,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def update_member(self, admin_state_up, member_id):
         uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
         put_body = Element("member")
-        p2 = Element("admin_state_up", admin_state_up)
-        put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def create_health_monitor(self, delay, max_retries, Type, timeout):
-        uri = '%s/lb/health_monitors' % (self.uri_prefix)
-        post_body = Element("health_monitor")
-        p1 = Element("delay", delay)
-        p2 = Element("max_retries", max_retries)
-        p3 = Element("type", Type)
-        p4 = Element("timeout", timeout)
-        post_body.append(p1)
-        post_body.append(p2)
-        post_body.append(p3)
-        post_body.append(p4)
-        resp, body = self.post(uri, str(Document(post_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_health_monitor(self, admin_state_up, uuid):
-        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, str(uuid))
-        put_body = Element("health_monitor")
         p2 = Element("admin_state_up", admin_state_up)
         put_body.append(p2)
         resp, body = self.put(uri, str(Document(put_body)))
