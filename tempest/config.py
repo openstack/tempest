@@ -78,7 +78,7 @@ IdentityGroup = [
                secret=True),
     cfg.StrOpt('admin_username',
                default='admin',
-               help="Administrative Username to use for"
+               help="Administrative Username to use for "
                     "Keystone API requests."),
     cfg.StrOpt('admin_tenant_name',
                default='admin',

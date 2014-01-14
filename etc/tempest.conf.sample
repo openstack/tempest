@@ -427,7 +427,7 @@
 # (string value)
 #alt_password=<None>
 
-# Administrative Username to use forKeystone API requests.
+# Administrative Username to use for Keystone API requests.
 # (string value)
 #admin_username=admin
 
