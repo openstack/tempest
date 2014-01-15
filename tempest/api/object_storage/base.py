@@ -32,7 +32,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         if not cls.config.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+        cls.isolated_creds = isolated_creds.IsolatedCreds(
+            cls.__name__, network_resources=cls.network_resources)
         if cls.config.compute.allow_tenant_isolation:
             # Get isolated creds for normal user
             creds = cls.isolated_creds.get_primary_creds()
