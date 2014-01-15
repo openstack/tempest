@@ -131,7 +131,12 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self.server.add_floating_ip(self.floating_ip)
 
     def ssh_to_server(self):
-        self.linux_client = self.get_remote_client(self.floating_ip.ip)
+        try:
+            self.linux_client = self.get_remote_client(self.floating_ip.ip)
+        except Exception:
+            LOG.exception('ssh to server failed')
+            self._log_console_output()
+            raise
 
     def check_partitions(self):
         partitions = self.linux_client.get_partitions()

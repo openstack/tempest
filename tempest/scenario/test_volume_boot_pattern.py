@@ -13,8 +13,12 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
+from tempest.openstack.common import log
 from tempest.scenario import manager
 from tempest.test import services
+
+
+LOG = log.getLogger(__name__)
 
 
 class TestVolumeBootPattern(manager.OfficialClientTest):
@@ -96,8 +100,14 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
             network_name_for_ssh = self.config.compute.network_for_ssh
             ip = server.networks[network_name_for_ssh][0]
 
-        client = self.get_remote_client(ip,
-                                        private_key=keypair.private_key)
+        try:
+            client = self.get_remote_client(
+                ip,
+                private_key=keypair.private_key)
+        except Exception:
+            LOG.exception('ssh to server failed')
+            self._log_console_output()
+            raise
         return client.ssh_client
 
     def _get_content(self, ssh_client):

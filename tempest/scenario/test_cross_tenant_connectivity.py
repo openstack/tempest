@@ -371,6 +371,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
                             msg)
         except Exception:
             debug.log_ip_ns()
+            self._log_console_output(servers=self.servers)
             raise
 
     def _test_in_tenant_block(self, tenant):
