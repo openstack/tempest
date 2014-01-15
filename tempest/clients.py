@@ -17,7 +17,6 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.services.baremetal.v1.client_json import BaremetalClientJSON
-from tempest.services.baremetal.v1.client_xml import BaremetalClientXML
 from tempest.services import botoclients
 from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
@@ -217,7 +216,6 @@ class Manager(object):
 
         if interface == 'xml':
             self.certificates_client = CertificatesClientXML(*client_args)
-            self.baremetal_client = BaremetalClientXML(*client_args)
             self.servers_client = ServersClientXML(*client_args)
             self.limits_client = LimitsClientXML(*client_args)
             self.images_client = ImagesClientXML(*client_args)
