@@ -186,3 +186,10 @@ class SnapshotsClientJSON(RestClient):
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
         resp, body = self.delete(url, self.headers)
         return resp, body
+
+    def force_delete_snapshot(self, snapshot_id):
+        """Force Delete Snapshot."""
+        post_body = json.dumps({'os-force_delete': {}})
+        resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body,
+                               self.headers)
+        return resp, body
