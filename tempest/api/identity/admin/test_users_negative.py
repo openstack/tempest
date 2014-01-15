@@ -66,7 +66,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
                           self.data.tenant['id'], self.data.test_email)
 
     @attr(type=['negative', 'gate'])
-    def test_create_user_for_non_existant_tenant(self):
+    def test_create_user_for_non_existent_tenant(self):
         # Attempt to create a user in a non-existent tenant should fail
         self.assertRaises(exceptions.NotFound, self.client.create_user,
                           self.alt_user, self.alt_password, '49ffgg99999',
@@ -98,7 +98,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
                           self.alt_email, enabled=3)
 
     @attr(type=['negative', 'gate'])
-    def test_update_user_for_non_existant_user(self):
+    def test_update_user_for_non_existent_user(self):
         # Attempt to update a user non-existent user should fail
         user_name = data_utils.rand_name('user-')
         non_existent_id = str(uuid.uuid4())
@@ -135,7 +135,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
                           self.data.user['id'])
 
     @attr(type=['negative', 'gate'])
-    def test_delete_non_existant_user(self):
+    def test_delete_non_existent_user(self):
         # Attempt to delete a non-existent user should fail
         self.assertRaises(exceptions.NotFound, self.client.delete_user,
                           'junk12345123')

@@ -36,14 +36,14 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
         cls.mountpoint = "/dev/vdc"
 
     @attr(type=['negative', 'gate'])
-    def test_volume_get_nonexistant_volume_id(self):
-        # Should not be able to get a non-existant volume
+    def test_volume_get_nonexistent_volume_id(self):
+        # Should not be able to get a non-existent volume
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           str(uuid.uuid4()))
 
     @attr(type=['negative', 'gate'])
-    def test_volume_delete_nonexistant_volume_id(self):
-        # Should not be able to delete a non-existant Volume
+    def test_volume_delete_nonexistent_volume_id(self):
+        # Should not be able to delete a non-existent Volume
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           str(uuid.uuid4()))
 
@@ -82,8 +82,8 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
                           size='-1', display_name=v_name, metadata=metadata)
 
     @attr(type=['negative', 'gate'])
-    def test_create_volume_with_nonexistant_volume_type(self):
-        # Should not be able to create volume with non-existant volume type
+    def test_create_volume_with_nonexistent_volume_type(self):
+        # Should not be able to create volume with non-existent volume type
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.create_volume,
@@ -91,8 +91,8 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
                           display_name=v_name, metadata=metadata)
 
     @attr(type=['negative', 'gate'])
-    def test_create_volume_with_nonexistant_snapshot_id(self):
-        # Should not be able to create volume with non-existant snapshot
+    def test_create_volume_with_nonexistent_snapshot_id(self):
+        # Should not be able to create volume with non-existent snapshot
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.create_volume,
@@ -100,8 +100,8 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
                           display_name=v_name, metadata=metadata)
 
     @attr(type=['negative', 'gate'])
-    def test_create_volume_with_nonexistant_source_volid(self):
-        # Should not be able to create volume with non-existant source volume
+    def test_create_volume_with_nonexistent_source_volid(self):
+        # Should not be able to create volume with non-existent source volume
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.create_volume,
@@ -109,7 +109,7 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
                           display_name=v_name, metadata=metadata)
 
     @attr(type=['negative', 'gate'])
-    def test_update_volume_with_nonexistant_volume_id(self):
+    def test_update_volume_with_nonexistent_volume_id(self):
         v_name = data_utils.rand_name('Volume-')
         metadata = {'Type': 'work'}
         self.assertRaises(exceptions.NotFound, self.client.update_volume,
