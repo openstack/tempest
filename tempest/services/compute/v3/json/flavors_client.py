@@ -61,7 +61,7 @@ class FlavorsV3ClientJSON(RestClient):
             'id': flavor_id,
         }
         if kwargs.get('ephemeral'):
-            post_body['OS-FLV-EXT-DATA:ephemeral'] = kwargs.get('ephemeral')
+            post_body['ephemeral'] = kwargs.get('ephemeral')
         if kwargs.get('swap'):
             post_body['swap'] = kwargs.get('swap')
         if kwargs.get('rxtx'):
