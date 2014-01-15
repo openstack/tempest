@@ -95,20 +95,6 @@ class Client(object):
     def _is_timed_out(self, start_time):
         return (time.time() - self.timeout) > start_time
 
-    def connect_until_closed(self):
-        """Connect to the server and wait until connection is lost."""
-        try:
-            ssh = self._get_ssh_connection()
-            _transport = ssh.get_transport()
-            _start_time = time.time()
-            _timed_out = self._is_timed_out(_start_time)
-            while _transport.is_active() and not _timed_out:
-                time.sleep(5)
-                _timed_out = self._is_timed_out(_start_time)
-            ssh.close()
-        except (EOFError, paramiko.AuthenticationException, socket.error):
-            return
-
     def exec_command(self, cmd):
         """
         Execute the specified command on the server.
@@ -140,7 +126,7 @@ class Client(object):
                 raise exceptions.TimeoutException(
                     "Command: '{0}' executed on host '{1}'.".format(
                         cmd, self.host))
-            if not ready[0]:        # If there is nothing to read.
+            if not ready[0]:  # If there is nothing to read.
                 continue
             out_chunk = err_chunk = None
             if channel.recv_ready():
