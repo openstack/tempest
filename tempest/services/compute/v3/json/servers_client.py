@@ -45,8 +45,6 @@ class ServersV3ClientJSON(RestClient):
         admin_password: Sets the initial root password.
         key_name: Key name of keypair that was created earlier.
         meta: A dictionary of values to be used as metadata.
-        personality: A list of dictionaries for files to be injected into
-        the server.
         security_groups: A list of security group dicts.
         networks: A list of network dicts with UUID and fixed_ip.
         user_data: User data for instance.
@@ -64,7 +62,7 @@ class ServersV3ClientJSON(RestClient):
             'flavor_ref': flavor_ref
         }
 
-        for option in ['personality', 'admin_password', 'key_name', 'networks',
+        for option in ['admin_password', 'key_name', 'networks',
                        ('os-security-groups:security_groups',
                         'security_groups'),
                        ('os-user-data:user_data', 'user_data'),
@@ -103,7 +101,6 @@ class ServersV3ClientJSON(RestClient):
         Updates the properties of an existing server.
         server_id: The id of an existing server.
         name: The name of the server.
-        personality: A list of files to be injected into the server.
         access_ip_v4: The IPv4 access address for the server.
         access_ip_v6: The IPv6 access address for the server.
         """

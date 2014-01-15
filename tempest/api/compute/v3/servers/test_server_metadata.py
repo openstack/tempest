@@ -20,12 +20,12 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServerMetadataTestJSON(base.BaseV2ComputeTest):
+class ServerMetadataV3TestJSON(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServerMetadataTestJSON, cls).setUpClass()
+        super(ServerMetadataV3TestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
@@ -37,7 +37,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         cls.server_id = server['id']
 
     def setUp(self):
-        super(ServerMetadataTestJSON, self).setUp()
+        super(ServerMetadataV3TestJSON, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
         resp, _ = self.client.set_server_metadata(self.server_id, meta)
         self.assertEqual(resp.status, 200)
@@ -88,7 +88,7 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
         meta = {'key1': 'alt1', 'key3': 'value3'}
         resp, metadata = self.client.update_server_metadata(self.server_id,
                                                             meta)
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
 
         # Verify the values have been updated to the proper values
         resp, resp_metadata = self.client.list_server_metadata(self.server_id)
@@ -213,5 +213,5 @@ class ServerMetadataTestJSON(base.BaseV2ComputeTest):
                           self.server_id, meta=meta, no_metadata_field=True)
 
 
-class ServerMetadataTestXML(ServerMetadataTestJSON):
+class ServerMetadataV3TestXML(ServerMetadataV3TestJSON):
     _interface = 'xml'
