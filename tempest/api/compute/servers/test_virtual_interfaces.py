@@ -29,6 +29,8 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        # This test needs a network and a subnet
+        cls.set_network_resources(network=True, subnet=True)
         super(VirtualInterfacesTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         resp, server = cls.create_test_server(wait_until='ACTIVE')

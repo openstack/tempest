@@ -30,6 +30,8 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        # No network resources required for this test
+        cls.set_network_resources()
         super(AuthorizationTestJSON, cls).setUpClass()
         if not cls.multi_user:
             msg = "Need >1 user"

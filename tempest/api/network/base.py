@@ -50,6 +50,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        # Create no network resources for these test.
+        cls.set_network_resources()
         super(BaseNetworkTest, cls).setUpClass()
         os = clients.Manager(interface=cls._interface)
         cls.network_cfg = os.config.network

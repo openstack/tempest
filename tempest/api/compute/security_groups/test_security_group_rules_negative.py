@@ -17,7 +17,7 @@
 
 import testtools
 
-from tempest.api.compute import base
+from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -27,7 +27,7 @@ from tempest.test import skip_because
 CONF = config.CONF
 
 
-class SecurityGroupRulesNegativeTestJSON(base.BaseV2ComputeTest):
+class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
     _interface = 'json'
 
     @classmethod

@@ -169,6 +169,8 @@ class BaseV2ComputeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        # By default compute tests do not create network resources
+        cls.set_network_resources()
         super(BaseV2ComputeTest, cls).setUpClass()
         cls.servers_client = cls.os.servers_client
         cls.flavors_client = cls.os.flavors_client

@@ -15,13 +15,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute import base
+from tempest.api.compute.floating_ips import base
 from tempest.common.utils.data_utils import rand_name
 from tempest import exceptions
 from tempest.test import attr
 
 
-class FloatingIPsTestJSON(base.BaseV2ComputeTest):
+class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     _interface = 'json'
     server_id = None
     floating_ip = None
