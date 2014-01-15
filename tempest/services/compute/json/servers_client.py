@@ -397,9 +397,9 @@ class ServersClientJSON(RestClient):
                               'os-virtual-interfaces']))
         return resp, json.loads(body)
 
-    def rescue_server(self, server_id, adminPass=None):
+    def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, adminPass=adminPass)
+        return self.action(server_id, 'rescue', None, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""

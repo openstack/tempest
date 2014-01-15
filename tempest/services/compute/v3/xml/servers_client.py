@@ -630,10 +630,9 @@ class ServersV3ClientXML(RestClientXML):
         return self.action(server_id, 'get_console_output', 'output',
                            length=length)
 
-    def rescue_server(self, server_id, admin_password=None):
+    def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None,
-                           admin_password=admin_password)
+        return self.action(server_id, 'rescue', None, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
