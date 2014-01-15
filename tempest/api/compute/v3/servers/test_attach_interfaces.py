@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import exceptions
 from tempest.test import attr
 
 import time
@@ -73,15 +74,19 @@ class AttachInterfacesV3TestJSON(base.BaseV3ComputeTest):
         # NOTE(danms): delete not the first or last, but one in the middle
         iface = ifs[1]
         self.client.delete_interface(server['id'], iface['port_id'])
-        for i in range(0, 5):
-            _r, _ifs = self.client.list_interfaces(server['id'])
-            if len(ifs) != len(_ifs):
-                break
-            time.sleep(1)
+        _ifs = self.client.list_interfaces(server['id'])[1]
+        start = int(time.time())
 
-        self.assertEqual(len(_ifs), len(ifs) - 1)
-        for _iface in _ifs:
-            self.assertNotEqual(iface['port_id'], _iface['port_id'])
+        while len(ifs) == len(_ifs):
+            time.sleep(self.build_interval)
+            _ifs = self.client.list_interfaces(server['id'])[1]
+            timed_out = int(time.time()) - start >= self.build_timeout
+            if len(ifs) == len(_ifs) and timed_out:
+                message = ('Failed to delete interface within '
+                           'the required time: %s sec.' % self.build_timeout)
+                raise exceptions.TimeoutException(message)
+
+        self.assertNotIn(iface['port_id'], [i['port_id'] for i in _ifs])
         return _ifs
 
     def _compare_iface_list(self, list1, list2):
