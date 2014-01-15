@@ -1025,9 +1025,6 @@ class NetworkScenarioTest(OfficialClientTest):
         router = self._get_router(tenant_id)
         subnet = self._create_subnet(network)
         subnet.add_to_router(router.id)
-        self.networks.append(network)
-        self.subnets.append(subnet)
-        self.routers.append(router)
         return network, subnet, router
 
 
