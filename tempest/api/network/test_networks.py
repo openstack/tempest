@@ -45,14 +45,20 @@ class NetworksTestJSON(base.BaseNetworkTest):
         network update
         subnet update
 
+        All subnet tests are run once with ipv4 and once with ipv6.
+
     v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
 
         tenant_network_cidr with a block of cidr's from which smaller blocks
-        can be allocated for tenant networks
+        can be allocated for tenant ipv4 subnets
+
+        tenant_network_v6_cidr is the equivalent for ipv6 subnets
 
         tenant_network_mask_bits with the mask bits to be used to partition the
-        block defined by tenant-network_cidr
+        block defined by tenant_network_cidr
+
+        tenant_network_v6_mask_bits is the equivalent for ipv6 subnets
     """
 
     @classmethod
@@ -79,14 +85,14 @@ class NetworksTestJSON(base.BaseNetworkTest):
         updated_net = body['network']
         self.assertEqual(updated_net['name'], new_name)
         # Find a cidr that is not in use yet and create a subnet with it
-        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        cidr = netaddr.IPNetwork(self._tenant_network_cidr)
+        mask_bits = self._tenant_network_mask_bits
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
                 resp, body = self.client.create_subnet(
                     network_id=net_id,
                     cidr=str(subnet_cidr),
-                    ip_version=4)
+                    ip_version=self._ip_version)
                 break
             except exceptions.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
@@ -391,4 +397,14 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
 
 
 class BulkNetworkOpsTestXML(BulkNetworkOpsTestJSON):
+    _interface = 'xml'
+
+
+class NetworksIpV6TestJSON(NetworksTestJSON):
+    _ip_version = 6
+    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
+    _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
+
+
+class NetworksIpV6TestXML(NetworksIpV6TestJSON):
     _interface = 'xml'
