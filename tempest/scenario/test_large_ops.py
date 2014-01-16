@@ -36,6 +36,11 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
 
     """
 
+    @classmethod
+    def setUpClass(cls):
+        cls.set_network_resources()
+        super(TestLargeOpsScenario, cls).setUpClass()
+
     def _wait_for_server_status(self, status):
         for server in self.servers:
             self.status_timeout(

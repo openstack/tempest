@@ -34,6 +34,7 @@ class TestDashboardBasicOps(manager.OfficialClientTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources()
         super(TestDashboardBasicOps, cls).setUpClass()
 
         if not cls.config.service_available.horizon:
