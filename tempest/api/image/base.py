@@ -129,11 +129,11 @@ class BaseV2ImageTest(BaseImageTest):
             raise cls.skipException(msg)
 
 
-class BaseV2MemeberImageTest(BaseV2ImageTest):
+class BaseV2MemberImageTest(BaseV2ImageTest):
 
     @classmethod
     def setUpClass(cls):
-        super(BaseV2MemeberImageTest, cls).setUpClass()
+        super(BaseV2MemberImageTest, cls).setUpClass()
         if cls.config.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
             username, tenant_name, password = creds
