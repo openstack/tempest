@@ -129,7 +129,7 @@ class BaseV2ImageTest(BaseImageTest):
             raise cls.skipException(msg)
 
 
-class BaseV2MemeberImageTest(BaseImageTest):
+class BaseV2MemeberImageTest(BaseV2ImageTest):
 
     @classmethod
     def setUpClass(cls):
