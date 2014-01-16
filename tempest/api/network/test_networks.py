@@ -216,6 +216,37 @@ class NetworksTestJSON(base.BaseNetworkTest):
         # it from the list.
         self.subnets.pop()
 
+    @test.attr(type='smoke')
+    def test_create_delete_subnet_with_gw(self):
+        gateway = '10.100.0.13'
+        name = data_utils.rand_name('network-')
+        resp, body = self.client.create_network(name=name)
+        self.assertEqual('201', resp['status'])
+        network = body['network']
+        net_id = network['id']
+        subnet = self.create_subnet(network, gateway)
+        # Verifies Subnet GW in IPv4
+        self.assertEqual(subnet['gateway_ip'], gateway)
+        # Delete network and subnet
+        resp, body = self.client.delete_network(net_id)
+        self.assertEqual('204', resp['status'])
+        self.subnets.pop()
+
+    @test.attr(type='smoke')
+    def test_create_delete_subnet_without_gw(self):
+        name = data_utils.rand_name('network-')
+        resp, body = self.client.create_network(name=name)
+        self.assertEqual('201', resp['status'])
+        network = body['network']
+        net_id = network['id']
+        subnet = self.create_subnet(network)
+        # Verifies Subnet GW in IPv4
+        self.assertEqual(subnet['gateway_ip'], '10.100.0.1')
+        # Delete network and subnet
+        resp, body = self.client.delete_network(net_id)
+        self.assertEqual('204', resp['status'])
+        self.subnets.pop()
+
 
 class NetworksTestXML(NetworksTestJSON):
     _interface = 'xml'
@@ -369,6 +400,37 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
             cls.tearDownClass()
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
+
+    @test.attr(type='smoke')
+    def test_create_delete_subnet_with_gw(self):
+        gateway = '2003::2'
+        name = data_utils.rand_name('network-')
+        resp, body = self.client.create_network(name=name)
+        self.assertEqual('201', resp['status'])
+        network = body['network']
+        net_id = network['id']
+        subnet = self.create_subnet(network, gateway)
+        # Verifies Subnet GW in IPv6
+        self.assertEqual(subnet['gateway_ip'], gateway)
+        # Delete network and subnet
+        resp, body = self.client.delete_network(net_id)
+        self.assertEqual('204', resp['status'])
+        self.subnets.pop()
+
+    @test.attr(type='smoke')
+    def test_create_delete_subnet_without_gw(self):
+        name = data_utils.rand_name('network-')
+        resp, body = self.client.create_network(name=name)
+        self.assertEqual('201', resp['status'])
+        network = body['network']
+        net_id = network['id']
+        subnet = self.create_subnet(network)
+        # Verifies Subnet GW in IPv6
+        self.assertEqual(subnet['gateway_ip'], '2003::1')
+        # Delete network and subnet
+        resp, body = self.client.delete_network(net_id)
+        self.assertEqual('204', resp['status'])
+        self.subnets.pop()
 
 
 class NetworksIpV6TestXML(NetworksIpV6TestJSON):
