@@ -39,6 +39,8 @@ n-cpu:
       message: "Instance failed network setup after 1 attempt"
     - module: "nova.compute.manager"
       message: "Periodic sync_power_state task had an error"
+    - module: "nova.virt.driver"
+      message: "Info cache for instance .* could not be found"
 
 g-api:
     - module: "glance.store.sheepdog"
@@ -72,6 +74,10 @@ ceilometer-acompute:
       message: ".*"
     - module: "ceilometer.compute.pollsters.disk"
       message: ".*"
+
+ceilometer-acentral:
+    - module: "ceilometer.central.manager"
+      message: "403 Forbidden"
 
 ceilometer-alarm-evaluator:
     - module: "ceilometer.alarm.service"
