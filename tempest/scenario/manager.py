@@ -527,6 +527,13 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             private_key = self.keypair.private_key
         return RemoteClient(ip, username, pkey=private_key)
 
+    def _log_console_output(self, servers=None):
+        if not servers:
+            servers = self.compute_client.servers.list()
+        for server in servers:
+            LOG.debug('Console output for %s', server.id)
+            LOG.debug(server.get_console_output())
+
 
 class NetworkScenarioTest(OfficialClientTest):
     """
