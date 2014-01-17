@@ -66,7 +66,9 @@ class HostsAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.update_host,
-                          hostname)
+                          hostname,
+                          status='enable',
+                          maintenance_mode='enable')
 
     @test.attr(type=['negative', 'gate'])
     def test_update_host_with_extra_param(self):

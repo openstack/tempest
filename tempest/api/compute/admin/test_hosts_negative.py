@@ -66,7 +66,9 @@ class HostsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.update_host,
-                          hostname)
+                          hostname,
+                          status='enable',
+                          maintenance_mode='enable')
 
     @test.skip_because(bug="1261964", interface="xml")
     @test.attr(type=['negative', 'gate'])
