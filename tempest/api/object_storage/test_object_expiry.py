@@ -30,30 +30,34 @@ class ObjectExpiryTest(base.BaseObjectTest):
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.container_client.create_container(cls.container_name)
 
+    def setUp(self):
+        super(ObjectExpiryTest, self).setUp()
+        # create object
+        self.object_name = data_utils.rand_name(name='TestObject')
+        resp, _ = self.object_client.create_object(self.container_name,
+                                                   self.object_name, '')
+
     @classmethod
     def tearDownClass(cls):
         cls.delete_containers([cls.container_name])
         super(ObjectExpiryTest, cls).tearDownClass()
 
     def _test_object_expiry(self, metadata):
-        # create object
-        object_name = data_utils.rand_name(name='TestObject')
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   object_name, '')
         # update object metadata
         resp, _ = \
             self.object_client.update_object_metadata(self.container_name,
-                                                      object_name, metadata,
+                                                      self.object_name,
+                                                      metadata,
                                                       metadata_prefix='')
         # verify object metadata
         resp, _ = \
             self.object_client.list_object_metadata(self.container_name,
-                                                    object_name)
+                                                    self.object_name)
         self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'HEAD')
         self.assertIn('x-delete-at', resp)
         resp, body = self.object_client.get_object(self.container_name,
-                                                   object_name)
+                                                   self.object_name)
         self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertIn('x-delete-at', resp)
@@ -63,7 +67,7 @@ class ObjectExpiryTest(base.BaseObjectTest):
 
         # object should not be there anymore
         self.assertRaises(exceptions.NotFound, self.object_client.get_object,
-                          self.container_name, object_name)
+                          self.container_name, self.object_name)
 
     @attr(type='gate')
     def test_get_object_after_expiry_time(self):
