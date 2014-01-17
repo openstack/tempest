@@ -25,6 +25,8 @@ class ServerAddressesV3Test(base.BaseV3ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        # This test module might use a network and a subnet
+        cls.set_network_resources(network=True, subnet=True)
         super(ServerAddressesV3Test, cls).setUpClass()
         cls.client = cls.servers_client
 

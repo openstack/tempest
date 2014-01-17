@@ -26,6 +26,8 @@ class AttachInterfacesV3TestJSON(base.BaseV3ComputeTest):
     def setUpClass(cls):
         if not cls.config.service_available.neutron:
             raise cls.skipException("Neutron is required")
+        # This test class requires network and subnet
+        cls.set_network_resources(network=True, subnet=True)
         super(AttachInterfacesV3TestJSON, cls).setUpClass()
         cls.client = cls.interfaces_client
 
