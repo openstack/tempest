@@ -16,7 +16,6 @@ import re
 import time
 
 from tempest.common.ssh import Client
-from tempest.common import utils
 from tempest import config
 from tempest.exceptions import ServerUnreachable
 
@@ -78,11 +77,10 @@ class RemoteClient():
         return output
 
     def get_boot_time(self):
-        cmd = 'date -d "`cut -f1 -d. /proc/uptime` seconds ago" \
-            "+%Y-%m-%d %H:%M:%S"'
-        boot_time_string = self.ssh_client.exec_command(cmd)
-        boot_time_string = boot_time_string.replace('\n', '')
-        return time.strptime(boot_time_string, utils.LAST_REBOOT_TIME_FORMAT)
+        cmd = 'cut -f1 -d. /proc/uptime'
+        boot_secs = self.ssh_client.exec_command(cmd)
+        boot_time = time.time() - int(boot_secs)
+        return time.localtime(boot_time)
 
     def write_to_console(self, message):
         message = re.sub("([$\\`])", "\\\\\\\\\\1", message)
