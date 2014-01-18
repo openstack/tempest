@@ -14,7 +14,7 @@
 
 from tempest.api.network import base
 from tempest.common import tempest_fixtures as fixtures
-from tempest.test import attr
+from tempest import test
 
 
 class AgentManagementTestJSON(base.BaseAdminNetworkTest):
@@ -23,11 +23,14 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(AgentManagementTestJSON, cls).setUpClass()
+        if not test.is_extension_enabled('agent', 'network'):
+            msg = "agent extension not enabled."
+            raise cls.skipException(msg)
         resp, body = cls.admin_client.list_agents()
         agents = body['agents']
         cls.agent = agents[0]
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_agent(self):
         resp, body = self.admin_client.list_agents()
         self.assertEqual('200', resp['status'])
@@ -38,20 +41,20 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
             agent.pop('heartbeat_timestamp', None)
         self.assertIn(self.agent, agents)
 
-    @attr(type=['smoke'])
+    @test.attr(type=['smoke'])
     def test_list_agents_non_admin(self):
         resp, body = self.client.list_agents()
         self.assertEqual('200', resp['status'])
         self.assertEqual(len(body["agents"]), 0)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_agent(self):
         resp, body = self.admin_client.show_agent(self.agent['id'])
         agent = body['agent']
         self.assertEqual('200', resp['status'])
         self.assertEqual(agent['id'], self.agent['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_agent_status(self):
         origin_status = self.agent['admin_state_up']
         # Try to update the 'admin_state_up' to the original
@@ -63,7 +66,7 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual(origin_status, updated_status)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_agent_description(self):
         self.useFixture(fixtures.LockFixture('agent_description'))
         description = 'description for update agent.'

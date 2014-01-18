@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.api.network import base
-from tempest.test import attr
+from tempest import test
 
 
 class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
@@ -22,6 +22,9 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(DHCPAgentSchedulersTestJSON, cls).setUpClass()
+        if not test.is_extension_enabled('dhcp_agent_scheduler', 'network'):
+            msg = "dhcp_agent_scheduler extension not enabled."
+            raise cls.skipException(msg)
         # Create a network and make sure it will be hosted by a
         # dhcp agent.
         cls.network = cls.create_network()
@@ -29,13 +32,13 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
         cls.cidr = cls.subnet['cidr']
         cls.port = cls.create_port(cls.network)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_dhcp_agent_hosting_network(self):
         resp, body = self.admin_client.list_dhcp_agent_hosting_network(
             self.network['id'])
         self.assertEqual(resp['status'], '200')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_networks_hosted_by_one_dhcp(self):
         resp, body = self.admin_client.list_dhcp_agent_hosting_network(
             self.network['id'])
@@ -55,7 +58,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
             network_ids.append(network['id'])
         return network_id in network_ids
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_remove_network_from_dhcp_agent(self):
         resp, body = self.admin_client.list_dhcp_agent_hosting_network(
             self.network['id'])

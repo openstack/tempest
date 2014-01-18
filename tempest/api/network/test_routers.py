@@ -29,6 +29,9 @@ class RoutersTest(base.BaseRouterTest):
     @classmethod
     def setUpClass(cls):
         super(RoutersTest, cls).setUpClass()
+        if not test.is_extension_enabled('router', 'network'):
+            msg = "router extension not enabled."
+            raise cls.skipException(msg)
 
     @test.attr(type='smoke')
     def test_create_show_list_update_delete_router(self):
