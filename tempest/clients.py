@@ -148,6 +148,7 @@ from tempest.services.volume.json.admin.volume_hosts_client import \
     VolumeHostsClientJSON
 from tempest.services.volume.json.admin.volume_types_client import \
     VolumeTypesClientJSON
+from tempest.services.volume.json.backups_client import BackupsClientJSON
 from tempest.services.volume.json.extensions_client import \
     ExtensionsClientJSON as VolumeExtensionClientJSON
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
@@ -158,6 +159,7 @@ from tempest.services.volume.xml.admin.volume_hosts_client import \
     VolumeHostsClientXML
 from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
+from tempest.services.volume.xml.backups_client import BackupsClientXML
 from tempest.services.volume.xml.extensions_client import \
     ExtensionsClientXML as VolumeExtensionClientXML
 from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
@@ -212,6 +214,7 @@ class Manager(object):
                 auth_provider)
             self.floating_ips_client = FloatingIPsClientXML(
                 auth_provider)
+            self.backups_client = BackupsClientXML(auth_provider)
             self.snapshots_client = SnapshotsClientXML(auth_provider)
             self.volumes_client = VolumesClientXML(auth_provider)
             self.volumes_v2_client = VolumesV2ClientXML(auth_provider)
@@ -277,6 +280,7 @@ class Manager(object):
                 auth_provider)
             self.floating_ips_client = FloatingIPsClientJSON(
                 auth_provider)
+            self.backups_client = BackupsClientJSON(auth_provider)
             self.snapshots_client = SnapshotsClientJSON(auth_provider)
             self.volumes_client = VolumesClientJSON(auth_provider)
             self.volumes_v2_client = VolumesV2ClientJSON(auth_provider)
