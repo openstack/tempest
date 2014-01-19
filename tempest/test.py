@@ -332,12 +332,16 @@ class BaseTestCase(testtools.TestCase,
         @param subnet
         @param dhcp
         """
-        self.network_resources = {
-            'network': network,
-            'router': router,
-            'subnet': subnet,
-            'dhcp': dhcp,
-        }
+        # network resources should be set only once from callers
+        # in order to ensure that even if it's called multiple times in
+        # a chain of overloaded methods, the attribute is set only
+        # in the leaf class
+        if not self.network_resources:
+            self.network_resources = {
+                'network': network,
+                'router': router,
+                'subnet': subnet,
+                'dhcp': dhcp}
 
 
 def call_until_true(func, duration, sleep_for):

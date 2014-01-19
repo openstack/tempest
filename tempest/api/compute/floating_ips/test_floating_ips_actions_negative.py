@@ -17,13 +17,13 @@
 
 import uuid
 
-from tempest.api.compute import base
+from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
 
 
-class FloatingIPsNegativeTestJSON(base.BaseV2ComputeTest):
+class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
     _interface = 'json'
     server_id = None
 

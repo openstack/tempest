@@ -27,6 +27,8 @@ class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        # For this test no network resources are needed
+        cls.set_network_resources()
         super(VirtualInterfacesNegativeTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 

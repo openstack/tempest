@@ -15,12 +15,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute import base
+from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class SecurityGroupRulesTestJSON(base.BaseV2ComputeTest):
+class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     _interface = 'json'
 
     @classmethod

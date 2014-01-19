@@ -25,6 +25,7 @@ class ServerAddressesNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources(network=True, subnet=True)
         super(ServerAddressesNegativeTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 
