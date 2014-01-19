@@ -39,6 +39,7 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources()
         super(TestSwiftBasicOps, cls).setUpClass()
         if not cls.config.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" %

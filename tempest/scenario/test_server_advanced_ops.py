@@ -33,6 +33,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources()
         super(TestServerAdvancedOps, cls).setUpClass()
 
         if not cls.config.compute_feature_enabled.resize:
