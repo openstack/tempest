@@ -32,7 +32,8 @@ LOG = logging.getLogger(__name__)
 class IsolatedCreds(object):
 
     def __init__(self, name, tempest_client=True, interface='json',
-                 password='pass'):
+                 password='pass', network_resources=None):
+        self.network_resources = network_resources
         self.isolated_creds = {}
         self.isolated_net_resources = {}
         self.ports = []
@@ -198,15 +199,33 @@ class IsolatedCreds(object):
         network = None
         subnet = None
         router = None
+        # Make sure settings
+        if self.network_resources:
+            if self.network_resources['router']:
+                if (not self.network_resources['subnet'] or
+                    not self.network_resources['network']):
+                    raise exceptions.InvalidConfiguration(
+                        'A router requires a subnet and network')
+            elif self.network_resources['subnet']:
+                if not self.network_resources['network']:
+                    raise exceptions.InvalidConfiguration(
+                        'A subnet requires a network')
+            elif self.network_resources['dhcp']:
+                raise exceptions.InvalidConfiguration('DHCP requires a subnet')
+
         data_utils.rand_name_root = data_utils.rand_name(self.name)
-        network_name = data_utils.rand_name_root + "-network"
-        network = self._create_network(network_name, tenant_id)
+        if not self.network_resources or self.network_resources['network']:
+            network_name = data_utils.rand_name_root + "-network"
+            network = self._create_network(network_name, tenant_id)
         try:
-            subnet_name = data_utils.rand_name_root + "-subnet"
-            subnet = self._create_subnet(subnet_name, tenant_id, network['id'])
-            router_name = data_utils.rand_name_root + "-router"
-            router = self._create_router(router_name, tenant_id)
-            self._add_router_interface(router['id'], subnet['id'])
+            if not self.network_resources or self.network_resources['subnet']:
+                subnet_name = data_utils.rand_name_root + "-subnet"
+                subnet = self._create_subnet(subnet_name, tenant_id,
+                                             network['id'])
+            if not self.network_resources or self.network_resources['router']:
+                router_name = data_utils.rand_name_root + "-router"
+                router = self._create_router(router_name, tenant_id)
+                self._add_router_interface(router['id'], subnet['id'])
         except Exception:
             if router:
                 self._clear_isolated_router(router['id'], router['name'])
@@ -230,14 +249,25 @@ class IsolatedCreds(object):
         if not self.tempest_client:
             body = {'subnet': {'name': subnet_name, 'tenant_id': tenant_id,
                                'network_id': network_id, 'ip_version': 4}}
+            if self.network_resources:
+                body['enable_dhcp'] = self.network_resources['dhcp']
         base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         mask_bits = CONF.network.tenant_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.tempest_client:
-                    resp, resp_body = self.network_admin_client.create_subnet(
-                        network_id, str(subnet_cidr), name=subnet_name,
-                        tenant_id=tenant_id)
+                    if self.network_resources:
+                        resp, resp_body = self.network_admin_client.\
+                            create_subnet(
+                                network_id, str(subnet_cidr),
+                                name=subnet_name,
+                                tenant_id=tenant_id,
+                                enable_dhcp=self.network_resources['dhcp'])
+                    else:
+                        resp, resp_body = self.network_admin_client.\
+                            create_subnet(network_id, str(subnet_cidr),
+                                          name=subnet_name,
+                                          tenant_id=tenant_id)
                 else:
                     body['subnet']['cidr'] = str(subnet_cidr)
                     resp_body = self.network_admin_client.create_subnet(body)
@@ -431,26 +461,27 @@ class IsolatedCreds(object):
         net_client = self.network_admin_client
         for cred in self.isolated_net_resources:
             network, subnet, router = self.isolated_net_resources.get(cred)
-            try:
-                if self.tempest_client:
-                    net_client.remove_router_interface_with_subnet_id(
-                        router['id'], subnet['id'])
-                else:
-                    body = {'subnet_id': subnet['id']}
-                    net_client.remove_interface_router(router['id'], body)
-            except exceptions.NotFound:
-                LOG.warn('router with name: %s not found for delete' %
-                         router['name'])
-                pass
-            self._clear_isolated_router(router['id'], router['name'])
-            # TODO(mlavalle) This method call will be removed once patch
-            # https://review.openstack.org/#/c/46563/ merges in Neutron
-            self._cleanup_ports(network['id'])
-            self._clear_isolated_subnet(subnet['id'], subnet['name'])
-            self._clear_isolated_network(network['id'], network['name'])
-            LOG.info("Cleared isolated network resources: \n"
-                     + " network: %s, subnet: %s, router: %s"
-                     % (network['name'], subnet['name'], router['name']))
+            if self.network_resources.get('router'):
+                try:
+                    if self.tempest_client:
+                        net_client.remove_router_interface_with_subnet_id(
+                            router['id'], subnet['id'])
+                    else:
+                        body = {'subnet_id': subnet['id']}
+                        net_client.remove_interface_router(router['id'], body)
+                except exceptions.NotFound:
+                    LOG.warn('router with name: %s not found for delete' %
+                             router['name'])
+                    pass
+                self._clear_isolated_router(router['id'], router['name'])
+            if self.network_resources.get('network'):
+                # TODO(mlavalle) This method call will be removed once patch
+                # https://review.openstack.org/#/c/46563/ merges in Neutron
+                self._cleanup_ports(network['id'])
+            if self.network_resources.get('subnet'):
+                self._clear_isolated_subnet(subnet['id'], subnet['name'])
+            if self.network_resources.get('network'):
+                self._clear_isolated_network(network['id'], network['name'])
 
     def clear_isolated_creds(self):
         if not self.isolated_creds:

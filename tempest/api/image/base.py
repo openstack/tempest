@@ -34,7 +34,8 @@ class BaseImageTest(tempest.test.BaseTestCase):
         super(BaseImageTest, cls).setUpClass()
         cls.created_images = []
         cls._interface = 'json'
-        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+        cls.isolated_creds = isolated_creds.IsolatedCreds(
+            cls.__name__, network_resources=cls.network_resources)
         if not cls.config.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

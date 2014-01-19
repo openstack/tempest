@@ -230,6 +230,8 @@ class BaseTestCase(testtools.TestCase,
 
     setUpClassCalled = False
 
+    network_resources = {}
+
     @classmethod
     def setUpClass(cls):
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
@@ -277,7 +279,8 @@ class BaseTestCase(testtools.TestCase,
         """
         Returns an Openstack client manager
         """
-        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+        cls.isolated_creds = isolated_creds.IsolatedCreds(
+            cls.__name__, network_resources=cls.network_resources)
 
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
         if (cls.config.compute.allow_tenant_isolation or
@@ -318,6 +321,23 @@ class BaseTestCase(testtools.TestCase,
             cls.config.identity.admin_password,
             cls.config.identity.uri
         )
+
+    @classmethod
+    def set_network_resources(self, network=False, router=False, subnet=False,
+                              dhcp=False):
+        """Specify which network resources should be created
+
+        @param network
+        @param router
+        @param subnet
+        @param dhcp
+        """
+        self.network_resources = {
+            'network': network,
+            'router': router,
+            'subnet': subnet,
+            'dhcp': dhcp,
+        }
 
 
 def call_until_true(func, duration, sleep_for):
