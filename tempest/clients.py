@@ -64,6 +64,8 @@ from tempest.services.compute.v3.json.flavors_client import FlavorsV3ClientJSON
 from tempest.services.compute.v3.json.hosts_client import HostsV3ClientJSON
 from tempest.services.compute.v3.json.hypervisor_client import \
     HypervisorV3ClientJSON
+from tempest.services.compute.v3.json.instance_usage_audit_log_client import \
+    InstanceUsagesAuditLogV3ClientJSON
 from tempest.services.compute.v3.json.interfaces_client import \
     InterfacesV3ClientJSON
 from tempest.services.compute.v3.json.keypairs_client import \
@@ -88,6 +90,8 @@ from tempest.services.compute.v3.xml.flavors_client import FlavorsV3ClientXML
 from tempest.services.compute.v3.xml.hosts_client import HostsV3ClientXML
 from tempest.services.compute.v3.xml.hypervisor_client import \
     HypervisorV3ClientXML
+from tempest.services.compute.v3.xml.instance_usage_audit_log_client import \
+    InstanceUsagesAuditLogV3ClientXML
 from tempest.services.compute.v3.xml.interfaces_client import \
     InterfacesV3ClientXML
 from tempest.services.compute.v3.xml.keypairs_client import KeyPairsV3ClientXML
@@ -284,6 +288,8 @@ class Manager(object):
             self.credentials_client = CredentialsClientXML(*client_args)
             self.instance_usages_audit_log_client = \
                 InstanceUsagesAuditLogClientXML(*client_args)
+            self.instance_usages_audit_log_v3_client = \
+                InstanceUsagesAuditLogV3ClientXML(*client_args)
             self.volume_hosts_client = VolumeHostsClientXML(*client_args)
             self.volumes_extension_client = VolumeExtensionClientXML(
                 *client_args)
@@ -347,6 +353,8 @@ class Manager(object):
             self.credentials_client = CredentialsClientJSON(*client_args)
             self.instance_usages_audit_log_client = \
                 InstanceUsagesAuditLogClientJSON(*client_args)
+            self.instance_usages_audit_log_v3_client = \
+                InstanceUsagesAuditLogV3ClientJSON(*client_args)
             self.volume_hosts_client = VolumeHostsClientJSON(*client_args)
             self.volumes_extension_client = VolumeExtensionClientJSON(
                 *client_args)

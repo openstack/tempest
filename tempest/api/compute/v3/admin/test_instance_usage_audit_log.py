@@ -16,22 +16,22 @@
 #    under the License.
 
 import datetime
-
-from tempest.api.compute import base
-from tempest.test import attr
 import urllib
 
+from tempest.api.compute import base
+from tempest import test
 
-class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
+
+class InstanceUsageAuditLogV3TestJSON(base.BaseV3ComputeAdminTest):
 
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(InstanceUsageAuditLogTestJSON, cls).setUpClass()
-        cls.adm_client = cls.os_adm.instance_usages_audit_log_client
+        super(InstanceUsageAuditLogV3TestJSON, cls).setUpClass()
+        cls.adm_client = cls.instance_usages_audit_log_admin_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_instance_usage_audit_logs(self):
         # list instance usage audit logs
         resp, body = self.adm_client.list_instance_usage_audit_logs()
@@ -44,12 +44,12 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
         for item in expected_items:
             self.assertIn(item, body)
 
-    @attr(type='gate')
-    def test_get_instance_usage_audit_log(self):
+    @test.attr(type='gate')
+    def test_list_instance_usage_audit_logs_with_filter_before(self):
         # Get instance usage audit log before specified time
-        now = datetime.datetime.now()
-        resp, body = self.adm_client.get_instance_usage_audit_log(
-            urllib.quote(now.strftime("%Y-%m-%d %H:%M:%S")))
+        ending_time = datetime.datetime(2012, 12, 24)
+        resp, body = self.adm_client.list_instance_usage_audit_logs(
+            urllib.quote(ending_time.strftime("%Y-%m-%d %H:%M:%S")))
 
         self.assertEqual(200, resp.status)
         expected_items = ['total_errors', 'total_instances', 'log',
@@ -58,7 +58,8 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
                           'period_beginning', 'num_hosts_not_run']
         for item in expected_items:
             self.assertIn(item, body)
+        self.assertEqual(body['period_ending'], "2012-12-23 23:00:00")
 
 
-class InstanceUsageAuditLogTestXML(InstanceUsageAuditLogTestJSON):
+class InstanceUsageAuditLogV3TestXML(InstanceUsageAuditLogV3TestJSON):
     _interface = 'xml'
