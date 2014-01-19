@@ -19,55 +19,14 @@
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.openstack.common import jsonutils
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 
-import tempest.test
 from tempest.test import attr
 from tempest.test import services
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
-
-
-class FloatingIPCheckTracker(object):
-    """
-    Checking VM connectivity through floating IP addresses is bound to fail
-    if the floating IP has not actually been associated with the VM yet.
-    This helper class facilitates checking for floating IP assignments on
-    VMs. It only checks for a given IP address once.
-    """
-
-    def __init__(self, compute_client, floating_ip_map):
-        self.compute_client = compute_client
-        self.unchecked = floating_ip_map.copy()
-
-    def run_checks(self):
-        """Check for any remaining unverified floating IPs
-
-        Gets VM details from nova and checks for floating IPs
-        within the returned information. Returns true when all
-        checks are complete and is suitable for use with
-        tempest.test.call_until_true()
-        """
-        to_delete = []
-        loggable_map = {}
-        for check_addr, server in self.unchecked.iteritems():
-            serverdata = self.compute_client.servers.get(server.id)
-            ip_addr = [addr for sublist in serverdata.networks.values() for
-                       addr in sublist]
-            if check_addr.floating_ip_address in ip_addr:
-                to_delete.append(check_addr)
-            else:
-                loggable_map[server.id] = check_addr
-
-        for to_del in to_delete:
-            del self.unchecked[to_del]
-
-        LOG.debug('Unchecked floating IPs: %s',
-                  jsonutils.dumps(loggable_map))
-        return len(self.unchecked) == 0
 
 
 class TestNetworkBasicOps(manager.NetworkScenarioTest):
@@ -234,17 +193,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             debug.log_ip_ns()
             raise
 
-    def _wait_for_floating_ip_association(self):
-        ip_tracker = FloatingIPCheckTracker(self.compute_client,
-                                            self.floating_ips)
-
-        self.assertTrue(
-            tempest.test.call_until_true(
-                ip_tracker.run_checks, CONF.compute.build_timeout,
-                CONF.compute.build_interval),
-            "Timed out while waiting for the floating IP assignments "
-            "to propagate")
-
     def _create_and_associate_floating_ips(self):
         public_network_id = CONF.network.public_network_id
         for server in self.servers.keys():
@@ -295,11 +243,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_networks()
         self._create_servers()
         self._create_and_associate_floating_ips()
-        self._wait_for_floating_ip_association()
         self._check_tenant_network_connectivity()
         self._check_public_network_connectivity(should_connect=True)
         self._disassociate_floating_ips()
         self._check_public_network_connectivity(should_connect=False)
         self._reassociate_floating_ips()
-        self._wait_for_floating_ip_association()
         self._check_public_network_connectivity(should_connect=True)
