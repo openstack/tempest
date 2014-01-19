@@ -17,9 +17,12 @@ import re
 from tempest.api.identity import base
 from tempest import clients
 from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import timeutils
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class BaseTrustsV3Test(base.BaseIdentityAdminTest):
@@ -27,6 +30,9 @@ class BaseTrustsV3Test(base.BaseIdentityAdminTest):
     def setUp(self):
         super(BaseTrustsV3Test, self).setUp()
         # Use alt_username as the trustee
+        if not CONF.identity_feature_enabled.trust:
+            raise self.skipException("Trusts aren't enabled")
+
         self.trustee_username = self.config.identity.alt_username
         self.trust_id = None
 
