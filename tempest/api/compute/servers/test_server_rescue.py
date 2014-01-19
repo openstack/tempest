@@ -70,7 +70,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         cls.rescue_password = resc_server['adminPass']
 
         cls.servers_client.rescue_server(
-            cls.rescue_id, cls.rescue_password)
+            cls.rescue_id, adminPass=cls.rescue_password)
         cls.servers_client.wait_for_server_status(cls.rescue_id, 'RESCUE')
 
     def setUp(self):
@@ -111,7 +111,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     @attr(type='smoke')
     def test_rescue_unrescue_instance(self):
         resp, body = self.servers_client.rescue_server(
-            self.server_id, self.password)
+            self.server_id, adminPass=self.password)
         self.assertEqual(200, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
         resp, body = self.servers_client.unrescue_server(self.server_id)
@@ -152,7 +152,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     @attr(type=['negative', 'gate'])
     def test_rescued_vm_attach_volume(self):
         # Rescue the server
-        self.servers_client.rescue_server(self.server_id, self.password)
+        self.servers_client.rescue_server(self.server_id,
+                                          adminPass=self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
         self.addCleanup(self._unrescue, self.server_id)
 
@@ -173,7 +174,8 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
             self.volume_to_detach['id'], 'in-use')
 
         # Rescue the server
-        self.servers_client.rescue_server(self.server_id, self.password)
+        self.servers_client.rescue_server(self.server_id,
+                                          adminPass=self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
         # addCleanup is a LIFO queue
         self.addCleanup(self._detach, self.server_id,
@@ -190,7 +192,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Rescue the server
         self.servers_client.rescue_server(
-            self.server_id, self.password)
+            self.server_id, adminPass=self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
         self.addCleanup(self._unrescue, self.server_id)
 
@@ -210,7 +212,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def test_rescued_vm_add_remove_security_group(self):
         # Rescue the server
         self.servers_client.rescue_server(
-            self.server_id, self.password)
+            self.server_id, adminPass=self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
 
         # Add Security group
