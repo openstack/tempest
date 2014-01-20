@@ -262,6 +262,8 @@ class BaseV3ComputeTest(BaseComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        # By default compute tests do not create network resources
+        cls.set_network_resources()
         super(BaseV3ComputeTest, cls).setUpClass()
         if not cls.config.compute_feature_enabled.api_v3:
             cls.tearDownClass()
