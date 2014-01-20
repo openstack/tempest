@@ -26,7 +26,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
 
     # list of plurals used for xml serialization
     PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
-               'fixed_ips', 'extensions']
+               'fixed_ips', 'extensions', 'extra_dhcp_opts']
 
     def get_rest_client(self, auth_provider):
         return RestClientXML(auth_provider)
@@ -74,6 +74,18 @@ class NetworkClientXML(client_base.NetworkClientBase):
             xml_elem = Element(name)
             xml_elem.add_attr("xsi:nil", "true")
             return xml_elem
+        elif isinstance(value, dict):
+            dict_element = Element(name)
+            for key, value in value.iteritems():
+                elem = self._get_element(key, value)
+                dict_element.append(elem)
+            return dict_element
+        elif isinstance(value, list):
+            list_element = Element(name)
+            for element in value:
+                elem = self._get_element(name[:-1], element)
+                list_element.append(elem)
+            return list_element
         else:
             return Element(name, value)
 
