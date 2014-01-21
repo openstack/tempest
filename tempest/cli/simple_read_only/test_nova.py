@@ -44,6 +44,13 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
 
     """
 
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.service_available.nova:
+            msg = ("%s skipped as Nova is not available" % cls.__name__)
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyNovaClientTest, cls).setUpClass()
+
     def test_admin_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
                           self.nova,
