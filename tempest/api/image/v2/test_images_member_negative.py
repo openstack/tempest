@@ -15,7 +15,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ImagesMemberNegativeTest(base.BaseV2MemeberImageTest):
+class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
     _interface = 'json'
 
     @attr(type=['negative', 'gate'])

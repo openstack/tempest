@@ -14,7 +14,7 @@ from tempest.api.image import base
 from tempest.test import attr
 
 
-class ImagesMemberTest(base.BaseV2MemeberImageTest):
+class ImagesMemberTest(base.BaseV2MemberImageTest):
     _interface = 'json'
 
     @attr(type='gate')
