@@ -22,11 +22,11 @@ from tempest import test
 load_tests = testscenarios.load_tests_apply_scenarios
 
 
-class FlavorsListNegativeTestJSON(base.BaseV2ComputeTest,
-                                  test.NegativeAutoTest):
+class FlavorsListNegativeV3Test(base.BaseV3ComputeTest,
+                                test.NegativeAutoTest):
     _interface = 'json'
-    _service = 'compute'
-    _schema_file = 'compute/flavors/flavors_list.json'
+    _service = 'computev3'
+    _schema_file = 'compute/flavors/flavors_list_v3.json'
 
     scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
 
@@ -35,17 +35,17 @@ class FlavorsListNegativeTestJSON(base.BaseV2ComputeTest,
         self.execute(self._schema_file)
 
 
-class FlavorDetailsNegativeTestJSON(base.BaseV2ComputeTest,
-                                    test.NegativeAutoTest):
+class FlavorDetailsNegativeV3Test(base.BaseV3ComputeTest,
+                                  test.NegativeAutoTest):
     _interface = 'json'
-    _service = 'compute'
-    _schema_file = 'compute/flavors/flavor_details.json'
+    _service = 'computev3'
+    _schema_file = 'compute/flavors/flavor_details_v3.json'
 
     scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorDetailsNegativeTestJSON, cls).setUpClass()
+        super(FlavorDetailsNegativeV3Test, cls).setUpClass()
         cls.set_resource("flavor", cls.flavor_ref)
 
     @test.attr(type=['negative', 'gate'])

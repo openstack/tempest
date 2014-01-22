@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
+class FlavorsAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Flavors API Create and Delete that require admin privileges
@@ -31,13 +31,10 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsAdminNegativeTestJSON, cls).setUpClass()
-        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
-            msg = "FlavorExtraData extension not enabled."
-            raise cls.skipException(msg)
+        super(FlavorsAdminNegativeV3Test, cls).setUpClass()
 
-        cls.client = cls.os_adm.flavors_client
-        cls.user_client = cls.os.flavors_client
+        cls.client = cls.flavors_admin_client
+        cls.user_client = cls.flavors_client
         cls.flavor_name_prefix = 'test_flavor_'
         cls.ram = 512
         cls.vcpus = 1
@@ -48,7 +45,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     def flavor_clean_up(self, flavor_id):
         resp, body = self.client.delete_flavor(flavor_id)
-        self.assertEqual(resp.status, 202)
+        self.assertEqual(resp.status, 204)
         self.client.wait_for_resource_deletion(flavor_id)
 
     @test.attr(type=['negative', 'gate'])
@@ -69,8 +66,8 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Delete the flavor
         new_flavor_id = flavor['id']
         resp_delete, body = self.client.delete_flavor(new_flavor_id)
-        self.assertEqual(200, resp.status)
-        self.assertEqual(202, resp_delete.status)
+        self.assertEqual(201, resp.status)
+        self.assertEqual(204, resp_delete.status)
 
         # Deleted flavors can be seen via detailed GET
         resp, flavor = self.client.get_flavor_details(new_flavor_id)
@@ -316,7 +313,7 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                  ephemeral=self.ephemeral,
                                                  swap=self.swap,
                                                  rxtx=self.rxtx)
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
         self.addCleanup(self.flavor_clean_up, flavor['id'])
 
         self.assertRaises(exceptions.Conflict,
@@ -336,7 +333,3 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_flavor,
                           nonexistent_flavor_id)
-
-
-class FlavorsAdminNegativeTestXML(FlavorsAdminNegativeTestJSON):
-    _interface = 'xml'
