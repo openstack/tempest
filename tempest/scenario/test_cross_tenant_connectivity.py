@@ -369,7 +369,6 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
                             msg)
         except Exception:
             debug.log_ip_ns()
-            self._log_console_output(servers=self.servers)
             raise
 
     def _test_in_tenant_block(self, tenant):
@@ -472,17 +471,21 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
     @attr(type='smoke')
     @services('compute', 'network')
     def test_cross_tenant_traffic(self):
-        for tenant_id in self.tenants.keys():
-            self._deploy_tenant(tenant_id)
-            self._verify_network_details(self.tenants[tenant_id])
-            self._verify_mac_addr(self.tenants[tenant_id])
+        try:
+            for tenant_id in self.tenants.keys():
+                self._deploy_tenant(tenant_id)
+                self._verify_network_details(self.tenants[tenant_id])
+                self._verify_mac_addr(self.tenants[tenant_id])
 
-        # in-tenant check
-        self._test_in_tenant_block(self.demo_tenant)
-        self._test_in_tenant_allow(self.demo_tenant)
+            # in-tenant check
+            self._test_in_tenant_block(self.demo_tenant)
+            self._test_in_tenant_allow(self.demo_tenant)
 
-        # cross tenant check
-        source_tenant = self.demo_tenant
-        dest_tenant = self.alt_tenant
-        self._test_cross_tenant_block(source_tenant, dest_tenant)
-        self._test_cross_tenant_allow(source_tenant, dest_tenant)
+            # cross tenant check
+            source_tenant = self.demo_tenant
+            dest_tenant = self.alt_tenant
+            self._test_cross_tenant_block(source_tenant, dest_tenant)
+            self._test_cross_tenant_allow(source_tenant, dest_tenant)
+        except Exception:
+            self._log_console_output(servers=self.servers)
+            raise
