@@ -272,9 +272,48 @@ class IdentityV3ClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['group']
 
+    def get_group(self, group_id):
+        """Get group details."""
+        resp, body = self.get('groups/%s' % group_id, self.headers)
+        body = json.loads(body)
+        return resp, body['group']
+
+    def update_group(self, group_id, **kwargs):
+        """Updates a group."""
+        resp, body = self.get_group(group_id)
+        name = kwargs.get('name', body['name'])
+        description = kwargs.get('description', body['description'])
+        post_body = {
+            'name': name,
+            'description': description
+        }
+        post_body = json.dumps({'group': post_body})
+        resp, body = self.patch('groups/%s' % group_id, post_body,
+                                self.headers)
+        body = json.loads(body)
+        return resp, body['group']
+
     def delete_group(self, group_id):
         """Delete a group."""
         resp, body = self.delete('groups/%s' % str(group_id))
+        return resp, body
+
+    def add_group_user(self, group_id, user_id):
+        """Add user into group."""
+        resp, body = self.put('groups/%s/users/%s' % (group_id, user_id),
+                              None, self.headers)
+        return resp, body
+
+    def list_group_users(self, group_id):
+        """List users in group."""
+        resp, body = self.get('groups/%s/users' % group_id, self.headers)
+        body = json.loads(body)
+        return resp, body['users']
+
+    def delete_group_user(self, group_id, user_id):
+        """Delete user in group."""
+        resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id),
+                                 self.headers)
         return resp, body
 
     def assign_user_role_on_project(self, project_id, user_id, role_id):

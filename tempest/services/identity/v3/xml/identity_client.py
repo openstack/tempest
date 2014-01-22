@@ -50,6 +50,14 @@ class IdentityV3ClientXML(RestClientXML):
                 array.append(xml_to_json(child))
         return array
 
+    def _parse_group_users(self, node):
+        array = []
+        for child in node.getchildren():
+            tag_list = child.tag.split('}', 1)
+            if tag_list[1] == "user":
+                array.append(xml_to_json(child))
+        return array
+
     def _parse_roles(self, node):
         array = []
         for child in node.getchildren():
@@ -316,9 +324,48 @@ class IdentityV3ClientXML(RestClientXML):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def get_group(self, group_id):
+        """Get group details."""
+        resp, body = self.get('groups/%s' % group_id, self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
+    def update_group(self, group_id, **kwargs):
+        """Updates a group."""
+        resp, body = self.get_group(group_id)
+        name = kwargs.get('name', body['name'])
+        description = kwargs.get('description', body['description'])
+        post_body = Element("group",
+                            xmlns=XMLNS,
+                            name=name,
+                            description=description)
+        resp, body = self.patch('groups/%s' % group_id,
+                                str(Document(post_body)),
+                                self.headers)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
     def delete_group(self, group_id):
         """Delete a group."""
         resp, body = self.delete('groups/%s' % group_id, self.headers)
+        return resp, body
+
+    def add_group_user(self, group_id, user_id):
+        """Add user into group."""
+        resp, body = self.put('groups/%s/users/%s' % (group_id, user_id),
+                              '', self.headers)
+        return resp, body
+
+    def list_group_users(self, group_id):
+        """List users in group."""
+        resp, body = self.get('groups/%s/users' % group_id, self.headers)
+        body = self._parse_group_users(etree.fromstring(body))
+        return resp, body
+
+    def delete_group_user(self, group_id, user_id):
+        """Delete user in group."""
+        resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id),
+                                 self.headers)
         return resp, body
 
     def assign_user_role_on_project(self, project_id, user_id, role_id):
