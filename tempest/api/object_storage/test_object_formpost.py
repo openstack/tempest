@@ -1,4 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
 #
 # Author: Christian Schwede <christian.schwede@enovance.com>

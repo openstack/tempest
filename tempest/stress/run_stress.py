@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 Quanta Research Cambridge, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
