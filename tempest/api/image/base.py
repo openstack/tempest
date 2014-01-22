@@ -29,6 +29,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources()
         super(BaseImageTest, cls).setUpClass()
         cls.created_images = []
         cls._interface = 'json'
