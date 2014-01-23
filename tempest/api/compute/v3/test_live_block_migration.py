@@ -162,10 +162,3 @@ class LiveBlockMigrationV3TestJSON(base.BaseV3ComputeAdminTest):
             cls.servers_client.delete_server(server_id)
 
         super(LiveBlockMigrationV3TestJSON, cls).tearDownClass()
-
-
-class LiveBlockMigrationV3TestXML(LiveBlockMigrationV3TestJSON):
-    _host_key = (
-        '{http://docs.openstack.org/compute/ext/'
-        'extended_server_attributes/api/v3}host')
-    _interface = 'xml'

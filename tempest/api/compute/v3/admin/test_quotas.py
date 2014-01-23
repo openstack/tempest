@@ -147,7 +147,3 @@ class QuotasAdminV3TestJSON(base.BaseV3ComputeAdminTest):
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
         self.assertRaises(exceptions.OverLimit, self.create_test_server)
-
-
-class QuotasAdminV3TestXML(QuotasAdminV3TestJSON):
-    _interface = 'xml'

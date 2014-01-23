@@ -167,7 +167,3 @@ class ServerRescueV3TestJSON(base.BaseV3ComputeTest):
                           self.servers_client.detach_volume,
                           self.server_id,
                           self.volume_to_detach['id'])
-
-
-class ServerRescueV3TestXML(ServerRescueV3TestJSON):
-    _interface = 'xml'

@@ -57,7 +57,3 @@ class InstanceUsageAuditLogV3TestJSON(base.BaseV3ComputeAdminTest):
         for item in expected_items:
             self.assertIn(item, body)
         self.assertEqual(body['period_ending'], "2012-12-23 23:00:00")
-
-
-class InstanceUsageAuditLogV3TestXML(InstanceUsageAuditLogV3TestJSON):
-    _interface = 'xml'

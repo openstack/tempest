@@ -428,7 +428,3 @@ class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
         self.assertRaises(exceptions.Conflict,
                           self.client.unshelve_server,
                           self.server_id)
-
-
-class ServersNegativeV3TestXML(ServersNegativeV3TestJSON):
-    _interface = 'xml'

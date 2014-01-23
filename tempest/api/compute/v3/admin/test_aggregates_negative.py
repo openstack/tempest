@@ -188,7 +188,3 @@ class AggregatesAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
         self.assertRaises(exceptions.NotFound, self.client.remove_host,
                           aggregate['id'], non_exist_host)
-
-
-class AggregatesAdminNegativeV3TestXML(AggregatesAdminNegativeV3TestJSON):
-    _interface = 'xml'

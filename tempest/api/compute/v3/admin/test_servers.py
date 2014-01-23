@@ -155,7 +155,3 @@ class ServersAdminV3TestJSON(base.BaseV3ComputeAdminTest):
         resp, server = self.non_admin_client.get_server(rebuilt_server['id'])
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
-
-
-class ServersAdminV3TestXML(ServersAdminV3TestJSON):
-    _interface = 'xml'

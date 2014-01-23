@@ -73,7 +73,3 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_image_metadata_item,
                           data_utils.rand_uuid(), 'key1')
-
-
-class ImagesMetadataTestXML(ImagesMetadataTestJSON):
-    _interface = 'xml'

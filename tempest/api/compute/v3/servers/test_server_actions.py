@@ -402,7 +402,3 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         resp, server = self.servers_client.start(self.server_id)
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
-
-
-class ServerActionsV3TestXML(ServerActionsV3TestJSON):
-    _interface = 'xml'

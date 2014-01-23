@@ -53,7 +53,3 @@ class AZAdminV3TestJSON(base.BaseV3ComputeAdminTest):
             self.non_adm_client.get_availability_zone_list()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
-
-
-class AZAdminV3TestXML(AZAdminV3TestJSON):
-    _interface = 'xml'

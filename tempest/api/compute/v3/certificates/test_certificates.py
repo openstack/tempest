@@ -32,7 +32,3 @@ class CertificatesV3TestJSON(base.BaseV3ComputeTest):
         self.assertEqual(200, resp.status)
         self.assertIn('data', body)
         self.assertIn('private_key', body)
-
-
-class CertificatesV3TestXML(CertificatesV3TestJSON):
-    _interface = 'xml'

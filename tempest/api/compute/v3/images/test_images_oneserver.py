@@ -130,7 +130,3 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         image_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.client.delete_image, image_id)
         self.assertEqual('202', resp['status'])
-
-
-class ImagesOneServerTestXML(ImagesOneServerTestJSON):
-    _interface = 'xml'

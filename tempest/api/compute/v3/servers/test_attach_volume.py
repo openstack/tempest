@@ -112,7 +112,3 @@ class AttachVolumeV3TestJSON(base.BaseV3ComputeTest):
                                     server['admin_password'])
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
-
-
-class AttachVolumeV3TestXML(AttachVolumeV3TestJSON):
-    _interface = 'xml'

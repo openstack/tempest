@@ -86,7 +86,3 @@ class HostsAdminV3TestJSON(base.BaseV3ComputeAdminTest):
             self.assertIsNotNone(host_resource['memory_mb'])
             self.assertIsNotNone(host_resource['project'])
             self.assertEqual(hostname, host_resource['host'])
-
-
-class HostsAdminV3TestXML(HostsAdminV3TestJSON):
-    _interface = 'xml'

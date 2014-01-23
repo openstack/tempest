@@ -250,7 +250,3 @@ class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
         params = {'limit': 1}
         resp, servers = self.client.list_servers_with_detail(params)
         self.assertEqual(1, len(servers['servers']))
-
-
-class ListServerFiltersV3TestXML(ListServerFiltersV3TestJSON):
-    _interface = 'xml'

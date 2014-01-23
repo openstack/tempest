@@ -126,7 +126,3 @@ class ServersV3TestJSON(base.BaseV3ComputeTest):
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('2001:2001::3', server['os-access-ips:access_ip_v6'])
-
-
-class ServersV3TestXML(ServersV3TestJSON):
-    _interface = 'xml'

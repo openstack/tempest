@@ -64,7 +64,3 @@ class ServicesAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
         resp, services = self.client.list_services(params)
         self.assertEqual(200, resp.status)
         self.assertEqual(0, len(services))
-
-
-class ServicesAdminNegativeV3TestXML(ServicesAdminNegativeV3TestJSON):
-    _interface = 'xml'

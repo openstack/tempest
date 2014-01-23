@@ -39,8 +39,3 @@ class InstanceUsageLogNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertRaises(exceptions.BadRequest,
                           self.adm_client.list_instance_usage_audit_logs,
                           "invalid_time")
-
-
-class InstanceUsageLogNegativeV3TestXML(
-    InstanceUsageLogNegativeV3TestJSON):
-    _interface = 'xml'
