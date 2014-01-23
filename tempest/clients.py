@@ -78,31 +78,6 @@ from tempest.services.compute.v3.json.tenant_usages_client import \
     TenantUsagesV3ClientJSON
 from tempest.services.compute.v3.json.version_client import \
     VersionV3ClientJSON
-from tempest.services.compute.v3.xml.aggregates_client import \
-    AggregatesV3ClientXML
-from tempest.services.compute.v3.xml.availability_zone_client import \
-    AvailabilityZoneV3ClientXML
-from tempest.services.compute.v3.xml.certificates_client import \
-    CertificatesV3ClientXML
-from tempest.services.compute.v3.xml.extensions_client import \
-    ExtensionsV3ClientXML
-from tempest.services.compute.v3.xml.flavors_client import FlavorsV3ClientXML
-from tempest.services.compute.v3.xml.hosts_client import HostsV3ClientXML
-from tempest.services.compute.v3.xml.hypervisor_client import \
-    HypervisorV3ClientXML
-from tempest.services.compute.v3.xml.instance_usage_audit_log_client import \
-    InstanceUsagesAuditLogV3ClientXML
-from tempest.services.compute.v3.xml.interfaces_client import \
-    InterfacesV3ClientXML
-from tempest.services.compute.v3.xml.keypairs_client import KeyPairsV3ClientXML
-from tempest.services.compute.v3.xml.quotas_client import \
-    QuotasV3ClientXML
-from tempest.services.compute.v3.xml.servers_client import ServersV3ClientXML
-from tempest.services.compute.v3.xml.services_client import \
-    ServicesV3ClientXML
-from tempest.services.compute.v3.xml.tenant_usages_client import \
-    TenantUsagesV3ClientXML
-from tempest.services.compute.v3.xml.version_client import VersionV3ClientXML
 from tempest.services.compute.xml.aggregates_client import AggregatesClientXML
 from tempest.services.compute.xml.availability_zone_client import \
     AvailabilityZoneClientXML
@@ -238,20 +213,13 @@ class Manager(object):
 
         if interface == 'xml':
             self.certificates_client = CertificatesClientXML(*client_args)
-            self.certificates_v3_client = CertificatesV3ClientXML(*client_args)
             self.baremetal_client = BaremetalClientXML(*client_args)
             self.servers_client = ServersClientXML(*client_args)
-            self.servers_v3_client = ServersV3ClientXML(*client_args)
             self.limits_client = LimitsClientXML(*client_args)
             self.images_client = ImagesClientXML(*client_args)
-            self.keypairs_v3_client = KeyPairsV3ClientXML(*client_args)
             self.keypairs_client = KeyPairsClientXML(*client_args)
-            self.keypairs_v3_client = KeyPairsV3ClientXML(*client_args)
             self.quotas_client = QuotasClientXML(*client_args)
-            self.quotas_v3_client = QuotasV3ClientXML(*client_args)
             self.flavors_client = FlavorsClientXML(*client_args)
-            self.flavors_v3_client = FlavorsV3ClientXML(*client_args)
-            self.extensions_v3_client = ExtensionsV3ClientXML(*client_args)
             self.extensions_client = ExtensionsClientXML(*client_args)
             self.volumes_extensions_client = VolumesExtensionsClientXML(
                 *client_args)
@@ -264,38 +232,26 @@ class Manager(object):
             self.token_client = TokenClientXML(CONF)
             self.security_groups_client = SecurityGroupsClientXML(
                 *client_args)
-            self.interfaces_v3_client = InterfacesV3ClientXML(*client_args)
             self.interfaces_client = InterfacesClientXML(*client_args)
             self.endpoints_client = EndPointClientXML(*client_args)
             self.fixed_ips_client = FixedIPsClientXML(*client_args)
-            self.availability_zone_v3_client = AvailabilityZoneV3ClientXML(
-                *client_args)
             self.availability_zone_client = AvailabilityZoneClientXML(
                 *client_args)
-            self.services_v3_client = ServicesV3ClientXML(*client_args)
             self.service_client = ServiceClientXML(*client_args)
-            self.aggregates_v3_client = AggregatesV3ClientXML(*client_args)
             self.aggregates_client = AggregatesClientXML(*client_args)
             self.services_client = ServicesClientXML(*client_args)
-            self.tenant_usages_v3_client = TenantUsagesV3ClientXML(
-                *client_args)
             self.tenant_usages_client = TenantUsagesClientXML(*client_args)
-            self.version_v3_client = VersionV3ClientXML(*client_args)
             self.policy_client = PolicyClientXML(*client_args)
             self.hosts_client = HostsClientXML(*client_args)
-            self.hypervisor_v3_client = HypervisorV3ClientXML(*client_args)
             self.hypervisor_client = HypervisorClientXML(*client_args)
             self.token_v3_client = V3TokenClientXML(*client_args)
             self.network_client = NetworkClientXML(*client_args)
             self.credentials_client = CredentialsClientXML(*client_args)
             self.instance_usages_audit_log_client = \
                 InstanceUsagesAuditLogClientXML(*client_args)
-            self.instance_usages_audit_log_v3_client = \
-                InstanceUsagesAuditLogV3ClientXML(*client_args)
             self.volume_hosts_client = VolumeHostsClientXML(*client_args)
             self.volumes_extension_client = VolumeExtensionClientXML(
                 *client_args)
-            self.hosts_v3_client = HostsV3ClientXML(*client_args)
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientXML(

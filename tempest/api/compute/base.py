@@ -261,6 +261,11 @@ class BaseV3ComputeTest(BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         # By default compute tests do not create network resources
+        if cls._interface == "xml":
+            skip_msg = ("XML interface is being removed from Nova v3. "
+                        "%s will be removed shortly" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
         cls.set_network_resources()
         super(BaseV3ComputeTest, cls).setUpClass()
         if not cls.config.compute_feature_enabled.api_v3:
