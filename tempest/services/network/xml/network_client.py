@@ -277,6 +277,13 @@ class NetworkClientXML(client_base.NetworkClientBase):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def add_dhcp_agent_to_network(self, agent_id, network_id):
+        uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
+        network = common.Element("network_id", network_id)
+        resp, body = self.post(uri, str(common.Document(network)))
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
