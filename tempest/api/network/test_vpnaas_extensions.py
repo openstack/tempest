@@ -35,10 +35,10 @@ class VPNaaSJSON(base.BaseNetworkTest):
 
     @classmethod
     def setUpClass(cls):
-        super(VPNaaSJSON, cls).setUpClass()
         if not test.is_extension_enabled('vpnaas', 'network'):
             msg = "vpnaas extension not enabled."
             raise cls.skipException(msg)
+        super(VPNaaSJSON, cls).setUpClass()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.router = cls.create_router(
