@@ -63,13 +63,13 @@ Tempest is not tied to any single test runner, but testr is the most commonly
 used tool. After setting up your configuration file, you can execute
 the set of Tempest tests by using ``testr`` ::
 
-    $> testr run --parallel tempest
+    $> testr run --parallel
 
 To run one single test  ::
 
     $> testr run --parallel tempest.api.compute.servers.test_servers_negative.ServersNegativeTestJSON.test_reboot_non_existent_server
 
-Alternatively, you can use the run_tests.sh script which will create a venv
+Alternatively, you can use the run_tempest.sh script which will create a venv
 and run the tests or use tox to do the same.
 
 Configuration
@@ -101,3 +101,20 @@ Additionally, devstack only provides a single image which Nova can use.
 For the moment, the best solution is to provide the same image uuid for
 both image_ref and image_ref_alt. Tempest will skip tests as needed if it
 detects that both images are the same.
+
+Unit Tests
+----------
+
+Tempest also has a set of unit tests which test the tempest code itself. These
+tests can be run by specifing the test discovery path::
+
+    $> OS_TEST_PATH=./tempest/tests testr run --parallel
+
+By setting OS_TEST_PATH to ./tempest/tests it specifies that test discover
+should only be run on the unit test directory. The default value of OS_TEST_PATH
+is OS_TEST_PATH=./tempest/test_discover which will only run test discover on the
+tempest suite.
+
+Alternatively, you can use the run_tests.sh script which will create a venv and
+run the unit tests. There are also the py26, py27, or py33 tox jobs which will
+run the unit tests with the corresponding version of python.
