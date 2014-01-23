@@ -33,18 +33,18 @@ class VolumesNegativeTest(base.BaseV2ComputeTest):
             raise cls.skipException(skip_msg)
 
     @attr(type=['negative', 'gate'])
-    def test_volume_get_nonexistant_volume_id(self):
-        # Negative: Should not be able to get details of nonexistant volume
-        # Creating a nonexistant volume id
-        # Trying to GET a non existant volume
+    def test_volume_get_nonexistent_volume_id(self):
+        # Negative: Should not be able to get details of nonexistent volume
+        # Creating a nonexistent volume id
+        # Trying to GET a non existent volume
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           str(uuid.uuid4()))
 
     @attr(type=['negative', 'gate'])
-    def test_volume_delete_nonexistant_volume_id(self):
-        # Negative: Should not be able to delete nonexistant Volume
-        # Creating nonexistant volume id
-        # Trying to DELETE a non existant volume
+    def test_volume_delete_nonexistent_volume_id(self):
+        # Negative: Should not be able to delete nonexistent Volume
+        # Creating nonexistent volume id
+        # Trying to DELETE a non existent volume
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           str(uuid.uuid4()))
 

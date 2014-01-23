@@ -220,7 +220,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
 
     @attr(type=['negative', 'gate'])
-    def test_get_nonexistant_image(self):
+    def test_get_nonexistent_image(self):
         # Negative test: GET on non-existent image should fail
         self.assertRaises(exceptions.NotFound, self.client.get_image, 999)
 

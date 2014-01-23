@@ -183,7 +183,7 @@ class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
                           networks=networks)
 
     @test.attr(type=['negative', 'gate'])
-    def test_create_with_non_existant_keypair(self):
+    def test_create_with_non_existent_keypair(self):
         # Pass a non-existent keypair while creating a server
 
         key_name = data_utils.rand_name('key')
