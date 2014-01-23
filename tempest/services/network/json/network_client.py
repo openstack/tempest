@@ -310,6 +310,20 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.loads(body)
         return resp, body
 
+    def add_router_to_l3_agent(self, agent_id, router_id):
+        uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
+        post_body = {"router_id": router_id}
+        body = json.dumps(post_body)
+        resp, body = self.post(uri, body)
+        body = json.loads(body)
+        return resp, body
+
+    def remove_router_from_l3_agent(self, agent_id, router_id):
+        uri = '%s/agents/%s/l3-routers/%s' % (
+            self.uri_prefix, agent_id, router_id)
+        resp, body = self.delete(uri)
+        return resp, body
+
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
         resp, body = self.get(uri)
