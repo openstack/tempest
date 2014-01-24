@@ -159,6 +159,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self.cinder_list()
         self.cinder_show()
         self.nova_volume_attach()
+        self.addCleanup(self.nova_volume_detach)
         self.cinder_show()
         self.nova_reboot()
 
@@ -167,5 +168,3 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self._create_loginable_secgroup_rule_nova()
         self.ssh_to_server()
         self.check_partitions()
-
-        self.nova_volume_detach()
