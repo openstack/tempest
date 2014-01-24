@@ -226,7 +226,7 @@
 
 # Timeout in seconds to wait for ping to succeed. (integer
 # value)
-#ping_timeout=60
+#ping_timeout=120
 
 # Timeout in seconds to wait for authentication to succeed.
 # (integer value)
