@@ -32,6 +32,10 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         resp, body = self.admin_client.list_agents()
         self.assertEqual('200', resp['status'])
         agents = body['agents']
+        # Hearthbeats must be excluded from comparison
+        self.agent.pop('heartbeat_timestamp', None)
+        for agent in agents:
+            agent.pop('heartbeat_timestamp', None)
         self.assertIn(self.agent, agents)
 
     @attr(type=['smoke'])
