@@ -106,7 +106,3 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
-
-
-class ImagesMetadataTestXML(ImagesMetadataTestJSON):
-    _interface = 'xml'

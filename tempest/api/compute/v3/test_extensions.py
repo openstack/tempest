@@ -49,7 +49,3 @@ class ExtensionsV3TestJSON(base.BaseV3ComputeTest):
         resp, extension = self.extensions_client.get_extension('servers')
         self.assertEqual(200, resp.status)
         self.assertEqual('servers', extension['alias'])
-
-
-class ExtensionsV3TestXML(ExtensionsV3TestJSON):
-    _interface = 'xml'

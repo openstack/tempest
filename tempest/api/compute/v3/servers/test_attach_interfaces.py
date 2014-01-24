@@ -119,7 +119,3 @@ class AttachInterfacesV3TestJSON(base.BaseV3ComputeTest):
 
         _ifs = self._test_delete_interface(server, ifs)
         self.assertEqual(len(ifs) - 1, len(_ifs))
-
-
-class AttachInterfacesV3TestXML(AttachInterfacesV3TestJSON):
-    _interface = 'xml'

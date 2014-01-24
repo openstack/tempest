@@ -87,7 +87,3 @@ class MultipleCreateV3TestJSON(base.BaseV3ComputeTest):
                                                    return_reservation_id=True)
         self.assertEqual(resp['status'], '202')
         self.assertIn('reservation_id', body)
-
-
-class MultipleCreateV3TestXML(MultipleCreateV3TestJSON):
-    _interface = 'xml'

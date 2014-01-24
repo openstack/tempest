@@ -93,7 +93,3 @@ class KeyPairsNegativeV3TestJSON(base.BaseV3ComputeTest):
         k_name = 'key_/.\@:'
         self.assertRaises(exceptions.BadRequest, self._create_keypair,
                           k_name)
-
-
-class KeyPairsNegativeV3TestXML(KeyPairsNegativeV3TestJSON):
-    _interface = 'xml'

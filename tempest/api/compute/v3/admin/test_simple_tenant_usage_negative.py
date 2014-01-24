@@ -71,7 +71,3 @@ class TenantUsagesNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
                   'detailed': int(bool(True))}
         self.assertRaises(exceptions.Unauthorized,
                           self.client.list_tenant_usages, params)
-
-
-class TenantUsagesNegativeV3TestXML(TenantUsagesNegativeV3TestJSON):
-    _interface = 'xml'

@@ -97,7 +97,3 @@ class HypervisorAdminV3TestJSON(base.BaseV3ComputeAdminTest):
             hypers[0]['hypervisor_hostname'])
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hypers) > 0)
-
-
-class HypervisorAdminV3TestXML(HypervisorAdminV3TestJSON):
-    _interface = 'xml'

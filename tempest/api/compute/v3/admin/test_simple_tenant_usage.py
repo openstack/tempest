@@ -83,7 +83,3 @@ class TenantUsagesV3TestJSON(base.BaseV3ComputeAdminTest):
 
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
-
-
-class TenantUsagesV3TestXML(TenantUsagesV3TestJSON):
-    _interface = 'xml'

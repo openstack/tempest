@@ -223,7 +223,3 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
     def test_get_nonexistent_image(self):
         # Negative test: GET on non-existent image should fail
         self.assertRaises(exceptions.NotFound, self.client.get_image, 999)
-
-
-class ListImageFiltersTestXML(ListImageFiltersTestJSON):
-    _interface = 'xml'

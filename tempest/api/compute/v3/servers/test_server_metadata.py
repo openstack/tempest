@@ -209,7 +209,3 @@ class ServerMetadataV3TestJSON(base.BaseV3ComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.client.set_server_metadata,
                           self.server_id, meta=meta, no_metadata_field=True)
-
-
-class ServerMetadataV3TestXML(ServerMetadataV3TestJSON):
-    _interface = 'xml'

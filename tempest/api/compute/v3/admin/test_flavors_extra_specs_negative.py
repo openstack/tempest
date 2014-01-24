@@ -124,7 +124,3 @@ class FlavorsExtraSpecsNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
                           "key1",
                           key1="value",
                           key2="value")
-
-
-class FlavorsExtraSpecsNegativeV3TestXML(FlavorsExtraSpecsNegativeV3TestJSON):
-    _interface = 'xml'

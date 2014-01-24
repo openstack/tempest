@@ -120,7 +120,3 @@ class FlavorsExtraSpecsV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertEqual(resp.status, 200)
         self.assertEqual(body['key1'], 'value1')
         self.assertNotIn('key2', body)
-
-
-class FlavorsExtraSpecsV3TestXML(FlavorsExtraSpecsV3TestJSON):
-    _interface = 'xml'

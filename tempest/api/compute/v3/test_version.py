@@ -28,7 +28,3 @@ class VersionV3TestJSON(base.BaseV3ComputeTest):
         self.assertEqual(200, resp.status)
         self.assertIn("id", version)
         self.assertEqual("v3.0", version["id"])
-
-
-class VersionV3TestXML(VersionV3TestJSON):
-    _interface = 'xml'

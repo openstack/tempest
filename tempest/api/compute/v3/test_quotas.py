@@ -63,7 +63,3 @@ class QuotasV3TestJSON(base.BaseV3ComputeTest):
         resp, tenant_quota_set = self.client.get_quota_set(self.tenant_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(defualt_quota_set, tenant_quota_set)
-
-
-class QuotasV3TestXML(QuotasV3TestJSON):
-    _interface = 'xml'

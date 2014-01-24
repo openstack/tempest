@@ -118,7 +118,3 @@ class ImagesV3TestJSON(base.BaseV3ComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.servers_client.create_image,
                           test_uuid, snapshot_name)
-
-
-class ImagesV3TestXML(ImagesV3TestJSON):
-    _interface = 'xml'

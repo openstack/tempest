@@ -168,7 +168,3 @@ class HostsAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.reboot_host,
                           hostname)
-
-
-class HostsAdminNegativeV3TestXML(HostsAdminNegativeV3TestJSON):
-    _interface = 'xml'

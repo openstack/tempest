@@ -116,7 +116,3 @@ class KeyPairsV3TestJSON(base.BaseV3ComputeTest):
         self.assertEqual(key_name, k_name,
                          "The created keypair name is not equal "
                          "to the requested name!")
-
-
-class KeyPairsV3TestXML(KeyPairsV3TestJSON):
-    _interface = 'xml'

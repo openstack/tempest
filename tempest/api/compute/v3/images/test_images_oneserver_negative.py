@@ -154,7 +154,3 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.image_ids.remove(image_id)
 
         self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
-
-
-class ImagesOneServerNegativeTestXML(ImagesOneServerNegativeTestJSON):
-    _interface = 'xml'

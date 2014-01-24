@@ -222,11 +222,3 @@ class ServersV3TestManualDisk(ServersV3TestJSON):
             msg = "DiskConfig extension not enabled."
             raise cls.skipException(msg)
         super(ServersV3TestManualDisk, cls).setUpClass()
-
-
-class ServersV3TestXML(ServersV3TestJSON):
-    _interface = 'xml'
-
-
-class ServersWithSpecificFlavorV3TestXML(ServersWithSpecificFlavorV3TestJSON):
-    _interface = 'xml'
