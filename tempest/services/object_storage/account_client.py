@@ -93,6 +93,14 @@ class AccountClient(RestClient):
         body = json.loads(body)
         return resp, body
 
+    def list_extensions(self):
+        _base_url = self.base_url
+        self.base_url = "/".join(self.base_url.split("/")[:-2])
+        resp, body = self.get('info')
+        self.base_url = _base_url
+        body = json.loads(body)
+        return resp, body
+
 
 class AccountClientCustomizedHeader(RestClient):
 

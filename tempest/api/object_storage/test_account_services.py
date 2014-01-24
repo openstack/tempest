@@ -16,6 +16,7 @@
 import random
 
 from tempest.api.object_storage import base
+from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
@@ -50,6 +51,13 @@ class AccountTest(base.BaseObjectTest):
         container_names = [c['name'] for c in container_list]
         for container_name in self.containers:
             self.assertIn(container_name, container_names)
+
+    @attr(type='smoke')
+    def test_list_extensions(self):
+        resp, extensions = self.account_client.list_extensions()
+
+        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
     @attr(type='smoke')
     def test_list_containers_with_limit(self):
