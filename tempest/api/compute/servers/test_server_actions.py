@@ -230,7 +230,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
         # create the first and the second backup
-        backup1 = data_utils.rand_name('backup')
+        backup1 = data_utils.rand_name('backup-1')
         resp, _ = self.servers_client.create_backup(self.server_id,
                                                     'daily',
                                                     2,
@@ -247,7 +247,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         self.os.image_client.wait_for_image_status(image1_id, 'active')
 
-        backup2 = data_utils.rand_name('backup')
+        backup2 = data_utils.rand_name('backup-2')
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         resp, _ = self.servers_client.create_backup(self.server_id,
                                                     'daily',
@@ -275,7 +275,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         # create the third one, due to the rotation is 2,
         # the first one will be deleted
-        backup3 = data_utils.rand_name('backup')
+        backup3 = data_utils.rand_name('backup-3')
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
         resp, _ = self.servers_client.create_backup(self.server_id,
                                                     'daily',
@@ -293,7 +293,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             sort_key='created_at',
             sort_dir='asc')
         self.assertEqual(200, resp.status)
-        self.assertEqual(2, len(image_list))
+        self.assertEqual(2, len(image_list),
+                         'Unexpected number of images for '
+                         'v2:test_create_backup; was the oldest backup not '
+                         'yet deleted? Image list: %s' %
+                         [image['name'] for image in image_list])
         self.assertEqual((backup2, backup3),
                          (image_list[0]['name'], image_list[1]['name']))
 
