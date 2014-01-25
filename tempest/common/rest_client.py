@@ -456,18 +456,17 @@ class RestClient(object):
         if resp.status < 400:
             return
 
-        JSON_ENC = ['application/json; charset=UTF-8', 'application/json',
-                    'application/json; charset=utf-8']
+        JSON_ENC = ['application/json', 'application/json; charset=utf-8']
         # NOTE(mtreinish): This is for compatibility with Glance and swift
         # APIs. These are the return content types that Glance api v1
         # (and occasionally swift) are using.
-        TXT_ENC = ['text/plain', 'text/plain; charset=UTF-8',
-                   'text/html; charset=UTF-8', 'text/plain; charset=utf-8']
-        XML_ENC = ['application/xml', 'application/xml; charset=UTF-8']
+        TXT_ENC = ['text/plain', 'text/html', 'text/html; charset=utf-8',
+                   'text/plain; charset=utf-8']
+        XML_ENC = ['application/xml', 'application/xml; charset=utf-8']
 
-        if ctype in JSON_ENC or ctype in XML_ENC:
+        if ctype.lower() in JSON_ENC or ctype.lower() in XML_ENC:
             parse_resp = True
-        elif ctype in TXT_ENC:
+        elif ctype.lower() in TXT_ENC:
             parse_resp = False
         else:
             raise exceptions.RestClientException(str(resp.status))
