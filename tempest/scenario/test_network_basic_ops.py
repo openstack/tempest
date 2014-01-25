@@ -186,8 +186,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                     key.private_key)
         except Exception:
             LOG.exception('Tenant connectivity check failed')
-            self._log_console_output(
-                servers=[server for server, _key in self.servers])
+            self._log_console_output(servers=self.servers.keys())
             debug.log_ip_ns()
             raise
 
@@ -214,8 +213,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                             should_connect=should_connect)
         except Exception:
             LOG.exception('Public network connectivity check failed')
-            self._log_console_output(
-                servers=[server for server, _key in self.servers])
+            self._log_console_output(servers=self.servers.keys())
             debug.log_ip_ns()
             raise
 
