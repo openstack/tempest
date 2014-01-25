@@ -84,7 +84,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # Log in and verify the boot time has changed
             linux_client = RemoteClient(server, self.ssh_user, self.password)
             new_boot_time = linux_client.get_boot_time()
-            self.assertGreater(new_boot_time, boot_time)
+            self.assertTrue(new_boot_time > boot_time,
+                            '%s > %s' % (new_boot_time, boot_time))
 
     @skip_because(bug="1014647")
     @attr(type='smoke')
@@ -104,7 +105,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # Log in and verify the boot time has changed
             linux_client = RemoteClient(server, self.ssh_user, self.password)
             new_boot_time = linux_client.get_boot_time()
-            self.assertGreater(new_boot_time, boot_time)
+            self.assertTrue(new_boot_time > boot_time,
+                            '%s > %s' % (new_boot_time, boot_time))
 
     @attr(type='smoke')
     def test_rebuild_server(self):
