@@ -55,10 +55,17 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
         cls.alt_client = cls.os_alt.volumes_client
         cls.adm_client = cls.os_adm.volumes_client
 
+    def _delete_volume(self, volume_id):
+        # Delete the specified volume using admin creds
+        resp, _ = self.adm_client.delete_volume(volume_id)
+        self.assertEqual(202, resp.status)
+        self.adm_client.wait_for_resource_deletion(volume_id)
+
     @attr(type='gate')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
+        self.addCleanup(self._delete_volume, volume['id'])
 
         # Create a volume transfer
         resp, transfer = self.client.create_volume_transfer(volume['id'])
@@ -88,6 +95,7 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
     def test_create_list_delete_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()
+        self.addCleanup(self._delete_volume, volume['id'])
 
         # Create a volume transfer
         resp, body = self.client.create_volume_transfer(volume['id'])
