@@ -15,6 +15,7 @@
 import os
 
 import fixtures
+import mock
 import testtools
 
 from tempest.openstack.common.fixture import moxstubout
@@ -36,3 +37,22 @@ class TestCase(testtools.TestCase):
         mox_fixture = self.useFixture(moxstubout.MoxStubout())
         self.mox = mox_fixture.mox
         self.stubs = mox_fixture.stubs
+
+    def patch(self, target, **kwargs):
+        """
+        Returns a started `mock.patch` object for the supplied target.
+
+        The caller may then call the returned patcher to create a mock object.
+
+        The caller does not need to call stop() on the returned
+        patcher object, as this method automatically adds a cleanup
+        to the test class to stop the patcher.
+
+        :param target: String module.class or module.object expression to patch
+        :param **kwargs: Passed as-is to `mock.patch`. See mock documentation
+                         for details.
+        """
+        p = mock.patch(target, **kwargs)
+        m = p.start()
+        self.addCleanup(p.stop)
+        return m
