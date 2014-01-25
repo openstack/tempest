@@ -199,8 +199,8 @@ class ListImagesTest(base.BaseV2ImageTest):
 
     @attr(type='gate')
     def test_list_images_param_status(self):
-        # Test to get all available images
-        params = {"status": "available"}
+        # Test to get all active images
+        params = {"status": "active"}
         self._list_by_param_value_and_assert(params)
 
     @attr(type='gate')
