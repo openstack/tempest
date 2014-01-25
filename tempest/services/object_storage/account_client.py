@@ -33,9 +33,7 @@ class AccountClient(RestClient):
         HEAD on the storage URL
         Returns all account metadata headers
         """
-
-        headers = {"X-Storage-Token": self.token}
-        resp, body = self.head('', headers=headers)
+        resp, body = self.head('')
         return resp, body
 
     def create_account_metadata(self, metadata,
@@ -54,7 +52,7 @@ class AccountClient(RestClient):
         Deletes an account metadata entry.
         """
 
-        headers = {"X-Storage-Token": self.token}
+        headers = {}
         for item in metadata:
             headers[metadata_prefix + item] = 'x'
         resp, body = self.post('', headers=headers, body=None)
@@ -63,8 +61,8 @@ class AccountClient(RestClient):
     def list_account_containers(self, params=None):
         """
         GET on the (base) storage URL
-        Given the X-Storage-URL and a valid X-Auth-Token, returns
-        a list of all containers for the account.
+        Given valid X-Auth-Token, returns a list of all containers for the
+        account.
 
         Optional Arguments:
         limit=[integer value N]
@@ -135,8 +133,8 @@ class AccountClientCustomizedHeader(RestClient):
     def list_account_containers(self, params=None, metadata=None):
         """
         GET on the (base) storage URL
-        Given the X-Storage-URL and a valid X-Auth-Token, returns
-        a list of all containers for the account.
+        Given a valid X-Auth-Token, returns a list of all containers for the
+        account.
 
         Optional Arguments:
         limit=[integer value N]
