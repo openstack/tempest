@@ -17,7 +17,6 @@ from tempest import clients
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
@@ -332,28 +331,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                                private_key=private_key)
         return access_point_ssh
 
-    def _test_remote_connectivity(self, source, dest, should_succeed=True):
-        """
-        check ping server via source ssh connection
-
-        :param source: RemoteClient: an ssh connection from which to ping
-        :param dest: and IP to ping against
-        :param should_succeed: boolean should ping succeed or not
-        :returns: boolean -- should_succeed == ping
-        :returns: ping is false if ping failed
-        """
-        def ping_remote():
-            try:
-                source.ping_host(dest)
-            except exceptions.SSHExecCommandFailed as ex:
-                LOG.debug(ex)
-                return not should_succeed
-            return should_succeed
-
-        return test.call_until_true(ping_remote,
-                                    CONF.compute.ping_timeout,
-                                    1)
-
     def _check_connectivity(self, access_point, ip, should_succeed=True):
         if should_succeed:
             msg = "Timed out waiting for %s to become reachable" % ip
@@ -362,8 +339,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             return True
             msg = "%s is reachable" % ip
         try:
-            self.assertTrue(self._test_remote_connectivity(access_point, ip,
-                                                           should_succeed),
+            self.assertTrue(self._check_remote_connectivity(access_point, ip,
+                                                            should_succeed),
                             msg)
         except Exception:
             debug.log_ip_ns()

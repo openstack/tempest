@@ -93,3 +93,18 @@ class RemoteClient():
     def get_mac_address(self):
         cmd = "/sbin/ifconfig | awk '/HWaddr/ {print $5}'"
         return self.ssh_client.exec_command(cmd)
+
+    def get_ip_list(self):
+        cmd = "/bin/ip address"
+        return self.ssh_client.exec_command(cmd)
+
+    def assign_static_ip(self, nic, addr):
+        cmd = "sudo /bin/ip addr add {ip}/{mask} dev {nic}".format(
+            ip=addr, mask=CONF.network.tenant_network_mask_bits,
+            nic=nic
+        )
+        return self.ssh_client.exec_command(cmd)
+
+    def turn_nic_on(self, nic):
+        cmd = "sudo /bin/ip link set {nic} up".format(nic=nic)
+        return self.ssh_client.exec_command(cmd)

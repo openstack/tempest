@@ -15,6 +15,9 @@
 #    under the License.
 import collections
 
+import re
+
+from tempest.api.network import common as net_common
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
@@ -35,36 +38,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     This smoke test suite assumes that Nova has been configured to
     boot VM's with Neutron-managed networking, and attempts to
     verify network connectivity as follows:
-
-     * For a freshly-booted VM with an IP address ("port") on a given network:
-
-       - the Tempest host can ping the IP address.  This implies, but
-         does not guarantee (see the ssh check that follows), that the
-         VM has been assigned the correct IP address and has
-         connectivity to the Tempest host.
-
-       - the Tempest host can perform key-based authentication to an
-         ssh server hosted at the IP address.  This check guarantees
-         that the IP address is associated with the target VM.
-
-       - detach the floating-ip from the VM and verify that it becomes
-       unreachable
-
-       - associate detached floating ip to a new VM and verify connectivity.
-       VMs are created with unique keypair so connectivity also asserts that
-       floating IP is associated with the new VM instead of the old one
-
-       # TODO(mnewby) - Need to implement the following:
-       - the Tempest host can ssh into the VM via the IP address and
-         successfully execute the following:
-
-         - ping an external IP address, implying external connectivity.
-
-         - ping an external hostname, implying that dns is correctly
-           configured.
-
-         - ping an internal IP address, implying connectivity to another
-           VM on the same network.
 
      There are presumed to be two types of networks: tenant and
      public.  A tenant network may or may not be reachable from the
@@ -250,9 +223,125 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.floating_ip_tuple = Floating_IP_tuple(
             floating_ip, serv_dict['server'])
 
+    def _create_new_network(self):
+        self.new_net = self._create_network(self.tenant_id)
+        self.addCleanup(self.cleanup_wrapper, self.new_net)
+        self.new_subnet = self._create_subnet(
+            network=self.new_net,
+            gateway_ip=None)
+        self.addCleanup(self.cleanup_wrapper, self.new_subnet)
+
+    def _hotplug_server(self):
+        old_floating_ip, server = self.floating_ip_tuple
+        ip_address = old_floating_ip.floating_ip_address
+        private_key = self.servers[server].private_key
+        ssh_client = self.get_remote_client(ip_address,
+                                            private_key=private_key)
+        old_nic_list = self._get_server_nics(ssh_client)
+        # get a port from a list of one item
+        port_list = self._list_ports(device_id=server.id)
+        self.assertEqual(1, len(port_list))
+        old_port = port_list[0]
+        self.compute_client.servers.interface_attach(server=server,
+                                                     net_id=self.new_net.id,
+                                                     port_id=None,
+                                                     fixed_ip=None)
+        # move server to the head of the cleanup list
+        self.addCleanup(self.cleanup_wrapper, server)
+
+        def check_ports():
+            port_list = [port for port in
+                         self._list_ports(device_id=server.id)
+                         if port != old_port]
+            return len(port_list) == 1
+
+        test.call_until_true(check_ports, 60, 1)
+        new_port_list = [p for p in
+                         self._list_ports(device_id=server.id)
+                         if p != old_port]
+        self.assertEqual(1, len(new_port_list))
+        new_port = new_port_list[0]
+        new_port = net_common.DeletablePort(client=self.network_client,
+                                            **new_port)
+        new_nic_list = self._get_server_nics(ssh_client)
+        diff_list = [n for n in new_nic_list if n not in old_nic_list]
+        self.assertEqual(1, len(diff_list))
+        num, new_nic = diff_list[0]
+        ssh_client.assign_static_ip(nic=new_nic,
+                                    addr=new_port.fixed_ips[0]['ip_address'])
+        ssh_client.turn_nic_on(nic=new_nic)
+
+    def _get_server_nics(self, ssh_client):
+        reg = re.compile(r'(?P<num>\d+): (?P<nic_name>\w+):')
+        ipatxt = ssh_client.get_ip_list()
+        return reg.findall(ipatxt)
+
+    def _check_network_internal_connectivity(self):
+        """
+        via ssh check VM internal connectivity:
+        - ping internal DHCP port, implying in-tenant connectivty
+        """
+        floating_ip, server = self.floating_ip_tuple
+        # get internal ports' ips:
+        # get all network ports in the new network
+        internal_ips = (p['fixed_ips'][0]['ip_address'] for p in
+                        self._list_ports(tenant_id=server.tenant_id,
+                                         network_id=self.new_net.id)
+                        if p['device_owner'].startswith('network'))
+
+        ip_address = floating_ip.floating_ip_address
+        private_key = self.servers[server].private_key
+        ssh_source = self._ssh_to_server(ip_address, private_key)
+
+        for remote_ip in internal_ips:
+            try:
+                self.assertTrue(self._check_remote_connectivity(ssh_source,
+                                                                remote_ip),
+                                "Timed out waiting for %s to become "
+                                "reachable" % remote_ip)
+            except Exception:
+                LOG.exception("Unable to access {dest} via ssh to "
+                              "floating-ip {src}".format(dest=remote_ip,
+                                                         src=floating_ip))
+                debug.log_ip_ns()
+                raise
+
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_ops(self):
+        """
+        For a freshly-booted VM with an IP address ("port") on a given
+            network:
+
+        - the Tempest host can ping the IP address.  This implies, but
+         does not guarantee (see the ssh check that follows), that the
+         VM has been assigned the correct IP address and has
+         connectivity to the Tempest host.
+
+        - the Tempest host can perform key-based authentication to an
+         ssh server hosted at the IP address.  This check guarantees
+         that the IP address is associated with the target VM.
+
+        - detach the floating-ip from the VM and verify that it becomes
+        unreachable
+
+        - associate detached floating ip to a new VM and verify connectivity.
+        VMs are created with unique keypair so connectivity also asserts that
+        floating IP is associated with the new VM instead of the old one
+
+        # TODO(mnewby) - Need to implement the following:
+        - the Tempest host can ssh into the VM via the IP address and
+         successfully execute the following:
+
+         - ping an external IP address, implying external connectivity.
+
+         - ping an external hostname, implying that dns is correctly
+           configured.
+
+         - ping an internal IP address, implying connectivity to another
+           VM on the same network.
+
+        """
         self._check_public_network_connectivity(should_connect=True)
         self._disassociate_floating_ips()
         self._check_public_network_connectivity(should_connect=False,
@@ -262,3 +351,20 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_public_network_connectivity(should_connect=True,
                                                 msg="after re-associate "
                                                     "floating ip")
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_hotplug_nic(self):
+        """
+        1. create a new network, with no gateway (to prevent overwriting VM's
+            gateway)
+        2. connect VM to new network
+        3. set static ip and bring new nic up
+        4. check VM can ping new network dhcp port
+
+        """
+
+        self._check_public_network_connectivity(should_connect=True)
+        self._create_new_network()
+        self._hotplug_server()
+        self._check_network_internal_connectivity()
