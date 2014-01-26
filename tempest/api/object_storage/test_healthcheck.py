@@ -16,7 +16,6 @@
 
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest.common import custom_matchers
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
@@ -28,37 +27,17 @@ class HealthcheckTest(base.BaseObjectTest):
     def setUpClass(cls):
         super(HealthcheckTest, cls).setUpClass()
 
-        # creates a test user. The test user will set its base_url to the Swift
-        # endpoint and test the healthcheck feature.
-        cls.data.setup_test_user()
-
-        cls.os_test_user = clients.Manager(
-            cls.data.test_user,
-            cls.data.test_password,
-            cls.data.test_tenant)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.data.teardown_all()
-        super(HealthcheckTest, cls).tearDownClass()
-
     def setUp(self):
         super(HealthcheckTest, self).setUp()
-        client = self.os_test_user.account_client
-        client._set_auth()
-
+        self.account_client._set_auth()
         # Turning http://.../v1/foobar into http://.../
-        client.base_url = "/".join(client.base_url.split("/")[:-2])
-
-    def tearDown(self):
-        # clear the base_url for subsequent requests
-        self.os_test_user.account_client.base_url = None
-        super(HealthcheckTest, self).tearDown()
+        self.account_client.base_url = "/".join(
+            self.account_client.base_url.split("/")[:-2])
 
     @attr('gate')
     def test_get_healthcheck(self):
 
-        resp, _ = self.os_test_user.account_client.get("healthcheck", {})
+        resp, _ = self.account_client.get("healthcheck", {})
 
         # The status is expected to be 200
         self.assertIn(int(resp['status']), HTTP_SUCCESS)

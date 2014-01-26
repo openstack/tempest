@@ -31,20 +31,9 @@ class ObjectTest(base.BaseObjectTest):
         cls.container_client.create_container(cls.container_name)
         cls.containers = [cls.container_name]
 
-        cls.data.setup_test_user()
-        resp, body = cls.token_client.auth(cls.data.test_user,
-                                           cls.data.test_password,
-                                           cls.data.test_tenant)
-        cls.new_token = cls.token_client.get_token(cls.data.test_user,
-                                                   cls.data.test_password,
-                                                   cls.data.test_tenant)
-        cls.custom_headers = {'X-Auth-Token': cls.new_token}
-
     @classmethod
     def tearDownClass(cls):
         cls.delete_containers(cls.containers)
-        # delete the user setup created
-        cls.data.teardown_all()
         super(ObjectTest, cls).tearDownClass()
 
     @attr(type='smoke')
