@@ -147,7 +147,7 @@ ComputeGroup = [
                default='root',
                help="User name used to authenticate to an instance."),
     cfg.IntOpt('ping_timeout',
-               default=60,
+               default=120,
                help="Timeout in seconds to wait for ping to "
                     "succeed."),
     cfg.IntOpt('ssh_timeout',
