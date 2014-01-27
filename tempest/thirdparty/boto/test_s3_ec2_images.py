@@ -15,7 +15,6 @@
 
 import os
 
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
@@ -30,7 +29,6 @@ class S3ImagesTest(BotoTestCase):
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
-        cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.images_client = cls.os.ec2api_client
         config = cls.config

@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import skip_because
@@ -30,7 +29,6 @@ class EC2KeysTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(EC2KeysTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
         cls.ec = cls.ec2_error_code
 
