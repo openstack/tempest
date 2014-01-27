@@ -1,3 +1,5 @@
+# Copyright 2014 NEC Corporation.  All rights reserved.
+#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -11,11 +13,11 @@
 #    under the License.
 
 from tempest.api.orchestration import base
-from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import exceptions
+from tempest import test
 
 
-class TemplateYAMLTestJSON(base.BaseOrchestrationTest):
+class TemplateYAMLNegativeTestJSON(base.BaseOrchestrationTest):
     _interface = 'json'
 
     template = """
@@ -31,30 +33,20 @@ Resources:
 
     @classmethod
     def setUpClass(cls):
-        super(TemplateYAMLTestJSON, cls).setUpClass()
+        super(TemplateYAMLNegativeTestJSON, cls).setUpClass()
         cls.client = cls.orchestration_client
-        cls.stack_name = data_utils.rand_name('heat')
-        cls.stack_identifier = cls.create_stack(cls.stack_name, cls.template)
-        cls.client.wait_for_stack_status(cls.stack_identifier,
-                                         'CREATE_COMPLETE')
-        cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.parameters = {}
 
-    @attr(type='gate')
-    def test_show_template(self):
-        """Getting template used to create the stack."""
-        resp, template = self.client.show_template(self.stack_identifier)
-        self.assertEqual('200', resp['status'])
-
-    @attr(type='gate')
-    def test_validate_template(self):
-        """Validating template passing it content."""
-        resp, parameters = self.client.validate_template(self.template,
-                                                         self.parameters)
-        self.assertEqual('200', resp['status'])
+    @test.attr(type=['gate', 'negative'])
+    def test_validate_template_url(self):
+        """Validating template passing url to it."""
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.validate_template_url,
+                          template_url=self.invalid_template_url,
+                          parameters=self.parameters)
 
 
-class TemplateAWSTestJSON(TemplateYAMLTestJSON):
+class TemplateAWSNegativeTestJSON(TemplateYAMLNegativeTestJSON):
     template = """
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
