@@ -280,7 +280,8 @@ class RestClient(object):
                            " (auth URL is '%s'), the response status is %s" %
                            (req_url, resp.status))
             raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password)
+                                                   password=password,
+                                                   tenant=project_name)
 
     def expected_success(self, expected_code, read_code):
         assert_msg = ("This function only allowed to use for HTTP status"
