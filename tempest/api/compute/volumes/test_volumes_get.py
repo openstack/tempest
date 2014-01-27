@@ -41,7 +41,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         resp, volume = self.client.create_volume(size=1,
                                                  display_name=v_name,
                                                  metadata=metadata)
-        self.addCleanup(self._delete_volume, volume)
+        self.addCleanup(self.delete_volume, volume['id'])
         self.assertEqual(200, resp.status)
         self.assertIn('id', volume)
         self.assertIn('displayName', volume)
@@ -68,16 +68,6 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
                         ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
-
-    def _delete_volume(self, volume):
-        # Delete the Volume created in this method
-        try:
-            resp, _ = self.client.delete_volume(volume['id'])
-            self.assertEqual(202, resp.status)
-            # Checking if the deleted Volume still exists
-            self.client.wait_for_resource_deletion(volume['id'])
-        except KeyError:
-            return
 
 
 class VolumesGetTestXML(VolumesGetTestJSON):
