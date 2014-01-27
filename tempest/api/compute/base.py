@@ -161,6 +161,18 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 return
             time.sleep(self.build_interval)
 
+    @staticmethod
+    def _delete_volume(volumes_client, volume_id):
+        """Deletes the given volume and waits for it to be gone."""
+        try:
+            resp, _ = volumes_client.delete_volume(volume_id)
+            # TODO(mriedem): We should move the wait_for_resource_deletion
+            # into the delete_volume method as a convenience to the caller.
+            volumes_client.wait_for_resource_deletion(volume_id)
+        except exceptions.NotFound:
+            LOG.warn("Unable to delete volume '%s' since it was not found. "
+                     "Maybe it was already deleted?" % volume_id)
+
 
 class BaseV2ComputeTest(BaseComputeTest):
 
@@ -232,14 +244,7 @@ class BaseV2ComputeTest(BaseComputeTest):
     @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
-        try:
-            resp, _ = cls.volumes_extensions_client.delete_volume(volume_id)
-            # TODO(mriedem): We should move the wait_for_resource_deletion
-            # into the delete_volume method as a convenience to the caller.
-            cls.volumes_extensions_client.wait_for_resource_deletion(volume_id)
-        except exceptions.NotFound:
-            LOG.warn("Unable to delete volume '%s' since it was not found. "
-                     "Maybe it was already deleted?" % volume_id)
+        cls._delete_volume(cls.volumes_extensions_client, volume_id)
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
@@ -336,6 +341,11 @@ class BaseV3ComputeTest(BaseComputeTest):
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         cls.password = server['admin_password']
         return server['id']
+
+    @classmethod
+    def delete_volume(cls, volume_id):
+        """Deletes the given volume and waits for it to be gone."""
+        cls._delete_volume(cls.volumes_client, volume_id)
 
 
 class BaseV3ComputeAdminTest(BaseV3ComputeTest):
