@@ -65,13 +65,13 @@ class NetworksTestJSON(base.BaseNetworkTest):
     def test_create_update_delete_network_subnet(self):
         # Creates a network
         name = data_utils.rand_name('network-')
-        resp, body = self.client.create_network(name)
+        resp, body = self.client.create_network(name=name)
         self.assertEqual('201', resp['status'])
         network = body['network']
         net_id = network['id']
         # Verification of network update
         new_name = "New_network"
-        resp, body = self.client.update_network(net_id, new_name)
+        resp, body = self.client.update_network(net_id, name=new_name)
         self.assertEqual('200', resp['status'])
         updated_net = body['network']
         self.assertEqual(updated_net['name'], new_name)
@@ -80,8 +80,10 @@ class NetworksTestJSON(base.BaseNetworkTest):
         mask_bits = self.network_cfg.tenant_network_mask_bits
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
-                resp, body = self.client.create_subnet(net_id,
-                                                       str(subnet_cidr))
+                resp, body = self.client.create_subnet(
+                    network_id=net_id,
+                    cidr=str(subnet_cidr),
+                    ip_version=4)
                 break
             except exceptions.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
@@ -92,7 +94,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
         subnet_id = subnet['id']
         # Verification of subnet update
         new_subnet = "New_subnet"
-        resp, body = self.client.update_subnet(subnet_id, new_subnet)
+        resp, body = self.client.update_subnet(subnet_id,
+                                               name=new_subnet)
         self.assertEqual('200', resp['status'])
         updated_subnet = body['subnet']
         self.assertEqual(updated_subnet['name'], new_subnet)
@@ -179,12 +182,13 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @attr(type='smoke')
     def test_create_update_delete_port(self):
         # Verify that successful port creation, update & deletion
-        resp, body = self.client.create_port(self.network['id'])
+        resp, body = self.client.create_port(
+            network_id=self.network['id'])
         self.assertEqual('201', resp['status'])
         port = body['port']
         # Verification of port update
         new_port = "New_Port"
-        resp, body = self.client.update_port(port['id'], new_port)
+        resp, body = self.client.update_port(port['id'], name=new_port)
         self.assertEqual('200', resp['status'])
         updated_port = body['port']
         self.assertEqual(updated_port['name'], new_port)
@@ -241,7 +245,7 @@ class BulkNetworkOpsJSON(base.BaseNetworkTest):
 
         bulk network creation
         bulk subnet creation
-        bulk subnet creation
+        bulk port creation
         list tenant's networks
 
     v2.0 of the Neutron API is assumed. It is also assumed that the following

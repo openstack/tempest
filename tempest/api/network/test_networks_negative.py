@@ -45,7 +45,7 @@ class NetworksNegativeTestJSON(base.BaseNetworkTest):
     def test_update_non_existent_network(self):
         non_exist_id = data_utils.rand_name('network')
         self.assertRaises(exceptions.NotFound, self.client.update_network,
-                          non_exist_id, "new_name")
+                          non_exist_id, name="new_name")
 
     @attr(type=['negative', 'smoke'])
     def test_delete_non_existent_network(self):

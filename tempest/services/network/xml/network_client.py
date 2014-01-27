@@ -33,6 +33,12 @@ class NetworkClientXML(client_base.NetworkClientBase):
         return RestClientXML(config, username, password,
                              auth_url, tenant_name)
 
+    def _parse_array(self, node):
+        array = []
+        for child in node.getchildren():
+            array.append(xml_to_json(child))
+        return array
+
     def deserialize_list(self, body):
         return parse_array(etree.fromstring(body), self.PLURALS)
 
@@ -44,84 +50,34 @@ class NetworkClientXML(client_base.NetworkClientBase):
         # expecting the dict with single key
         root = body.keys()[0]
         post_body = Element(root)
+        post_body.add_attr('xmlns:xsi',
+                           'http://www.w3.org/2001/XMLSchema-instance')
         for name, attr in body[root].items():
-            elt = Element(name, attr)
+            elt = self._get_element(name, attr)
             post_body.append(elt)
         return str(Document(post_body))
 
-    def create_network(self, name):
-        uri = '%s/networks' % (self.uri_prefix)
-        post_body = Element("network")
-        p2 = Element("name", name)
-        post_body.append(p2)
-        resp, body = self.post(uri, str(Document(post_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
+    def serialize_list(self, body, root_name=None, item_name=None):
+        # expecting dict in form
+        # body = {'resources': [res_dict1, res_dict2, ...]
+        post_body = Element(root_name)
+        post_body.add_attr('xmlns:xsi',
+                           'http://www.w3.org/2001/XMLSchema-instance')
+        for item in body[body.keys()[0]]:
+            elt = Element(item_name)
+            for name, attr in item.items():
+                elt_content = self._get_element(name, attr)
+                elt.append(elt_content)
+            post_body.append(elt)
+        return str(Document(post_body))
 
-    def create_bulk_network(self, count, names):
-        uri = '%s/networks' % (self.uri_prefix)
-        post_body = Element("networks")
-        for i in range(count):
-                p1 = Element("network")
-                p2 = Element("name", names[i])
-                p1.append(p2)
-                post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)))
-        networks = parse_array(etree.fromstring(body))
-        networks = {"networks": networks}
-        return resp, networks
-
-    def create_subnet(self, net_uuid, cidr):
-        uri = '%s/subnets' % (self.uri_prefix)
-        subnet = Element("subnet")
-        p2 = Element("network_id", net_uuid)
-        p3 = Element("cidr", cidr)
-        p4 = Element("ip_version", 4)
-        subnet.append(p2)
-        subnet.append(p3)
-        subnet.append(p4)
-        resp, body = self.post(uri, str(Document(subnet)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def create_port(self, net_uuid, **kwargs):
-        uri = '%s/ports' % (self.uri_prefix)
-        port = Element("port")
-        p1 = Element('network_id', net_uuid)
-        port.append(p1)
-        for key, val in kwargs.items():
-            key = Element(key, val)
-            port.append(key)
-        resp, body = self.post(uri, str(Document(port)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_port(self, port_id, name):
-        uri = '%s/ports/%s' % (self.uri_prefix, str(port_id))
-        port = Element("port")
-        p2 = Element("name", name)
-        port.append(p2)
-        resp, body = self.put(uri, str(Document(port)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_subnet(self, subnet_id, name):
-        uri = '%s/subnets/%s' % (self.uri_prefix, str(subnet_id))
-        subnet = Element("subnet")
-        p2 = Element("name", name)
-        subnet.append(p2)
-        resp, body = self.put(uri, str(Document(subnet)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_network(self, net_id, name):
-        uri = '%s/networks/%s' % (self.uri_prefix, str(net_id))
-        network = Element("network")
-        p2 = Element("name", name)
-        network.append(p2)
-        resp, body = self.put(uri, str(Document(network)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
+    def _get_element(self, name, value):
+        if value is None:
+            xml_elem = Element(name)
+            xml_elem.add_attr("xsi:nil", "true")
+            return xml_elem
+        else:
+            return Element(name, value)
 
     def create_security_group(self, name):
         uri = '%s/security-groups' % (self.uri_prefix)
@@ -146,36 +102,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         resp, body = self.post(uri, str(Document(rule)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
-
-    def create_bulk_subnet(self, subnet_list):
-        uri = '%s/subnets' % (self.uri_prefix)
-        post_body = Element("subnets")
-        for i in range(len(subnet_list)):
-            v = subnet_list[i]
-            p1 = Element("subnet")
-            for k, kv in v.iteritems():
-                p2 = Element(k, kv)
-                p1.append(p2)
-            post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)))
-        subnets = parse_array(etree.fromstring(body))
-        subnets = {"subnets": subnets}
-        return resp, subnets
-
-    def create_bulk_port(self, port_list):
-        uri = '%s/ports' % (self.uri_prefix)
-        post_body = Element("ports")
-        for i in range(len(port_list)):
-            v = port_list[i]
-            p1 = Element("port")
-            for k, kv in v.iteritems():
-                p2 = Element(k, kv)
-                p1.append(p2)
-            post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)))
-        ports = parse_array(etree.fromstring(body))
-        ports = {"ports": ports}
-        return resp, ports
 
     def create_vip(self, name, protocol, protocol_port, subnet_id, pool_id):
         uri = '%s/lb/vips' % (self.uri_prefix)

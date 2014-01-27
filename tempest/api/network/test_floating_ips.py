@@ -112,7 +112,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         # Create a floating IP
         created_floating_ip = self.create_floating_ip(self.ext_net_id)
         # Create a port
-        resp, port = self.client.create_port(self.network['id'])
+        resp, port = self.client.create_port(network_id=self.network['id'])
         created_port = port['port']
         resp, floating_ip = self.client.update_floating_ip(
             created_floating_ip['id'], port_id=created_port['id'])

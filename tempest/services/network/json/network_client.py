@@ -47,50 +47,8 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
     def serialize(self, data):
         return json.dumps(data)
 
-    def create_network(self, name, **kwargs):
-        post_body = {'network': kwargs}
-        post_body['network']['name'] = name
-        body = json.dumps(post_body)
-        uri = '%s/networks' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def create_bulk_network(self, count, names):
-        network_list = list()
-        for i in range(count):
-            network_list.append({'name': names[i]})
-        post_body = {'networks': network_list}
-        body = json.dumps(post_body)
-        uri = '%s/networks' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def create_subnet(self, net_uuid, cidr, ip_version=4, **kwargs):
-        post_body = {'subnet': kwargs}
-        post_body['subnet']['ip_version'] = ip_version
-        post_body['subnet']['network_id'] = net_uuid
-        post_body['subnet']['cidr'] = cidr
-        body = json.dumps(post_body)
-        uri = '%s/subnets' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def create_port(self, network_id, **kwargs):
-        post_body = {
-            'port': {
-                'network_id': network_id,
-            }
-        }
-        for key, val in kwargs.items():
-            post_body['port'][key] = val
-        body = json.dumps(post_body)
-        uri = '%s/ports' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
+    def serialize_list(self, data, root=None, item=None):
+        return self.serialize(data)
 
     def update_quotas(self, tenant_id, **kwargs):
         put_body = {'quota': kwargs}
@@ -103,42 +61,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
     def reset_quotas(self, tenant_id):
         uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
         resp, body = self.delete(uri)
-        return resp, body
-
-    def update_subnet(self, subnet_id, new_name):
-        put_body = {
-            'subnet': {
-                'name': new_name,
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/subnets/%s' % (self.uri_prefix, subnet_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_port(self, port_id, new_name):
-        put_body = {
-            'port': {
-                'name': new_name,
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/ports/%s' % (self.uri_prefix, port_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_network(self, network_id, new_name):
-        put_body = {
-            "network": {
-                "name": new_name,
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/networks/%s' % (self.uri_prefix, network_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
         return resp, body
 
     def create_router(self, name, admin_state_up=True, **kwargs):
@@ -268,22 +190,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
             post_body['security_group_rule'][str(key)] = value
         body = json.dumps(post_body)
         uri = '%s/security-group-rules' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def create_bulk_subnet(self, subnet_list):
-        post_body = {'subnets': subnet_list}
-        body = json.dumps(post_body)
-        uri = '%s/subnets' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def create_bulk_port(self, port_list):
-        post_body = {'ports': port_list}
-        body = json.dumps(post_body)
-        uri = '%s/ports' % (self.uri_prefix)
         resp, body = self.post(uri, body)
         body = json.loads(body)
         return resp, body

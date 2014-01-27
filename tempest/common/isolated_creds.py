@@ -237,7 +237,7 @@ class IsolatedCreds(object):
     def _create_network(self, name, tenant_id):
         if self.tempest_client:
             resp, resp_body = self.network_admin_client.create_network(
-                name, tenant_id=tenant_id)
+                name=name, tenant_id=tenant_id)
         else:
             body = {'network': {'tenant_id': tenant_id, 'name': name}}
             resp_body = self.network_admin_client.create_network(body)
@@ -257,15 +257,18 @@ class IsolatedCreds(object):
                     if self.network_resources:
                         resp, resp_body = self.network_admin_client.\
                             create_subnet(
-                                network_id, str(subnet_cidr),
+                                network_id=network_id, cidr=str(subnet_cidr),
                                 name=subnet_name,
                                 tenant_id=tenant_id,
-                                enable_dhcp=self.network_resources['dhcp'])
+                                enable_dhcp=self.network_resources['dhcp'],
+                                ip_version=4)
                     else:
                         resp, resp_body = self.network_admin_client.\
-                            create_subnet(network_id, str(subnet_cidr),
+                            create_subnet(network_id=network_id,
+                                          cidr=str(subnet_cidr),
                                           name=subnet_name,
-                                          tenant_id=tenant_id)
+                                          tenant_id=tenant_id,
+                                          ip_version=4)
                 else:
                     body['subnet']['cidr'] = str(subnet_cidr)
                     resp_body = self.network_admin_client.create_subnet(body)
