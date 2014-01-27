@@ -218,6 +218,8 @@ class OpenSSLConnectionDelegator(object):
         return getattr(self.connection, name)
 
     def makefile(self, *args, **kwargs):
+        # Ensure the socket is closed when this file is closed
+        kwargs['close'] = True
         return socket._fileobject(self.connection, *args, **kwargs)
 
 
@@ -344,6 +346,15 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
                             struct.pack('LL', self.timeout, 0))
         self.sock = OpenSSLConnectionDelegator(self.context, sock)
         self.sock.connect((self.host, self.port))
+
+    def close(self):
+        if self.sock:
+            # Remove the reference to the socket but don't close it yet.
+            # Response close will close both socket and associated
+            # file. Closing socket too soon will cause response
+            # reads to fail with socket IO error 'Bad file descriptor'.
+            self.sock = None
+        super(VerifiedHTTPSConnection, self).close()
 
 
 class ResponseBodyIterator(object):
