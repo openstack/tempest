@@ -134,14 +134,6 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
         self.client.clear_auth()
 
     @attr(type=['negative', 'gate'])
-    def test_assign_user_role_for_non_existent_user(self):
-        # Attempt to assign a role to a non existent user should fail
-        (user, tenant, role) = self._get_role_params()
-        non_existent_user = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.assign_user_role,
-                          tenant['id'], non_existent_user, role['id'])
-
-    @attr(type=['negative', 'gate'])
     def test_assign_user_role_for_non_existent_role(self):
         # Attempt to assign a non existent role to user should fail
         (user, tenant, role) = self._get_role_params()
@@ -192,17 +184,6 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
         self.client.clear_auth()
 
     @attr(type=['negative', 'gate'])
-    def test_remove_user_role_non_existent_user(self):
-        # Attempt to remove a role from a non existent user should fail
-        (user, tenant, role) = self._get_role_params()
-        resp, user_role = self.client.assign_user_role(tenant['id'],
-                                                       user['id'],
-                                                       role['id'])
-        non_existent_user = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.remove_user_role,
-                          tenant['id'], non_existent_user, role['id'])
-
-    @attr(type=['negative', 'gate'])
     def test_remove_user_role_non_existent_role(self):
         # Attempt to delete a non existent role from a user should fail
         (user, tenant, role) = self._get_role_params()
@@ -246,14 +227,6 @@ class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
                               user['id'])
         finally:
             self.client.clear_auth()
-
-    @attr(type=['negative', 'gate'])
-    def test_list_user_roles_for_non_existent_user(self):
-        # Attempt to list roles of a non existent user should fail
-        (user, tenant, role) = self._get_role_params()
-        non_existent_user = str(uuid.uuid4().hex)
-        self.assertRaises(exceptions.NotFound, self.client.list_user_roles,
-                          tenant['id'], non_existent_user)
 
 
 class RolesTestXML(RolesNegativeTestJSON):
