@@ -379,7 +379,7 @@ class ServersClientXML(RestClientXML):
 
             server_status = body['status']
             if server_status == 'ERROR' and not ignore_error:
-                raise exceptions.BuildErrorException
+                raise exceptions.BuildErrorException(server_id=server_id)
 
             if int(time.time()) - start_time >= self.build_timeout:
                 raise exceptions.TimeoutException

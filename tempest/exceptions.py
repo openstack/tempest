@@ -123,8 +123,7 @@ class EndpointNotFound(TempestException):
 
 
 class RateLimitExceeded(TempestException):
-    message = ("Rate limit exceeded.\nMessage: %(message)s\n"
-               "Details: %(details)s")
+    message = "Rate limit exceeded"
 
 
 class OverLimit(TempestException):
@@ -160,10 +159,6 @@ class SSHExecCommandFailed(TempestException):
 
 class ServerUnreachable(TempestException):
     message = "The server is not reachable via the configured network"
-
-
-class SQLException(TempestException):
-    message = "SQL error: %(message)s"
 
 
 class TearDownException(TempestException):

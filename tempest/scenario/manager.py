@@ -394,7 +394,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             if new_status.lower() == error_status.lower():
                 message = ("%s failed to get to expected status. "
                            "In %s state.") % (thing, new_status)
-                raise exceptions.BuildErrorException(message)
+                raise exceptions.BuildErrorException(message,
+                                                     server_id=thing_id)
             elif new_status == expected_status and expected_status is not None:
                 return True  # All good.
             LOG.debug("Waiting for %s to get to %s status. "
