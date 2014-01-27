@@ -1,6 +1,7 @@
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
+
 # Copyright (C) 2013 eNovance SAS <licensing@enovance.com>
-#
-# Author: Christian Schwede <christian.schwede@enovance.com>
+# Author: Joe H. Rahme <joe.hakim.rahme@enovance.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -22,14 +23,13 @@ import urlparse
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
 
 
-class ObjectFormPostTest(base.BaseObjectTest):
+class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ObjectFormPostTest, cls).setUpClass()
+        super(ObjectFormPostNegativeTest, cls).setUpClass()
         cls.container_name = data_utils.rand_name(name='TestContainer')
         cls.object_name = data_utils.rand_name(name='ObjectTemp')
 
@@ -45,7 +45,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         cls.account_client.delete_account_metadata(metadata=cls.metadata)
         cls.delete_containers(cls.containers)
         cls.data.teardown_all()
-        super(ObjectFormPostTest, cls).tearDownClass()
+        super(ObjectFormPostNegativeTest, cls).tearDownClass()
 
     def get_multipart_form(self, expires=600):
         path = "%s/%s/%s" % (
@@ -93,9 +93,10 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @attr(type='gate')
-    def test_post_object_using_form(self):
-        body, content_type = self.get_multipart_form()
+    @attr(type=['gate', 'negative'])
+    def test_post_object_using_form_expired(self):
+        body, content_type = self.get_multipart_form(expires=1)
+        time.sleep(2)
 
         headers = {'Content-Type': content_type,
                    'Content-Length': str(len(body))}
@@ -107,12 +108,5 @@ class ObjectFormPostTest(base.BaseObjectTest):
         # Use a raw request, otherwise authentication headers are used
         resp, body = self.object_client.http_obj.request(url, "POST",
                                                          body, headers=headers)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
-        self.assertHeaders(resp, "Object", "POST")
-
-        # Ensure object is available
-        resp, body = self.object_client.get("%s/%s%s" % (
-            self.container_name, self.object_name, "testfile"))
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
-        self.assertHeaders(resp, "Object", "GET")
-        self.assertEqual(body, "hello world")
+        self.assertEqual(int(resp['status']), 401)
+        self.assertIn('FormPost: Form Expired', body)
