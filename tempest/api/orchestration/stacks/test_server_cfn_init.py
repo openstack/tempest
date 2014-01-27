@@ -17,6 +17,7 @@ from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest import test
 
@@ -66,18 +67,13 @@ Resources:
               content: smoke test complete
             /etc/cfn/cfn-credentials:
               content:
-                Fn::Join:
-                - ''
-                - - AWSAccessKeyId=
-                  - {Ref: SmokeKeys}
-                  - '
-
-                    '
-                  - AWSSecretKey=
-                  - Fn::GetAtt: [SmokeKeys, SecretAccessKey]
-                  - '
-
-                    '
+                Fn::Replace:
+                - SmokeKeys: {Ref: SmokeKeys}
+                  SecretAccessKey:
+                    'Fn::GetAtt': [SmokeKeys, SecretAccessKey]
+                - |
+                  AWSAccessKeyId=SmokeKeys
+                  AWSSecretKey=SecretAccessKey
               mode: '000400'
               owner: root
               group: root
@@ -90,19 +86,13 @@ Resources:
       networks:
       - uuid: {Ref: network}
       user_data:
-        Fn::Base64:
-          Fn::Join:
-          - ''
-          - - |-
-                #!/bin/bash -v
-                /opt/aws/bin/cfn-init
-            - |-
-                || error_exit ''Failed to run cfn-init''
-                /opt/aws/bin/cfn-signal -e 0 --data "`cat /tmp/smoke-status`" '
-            - {Ref: WaitHandle}
-            - '''
-
-              '
+        Fn::Replace:
+        - WaitHandle: {Ref: WaitHandle}
+        - |
+          #!/bin/bash -v
+          /opt/aws/bin/cfn-init
+          /opt/aws/bin/cfn-signal -e 0 --data "`cat /tmp/smoke-status`" \
+              "WaitHandle"
   WaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
   WaitCondition:
@@ -172,9 +162,32 @@ Outputs:
         linux_client.validate_authentication()
 
     @test.attr(type='slow')
-    def test_stack_wait_condition_data(self):
-
+    def test_all_resources_created(self):
         sid = self.stack_identifier
+        self.client.wait_for_resource_status(
+            sid, 'WaitHandle', 'CREATE_COMPLETE')
+        self.client.wait_for_resource_status(
+            sid, 'SmokeSecurityGroup', 'CREATE_COMPLETE')
+        self.client.wait_for_resource_status(
+            sid, 'SmokeKeys', 'CREATE_COMPLETE')
+        self.client.wait_for_resource_status(
+            sid, 'CfnUser', 'CREATE_COMPLETE')
+        self.client.wait_for_resource_status(
+            sid, 'SmokeServer', 'CREATE_COMPLETE')
+        try:
+            self.client.wait_for_resource_status(
+                sid, 'WaitCondition', 'CREATE_COMPLETE')
+        except exceptions.TimeoutException as e:
+            # attempt to log the server console to help with debugging
+            # the cause of the server not signalling the waitcondition
+            # to heat.
+            resp, body = self.client.get_resource(sid, 'SmokeServer')
+            server_id = body['physical_resource_id']
+            LOG.debug('Console output for %s', server_id)
+            resp, output = self.servers_client.get_console_output(
+                server_id, None)
+            LOG.debug(output)
+            raise e
 
         # wait for create to complete.
         self.client.wait_for_stack_status(sid, 'CREATE_COMPLETE')
