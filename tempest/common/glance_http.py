@@ -354,7 +354,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
             # file. Closing socket too soon will cause response
             # reads to fail with socket IO error 'Bad file descriptor'.
             self.sock = None
-        super(VerifiedHTTPSConnection, self).close()
+        httplib.HTTPSConnection.close(self)
 
 
 class ResponseBodyIterator(object):
