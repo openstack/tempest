@@ -55,7 +55,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         # GET Volume
         resp, fetched_volume = self.client.get_volume(volume['id'])
         self.assertEqual(200, resp.status)
-        # Verfication of details of fetched Volume
+        # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],
                          'The fetched Volume is different '
