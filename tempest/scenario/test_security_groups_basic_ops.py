@@ -29,7 +29,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestNetworkCrossTenant(manager.NetworkScenarioTest):
+class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     """
     This test suite assumes that Nova has been configured to
@@ -50,7 +50,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
     failure - ping_timeout reached
 
     setup:
-        for each tenant (demo and alt):
+        for primary tenant:
             1. create a network&subnet
             2. create a router (if public router isn't configured)
             3. connect tenant network to public network via router
@@ -59,8 +59,6 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
                 b. a VM with a floating ip
             5. create a general empty security group (same as "default", but
             without rules allowing in-tenant traffic)
-            6. for demo tenant - create another server to test in-tenant
-            connections
 
     tests:
         1. _verify_network_details
@@ -80,7 +78,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             been created on source tenant
 
     assumptions:
-        1. alt_tenant/user existed and is different from demo_tenant/user
+        1. alt_tenant/user existed and is different from primary_tenant/user
         2. Public network is defined and reachable from the Tempest host
         3. Public router can either be:
             * defined, in which case all tenants networks can connect directly
@@ -92,7 +90,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
     """
 
     class TenantProperties():
-        '''
+        """
         helper class to save tenant details
             id
             credentials
@@ -101,7 +99,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             security groups
             servers
             access point
-        '''
+        """
 
         def __init__(self, tenant_id, tenant_user, tenant_pass, tenant_name):
             self.manager = OfficialClientManager(
@@ -109,6 +107,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
                 tenant_pass,
                 tenant_name
             )
+            self.keypair = None
             self.tenant_id = tenant_id
             self.tenant_name = tenant_name
             self.tenant_user = tenant_user
@@ -119,7 +118,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             self.security_groups = {}
             self.servers = list()
 
-        def _set_network(self, network, subnet, router):
+        def set_network(self, network, subnet, router):
             self.network = network
             self.subnet = subnet
             self.router = router
@@ -129,7 +128,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
 
     @classmethod
     def check_preconditions(cls):
-        super(TestNetworkCrossTenant, cls).check_preconditions()
+        super(TestSecurityGroupsBasicOps, cls).check_preconditions()
         if (cls.alt_tenant_id is None) or (cls.tenant_id is cls.alt_tenant_id):
             msg = 'No alt_tenant defined'
             cls.enabled = False
@@ -143,7 +142,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
 
     @classmethod
     def setUpClass(cls):
-        super(TestNetworkCrossTenant, cls).setUpClass()
+        super(TestSecurityGroupsBasicOps, cls).setUpClass()
         alt_creds = cls.alt_credentials()
         cls.alt_tenant_id = cls.manager._get_identity_client(
             *alt_creds
@@ -151,48 +150,47 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
         cls.check_preconditions()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
-        cls.keypairs = {}
-        cls.security_groups = {}
         cls.networks = []
         cls.subnets = []
         cls.routers = []
-        cls.servers = []
         cls.floating_ips = {}
         cls.tenants = {}
-        cls.demo_tenant = cls.TenantProperties(
-            cls.tenant_id,
-            *cls.credentials()
-        )
-        cls.alt_tenant = cls.TenantProperties(
-            cls.alt_tenant_id,
-            *alt_creds
-        )
-        for tenant in [cls.demo_tenant, cls.alt_tenant]:
+        cls.primary_tenant = cls.TenantProperties(cls.tenant_id,
+                                                  *cls.credentials())
+        cls.alt_tenant = cls.TenantProperties(cls.alt_tenant_id,
+                                              *alt_creds)
+        for tenant in [cls.primary_tenant, cls.alt_tenant]:
             cls.tenants[tenant.tenant_id] = tenant
-        if not CONF.network.public_router_id:
-            cls.floating_ip_access = True
-        else:
-            cls.floating_ip_access = False
+        cls.floating_ip_access = not CONF.network.public_router_id
 
-    @classmethod
-    def tearDownClass(cls):
-        super(TestNetworkCrossTenant, cls).tearDownClass()
+    def cleanup_wrapper(self, resource):
+        self.cleanup_resource(resource, self.__class__.__name__)
+
+    def setUp(self):
+        super(TestSecurityGroupsBasicOps, self).setUp()
+        self._deploy_tenant(self.primary_tenant)
+        self._verify_network_details(self.primary_tenant)
+        self._verify_mac_addr(self.primary_tenant)
 
     def _create_tenant_keypairs(self, tenant_id):
-        self.keypairs[tenant_id] = self.create_keypair(
+        keypair = self.create_keypair(
             name=data_utils.rand_name('keypair-smoke-'))
+        self.addCleanup(self.cleanup_wrapper, keypair)
+        self.tenants[tenant_id].keypair = keypair
 
     def _create_tenant_security_groups(self, tenant):
-        self.security_groups.setdefault(self.tenant_id, [])
         access_sg = self._create_empty_security_group(
             namestart='secgroup_access-',
             tenant_id=tenant.tenant_id
         )
+        self.addCleanup(self.cleanup_wrapper, access_sg)
+
         # don't use default secgroup since it allows in-tenant traffic
         def_sg = self._create_empty_security_group(
             namestart='secgroup_general-',
             tenant_id=tenant.tenant_id
         )
+        self.addCleanup(self.cleanup_wrapper, def_sg)
         tenant.security_groups.update(access=access_sg, default=def_sg)
         ssh_rule = dict(
             protocol='tcp',
@@ -200,9 +198,9 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             port_range_max=22,
             direction='ingress',
         )
-        self._create_security_group_rule(secgroup=access_sg,
-                                         **ssh_rule
-                                         )
+        rule = self._create_security_group_rule(secgroup=access_sg,
+                                                **ssh_rule)
+        self.addCleanup(self.cleanup_wrapper, rule)
 
     def _verify_network_details(self, tenant):
         # Checks that we see the newly created network/subnet/router via
@@ -245,11 +243,12 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             'nics': [
                 {'net-id': tenant.network.id},
             ],
-            'key_name': self.keypairs[tenant.tenant_id].name,
+            'key_name': tenant.keypair.name,
             'security_groups': security_groups,
             'tenant_id': tenant.tenant_id
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
+        self.addCleanup(self.cleanup_wrapper, server)
         return server
 
     def _create_tenant_servers(self, tenant, num=1):
@@ -260,7 +259,6 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             )
             name = data_utils.rand_name(name)
             server = self._create_server(name, tenant)
-            self.servers.append(server)
             tenant.servers.append(server)
 
     def _set_access_point(self, tenant):
@@ -275,17 +273,20 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
         name = data_utils.rand_name(name)
         server = self._create_server(name, tenant,
                                      security_groups=secgroups)
-        self.servers.append(server)
         tenant.access_point = server
         self._assign_floating_ips(server)
 
     def _assign_floating_ips(self, server):
         public_network_id = CONF.network.public_network_id
         floating_ip = self._create_floating_ip(server, public_network_id)
+        self.addCleanup(self.cleanup_wrapper, floating_ip)
         self.floating_ips.setdefault(server, floating_ip)
 
     def _create_tenant_network(self, tenant):
-        tenant._set_network(*self._create_networks(tenant.tenant_id))
+        network, subnet, router = self._create_networks(tenant.tenant_id)
+        for r in [network, router, subnet]:
+            self.addCleanup(self.cleanup_wrapper, r)
+        tenant.set_network(network, subnet, router)
 
     def _set_compute_context(self, tenant):
         self.compute_client = tenant.manager.compute_client
@@ -299,8 +300,6 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             router (if public not defined)
             access security group
             access-point server
-            for demo_tenant:
-                creates general server to test against
         """
         if not isinstance(tenant_or_id, self.TenantProperties):
             tenant = self.tenants[tenant_or_id]
@@ -312,14 +311,12 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
         self._create_tenant_keypairs(tenant_id)
         self._create_tenant_network(tenant)
         self._create_tenant_security_groups(tenant)
-        if tenant is self.demo_tenant:
-            self._create_tenant_servers(tenant, num=1)
         self._set_access_point(tenant)
 
     def _get_server_ip(self, server, floating=False):
-        '''
+        """
         returns the ip (floating/internal) of a server
-        '''
+        """
         if floating:
             return self.floating_ips[server].floating_ip_address
         else:
@@ -332,7 +329,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
         """
         access_point_ssh = \
             self.floating_ips[tenant.access_point].floating_ip_address
-        private_key = self.keypairs[tenant.tenant_id].private_key
+        private_key = tenant.keypair.private_key
         access_point_ssh = self._ssh_to_server(access_point_ssh,
                                                private_key=private_key)
         return access_point_ssh
@@ -391,17 +388,17 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             secgroup=tenant.security_groups['default'],
             **ruleset
         )
+        self.addCleanup(self.cleanup_wrapper, rule)
         access_point_ssh = self._connect_to_access_point(tenant)
         for server in tenant.servers:
             self._check_connectivity(access_point=access_point_ssh,
                                      ip=self._get_server_ip(server))
-        rule.delete()
 
     def _test_cross_tenant_block(self, source_tenant, dest_tenant):
-        '''
+        """
         if public router isn't defined, then dest_tenant access is via
         floating-ip
-        '''
+        """
         access_point_ssh = self._connect_to_access_point(source_tenant)
         ip = self._get_server_ip(dest_tenant.access_point,
                                  floating=self.floating_ip_access)
@@ -409,10 +406,10 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
                                  should_succeed=False)
 
     def _test_cross_tenant_allow(self, source_tenant, dest_tenant):
-        '''
+        """
         check for each direction:
         creating rule for tenant incoming traffic enables only 1way traffic
-        '''
+        """
         ruleset = dict(
             protocol='icmp',
             direction='ingress'
@@ -421,37 +418,26 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             secgroup=dest_tenant.security_groups['default'],
             **ruleset
         )
-        try:
-            access_point_ssh = self._connect_to_access_point(source_tenant)
-            ip = self._get_server_ip(dest_tenant.access_point,
-                                     floating=self.floating_ip_access)
-            self._check_connectivity(access_point_ssh, ip)
+        self.addCleanup(self.cleanup_wrapper, rule_s2d)
+        access_point_ssh = self._connect_to_access_point(source_tenant)
+        ip = self._get_server_ip(dest_tenant.access_point,
+                                 floating=self.floating_ip_access)
+        self._check_connectivity(access_point_ssh, ip)
 
-            # test that reverse traffic is still blocked
-            self._test_cross_tenant_block(dest_tenant, source_tenant)
+        # test that reverse traffic is still blocked
+        self._test_cross_tenant_block(dest_tenant, source_tenant)
 
-            # allow reverse traffic and check
-            rule_d2s = self._create_security_group_rule(
-                secgroup=source_tenant.security_groups['default'],
-                **ruleset
-            )
-            try:
-                access_point_ssh_2 = self._connect_to_access_point(dest_tenant)
-                ip = self._get_server_ip(source_tenant.access_point,
-                                         floating=self.floating_ip_access)
-                self._check_connectivity(access_point_ssh_2, ip)
+        # allow reverse traffic and check
+        rule_d2s = self._create_security_group_rule(
+            secgroup=source_tenant.security_groups['default'],
+            **ruleset
+        )
+        self.addCleanup(self.cleanup_wrapper, rule_d2s)
 
-                # clean_rules
-                rule_s2d.delete()
-                rule_d2s.delete()
-
-            except Exception as e:
-                rule_d2s.delete()
-                raise e
-
-        except Exception as e:
-            rule_s2d.delete()
-            raise e
+        access_point_ssh_2 = self._connect_to_access_point(dest_tenant)
+        ip = self._get_server_ip(source_tenant.access_point,
+                                 floating=self.floating_ip_access)
+        self._check_connectivity(access_point_ssh_2, ip)
 
     def _verify_mac_addr(self, tenant):
         """
@@ -475,20 +461,32 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
     @services('compute', 'network')
     def test_cross_tenant_traffic(self):
         try:
-            for tenant_id in self.tenants.keys():
-                self._deploy_tenant(tenant_id)
-                self._verify_network_details(self.tenants[tenant_id])
-                self._verify_mac_addr(self.tenants[tenant_id])
-
-            # in-tenant check
-            self._test_in_tenant_block(self.demo_tenant)
-            self._test_in_tenant_allow(self.demo_tenant)
+            # deploy new tenant
+            self._deploy_tenant(self.alt_tenant)
+            self._verify_network_details(self.alt_tenant)
+            self._verify_mac_addr(self.alt_tenant)
 
             # cross tenant check
-            source_tenant = self.demo_tenant
+            source_tenant = self.primary_tenant
             dest_tenant = self.alt_tenant
             self._test_cross_tenant_block(source_tenant, dest_tenant)
             self._test_cross_tenant_allow(source_tenant, dest_tenant)
         except Exception:
-            self._log_console_output(servers=self.servers)
+            for tenant in self.tenants.values():
+                self._log_console_output(servers=tenant.servers)
+            raise
+
+    @attr(type='smoke')
+    @services('compute', 'network')
+    def test_in_tenant_traffic(self):
+        try:
+            self._create_tenant_servers(self.primary_tenant, num=1)
+
+            # in-tenant check
+            self._test_in_tenant_block(self.primary_tenant)
+            self._test_in_tenant_allow(self.primary_tenant)
+
+        except Exception:
+            for tenant in self.tenants.values():
+                self._log_console_output(servers=tenant.servers)
             raise
