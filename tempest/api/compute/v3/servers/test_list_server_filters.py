@@ -123,7 +123,6 @@ class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
         # Verify only the expected number of servers are returned
         params = {'limit': 1}
         resp, servers = self.client.list_servers(params)
-        # when _interface='xml', one element for servers_links in servers
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
