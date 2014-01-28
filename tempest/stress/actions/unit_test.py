@@ -10,9 +10,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
 from tempest.openstack.common import importutils
 from tempest.openstack.common import log as logging
 import tempest.stress.stressaction as stressaction
+
+CONF = config.CONF
 
 
 class SetUpClassRunTime(object):
@@ -73,10 +76,14 @@ class UnitTest(stressaction.StressAction):
                 self.klass.setUpClass()
                 self.setupclass_called = True
 
-            self.run_core()
-
-            if (self.class_setup_per == SetUpClassRunTime.action):
-                self.klass.tearDownClass()
+            try:
+                self.run_core()
+            except Exception as e:
+                raise e
+            finally:
+                if (CONF.stress.leave_dirty_stack is False
+                    and self.class_setup_per == SetUpClassRunTime.action):
+                    self.klass.tearDownClass()
         else:
             self.run_core()
 

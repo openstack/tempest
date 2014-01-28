@@ -582,7 +582,12 @@ StressGroup = [
                help='time (in seconds) between log file error checks.'),
     cfg.IntOpt('default_thread_number_per_action',
                default=4,
-               help='The number of threads created while stress test.')
+               help='The number of threads created while stress test.'),
+    cfg.BoolOpt('leave_dirty_stack',
+                default=False,
+                help='Prevent the cleaning (tearDownClass()) between'
+                     ' each stress test run if an exception occurs'
+                     ' during this run.')
 ]
 
 

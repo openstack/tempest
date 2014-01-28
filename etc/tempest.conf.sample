@@ -748,6 +748,11 @@
 # value)
 #default_thread_number_per_action=4
 
+# Prevent the cleaning (tearDownClass()) between each stress
+# test run if an exception occurs during this run. (boolean
+# value)
+#leave_dirty_stack=false
+
 
 [telemetry]
 
