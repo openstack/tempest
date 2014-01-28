@@ -47,6 +47,12 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
 
     def test_cinder_volumes_list(self):
         self.cinder('list')
+        self.cinder('list', params='--all-tenants 1')
+        self.cinder('list', params='--all-tenants 0')
+        self.assertRaises(subprocess.CalledProcessError,
+                          self.cinder,
+                          'list',
+                          params='--all-tenants bad')
 
     def test_cinder_quota_class_show(self):
         """This CLI can accept and string as param."""
