@@ -268,6 +268,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         }
         resp, image_list = self.os.image_client.image_list_detail(
             properties,
+            status='active',
             sort_key='created_at',
             sort_dir='asc')
         self.assertEqual(200, resp.status)
@@ -292,6 +293,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         oldest_backup_exist = False
         resp, image_list = self.os.image_client.image_list_detail(
             properties,
+            status='active',
             sort_key='created_at',
             sort_dir='asc')
         self.assertEqual(200, resp.status)
