@@ -108,7 +108,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     @attr(type='gate')
     def test_aggregate_create_update_with_az(self):
         # Update an aggregate and ensure properties are updated correctly
-        self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
         resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
