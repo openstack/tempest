@@ -30,8 +30,12 @@ def rand_uuid_hex():
     return uuid.uuid4().hex
 
 
-def rand_name(name='test'):
-    return name + "-tempest-" + str(random.randint(1, 0x7fffffff))
+def rand_name(name=''):
+    randbits = str(random.randint(1, 0x7fffffff))
+    if name:
+        return name + '-' + randbits
+    else:
+        return randbits
 
 
 def rand_int_id(start=0, end=0x7fffffff):

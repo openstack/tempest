@@ -146,18 +146,28 @@ class IsolatedCreds(object):
         else:
             self.identity_admin_client.tenants.delete(tenant)
 
-    def _create_creds(self, suffix=None, admin=False):
-        data_utils.rand_name_root = data_utils.rand_name(self.name)
-        if suffix:
-            data_utils.rand_name_root += suffix
-        tenant_name = data_utils.rand_name_root + "-tenant"
+    def _create_creds(self, suffix="", admin=False):
+        """Create random credentials under the following schema.
+
+        If the name contains a '.' is the full class path of something, and
+        we don't really care. If it isn't, it's probably a meaningful name,
+        so use it.
+
+        For logging purposes, -user and -tenant are long and redundant,
+        don't use them. The user# will be sufficient to figure it out.
+        """
+        if '.' in self.name:
+            root = ""
+        else:
+            root = self.name
+
+        tenant_name = data_utils.rand_name(root) + suffix
         tenant_desc = tenant_name + "-desc"
         tenant = self._create_tenant(name=tenant_name,
                                      description=tenant_desc)
-        if suffix:
-            data_utils.rand_name_root += suffix
-        username = data_utils.rand_name_root + "-user"
-        email = data_utils.rand_name_root + "@example.com"
+
+        username = data_utils.rand_name(root) + suffix
+        email = data_utils.rand_name(root) + suffix + "@example.com"
         user = self._create_user(username, self.password,
                                  tenant, email)
         if admin:
