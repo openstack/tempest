@@ -175,7 +175,7 @@ class OrchestrationClient(rest_client.RestClient):
             stack_name = body['stack_name']
             stack_status = body['stack_status']
             if stack_status == status:
-                return
+                return body
             if fail_regexp.search(stack_status):
                 raise exceptions.StackBuildErrorException(
                     stack_identifier=stack_identifier,
