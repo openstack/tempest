@@ -78,6 +78,8 @@ ceilometer-acompute:
 ceilometer-acentral:
     - module: "ceilometer.central.manager"
       message: "403 Forbidden"
+    - module: "ceilometer.central.manager"
+      message: "get_samples\\(\\) got an unexpected keyword argument 'resources'"
 
 ceilometer-alarm-evaluator:
     - module: "ceilometer.alarm.service"
@@ -133,6 +135,8 @@ n-cond:
       message: "but the actual state is deleting to caller"
     - module: "nova.openstack.common.rpc.common"
       message: "Traceback \\(most recent call last"
+    - module: "nova.openstack.common.threadgroup"
+      message: "Service with host .* topic conductor exists."
 
 n-sch:
     - module: "nova.scheduler.filter_scheduler"
