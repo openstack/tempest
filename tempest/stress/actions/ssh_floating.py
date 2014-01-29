@@ -14,8 +14,11 @@ import socket
 import subprocess
 
 from tempest.common.utils import data_utils
+from tempest import config
 import tempest.stress.stressaction as stressaction
 import tempest.test
+
+CONF = config.CONF
 
 
 class FloatingStress(stressaction.StressAction):
@@ -109,8 +112,8 @@ class FloatingStress(stressaction.StressAction):
         self.logger.info("Deleted Floating IP %s", str(self.floating['ip']))
 
     def setUp(self, **kwargs):
-        self.image = self.manager.config.compute.image_ref
-        self.flavor = self.manager.config.compute.flavor_ref
+        self.image = CONF.compute.image_ref
+        self.flavor = CONF.compute.flavor_ref
         self.vm_extra_args = kwargs.get('vm_extra_args', {})
         self.wait_after_vm_create = kwargs.get('wait_after_vm_create',
                                                True)
