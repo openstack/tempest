@@ -63,7 +63,7 @@ class FlavorsV3ClientJSON(RestClient):
         if kwargs.get('swap'):
             post_body['swap'] = kwargs.get('swap')
         if kwargs.get('rxtx'):
-            post_body['rxtx_factor'] = kwargs.get('rxtx')
+            post_body['os-flavor-rxtx:rxtx_factor'] = kwargs.get('rxtx')
         if kwargs.get('is_public'):
             post_body['flavor-access:is_public'] = kwargs.get('is_public')
         post_body = json.dumps({'flavor': post_body})
