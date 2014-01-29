@@ -31,7 +31,7 @@ class BaseTrustsV3Test(base.BaseIdentityAdminTest):
         if not CONF.identity_feature_enabled.trust:
             raise self.skipException("Trusts aren't enabled")
 
-        self.trustee_username = self.config.identity.alt_username
+        self.trustee_username = CONF.identity.alt_username
         self.trust_id = None
 
     def tearDown(self):
