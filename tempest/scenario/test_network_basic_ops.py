@@ -103,8 +103,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @classmethod
     def check_preconditions(cls):
         super(TestNetworkBasicOps, cls).check_preconditions()
-        cfg = cls.config.network
-        if not (cfg.tenant_networks_reachable or cfg.public_network_id):
+        if not (CONF.network.tenant_networks_reachable
+                or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             cls.enabled = False

@@ -11,11 +11,13 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log
 from tempest.scenario import manager
 import tempest.test
 from tempest.test import services
 
+CONF = config.CONF
 
 LOG = log.getLogger(__name__)
 
@@ -36,7 +38,7 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
     """
 
     def _create_volume_from_image(self):
-        img_uuid = self.config.compute.image_ref
+        img_uuid = CONF.compute.image_ref
         vol_name = data_utils.rand_name('volume-origin')
         return self.create_volume(name=vol_name, imageRef=img_uuid)
 
@@ -89,14 +91,14 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
                                 'available')
 
     def _ssh_to_server(self, server, keypair):
-        if self.config.compute.use_floatingip_for_ssh:
+        if CONF.compute.use_floatingip_for_ssh:
             floating_ip = self.compute_client.floating_ips.create()
             fip_name = data_utils.rand_name('scenario-fip')
             self.set_resource(fip_name, floating_ip)
             server.add_floating_ip(floating_ip)
             ip = floating_ip.ip
         else:
-            network_name_for_ssh = self.config.compute.network_for_ssh
+            network_name_for_ssh = CONF.compute.network_for_ssh
             ip = server.networks[network_name_for_ssh][0]
 
         try:

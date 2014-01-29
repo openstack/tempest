@@ -14,10 +14,12 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import services
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -63,12 +65,9 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         return image.id
 
     def glance_image_create(self):
-        aki_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.aki_img_file
-        ari_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ari_img_file
-        ami_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ami_img_file
+        aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
+        ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
+        ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
         LOG.debug("paths: ami: %s, ari: %s, aki: %s"
                   % (ami_img_path, ari_img_path, aki_img_path))
         kernel_id = self._image_create('scenario-aki', 'aki', aki_img_path)

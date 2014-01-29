@@ -15,9 +15,12 @@
 
 
 from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import services
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +42,7 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
     def setUpClass(cls):
         cls.set_network_resources()
         super(TestSwiftBasicOps, cls).setUpClass()
-        if not cls.config.service_available.swift:
+        if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)

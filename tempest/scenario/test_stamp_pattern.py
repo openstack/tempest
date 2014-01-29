@@ -18,10 +18,13 @@ import time
 from cinderclient import exceptions as cinder_exceptions
 
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 import tempest.test
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -113,7 +116,6 @@ class TestStampPattern(manager.OfficialClientTest):
 
     def _wait_for_volume_availible_on_the_system(self, server_or_ip):
         ssh = self.get_remote_client(server_or_ip)
-        conf = self.config
 
         def _func():
             part = ssh.get_partitions()
@@ -121,8 +123,8 @@ class TestStampPattern(manager.OfficialClientTest):
             return 'vdb' in part
 
         if not tempest.test.call_until_true(_func,
-                                            conf.compute.build_timeout,
-                                            conf.compute.build_interval):
+                                            CONF.compute.build_timeout,
+                                            CONF.compute.build_interval):
             raise exceptions.TimeoutException
 
     def _create_timestamp(self, server_or_ip):
@@ -148,10 +150,10 @@ class TestStampPattern(manager.OfficialClientTest):
 
         # boot an instance and create a timestamp file in it
         volume = self._create_volume()
-        server = self._boot_image(self.config.compute.image_ref)
+        server = self._boot_image(CONF.compute.image_ref)
 
         # create and add floating IP to server1
-        if self.config.compute.use_floatingip_for_ssh:
+        if CONF.compute.use_floatingip_for_ssh:
             floating_ip_for_server = self._create_floating_ip()
             self._add_floating_ip(server, floating_ip_for_server)
             ip_for_server = floating_ip_for_server.ip
@@ -177,7 +179,7 @@ class TestStampPattern(manager.OfficialClientTest):
         server_from_snapshot = self._boot_image(snapshot_image.id)
 
         # create and add floating IP to server_from_snapshot
-        if self.config.compute.use_floatingip_for_ssh:
+        if CONF.compute.use_floatingip_for_ssh:
             floating_ip_for_snapshot = self._create_floating_ip()
             self._add_floating_ip(server_from_snapshot,
                                   floating_ip_for_snapshot)

@@ -14,9 +14,12 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import services
+
+CONF = config.CONF
 
 
 LOG = logging.getLogger(__name__)
@@ -67,12 +70,9 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
         return image.id
 
     def glance_image_create(self):
-        aki_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.aki_img_file
-        ari_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ari_img_file
-        ami_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ami_img_file
+        aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
+        ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
+        ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
         LOG.debug("paths: ami: %s, ari: %s, aki: %s"
                   % (ami_img_path, ari_img_path, aki_img_path))
         kernel_id = self._image_create('scenario-aki', 'aki', aki_img_path)
@@ -87,12 +87,12 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
     def nova_boot(self):
         name = data_utils.rand_name('scenario-server-')
         client = self.compute_client
-        flavor_id = self.config.compute.flavor_ref
+        flavor_id = CONF.compute.flavor_ref
         secgroup = self._create_security_group_nova()
         self.servers = client.servers.create(
             name=name, image=self.image,
             flavor=flavor_id,
-            min_count=self.config.scenario.large_ops_number,
+            min_count=CONF.scenario.large_ops_number,
             security_groups=[secgroup.name])
         # needed because of bug 1199788
         self.servers = [x for x in client.servers.list() if name in x.name]
@@ -102,7 +102,7 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
 
     @services('compute', 'image')
     def test_large_ops_scenario(self):
-        if self.config.scenario.large_ops_number < 1:
+        if CONF.scenario.large_ops_number < 1:
             return
         self.glance_image_create()
         self.nova_boot()
