@@ -18,8 +18,11 @@ from tempest.api.identity.base import DataGenerator
 from tempest import clients
 from tempest.common import custom_matchers
 from tempest.common import isolated_creds
+from tempest import config
 from tempest import exceptions
 import tempest.test
+
+CONF = config.CONF
 
 
 class BaseObjectTest(tempest.test.BaseTestCase):
@@ -28,12 +31,12 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         cls.set_network_resources()
         super(BaseObjectTest, cls).setUpClass()
-        if not cls.config.service_available.swift:
+        if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             cls.__name__, network_resources=cls.network_resources)
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             # Get isolated creds for normal user
             creds = cls.isolated_creds.get_primary_creds()
             username, tenant_name, password = creds
@@ -82,7 +85,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def _assign_member_role(cls):
         primary_user = cls.isolated_creds.get_primary_user()
         alt_user = cls.isolated_creds.get_alt_user()
-        swift_role = cls.config.object_storage.operator_role
+        swift_role = CONF.object_storage.operator_role
         try:
             resp, roles = cls.os_admin.identity_client.list_roles()
             role = next(r for r in roles if r['name'] == swift_role)

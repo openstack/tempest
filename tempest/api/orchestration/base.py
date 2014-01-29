@@ -12,9 +12,11 @@
 
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 import tempest.test
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -26,12 +28,10 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         super(BaseOrchestrationTest, cls).setUpClass()
         os = clients.OrchestrationManager()
-        cls.orchestration_cfg = os.config.orchestration
-        cls.compute_cfg = os.config.compute
-        if not os.config.service_available.heat:
+        if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
-        cls.build_timeout = cls.orchestration_cfg.build_timeout
-        cls.build_interval = cls.orchestration_cfg.build_interval
+        cls.build_timeout = CONF.orchestration.build_timeout
+        cls.build_interval = CONF.orchestration.build_interval
 
         cls.os = os
         cls.orchestration_client = os.orchestration_client
@@ -45,7 +45,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def _get_default_network(cls):
         resp, networks = cls.network_client.list_networks()
         for net in networks['networks']:
-            if net['name'] == cls.compute_cfg.fixed_network_name:
+            if net['name'] == CONF.compute.fixed_network_name:
                 return net
 
     @classmethod
@@ -56,16 +56,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         os = clients.AdminManager(interface=cls._interface)
         admin_client = os.identity_client
         return admin_client
-
-    @classmethod
-    def _get_client_args(cls):
-
-        return (
-            cls.config,
-            cls.config.identity.admin_username,
-            cls.config.identity.admin_password,
-            cls.config.identity.uri
-        )
 
     @classmethod
     def create_stack(cls, stack_name, template_data, parameters={}):

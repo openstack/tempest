@@ -16,8 +16,10 @@ import logging
 from tempest.api.orchestration import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -91,16 +93,15 @@ Resources:
     @classmethod
     def setUpClass(cls):
         super(NeutronResourcesTestJSON, cls).setUpClass()
-        if not cls.orchestration_cfg.image_ref:
+        if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
         cls.client = cls.orchestration_client
         os = clients.Manager()
-        cls.network_cfg = os.config.network
-        if not cls.config.service_available.neutron:
+        if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
         cls.network_client = os.network_client
         cls.stack_name = data_utils.rand_name('heat')
-        cls.keypair_name = (cls.orchestration_cfg.keypair_name or
+        cls.keypair_name = (CONF.orchestration.keypair_name or
                             cls._create_keypair()['name'])
         cls.external_router_id = cls._get_external_router_id()
 
@@ -110,8 +111,8 @@ Resources:
             cls.template,
             parameters={
                 'KeyName': cls.keypair_name,
-                'InstanceType': cls.orchestration_cfg.instance_type,
-                'ImageId': cls.orchestration_cfg.image_ref,
+                'InstanceType': CONF.orchestration.instance_type,
+                'ImageId': CONF.orchestration.image_ref,
                 'ExternalRouterId': cls.external_router_id
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]

@@ -14,8 +14,11 @@ import functools
 
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions as exc
 from tempest import test
+
+CONF = config.CONF
 
 
 def creates(resource):
@@ -42,7 +45,7 @@ class BaseBaremetalTest(test.BaseTestCase):
     def setUpClass(cls):
         super(BaseBaremetalTest, cls).setUpClass()
 
-        if not cls.config.service_available.ironic:
+        if not CONF.service_available.ironic:
             skip_msg = ('%s skipped as Ironic is not available' % cls.__name__)
             raise cls.skipException(skip_msg)
 
