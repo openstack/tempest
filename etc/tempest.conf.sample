@@ -155,7 +155,7 @@
 [cli]
 
 #
-# Options defined in tempest.cli
+# Options defined in tempest.config
 #
 
 # enable cli tests (boolean value)

@@ -15,15 +15,14 @@
 
 import subprocess
 
-from oslo.config import cfg
 import testtools
 
 import tempest.cli
+from tempest import config
 from tempest.openstack.common import log as logging
 import tempest.test
 
-CONF = cfg.CONF
-
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 

@@ -689,6 +689,20 @@ BaremetalGroup = [
                help="Catalog type of the baremetal provisioning service."),
 ]
 
+cli_group = cfg.OptGroup(name='cli', title="cli Configuration Options")
+
+CLIGroup = [
+    cfg.BoolOpt('enabled',
+                default=True,
+                help="enable cli tests"),
+    cfg.StrOpt('cli_dir',
+               default='/usr/local/bin',
+               help="directory where python client binaries are located"),
+    cfg.IntOpt('timeout',
+               default=15,
+               help="Number of seconds to wait on a CLI timeout"),
+]
+
 
 # this should never be called outside of this class
 class TempestConfigPrivate(object):
@@ -759,6 +773,7 @@ class TempestConfigPrivate(object):
         register_opt_group(cfg.CONF, debug_group, DebugGroup)
         register_opt_group(cfg.CONF, baremetal_group, BaremetalGroup)
         register_opt_group(cfg.CONF, input_scenario_group, InputScenarioGroup)
+        register_opt_group(cfg.CONF, cli_group, CLIGroup)
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity
@@ -784,6 +799,7 @@ class TempestConfigPrivate(object):
         self.debug = cfg.CONF.debug
         self.baremetal = cfg.CONF.baremetal
         self.input_scenario = cfg.CONF['input-scenario']
+        self.cli = cfg.CONF.cli
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password

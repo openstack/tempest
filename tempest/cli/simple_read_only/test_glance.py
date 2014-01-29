@@ -16,13 +16,11 @@
 import re
 import subprocess
 
-from oslo.config import cfg
-
 import tempest.cli
+from tempest import config
 from tempest.openstack.common import log as logging
 
-CONF = cfg.CONF
-
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -55,7 +53,7 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
             'Size', 'Status'])
 
     def test_glance_member_list(self):
-        tenant_name = '--tenant-id %s' % self.identity.admin_tenant_name
+        tenant_name = '--tenant-id %s' % CONF.identity.admin_tenant_name
         out = self.glance('member-list',
                           params=tenant_name)
         endpoints = self.parser.listing(out)

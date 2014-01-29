@@ -20,7 +20,6 @@ import subprocess
 import tempest.cli
 from tempest import config
 
-
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
@@ -73,14 +72,14 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
     def test_cinder_quota_defaults(self):
         """This CLI can accept and string as param."""
         roles = self.parser.listing(self.cinder('quota-defaults',
-                                                params=self.identity.
+                                                params=CONF.identity.
                                                 admin_tenant_name))
         self.assertTableStruct(roles, ['Property', 'Value'])
 
     def test_cinder_quota_show(self):
         """This CLI can accept and string as param."""
         roles = self.parser.listing(self.cinder('quota-show',
-                                                params=self.identity.
+                                                params=CONF.identity.
                                                 admin_tenant_name))
         self.assertTableStruct(roles, ['Property', 'Value'])
 
@@ -146,7 +145,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
         self.cinder('list', flags='--retries 3')
 
     def test_cinder_region_list(self):
-        region = self.config.volume.region
+        region = CONF.volume.region
         if not region:
-            region = self.config.identity.region
+            region = CONF.identity.region
         self.cinder('list', flags='--os-region-name ' + region)
