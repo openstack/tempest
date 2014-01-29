@@ -191,12 +191,13 @@ class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
                           self.create_test_server,
                           key_name=key_name)
 
+    @test.skip_because(bug="1273948")
     @test.attr(type=['negative', 'gate'])
     def test_create_server_metadata_exceeds_length_limit(self):
         # Pass really long metadata while creating a server
 
         metadata = {'a': 'b' * 260}
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(exceptions.BadRequest,
                           self.create_test_server,
                           meta=metadata)
 
