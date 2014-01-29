@@ -15,8 +15,11 @@
 
 
 from tempest.api.compute import base
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest import test
+
+CONF = config.CONF
 
 
 LOG = logging.getLogger(__name__)
@@ -28,11 +31,11 @@ class ExtensionsTestJSON(base.BaseV2ComputeTest):
     @test.attr(type='gate')
     def test_list_extensions(self):
         # List of all extensions
-        if len(self.config.compute_feature_enabled.api_extensions) == 0:
+        if len(CONF.compute_feature_enabled.api_extensions) == 0:
             raise self.skipException('There are not any extensions configured')
         resp, extensions = self.extensions_client.list_extensions()
         self.assertEqual(200, resp.status)
-        ext = self.config.compute_feature_enabled.api_extensions[0]
+        ext = CONF.compute_feature_enabled.api_extensions[0]
         if ext == 'all':
             self.assertIn('Hosts', map(lambda x: x['name'], extensions))
         elif ext:

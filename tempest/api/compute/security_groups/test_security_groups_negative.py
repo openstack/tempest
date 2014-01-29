@@ -31,7 +31,7 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     def setUpClass(cls):
         super(SecurityGroupsNegativeTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
-        cls.neutron_available = cls.config.service_available.neutron
+        cls.neutron_available = CONF.service_available.neutron
 
     def _delete_security_group(self, securitygroup_id):
         resp, _ = self.client.delete_security_group(securitygroup_id)

@@ -19,8 +19,11 @@ import sys
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 
 class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
@@ -396,7 +399,7 @@ class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.addCleanup(self.client.unshelve_server, self.server_id)
 
-        offload_time = self.config.compute.shelved_offload_time
+        offload_time = CONF.compute.shelved_offload_time
         if offload_time >= 0:
             self.client.wait_for_server_status(self.server_id,
                                                'SHELVED_OFFLOADED',

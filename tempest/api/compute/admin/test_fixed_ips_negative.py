@@ -13,8 +13,11 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
@@ -23,7 +26,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FixedIPsNegativeTestJson, cls).setUpClass()
-        if cls.config.service_available.neutron:
+        if CONF.service_available.neutron:
             msg = ("%s skipped as neutron is available" % cls.__name__)
             raise cls.skipException(msg)
         cls.client = cls.os_adm.fixed_ips_client

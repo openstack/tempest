@@ -23,12 +23,12 @@ from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
+CONF = config.CONF
+
 
 class LiveBlockMigrationV3TestJSON(base.BaseV3ComputeAdminTest):
     _host_key = 'os-extended-server-attributes:host'
     _interface = 'json'
-
-    CONF = config.CONF
 
     @classmethod
     def setUpClass(cls):
@@ -57,7 +57,7 @@ class LiveBlockMigrationV3TestJSON(base.BaseV3ComputeAdminTest):
     def _migrate_server_to(self, server_id, dest_host):
         _resp, body = self.admin_servers_client.live_migrate_server(
             server_id, dest_host,
-            self.config.compute_feature_enabled.
+            CONF.compute_feature_enabled.
             block_migration_for_live_migration)
         return body
 

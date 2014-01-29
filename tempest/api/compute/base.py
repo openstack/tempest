@@ -17,10 +17,12 @@ import time
 
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -37,15 +39,15 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         os = cls.get_client_manager()
 
         cls.os = os
-        cls.build_interval = cls.config.compute.build_interval
-        cls.build_timeout = cls.config.compute.build_timeout
-        cls.ssh_user = cls.config.compute.ssh_user
-        cls.image_ref = cls.config.compute.image_ref
-        cls.image_ref_alt = cls.config.compute.image_ref_alt
-        cls.flavor_ref = cls.config.compute.flavor_ref
-        cls.flavor_ref_alt = cls.config.compute.flavor_ref_alt
-        cls.image_ssh_user = cls.config.compute.image_ssh_user
-        cls.image_ssh_password = cls.config.compute.image_ssh_password
+        cls.build_interval = CONF.compute.build_interval
+        cls.build_timeout = CONF.compute.build_timeout
+        cls.ssh_user = CONF.compute.ssh_user
+        cls.image_ref = CONF.compute.image_ref
+        cls.image_ref_alt = CONF.compute.image_ref_alt
+        cls.flavor_ref = CONF.compute.flavor_ref
+        cls.flavor_ref_alt = CONF.compute.flavor_ref_alt
+        cls.image_ssh_user = CONF.compute.image_ssh_user
+        cls.image_ssh_password = CONF.compute.image_ssh_password
         cls.servers = []
         cls.images = []
         cls.multi_user = cls.get_multi_user()
@@ -57,14 +59,14 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         # used in testing. If the test cases are allowed to create
         # users (config.compute.allow_tenant_isolation is true,
         # then we allow multi-user.
-        if not cls.config.compute.allow_tenant_isolation:
-            user1 = cls.config.identity.username
-            user2 = cls.config.identity.alt_username
+        if not CONF.compute.allow_tenant_isolation:
+            user1 = CONF.identity.username
+            user2 = CONF.identity.alt_username
             if not user2 or user1 == user2:
                 multi_user = False
             else:
-                user2_password = cls.config.identity.alt_password
-                user2_tenant_name = cls.config.identity.alt_tenant_name
+                user2_password = CONF.identity.alt_password
+                user2_tenant_name = CONF.identity.alt_tenant_name
                 if not user2_password or not user2_tenant_name:
                     msg = ("Alternate user specified but not alternate "
                            "tenant or password: alt_tenant_name=%s "
@@ -234,14 +236,14 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     @classmethod
     def setUpClass(cls):
         super(BaseV2ComputeAdminTest, cls).setUpClass()
-        admin_username = cls.config.compute_admin.username
-        admin_password = cls.config.compute_admin.password
-        admin_tenant = cls.config.compute_admin.tenant_name
+        admin_username = CONF.compute_admin.username
+        admin_password = CONF.compute_admin.password
+        admin_tenant = CONF.compute_admin.tenant_name
         if not (admin_username and admin_password and admin_tenant):
             msg = ("Missing Compute Admin API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
-        if (cls.config.compute.allow_tenant_isolation or
+        if (CONF.compute.allow_tenant_isolation or
             cls.force_tenant_isolation is True):
             creds = cls.isolated_creds.get_admin_creds()
             admin_username, admin_tenant_name, admin_password = creds
@@ -265,7 +267,7 @@ class BaseV3ComputeTest(BaseComputeTest):
 
         cls.set_network_resources()
         super(BaseV3ComputeTest, cls).setUpClass()
-        if not cls.config.compute_feature_enabled.api_v3:
+        if not CONF.compute_feature_enabled.api_v3:
             cls.tearDownClass()
             skip_msg = ("%s skipped as nova v3 api is not available" %
                         cls.__name__)
@@ -330,14 +332,14 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
     @classmethod
     def setUpClass(cls):
         super(BaseV3ComputeAdminTest, cls).setUpClass()
-        admin_username = cls.config.compute_admin.username
-        admin_password = cls.config.compute_admin.password
-        admin_tenant = cls.config.compute_admin.tenant_name
+        admin_username = CONF.compute_admin.username
+        admin_password = CONF.compute_admin.password
+        admin_tenant = CONF.compute_admin.tenant_name
         if not (admin_username and admin_password and admin_tenant):
             msg = ("Missing Compute Admin API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_admin_creds()
             admin_username, admin_tenant_name, admin_password = creds
             os_adm = clients.Manager(username=admin_username,

@@ -71,7 +71,7 @@ class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
                                               flavor=cls.flavor_ref_alt,
                                               wait_until='ACTIVE')
 
-        cls.fixed_network_name = cls.config.compute.fixed_network_name
+        cls.fixed_network_name = CONF.compute.fixed_network_name
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @attr(type='gate')

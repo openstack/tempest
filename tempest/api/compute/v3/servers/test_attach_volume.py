@@ -36,8 +36,8 @@ class AttachVolumeV3TestJSON(base.BaseV3ComputeTest):
     @classmethod
     def setUpClass(cls):
         super(AttachVolumeV3TestJSON, cls).setUpClass()
-        cls.device = cls.config.compute.volume_device_name
-        if not cls.config.service_available.cinder:
+        cls.device = CONF.compute.volume_device_name
+        if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 

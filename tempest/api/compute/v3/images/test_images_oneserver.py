@@ -55,7 +55,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(ImagesOneServerTestJSON, cls).setUpClass()
         cls.client = cls.images_client
-        if not cls.config.service_available.glance:
+        if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
@@ -69,7 +69,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         cls.image_ids = []
 
         if cls.multi_user:
-            if cls.config.compute.allow_tenant_isolation:
+            if CONF.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds
                 cls.alt_manager = clients.Manager(username=username,
