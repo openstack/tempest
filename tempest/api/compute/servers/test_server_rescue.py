@@ -212,6 +212,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         self.servers_client.rescue_server(
             self.server_id, adminPass=self.password)
         self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
+        self.addCleanup(self._unrescue, self.server_id)
 
         # Add Security group
         resp, body = self.servers_client.add_security_group(self.server_id,
@@ -222,11 +223,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         resp, body = self.servers_client.remove_security_group(self.server_id,
                                                                self.sg_name)
         self.assertEqual(202, resp.status)
-
-        # Unrescue the server
-        resp, body = self.servers_client.unrescue_server(self.server_id)
-        self.assertEqual(202, resp.status)
-        self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
 
 class ServerRescueTestXML(ServerRescueTestJSON):
