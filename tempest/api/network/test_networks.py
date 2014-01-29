@@ -17,8 +17,11 @@ import netaddr
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class NetworksTestJSON(base.BaseNetworkTest):
@@ -76,8 +79,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
         updated_net = body['network']
         self.assertEqual(updated_net['name'], new_name)
         # Find a cidr that is not in use yet and create a subnet with it
-        cidr = netaddr.IPNetwork(self.network_cfg.tenant_network_cidr)
-        mask_bits = self.network_cfg.tenant_network_mask_bits
+        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        mask_bits = CONF.network.tenant_network_mask_bits
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
                 resp, body = self.client.create_subnet(
@@ -321,8 +324,8 @@ class BulkNetworkOpsJSON(base.BaseNetworkTest):
     @attr(type='smoke')
     def test_bulk_create_delete_subnet(self):
         # Creates 2 subnets in one request
-        cidr = netaddr.IPNetwork(self.network_cfg.tenant_network_cidr)
-        mask_bits = self.network_cfg.tenant_network_mask_bits
+        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        mask_bits = CONF.network.tenant_network_mask_bits
         cidrs = []
         for subnet_cidr in cidr.subnet(mask_bits):
             cidrs.append(subnet_cidr)
