@@ -88,30 +88,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         else:
             return common.Element(name, value)
 
-    def create_security_group(self, name):
-        uri = '%s/security-groups' % (self.uri_prefix)
-        post_body = common.Element("security_group")
-        p2 = common.Element("name", name)
-        post_body.append(p2)
-        resp, body = self.post(uri, str(common.Document(post_body)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def create_security_group_rule(self, secgroup_id,
-                                   direction='ingress', **kwargs):
-        uri = '%s/security-group-rules' % (self.uri_prefix)
-        rule = common.Element("security_group_rule")
-        p1 = common.Element('security_group_id', secgroup_id)
-        p2 = common.Element('direction', direction)
-        rule.append(p1)
-        rule.append(p2)
-        for key, val in kwargs.items():
-            key = common.Element(key, val)
-            rule.append(key)
-        resp, body = self.post(uri, str(common.Document(rule)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
     def create_member(self, address, protocol_port, pool_id):
         uri = '%s/lb/members' % (self.uri_prefix)
         post_body = common.Element("member")
