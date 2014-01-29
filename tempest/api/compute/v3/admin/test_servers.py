@@ -15,6 +15,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
+from tempest import test
 from tempest.test import attr
 from tempest.test import skip_because
 
@@ -62,6 +63,7 @@ class ServersAdminV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
+    @test.skip_because(bug='1265416')
     @attr(type='gate')
     def test_list_servers_by_admin_with_all_tenants(self):
         # Listing servers by admin user with all tenants parameter
