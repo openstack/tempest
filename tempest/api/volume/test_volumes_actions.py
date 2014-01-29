@@ -15,9 +15,12 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
 from tempest.test import services
 from tempest.test import stresstest
+
+CONF = config.CONF
 
 
 class VolumesActionsTest(base.BaseVolumeV1Test):
@@ -98,7 +101,7 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
         image_name = data_utils.rand_name('Image-')
         resp, body = self.client.upload_volume(self.volume['id'],
                                                image_name,
-                                               self.config.volume.disk_format)
+                                               CONF.volume.disk_format)
         image_id = body["image_id"]
         self.addCleanup(self.image_client.delete_image, image_id)
         self.assertEqual(202, resp.status)

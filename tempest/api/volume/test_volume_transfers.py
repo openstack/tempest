@@ -15,7 +15,10 @@
 
 from tempest.api.volume import base
 from tempest import clients
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class VolumesTransfersTest(base.BaseVolumeV1Test):
@@ -26,7 +29,7 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
         super(VolumesTransfersTest, cls).setUpClass()
 
         # Add another tenant to test volume-transfer
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
             username, tenant_name, password = creds
             cls.os_alt = clients.Manager(username=username,

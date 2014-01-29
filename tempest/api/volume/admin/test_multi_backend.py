@@ -12,10 +12,13 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.services.volume.json.admin import volume_types_client
 from tempest.services.volume.json import volumes_client
 from tempest.test import attr
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -26,24 +29,24 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
     @classmethod
     def setUpClass(cls):
         super(VolumeMultiBackendTest, cls).setUpClass()
-        if not cls.config.volume_feature_enabled.multi_backend:
+        if not CONF.volume_feature_enabled.multi_backend:
             cls.tearDownClass()
             raise cls.skipException("Cinder multi-backend feature disabled")
 
-        cls.backend1_name = cls.config.volume.backend1_name
-        cls.backend2_name = cls.config.volume.backend2_name
+        cls.backend1_name = CONF.volume.backend1_name
+        cls.backend2_name = CONF.volume.backend2_name
 
-        adm_user = cls.config.identity.admin_username
-        adm_pass = cls.config.identity.admin_password
-        adm_tenant = cls.config.identity.admin_tenant_name
-        auth_url = cls.config.identity.uri
+        adm_user = CONF.identity.admin_username
+        adm_pass = CONF.identity.admin_password
+        adm_tenant = CONF.identity.admin_tenant_name
+        auth_url = CONF.identity.uri
 
-        cls.volume_client = volumes_client.VolumesClientJSON(cls.config,
+        cls.volume_client = volumes_client.VolumesClientJSON(CONF,
                                                              adm_user,
                                                              adm_pass,
                                                              auth_url,
                                                              adm_tenant)
-        cls.type_client = volume_types_client.VolumeTypesClientJSON(cls.config,
+        cls.type_client = volume_types_client.VolumeTypesClientJSON(CONF,
                                                                     adm_user,
                                                                     adm_pass,
                                                                     auth_url,
