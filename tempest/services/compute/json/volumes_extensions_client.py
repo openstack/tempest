@@ -18,18 +18,21 @@ import time
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class VolumesExtensionsClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumesExtensionsClientJSON, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(VolumesExtensionsClientJSON, self).__init__(username,
                                                           password, auth_url,
                                                           tenant_name)
-        self.service = self.config.compute.catalog_type
-        self.build_interval = self.config.volume.build_interval
-        self.build_timeout = self.config.volume.build_timeout
+        self.service = CONF.compute.catalog_type
+        self.build_interval = CONF.volume.build_interval
+        self.build_timeout = CONF.volume.build_timeout
 
     def list_volumes(self, params=None):
         """List all the volumes created."""

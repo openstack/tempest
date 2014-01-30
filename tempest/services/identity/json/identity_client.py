@@ -14,15 +14,18 @@ import json
 
 from tempest.common import http
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class IdentityClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(IdentityClientJSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(IdentityClientJSON, self).__init__(username, password,
                                                  auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
     def has_admin_extensions(self):
@@ -239,8 +242,8 @@ class IdentityClientJSON(RestClient):
 
 class TokenClientJSON(RestClient):
 
-    def __init__(self, config):
-        auth_url = config.identity.uri
+    def __init__(self):
+        auth_url = CONF.identity.uri
 
         # TODO(jaypipes) Why is this all repeated code in here?
         # Normalize URI to ensure /tokens is in it.
@@ -248,7 +251,6 @@ class TokenClientJSON(RestClient):
             auth_url = auth_url.rstrip('/') + '/tokens'
 
         self.auth_url = auth_url
-        self.config = config
 
     def auth(self, user, password, tenant):
         creds = {
@@ -267,7 +269,7 @@ class TokenClientJSON(RestClient):
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
         if headers is None:

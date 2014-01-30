@@ -16,13 +16,16 @@
 import json
 
 from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
 class DataProcessingClient(rest_client.RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(DataProcessingClient, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(DataProcessingClient, self).__init__(username, password,
                                                    auth_url, tenant_name)
-        self.service = self.config.data_processing.catalog_type
+        self.service = CONF.data_processing.catalog_type
 
     @classmethod
     def _request_and_parse(cls, req_fun, uri, res_name, *args, **kwargs):

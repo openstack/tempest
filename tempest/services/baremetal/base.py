@@ -16,6 +16,9 @@ import json
 import six
 
 from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
 def handle_errors(f):
@@ -44,10 +47,10 @@ class BaremetalClient(rest_client.RestClient):
 
     """
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(BaremetalClient, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(BaremetalClient, self).__init__(username, password,
                                               auth_url, tenant_name)
-        self.service = self.config.baremetal.catalog_type
+        self.service = CONF.baremetal.catalog_type
         self.uri_prefix = ''
 
     def serialize(self, object_type, object_dict):

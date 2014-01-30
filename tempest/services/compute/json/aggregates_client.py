@@ -16,15 +16,18 @@
 import json
 
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class AggregatesClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AggregatesClientJSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(AggregatesClientJSON, self).__init__(username, password,
                                                    auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = CONF.compute.catalog_type
 
     def list_aggregates(self):
         """Get aggregate list."""

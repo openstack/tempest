@@ -18,8 +18,8 @@ from tempest.services.baremetal.v1 import base_v1
 class BaremetalClientJSON(base_v1.BaremetalClientV1):
     """Tempest REST client for Ironic JSON API v1."""
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(BaremetalClientJSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(BaremetalClientJSON, self).__init__(username, password,
                                                   auth_url, tenant_name)
 
         self.serialize = lambda obj_type, obj_body: json.dumps(obj_body)

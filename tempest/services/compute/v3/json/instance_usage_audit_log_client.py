@@ -16,14 +16,17 @@
 import json
 
 from tempest.common.rest_client import RestClient
+from tempest import config
+
+CONF = config.CONF
 
 
 class InstanceUsagesAuditLogV3ClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
+    def __init__(self, username, password, auth_url, tenant_name=None):
         super(InstanceUsagesAuditLogV3ClientJSON, self).__init__(
-            config, username, password, auth_url, tenant_name)
-        self.service = self.config.compute.catalog_v3_type
+            username, password, auth_url, tenant_name)
+        self.service = CONF.compute.catalog_v3_type
 
     def list_instance_usage_audit_logs(self, time_before=None):
         if time_before:

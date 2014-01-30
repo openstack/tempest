@@ -16,18 +16,21 @@
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
 from tempest.services.compute.xml.common import XMLNS_11
 
+CONF = config.CONF
+
 
 class QuotasClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(QuotasClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(QuotasClientXML, self).__init__(username, password,
                                               auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = CONF.compute.catalog_type
 
     def _format_quota(self, q):
         quota = {}

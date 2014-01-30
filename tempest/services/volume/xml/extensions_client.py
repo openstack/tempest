@@ -14,16 +14,20 @@
 #    under the License.
 
 from lxml import etree
+
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 
 class ExtensionsClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ExtensionsClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ExtensionsClientXML, self).__init__(username, password,
                                                   auth_url, tenant_name)
-        self.service = self.config.volume.catalog_type
+        self.service = CONF.volume.catalog_type
 
     def _parse_array(self, node):
         array = []

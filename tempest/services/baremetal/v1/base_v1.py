@@ -21,8 +21,8 @@ class BaremetalClientV1(base.BaremetalClient):
     methods in order to send requests to Ironic.
 
     """
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(BaremetalClientV1, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(BaremetalClientV1, self).__init__(username, password,
                                                 auth_url, tenant_name)
         self.version = '1'
         self.uri_prefix = 'v%s' % self.version

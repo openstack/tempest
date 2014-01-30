@@ -17,15 +17,18 @@ import json
 import time
 
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class InterfacesClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(InterfacesClientJSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(InterfacesClientJSON, self).__init__(username, password,
                                                    auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = CONF.compute.catalog_type
 
     def list_interfaces(self, server):
         resp, body = self.get('servers/%s/os-interface' % server)

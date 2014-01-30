@@ -20,23 +20,26 @@ import jsonschema
 
 from tempest.common import glance_http
 from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class ImageClientV2JSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ImageClientV2JSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ImageClientV2JSON, self).__init__(username, password,
                                                 auth_url, tenant_name)
-        self.service = self.config.images.catalog_type
-        if config.service_available.glance:
+        self.service = CONF.images.catalog_type
+        if CONF.service_available.glance:
             self.http = self._get_http()
 
     def _get_http(self):
         token, endpoint = self.keystone_auth(self.user, self.password,
                                              self.auth_url, self.service,
                                              self.tenant_name)
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         return glance_http.HTTPClient(endpoint=endpoint, token=token,
                                       insecure=dscv)
 

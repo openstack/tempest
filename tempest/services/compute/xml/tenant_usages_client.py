@@ -18,16 +18,19 @@ import urllib
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 
 class TenantUsagesClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(TenantUsagesClientXML, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(TenantUsagesClientXML, self).__init__(username,
                                                     password, auth_url,
                                                     tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):
         json = xml_to_json(node)

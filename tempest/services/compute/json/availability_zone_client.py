@@ -16,15 +16,18 @@
 import json
 
 from tempest.common.rest_client import RestClient
+from tempest import config
+
+CONF = config.CONF
 
 
 class AvailabilityZoneClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AvailabilityZoneClientJSON, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(AvailabilityZoneClientJSON, self).__init__(username,
                                                          password, auth_url,
                                                          tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = CONF.compute.catalog_type
 
     def get_availability_zone_list(self):
         resp, body = self.get('os-availability-zone')

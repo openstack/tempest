@@ -17,14 +17,17 @@ import json
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest import config
+
+CONF = config.CONF
 
 
 class TenantUsagesV3ClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
+    def __init__(self, username, password, auth_url, tenant_name=None):
         super(TenantUsagesV3ClientJSON, self).__init__(
-            config, username, password, auth_url, tenant_name)
-        self.service = self.config.compute.catalog_v3_type
+            username, password, auth_url, tenant_name)
+        self.service = CONF.compute.catalog_v3_type
 
     def list_tenant_usages(self, params=None):
         url = 'os-simple-tenant-usage'

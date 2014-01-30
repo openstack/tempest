@@ -12,6 +12,10 @@
 
 import urllib
 
+from tempest import config
+
+CONF = config.CONF
+
 # the following map is used to construct proper URI
 # for the given neutron resource
 service_resource_prefix_map = {
@@ -42,15 +46,15 @@ resource_plural_map = {
 
 
 class NetworkClientBase(object):
-    def __init__(self, config, username, password,
+    def __init__(self, username, password,
                  auth_url, tenant_name=None):
         self.rest_client = self.get_rest_client(
-            config, username, password, auth_url, tenant_name)
-        self.rest_client.service = self.rest_client.config.network.catalog_type
+            username, password, auth_url, tenant_name)
+        self.rest_client.service = CONF.network.catalog_type
         self.version = '2.0'
         self.uri_prefix = "v%s" % (self.version)
 
-    def get_rest_client(self, config, username, password,
+    def get_rest_client(self, username, password,
                         auth_url, tenant_name):
         raise NotImplementedError
 

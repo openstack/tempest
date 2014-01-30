@@ -21,17 +21,20 @@ import urllib
 
 from tempest.common.rest_client import RestClient
 from tempest.common import waiters
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class ServersV3ClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url,
+    def __init__(self, username, password, auth_url,
                  tenant_name=None, auth_version='v2'):
-        super(ServersV3ClientJSON, self).__init__(config, username, password,
+        super(ServersV3ClientJSON, self).__init__(username, password,
                                                   auth_url, tenant_name,
                                                   auth_version=auth_version)
-        self.service = self.config.compute.catalog_v3_type
+        self.service = CONF.compute.catalog_v3_type
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """

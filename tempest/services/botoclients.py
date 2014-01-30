@@ -18,25 +18,27 @@ import contextlib
 import types
 import urlparse
 
+from tempest import config
 from tempest import exceptions
 
 import boto
 import boto.ec2
 import boto.s3.connection
 
+CONF = config.CONF
+
 
 class BotoClientBase(object):
 
     ALLOWED_METHODS = set()
 
-    def __init__(self, config,
-                 username=None, password=None,
+    def __init__(self, username=None, password=None,
                  auth_url=None, tenant_name=None,
                  *args, **kwargs):
 
-        self.connection_timeout = str(config.boto.http_socket_timeout)
-        self.num_retries = str(config.boto.num_retries)
-        self.build_timeout = config.boto.build_timeout
+        self.connection_timeout = str(CONF.boto.http_socket_timeout)
+        self.num_retries = str(CONF.boto.num_retries)
+        self.build_timeout = CONF.boto.build_timeout
         self.ks_cred = {"username": username,
                         "password": password,
                         "auth_url": auth_url,
@@ -103,15 +105,15 @@ class APIClientEC2(BotoClientBase):
     def connect_method(self, *args, **kwargs):
         return boto.connect_ec2(*args, **kwargs)
 
-    def __init__(self, config, *args, **kwargs):
-        super(APIClientEC2, self).__init__(config, *args, **kwargs)
-        aws_access = config.boto.aws_access
-        aws_secret = config.boto.aws_secret
-        purl = urlparse.urlparse(config.boto.ec2_url)
+    def __init__(self, *args, **kwargs):
+        super(APIClientEC2, self).__init__(*args, **kwargs)
+        aws_access = CONF.boto.aws_access
+        aws_secret = CONF.boto.aws_secret
+        purl = urlparse.urlparse(CONF.boto.ec2_url)
 
-        region_name = config.compute.region
+        region_name = CONF.compute.region
         if not region_name:
-            region_name = config.identity.region
+            region_name = CONF.identity.region
         region = boto.ec2.regioninfo.RegionInfo(name=region_name,
                                                 endpoint=purl.hostname)
         port = purl.port
@@ -194,11 +196,11 @@ class ObjectClientS3(BotoClientBase):
     def connect_method(self, *args, **kwargs):
         return boto.connect_s3(*args, **kwargs)
 
-    def __init__(self, config, *args, **kwargs):
-        super(ObjectClientS3, self).__init__(config, *args, **kwargs)
-        aws_access = config.boto.aws_access
-        aws_secret = config.boto.aws_secret
-        purl = urlparse.urlparse(config.boto.s3_url)
+    def __init__(self, *args, **kwargs):
+        super(ObjectClientS3, self).__init__(*args, **kwargs)
+        aws_access = CONF.boto.aws_access
+        aws_secret = CONF.boto.aws_secret
+        purl = urlparse.urlparse(CONF.boto.s3_url)
         port = purl.port
         if port is None:
             if purl.scheme is not "https":

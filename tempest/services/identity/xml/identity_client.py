@@ -19,21 +19,23 @@ from lxml import etree
 
 from tempest.common import http
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
 
+CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v2.0"
 
 
 class IdentityClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(IdentityClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(IdentityClientXML, self).__init__(username, password,
                                                 auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
     def _parse_array(self, node):
@@ -263,8 +265,8 @@ class IdentityClientXML(RestClientXML):
 
 class TokenClientXML(RestClientXML):
 
-    def __init__(self, config):
-        auth_url = config.identity.uri
+    def __init__(self):
+        auth_url = CONF.identity.uri
 
         # TODO(jaypipes) Why is this all repeated code in here?
         # Normalize URI to ensure /tokens is in it.
@@ -272,7 +274,6 @@ class TokenClientXML(RestClientXML):
             auth_url = auth_url.rstrip('/') + '/tokens'
 
         self.auth_url = auth_url
-        self.config = config
 
     def auth(self, user, password, tenant):
         passwordCreds = Element("passwordCredentials",
@@ -287,7 +288,7 @@ class TokenClientXML(RestClientXML):
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
         if headers is None:

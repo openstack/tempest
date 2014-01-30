@@ -18,17 +18,20 @@ import urllib
 
 from tempest.common.rest_client import RestClient
 from tempest.common import waiters
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class ImagesClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ImagesClientJSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ImagesClientJSON, self).__init__(username, password,
                                                auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
-        self.build_interval = self.config.compute.build_interval
-        self.build_timeout = self.config.compute.build_timeout
+        self.service = CONF.compute.catalog_type
+        self.build_interval = CONF.compute.build_interval
+        self.build_timeout = CONF.compute.build_timeout
 
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""

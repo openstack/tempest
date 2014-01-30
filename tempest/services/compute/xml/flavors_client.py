@@ -18,12 +18,14 @@ import urllib
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 from tempest.services.compute.xml.common import XMLNS_11
 
+CONF = config.CONF
 
 XMLNS_OS_FLV_EXT_DATA = \
     "http://docs.openstack.org/compute/ext/flavor_extra_data/api/v1.1"
@@ -33,10 +35,10 @@ XMLNS_OS_FLV_ACCESS = \
 
 class FlavorsClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(FlavorsClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(FlavorsClientXML, self).__init__(username, password,
                                                auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = CONF.compute.catalog_type
 
     def _format_flavor(self, f):
         flavor = {'links': []}
