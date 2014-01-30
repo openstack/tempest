@@ -15,7 +15,10 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class VPNaaSJSON(base.BaseNetworkTest):
@@ -43,7 +46,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         cls.subnet = cls.create_subnet(cls.network)
         cls.router = cls.create_router(
             data_utils.rand_name("router-"),
-            external_network_id=cls.network_cfg.public_network_id)
+            external_network_id=CONF.network.public_network_id)
         cls.create_router_interface(cls.router['id'], cls.subnet['id'])
         cls.vpnservice = cls.create_vpnservice(cls.subnet['id'],
                                                cls.router['id'])

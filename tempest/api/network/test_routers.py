@@ -17,7 +17,10 @@ import netaddr
 
 from tempest.api.network import base_routers as base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class RoutersTest(base.BaseRouterTest):
@@ -35,14 +38,14 @@ class RoutersTest(base.BaseRouterTest):
         name = data_utils.rand_name('router-')
         resp, create_body = self.client.create_router(
             name, external_gateway_info={
-                "network_id": self.network_cfg.public_network_id},
+                "network_id": CONF.network.public_network_id},
             admin_state_up=False)
         self.assertEqual('201', resp['status'])
         self.addCleanup(self._delete_router, create_body['router']['id'])
         self.assertEqual(create_body['router']['name'], name)
         self.assertEqual(
             create_body['router']['external_gateway_info']['network_id'],
-            self.network_cfg.public_network_id)
+            CONF.network.public_network_id)
         self.assertEqual(create_body['router']['admin_state_up'], False)
         # Show details of the created router
         resp, show_body = self.client.show_router(
@@ -51,7 +54,7 @@ class RoutersTest(base.BaseRouterTest):
         self.assertEqual(show_body['router']['name'], name)
         self.assertEqual(
             show_body['router']['external_gateway_info']['network_id'],
-            self.network_cfg.public_network_id)
+            CONF.network.public_network_id)
         self.assertEqual(show_body['router']['admin_state_up'], False)
         # List routers and verify if created router is there in response
         resp, list_body = self.client.list_routers()
@@ -123,14 +126,14 @@ class RoutersTest(base.BaseRouterTest):
 
     def _verify_gateway_port(self, router_id):
         resp, list_body = self.admin_client.list_ports(
-            network_id=self.network_cfg.public_network_id,
+            network_id=CONF.network.public_network_id,
             device_id=router_id)
         self.assertEqual(len(list_body['ports']), 1)
         gw_port = list_body['ports'][0]
         fixed_ips = gw_port['fixed_ips']
         self.assertEqual(len(fixed_ips), 1)
         resp, public_net_body = self.admin_client.show_network(
-            self.network_cfg.public_network_id)
+            CONF.network.public_network_id)
         public_subnet_id = public_net_body['network']['subnets'][0]
         self.assertEqual(fixed_ips[0]['subnet_id'], public_subnet_id)
 
@@ -140,13 +143,13 @@ class RoutersTest(base.BaseRouterTest):
         self.client.update_router(
             router['id'],
             external_gateway_info={
-                'network_id': self.network_cfg.public_network_id})
+                'network_id': CONF.network.public_network_id})
         # Verify operation - router
         resp, show_body = self.client.show_router(router['id'])
         self.assertEqual('200', resp['status'])
         self._verify_router_gateway(
             router['id'],
-            {'network_id': self.network_cfg.public_network_id})
+            {'network_id': CONF.network.public_network_id})
         self._verify_gateway_port(router['id'])
 
     @test.requires_ext(extension='ext-gw-mode', service='network')
@@ -156,11 +159,11 @@ class RoutersTest(base.BaseRouterTest):
         self.admin_client.update_router_with_snat_gw_info(
             router['id'],
             external_gateway_info={
-                'network_id': self.network_cfg.public_network_id,
+                'network_id': CONF.network.public_network_id,
                 'enable_snat': True})
         self._verify_router_gateway(
             router['id'],
-            {'network_id': self.network_cfg.public_network_id,
+            {'network_id': CONF.network.public_network_id,
              'enable_snat': True})
         self._verify_gateway_port(router['id'])
 
@@ -171,11 +174,11 @@ class RoutersTest(base.BaseRouterTest):
         self.admin_client.update_router_with_snat_gw_info(
             router['id'],
             external_gateway_info={
-                'network_id': self.network_cfg.public_network_id,
+                'network_id': CONF.network.public_network_id,
                 'enable_snat': False})
         self._verify_router_gateway(
             router['id'],
-            {'network_id': self.network_cfg.public_network_id,
+            {'network_id': CONF.network.public_network_id,
              'enable_snat': False})
         self._verify_gateway_port(router['id'])
 
@@ -183,12 +186,12 @@ class RoutersTest(base.BaseRouterTest):
     def test_update_router_unset_gateway(self):
         router = self.create_router(
             data_utils.rand_name('router-'),
-            external_network_id=self.network_cfg.public_network_id)
+            external_network_id=CONF.network.public_network_id)
         self.client.update_router(router['id'], external_gateway_info={})
         self._verify_router_gateway(router['id'])
         # No gateway port expected
         resp, list_body = self.admin_client.list_ports(
-            network_id=self.network_cfg.public_network_id,
+            network_id=CONF.network.public_network_id,
             device_id=router['id'])
         self.assertFalse(list_body['ports'])
 
@@ -197,15 +200,15 @@ class RoutersTest(base.BaseRouterTest):
     def test_update_router_reset_gateway_without_snat(self):
         router = self.create_router(
             data_utils.rand_name('router-'),
-            external_network_id=self.network_cfg.public_network_id)
+            external_network_id=CONF.network.public_network_id)
         self.admin_client.update_router_with_snat_gw_info(
             router['id'],
             external_gateway_info={
-                'network_id': self.network_cfg.public_network_id,
+                'network_id': CONF.network.public_network_id,
                 'enable_snat': False})
         self._verify_router_gateway(
             router['id'],
-            {'network_id': self.network_cfg.public_network_id,
+            {'network_id': CONF.network.public_network_id,
              'enable_snat': False})
         self._verify_gateway_port(router['id'])
 

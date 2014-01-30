@@ -15,7 +15,10 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class FloatingIPTestJSON(base.BaseNetworkTest):
@@ -43,7 +46,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(FloatingIPTestJSON, cls).setUpClass()
-        cls.ext_net_id = cls.config.network.public_network_id
+        cls.ext_net_id = CONF.network.public_network_id
 
         # Create network, subnet, router and add interface
         cls.network = cls.create_network()
