@@ -16,7 +16,10 @@
 import cStringIO as StringIO
 
 from tempest.api.image import base
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class CreateRegisterImagesTest(base.BaseV1ImageTest):
@@ -68,7 +71,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         resp, body = self.create_image(name='New Http Image',
                                        container_format='bare',
                                        disk_format='raw', is_public=True,
-                                       copy_from=self.config.images.http_image)
+                                       copy_from=CONF.images.http_image)
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertEqual('New Http Image', body.get('name'))

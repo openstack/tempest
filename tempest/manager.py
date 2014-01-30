@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import config
 from tempest import exceptions
 
 
@@ -27,7 +26,6 @@ class Manager(object):
     """
 
     def __init__(self):
-        self.config = config.CONF
         self.client_attr_names = []
 
     # we do this everywhere, have it be part of the super class

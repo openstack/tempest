@@ -15,8 +15,11 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
 from testtools.matchers import ContainsAll
+
+CONF = config.CONF
 
 
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
@@ -27,7 +30,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(VolumesGetTestJSON, cls).setUpClass()
         cls.client = cls.volumes_extensions_client
-        if not cls.config.service_available.cinder:
+        if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
