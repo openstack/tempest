@@ -149,6 +149,7 @@ class RoutersTest(base.BaseRouterTest):
             {'network_id': self.network_cfg.public_network_id})
         self._verify_gateway_port(router['id'])
 
+    @test.requires_ext(extension='ext-gw-mode', service='network')
     @test.attr(type='smoke')
     def test_update_router_set_gateway_with_snat_explicit(self):
         router = self.create_router(data_utils.rand_name('router-'))
@@ -163,6 +164,7 @@ class RoutersTest(base.BaseRouterTest):
              'enable_snat': True})
         self._verify_gateway_port(router['id'])
 
+    @test.requires_ext(extension='ext-gw-mode', service='network')
     @test.attr(type='smoke')
     def test_update_router_set_gateway_without_snat(self):
         router = self.create_router(data_utils.rand_name('router-'))
@@ -190,6 +192,7 @@ class RoutersTest(base.BaseRouterTest):
             device_id=router['id'])
         self.assertFalse(list_body['ports'])
 
+    @test.requires_ext(extension='ext-gw-mode', service='network')
     @test.attr(type='smoke')
     def test_update_router_reset_gateway_without_snat(self):
         router = self.create_router(
