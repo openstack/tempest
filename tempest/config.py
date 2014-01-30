@@ -667,7 +667,7 @@ InputScenarioGroup = [
                default='^cirros-0.3.1-x86_64-uec$',
                help="Matching images become parameters for scenario tests"),
     cfg.StrOpt('flavor_regex',
-               default='^m1.(micro|nano|tiny)$',
+               default='^m1.nano$',
                help="Matching flavors become parameters for scenario tests"),
     cfg.StrOpt('non_ssh_image_regex',
                default='^.*[Ww]in.*$',

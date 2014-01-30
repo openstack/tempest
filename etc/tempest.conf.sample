@@ -494,7 +494,7 @@
 
 # Matching flavors become parameters for scenario tests
 # (string value)
-#flavor_regex=^m1.(micro|nano|tiny)$
+#flavor_regex=^m1.nano$
 
 # SSH verification in tests is skippedfor matching images
 # (string value)
