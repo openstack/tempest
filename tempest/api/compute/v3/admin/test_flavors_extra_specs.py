@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class FlavorsExtraSpecsV3TestJSON(base.BaseV3ComputeAdminTest):
+class FlavorsExtraSpecsV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Flavor Extra Spec API extension.
@@ -30,7 +30,7 @@ class FlavorsExtraSpecsV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsExtraSpecsV3TestJSON, cls).setUpClass()
+        super(FlavorsExtraSpecsV3Test, cls).setUpClass()
 
         cls.client = cls.flavors_admin_client
         flavor_name = data_utils.rand_name('test_flavor')
@@ -53,7 +53,7 @@ class FlavorsExtraSpecsV3TestJSON(base.BaseV3ComputeAdminTest):
     def tearDownClass(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsV3TestJSON, cls).tearDownClass()
+        super(FlavorsExtraSpecsV3Test, cls).tearDownClass()
 
     @test.attr(type='gate')
     def test_flavor_set_get_update_show_unset_keys(self):

@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class FlavorsAccessV3TestJSON(base.BaseV3ComputeAdminTest):
+class FlavorsAccessV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Flavor Access API extension.
@@ -29,7 +29,7 @@ class FlavorsAccessV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsAccessV3TestJSON, cls).setUpClass()
+        super(FlavorsAccessV3Test, cls).setUpClass()
 
         cls.client = cls.flavors_admin_client
         admin_client = cls._get_identity_admin_client()

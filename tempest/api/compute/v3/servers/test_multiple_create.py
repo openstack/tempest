@@ -19,7 +19,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class MultipleCreateV3TestJSON(base.BaseV3ComputeTest):
+class MultipleCreateV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
     _name = 'multiple-create-test'
 

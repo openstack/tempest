@@ -28,7 +28,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
+class ImagesOneServerNegativeTest(base.BaseV2ComputeTest):
     _interface = 'json'
 
     def tearDown(self):
@@ -36,12 +36,12 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         for image_id in self.image_ids:
             self.client.delete_image(image_id)
             self.image_ids.remove(image_id)
-        super(ImagesOneServerNegativeTestJSON, self).tearDown()
+        super(ImagesOneServerNegativeTest, self).tearDown()
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
-        super(ImagesOneServerNegativeTestJSON, self).setUp()
+        super(ImagesOneServerNegativeTest, self).setUp()
         # Check if the server is in a clean state after test
         try:
             self.servers_client.wait_for_server_status(self.server_id,
@@ -58,7 +58,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesOneServerNegativeTestJSON, cls).setUpClass()
+        super(ImagesOneServerNegativeTest, cls).setUpClass()
         cls.client = cls.images_client
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)

@@ -24,7 +24,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ExtensionsV3TestJSON(base.BaseV3ComputeTest):
+class ExtensionsV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @test.attr(type='gate')

@@ -20,13 +20,13 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ListServersNegativeV3TestJSON(base.BaseV3ComputeTest):
+class ListServersNegativeV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
     force_tenant_isolation = True
 
     @classmethod
     def setUpClass(cls):
-        super(ListServersNegativeV3TestJSON, cls).setUpClass()
+        super(ListServersNegativeV3Test, cls).setUpClass()
         cls.client = cls.servers_client
 
         # The following servers are created for use

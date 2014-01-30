@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class FlavorsExtraSpecsNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class FlavorsExtraSpecsNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Negative Tests Flavor Extra Spec API extension.
@@ -31,7 +31,7 @@ class FlavorsExtraSpecsNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsExtraSpecsNegativeV3TestJSON, cls).setUpClass()
+        super(FlavorsExtraSpecsNegativeV3Test, cls).setUpClass()
 
         cls.client = cls.flavors_admin_client
         flavor_name = data_utils.rand_name('test_flavor')
@@ -54,7 +54,7 @@ class FlavorsExtraSpecsNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
     def tearDownClass(cls):
         resp, body = cls.client.delete_flavor(cls.flavor['id'])
         cls.client.wait_for_resource_deletion(cls.flavor['id'])
-        super(FlavorsExtraSpecsNegativeV3TestJSON, cls).tearDownClass()
+        super(FlavorsExtraSpecsNegativeV3Test, cls).tearDownClass()
 
     @test.attr(type=['negative', 'gate'])
     def test_flavor_non_admin_set_keys(self):

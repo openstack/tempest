@@ -17,12 +17,12 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class QuotasV3TestJSON(base.BaseV3ComputeTest):
+class QuotasV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(QuotasV3TestJSON, cls).setUpClass()
+        super(QuotasV3Test, cls).setUpClass()
         cls.client = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
         resp, tenants = cls.admin_client.list_tenants()

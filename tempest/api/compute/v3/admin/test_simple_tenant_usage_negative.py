@@ -21,13 +21,13 @@ from tempest import test
 from tempest.test import attr
 
 
-class TenantUsagesNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class TenantUsagesNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(TenantUsagesNegativeV3TestJSON, cls).setUpClass()
+        super(TenantUsagesNegativeV3Test, cls).setUpClass()
         cls.adm_client = cls.os_adm.tenant_usages_client
         cls.client = cls.os.tenant_usages_client
         cls.identity_client = cls._get_identity_admin_client()

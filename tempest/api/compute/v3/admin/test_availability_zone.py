@@ -17,7 +17,7 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class AZAdminV3TestJSON(base.BaseV3ComputeAdminTest):
+class AZAdminV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Availability Zone API List
@@ -27,7 +27,7 @@ class AZAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(AZAdminV3TestJSON, cls).setUpClass()
+        super(AZAdminV3Test, cls).setUpClass()
         cls.client = cls.availability_zone_admin_client
         cls.non_adm_client = cls.availability_zone_client
 

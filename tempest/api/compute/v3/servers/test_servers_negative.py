@@ -26,11 +26,11 @@ from tempest import test
 CONF = config.CONF
 
 
-class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
+class ServersNegativeV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     def setUp(self):
-        super(ServersNegativeV3TestJSON, self).setUp()
+        super(ServersNegativeV3Test, self).setUp()
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
         except Exception:
@@ -38,7 +38,7 @@ class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServersNegativeV3TestJSON, cls).setUpClass()
+        super(ServersNegativeV3Test, cls).setUpClass()
         cls.client = cls.servers_client
         cls.alt_os = clients.AltManager()
         cls.alt_client = cls.alt_os.servers_v3_client

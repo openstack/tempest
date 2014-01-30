@@ -28,7 +28,7 @@ from tempest.test import skip_because
 CONF = config.CONF
 
 
-class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
+class ServerActionsV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
     resize_available = CONF.compute_feature_enabled.resize
     run_ssh = CONF.compute.run_ssh
@@ -36,7 +36,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
-        super(ServerActionsV3TestJSON, self).setUp()
+        super(ServerActionsV3Test, self).setUp()
         # Check if the server is in a clean state after test
         try:
             self.client.wait_for_server_status(self.server_id, 'ACTIVE')
@@ -46,7 +46,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServerActionsV3TestJSON, cls).setUpClass()
+        super(ServerActionsV3Test, cls).setUpClass()
         cls.client = cls.servers_client
         cls.server_id = cls.rebuild_server(None)
 

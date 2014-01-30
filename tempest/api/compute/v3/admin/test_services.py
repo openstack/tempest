@@ -18,7 +18,7 @@ from tempest.api.compute import base
 from tempest.test import attr
 
 
-class ServicesAdminV3TestJSON(base.BaseV3ComputeAdminTest):
+class ServicesAdminV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Services API. List and Enable/Disable require admin privileges.
@@ -28,7 +28,7 @@ class ServicesAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServicesAdminV3TestJSON, cls).setUpClass()
+        super(ServicesAdminV3Test, cls).setUpClass()
         cls.client = cls.services_admin_client
 
     @attr(type='gate')

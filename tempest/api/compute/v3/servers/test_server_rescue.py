@@ -18,12 +18,12 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServerRescueV3TestJSON(base.BaseV3ComputeTest):
+class ServerRescueV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServerRescueV3TestJSON, cls).setUpClass()
+        super(ServerRescueV3Test, cls).setUpClass()
         cls.device = 'vdf'
 
         # Create a volume and wait for it to become ready for attach
@@ -58,17 +58,17 @@ class ServerRescueV3TestJSON(base.BaseV3ComputeTest):
         cls.servers_client.wait_for_server_status(cls.rescue_id, 'RESCUE')
 
     def setUp(self):
-        super(ServerRescueV3TestJSON, self).setUp()
+        super(ServerRescueV3Test, self).setUp()
 
     @classmethod
     def tearDownClass(cls):
         client = cls.volumes_client
         client.delete_volume(str(cls.volume_to_attach['id']).strip())
         client.delete_volume(str(cls.volume_to_detach['id']).strip())
-        super(ServerRescueV3TestJSON, cls).tearDownClass()
+        super(ServerRescueV3Test, cls).tearDownClass()
 
     def tearDown(self):
-        super(ServerRescueV3TestJSON, self).tearDown()
+        super(ServerRescueV3Test, self).tearDown()
 
     def _detach(self, server_id, volume_id):
         self.servers_client.detach_volume(server_id, volume_id)

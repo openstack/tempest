@@ -19,12 +19,12 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
+class ImagesMetadataTest(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesMetadataTestJSON, cls).setUpClass()
+        super(ImagesMetadataTest, cls).setUpClass()
         cls.client = cls.images_client
 
     @attr(type=['negative', 'gate'])

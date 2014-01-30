@@ -22,13 +22,13 @@ from tempest import test
 CONF = config.CONF
 
 
-class QuotasAdminV3TestJSON(base.BaseV3ComputeAdminTest):
+class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     _interface = 'json'
     force_tenant_isolation = True
 
     @classmethod
     def setUpClass(cls):
-        super(QuotasAdminV3TestJSON, cls).setUpClass()
+        super(QuotasAdminV3Test, cls).setUpClass()
         cls.auth_url = CONF.identity.uri
         cls.client = cls.quotas_client
         cls.adm_client = cls.quotas_admin_client

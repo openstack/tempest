@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class AggregatesAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class AggregatesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Aggregates API that require admin privileges
@@ -30,7 +30,7 @@ class AggregatesAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(AggregatesAdminNegativeV3TestJSON, cls).setUpClass()
+        super(AggregatesAdminNegativeV3Test, cls).setUpClass()
         cls.client = cls.aggregates_admin_client
         cls.user_client = cls.aggregates_client
         cls.aggregate_name_prefix = 'test_aggregate_'

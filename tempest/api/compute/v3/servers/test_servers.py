@@ -18,17 +18,17 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class ServersV3TestJSON(base.BaseV3ComputeTest):
+class ServersV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServersV3TestJSON, cls).setUpClass()
+        super(ServersV3Test, cls).setUpClass()
         cls.client = cls.servers_client
 
     def tearDown(self):
         self.clear_servers()
-        super(ServersV3TestJSON, self).tearDown()
+        super(ServersV3Test, self).tearDown()
 
     @test.attr(type='gate')
     def test_create_server_with_admin_password(self):

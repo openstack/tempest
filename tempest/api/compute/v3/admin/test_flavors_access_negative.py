@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class FlavorsAccessNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class FlavorsAccessNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Flavor Access API extension.
@@ -32,7 +32,7 @@ class FlavorsAccessNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsAccessNegativeV3TestJSON, cls).setUpClass()
+        super(FlavorsAccessNegativeV3Test, cls).setUpClass()
 
         cls.client = cls.flavors_admin_client
         admin_client = cls._get_identity_admin_client()

@@ -21,12 +21,12 @@ from tempest.test import attr
 CONF = config.CONF
 
 
-class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
+class ImagesMetadataTest(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesMetadataTestJSON, cls).setUpClass()
+        super(ImagesMetadataTest, cls).setUpClass()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
@@ -47,10 +47,10 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def tearDownClass(cls):
         cls.client.delete_image(cls.image_id)
-        super(ImagesMetadataTestJSON, cls).tearDownClass()
+        super(ImagesMetadataTest, cls).tearDownClass()
 
     def setUp(self):
-        super(ImagesMetadataTestJSON, self).setUp()
+        super(ImagesMetadataTest, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
         resp, _ = self.client.set_image_metadata(self.image_id, meta)
         self.assertEqual(resp.status, 200)
