@@ -155,9 +155,6 @@ class ServersNegativeV3TestJSON(base.BaseV3ComputeTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_numeric_server_name(self):
         # Create a server with a numeric name
-        if self.__class__._interface == "xml":
-            raise self.skipException("Not testable in XML")
-
         server_name = 12345
         self.assertRaises(exceptions.BadRequest,
                           self.create_test_server,

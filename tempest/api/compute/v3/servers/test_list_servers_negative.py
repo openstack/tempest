@@ -103,7 +103,6 @@ class ListServersNegativeV3TestJSON(base.BaseV3ComputeTest):
         # List servers by specifying limits
         resp, body = self.client.list_servers({'limit': 1})
         self.assertEqual('200', resp['status'])
-        # when _interface='xml', one element for servers_links in servers
         self.assertEqual(1, len([x for x in body['servers'] if 'id' in x]))
 
     @attr(type=['negative', 'gate'])

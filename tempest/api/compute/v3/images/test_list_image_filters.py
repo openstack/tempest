@@ -135,8 +135,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
         resp, images = self.client.list_images(params)
-        # when _interface='xml', one element for images_links in images
-        # ref: Question #224349
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
     @attr(type='gate')

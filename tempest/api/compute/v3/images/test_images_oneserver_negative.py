@@ -85,8 +85,6 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     @skip_because(bug="1006725")
     @attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
-        if self.__class__._interface == "xml":
-            raise self.skipException("Not testable in XML")
         # invalid multibyte sequence from:
         # http://stackoverflow.com/questions/1301402/
         #     example-invalid-utf8-string
