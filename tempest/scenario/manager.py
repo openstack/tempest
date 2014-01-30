@@ -233,7 +233,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         super(OfficialClientTest, cls).setUpClass()
         cls.isolated_creds = isolated_creds.IsolatedCreds(
-            __name__, tempest_client=False,
+            cls.__name__, tempest_client=False,
             network_resources=cls.network_resources)
 
         username, password, tenant_name = cls.credentials()
