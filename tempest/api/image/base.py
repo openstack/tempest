@@ -17,9 +17,12 @@ import cStringIO as StringIO
 from tempest import clients
 from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -35,10 +38,10 @@ class BaseImageTest(tempest.test.BaseTestCase):
         cls._interface = 'json'
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             cls.__name__, network_resources=cls.network_resources)
-        if not cls.config.service_available.glance:
+        if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_primary_creds()
             username, tenant_name, password = creds
             cls.os = clients.Manager(username=username,
@@ -83,7 +86,7 @@ class BaseV1ImageTest(BaseImageTest):
     def setUpClass(cls):
         super(BaseV1ImageTest, cls).setUpClass()
         cls.client = cls.os.image_client
-        if not cls.config.image_feature_enabled.api_v1:
+        if not CONF.image_feature_enabled.api_v1:
             msg = "Glance API v1 not supported"
             raise cls.skipException(msg)
 
@@ -92,7 +95,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
     @classmethod
     def setUpClass(cls):
         super(BaseV1ImageMembersTest, cls).setUpClass()
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
             username, tenant_name, password = creds
             cls.os_alt = clients.Manager(username=username,
@@ -124,7 +127,7 @@ class BaseV2ImageTest(BaseImageTest):
     def setUpClass(cls):
         super(BaseV2ImageTest, cls).setUpClass()
         cls.client = cls.os.image_client_v2
-        if not cls.config.image_feature_enabled.api_v2:
+        if not CONF.image_feature_enabled.api_v2:
             msg = "Glance API v2 not supported"
             raise cls.skipException(msg)
 
@@ -134,7 +137,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
     @classmethod
     def setUpClass(cls):
         super(BaseV2MemberImageTest, cls).setUpClass()
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
             username, tenant_name, password = creds
             cls.os_alt = clients.Manager(username=username,
