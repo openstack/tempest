@@ -472,7 +472,11 @@ class IsolatedCreds(object):
         net_client = self.network_admin_client
         for cred in self.isolated_net_resources:
             network, subnet, router = self.isolated_net_resources.get(cred)
-            if self.network_resources.get('router'):
+            LOG.debug("Clearing network: %(network)s, "
+                      "subnet: %(subnet)s, router: %(router)s",
+                      {'network': network, 'subnet': subnet, 'router': router})
+            if (not self.network_resources or
+                self.network_resources.get('router')):
                 try:
                     if self.tempest_client:
                         net_client.remove_router_interface_with_subnet_id(
@@ -485,13 +489,16 @@ class IsolatedCreds(object):
                              router['name'])
                     pass
                 self._clear_isolated_router(router['id'], router['name'])
-            if self.network_resources.get('network'):
+            if (not self.network_resources or
+                self.network_resources.get('network')):
                 # TODO(mlavalle) This method call will be removed once patch
                 # https://review.openstack.org/#/c/46563/ merges in Neutron
                 self._cleanup_ports(network['id'])
-            if self.network_resources.get('subnet'):
+            if (not self.network_resources or
+                self.network_resources.get('subnet')):
                 self._clear_isolated_subnet(subnet['id'], subnet['name'])
-            if self.network_resources.get('network'):
+            if (not self.network_resources or
+                self.network_resources.get('network')):
                 self._clear_isolated_network(network['id'], network['name'])
 
     def clear_isolated_creds(self):
