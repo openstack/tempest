@@ -96,9 +96,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # to specific server should change the association of the Floating IP
         # Create server so as to use for Multiple association
         new_name = rand_name('floating_server')
-        resp, body = self.servers_client.create_server(new_name,
-                                                       self.image_ref,
-                                                       self.flavor_ref)
+        resp, body = self.create_test_server(name=new_name)
         self.servers_client.wait_for_server_status(body['id'], 'ACTIVE')
         self.new_server_id = body['id']
 
