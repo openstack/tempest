@@ -39,13 +39,9 @@ class AggregatesV3ClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['aggregate']
 
-    def create_aggregate(self, name, availability_zone=None):
+    def create_aggregate(self, **kwargs):
         """Creates a new aggregate."""
-        post_body = {
-            'name': name,
-            'availability_zone': availability_zone,
-        }
-        post_body = json.dumps({'aggregate': post_body})
+        post_body = json.dumps({'aggregate': kwargs})
         resp, body = self.post('os-aggregates', post_body, self.headers)
 
         body = json.loads(body)
