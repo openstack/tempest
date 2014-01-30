@@ -14,7 +14,6 @@
 
 import hashlib
 import json
-import re
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
@@ -95,29 +94,19 @@ class ObjectSloTest(base.BaseObjectTest):
         return object_name
 
     def _assertHeadersSLO(self, resp, method):
-        # Check the existence of common headers with custom matcher
-        self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
-                        'Object', method))
         # When sending GET or HEAD requests to SLO the response contains
         # 'X-Static-Large-Object' header
         if method in ('GET', 'HEAD'):
             self.assertIn('x-static-large-object', resp)
+            self.assertEqual(resp['x-static-large-object'], 'True')
 
-        # Check common headers for all HTTP methods
-        self.assertTrue(re.match("^tx[0-9a-f]*-[0-9a-f]*$",
-                                 resp['x-trans-id']))
-        self.assertTrue(resp['content-length'].isdigit())
-        self.assertNotEqual(len(resp['date']), 0)
         # Etag value of a large object is enclosed in double-quotations.
+        # After etag quotes are checked they are removed and the response is
+        # checked if all common headers are present and well formatted
         self.assertTrue(resp['etag'].startswith('\"'))
         self.assertTrue(resp['etag'].endswith('\"'))
-        self.assertTrue(resp['etag'].strip('\"').isalnum())
-        # Check header formats for a specific method
-        if method in ('GET', 'HEAD'):
-            self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
-            self.assertNotEqual(len(resp['content-type']), 0)
-            self.assertEqual(resp['accept-ranges'], 'bytes')
-            self.assertEqual(resp['x-static-large-object'], 'True')
+        resp['etag'] = resp['etag'].strip('"')
+        self.assertHeaders(resp, 'Object', method)
 
     @test.attr(type='gate')
     def test_upload_manifest(self):
