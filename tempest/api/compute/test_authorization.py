@@ -16,9 +16,12 @@
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -39,7 +42,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_client = cls.os.security_groups_client
 
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
             username, tenant_name, password = creds
             cls.alt_manager = clients.Manager(username=username,

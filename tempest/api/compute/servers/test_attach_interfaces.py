@@ -14,10 +14,13 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
 import time
+
+CONF = config.CONF
 
 
 class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
@@ -25,7 +28,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        if not cls.config.service_available.neutron:
+        if not CONF.service_available.neutron:
             raise cls.skipException("Neutron is required")
         # This test class requires network and subnet
         cls.set_network_resources(network=True, subnet=True)

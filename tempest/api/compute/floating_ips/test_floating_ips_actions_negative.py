@@ -17,8 +17,11 @@ import uuid
 
 from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
@@ -40,7 +43,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
             cls.floating_ip_ids.append(body[i]['id'])
         while True:
             cls.non_exist_id = data_utils.rand_int_id(start=999)
-            if cls.config.service_available.neutron:
+            if CONF.service_available.neutron:
                 cls.non_exist_id = str(uuid.uuid4())
             if cls.non_exist_id not in cls.floating_ip_ids:
                 break

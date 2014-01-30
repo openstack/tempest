@@ -15,8 +15,11 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 
 class QuotasAdminV3TestJSON(base.BaseV3ComputeAdminTest):
@@ -26,7 +29,7 @@ class QuotasAdminV3TestJSON(base.BaseV3ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(QuotasAdminV3TestJSON, cls).setUpClass()
-        cls.auth_url = cls.config.identity.uri
+        cls.auth_url = CONF.identity.uri
         cls.client = cls.quotas_client
         cls.adm_client = cls.quotas_admin_client
         cls.identity_admin_client = cls._get_identity_admin_client()

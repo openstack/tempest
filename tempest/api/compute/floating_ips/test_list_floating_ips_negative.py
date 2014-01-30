@@ -17,8 +17,11 @@ import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
@@ -34,7 +37,7 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
         # Negative test:Should not be able to GET the details
         # of non-existent floating IP
         # Creating a non-existent floatingIP id
-        if self.config.service_available.neutron:
+        if CONF.service_available.neutron:
             non_exist_id = str(uuid.uuid4())
         else:
             non_exist_id = data_utils.rand_int_id(start=999)

@@ -15,7 +15,10 @@
 
 from tempest.api.compute.security_groups import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
@@ -25,7 +28,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
     def setUpClass(cls):
         super(SecurityGroupRulesTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
-        cls.neutron_available = cls.config.service_available.neutron
+        cls.neutron_available = CONF.service_available.neutron
 
     @attr(type='smoke')
     def test_security_group_rules_create(self):

@@ -15,8 +15,11 @@
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class ImagesTestJSON(base.BaseV2ComputeTest):
@@ -25,7 +28,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setUpClass(cls):
         super(ImagesTestJSON, cls).setUpClass()
-        if not cls.config.service_available.glance:
+        if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
         cls.client = cls.images_client
@@ -34,7 +37,7 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         cls.image_ids = []
 
         if cls.multi_user:
-            if cls.config.compute.allow_tenant_isolation:
+            if CONF.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds
                 cls.alt_manager = clients.Manager(username=username,

@@ -19,11 +19,11 @@ from tempest.api.compute import base
 from tempest import config
 from tempest import test
 
+CONF = config.CONF
+
 
 class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
-
-    CONF = config.CONF
 
     @classmethod
     def setUpClass(cls):

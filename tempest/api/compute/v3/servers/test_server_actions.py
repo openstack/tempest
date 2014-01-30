@@ -359,7 +359,7 @@ class ServerActionsV3TestJSON(base.BaseV3ComputeTest):
         resp, server = self.client.shelve_server(self.server_id)
         self.assertEqual(202, resp.status)
 
-        offload_time = self.config.compute.shelved_offload_time
+        offload_time = CONF.compute.shelved_offload_time
         if offload_time >= 0:
             self.client.wait_for_server_status(self.server_id,
                                                'SHELVED_OFFLOADED',

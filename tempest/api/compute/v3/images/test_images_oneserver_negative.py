@@ -17,10 +17,13 @@
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 from tempest.test import skip_because
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -57,7 +60,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(ImagesOneServerNegativeTestJSON, cls).setUpClass()
         cls.client = cls.images_client
-        if not cls.config.service_available.glance:
+        if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
@@ -71,7 +74,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         cls.image_ids = []
 
         if cls.multi_user:
-            if cls.config.compute.allow_tenant_isolation:
+            if CONF.compute.allow_tenant_isolation:
                 creds = cls.isolated_creds.get_alt_creds()
                 username, tenant_name, password = creds
                 cls.alt_manager = clients.Manager(username=username,
