@@ -13,7 +13,7 @@ function usage {
   echo "  -t, --serial             Run testr serially"
   echo "  -C, --config             Config file location"
   echo "  -h, --help               Print this usage message"
-  echo "  -d, --debug              Debug this script -- set -o xtrace"
+  echo "  -d, --debug              Run tests with testtools instead of testr. This allows you to use PDB"
   echo "  -l, --logging            Enable logging"
   echo "  -L, --logging-config     Logging config file location.  Default is etc/logging.conf"
   echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
@@ -26,6 +26,7 @@ serial=0
 always_venv=0
 never_venv=0
 no_site_packages=0
+debug=0
 force=0
 wrapper=""
 config_file=""
@@ -50,7 +51,7 @@ while [ $# -gt 0 ]; do
     -n|--no-site-packages) no_site_packages=1;;
     -f|--force) force=1;;
     -u|--update) update=1;;
-    -d|--debug) set -o xtrace;;
+    -d|--debug) debug=1;;
     -C|--config) config_file=$2; shift;;
     -s|--smoke) testrargs+="smoke"; noseargs+="--attr=type=smoke";;
     -t|--serial) serial=1;;
@@ -94,6 +95,14 @@ function run_tests {
   testr_init
   ${wrapper} find . -type f -name "*.pyc" -delete
   export OS_TEST_PATH=./tempest/test_discover
+  if [ $debug -eq 1 ]; then
+      if [ "$testrargs" = "" ]; then
+           testrargs="discover ./tempest/test_discover"
+      fi
+      ${wrapper} python -m testtools.run $testrargs
+      return $?
+  fi
+
   if [ $serial -eq 1 ]; then
       ${wrapper} testr run --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
   else
