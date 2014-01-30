@@ -126,21 +126,6 @@ class RestClient(object):
 
         return self.token
 
-    def basic_auth(self, user, password, auth_url):
-        """
-        Provides authentication for the target API.
-        """
-
-        params = {}
-        params['headers'] = {'User-Agent': 'Test-Client', 'X-Auth-User': user,
-                             'X-Auth-Key': password}
-
-        resp, body = self.http_obj.request(auth_url, 'GET', **params)
-        try:
-            return resp['x-auth-token'], resp['x-server-management-url']
-        except Exception:
-            raise
-
     def keystone_auth(self, user, password, auth_url, service, tenant_name):
         """
         Provides authentication via Keystone using v2 identity API.
