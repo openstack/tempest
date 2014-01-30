@@ -18,7 +18,10 @@ import re
 import subprocess
 
 import tempest.cli
+from tempest import config
 
+
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -29,6 +32,13 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
     These tests do not presume any content, nor do they create
     their own. They only verify the structure of output if present.
     """
+
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.service_available.cinder:
+            msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyCinderClientTest, cls).setUpClass()
 
     def test_cinder_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,

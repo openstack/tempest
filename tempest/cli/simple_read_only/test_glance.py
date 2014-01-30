@@ -35,6 +35,13 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
     their own. They only verify the structure of output if present.
     """
 
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.service_available.glance:
+            msg = ("%s skipped as Glance is not available" % cls.__name__)
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyGlanceClientTest, cls).setUpClass()
+
     def test_glance_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
                           self.glance,
