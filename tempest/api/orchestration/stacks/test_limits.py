@@ -14,9 +14,11 @@ import logging
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -32,7 +34,7 @@ class TestServerStackLimits(base.BaseOrchestrationTest):
 
     @attr(type='gate')
     def test_exceed_max_template_size_fails(self):
-        fill = 'A' * self.orchestration_cfg.max_template_size
+        fill = 'A' * CONF.orchestration.max_template_size
         template = '''
 HeatTemplateFormatVersion: '2012-12-12'
 Description: '%s'

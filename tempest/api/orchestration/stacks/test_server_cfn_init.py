@@ -125,13 +125,13 @@ Outputs:
     @classmethod
     def setUpClass(cls):
         super(ServerCfnInitTestJSON, cls).setUpClass()
-        if not cls.orchestration_cfg.image_ref:
+        if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
         cls.client = cls.orchestration_client
 
         stack_name = data_utils.rand_name('heat')
-        if cls.orchestration_cfg.keypair_name:
-            keypair_name = cls.orchestration_cfg.keypair_name
+        if CONF.orchestration.keypair_name:
+            keypair_name = CONF.orchestration.keypair_name
         else:
             cls.keypair = cls._create_keypair()
             keypair_name = cls.keypair['name']
@@ -142,8 +142,8 @@ Outputs:
             cls.template,
             parameters={
                 'key_name': keypair_name,
-                'flavor': cls.orchestration_cfg.instance_type,
-                'image': cls.orchestration_cfg.image_ref,
+                'flavor': CONF.orchestration.instance_type,
+                'image': CONF.orchestration.image_ref,
                 'network': cls._get_default_network()['id']
             })
 

@@ -18,8 +18,12 @@ import urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
 from tempest.test import HTTP_SUCCESS
+
+CONF = config.CONF
+
 
 # This test can be quite long to run due to its
 # dependency on container-sync process running interval.
@@ -40,9 +44,9 @@ class ContainerSyncTest(base.BaseObjectTest):
 
         # Must be configure according to container-sync interval
         container_sync_timeout = \
-            int(cls.config.object_storage.container_sync_timeout)
+            int(CONF.object_storage.container_sync_timeout)
         cls.container_sync_interval = \
-            int(cls.config.object_storage.container_sync_interval)
+            int(CONF.object_storage.container_sync_interval)
         cls.attempts = \
             int(container_sync_timeout / cls.container_sync_interval)
 
