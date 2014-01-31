@@ -220,6 +220,28 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertIsNotNone(found, "Port list doesn't contain created port")
 
     @attr(type='smoke')
+    def test_port_list_filter_by_router_id(self):
+        # Create a router
+        network = self.create_network()
+        self.create_subnet(network)
+        router = self.create_router(data_utils.rand_name('router-'))
+        resp, port = self.client.create_port(
+            network_id=network['id'])
+        # Add router interface to port created above
+        resp, interface = self.client.add_router_interface_with_port_id(
+            router['id'], port['port']['id'])
+        self.addCleanup(self.client.remove_router_interface_with_port_id,
+                        router['id'], port['port']['id'])
+        # list ports filtered by router_id
+        resp, port_list = self.client.list_ports(
+            device_id=router['id'])
+        self.assertEqual('200', resp['status'])
+        # Verify if only corresponding port is listed and assert router_id
+        self.assertEqual(len(port_list['ports']), 1)
+        self.assertEqual(port['port']['id'], port_list['ports'][0]['id'])
+        self.assertEqual(router['id'], port_list['ports'][0]['device_id'])
+
+    @attr(type='smoke')
     def test_list_ports_fields(self):
         # Verify listing some fields of the ports
         resp, body = self.client.list_ports(fields='id')
