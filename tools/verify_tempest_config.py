@@ -63,6 +63,7 @@ def get_extension_client(os, service):
         'nova_v3': os.extensions_v3_client,
         'cinder': os.volumes_extension_client,
         'neutron': os.network_client,
+        'swift': os.account_client,
     }
     if service not in extensions_client:
         print('No tempest extensions client for %s' % service)
@@ -76,6 +77,7 @@ def get_enabled_extensions(service):
         'nova_v3': CONF.compute_feature_enabled.api_v3_extensions,
         'cinder': CONF.volume_feature_enabled.api_extensions,
         'neutron': CONF.network_feature_enabled.api_extensions,
+        'swift': CONF.object_storage_feature_enabled.discoverable_apis,
     }
     if service not in extensions_options:
         print('No supported extensions list option for %s' % service)
@@ -93,6 +95,10 @@ def verify_extensions(os, service, results):
         # instead of name.
         if service == 'neutron':
             extensions = map(lambda x: x['alias'], resp['extensions'])
+        elif service == 'swift':
+            # Remove Swift general information from extensions list
+            resp.pop('swift')
+            extensions = resp.keys()
         else:
             extensions = map(lambda x: x['name'], resp['extensions'])
 
@@ -142,7 +148,7 @@ def main(argv):
     print('Running config verification...')
     os = clients.ComputeAdminManager(interface='json')
     results = {}
-    for service in ['nova', 'nova_v3', 'cinder', 'neutron']:
+    for service in ['nova', 'nova_v3', 'cinder', 'neutron', 'swift']:
         # TODO(mtreinish) make this a keystone endpoint check for available
         # services
         if not check_service_availability(service):
