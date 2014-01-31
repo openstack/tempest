@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.common.rest_client import NegativeRestClient
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -174,7 +175,7 @@ class Manager(object):
     """
 
     def __init__(self, username=None, password=None, tenant_name=None,
-                 interface='json'):
+                 interface='json', service=None):
         """
         We allow overriding of the credentials used within the various
         client classes managed by the Manager object. Left as None, the
@@ -323,10 +324,15 @@ class Manager(object):
             self.hosts_v3_client = HostsV3ClientJSON(*client_args)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientJSON(*client_args)
+            self.negative_client = NegativeRestClient(*client_args)
+            self.negative_client.service = service
 
             if client_args_v3_auth:
                 self.servers_client_v3_auth = ServersClientJSON(
                     *client_args_v3_auth)
+                self.negative_v3_client = NegativeRestClient(
+                    *client_args_v3_auth)
+                self.negative_v3_client.service = service
         else:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
@@ -354,11 +360,12 @@ class AltManager(Manager):
     managed client objects
     """
 
-    def __init__(self, interface='json'):
+    def __init__(self, interface='json', service=None):
         super(AltManager, self).__init__(CONF.identity.alt_username,
                                          CONF.identity.alt_password,
                                          CONF.identity.alt_tenant_name,
-                                         interface=interface)
+                                         interface=interface,
+                                         service=service)
 
 
 class AdminManager(Manager):
@@ -368,11 +375,12 @@ class AdminManager(Manager):
     managed client objects
     """
 
-    def __init__(self, interface='json'):
+    def __init__(self, interface='json', service=None):
         super(AdminManager, self).__init__(CONF.identity.admin_username,
                                            CONF.identity.admin_password,
                                            CONF.identity.admin_tenant_name,
-                                           interface=interface)
+                                           interface=interface,
+                                           service=service)
 
 
 class ComputeAdminManager(Manager):
@@ -382,12 +390,13 @@ class ComputeAdminManager(Manager):
     managed client objects
     """
 
-    def __init__(self, interface='json'):
+    def __init__(self, interface='json', service=None):
         base = super(ComputeAdminManager, self)
         base.__init__(CONF.compute_admin.username,
                       CONF.compute_admin.password,
                       CONF.compute_admin.tenant_name,
-                      interface=interface)
+                      interface=interface,
+                      service=service)
 
 
 class OrchestrationManager(Manager):
@@ -395,9 +404,10 @@ class OrchestrationManager(Manager):
     Manager object that uses the admin credentials for its
     so that heat templates can create users
     """
-    def __init__(self, interface='json'):
+    def __init__(self, interface='json', service=None):
         base = super(OrchestrationManager, self)
         base.__init__(CONF.identity.admin_username,
                       CONF.identity.admin_password,
                       CONF.identity.tenant_name,
-                      interface=interface)
+                      interface=interface,
+                      service=service)

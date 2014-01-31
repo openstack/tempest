@@ -15,8 +15,11 @@
 
 import atexit
 import functools
+import json
 import os
 import time
+import urllib
+import uuid
 
 import fixtures
 import nose.plugins.attrib
@@ -24,6 +27,7 @@ import testresources
 import testtools
 
 from tempest import clients
+from tempest.common import generate_json
 from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
@@ -224,6 +228,7 @@ class BaseTestCase(testtools.TestCase,
                    testresources.ResourcedTestCase):
 
     setUpClassCalled = False
+    _service = None
 
     network_resources = {}
 
@@ -286,23 +291,27 @@ class BaseTestCase(testtools.TestCase,
                 os = clients.Manager(username=username,
                                      password=password,
                                      tenant_name=tenant_name,
-                                     interface=cls._interface)
+                                     interface=cls._interface,
+                                     service=cls._service)
             elif interface:
                 os = clients.Manager(username=username,
                                      password=password,
                                      tenant_name=tenant_name,
-                                     interface=interface)
+                                     interface=interface,
+                                     service=cls._service)
             else:
                 os = clients.Manager(username=username,
                                      password=password,
-                                     tenant_name=tenant_name)
+                                     tenant_name=tenant_name,
+                                     service=cls._service)
         else:
             if getattr(cls, '_interface', None):
-                os = clients.Manager(interface=cls._interface)
+                os = clients.Manager(interface=cls._interface,
+                                     service=cls._service)
             elif interface:
-                os = clients.Manager(interface=interface)
+                os = clients.Manager(interface=interface, service=cls._service)
             else:
-                os = clients.Manager()
+                os = clients.Manager(service=cls._service)
         return os
 
     @classmethod
@@ -318,7 +327,8 @@ class BaseTestCase(testtools.TestCase,
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.AdminManager(interface=cls._interface)
+        os = clients.AdminManager(interface=cls._interface,
+                                  service=cls._service)
         admin_client = os.identity_client
         return admin_client
 
@@ -342,6 +352,171 @@ class BaseTestCase(testtools.TestCase,
                 'router': router,
                 'subnet': subnet,
                 'dhcp': dhcp}
+
+
+class NegativeAutoTest(BaseTestCase):
+
+    _resources = {}
+
+    @classmethod
+    def setUpClass(cls):
+        super(NegativeAutoTest, cls).setUpClass()
+        os = cls.get_client_manager()
+        cls.client = os.negative_client
+
+    @staticmethod
+    def load_schema(file):
+        """
+        Loads a schema from a file on a specified location.
+
+        :param file: the file name
+        """
+        #NOTE(mkoderer): must be extended for xml support
+        fn = os.path.join(
+            os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
+            "etc", "schemas", file)
+        LOG.debug("Open schema file: %s" % (fn))
+        return json.load(open(fn))
+
+    @staticmethod
+    def generate_scenario(description_file):
+        """
+        Generates the test scenario list for a given description.
+
+        :param description: A dictionary with the following entries:
+            name (required) name for the api
+            http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
+            url (required) the url to be appended to the catalog url with '%s'
+                for each resource mentioned
+            resources: (optional) A list of resource names such as "server",
+                "flavor", etc. with an element for each '%s' in the url. This
+                method will call self.get_resource for each element when
+                constructing the positive test case template so negative
+                subclasses are expected to return valid resource ids when
+                appropriate.
+            json-schema (optional) A valid json schema that will be used to
+                create invalid data for the api calls. For "GET" and "HEAD",
+                the data is used to generate query strings appended to the url,
+                otherwise for the body of the http call.
+        """
+        description = NegativeAutoTest.load_schema(description_file)
+        LOG.debug(description)
+        generate_json.validate_negative_test_schema(description)
+        schema = description.get("json-schema", None)
+        resources = description.get("resources", [])
+        scenario_list = []
+        for resource in resources:
+            LOG.debug("Add resource to test %s" % resource)
+            scn_name = "inv_res_%s" % (resource)
+            scenario_list.append((scn_name, {"resource": (resource,
+                                                          str(uuid.uuid4()))
+                                             }))
+        if schema is not None:
+            for invalid in generate_json.generate_invalid(schema):
+                scenario_list.append((invalid[0],
+                                      {"schema": invalid[1],
+                                       "expected_result": invalid[2]}))
+        LOG.debug(scenario_list)
+        return scenario_list
+
+    def execute(self, description_file):
+        """
+        Execute a http call on an api that are expected to
+        result in client errors. First it uses invalid resources that are part
+        of the url, and then invalid data for queries and http request bodies.
+
+        :param description: A dictionary with the following entries:
+            name (required) name for the api
+            http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
+            url (required) the url to be appended to the catalog url with '%s'
+                for each resource mentioned
+            resources: (optional) A list of resource names such as "server",
+                "flavor", etc. with an element for each '%s' in the url. This
+                method will call self.get_resource for each element when
+                constructing the positive test case template so negative
+                subclasses are expected to return valid resource ids when
+                appropriate.
+            json-schema (optional) A valid json schema that will be used to
+                create invalid data for the api calls. For "GET" and "HEAD",
+                the data is used to generate query strings appended to the url,
+                otherwise for the body of the http call.
+
+        """
+        description = NegativeAutoTest.load_schema(description_file)
+        LOG.info("Executing %s" % description["name"])
+        LOG.debug(description)
+        method = description["http-method"]
+        url = description["url"]
+
+        resources = [self.get_resource(r) for
+                     r in description.get("resources", [])]
+
+        if hasattr(self, "resource"):
+            # Note(mkoderer): The resources list already contains an invalid
+            # entry (see get_resource).
+            # We just send a valid json-schema with it
+            valid = None
+            schema = description.get("json-schema", None)
+            if schema:
+                valid = generate_json.generate_valid(schema)
+            new_url, body = self._http_arguments(valid, url, method)
+            resp, resp_body = self.client.send_request(method, new_url,
+                                                       resources, body=body)
+            self._check_negative_response(resp.status, resp_body)
+            return
+
+        if hasattr(self, "schema"):
+            new_url, body = self._http_arguments(self.schema, url, method)
+            resp, resp_body = self.client.send_request(method, new_url,
+                                                       resources, body=body)
+            self._check_negative_response(resp.status, resp_body)
+
+    def _http_arguments(self, json_dict, url, method):
+        LOG.debug("dict: %s url: %s method: %s" % (json_dict, url, method))
+        if not json_dict:
+            return url, None
+        elif method in ["GET", "HEAD", "PUT", "DELETE"]:
+            return "%s?%s" % (url, urllib.urlencode(json_dict)), None
+        else:
+            return url, json.dumps(json_dict)
+
+    def _check_negative_response(self, result, body):
+        expected_result = getattr(self, "expected_result", None)
+        self.assertTrue(result >= 400 and result < 500 and result != 413,
+                        "Expected client error, got %s:%s" %
+                        (result, body))
+        self.assertTrue(expected_result is None or expected_result == result,
+                        "Expected %s, got %s:%s" %
+                        (expected_result, result, body))
+
+    @classmethod
+    def set_resource(cls, name, resource):
+        """
+        This function can be used in setUpClass context to register a resoruce
+        for a test.
+
+        :param name: The name of the kind of resource such as "flavor", "role",
+            etc.
+        :resource: The id of the resource
+        """
+        cls._resources[name] = resource
+
+    def get_resource(self, name):
+        """
+        Return a valid uuid for a type of resource. If a real resource is
+        needed as part of a url then this method should return one. Otherwise
+        it can return None.
+
+        :param name: The name of the kind of resource such as "flavor", "role",
+            etc.
+        """
+        if hasattr(self, "resource") and self.resource[0] == name:
+            LOG.debug("Return invalid resource (%s) value: %s" %
+                      (self.resource[0], self.resource[1]))
+            return self.resource[1]
+        if name in self._resources:
+            return self._resources[name]
+        return None
 
 
 def call_until_true(func, duration, sleep_for):
