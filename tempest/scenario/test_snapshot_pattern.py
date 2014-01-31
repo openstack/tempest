@@ -13,10 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
 from tempest.openstack.common import log
 from tempest.scenario import manager
 from tempest.test import services
 
+CONF = config.CONF
 
 LOG = log.getLogger(__name__)
 
@@ -74,8 +76,8 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         self._create_loginable_secgroup_rule_nova()
 
         # boot a instance and create a timestamp file in it
-        server = self._boot_image(self.config.compute.image_ref)
-        if self.config.compute.use_floatingip_for_ssh:
+        server = self._boot_image(CONF.compute.image_ref)
+        if CONF.compute.use_floatingip_for_ssh:
             fip_for_server = self._create_floating_ip()
             self._set_floating_ip_to_server(server, fip_for_server)
             self._write_timestamp(fip_for_server.ip)
@@ -89,7 +91,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         server_from_snapshot = self._boot_image(snapshot_image.id)
 
         # check the existence of the timestamp file in the second instance
-        if self.config.compute.use_floatingip_for_ssh:
+        if CONF.compute.use_floatingip_for_ssh:
             fip_for_snapshot = self._create_floating_ip()
             self._set_floating_ip_to_server(server_from_snapshot,
                                             fip_for_snapshot)

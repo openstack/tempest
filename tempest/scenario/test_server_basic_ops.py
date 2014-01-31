@@ -15,11 +15,14 @@
 
 from tempest.common.utils import data_utils
 from tempest.common.utils import test_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import services
 
 import testscenarios
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -56,9 +59,9 @@ class TestServerBasicOps(manager.OfficialClientTest):
         # Setup image and flavor the test instance
         # Support both configured and injected values
         if not hasattr(self, 'image_ref'):
-            self.image_ref = self.config.compute.image_ref
+            self.image_ref = CONF.compute.image_ref
         if not hasattr(self, 'flavor_ref'):
-            self.flavor_ref = self.config.compute.flavor_ref
+            self.flavor_ref = CONF.compute.flavor_ref
         self.image_utils = test_utils.ImageUtils()
         if not self.image_utils.is_flavor_enough(self.flavor_ref,
                                                  self.image_ref):
@@ -67,7 +70,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
                     image=self.image_ref, flavor=self.flavor_ref
                 )
             )
-        self.run_ssh = self.config.compute.run_ssh and \
+        self.run_ssh = CONF.compute.run_ssh and \
             self.image_utils.is_sshable_image(self.image_ref)
         self.ssh_user = self.image_utils.ssh_user(self.image_ref)
         LOG.debug('Starting test for i:{image}, f:{flavor}. '

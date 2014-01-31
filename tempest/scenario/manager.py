@@ -35,11 +35,13 @@ from tempest.api.network import common as net_common
 from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest import config
 from tempest import exceptions
 import tempest.manager
 from tempest.openstack.common import log
 import tempest.test
 
+CONF = config.CONF
 
 LOG = log.getLogger(__name__)
 
@@ -89,14 +91,14 @@ class OfficialClientManager(tempest.manager.Manager):
         # each user that operations need to be performed for.
         self._validate_credentials(username, password, tenant_name)
 
-        auth_url = self.config.identity.uri
-        dscv = self.config.identity.disable_ssl_certificate_validation
-        region = self.config.identity.region
+        auth_url = CONF.identity.uri
+        dscv = CONF.identity.disable_ssl_certificate_validation
+        region = CONF.identity.region
 
         client_args = (username, password, tenant_name, auth_url)
 
         # Create our default Nova client to use in testing
-        service_type = self.config.compute.catalog_type
+        service_type = CONF.compute.catalog_type
         return novaclient.client.Client(self.NOVACLIENT_VERSION,
                                         *client_args,
                                         service_type=service_type,
@@ -107,17 +109,17 @@ class OfficialClientManager(tempest.manager.Manager):
 
     def _get_image_client(self):
         token = self.identity_client.auth_token
-        region = self.config.identity.region
+        region = CONF.identity.region
         endpoint = self.identity_client.service_catalog.url_for(
             attr='region', filter_value=region,
             service_type='image', endpoint_type='publicURL')
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         return glanceclient.Client('1', endpoint=endpoint, token=token,
                                    insecure=dscv)
 
     def _get_volume_client(self, username, password, tenant_name):
-        auth_url = self.config.identity.uri
-        region = self.config.identity.region
+        auth_url = CONF.identity.uri
+        region = CONF.identity.region
         return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
                                           username,
                                           password,
@@ -127,16 +129,16 @@ class OfficialClientManager(tempest.manager.Manager):
                                           http_log_debug=True)
 
     def _get_object_storage_client(self, username, password, tenant_name):
-        auth_url = self.config.identity.uri
+        auth_url = CONF.identity.uri
         # add current tenant to swift operator role group.
         keystone_admin = self._get_identity_client(
-            self.config.identity.admin_username,
-            self.config.identity.admin_password,
-            self.config.identity.admin_tenant_name)
+            CONF.identity.admin_username,
+            CONF.identity.admin_password,
+            CONF.identity.admin_tenant_name)
 
         # enable test user to operate swift by adding operator role to him.
         roles = keystone_admin.roles.list()
-        operator_role = self.config.object_storage.operator_role
+        operator_role = CONF.object_storage.operator_role
         member_role = [role for role in roles if role.name == operator_role][0]
         # NOTE(maurosr): This is surrounded in the try-except block cause
         # neutron tests doesn't have tenant isolation.
@@ -154,16 +156,16 @@ class OfficialClientManager(tempest.manager.Manager):
     def _get_orchestration_client(self, username=None, password=None,
                                   tenant_name=None):
         if not username:
-            username = self.config.identity.admin_username
+            username = CONF.identity.admin_username
         if not password:
-            password = self.config.identity.admin_password
+            password = CONF.identity.admin_password
         if not tenant_name:
-            tenant_name = self.config.identity.tenant_name
+            tenant_name = CONF.identity.tenant_name
 
         self._validate_credentials(username, password, tenant_name)
 
         keystone = self._get_identity_client(username, password, tenant_name)
-        region = self.config.identity.region
+        region = CONF.identity.region
         token = keystone.auth_token
         try:
             endpoint = keystone.service_catalog.url_for(
@@ -185,8 +187,8 @@ class OfficialClientManager(tempest.manager.Manager):
         # of the identity service, so use admin credentials by default.
         self._validate_credentials(username, password, tenant_name)
 
-        auth_url = self.config.identity.uri
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        auth_url = CONF.identity.uri
+        dscv = CONF.identity.disable_ssl_certificate_validation
 
         return keystoneclient.v2_0.client.Client(username=username,
                                                  password=password,
@@ -201,14 +203,14 @@ class OfficialClientManager(tempest.manager.Manager):
         # preferable to authenticating as a specific user because
         # working with certain resources (public routers and networks)
         # often requires admin privileges anyway.
-        username = self.config.identity.admin_username
-        password = self.config.identity.admin_password
-        tenant_name = self.config.identity.admin_tenant_name
+        username = CONF.identity.admin_username
+        password = CONF.identity.admin_password
+        tenant_name = CONF.identity.admin_tenant_name
 
         self._validate_credentials(username, password, tenant_name)
 
-        auth_url = self.config.identity.uri
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        auth_url = CONF.identity.uri
+        dscv = CONF.identity.disable_ssl_certificate_validation
 
         return neutronclient.v2_0.client.Client(username=username,
                                                 password=password,
@@ -252,12 +254,12 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
     @classmethod
     def _get_credentials(cls, get_creds, prefix):
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             username, tenant_name, password = get_creds()
         else:
-            username = getattr(cls.config.identity, prefix + 'username')
-            password = getattr(cls.config.identity, prefix + 'password')
-            tenant_name = getattr(cls.config.identity, prefix + 'tenant_name')
+            username = getattr(CONF.identity, prefix + 'username')
+            password = getattr(CONF.identity, prefix + 'password')
+            tenant_name = getattr(CONF.identity, prefix + 'tenant_name')
         return username, password, tenant_name
 
     @classmethod
@@ -403,8 +405,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                       thing, log_status, new_status)
         if not tempest.test.call_until_true(
             check_status,
-            self.config.compute.build_timeout,
-            self.config.compute.build_interval):
+            CONF.compute.build_timeout,
+            CONF.compute.build_interval):
             message = ("Timed out waiting for thing %s "
                        "to become %s") % (thing_id, log_status)
             raise exceptions.TimeoutException(message)
@@ -454,9 +456,9 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         if name is None:
             name = data_utils.rand_name('scenario-server-')
         if image is None:
-            image = self.config.compute.image_ref
+            image = CONF.compute.image_ref
         if flavor is None:
-            flavor = self.config.compute.flavor_ref
+            flavor = CONF.compute.flavor_ref
         LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
                   name, image, flavor)
         server = client.servers.create(name, image, flavor, **create_kwargs)
@@ -519,10 +521,10 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         if isinstance(server_or_ip, basestring):
             ip = server_or_ip
         else:
-            network_name_for_ssh = self.config.compute.network_for_ssh
+            network_name_for_ssh = CONF.compute.network_for_ssh
             ip = server_or_ip.networks[network_name_for_ssh][0]
         if username is None:
-            username = self.config.scenario.ssh_user
+            username = CONF.scenario.ssh_user
         if private_key is None:
             private_key = self.keypair.private_key
         return RemoteClient(ip, username, pkey=private_key)
@@ -542,7 +544,7 @@ class NetworkScenarioTest(OfficialClientTest):
 
     @classmethod
     def check_preconditions(cls):
-        if (cls.config.service_available.neutron):
+        if (CONF.service_available.neutron):
             cls.enabled = True
             # verify that neutron_available is telling the truth
             try:
@@ -558,13 +560,13 @@ class NetworkScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
         super(NetworkScenarioTest, cls).setUpClass()
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             cls.tenant_id = cls.isolated_creds.get_primary_tenant().id
         else:
             cls.tenant_id = cls.manager._get_identity_client(
-                cls.config.identity.username,
-                cls.config.identity.password,
-                cls.config.identity.tenant_name).tenant_id
+                CONF.identity.username,
+                CONF.identity.password,
+                CONF.identity.tenant_name).tenant_id
 
     def _create_network(self, tenant_id, namestart='network-smoke-'):
         name = data_utils.rand_name(namestart)
@@ -619,12 +621,12 @@ class NetworkScenarioTest(OfficialClientTest):
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
         """
-        cfg = self.config.network
-        tenant_cidr = netaddr.IPNetwork(cfg.tenant_network_cidr)
+        tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         result = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
-        for subnet_cidr in tenant_cidr.subnet(cfg.tenant_network_mask_bits):
+        for subnet_cidr in tenant_cidr.subnet(
+            CONF.network.tenant_network_mask_bits):
             body = dict(
                 subnet=dict(
                     ip_version=4,
@@ -708,7 +710,7 @@ class NetworkScenarioTest(OfficialClientTest):
             return (proc.returncode == 0) == should_succeed
 
         return tempest.test.call_until_true(
-            ping, self.config.compute.ping_timeout, 1)
+            ping, CONF.compute.ping_timeout, 1)
 
     def _check_vm_connectivity(self, ip_address,
                                username=None,
@@ -904,7 +906,7 @@ class NetworkScenarioTest(OfficialClientTest):
         return rules
 
     def _ssh_to_server(self, server, private_key):
-        ssh_login = self.config.compute.image_ssh_user
+        ssh_login = CONF.compute.image_ssh_user
         return self.get_remote_client(server,
                                       username=ssh_login,
                                       private_key=private_key)
@@ -930,8 +932,8 @@ class NetworkScenarioTest(OfficialClientTest):
         network has, a tenant router will be created and returned that
         routes traffic to the public network.
         """
-        router_id = self.config.network.public_router_id
-        network_id = self.config.network.public_network_id
+        router_id = CONF.network.public_router_id
+        network_id = CONF.network.public_network_id
         if router_id:
             result = self.network_client.show_router(router_id)
             return net_common.AttributeDict(**result['router'])
@@ -984,14 +986,14 @@ class OrchestrationScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
         super(OrchestrationScenarioTest, cls).setUpClass()
-        if not cls.config.service_available.heat:
+        if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
 
     @classmethod
     def credentials(cls):
-        username = cls.config.identity.admin_username
-        password = cls.config.identity.admin_password
-        tenant_name = cls.config.identity.tenant_name
+        username = CONF.identity.admin_username
+        password = CONF.identity.admin_password
+        tenant_name = CONF.identity.tenant_name
         return username, password, tenant_name
 
     def _load_template(self, base_file, file_name):
@@ -1008,5 +1010,5 @@ class OrchestrationScenarioTest(OfficialClientTest):
     def _get_default_network(cls):
         networks = cls.network_client.list_networks()
         for net in networks['networks']:
-            if net['name'] == cls.config.compute.fixed_network_name:
+            if net['name'] == CONF.compute.fixed_network_name:
                 return net

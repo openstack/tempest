@@ -13,9 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import services
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -34,13 +37,13 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
         cls.set_network_resources()
         super(TestServerAdvancedOps, cls).setUpClass()
 
-        if not cls.config.compute_feature_enabled.resize:
+        if not CONF.compute_feature_enabled.resize:
             msg = "Skipping test - resize not available on this host"
             raise cls.skipException(msg)
 
-        resize_flavor = cls.config.compute.flavor_ref_alt
+        resize_flavor = CONF.compute.flavor_ref_alt
 
-        if resize_flavor == cls.config.compute.flavor_ref:
+        if resize_flavor == CONF.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise cls.skipException(msg)
 
@@ -49,7 +52,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
         # We create an instance for use in this test
         instance = self.create_server()
         instance_id = instance.id
-        resize_flavor = self.config.compute.flavor_ref_alt
+        resize_flavor = CONF.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
                   instance.id, instance.flavor, resize_flavor)
         instance.resize(resize_flavor)

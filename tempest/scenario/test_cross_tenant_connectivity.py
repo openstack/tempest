@@ -15,6 +15,7 @@
 
 from tempest.common import debug
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
@@ -22,6 +23,8 @@ from tempest.scenario.manager import OfficialClientManager
 from tempest.test import attr
 from tempest.test import call_until_true
 from tempest.test import services
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -131,8 +134,8 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             msg = 'No alt_tenant defined'
             cls.enabled = False
             raise cls.skipException(msg)
-        cfg = cls.config.network
-        if not (cfg.tenant_networks_reachable or cfg.public_network_id):
+        if not (CONF.network.tenant_networks_reachable or
+                CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             cls.enabled = False
@@ -166,7 +169,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
         )
         for tenant in [cls.demo_tenant, cls.alt_tenant]:
             cls.tenants[tenant.tenant_id] = tenant
-        if not cls.config.network.public_router_id:
+        if not CONF.network.public_router_id:
             cls.floating_ip_access = True
         else:
             cls.floating_ip_access = False
@@ -277,7 +280,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
         self._assign_floating_ips(server)
 
     def _assign_floating_ips(self, server):
-        public_network_id = self.config.network.public_network_id
+        public_network_id = CONF.network.public_network_id
         floating_ip = self._create_floating_ip(server, public_network_id)
         self.floating_ips.setdefault(server, floating_ip)
 
@@ -353,7 +356,7 @@ class TestNetworkCrossTenant(manager.NetworkScenarioTest):
             return should_succeed
 
         return call_until_true(ping_remote,
-                               self.config.compute.ping_timeout,
+                               CONF.compute.ping_timeout,
                                1)
 
     def _check_connectivity(self, access_point, ip, should_succeed=True):
