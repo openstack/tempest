@@ -27,6 +27,7 @@ class TestWrappers(base.TestCase):
         super(TestWrappers, self).setUp()
         # Setup test dirs
         self.directory = tempfile.mkdtemp(prefix='tempest-unit')
+        self.addCleanup(shutil.rmtree, self.directory)
         self.test_dir = os.path.join(self.directory, 'tests')
         os.mkdir(self.test_dir)
         # Setup Test files
