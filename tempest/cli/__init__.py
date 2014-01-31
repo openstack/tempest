@@ -17,31 +17,15 @@ import os
 import shlex
 import subprocess
 
-from oslo.config import cfg
-
 import tempest.cli.output_parser
+from tempest import config
 from tempest.openstack.common import log as logging
 import tempest.test
 
 
 LOG = logging.getLogger(__name__)
 
-cli_opts = [
-    cfg.BoolOpt('enabled',
-                default=True,
-                help="enable cli tests"),
-    cfg.StrOpt('cli_dir',
-               default='/usr/local/bin',
-               help="directory where python client binaries are located"),
-    cfg.IntOpt('timeout',
-               default=15,
-               help="Number of seconds to wait on a CLI timeout"),
-]
-
-CONF = cfg.CONF
-cli_group = cfg.OptGroup(name='cli', title="cli Configuration Options")
-CONF.register_group(cli_group)
-CONF.register_opts(cli_opts, group=cli_group)
+CONF = config.CONF
 
 
 class ClientTestBase(tempest.test.BaseTestCase):
@@ -50,7 +34,6 @@ class ClientTestBase(tempest.test.BaseTestCase):
         if not CONF.cli.enabled:
             msg = "cli testing disabled"
             raise cls.skipException(msg)
-        cls.identity = cls.config.identity
         super(ClientTestBase, cls).setUpClass()
 
     def __init__(self, *args, **kwargs):
@@ -106,10 +89,10 @@ class ClientTestBase(tempest.test.BaseTestCase):
         # TODO(jogo) make admin=False work
         creds = ('--os-username %s --os-tenant-name %s --os-password %s '
                  '--os-auth-url %s ' %
-                 (self.identity.admin_username,
-                  self.identity.admin_tenant_name,
-                  self.identity.admin_password,
-                  self.identity.uri))
+                 (CONF.identity.admin_username,
+                  CONF.identity.admin_tenant_name,
+                  CONF.identity.admin_password,
+                  CONF.identity.uri))
         flags = creds + ' ' + flags
         return self.cmd(cmd, action, flags, params, fail_ok)
 
