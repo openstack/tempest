@@ -155,13 +155,12 @@ def is_extension_enabled(extension_name, service):
     """A function that will check the list of enabled extensions from config
 
     """
-    configs = CONF
     config_dict = {
-        'compute': configs.compute_feature_enabled.api_extensions,
-        'compute_v3': configs.compute_feature_enabled.api_v3_extensions,
-        'volume': configs.volume_feature_enabled.api_extensions,
-        'network': configs.network_feature_enabled.api_extensions,
-        'object': configs.object_storage_feature_enabled.discoverable_apis,
+        'compute': CONF.compute_feature_enabled.api_extensions,
+        'compute_v3': CONF.compute_feature_enabled.api_v3_extensions,
+        'volume': CONF.volume_feature_enabled.api_extensions,
+        'network': CONF.network_feature_enabled.api_extensions,
+        'object': CONF.object_storage_feature_enabled.discoverable_apis,
     }
     if config_dict[service][0] == 'all':
         return True
@@ -224,8 +223,6 @@ class BaseTestCase(testtools.TestCase,
                    testtools.testcase.WithAttributes,
                    testresources.ResourcedTestCase):
 
-    config = CONF
-
     setUpClassCalled = False
 
     network_resources = {}
@@ -281,7 +278,7 @@ class BaseTestCase(testtools.TestCase,
             cls.__name__, network_resources=cls.network_resources)
 
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
-        if (cls.config.compute.allow_tenant_isolation or
+        if (CONF.compute.allow_tenant_isolation or
             force_tenant_isolation):
             creds = cls.isolated_creds.get_primary_creds()
             username, tenant_name, password = creds
@@ -309,16 +306,6 @@ class BaseTestCase(testtools.TestCase,
         os = clients.AdminManager(interface=cls._interface)
         admin_client = os.identity_client
         return admin_client
-
-    @classmethod
-    def _get_client_args(cls):
-
-        return (
-            cls.config,
-            cls.config.identity.admin_username,
-            cls.config.identity.admin_password,
-            cls.config.identity.uri
-        )
 
     @classmethod
     def set_network_resources(self, network=False, router=False, subnet=False,

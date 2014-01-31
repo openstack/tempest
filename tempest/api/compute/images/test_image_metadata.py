@@ -15,7 +15,10 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
@@ -24,7 +27,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
     @classmethod
     def setUpClass(cls):
         super(ImagesMetadataTestJSON, cls).setUpClass()
-        if not cls.config.service_available.glance:
+        if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
