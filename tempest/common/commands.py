@@ -29,7 +29,8 @@ def sudo_cmd_call(cmd):
     subprocess_args = {'stdout': subprocess.PIPE,
                        'stderr': subprocess.STDOUT}
     try:
-        proc = subprocess.Popen(['/usr/bin/sudo'] + args, **subprocess_args)
+        proc = subprocess.Popen(['/usr/bin/sudo', '-n'] + args,
+                                **subprocess_args)
         return proc.communicate()[0]
         if proc.returncode != 0:
             LOG.error(cmd + "returned with: " +
