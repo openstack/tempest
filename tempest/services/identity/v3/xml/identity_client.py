@@ -18,20 +18,23 @@ from urlparse import urlparse
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 
 class IdentityV3ClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(IdentityV3ClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(IdentityV3ClientXML, self).__init__(username, password,
                                                   auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
     def _parse_projects(self, node):
@@ -451,19 +454,18 @@ class IdentityV3ClientXML(RestClientXML):
 
 class V3TokenClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(V3TokenClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(V3TokenClientXML, self).__init__(username, password,
                                                auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
-        auth_url = config.identity.uri
+        auth_url = CONF.identity.uri
 
         if 'tokens' not in auth_url:
             auth_url = auth_url.rstrip('/') + '/tokens'
 
         self.auth_url = auth_url
-        self.config = config
 
     def auth(self, user_id, password):
         user = Element('user',

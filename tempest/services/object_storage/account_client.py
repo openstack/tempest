@@ -18,14 +18,17 @@ import urllib
 
 from tempest.common import http
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class AccountClient(RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AccountClient, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(AccountClient, self).__init__(username, password,
                                             auth_url, tenant_name)
-        self.service = self.config.object_storage.catalog_type
+        self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
     def list_account_metadata(self):
@@ -102,12 +105,12 @@ class AccountClient(RestClient):
 
 class AccountClientCustomizedHeader(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AccountClientCustomizedHeader, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(AccountClientCustomizedHeader, self).__init__(username,
                                                             password, auth_url,
                                                             tenant_name)
         # Overwrites json-specific header encoding in RestClient
-        self.service = self.config.object_storage.catalog_type
+        self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
     def request(self, method, url, headers=None, body=None):

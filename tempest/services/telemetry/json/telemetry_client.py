@@ -20,9 +20,9 @@ import tempest.services.telemetry.telemetry_client_base as client
 
 class TelemetryClientJSON(client.TelemetryClientBase):
 
-    def get_rest_client(self, config, username,
+    def get_rest_client(self, username,
                         password, auth_url, tenant_name=None):
-        return RestClient(config, username, password, auth_url, tenant_name)
+        return RestClient(username, password, auth_url, tenant_name)
 
     def deserialize(self, body):
         return json.loads(body.replace("\n", ""))

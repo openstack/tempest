@@ -18,7 +18,10 @@ import urllib
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 
 class VolumeHostsClientXML(RestClientXML):
@@ -26,12 +29,12 @@ class VolumeHostsClientXML(RestClientXML):
     Client class to send CRUD Volume Hosts API requests to a Cinder endpoint
     """
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumeHostsClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(VolumeHostsClientXML, self).__init__(username, password,
                                                    auth_url, tenant_name)
-        self.service = self.config.volume.catalog_type
-        self.build_interval = self.config.compute.build_interval
-        self.build_timeout = self.config.compute.build_timeout
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.compute.build_interval
+        self.build_timeout = CONF.compute.build_timeout
 
     def _parse_array(self, node):
         """

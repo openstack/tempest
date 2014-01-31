@@ -16,15 +16,18 @@
 import json
 
 from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
 class VersionV3ClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VersionV3ClientJSON, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(VersionV3ClientJSON, self).__init__(username,
                                                   password, auth_url,
                                                   tenant_name)
-        self.service = self.config.compute.catalog_v3_type
+        self.service = CONF.compute.catalog_v3_type
 
     def get_version(self):
         resp, body = self.get('')

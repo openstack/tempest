@@ -22,19 +22,22 @@ import urllib
 
 from tempest.common import glance_http
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
 class ImageClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ImageClientJSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ImageClientJSON, self).__init__(username, password,
                                               auth_url, tenant_name)
-        self.service = self.config.images.catalog_type
-        if config.service_available.glance:
+        self.service = CONF.images.catalog_type
+        if CONF.service_available.glance:
             self.http = self._get_http()
 
     def _image_meta_from_headers(self, headers):
@@ -108,7 +111,7 @@ class ImageClientJSON(RestClient):
                                              self.auth_url,
                                              self.service,
                                              self.tenant_name)
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         return glance_http.HTTPClient(endpoint=endpoint, token=token,
                                       insecure=dscv)
 

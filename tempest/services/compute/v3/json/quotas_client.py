@@ -16,14 +16,17 @@
 import json
 
 from tempest.common.rest_client import RestClient
+from tempest import config
+
+CONF = config.CONF
 
 
 class QuotasV3ClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(QuotasV3ClientJSON, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(QuotasV3ClientJSON, self).__init__(username, password,
                                                  auth_url, tenant_name)
-        self.service = self.config.compute.catalog_v3_type
+        self.service = CONF.compute.catalog_v3_type
 
     def get_quota_set(self, tenant_id):
         """List the quota set for a tenant."""

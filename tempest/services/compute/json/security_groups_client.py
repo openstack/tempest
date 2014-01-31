@@ -17,16 +17,19 @@ import json
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class SecurityGroupsClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(SecurityGroupsClientJSON, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(SecurityGroupsClientJSON, self).__init__(username,
                                                        password, auth_url,
                                                        tenant_name)
-        self.service = self.config.compute.catalog_type
+        self.service = CONF.compute.catalog_type
 
     def list_security_groups(self, params=None):
         """List all security groups for a user."""

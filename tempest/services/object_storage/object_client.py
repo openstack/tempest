@@ -17,15 +17,18 @@ import urllib
 
 from tempest.common import http
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class ObjectClient(RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ObjectClient, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ObjectClient, self).__init__(username, password,
                                            auth_url, tenant_name)
 
-        self.service = self.config.object_storage.catalog_type
+        self.service = CONF.object_storage.catalog_type
 
     def create_object(self, container, object_name, data, params=None):
         """Create storage object."""
@@ -135,17 +138,17 @@ class ObjectClient(RestClient):
 
 class ObjectClientCustomizedHeader(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ObjectClientCustomizedHeader, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ObjectClientCustomizedHeader, self).__init__(username,
                                                            password, auth_url,
                                                            tenant_name)
         # Overwrites json-specific header encoding in RestClient
-        self.service = self.config.object_storage.catalog_type
+        self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
         if headers is None:

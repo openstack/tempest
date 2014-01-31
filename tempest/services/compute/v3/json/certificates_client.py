@@ -16,15 +16,18 @@
 import json
 
 from tempest.common.rest_client import RestClient
+from tempest import config
+
+CONF = config.CONF
 
 
 class CertificatesV3ClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(CertificatesV3ClientJSON, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(CertificatesV3ClientJSON, self).__init__(username,
                                                        password,
                                                        auth_url, tenant_name)
-        self.service = self.config.compute.catalog_v3_type
+        self.service = CONF.compute.catalog_v3_type
 
     def get_certificate(self, id):
         url = "os-certificates/%s" % (id)

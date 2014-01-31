@@ -17,16 +17,19 @@ import json
 import time
 
 from tempest.common.rest_client import RestClient
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class InterfacesV3ClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(InterfacesV3ClientJSON, self).__init__(config, username,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(InterfacesV3ClientJSON, self).__init__(username,
                                                      password, auth_url,
                                                      tenant_name)
-        self.service = self.config.compute.catalog_v3_type
+        self.service = CONF.compute.catalog_v3_type
 
     def list_interfaces(self, server):
         resp, body = self.get('servers/%s/os-attach-interfaces' % server)

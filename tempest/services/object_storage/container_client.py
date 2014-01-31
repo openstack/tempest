@@ -17,16 +17,19 @@ import json
 import urllib
 
 from tempest.common.rest_client import RestClient
+from tempest import config
+
+CONF = config.CONF
 
 
 class ContainerClient(RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ContainerClient, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ContainerClient, self).__init__(username, password,
                                               auth_url, tenant_name)
 
         # Overwrites json-specific header encoding in RestClient
         self.headers = {}
-        self.service = self.config.object_storage.catalog_type
+        self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
     def create_container(self, container_name, metadata=None,

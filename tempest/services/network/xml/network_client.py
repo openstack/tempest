@@ -28,9 +28,9 @@ class NetworkClientXML(client_base.NetworkClientBase):
     PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
                'fixed_ips', 'extensions']
 
-    def get_rest_client(self, config, username, password,
+    def get_rest_client(self, username, password,
                         auth_url, tenant_name=None):
-        return RestClientXML(config, username, password,
+        return RestClientXML(username, password,
                              auth_url, tenant_name)
 
     def _parse_array(self, node):

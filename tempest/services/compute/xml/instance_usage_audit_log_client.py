@@ -16,15 +16,18 @@
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 
 class InstanceUsagesAuditLogClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
+    def __init__(self, username, password, auth_url, tenant_name=None):
         super(InstanceUsagesAuditLogClientXML, self).__init__(
-            config, username, password, auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+            username, password, auth_url, tenant_name)
+        self.service = CONF.compute.catalog_type
 
     def list_instance_usage_audit_logs(self):
         url = 'os-instance_usage_audit_log'

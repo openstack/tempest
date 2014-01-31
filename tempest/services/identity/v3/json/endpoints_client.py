@@ -17,15 +17,17 @@ import json
 import urlparse
 
 from tempest.common.rest_client import RestClient
+from tempest import config
+
+CONF = config.CONF
 
 
 class EndPointClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(EndPointClientJSON, self).__init__(config,
-                                                 username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(EndPointClientJSON, self).__init__(username, password,
                                                  auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
     def request(self, method, url, headers=None, body=None, wait=None):

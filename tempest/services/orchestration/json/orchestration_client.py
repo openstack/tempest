@@ -19,17 +19,20 @@ import time
 import urllib
 
 from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class OrchestrationClient(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(OrchestrationClient, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(OrchestrationClient, self).__init__(username, password,
                                                   auth_url, tenant_name)
-        self.service = self.config.orchestration.catalog_type
-        self.build_interval = self.config.orchestration.build_interval
-        self.build_timeout = self.config.orchestration.build_timeout
+        self.service = CONF.orchestration.catalog_type
+        self.build_interval = CONF.orchestration.build_interval
+        self.build_timeout = CONF.orchestration.build_timeout
 
     def list_stacks(self, params=None):
         """Lists all stacks for a user."""

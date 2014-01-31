@@ -15,6 +15,7 @@
 import httplib2
 
 from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
@@ -29,8 +30,8 @@ class BaseRestClientTestClass(base.TestCase):
 
     def setUp(self):
         super(BaseRestClientTestClass, self).setUp()
-        self.rest_client = rest_client.RestClient(fake_config.FakeConfig(),
-                                                  'fake_user', 'fake_pass',
+        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakeConfig)
+        self.rest_client = rest_client.RestClient('fake_user', 'fake_pass',
                                                   'http://fake_url/v2.0')
         self.stubs.Set(httplib2.Http, 'request', self.fake_http.request)
         self.useFixture(mockpatch.PatchObject(self.rest_client, '_set_auth',

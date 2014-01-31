@@ -19,19 +19,22 @@ from lxml import etree
 
 from tempest.common import http
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 
 class PolicyClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(PolicyClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(PolicyClientXML, self).__init__(username, password,
                                               auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
     def _parse_array(self, node):
@@ -48,7 +51,7 @@ class PolicyClientXML(RestClientXML):
 
     def request(self, method, url, headers=None, body=None, wait=None):
         """Overriding the existing HTTP request in super class RestClient."""
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
         self._set_auth()

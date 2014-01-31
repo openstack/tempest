@@ -31,9 +31,9 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
     quotas
     """
 
-    def get_rest_client(self, config, username,
+    def get_rest_client(self, username,
                         password, auth_url, tenant_name=None):
-        return RestClient(config, username, password, auth_url, tenant_name)
+        return RestClient(username, password, auth_url, tenant_name)
 
     def deserialize_single(self, body):
         return json.loads(body)

@@ -18,20 +18,22 @@ from urlparse import urlparse
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import xml_to_json
 
+CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 
 class ServiceClientXML(RestClientXML):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ServiceClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(ServiceClientXML, self).__init__(username, password,
                                                auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
 
     def _parse_array(self, node):

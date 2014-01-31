@@ -17,6 +17,10 @@ import abc
 import six
 import urllib
 
+from tempest import config
+
+CONF = config.CONF
+
 
 @six.add_metaclass(abc.ABCMeta)
 class TelemetryClientBase(object):
@@ -31,17 +35,16 @@ class TelemetryClientBase(object):
     statistics
     """
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        self.rest_client = self.get_rest_client(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        self.rest_client = self.get_rest_client(username, password,
                                                 auth_url, tenant_name)
-        self.rest_client.service = \
-            self.rest_client.config.telemetry.catalog_type
+        self.rest_client.service = CONF.telemetry.catalog_type
         self.headers = self.rest_client.headers
         self.version = '2'
         self.uri_prefix = "v%s" % self.version
 
     @abc.abstractmethod
-    def get_rest_client(self, config, username, password,
+    def get_rest_client(self, username, password,
                         auth_url, tenant_name):
         """
         :param config:

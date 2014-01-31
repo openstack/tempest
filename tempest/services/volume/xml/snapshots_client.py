@@ -16,6 +16,7 @@ import urllib
 from lxml import etree
 
 from tempest.common.rest_client import RestClientXML
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.services.compute.xml.common import Document
@@ -24,19 +25,21 @@ from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
 from tempest.services.compute.xml.common import XMLNS_11
 
+CONF = config.CONF
+
 LOG = logging.getLogger(__name__)
 
 
 class SnapshotsClientXML(RestClientXML):
     """Client class to send CRUD Volume API requests."""
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(SnapshotsClientXML, self).__init__(config, username, password,
+    def __init__(self, username, password, auth_url, tenant_name=None):
+        super(SnapshotsClientXML, self).__init__(username, password,
                                                  auth_url, tenant_name)
 
-        self.service = self.config.volume.catalog_type
-        self.build_interval = self.config.volume.build_interval
-        self.build_timeout = self.config.volume.build_timeout
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.volume.build_interval
+        self.build_timeout = CONF.volume.build_timeout
 
     def list_snapshots(self, params=None):
         """List all snapshot."""

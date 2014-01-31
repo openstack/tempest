@@ -22,9 +22,12 @@ import re
 import time
 
 from tempest.common import http
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 # redrive rate limited calls at most twice
 MAX_RECURSION_DEPTH = 2
@@ -38,9 +41,8 @@ class RestClient(object):
     TYPE = "json"
     LOG = logging.getLogger(__name__)
 
-    def __init__(self, config, user, password, auth_url, tenant_name=None,
+    def __init__(self, user, password, auth_url, tenant_name=None,
                  auth_version='v2'):
-        self.config = config
         self.user = user
         self.password = password
         self.auth_url = auth_url
@@ -51,21 +53,21 @@ class RestClient(object):
         self.token = None
         self.base_url = None
         self.region = {}
-        for cfgname in dir(self.config):
+        for cfgname in dir(CONF):
             # Find all config.FOO.catalog_type and assume FOO is a service.
-            cfg = getattr(self.config, cfgname)
+            cfg = getattr(CONF, cfgname)
             catalog_type = getattr(cfg, 'catalog_type', None)
             if not catalog_type:
                 continue
             service_region = getattr(cfg, 'region', None)
             if not service_region:
-                service_region = self.config.identity.region
+                service_region = CONF.identity.region
             self.region[catalog_type] = service_region
         self.endpoint_url = 'publicURL'
         self.headers = {'Content-Type': 'application/%s' % self.TYPE,
                         'Accept': 'application/%s' % self.TYPE}
-        self.build_interval = config.compute.build_interval
-        self.build_timeout = config.compute.build_timeout
+        self.build_interval = CONF.compute.build_interval
+        self.build_timeout = CONF.compute.build_timeout
         self.general_header_lc = set(('cache-control', 'connection',
                                       'date', 'pragma', 'trailer',
                                       'transfer-encoding', 'via',
@@ -74,18 +76,18 @@ class RestClient(object):
                                        'location', 'proxy-authenticate',
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
 
     def __str__(self):
         STRING_LIMIT = 80
-        str_format = ("config:%s, user:%s, password:%s, "
+        str_format = ("user:%s, password:%s, "
                       "auth_url:%s, tenant_name:%s, auth_version:%s, "
                       "service:%s, base_url:%s, region:%s, "
                       "endpoint_url:%s, build_interval:%s, build_timeout:%s"
                       "\ntoken:%s..., \nheaders:%s...")
-        return str_format % (self.config, self.user, self.password,
+        return str_format % (self.user, self.password,
                              self.auth_url, self.tenant_name,
                              self.auth_version, self.service,
                              self.base_url, self.region, self.endpoint_url,
