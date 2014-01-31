@@ -15,8 +15,11 @@
 
 
 from tempest.api.volume import base
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 LOG = logging.getLogger(__name__)
@@ -30,11 +33,11 @@ class ExtensionsTestJSON(base.BaseVolumeV1Test):
         # List of all extensions
         resp, extensions = self.volumes_extension_client.list_extensions()
         self.assertEqual(200, resp.status)
-        if len(self.config.volume_feature_enabled.api_extensions) == 0:
+        if len(CONF.volume_feature_enabled.api_extensions) == 0:
             raise self.skipException('There are not any extensions configured')
         extension_list = [extension.get('alias') for extension in extensions]
         LOG.debug("Cinder extensions: %s" % ','.join(extension_list))
-        ext = self.config.volume_feature_enabled.api_extensions[0]
+        ext = CONF.volume_feature_enabled.api_extensions[0]
         if ext == 'all':
             self.assertIn('Hosts', map(lambda x: x['name'], extensions))
         elif ext:

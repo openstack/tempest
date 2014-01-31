@@ -17,8 +17,11 @@ from testtools.matchers import ContainsAll
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
 from tempest.test import services
+
+CONF = config.CONF
 
 
 class VolumesGetTest(base.BaseVolumeV1Test):
@@ -124,8 +127,7 @@ class VolumesGetTest(base.BaseVolumeV1Test):
     @attr(type='smoke')
     @services('image')
     def test_volume_create_get_update_delete_from_image(self):
-        self._volume_create_get_update_delete(imageRef=self.
-                                              config.compute.image_ref)
+        self._volume_create_get_update_delete(imageRef=CONF.compute.image_ref)
 
     @attr(type='gate')
     def test_volume_create_get_update_delete_as_clone(self):

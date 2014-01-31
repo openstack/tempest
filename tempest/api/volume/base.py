@@ -15,8 +15,11 @@
 
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 import tempest.test
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -30,17 +33,17 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         cls.set_network_resources()
         super(BaseVolumeTest, cls).setUpClass()
 
-        if not cls.config.service_available.cinder:
+        if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
         cls.os = cls.get_client_manager()
 
         cls.servers_client = cls.os.servers_client
-        cls.image_ref = cls.config.compute.image_ref
-        cls.flavor_ref = cls.config.compute.flavor_ref
-        cls.build_interval = cls.config.volume.build_interval
-        cls.build_timeout = cls.config.volume.build_timeout
+        cls.image_ref = CONF.compute.image_ref
+        cls.flavor_ref = CONF.compute.flavor_ref
+        cls.build_interval = CONF.volume.build_interval
+        cls.build_timeout = CONF.volume.build_timeout
         cls.snapshots = []
         cls.volumes = []
 
@@ -109,7 +112,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
 class BaseVolumeV1Test(BaseVolumeTest):
     @classmethod
     def setUpClass(cls):
-        if not cls.config.volume_feature_enabled.api_v1:
+        if not CONF.volume_feature_enabled.api_v1:
             msg = "Volume API v1 not supported"
             raise cls.skipException(msg)
         super(BaseVolumeV1Test, cls).setUpClass()
@@ -123,14 +126,14 @@ class BaseVolumeV1AdminTest(BaseVolumeV1Test):
     @classmethod
     def setUpClass(cls):
         super(BaseVolumeV1AdminTest, cls).setUpClass()
-        cls.adm_user = cls.config.identity.admin_username
-        cls.adm_pass = cls.config.identity.admin_password
-        cls.adm_tenant = cls.config.identity.admin_tenant_name
+        cls.adm_user = CONF.identity.admin_username
+        cls.adm_pass = CONF.identity.admin_password
+        cls.adm_tenant = CONF.identity.admin_tenant_name
         if not all((cls.adm_user, cls.adm_pass, cls.adm_tenant)):
             msg = ("Missing Volume Admin API credentials "
                    "in configuration.")
             raise cls.skipException(msg)
-        if cls.config.compute.allow_tenant_isolation:
+        if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_admin_creds()
             admin_username, admin_tenant_name, admin_password = creds
             cls.os_adm = clients.Manager(username=admin_username,

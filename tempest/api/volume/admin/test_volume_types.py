@@ -15,7 +15,10 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class VolumeTypesTest(base.BaseVolumeV1AdminTest):
@@ -43,8 +46,8 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
         volume = {}
         vol_name = data_utils.rand_name("volume-")
         vol_type_name = data_utils.rand_name("volume-type-")
-        proto = self.config.volume.storage_protocol
-        vendor = self.config.volume.vendor_name
+        proto = CONF.volume.storage_protocol
+        vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
         body = {}
@@ -86,8 +89,8 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
         # Create/get volume type.
         body = {}
         name = data_utils.rand_name("volume-type-")
-        proto = self.config.volume.storage_protocol
-        vendor = self.config.volume.vendor_name
+        proto = CONF.volume.storage_protocol
+        vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
         resp, body = self.client.create_volume_type(
