@@ -20,10 +20,13 @@ import time
 from tempest import clients
 from tempest.common import ssh
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import importutils
 from tempest.openstack.common import log as logging
 from tempest.stress import cleanup
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 processes = []
@@ -110,14 +113,13 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
     """
     admin_manager = clients.AdminManager()
 
-    ssh_user = admin_manager.config.stress.target_ssh_user
-    ssh_key = admin_manager.config.stress.target_private_key_path
-    logfiles = admin_manager.config.stress.target_logfiles
-    log_check_interval = int(admin_manager.config.stress.log_check_interval)
-    default_thread_num = int(admin_manager.config.stress.
-                             default_thread_number_per_action)
+    ssh_user = CONF.stress.target_ssh_user
+    ssh_key = CONF.stress.target_private_key_path
+    logfiles = CONF.stress.target_logfiles
+    log_check_interval = int(CONF.stress.log_check_interval)
+    default_thread_num = int(CONF.stress.default_thread_number_per_action)
     if logfiles:
-        controller = admin_manager.config.stress.target_controller
+        controller = CONF.stress.target_controller
         computes = _get_compute_nodes(controller, ssh_user, ssh_key)
         for node in computes:
             do_ssh("rm -f %s" % logfiles, node, ssh_user, ssh_key)

@@ -18,6 +18,7 @@ from boto import exception
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
@@ -26,6 +27,8 @@ from tempest.thirdparty.boto.test import BotoTestCase
 from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
 from tempest.thirdparty.boto.utils.wait import re_search_wait
 from tempest.thirdparty.boto.utils.wait import state_wait
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -42,12 +45,11 @@ class InstanceRunTest(BotoTestCase):
         cls.s3_client = cls.os.s3_client
         cls.ec2_client = cls.os.ec2api_client
         cls.zone = cls.ec2_client.get_good_zone()
-        config = cls.config
-        cls.materials_path = config.boto.s3_materials_path
-        ami_manifest = config.boto.ami_manifest
-        aki_manifest = config.boto.aki_manifest
-        ari_manifest = config.boto.ari_manifest
-        cls.instance_type = config.boto.instance_type
+        cls.materials_path = CONF.boto.s3_materials_path
+        ami_manifest = CONF.boto.ami_manifest
+        aki_manifest = CONF.boto.aki_manifest
+        ari_manifest = CONF.boto.ari_manifest
+        cls.instance_type = CONF.boto.instance_type
         cls.bucket_name = data_utils.rand_name("s3bucket-")
         cls.keypair_name = data_utils.rand_name("keypair-")
         cls.keypair = cls.ec2_client.create_key_pair(cls.keypair_name)
@@ -281,7 +283,7 @@ class InstanceRunTest(BotoTestCase):
         # NOTE(afazekas): it may be reports availble before it is available
 
         ssh = RemoteClient(address.public_ip,
-                           self.os.config.compute.ssh_user,
+                           CONF.compute.ssh_user,
                            pkey=self.keypair.material)
         text = data_utils.rand_name("Pattern text for console output -")
         resp = ssh.write_to_console(text)

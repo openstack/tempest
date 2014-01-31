@@ -17,9 +17,12 @@ import os
 
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
+
+CONF = config.CONF
 
 
 class S3ImagesTest(BotoTestCase):
@@ -33,11 +36,10 @@ class S3ImagesTest(BotoTestCase):
         cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.images_client = cls.os.ec2api_client
-        config = cls.config
-        cls.materials_path = config.boto.s3_materials_path
-        cls.ami_manifest = config.boto.ami_manifest
-        cls.aki_manifest = config.boto.aki_manifest
-        cls.ari_manifest = config.boto.ari_manifest
+        cls.materials_path = CONF.boto.s3_materials_path
+        cls.ami_manifest = CONF.boto.ami_manifest
+        cls.aki_manifest = CONF.boto.aki_manifest
+        cls.ari_manifest = CONF.boto.ari_manifest
         cls.ami_path = cls.materials_path + os.sep + cls.ami_manifest
         cls.aki_path = cls.materials_path + os.sep + cls.aki_manifest
         cls.ari_path = cls.materials_path + os.sep + cls.ari_manifest
