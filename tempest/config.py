@@ -100,7 +100,13 @@ IdentityFeatureGroup = [
     cfg.BoolOpt('trust',
                 default=True,
                 help='Does the identity service have delegation and '
-                     'impersonation enabled')
+                     'impersonation enabled'),
+    cfg.BoolOpt('api_v2',
+                default=True,
+                help='Is the v2 identity API enabled'),
+    cfg.BoolOpt('api_v3',
+                default=True,
+                help='Is the v3 identity API enabled'),
 ]
 
 compute_group = cfg.OptGroup(name='compute',

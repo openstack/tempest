@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class RolesNegativeTestJSON(base.BaseIdentityAdminTest):
+class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     def _get_role_params(self):

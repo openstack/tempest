@@ -20,7 +20,7 @@ from tempest.test import attr
 import uuid
 
 
-class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
+class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @classmethod

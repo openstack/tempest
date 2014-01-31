@@ -454,6 +454,12 @@
 # enabled (boolean value)
 #trust=true
 
+# Is the v2 identity API enabled (boolean value)
+#api_v2=true
+
+# Is the v3 identity API enabled (boolean value)
+#api_v3=true
+
 
 [image]
 

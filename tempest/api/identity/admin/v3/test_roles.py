@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class RolesV3TestJSON(base.BaseIdentityAdminTest):
+class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
@@ -30,20 +30,20 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_name('pass-')
         resp = [None] * 5
-        resp[0], cls.project = cls.v3_client.create_project(
+        resp[0], cls.project = cls.client.create_project(
             data_utils.rand_name('project-'),
             description=data_utils.rand_name('project-desc-'))
-        resp[1], cls.domain = cls.v3_client.create_domain(
+        resp[1], cls.domain = cls.client.create_domain(
             data_utils.rand_name('domain-'),
             description=data_utils.rand_name('domain-desc-'))
-        resp[2], cls.group_body = cls.v3_client.create_group(
+        resp[2], cls.group_body = cls.client.create_group(
             data_utils.rand_name('Group-'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])
-        resp[3], cls.user_body = cls.v3_client.create_user(
+        resp[3], cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])
-        resp[4], cls.role = cls.v3_client.create_role(
+        resp[4], cls.role = cls.client.create_role(
             data_utils.rand_name('Role-'))
         for r in resp:
             assert r['status'] == '201', "Expected: %s" % r['status']
@@ -51,14 +51,14 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
     @classmethod
     def tearDownClass(cls):
         resp = [None] * 5
-        resp[0], _ = cls.v3_client.delete_role(cls.role['id'])
-        resp[1], _ = cls.v3_client.delete_group(cls.group_body['id'])
-        resp[2], _ = cls.v3_client.delete_user(cls.user_body['id'])
-        resp[3], _ = cls.v3_client.delete_project(cls.project['id'])
+        resp[0], _ = cls.client.delete_role(cls.role['id'])
+        resp[1], _ = cls.client.delete_group(cls.group_body['id'])
+        resp[2], _ = cls.client.delete_user(cls.user_body['id'])
+        resp[3], _ = cls.client.delete_project(cls.project['id'])
         # NOTE(harika-vakadi): It is necessary to disable the domain
         # before deleting,or else it would result in unauthorized error
-        cls.v3_client.update_domain(cls.domain['id'], enabled=False)
-        resp[4], _ = cls.v3_client.delete_domain(cls.domain['id'])
+        cls.client.update_domain(cls.domain['id'], enabled=False)
+        resp[4], _ = cls.client.delete_domain(cls.domain['id'])
         for r in resp:
             assert r['status'] == '204', "Expected: %s" % r['status']
         super(RolesV3TestJSON, cls).tearDownClass()
@@ -71,32 +71,32 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
     @attr(type='smoke')
     def test_role_create_update_get(self):
         r_name = data_utils.rand_name('Role-')
-        resp, role = self.v3_client.create_role(r_name)
-        self.addCleanup(self.v3_client.delete_role, role['id'])
+        resp, role = self.client.create_role(r_name)
+        self.addCleanup(self.client.delete_role, role['id'])
         self.assertEqual(resp['status'], '201')
         self.assertIn('name', role)
         self.assertEqual(role['name'], r_name)
 
         new_name = data_utils.rand_name('NewRole-')
-        resp, updated_role = self.v3_client.update_role(new_name, role['id'])
+        resp, updated_role = self.client.update_role(new_name, role['id'])
         self.assertEqual(resp['status'], '200')
         self.assertIn('name', updated_role)
         self.assertIn('id', updated_role)
         self.assertIn('links', updated_role)
         self.assertNotEqual(r_name, updated_role['name'])
 
-        resp, new_role = self.v3_client.get_role(role['id'])
+        resp, new_role = self.client.get_role(role['id'])
         self.assertEqual(resp['status'], '200')
         self.assertEqual(new_name, new_role['name'])
         self.assertEqual(updated_role['id'], new_role['id'])
 
     @attr(type='smoke')
     def test_grant_list_revoke_role_to_user_on_project(self):
-        resp, _ = self.v3_client.assign_user_role_on_project(
+        resp, _ = self.client.assign_user_role_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
-        resp, roles = self.v3_client.list_user_roles_on_project(
+        resp, roles = self.client.list_user_roles_on_project(
             self.project['id'], self.user_body['id'])
 
         for i in roles:
@@ -105,17 +105,17 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
         self._list_assertions(resp, roles, self.fetched_role_ids,
                               self.role['id'])
 
-        resp, _ = self.v3_client.revoke_role_from_user_on_project(
+        resp, _ = self.client.revoke_role_from_user_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
     @attr(type='smoke')
     def test_grant_list_revoke_role_to_user_on_domain(self):
-        resp, _ = self.v3_client.assign_user_role_on_domain(
+        resp, _ = self.client.assign_user_role_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
-        resp, roles = self.v3_client.list_user_roles_on_domain(
+        resp, roles = self.client.list_user_roles_on_domain(
             self.domain['id'], self.user_body['id'])
 
         for i in roles:
@@ -124,17 +124,17 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
         self._list_assertions(resp, roles, self.fetched_role_ids,
                               self.role['id'])
 
-        resp, _ = self.v3_client.revoke_role_from_user_on_domain(
+        resp, _ = self.client.revoke_role_from_user_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
     @attr(type='smoke')
     def test_grant_list_revoke_role_to_group_on_project(self):
-        resp, _ = self.v3_client.assign_group_role_on_project(
+        resp, _ = self.client.assign_group_role_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
-        resp, roles = self.v3_client.list_group_roles_on_project(
+        resp, roles = self.client.list_group_roles_on_project(
             self.project['id'], self.group_body['id'])
 
         for i in roles:
@@ -143,17 +143,17 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
         self._list_assertions(resp, roles, self.fetched_role_ids,
                               self.role['id'])
 
-        resp, _ = self.v3_client.revoke_role_from_group_on_project(
+        resp, _ = self.client.revoke_role_from_group_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
     @attr(type='smoke')
     def test_grant_list_revoke_role_to_group_on_domain(self):
-        resp, _ = self.v3_client.assign_group_role_on_domain(
+        resp, _ = self.client.assign_group_role_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
-        resp, roles = self.v3_client.list_group_roles_on_domain(
+        resp, roles = self.client.list_group_roles_on_domain(
             self.domain['id'], self.group_body['id'])
 
         for i in roles:
@@ -162,7 +162,7 @@ class RolesV3TestJSON(base.BaseIdentityAdminTest):
         self._list_assertions(resp, roles, self.fetched_role_ids,
                               self.role['id'])
 
-        resp, _ = self.v3_client.revoke_role_from_group_on_domain(
+        resp, _ = self.client.revoke_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 

@@ -14,7 +14,6 @@
 #    under the License.
 
 import json
-import urlparse
 
 from tempest.common.rest_client import RestClient
 from tempest import config
@@ -457,11 +456,10 @@ class V3TokenClientJSON(RestClient):
     def __init__(self):
         super(V3TokenClientJSON, self).__init__(None)
         auth_url = CONF.identity.uri_v3
-        # If the v3 url is not set, get it from the v2 one
-        if auth_url is None:
-            auth_url = CONF.identity.uri.replace(urlparse.urlparse(
-                CONF.identity.uri).path, "/v3")
-
+        if not auth_url and CONF.identity_feature_enabled.api_v3:
+            raise exceptions.InvalidConfiguration('you must specify a v3 uri '
+                                                  'if using the v3 identity '
+                                                  'api')
         if 'auth/tokens' not in auth_url:
             auth_url = auth_url.rstrip('/') + '/auth/tokens'
 

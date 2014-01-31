@@ -20,7 +20,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class ServicesTestJSON(base.BaseIdentityAdminTest):
+class ServicesTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     def _del_service(self, service_id):
