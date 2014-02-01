@@ -229,6 +229,18 @@ class BaseV2ComputeTest(BaseComputeTest):
         cls.password = server['adminPass']
         return server['id']
 
+    @classmethod
+    def delete_volume(cls, volume_id):
+        """Deletes the given volume and waits for it to be gone."""
+        try:
+            resp, _ = cls.volumes_extensions_client.delete_volume(volume_id)
+            # TODO(mriedem): We should move the wait_for_resource_deletion
+            # into the delete_volume method as a convenience to the caller.
+            cls.volumes_extensions_client.wait_for_resource_deletion(volume_id)
+        except exceptions.NotFound:
+            LOG.warn("Unable to delete volume '%s' since it was not found. "
+                     "Maybe it was already deleted?" % volume_id)
+
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     """Base test case class for Compute Admin V2 API tests."""

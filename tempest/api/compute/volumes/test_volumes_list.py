@@ -62,7 +62,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
                     # too small. So, here, we clean up whatever we did manage
                     # to create and raise a SkipTest
                     for volume in cls.volume_list:
-                        cls.client.delete_volume(volume)
+                        cls.delete_volume(volume['id'])
                     msg = ("Failed to create ALL necessary volumes to run "
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
@@ -74,8 +74,7 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     def tearDownClass(cls):
         # Delete the created Volumes
         for volume in cls.volume_list:
-            resp, _ = cls.client.delete_volume(volume['id'])
-            cls.client.wait_for_resource_deletion(volume['id'])
+            cls.delete_volume(volume['id'])
         super(VolumesTestJSON, cls).tearDownClass()
 
     @attr(type='gate')
