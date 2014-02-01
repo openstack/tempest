@@ -44,6 +44,7 @@ class FlavorsAccessV3TestJSON(base.BaseV3ComputeAdminTest):
         cls.vcpus = 1
         cls.disk = 10
 
+    @test.skip_because(bug='1265416')
     @test.attr(type='gate')
     def test_flavor_access_list_with_private_flavor(self):
         # Test to list flavor access successfully by querying private flavor
@@ -63,6 +64,7 @@ class FlavorsAccessV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertEqual(str(new_flavor_id), str(first_flavor['flavor_id']))
         self.assertEqual(self.adm_tenant_id, first_flavor['tenant_id'])
 
+    @test.skip_because(bug='1265416')
     @test.attr(type='gate')
     def test_flavor_access_add_remove(self):
         # Test to add and remove flavor access to a given tenant.
