@@ -270,7 +270,7 @@ class BaseTestCase(testtools.TestCase,
                                                    level=None))
 
     @classmethod
-    def get_client_manager(cls):
+    def get_client_manager(cls, interface=None):
         """
         Returns an Openstack client manager
         """
@@ -282,12 +282,27 @@ class BaseTestCase(testtools.TestCase,
             force_tenant_isolation):
             creds = cls.isolated_creds.get_primary_creds()
             username, tenant_name, password = creds
-            os = clients.Manager(username=username,
-                                 password=password,
-                                 tenant_name=tenant_name,
-                                 interface=cls._interface)
+            if getattr(cls, '_interface', None):
+                os = clients.Manager(username=username,
+                                     password=password,
+                                     tenant_name=tenant_name,
+                                     interface=cls._interface)
+            elif interface:
+                os = clients.Manager(username=username,
+                                     password=password,
+                                     tenant_name=tenant_name,
+                                     interface=interface)
+            else:
+                os = clients.Manager(username=username,
+                                     password=password,
+                                     tenant_name=tenant_name)
         else:
-            os = clients.Manager(interface=cls._interface)
+            if getattr(cls, '_interface', None):
+                os = clients.Manager(interface=cls._interface)
+            elif interface:
+                os = clients.Manager(interface=interface)
+            else:
+                os = clients.Manager()
         return os
 
     @classmethod

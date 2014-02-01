@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
@@ -24,7 +23,6 @@ class EC2SecurityGroupTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(EC2SecurityGroupTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
 
     @attr(type='smoke')

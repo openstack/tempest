@@ -17,7 +17,6 @@ import contextlib
 
 import boto.s3.key
 
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
@@ -28,7 +27,6 @@ class S3BucketsTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(S3BucketsTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.s3_client
 
     @attr(type='smoke')

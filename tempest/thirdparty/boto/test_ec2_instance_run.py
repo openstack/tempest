@@ -15,7 +15,6 @@
 
 from boto import exception
 
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import config
@@ -41,7 +40,6 @@ class InstanceRunTest(BotoTestCase):
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
-        cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.ec2_client = cls.os.ec2api_client
         cls.zone = cls.ec2_client.get_good_zone()

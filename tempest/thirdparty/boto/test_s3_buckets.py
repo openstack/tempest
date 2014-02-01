@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import skip_because
@@ -25,7 +24,6 @@ class S3BucketsTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(S3BucketsTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.s3_client
 
     @skip_because(bug="1076965")
