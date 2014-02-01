@@ -1,7 +1,7 @@
 Tempest Field Guide to Stress Tests
 ===================================
 
-Nova is a distributed, asynchronous system that is prone to race condition
+OpenStack is a distributed, asynchronous system that is prone to race condition
 bugs. These bugs will not be easily found during
 functional testing but will be encountered by users in large deployments in a
 way that is hard to debug. The stress test tries to cause these bugs to happen
