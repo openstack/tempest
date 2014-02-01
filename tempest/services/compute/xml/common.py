@@ -112,11 +112,27 @@ def xml_to_json(node, plurals=None):
     others, it requires a little hand-editing of the result.
     """
     json = {}
+    bool_flag = False
+    int_flag = False
+    long_flag = False
     for attr in node.keys():
         if not attr.startswith("xmlns"):
             json[attr] = node.get(attr)
+            if json[attr] == 'bool':
+                bool_flag = True
+            elif json[attr] == 'int':
+                int_flag = True
+            elif json[attr] == 'long':
+                long_flag = True
     if not node.getchildren():
-        return node.text or json
+        if bool_flag:
+            return node.text == 'True'
+        elif int_flag:
+            return int(node.text)
+        elif long_flag:
+            return long(node.text)
+        else:
+            return node.text or json
     for child in node.getchildren():
         tag = child.tag
         if tag.startswith("{"):
