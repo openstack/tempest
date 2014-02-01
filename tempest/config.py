@@ -727,9 +727,7 @@ class TempestConfigPrivate(object):
 
         path = os.path.join(conf_dir, conf_file)
 
-        if not (os.path.isfile(path) or
-                'TEMPEST_CONFIG_DIR' in os.environ or
-                'TEMPEST_CONFIG' in os.environ):
+        if not os.path.isfile(path):
             path = failsafe_path
 
         # only parse the config file if we expect one to exist. This is needed
