@@ -67,7 +67,7 @@ def services(*args, **kwargs):
     exercised by a test case.
     """
     valid_service_list = ['compute', 'image', 'volume', 'orchestration',
-                          'network', 'identity', 'object', 'dashboard']
+                          'network', 'identity', 'object_storage', 'dashboard']
 
     def decorator(f):
         for service in args:

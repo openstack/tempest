@@ -93,7 +93,7 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
             for obj in not_present_obj:
                 self.assertNotIn(obj, object_list)
 
-    @services('object')
+    @services('object_storage')
     def test_swift_basic_ops(self):
         self._get_swift_stat()
         container_name = self._create_container()
