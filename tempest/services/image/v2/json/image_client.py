@@ -68,6 +68,15 @@ class ImageClientV2JSON(rest_client.RestClient):
                 self._http = self._get_http()
         return self._http
 
+    def update_image(self, image_id, patch):
+        data = json.dumps(patch)
+        self._validate_schema(data)
+
+        headers = {"Content-Type": "application/openstack-images-v2.0"
+                                   "-json-patch"}
+        resp, body = self.patch('v2/images/%s' % image_id, data, headers)
+        return resp, self._parse_resp(body)
+
     def create_image(self, name, container_format, disk_format, **kwargs):
         params = {
             "name": name,
@@ -163,3 +172,15 @@ class ImageClientV2JSON(rest_client.RestClient):
         body = json.loads(body)
         self.expected_success(200, resp)
         return resp, body
+
+    def get_member(self, image_id, member_id):
+        url = 'v2/images/%s/members/%s' % (image_id, member_id)
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        return resp, json.loads(body)
+
+    def remove_member(self, image_id, member_id):
+        url = 'v2/images/%s/members/%s' % (image_id, member_id)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp)
+        return resp
