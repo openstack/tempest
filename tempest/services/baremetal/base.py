@@ -12,6 +12,7 @@
 
 import functools
 import json
+import urllib
 
 import six
 
@@ -103,16 +104,19 @@ class BaremetalClient(rest_client.RestClient):
 
         return patch
 
-    def _list_request(self, resource, permanent=False):
+    def _list_request(self, resource, permanent=False, **kwargs):
         """
         Get the list of objects of the specified type.
 
         :param resource: The name of the REST resource, e.g., 'nodes'.
+        "param **kw: Parameters for the request.
         :return: A tuple with the server response and deserialized JSON list
                  of objects
 
         """
         uri = self._get_uri(resource, permanent=permanent)
+        if kwargs:
+            uri += "?%s" % urllib.urlencode(kwargs)
 
         resp, body = self.get(uri)
 

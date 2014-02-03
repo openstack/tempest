@@ -37,9 +37,14 @@ class BaremetalClientV1(base.BaremetalClient):
         return self._list_request('chassis')
 
     @base.handle_errors
-    def list_ports(self):
+    def list_ports(self, **kwargs):
         """List all existing ports."""
-        return self._list_request('ports')
+        return self._list_request('ports', **kwargs)
+
+    @base.handle_errors
+    def list_ports_detail(self):
+        """Details list all existing ports."""
+        return self._list_request('/ports/detail')
 
     @base.handle_errors
     def show_node(self, uuid):
@@ -116,12 +121,20 @@ class BaremetalClientV1(base.BaremetalClient):
         Create a port with the specified parameters.
 
         :param node_id: The ID of the node which owns the port.
-        :param address: MAC address of the port. Default: 01:23:45:67:89:0A.
+        :param address: MAC address of the port.
+        :param extra: Meta data of the port. Default: {'foo': 'bar'}.
+        :param uuid: UUID of the port.
         :return: A tuple with the server response and the created port.
 
         """
-        port = {'address': kwargs.get('address', '01:23:45:67:89:0A'),
-                'node_uuid': node_id}
+        port = {'extra': kwargs.get('extra', {'foo': 'bar'}),
+                'uuid': kwargs['uuid']}
+
+        if node_id is not None:
+            port['node_uuid'] = node_id
+
+        if kwargs['address'] is not None:
+            port['address'] = kwargs['address']
 
         return self._create_request('ports', 'port', port)
 
@@ -192,15 +205,14 @@ class BaremetalClientV1(base.BaremetalClient):
         return self._patch_request('chassis', uuid, patch)
 
     @base.handle_errors
-    def update_port(self, uuid, **kwargs):
+    def update_port(self, uuid, patch):
         """
         Update the specified port.
 
         :param uuid: The unique identifier of the port.
+        :param patch: List of dicts representing json patches.
         :return: A tuple with the server response and the updated port.
 
         """
-        port_attributes = ('address',)
-        patch = self._make_patch(port_attributes, **kwargs)
 
         return self._patch_request('ports', uuid, patch)
