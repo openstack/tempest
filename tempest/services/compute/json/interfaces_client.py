@@ -39,11 +39,12 @@ class InterfacesClientJSON(RestClient):
                          fixed_ip=None):
         post_body = dict(interfaceAttachment=dict())
         if port_id:
-            post_body['port_id'] = port_id
+            post_body['interfaceAttachment']['port_id'] = port_id
         if network_id:
-            post_body['net_id'] = network_id
+            post_body['interfaceAttachment']['net_id'] = network_id
         if fixed_ip:
-            post_body['fixed_ips'] = [dict(ip_address=fixed_ip)]
+            fip = dict(ip_address=fixed_ip)
+            post_body['interfaceAttachment']['fixed_ips'] = [fip]
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/os-interface' % server,
                                headers=self.headers,
