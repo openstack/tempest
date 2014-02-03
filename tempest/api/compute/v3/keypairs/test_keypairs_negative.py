@@ -20,12 +20,12 @@ from tempest import exceptions
 from tempest import test
 
 
-class KeyPairsNegativeV3TestJSON(base.BaseV3ComputeTest):
+class KeyPairsNegativeV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(KeyPairsNegativeV3TestJSON, cls).setUpClass()
+        super(KeyPairsNegativeV3Test, cls).setUpClass()
         cls.client = cls.keypairs_client
 
     def _create_keypair(self, keypair_name, pub_key=None):

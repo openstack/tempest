@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class HypervisorAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class HypervisorAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Hypervisors API that require admin privileges
@@ -31,7 +31,7 @@ class HypervisorAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(HypervisorAdminNegativeV3TestJSON, cls).setUpClass()
+        super(HypervisorAdminNegativeV3Test, cls).setUpClass()
         cls.client = cls.hypervisor_admin_client
         cls.non_adm_client = cls.hypervisor_client
 

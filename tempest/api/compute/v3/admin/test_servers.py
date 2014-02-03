@@ -20,7 +20,7 @@ from tempest.test import attr
 from tempest.test import skip_because
 
 
-class ServersAdminV3TestJSON(base.BaseV3ComputeAdminTest):
+class ServersAdminV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Servers API using admin privileges
@@ -30,7 +30,7 @@ class ServersAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServersAdminV3TestJSON, cls).setUpClass()
+        super(ServersAdminV3Test, cls).setUpClass()
         cls.client = cls.servers_admin_client
         cls.non_admin_client = cls.servers_client
         cls.flavors_client = cls.flavors_admin_client

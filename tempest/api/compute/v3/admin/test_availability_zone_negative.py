@@ -18,7 +18,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class AZAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class AZAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Availability Zone API List
@@ -28,7 +28,7 @@ class AZAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(AZAdminNegativeV3TestJSON, cls).setUpClass()
+        super(AZAdminNegativeV3Test, cls).setUpClass()
         cls.client = cls.availability_zone_admin_client
         cls.non_adm_client = cls.availability_zone_client
 

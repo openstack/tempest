@@ -20,13 +20,13 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class InstanceUsageAuditLogV3TestJSON(base.BaseV3ComputeAdminTest):
+class InstanceUsageAuditLogV3Test(base.BaseV3ComputeAdminTest):
 
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(InstanceUsageAuditLogV3TestJSON, cls).setUpClass()
+        super(InstanceUsageAuditLogV3Test, cls).setUpClass()
         cls.adm_client = cls.instance_usages_audit_log_admin_client
 
     @test.attr(type='gate')

@@ -27,14 +27,14 @@ from tempest import test
 CONF = config.CONF
 
 
-class ServersV3TestJSON(base.BaseV3ComputeTest):
+class ServersV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
     run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
     @classmethod
     def setUpClass(cls):
-        super(ServersV3TestJSON, cls).setUpClass()
+        super(ServersV3Test, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -115,14 +115,14 @@ class ServersV3TestJSON(base.BaseV3ComputeTest):
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
 
-class ServersWithSpecificFlavorV3TestJSON(base.BaseV3ComputeAdminTest):
+class ServersWithSpecificFlavorV3Test(base.BaseV3ComputeAdminTest):
     _interface = 'json'
     run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
     @classmethod
     def setUpClass(cls):
-        super(ServersWithSpecificFlavorV3TestJSON, cls).setUpClass()
+        super(ServersWithSpecificFlavorV3Test, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
         cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
@@ -213,7 +213,7 @@ class ServersWithSpecificFlavorV3TestJSON(base.BaseV3ComputeAdminTest):
         self.assertEqual(partition_num + 1, linux_client.get_partitions())
 
 
-class ServersV3TestManualDisk(ServersV3TestJSON):
+class ServersV3TestManualDisk(ServersV3Test):
     disk_config = 'MANUAL'
 
     @classmethod

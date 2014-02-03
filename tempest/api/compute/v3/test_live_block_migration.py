@@ -26,13 +26,13 @@ from tempest.test import attr
 CONF = config.CONF
 
 
-class LiveBlockMigrationV3TestJSON(base.BaseV3ComputeAdminTest):
+class LiveBlockMigrationV3Test(base.BaseV3ComputeAdminTest):
     _host_key = 'os-extended-server-attributes:host'
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(LiveBlockMigrationV3TestJSON, cls).setUpClass()
+        super(LiveBlockMigrationV3Test, cls).setUpClass()
 
         cls.admin_hosts_client = cls.hosts_admin_client
         cls.admin_servers_client = cls.servers_admin_client
@@ -161,4 +161,4 @@ class LiveBlockMigrationV3TestJSON(base.BaseV3ComputeAdminTest):
         for server_id in cls.created_server_ids:
             cls.servers_client.delete_server(server_id)
 
-        super(LiveBlockMigrationV3TestJSON, cls).tearDownClass()
+        super(LiveBlockMigrationV3Test, cls).tearDownClass()

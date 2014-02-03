@@ -18,7 +18,7 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class VersionV3TestJSON(base.BaseV3ComputeTest):
+class VersionV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @test.attr(type='gate')

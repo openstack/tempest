@@ -22,12 +22,12 @@ from tempest.test import attr
 CONF = config.CONF
 
 
-class ImagesV3TestJSON(base.BaseV3ComputeTest):
+class ImagesV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesV3TestJSON, cls).setUpClass()
+        super(ImagesV3Test, cls).setUpClass()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

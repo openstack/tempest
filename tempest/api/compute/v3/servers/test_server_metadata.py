@@ -17,12 +17,12 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class ServerMetadataV3TestJSON(base.BaseV3ComputeTest):
+class ServerMetadataV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServerMetadataV3TestJSON, cls).setUpClass()
+        super(ServerMetadataV3Test, cls).setUpClass()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
@@ -34,7 +34,7 @@ class ServerMetadataV3TestJSON(base.BaseV3ComputeTest):
         cls.server_id = server['id']
 
     def setUp(self):
-        super(ServerMetadataV3TestJSON, self).setUp()
+        super(ServerMetadataV3Test, self).setUp()
         meta = {'key1': 'value1', 'key2': 'value2'}
         resp, _ = self.client.set_server_metadata(self.server_id, meta)
         self.assertEqual(resp.status, 200)

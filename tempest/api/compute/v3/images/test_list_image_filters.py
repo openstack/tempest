@@ -24,12 +24,12 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
+class ListImageFiltersTest(base.BaseV2ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ListImageFiltersTestJSON, cls).setUpClass()
+        super(ListImageFiltersTest, cls).setUpClass()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)

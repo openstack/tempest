@@ -17,7 +17,7 @@ from tempest.common import tempest_fixtures as fixtures
 from tempest import test
 
 
-class HostsAdminV3TestJSON(base.BaseV3ComputeAdminTest):
+class HostsAdminV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests hosts API using admin privileges.
@@ -27,7 +27,7 @@ class HostsAdminV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(HostsAdminV3TestJSON, cls).setUpClass()
+        super(HostsAdminV3Test, cls).setUpClass()
         cls.client = cls.hosts_admin_client
 
     @test.attr(type='gate')

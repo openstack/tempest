@@ -24,12 +24,12 @@ from tempest.test import skip_because
 CONF = config.CONF
 
 
-class ListServerFiltersV3TestJSON(base.BaseV3ComputeTest):
+class ListServerFiltersV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ListServerFiltersV3TestJSON, cls).setUpClass()
+        super(ListServerFiltersV3Test, cls).setUpClass()
         cls.client = cls.servers_client
 
         # Check to see if the alternate image ref actually exists...

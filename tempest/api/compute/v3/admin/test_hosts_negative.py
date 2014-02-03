@@ -18,7 +18,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class HostsAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class HostsAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests hosts API using admin privileges.
@@ -28,7 +28,7 @@ class HostsAdminNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(HostsAdminNegativeV3TestJSON, cls).setUpClass()
+        super(HostsAdminNegativeV3Test, cls).setUpClass()
         cls.client = cls.hosts_admin_client
         cls.non_admin_client = cls.hosts_client
 

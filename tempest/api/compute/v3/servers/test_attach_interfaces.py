@@ -23,7 +23,7 @@ import time
 CONF = config.CONF
 
 
-class AttachInterfacesV3TestJSON(base.BaseV3ComputeTest):
+class AttachInterfacesV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
@@ -32,7 +32,7 @@ class AttachInterfacesV3TestJSON(base.BaseV3ComputeTest):
             raise cls.skipException("Neutron is required")
         # This test class requires network and subnet
         cls.set_network_resources(network=True, subnet=True)
-        super(AttachInterfacesV3TestJSON, cls).setUpClass()
+        super(AttachInterfacesV3Test, cls).setUpClass()
         cls.client = cls.interfaces_client
 
     def _check_interface(self, iface, port_id=None, network_id=None,

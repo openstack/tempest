@@ -18,13 +18,13 @@ from tempest import exceptions
 from tempest import test
 
 
-class InstanceUsageLogNegativeV3TestJSON(base.BaseV3ComputeAdminTest):
+class InstanceUsageLogNegativeV3Test(base.BaseV3ComputeAdminTest):
 
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(InstanceUsageLogNegativeV3TestJSON, cls).setUpClass()
+        super(InstanceUsageLogNegativeV3Test, cls).setUpClass()
         cls.adm_client = cls.instance_usages_audit_log_admin_client
 
     @test.attr(type=['negative', 'gate'])

@@ -23,19 +23,19 @@ from tempest.test import attr
 CONF = config.CONF
 
 
-class AttachVolumeV3TestJSON(base.BaseV3ComputeTest):
+class AttachVolumeV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
     run_ssh = CONF.compute.run_ssh
 
     def __init__(self, *args, **kwargs):
-        super(AttachVolumeV3TestJSON, self).__init__(*args, **kwargs)
+        super(AttachVolumeV3Test, self).__init__(*args, **kwargs)
         self.server = None
         self.volume = None
         self.attached = False
 
     @classmethod
     def setUpClass(cls):
-        super(AttachVolumeV3TestJSON, cls).setUpClass()
+        super(AttachVolumeV3Test, cls).setUpClass()
         cls.device = CONF.compute.volume_device_name
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)

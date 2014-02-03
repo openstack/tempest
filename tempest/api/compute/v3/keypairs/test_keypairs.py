@@ -18,12 +18,12 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class KeyPairsV3TestJSON(base.BaseV3ComputeTest):
+class KeyPairsV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(KeyPairsV3TestJSON, cls).setUpClass()
+        super(KeyPairsV3Test, cls).setUpClass()
         cls.client = cls.keypairs_client
 
     def _delete_keypair(self, keypair_name):
