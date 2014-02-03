@@ -64,6 +64,19 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
                                                           status)
         super(SnapshotsActionsTest, self).tearDown()
 
+    def _create_reset_and_force_delete_temp_snapshot(self, status=None):
+        # Create snapshot, reset snapshot status,
+        # and force delete temp snapshot
+        temp_snapshot = self.create_snapshot(self.volume['id'])
+        if status:
+            resp, body = self.admin_snapshots_client.\
+                reset_snapshot_status(temp_snapshot['id'], status)
+            self.assertEqual(202, resp.status)
+        resp_delete, volume_delete = self.admin_snapshots_client.\
+            force_delete_snapshot(temp_snapshot['id'])
+        self.assertEqual(202, resp_delete.status)
+        self.client.wait_for_resource_deletion(temp_snapshot['id'])
+
     def _get_progress_alias(self):
         return 'os-extended-snapshot-attributes:progress'
 
@@ -98,6 +111,26 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
         self.assertEqual(200, resp_get.status)
         self.assertEqual(status, snapshot_get['status'])
         self.assertEqual(progress, snapshot_get[progress_alias])
+
+    @attr(type='gate')
+    def test_snapshot_force_delete_when_snapshot_is_creating(self):
+        # test force delete when status of snapshot is creating
+        self._create_reset_and_force_delete_temp_snapshot('creating')
+
+    @attr(type='gate')
+    def test_snapshot_force_delete_when_snapshot_is_deleting(self):
+        # test force delete when status of snapshot is deleting
+        self._create_reset_and_force_delete_temp_snapshot('deleting')
+
+    @attr(type='gate')
+    def test_snapshot_force_delete_when_snapshot_is_error(self):
+        # test force delete when status of snapshot is error
+        self._create_reset_and_force_delete_temp_snapshot('error')
+
+    @attr(type='gate')
+    def test_snapshot_force_delete_when_snapshot_is_error_deleting(self):
+        # test force delete when status of snapshot is error_deleting
+        self._create_reset_and_force_delete_temp_snapshot('error_deleting')
 
 
 class SnapshotsActionsTestXML(SnapshotsActionsTest):

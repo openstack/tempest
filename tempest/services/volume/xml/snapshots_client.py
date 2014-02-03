@@ -226,3 +226,12 @@ class SnapshotsClientXML(RestClientXML):
         """Delete metadata item for the snapshot."""
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
         return self.delete(url)
+
+    def force_delete_snapshot(self, snapshot_id):
+        """Force Delete Snapshot."""
+        post_body = Element("os-force_delete")
+        url = 'snapshots/%s/action' % str(snapshot_id)
+        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        if body:
+            body = xml_to_json(etree.fromstring(body))
+        return resp, body
