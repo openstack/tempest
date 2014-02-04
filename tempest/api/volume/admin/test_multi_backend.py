@@ -41,13 +41,11 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
         adm_tenant = CONF.identity.admin_tenant_name
         auth_url = CONF.identity.uri
 
-        cls.volume_client = volumes_client.VolumesClientJSON(CONF,
-                                                             adm_user,
+        cls.volume_client = volumes_client.VolumesClientJSON(adm_user,
                                                              adm_pass,
                                                              auth_url,
                                                              adm_tenant)
-        cls.type_client = volume_types_client.VolumeTypesClientJSON(CONF,
-                                                                    adm_user,
+        cls.type_client = volume_types_client.VolumeTypesClientJSON(adm_user,
                                                                     adm_pass,
                                                                     auth_url,
                                                                     adm_tenant)
