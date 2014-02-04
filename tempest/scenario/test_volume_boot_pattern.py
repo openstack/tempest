@@ -14,7 +14,6 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log
 from tempest.scenario import manager
-import tempest.test
 from tempest.test import services
 
 CONF = config.CONF
@@ -128,7 +127,6 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
         actual = self._get_content(ssh_client)
         self.assertEqual(expected, actual)
 
-    @tempest.test.skip_because(bug="1270608")
     @services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
