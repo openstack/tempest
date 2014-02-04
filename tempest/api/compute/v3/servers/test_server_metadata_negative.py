@@ -18,12 +18,12 @@ from tempest import exceptions
 from tempest import test
 
 
-class ServerMetadataV3NegativeTestJSON(base.BaseV3ComputeTest):
+class ServerMetadataV3NegativeTest(base.BaseV3ComputeTest):
     _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
-        super(ServerMetadataV3NegativeTestJSON, cls).setUpClass()
+        super(ServerMetadataV3NegativeTest, cls).setUpClass()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
         cls.admin_client = cls._get_identity_admin_client()
