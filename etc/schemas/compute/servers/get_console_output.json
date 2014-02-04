@@ -1,0 +1,21 @@
+{
+    "name": "get-console-output",
+    "http-method": "POST",
+    "url": "servers/%s/action",
+    "resources": ["server"],
+    "json-schema": {
+        "type": "object",
+        "properties": {
+            "os-getConsoleOutput": {
+                "type": "object",
+                "properties": {
+                    "length": {
+                        "type": ["integer", "string"],
+                        "minimum": 0
+                    }
+                }
+            }
+        },
+        "additionalProperties": false
+    }
+}

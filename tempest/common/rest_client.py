@@ -559,3 +559,33 @@ class RestClientXML(RestClient):
                 'retry-after' not in resp):
             return True
         return 'exceed' in resp_body.get('message', 'blabla')
+
+
+class NegativeRestClient(RestClient):
+    """
+    Version of RestClient that does not raise exceptions.
+    """
+    def _error_checker(self, method, url,
+                       headers, body, resp, resp_body):
+        pass
+
+    def send_request(self, method, url_template, resources, body=None):
+        url = url_template % tuple(resources)
+        if method == "GET":
+            resp, body = self.get(url)
+        elif method == "POST":
+            resp, body = self.post(url, body, self.headers)
+        elif method == "PUT":
+            resp, body = self.put(url, body, self.headers)
+        elif method == "PATCH":
+            resp, body = self.patch(url, body, self.headers)
+        elif method == "HEAD":
+            resp, body = self.head(url)
+        elif method == "DELETE":
+            resp, body = self.delete(url)
+        elif method == "COPY":
+            resp, body = self.copy(url)
+        else:
+            assert False
+
+        return resp, body
