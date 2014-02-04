@@ -38,14 +38,14 @@ class InterfacesV3ClientJSON(RestClient):
 
     def create_interface(self, server, port_id=None, network_id=None,
                          fixed_ip=None):
-        post_body = dict(interface_attachment=dict())
+        post_body = dict()
         if port_id:
             post_body['port_id'] = port_id
         if network_id:
             post_body['net_id'] = network_id
         if fixed_ip:
             post_body['fixed_ips'] = [dict(ip_address=fixed_ip)]
-        post_body = json.dumps(post_body)
+        post_body = json.dumps({'interface_attachment': post_body})
         resp, body = self.post('servers/%s/os-attach-interfaces' % server,
                                headers=self.headers,
                                body=post_body)
