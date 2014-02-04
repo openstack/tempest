@@ -127,11 +127,22 @@ def display_results(results):
                           "enabled extensions" % (service, extension))
 
 
+def check_service_availability(service):
+    if service == 'nova_v3':
+        service = 'nova'
+    return getattr(CONF.service_available, service)
+
+
 def main(argv):
     print('Running config verification...')
     os = clients.ComputeAdminManager(interface='json')
     results = {}
     for service in ['nova', 'nova_v3', 'cinder', 'neutron']:
+        # TODO(mtreinish) make this a keystone endpoint check for available
+        # services
+        if not check_service_availability(service):
+            print("%s is not available" % service)
+            continue
         results = verify_extensions(os, service, results)
     verify_glance_api_versions(os)
     verify_nova_api_versions(os)
