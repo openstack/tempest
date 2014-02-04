@@ -196,7 +196,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips[floating_ip] = server
 
-    def _check_public_network_connectivity(self, should_connect=True):
+    def _check_public_network_connectivity(self, should_connect=True,
+                                           msg=None):
         # The target login is assumed to have been configured for
         # key-based authentication by cloud-init.
         ssh_login = CONF.compute.image_ssh_user
@@ -212,7 +213,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                             private_key,
                                             should_connect=should_connect)
         except Exception:
-            LOG.exception('Public network connectivity check failed')
+            ex_msg = 'Public network connectivity check failed'
+            if msg:
+                ex_msg += ": " + msg
+            LOG.exception(ex_msg)
             self._log_console_output(servers=self.servers.keys())
             debug.log_ip_ns()
             raise
@@ -242,6 +246,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._check_tenant_network_connectivity()
         self._check_public_network_connectivity(should_connect=True)
         self._disassociate_floating_ips()
-        self._check_public_network_connectivity(should_connect=False)
+        self._check_public_network_connectivity(should_connect=False,
+                                                msg="after disassociate "
+                                                    "floating ip")
         self._reassociate_floating_ips()
-        self._check_public_network_connectivity(should_connect=True)
+        self._check_public_network_connectivity(should_connect=True,
+                                                msg="after re-associate "
+                                                    "floating ip")
