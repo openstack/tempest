@@ -22,7 +22,7 @@ import subprocess
 import cinderclient.client
 import glanceclient
 import heatclient.client
-import keystoneclient.apiclient.exceptions
+import keystoneclient.exceptions
 import keystoneclient.v2_0.client
 import netaddr
 from neutronclient.common import exceptions as exc
@@ -146,7 +146,7 @@ class OfficialClientManager(tempest.manager.Manager):
             keystone_admin.roles.add_user_role(self.identity_client.user_id,
                                                member_role.id,
                                                self.identity_client.tenant_id)
-        except keystoneclient.apiclient.exceptions.Conflict:
+        except keystoneclient.exceptions.Conflict:
             pass
 
         return swiftclient.Connection(auth_url, username, password,
