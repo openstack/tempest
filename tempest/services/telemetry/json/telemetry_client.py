@@ -30,10 +30,6 @@ class TelemetryClientJSON(client.TelemetryClientBase):
     def serialize(self, body):
         return json.dumps(body)
 
-    def create_alarm(self, **kwargs):
-        uri = "%s/alarms" % self.uri_prefix
-        return self.post(uri, kwargs)
-
     def add_sample(self, sample_list, meter_name, meter_unit, volume,
                    sample_type, resource_id, **kwargs):
         sample = {"counter_name": meter_name, "counter_unit": meter_unit,
