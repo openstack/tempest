@@ -45,7 +45,7 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
     def test_aggregate_create_delete(self):
         # Create and delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name)
+        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
         self.assertEqual(201, resp.status)
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(None, aggregate['availability_zone'])
@@ -59,7 +59,8 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
         # Create and delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
+        resp, aggregate = self.client.create_aggregate(
+            name=aggregate_name, availability_zone=az_name)
         self.assertEqual(201, resp.status)
         self.assertEqual(aggregate_name, aggregate['name'])
         self.assertEqual(az_name, aggregate['availability_zone'])
@@ -72,7 +73,7 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
     def test_aggregate_create_verify_entry_in_list(self):
         # Create an aggregate and ensure it is listed.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name)
+        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         resp, aggregates = self.client.list_aggregates()
@@ -85,7 +86,7 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
     def test_aggregate_create_update_metadata_get_details(self):
         # Create an aggregate and ensure its details are returned.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name)
+        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         resp, body = self.client.get_aggregate(aggregate['id'])
@@ -112,7 +113,8 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
+        resp, aggregate = self.client.create_aggregate(
+            name=aggregate_name, availability_zone=az_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         self.assertEqual(201, resp.status)
@@ -143,7 +145,7 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
         # Add an host to the given aggregate and remove.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name)
+        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
 
         resp, body = self.client.add_host(aggregate['id'], self.host)
@@ -165,7 +167,7 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
         # Add an host to the given aggregate and list.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name)
+        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
@@ -183,7 +185,7 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
         # Add an host to the given aggregate and get details.
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name)
+        resp, aggregate = self.client.create_aggregate(name=aggregate_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)
@@ -199,7 +201,8 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
         az_name = data_utils.rand_name(self.az_name_prefix)
-        resp, aggregate = self.client.create_aggregate(aggregate_name, az_name)
+        resp, aggregate = self.client.create_aggregate(
+            name=aggregate_name, availability_zone=az_name)
         self.addCleanup(self.client.delete_aggregate, aggregate['id'])
         self.client.add_host(aggregate['id'], self.host)
         self.addCleanup(self.client.remove_host, aggregate['id'], self.host)

@@ -36,9 +36,10 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
     def credentials(cls):
         return cls.admin_credentials()
 
-    def _create_aggregate(self, aggregate_name, availability_zone=None):
-        aggregate = self.compute_client.aggregates.create(aggregate_name,
-                                                          availability_zone)
+    def _create_aggregate(self, **kwargs):
+        aggregate = self.compute_client.aggregates.create(**kwargs)
+        aggregate_name = kwargs['name']
+        availability_zone = kwargs['availability_zone']
         self.assertEqual(aggregate.name, aggregate_name)
         self.assertEqual(aggregate.availability_zone, availability_zone)
         self.set_resource(aggregate.id, aggregate)
@@ -107,7 +108,8 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         az = 'foo_zone'
         aggregate_name = rand_name('aggregate-scenario')
-        aggregate = self._create_aggregate(aggregate_name, az)
+        aggregate = self._create_aggregate(name=aggregate_name,
+                                           availability_zone=az)
 
         metadata = {'meta_key': 'meta_value'}
         self._set_aggregate_metadata(aggregate, metadata)
