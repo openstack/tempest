@@ -17,7 +17,7 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class L3AgentSchedulerJSON(base.BaseAdminNetworkTest):
+class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     """
@@ -33,7 +33,7 @@ class L3AgentSchedulerJSON(base.BaseAdminNetworkTest):
 
     @classmethod
     def setUpClass(cls):
-        super(L3AgentSchedulerJSON, cls).setUpClass()
+        super(L3AgentSchedulerTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('l3_agent_scheduler', 'network'):
             msg = "L3 Agent Scheduler Extension not enabled."
             raise cls.skipException(msg)
@@ -61,5 +61,5 @@ class L3AgentSchedulerJSON(base.BaseAdminNetworkTest):
         self.assertEqual(204, resp.status)
 
 
-class L3AgentSchedulerXML(L3AgentSchedulerJSON):
+class L3AgentSchedulerTestXML(L3AgentSchedulerTestJSON):
     _interface = 'xml'

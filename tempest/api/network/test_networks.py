@@ -239,7 +239,7 @@ class NetworksTestXML(NetworksTestJSON):
     _interface = 'xml'
 
 
-class BulkNetworkOpsJSON(base.BaseNetworkTest):
+class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
     """
@@ -263,7 +263,7 @@ class BulkNetworkOpsJSON(base.BaseNetworkTest):
 
     @classmethod
     def setUpClass(cls):
-        super(BulkNetworkOpsJSON, cls).setUpClass()
+        super(BulkNetworkOpsTestJSON, cls).setUpClass()
         cls.network1 = cls.create_network()
         cls.network2 = cls.create_network()
 
@@ -390,5 +390,5 @@ class BulkNetworkOpsJSON(base.BaseNetworkTest):
             self.assertIn(n['id'], ports_list)
 
 
-class BulkNetworkOpsXML(BulkNetworkOpsJSON):
+class BulkNetworkOpsTestXML(BulkNetworkOpsTestJSON):
     _interface = 'xml'
