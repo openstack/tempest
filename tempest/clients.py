@@ -152,6 +152,7 @@ from tempest.services.object_storage.object_client import \
     ObjectClientCustomizedHeader
 from tempest.services.orchestration.json.orchestration_client import \
     OrchestrationClient
+from tempest.services.queuing.json.queuing_client import QueuingClientJSON
 from tempest.services.telemetry.json.telemetry_client import \
     TelemetryClientJSON
 from tempest.services.telemetry.xml.telemetry_client import \
@@ -334,6 +335,7 @@ class Manager(manager.Manager):
             self.hosts_v3_client = HostsV3ClientJSON(self.auth_provider)
             self.database_flavors_client = DatabaseFlavorsClientJSON(
                 self.auth_provider)
+            self.queuing_client = QueuingClientJSON(self.auth_provider)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientJSON(
                     self.auth_provider)
