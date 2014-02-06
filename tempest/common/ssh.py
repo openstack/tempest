@@ -49,7 +49,7 @@ class Client(object):
         self.channel_timeout = float(channel_timeout)
         self.buf_size = 1024
 
-    def _get_ssh_connection(self, sleep=1.5, backoff=1.01):
+    def _get_ssh_connection(self, sleep=1.5, backoff=1):
         """Returns an ssh connection to the specified host."""
         bsleep = sleep
         ssh = paramiko.SSHClient()
@@ -76,19 +76,21 @@ class Client(object):
                          self.username, self.host)
                 return ssh
             except (socket.error,
-                    paramiko.SSHException):
-                attempts += 1
-                time.sleep(bsleep)
-                bsleep *= backoff
-                if not self._is_timed_out(_start_time):
-                    continue
-                else:
+                    paramiko.SSHException) as e:
+                if self._is_timed_out(_start_time):
                     LOG.exception("Failed to establish authenticated ssh"
                                   " connection to %s@%s after %d attempts",
                                   self.username, self.host, attempts)
                     raise exceptions.SSHTimeout(host=self.host,
                                                 user=self.username,
                                                 password=self.password)
+                bsleep += backoff
+                attempts += 1
+                LOG.warning("Failed to establish authenticated ssh"
+                            " connection to %s@%s (%s). Number attempts: %s."
+                            " Retry after %d seconds.",
+                            self.username, self.host, e, attempts, bsleep)
+                time.sleep(bsleep)
 
     def _is_timed_out(self, start_time):
         return (time.time() - self.timeout) > start_time

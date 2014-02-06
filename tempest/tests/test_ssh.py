@@ -88,15 +88,17 @@ class TestSshClient(base.TestCase):
         client_mock.connect.side_effect = [socket.error, socket.error, True]
         t_mock.side_effect = [
             1000,  # Start time
+            1000,  # LOG.warning() calls time.time() loop 1
             1001,  # Sleep loop 1
+            1001,  # LOG.warning() calls time.time() loop 2
             1002   # Sleep loop 2
         ]
 
         client._get_ssh_connection(sleep=1)
 
         expected_sleeps = [
-            mock.call(1),
-            mock.call(1.01)
+            mock.call(2),
+            mock.call(3)
         ]
         self.assertEqual(expected_sleeps, s_mock.mock_calls)
 
@@ -111,7 +113,9 @@ class TestSshClient(base.TestCase):
         ]
         t_mock.side_effect = [
             1000,  # Start time
+            1000,  # LOG.warning() calls time.time() loop 1
             1001,  # Sleep loop 1
+            1001,  # LOG.warning() calls time.time() loop 2
             1002,  # Sleep loop 2
             1003,  # Sleep loop 3
             1004  # LOG.error() calls time.time()
