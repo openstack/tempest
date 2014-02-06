@@ -62,7 +62,7 @@ class AccountClient(RestClient):
                 url += 'bulk-delete&'
             url = '?%s%s' % (url, urllib.urlencode(params))
 
-        resp, body = self.delete(url, headers=None, body=data)
+        resp, body = self.delete(url, headers={}, body=data)
         return resp, body
 
     def list_account_metadata(self):
