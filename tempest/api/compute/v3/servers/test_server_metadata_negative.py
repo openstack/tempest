@@ -34,6 +34,7 @@ class ServerMetadataV3NegativeTest(base.BaseV3ComputeTest):
 
         cls.server_id = server['id']
 
+    @test.skip_because(bug="1273948")
     @test.attr(type=['gate', 'negative'])
     def test_server_create_metadata_key_too_long(self):
         # Attempt to start a server with a meta-data key that is > 255
@@ -43,7 +44,7 @@ class ServerMetadataV3NegativeTest(base.BaseV3ComputeTest):
         for sz in [256, 257, 511, 1023]:
             key = "k" * sz
             meta = {key: 'data1'}
-            self.assertRaises(exceptions.OverLimit,
+            self.assertRaises(exceptions.BadRequest,
                               self.create_test_server,
                               meta=meta)
 
