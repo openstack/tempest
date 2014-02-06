@@ -24,6 +24,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources(network=True, subnet=True, router=True)
         super(ServerRescueTestJSON, cls).setUpClass()
         cls.device = 'vdf'
 
