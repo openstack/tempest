@@ -405,11 +405,16 @@ class NegativeAutoTest(BaseTestCase):
         schema = description.get("json-schema", None)
         resources = description.get("resources", [])
         scenario_list = []
+        expected_result = None
         for resource in resources:
+            if isinstance(resource, dict):
+                expected_result = resource['expected_result']
+                resource = resource['name']
             LOG.debug("Add resource to test %s" % resource)
             scn_name = "inv_res_%s" % (resource)
             scenario_list.append((scn_name, {"resource": (resource,
-                                                          str(uuid.uuid4()))
+                                                          str(uuid.uuid4())),
+                                             "expected_result": expected_result
                                              }))
         if schema is not None:
             for invalid in generate_json.generate_invalid(schema):
@@ -460,16 +465,12 @@ class NegativeAutoTest(BaseTestCase):
             if schema:
                 valid = generate_json.generate_valid(schema)
             new_url, body = self._http_arguments(valid, url, method)
-            resp, resp_body = self.client.send_request(method, new_url,
-                                                       resources, body=body)
-            self._check_negative_response(resp.status, resp_body)
-            return
-
-        if hasattr(self, "schema"):
+        elif hasattr(self, "schema"):
             new_url, body = self._http_arguments(self.schema, url, method)
-            resp, resp_body = self.client.send_request(method, new_url,
-                                                       resources, body=body)
-            self._check_negative_response(resp.status, resp_body)
+
+        resp, resp_body = self.client.send_request(method, new_url,
+                                                   resources, body=body)
+        self._check_negative_response(resp.status, resp_body)
 
     def _http_arguments(self, json_dict, url, method):
         LOG.debug("dict: %s url: %s method: %s" % (json_dict, url, method))
@@ -510,6 +511,8 @@ class NegativeAutoTest(BaseTestCase):
         :param name: The name of the kind of resource such as "flavor", "role",
             etc.
         """
+        if isinstance(name, dict):
+            name = name['name']
         if hasattr(self, "resource") and self.resource[0] == name:
             LOG.debug("Return invalid resource (%s) value: %s" %
                       (self.resource[0], self.resource[1]))

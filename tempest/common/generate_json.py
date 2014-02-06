@@ -203,36 +203,62 @@ def gen_inv_prop_obj(schema):
     return invalids
 
 
-type_map_valid = {"string": generate_valid_string,
-                  "integer": generate_valid_integer,
-                  "object": generate_valid_object}
+type_map_valid = {
+    "string": generate_valid_string,
+    "integer": generate_valid_integer,
+    "object": generate_valid_object
+}
 
-type_map_invalid = {"string": [gen_int,
-                               gen_none,
-                               gen_str_min_length,
-                               gen_str_max_length],
-                    "integer": [gen_string,
-                                gen_none,
-                                gen_int_min,
-                                gen_int_max],
-                    "object": [gen_obj_remove_attr,
-                               gen_obj_add_attr,
-                               gen_inv_prop_obj]}
+type_map_invalid = {
+    "string": [
+        gen_int,
+        gen_none,
+        gen_str_min_length,
+        gen_str_max_length],
+    "integer": [
+        gen_string,
+        gen_none,
+        gen_int_min,
+        gen_int_max],
+    "object": [
+        gen_obj_remove_attr,
+        gen_obj_add_attr,
+        gen_inv_prop_obj]
+}
 
-schema = {"type": "object",
-          "properties":
-          {"name": {"type": "string"},
-           "http-method": {"enum": ["GET", "PUT", "HEAD",
-                                    "POST", "PATCH", "DELETE", 'COPY']},
-           "url": {"type": "string"},
-           "json-schema": jsonschema._utils.load_schema("draft4"),
-           "resources": {"type": "array", "items": {"type": "string"}},
-           "results": {"type": "object",
-                       "properties": {}}
-           },
-          "required": ["name", "http-method", "url"],
-          "additionalProperties": False,
-          }
+schema = {
+    "type": "object",
+    "properties": {
+        "name": {"type": "string"},
+        "http-method": {
+            "enum": ["GET", "PUT", "HEAD",
+                     "POST", "PATCH", "DELETE", 'COPY']
+        },
+        "url": {"type": "string"},
+        "json-schema": jsonschema._utils.load_schema("draft4"),
+        "resources": {
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {"type": "string"},
+                    {
+                        "type": "object",
+                        "properties": {
+                            "name": {"type": "string"},
+                            "expected_result": {"type": "integer"}
+                        }
+                    }
+                ]
+            }
+        },
+        "results": {
+            "type": "object",
+            "properties": {}
+        }
+    },
+    "required": ["name", "http-method", "url"],
+    "additionalProperties": False,
+}
 
 
 def validate_negative_test_schema(nts):
