@@ -32,10 +32,6 @@ class ContainerClient(RestClient):
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
-    @property
-    def token(self):
-        return self.auth_provider.auth_data[0]
-
     def create_container(
             self, container_name,
             metadata=None,

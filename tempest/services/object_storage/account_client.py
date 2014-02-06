@@ -30,10 +30,6 @@ class AccountClient(RestClient):
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
-    @property
-    def token(self):
-        return self.auth_provider.auth_data[0]
-
     def create_account(self, data=None,
                        params=None,
                        metadata={},
