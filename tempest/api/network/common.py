@@ -126,3 +126,21 @@ class DeletableSecurityGroupRule(DeletableResource):
 
     def delete(self):
         self.client.delete_security_group_rule(self.id)
+
+
+class DeletablePool(DeletableResource):
+
+    def delete(self):
+        self.client.delete_pool(self.id)
+
+
+class DeletableMember(DeletableResource):
+
+    def delete(self):
+        self.client.delete_member(self.id)
+
+
+class DeletableVip(DeletableResource):
+
+    def delete(self):
+        self.client.delete_vip(self.id)
