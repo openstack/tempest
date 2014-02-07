@@ -72,7 +72,7 @@ class Client(object):
                             look_for_keys=self.look_for_keys,
                             key_filename=self.key_filename,
                             timeout=self.channel_timeout, pkey=self.pkey)
-                LOG.info("ssh connection to %s@%s sucessfuly created",
+                LOG.info("ssh connection to %s@%s successfuly created",
                          self.username, self.host)
                 return ssh
             except (socket.error,

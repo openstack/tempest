@@ -147,7 +147,7 @@ class ServersAdminV3Test(base.BaseV3ComputeAdminTest):
         # The server in error state should be rebuilt using the provided
         # image and changed to ACTIVE state
 
-        # resetting vm state require admin priviledge
+        # resetting vm state require admin privilege
         resp, server = self.client.reset_state(self.s1_id, state='error')
         self.assertEqual(202, resp.status)
         resp, rebuilt_server = self.non_admin_client.rebuild(
