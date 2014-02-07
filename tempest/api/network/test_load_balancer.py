@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest import test
 
 
-class LoadBalancerJSON(base.BaseNetworkTest):
+class LoadBalancerTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
     """
@@ -39,7 +39,7 @@ class LoadBalancerJSON(base.BaseNetworkTest):
 
     @classmethod
     def setUpClass(cls):
-        super(LoadBalancerJSON, cls).setUpClass()
+        super(LoadBalancerTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('lbaas', 'network'):
             msg = "lbaas extension not enabled."
             raise cls.skipException(msg)
@@ -210,5 +210,5 @@ class LoadBalancerJSON(base.BaseNetworkTest):
         self.assertEqual('204', resp['status'])
 
 
-class LoadBalancerXML(LoadBalancerJSON):
+class LoadBalancerTestXML(LoadBalancerTestJSON):
     _interface = 'xml'
