@@ -15,8 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ServerRescueTestJSON(base.BaseV2ComputeTest):
@@ -26,7 +25,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         cls.set_network_resources(network=True, subnet=True, router=True)
         super(ServerRescueTestJSON, cls).setUpClass()
-        cls.device = 'vdf'
 
         # Floating IP creation
         resp, body = cls.floating_ips_client.create_floating_ip()
@@ -54,14 +52,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         cls.password = server['adminPass']
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
-        # Server for negative tests
-        cls.rescue_id = resc_server['id']
-        cls.rescue_password = resc_server['adminPass']
-
-        cls.servers_client.rescue_server(
-            cls.rescue_id, adminPass=cls.rescue_password)
-        cls.servers_client.wait_for_server_status(cls.rescue_id, 'RESCUE')
-
     def setUp(self):
         super(ServerRescueTestJSON, self).setUp()
 
@@ -77,22 +67,12 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     def tearDown(self):
         super(ServerRescueTestJSON, self).tearDown()
 
-    def _detach(self, server_id, volume_id):
-        self.servers_client.detach_volume(server_id, volume_id)
-        self.volumes_extensions_client.wait_for_volume_status(volume_id,
-                                                              'available')
-
     def _unrescue(self, server_id):
         resp, body = self.servers_client.unrescue_server(server_id)
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
-    def _unpause(self, server_id):
-        resp, body = self.servers_client.unpause_server(server_id)
-        self.assertEqual(202, resp.status)
-        self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
-
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_rescue_unrescue_instance(self):
         resp, body = self.servers_client.rescue_server(
             self.server_id, adminPass=self.password)
@@ -102,76 +82,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @attr(type=['negative', 'gate'])
-    def test_rescue_paused_instance(self):
-        # Rescue a paused server
-        resp, body = self.servers_client.pause_server(
-            self.server_id)
-        self.addCleanup(self._unpause, self.server_id)
-        self.assertEqual(202, resp.status)
-        self.servers_client.wait_for_server_status(self.server_id, 'PAUSED')
-        self.assertRaises(exceptions.Conflict,
-                          self.servers_client.rescue_server,
-                          self.server_id)
-
-    @attr(type=['negative', 'gate'])
-    def test_rescued_vm_reboot(self):
-        self.assertRaises(exceptions.Conflict, self.servers_client.reboot,
-                          self.rescue_id, 'HARD')
-
-    @attr(type=['negative', 'gate'])
-    def test_rescue_non_existent_server(self):
-        # Rescue a non-existing server
-        self.assertRaises(exceptions.NotFound,
-                          self.servers_client.rescue_server,
-                          '999erra43')
-
-    @attr(type=['negative', 'gate'])
-    def test_rescued_vm_rebuild(self):
-        self.assertRaises(exceptions.Conflict,
-                          self.servers_client.rebuild,
-                          self.rescue_id,
-                          self.image_ref_alt)
-
-    @attr(type=['negative', 'gate'])
-    def test_rescued_vm_attach_volume(self):
-        # Rescue the server
-        self.servers_client.rescue_server(self.server_id,
-                                          adminPass=self.password)
-        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
-        self.addCleanup(self._unrescue, self.server_id)
-
-        # Attach the volume to the server
-        self.assertRaises(exceptions.Conflict,
-                          self.servers_client.attach_volume,
-                          self.server_id,
-                          self.volume['id'],
-                          device='/dev/%s' % self.device)
-
-    @attr(type=['negative', 'gate'])
-    def test_rescued_vm_detach_volume(self):
-        # Attach the volume to the server
-        self.servers_client.attach_volume(self.server_id,
-                                          self.volume['id'],
-                                          device='/dev/%s' % self.device)
-        self.volumes_extensions_client.wait_for_volume_status(
-            self.volume['id'], 'in-use')
-
-        # Rescue the server
-        self.servers_client.rescue_server(self.server_id,
-                                          adminPass=self.password)
-        self.servers_client.wait_for_server_status(self.server_id, 'RESCUE')
-        # addCleanup is a LIFO queue
-        self.addCleanup(self._detach, self.server_id, self.volume['id'])
-        self.addCleanup(self._unrescue, self.server_id)
-
-        # Detach the volume from the server expecting failure
-        self.assertRaises(exceptions.Conflict,
-                          self.servers_client.detach_volume,
-                          self.server_id,
-                          self.volume['id'])
-
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rescued_vm_associate_dissociate_floating_ip(self):
         # Rescue the server
         self.servers_client.rescue_server(
@@ -191,7 +102,7 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
                                                         self.server_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rescued_vm_add_remove_security_group(self):
         # Rescue the server
         self.servers_client.rescue_server(
