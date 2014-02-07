@@ -14,8 +14,6 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.services.volume.json.admin import volume_types_client
-from tempest.services.volume.json import volumes_client
 from tempest.test import attr
 
 CONF = config.CONF
@@ -36,20 +34,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
         cls.backend1_name = CONF.volume.backend1_name
         cls.backend2_name = CONF.volume.backend2_name
 
-        adm_user = CONF.identity.admin_username
-        adm_pass = CONF.identity.admin_password
-        adm_tenant = CONF.identity.admin_tenant_name
-        auth_url = CONF.identity.uri
-
-        cls.volume_client = volumes_client.VolumesClientJSON(adm_user,
-                                                             adm_pass,
-                                                             auth_url,
-                                                             adm_tenant)
-        cls.type_client = volume_types_client.VolumeTypesClientJSON(adm_user,
-                                                                    adm_pass,
-                                                                    auth_url,
-                                                                    adm_tenant)
-
+        cls.volume_client = cls.os_adm.volumes_client
         cls.volume_type_id_list = []
         cls.volume_id_list = []
         try:
@@ -57,7 +42,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
             type1_name = data_utils.rand_name('Type-')
             vol1_name = data_utils.rand_name('Volume-')
             extra_specs1 = {"volume_backend_name": cls.backend1_name}
-            resp, cls.type1 = cls.type_client.create_volume_type(
+            resp, cls.type1 = cls.client.create_volume_type(
                 type1_name, extra_specs=extra_specs1)
             cls.volume_type_id_list.append(cls.type1['id'])
 
@@ -72,7 +57,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
                 type2_name = data_utils.rand_name('Type-')
                 vol2_name = data_utils.rand_name('Volume-')
                 extra_specs2 = {"volume_backend_name": cls.backend2_name}
-                resp, cls.type2 = cls.type_client.create_volume_type(
+                resp, cls.type2 = cls.client.create_volume_type(
                     type2_name, extra_specs=extra_specs2)
                 cls.volume_type_id_list.append(cls.type2['id'])
 
@@ -97,7 +82,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
         # volume types deletion
         volume_type_id_list = getattr(cls, 'volume_type_id_list', [])
         for volume_type_id in volume_type_id_list:
-            cls.type_client.delete_volume_type(volume_type_id)
+            cls.client.delete_volume_type(volume_type_id)
 
         super(VolumeMultiBackendTest, cls).tearDownClass()
 
