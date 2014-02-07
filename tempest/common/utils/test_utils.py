@@ -112,6 +112,8 @@ class InputScenarioUtils(object):
         """
         :return: a scenario with name and uuid of images
         """
+        if not CONF.service_available.glance:
+            return []
         if not hasattr(self, '_scenario_images'):
             images = self.client.images.list(detailed=False)
             self._scenario_images = [
