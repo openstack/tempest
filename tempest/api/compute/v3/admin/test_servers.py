@@ -79,7 +79,7 @@ class ServersAdminV3Test(base.BaseV3ComputeAdminTest):
     @attr(type='gate')
     def test_admin_delete_servers_of_others(self):
         # Administrator can delete servers of others
-        _, server = self.create_test_server()
+        _, server = self.create_test_server(wait_until='ACTIVE')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
         self.servers_client.wait_for_server_termination(server['id'])
