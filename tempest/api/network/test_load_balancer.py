@@ -209,6 +209,17 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                      (self.health_monitor['id'], self.pool['id']))
         self.assertEqual('204', resp['status'])
 
+    @test.attr(type='smoke')
+    def test_get_lb_pool_stats(self):
+        # Verify the details of pool stats
+        resp, body = self.client.list_lb_pool_stats(self.pool['id'])
+        self.assertEqual('200', resp['status'])
+        stats = body['stats']
+        self.assertIn("bytes_in", stats)
+        self.assertIn("total_connections", stats)
+        self.assertIn("active_connections", stats)
+        self.assertIn("bytes_out", stats)
+
 
 class LoadBalancerTestXML(LoadBalancerTestJSON):
     _interface = 'xml'

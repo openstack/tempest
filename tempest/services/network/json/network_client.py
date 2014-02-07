@@ -417,3 +417,9 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         resp, body = self.put(uri, body)
         body = json.loads(body)
         return resp, body
+
+    def list_lb_pool_stats(self, pool_id):
+        uri = '%s/lb/pools/%s/stats' % (self.uri_prefix, pool_id)
+        resp, body = self.get(uri)
+        body = json.loads(body)
+        return resp, body

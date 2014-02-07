@@ -321,6 +321,12 @@ class NetworkClientXML(client_base.NetworkClientBase):
         resp, body = self.delete(uri)
         return resp, body
 
+    def list_lb_pool_stats(self, pool_id):
+        uri = '%s/lb/pools/%s/stats' % (self.uri_prefix, pool_id)
+        resp, body = self.get(uri)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
