@@ -54,7 +54,7 @@ while [ $# -gt 0 ]; do
     -c|--coverage) coverage=1;;
     -t|--serial) serial=1;;
     --) [ "yes" == "$first_uu" ] || testrargs="$testrargs $1"; first_uu=no  ;;
-    *) testrargs="$testrargs $1"; noseargs+=" $1" ;;
+    *) testrargs="$testrargs $1";;
   esac
   shift
 done

@@ -53,12 +53,12 @@ while [ $# -gt 0 ]; do
     -u|--update) update=1;;
     -d|--debug) debug=1;;
     -C|--config) config_file=$2; shift;;
-    -s|--smoke) testrargs+="smoke"; noseargs+="--attr=type=smoke";;
+    -s|--smoke) testrargs+="smoke";;
     -t|--serial) serial=1;;
     -l|--logging) logging=1;;
     -L|--logging-config) logging_config=$2; shift;;
     --) [ "yes" == "$first_uu" ] || testrargs="$testrargs $1"; first_uu=no  ;;
-    *) testrargs="$testrargs $1"; noseargs+=" $1" ;;
+    *) testrargs+="$testrargs $1";;
   esac
   shift
 done
@@ -110,22 +110,6 @@ function run_tests {
   fi
 }
 
-function run_tests_nose {
-    export NOSE_WITH_OPENSTACK=1
-    export NOSE_OPENSTACK_COLOR=1
-    export NOSE_OPENSTACK_RED=15.00
-    export NOSE_OPENSTACK_YELLOW=3.00
-    export NOSE_OPENSTACK_SHOW_ELAPSED=1
-    export NOSE_OPENSTACK_STDOUT=1
-    export TEMPEST_PY26_NOSE_COMPAT=1
-    if [[ "x$noseargs" =~ "tempest" ]]; then
-        noseargs="$testrargs"
-    else
-        noseargs="$noseargs tempest"
-    fi
-    ${wrapper} nosetests $noseargs
-}
-
 if [ $never_venv -eq 0 ]
 then
   # Remove the virtual environment if --force used
@@ -156,12 +140,7 @@ then
   fi
 fi
 
-py_version=`${wrapper} python --version 2>&1`
-if [[ $py_version =~ "2.6" ]] ; then
-    run_tests_nose
-else
-    run_tests
-fi
+run_tests
 retval=$?
 
 exit $retval

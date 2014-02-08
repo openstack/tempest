@@ -1,6 +1,5 @@
 pbr>=0.5.21,<1.0
 anyjson>=0.3.3
-nose
 httplib2>=0.7.5
 jsonschema>=2.0.0,<3.0.0
 testtools>=0.9.34
