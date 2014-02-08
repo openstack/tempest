@@ -130,6 +130,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
     def ssh_to_server(self):
         try:
             self.linux_client = self.get_remote_client(self.floating_ip.ip)
+            self.linux_client.validate_authentication()
         except Exception:
             LOG.exception('ssh to server failed')
             self._log_console_output()
@@ -160,10 +161,11 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self.nova_volume_attach()
         self.addCleanup(self.nova_volume_detach)
         self.cinder_show()
-        self.nova_reboot()
 
         self.nova_floating_ip_create()
         self.nova_floating_ip_add()
         self._create_loginable_secgroup_rule_nova()
+        self.ssh_to_server()
+        self.nova_reboot()
         self.ssh_to_server()
         self.check_partitions()
