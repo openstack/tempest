@@ -47,7 +47,7 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
                                          interface=cls._interface)
         else:
             cls.os_alt = clients.AltManager()
-            alt_tenant_name = cls.os_alt.tenant_name
+            alt_tenant_name = cls.os_alt.credentials['tenant_name']
             identity_client = cls._get_identity_admin_client()
             _, tenants = identity_client.list_tenants()
             cls.alt_tenant_id = [tnt['id'] for tnt in tenants
