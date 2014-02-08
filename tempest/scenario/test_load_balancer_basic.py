@@ -214,7 +214,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             resp.append(
                 urllib.urlopen(
                     "http://{0}/".format(floating_ip_vip)).read())
-        self.assertEqual({"server1\n", "server2\n"}, set(resp))
+        self.assertEqual(set(["server1\n", "server2\n"]), set(resp))
         self.assertEqual(5, resp.count("server1\n"))
         self.assertEqual(5, resp.count("server2\n"))
 
