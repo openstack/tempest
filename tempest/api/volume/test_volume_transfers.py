@@ -107,10 +107,14 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
         self.client.wait_for_volume_status(volume['id'],
                                            'awaiting-transfer')
 
-        # List all volume transfers, there's only one in this test
+        # List all volume transfers (looking for the one we created)
         resp, body = self.client.list_volume_transfers()
         self.assertEqual(200, resp.status)
-        self.assertEqual(volume['id'], body[0]['volume_id'])
+        for transfer in body:
+            if volume['id'] == transfer['volume_id']:
+                break
+        else:
+            self.fail('Transfer not found for volume %s' % volume['id'])
 
         # Delete a volume transfer
         resp, body = self.client.delete_volume_transfer(transfer_id)
