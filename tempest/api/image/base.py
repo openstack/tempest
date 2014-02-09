@@ -106,7 +106,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
             cls.os_alt = clients.AltManager()
             identity_client = cls._get_identity_admin_client()
             cls.alt_tenant_id = identity_client.get_tenant_by_name(
-                cls.os_alt.tenant_name)['id']
+                cls.os_alt.credentials['tenant_name'])['id']
 
         cls.alt_img_cli = cls.os_alt.image_client
 
@@ -147,7 +147,7 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
             cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
         else:
             cls.os_alt = clients.AltManager()
-            alt_tenant_name = cls.os_alt.tenant_name
+            alt_tenant_name = cls.os_alt.credentials['tenant_name']
             identity_client = cls._get_identity_admin_client()
             cls.alt_tenant_id = identity_client.get_tenant_by_name(
                 alt_tenant_name)['id']
