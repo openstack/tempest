@@ -68,10 +68,10 @@ class AuthProvider(object):
         """
         Decorate request with authentication data
         """
-        raise NotImplemented
+        raise NotImplementedError
 
     def _get_auth(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     @classmethod
     def check_credentials(cls, credentials):
@@ -98,7 +98,7 @@ class AuthProvider(object):
         self.cache = None
 
     def is_expired(self, auth_data):
-        raise NotImplemented
+        raise NotImplementedError
 
     def auth_request(self, method, url, headers=None, body=None, filters=None):
         """
@@ -176,7 +176,7 @@ class AuthProvider(object):
         """
         Extracts the base_url based on provided filters
         """
-        raise NotImplemented
+        raise NotImplementedError
 
 
 class KeystoneAuthProvider(AuthProvider):
@@ -208,10 +208,10 @@ class KeystoneAuthProvider(AuthProvider):
         return _url, _headers, body
 
     def _auth_client(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def _auth_params(self):
-        raise NotImplemented
+        raise NotImplementedError
 
     def _get_auth(self):
         # Bypasses the cache
@@ -223,7 +223,7 @@ class KeystoneAuthProvider(AuthProvider):
             token, auth_data = auth_func(**auth_params)
             return token, auth_data
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def get_token(self):
         return self.auth_data[0]
@@ -250,7 +250,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
             else:
                 return xml_id.TokenClientXML()
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _auth_params(self):
         if self.client_type == 'tempest':
@@ -260,7 +260,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
                 tenant=self.credentials.get('tenant_name', None),
                 auth_data=True)
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def base_url(self, filters, auth_data=None):
         """
@@ -334,7 +334,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             else:
                 return xml_v3id.V3TokenClientXML()
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def _auth_params(self):
         if self.client_type == 'tempest':
@@ -345,7 +345,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
                 domain=self.credentials['domain_name'],
                 auth_data=True)
         else:
-            raise NotImplemented
+            raise NotImplementedError
 
     def base_url(self, filters, auth_data=None):
         """
