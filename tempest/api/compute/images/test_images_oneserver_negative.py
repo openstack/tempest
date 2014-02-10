@@ -15,13 +15,11 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 CONF = config.CONF
 
@@ -73,20 +71,8 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
 
         cls.image_ids = []
 
-        if cls.multi_user:
-            if CONF.compute.allow_tenant_isolation:
-                creds = cls.isolated_creds.get_alt_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.images_client
-
-    @skip_because(bug="1006725")
-    @attr(type=['negative', 'gate'])
+    @test.skip_because(bug="1006725")
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         if self.__class__._interface == "xml":
             raise self.skipException("Not testable in XML")
@@ -98,7 +84,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.create_image, self.server_id,
                           invalid_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_invalid_metadata(self):
         # Return an error when creating image with invalid metadata
         snapshot_name = data_utils.rand_name('test-snap-')
@@ -106,7 +92,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_metadata_over_limits(self):
         # Return an error when creating image with meta data over 256 chars
         snapshot_name = data_utils.rand_name('test-snap-')
@@ -114,7 +100,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name, meta)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_second_image_when_first_image_is_being_saved(self):
         # Disallow creating another image when first image is being saved
 
@@ -132,7 +118,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.Conflict, self.client.create_image,
                           self.server_id, alt_snapshot_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_image_specify_name_over_256_chars(self):
         # Return an error if snapshot name over 256 characters is passed
 
@@ -140,7 +126,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           self.server_id, snapshot_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_image_that_is_not_yet_active(self):
         # Return an error while trying to delete an image what is creating
 

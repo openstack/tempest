@@ -16,7 +16,7 @@
 from tempest.api.compute import base
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -33,7 +33,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
         cls.client = cls.images_client
-        cls.image_ids = []
 
         try:
             resp, cls.server1 = cls.create_test_server()
@@ -63,7 +62,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             cls.tearDownClass()
             raise
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_filter_by_status(self):
         # The list of images should contain only images with the
         # provided status
@@ -74,7 +73,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_filter_by_name(self):
         # List of all images should contain the expected images filtered
         # by name
@@ -85,7 +84,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_filter_by_server_id(self):
         # The images should contain images filtered by server id
         params = {'server': self.server1['id']}
@@ -97,7 +96,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_filter_by_server_ref(self):
         # The list of servers should be filtered by server ref
         server_links = self.server2['links']
@@ -114,7 +113,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.image3_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_filter_by_type(self):
         # The list of servers should be filtered by image type
         params = {'type': 'snapshot'}
@@ -125,7 +124,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image_ref]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_limit_results(self):
         # Verify only the expected number of results are returned
         params = {'limit': '1'}
@@ -134,7 +133,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         # ref: Question #224349
         self.assertEqual(1, len([x for x in images if 'id' in x]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_filter_by_changes_since(self):
         # Verify only updated images are returned in the detailed list
 
@@ -145,7 +144,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         found = any([i for i in images if i['id'] == self.image3_id])
         self.assertTrue(found)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_status(self):
         # Detailed list of all images should only contain images
         # with the provided status
@@ -156,7 +155,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image2_id]))
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_name(self):
         # Detailed list of all images should contain the expected
         # images filtered by name
@@ -167,7 +166,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_with_detail_limit_results(self):
         # Verify only the expected number of results (with full details)
         # are returned
@@ -175,7 +174,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         resp, images = self.client.list_images_with_detail(params)
         self.assertEqual(1, len(images))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_server_ref(self):
         # Detailed list of servers should be filtered by server ref
         server_links = self.server2['links']
@@ -192,7 +191,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.image3_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_type(self):
         # The detailed list of servers should be filtered by image type
         params = {'type': 'snapshot'}
@@ -204,7 +203,7 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(any([i for i in images if i['id'] == self.image3_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image_ref]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_changes_since(self):
         # Verify an update image is returned
 
