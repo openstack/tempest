@@ -110,9 +110,6 @@ class AuthProvider(object):
         :param filters: select a base URL out of the catalog
         :returns a Tuple (url, headers, body)
         """
-        LOG.debug("Auth request m:{m}, u:{u}, h:{h}, b:{b}, f:{f}".format(
-            m=method, u=url, h=headers, b=body, f=filters
-        ))
         orig_req = dict(url=url, headers=headers, body=body)
 
         auth_url, auth_headers, auth_body = self._decorate_request(
@@ -127,7 +124,6 @@ class AuthProvider(object):
                     auth_data=self.alt_auth_data)
                 alt_auth_req = dict(url=alt_url, headers=alt_headers,
                                     body=alt_body)
-                self._log_auth_request(alt_auth_req, 'ALTERNATE')
                 auth_req[self.alt_part] = alt_auth_req[self.alt_part]
 
             else:
@@ -137,20 +133,7 @@ class AuthProvider(object):
             # Next auth request will be normal, unless otherwise requested
             self.reset_alt_auth_data()
 
-        self._log_auth_request(auth_req, 'Authorized Request:')
-
         return auth_req['url'], auth_req['headers'], auth_req['body']
-
-    def _log_auth_request(self, auth_req, tag):
-        url = auth_req.get('url', None)
-        headers = copy.deepcopy(auth_req.get('headers', None))
-        body = auth_req.get('body', None)
-        if headers is not None:
-            if 'X-Auth-Token' in headers.keys():
-                headers['X-Auth-Token'] = '<Token Omitted>'
-        LOG.debug("[{tag}]: u: {url}, h: {headers}, b: {body}".format(
-            tag=tag, url=url, headers=headers, body=body
-        ))
 
     def reset_alt_auth_data(self):
         """
