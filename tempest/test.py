@@ -17,6 +17,7 @@ import atexit
 import functools
 import json
 import os
+import sys
 import time
 import urllib
 import uuid
@@ -241,10 +242,23 @@ def validate_tearDownClass():
 
 atexit.register(validate_tearDownClass)
 
-
-class BaseTestCase(testtools.TestCase,
+if sys.version_info >= (2, 7):
+    class BaseDeps(testtools.TestCase,
                    testtools.testcase.WithAttributes,
                    testresources.ResourcedTestCase):
+        pass
+else:
+    # Define asserts for py26
+    import unittest2
+
+    class BaseDeps(testtools.TestCase,
+                   testtools.testcase.WithAttributes,
+                   testresources.ResourcedTestCase,
+                   unittest2.TestCase):
+        pass
+
+
+class BaseTestCase(BaseDeps):
 
     setUpClassCalled = False
     _service = None
