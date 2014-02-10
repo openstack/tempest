@@ -77,3 +77,17 @@ class DataProcessingClient(rest_client.RestClient):
 
         uri = "node-group-templates/%s" % tmpl_id
         return self.delete(uri)
+
+    def list_plugins(self):
+        """List all enabled plugins."""
+
+        uri = 'plugins'
+        return self._request_and_parse(self.get, uri, 'plugins')
+
+    def get_plugin(self, plugin_name, plugin_version=None):
+        """Returns the details of a single plugin."""
+
+        uri = "plugins/%s" % plugin_name
+        if plugin_version:
+            uri += '/%s' % plugin_version
+        return self._request_and_parse(self.get, uri, 'plugin')
