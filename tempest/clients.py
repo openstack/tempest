@@ -63,8 +63,6 @@ from tempest.services.compute.v3.json.flavors_client import FlavorsV3ClientJSON
 from tempest.services.compute.v3.json.hosts_client import HostsV3ClientJSON
 from tempest.services.compute.v3.json.hypervisor_client import \
     HypervisorV3ClientJSON
-from tempest.services.compute.v3.json.instance_usage_audit_log_client import \
-    InstanceUsagesAuditLogV3ClientJSON
 from tempest.services.compute.v3.json.interfaces_client import \
     InterfacesV3ClientJSON
 from tempest.services.compute.v3.json.keypairs_client import \
@@ -321,8 +319,6 @@ class Manager(object):
                 auth_provider)
             self.instance_usages_audit_log_client = \
                 InstanceUsagesAuditLogClientJSON(auth_provider)
-            self.instance_usages_audit_log_v3_client = \
-                InstanceUsagesAuditLogV3ClientJSON(auth_provider)
             self.volume_hosts_client = VolumeHostsClientJSON(
                 auth_provider)
             self.volumes_extension_client = VolumeExtensionClientJSON(
