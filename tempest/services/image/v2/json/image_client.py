@@ -30,7 +30,7 @@ class ImageClientV2JSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(ImageClientV2JSON, self).__init__(auth_provider)
-        self.service = CONF.images.catalog_type
+        self.service = CONF.image.catalog_type
         self._http = None
 
     def _get_http(self):

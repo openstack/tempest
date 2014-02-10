@@ -71,7 +71,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         resp, body = self.create_image(name='New Http Image',
                                        container_format='bare',
                                        disk_format='raw', is_public=True,
-                                       copy_from=CONF.images.http_image)
+                                       copy_from=CONF.image.http_image)
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertEqual('New Http Image', body.get('name'))
