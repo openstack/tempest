@@ -112,7 +112,7 @@ class OfficialClientManager(tempest.manager.Manager):
         region = CONF.identity.region
         endpoint = self.identity_client.service_catalog.url_for(
             attr='region', filter_value=region,
-            service_type='image', endpoint_type='publicURL')
+            service_type=CONF.images.catalog_type, endpoint_type='publicURL')
         dscv = CONF.identity.disable_ssl_certificate_validation
         return glanceclient.Client('1', endpoint=endpoint, token=token,
                                    insecure=dscv)
@@ -167,11 +167,12 @@ class OfficialClientManager(tempest.manager.Manager):
         keystone = self._get_identity_client(username, password, tenant_name)
         region = CONF.identity.region
         token = keystone.auth_token
+        service_type = CONF.orchestration.catalog_type
         try:
             endpoint = keystone.service_catalog.url_for(
                 attr='region',
                 filter_value=region,
-                service_type='orchestration',
+                service_type=service_type,
                 endpoint_type='publicURL')
         except keystoneclient.exceptions.EndpointNotFound:
             return None
