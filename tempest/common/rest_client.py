@@ -108,6 +108,10 @@ class RestClient(object):
         return self.auth_provider.base_url(filters=self.filters)
 
     @property
+    def token(self):
+        return self.auth_provider.get_token()
+
+    @property
     def filters(self):
         _filters = dict(
             service=self.service,

@@ -398,8 +398,7 @@
 #uri_v3=<None>
 
 # Identity API version to be used for authentication for API
-# tests. Planned to extend to tenant isolation, scenario tests
-# and CLI tests. (string value)
+# tests. (string value)
 #auth_version=v2
 
 # The identity region name to use. Also used as the other

@@ -207,7 +207,7 @@ class UsersNegativeTestJSON(base.BaseIdentityAdminTest):
     @attr(type=['negative', 'gate'])
     def test_get_users_request_without_token(self):
         # Request to get list of users without a valid token should fail
-        token = self.client.auth_provider.auth_data[0]
+        token = self.client.auth_provider.get_token()
         self.client.delete_token(token)
         self.assertRaises(exceptions.Unauthorized, self.client.get_users)
         self.client.auth_provider.clear_auth()
