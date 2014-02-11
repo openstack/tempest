@@ -42,7 +42,12 @@ def verify_glance_api_versions(os):
 def verify_nova_api_versions(os):
     # Check nova api versions - only get base URL without PATH
     os.servers_client.skip_path = True
-    __, body = RAW_HTTP.request(os.servers_client.base_url, 'GET')
+    # The nova base endpoint url includes the version but to get the versions
+    # list the unversioned endpoint is needed
+    v2_endpoint = os.servers_client.base_url
+    v2_endpoint_parts = v2_endpoint.split('/')
+    endpoint = v2_endpoint_parts[0] + '//' + v2_endpoint_parts[2]
+    __, body = RAW_HTTP.request(endpoint, 'GET')
     body = json.loads(body)
     # Restore full base_url
     os.servers_client.skip_path = False
