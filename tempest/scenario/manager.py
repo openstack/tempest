@@ -112,7 +112,7 @@ class OfficialClientManager(tempest.manager.Manager):
         region = CONF.identity.region
         endpoint = self.identity_client.service_catalog.url_for(
             attr='region', filter_value=region,
-            service_type=CONF.images.catalog_type, endpoint_type='publicURL')
+            service_type=CONF.image.catalog_type, endpoint_type='publicURL')
         dscv = CONF.identity.disable_ssl_certificate_validation
         return glanceclient.Client('1', endpoint=endpoint, token=token,
                                    insecure=dscv)

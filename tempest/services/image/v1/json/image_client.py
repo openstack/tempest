@@ -35,7 +35,7 @@ class ImageClientJSON(RestClient):
 
     def __init__(self, auth_provider):
         super(ImageClientJSON, self).__init__(auth_provider)
-        self.service = CONF.images.catalog_type
+        self.service = CONF.image.catalog_type
         self._http = None
 
     def _image_meta_from_headers(self, headers):
