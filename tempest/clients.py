@@ -445,6 +445,6 @@ class OrchestrationManager(Manager):
         base = super(OrchestrationManager, self)
         base.__init__(CONF.identity.admin_username,
                       CONF.identity.admin_password,
-                      CONF.identity.tenant_name,
+                      CONF.identity.admin_tenant_name,
                       interface=interface,
                       service=service)
