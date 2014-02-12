@@ -28,7 +28,7 @@ import yaml
 is_neutron = os.environ.get('DEVSTACK_GATE_NEUTRON', "0") == "1"
 is_grenade = (os.environ.get('DEVSTACK_GATE_GRENADE', "0") == "1" or
               os.environ.get('DEVSTACK_GATE_GRENADE_FORWARD', "0") == "1")
-dump_all_errors = is_neutron
+dump_all_errors = True
 
 
 def process_files(file_specs, url_specs, whitelists):
@@ -69,6 +69,7 @@ def scan_content(name, content, regexp, whitelist):
                     print_log_name = False
                 if not whitelisted:
                     had_errors = True
+                    print("*** Not Whitelisted ***"),
                 print(line)
     return had_errors
 
