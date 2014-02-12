@@ -70,16 +70,35 @@ def services(*args, **kwargs):
     This decorator applies a testtools attr for each service that gets
     exercised by a test case.
     """
-    valid_service_list = ['compute', 'image', 'volume', 'orchestration',
-                          'network', 'identity', 'object_storage', 'dashboard']
+    service_list = {
+        'compute': CONF.service_available.nova,
+        'image': CONF.service_available.glance,
+        'volume': CONF.service_available.cinder,
+        'orchestration': CONF.service_available.heat,
+        # NOTE(mtreinish) nova-network will provide networking functionality
+        # if neutron isn't available, so always set to True.
+        'network': True,
+        'identity': True,
+        'object_storage': CONF.service_available.swift,
+        'dashboard': CONF.service_available.horizon,
+    }
 
     def decorator(f):
         for service in args:
-            if service not in valid_service_list:
+            if service not in service_list:
                 raise exceptions.InvalidServiceTag('%s is not a valid service'
                                                    % service)
         attr(type=list(args))(f)
-        return f
+
+        @functools.wraps(f)
+        def wrapper(self, *func_args, **func_kwargs):
+            for service in args:
+                if not service_list[service]:
+                    msg = 'Skipped because the %s service is not available' % (
+                        service)
+                    raise testtools.TestCase.skipException(msg)
+            return f(self, *func_args, **func_kwargs)
+        return wrapper
     return decorator
 
 
