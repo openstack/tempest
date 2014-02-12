@@ -181,7 +181,7 @@ class ContainerClient(RestClient):
             url += '?'
             url += '&%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url)
+        resp, body = self.get(url, headers={})
         if params and params.get('format') == 'json':
             body = json.loads(body)
         elif params and params.get('format') == 'xml':

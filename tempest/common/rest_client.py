@@ -38,7 +38,21 @@ HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
 
 
 class RestClient(object):
+
     TYPE = "json"
+
+    # This is used by _parse_resp method
+    # Redefine it for purposes of your xml service client
+    # List should contain top-xml_tag-names of data, which is like list/array
+    # For example, in keystone it is users, roles, tenants and services
+    # All of it has children with same tag-names
+    list_tags = []
+
+    # This is used by _parse_resp method too
+    # Used for selection of dict-like xmls,
+    # like metadata for Vms in nova, and volumes in cinder
+    dict_tags = ["metadata", ]
+
     LOG = logging.getLogger(__name__)
 
     def __init__(self, auth_provider):
@@ -49,6 +63,9 @@ class RestClient(object):
         # The version of the API this client implements
         self.api_version = None
         self._skip_path = False
+        # NOTE(vponomaryov): self.headers is deprecated now.
+        # should be removed after excluding it from all use places.
+        # Insted of this should be used 'get_headers' method
         self.headers = {'Content-Type': 'application/%s' % self.TYPE,
                         'Accept': 'application/%s' % self.TYPE}
         self.build_interval = CONF.compute.build_interval
@@ -65,6 +82,19 @@ class RestClient(object):
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
 
+    def _get_type(self):
+        return self.TYPE
+
+    def get_headers(self, accept_type=None, send_type=None):
+        # This method should be used instead of
+        # deprecated 'self.headers'
+        if accept_type is None:
+            accept_type = self._get_type()
+        if send_type is None:
+            send_type = self._get_type()
+        return {'Content-Type': 'application/%s' % send_type,
+                'Accept': 'application/%s' % accept_type}
+
     def __str__(self):
         STRING_LIMIT = 80
         str_format = ("config:%s, service:%s, base_url:%s, "
@@ -74,7 +104,7 @@ class RestClient(object):
                              self.filters, self.build_interval,
                              self.build_timeout,
                              str(self.token)[0:STRING_LIMIT],
-                             str(self.headers)[0:STRING_LIMIT])
+                             str(self.get_headers())[0:STRING_LIMIT])
 
     def _get_region(self, service):
         """
@@ -150,7 +180,7 @@ class RestClient(object):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 
-    def post(self, url, body, headers):
+    def post(self, url, body, headers=None):
         return self.request('POST', url, headers, body)
 
     def get(self, url, headers=None):
@@ -159,10 +189,10 @@ class RestClient(object):
     def delete(self, url, headers=None, body=None):
         return self.request('DELETE', url, headers, body)
 
-    def patch(self, url, body, headers):
+    def patch(self, url, body, headers=None):
         return self.request('PATCH', url, headers, body)
 
-    def put(self, url, body, headers):
+    def put(self, url, body, headers=None):
         return self.request('PUT', url, headers, body)
 
     def head(self, url, headers=None):
@@ -218,7 +248,48 @@ class RestClient(object):
                                hashlib.md5(str_body).hexdigest())
 
     def _parse_resp(self, body):
-        return json.loads(body)
+        if self._get_type() is "json":
+            body = json.loads(body)
+
+            # We assume, that if the first value of the deserialized body's
+            # item set is a dict or a list, that we just return the first value
+            # of deserialized body.
+            # Essentially "cutting out" the first placeholder element in a body
+            # that looks like this:
+            #
+            #  {
+            #    "users": [
+            #      ...
+            #    ]
+            #  }
+            try:
+                # Ensure there are not more than one top-level keys
+                if len(body.keys()) > 1:
+                    return body
+                # Just return the "wrapped" element
+                first_key, first_item = body.items()[0]
+                if isinstance(first_item, (dict, list)):
+                    return first_item
+            except (ValueError, IndexError):
+                pass
+            return body
+        elif self._get_type() is "xml":
+            element = etree.fromstring(body)
+            if any(s in element.tag for s in self.dict_tags):
+                # Parse dictionary-like xmls (metadata, etc)
+                dictionary = {}
+                for el in element.getchildren():
+                    dictionary[u"%s" % el.get("key")] = u"%s" % el.text
+                return dictionary
+            if any(s in element.tag for s in self.list_tags):
+                # Parse list-like xmls (users, roles, etc)
+                array = []
+                for child in element.getchildren():
+                    array.append(xml_to_json(child))
+                return array
+
+            # Parse one-item-like xmls (user, role, etc)
+            return xml_to_json(element)
 
     def response_checker(self, method, url, headers, body, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
@@ -248,8 +319,7 @@ class RestClient(object):
         if not resp_body and resp.status >= 400:
             self.LOG.warning("status >= 400 response with empty body")
 
-    def _request(self, method, url,
-                 headers=None, body=None):
+    def _request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
         # Authenticate the request with the auth provider
         req_url, req_headers, req_body = self.auth_provider.auth_request(
@@ -265,12 +335,13 @@ class RestClient(object):
 
         return resp, resp_body
 
-    def request(self, method, url,
-                headers=None, body=None):
+    def request(self, method, url, headers=None, body=None):
         retry = 0
 
         if headers is None:
-            headers = {}
+            # NOTE(vponomaryov): if some client do not need headers,
+            # it should explicitly pass empty dict
+            headers = self.get_headers()
 
         resp, resp_body = self._request(method, url,
                                         headers=headers, body=body)
@@ -390,10 +461,13 @@ class RestClient(object):
         if (not isinstance(resp_body, collections.Mapping) or
                 'retry-after' not in resp):
             return True
-        over_limit = resp_body.get('overLimit', None)
-        if not over_limit:
-            return True
-        return 'exceed' in over_limit.get('message', 'blabla')
+        if self._get_type() is "json":
+            over_limit = resp_body.get('overLimit', None)
+            if not over_limit:
+                return True
+            return 'exceed' in over_limit.get('message', 'blabla')
+        elif self._get_type() is "xml":
+            return 'exceed' in resp_body.get('message', 'blabla')
 
     def wait_for_resource_deletion(self, id):
         """Waits for a resource to be deleted."""
@@ -415,6 +489,11 @@ class RestClient(object):
 
 
 class RestClientXML(RestClient):
+
+    # NOTE(vponomaryov): This is deprecated class
+    # and should be removed after excluding it
+    # from all service clients
+
     TYPE = "xml"
 
     def _parse_resp(self, body):
@@ -440,11 +519,11 @@ class NegativeRestClient(RestClient):
         if method == "GET":
             resp, body = self.get(url)
         elif method == "POST":
-            resp, body = self.post(url, body, self.headers)
+            resp, body = self.post(url, body)
         elif method == "PUT":
-            resp, body = self.put(url, body, self.headers)
+            resp, body = self.put(url, body)
         elif method == "PATCH":
-            resp, body = self.patch(url, body, self.headers)
+            resp, body = self.patch(url, body)
         elif method == "HEAD":
             resp, body = self.head(url)
         elif method == "DELETE":

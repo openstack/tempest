@@ -13,11 +13,13 @@
 #    under the License.
 
 import httplib2
+import json
 
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
+from tempest.services.compute.xml import common as xml
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
@@ -25,6 +27,8 @@ from tempest.tests import fake_http
 
 
 class BaseRestClientTestClass(base.TestCase):
+
+    url = 'fake_endpoint'
 
     def _get_region(self):
         return 'fake region'
@@ -49,36 +53,33 @@ class TestRestClientHTTPMethods(BaseRestClientTestClass):
                                               '_error_checker'))
 
     def test_post(self):
-        __, return_dict = self.rest_client.post('fake_endpoint', {},
-                                                {})
+        __, return_dict = self.rest_client.post(self.url, {}, {})
         self.assertEqual('POST', return_dict['method'])
 
     def test_get(self):
-        __, return_dict = self.rest_client.get('fake_endpoint')
+        __, return_dict = self.rest_client.get(self.url)
         self.assertEqual('GET', return_dict['method'])
 
     def test_delete(self):
-        __, return_dict = self.rest_client.delete('fake_endpoint')
+        __, return_dict = self.rest_client.delete(self.url)
         self.assertEqual('DELETE', return_dict['method'])
 
     def test_patch(self):
-        __, return_dict = self.rest_client.patch('fake_endpoint', {},
-                                                 {})
+        __, return_dict = self.rest_client.patch(self.url, {}, {})
         self.assertEqual('PATCH', return_dict['method'])
 
     def test_put(self):
-        __, return_dict = self.rest_client.put('fake_endpoint', {},
-                                               {})
+        __, return_dict = self.rest_client.put(self.url, {}, {})
         self.assertEqual('PUT', return_dict['method'])
 
     def test_head(self):
         self.useFixture(mockpatch.PatchObject(self.rest_client,
                                               'response_checker'))
-        __, return_dict = self.rest_client.head('fake_endpoint')
+        __, return_dict = self.rest_client.head(self.url)
         self.assertEqual('HEAD', return_dict['method'])
 
     def test_copy(self):
-        __, return_dict = self.rest_client.copy('fake_endpoint')
+        __, return_dict = self.rest_client.copy(self.url)
         self.assertEqual('COPY', return_dict['method'])
 
 
@@ -89,4 +90,143 @@ class TestRestClientNotFoundHandling(BaseRestClientTestClass):
 
     def test_post(self):
         self.assertRaises(exceptions.NotFound, self.rest_client.post,
-                          'fake_endpoint', {}, {})
+                          self.url, {}, {})
+
+
+class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
+    TYPE = "json"
+
+    def _verify_headers(self, resp):
+        self.assertEqual(self.rest_client._get_type(), self.TYPE)
+        resp = dict((k.lower(), v) for k, v in resp.iteritems())
+        self.assertEqual(self.header_value, resp['accept'])
+        self.assertEqual(self.header_value, resp['content-type'])
+
+    def setUp(self):
+        super(TestRestClientHeadersJSON, self).setUp()
+        self.rest_client.TYPE = self.TYPE
+        self.header_value = 'application/%s' % self.rest_client._get_type()
+
+    def test_post(self):
+        resp, __ = self.rest_client.post(self.url, {})
+        self._verify_headers(resp)
+
+    def test_get(self):
+        resp, __ = self.rest_client.get(self.url)
+        self._verify_headers(resp)
+
+    def test_delete(self):
+        resp, __ = self.rest_client.delete(self.url)
+        self._verify_headers(resp)
+
+    def test_patch(self):
+        resp, __ = self.rest_client.patch(self.url, {})
+        self._verify_headers(resp)
+
+    def test_put(self):
+        resp, __ = self.rest_client.put(self.url, {})
+        self._verify_headers(resp)
+
+    def test_head(self):
+        self.useFixture(mockpatch.PatchObject(self.rest_client,
+                                              'response_checker'))
+        resp, __ = self.rest_client.head(self.url)
+        self._verify_headers(resp)
+
+    def test_copy(self):
+        resp, __ = self.rest_client.copy(self.url)
+        self._verify_headers(resp)
+
+
+class TestRestClientHeadersXML(TestRestClientHeadersJSON):
+    TYPE = "xml"
+
+    # These two tests are needed in one exemplar
+    def test_send_json_accept_xml(self):
+        resp, __ = self.rest_client.get(self.url,
+                                        self.rest_client.get_headers("xml",
+                                                                     "json"))
+        resp = dict((k.lower(), v) for k, v in resp.iteritems())
+        self.assertEqual("application/json", resp["content-type"])
+        self.assertEqual("application/xml", resp["accept"])
+
+    def test_send_xml_accept_json(self):
+        resp, __ = self.rest_client.get(self.url,
+                                        self.rest_client.get_headers("json",
+                                                                     "xml"))
+        resp = dict((k.lower(), v) for k, v in resp.iteritems())
+        self.assertEqual("application/json", resp["accept"])
+        self.assertEqual("application/xml", resp["content-type"])
+
+
+class TestRestClientParseRespXML(BaseRestClientTestClass):
+    TYPE = "xml"
+
+    keys = ["fake_key1", "fake_key2"]
+    values = ["fake_value1", "fake_value2"]
+    item_expected = {key: value for key, value in zip(keys, values)}
+    list_expected = {"body_list": [
+        {keys[0]: values[0]},
+        {keys[1]: values[1]},
+    ]}
+    dict_expected = {"body_dict": {
+        keys[0]: values[0],
+        keys[1]: values[1],
+    }}
+
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestRestClientParseRespXML, self).setUp()
+        self.rest_client.TYPE = self.TYPE
+
+    def test_parse_resp_body_item(self):
+        body_item = xml.Element("item", **self.item_expected)
+        body = self.rest_client._parse_resp(str(xml.Document(body_item)))
+        self.assertEqual(self.item_expected, body)
+
+    def test_parse_resp_body_list(self):
+        self.rest_client.list_tags = ["fake_list", ]
+        body_list = xml.Element(self.rest_client.list_tags[0])
+        for i in range(2):
+            body_list.append(xml.Element("fake_item",
+                                         **self.list_expected["body_list"][i]))
+        body = self.rest_client._parse_resp(str(xml.Document(body_list)))
+        self.assertEqual(self.list_expected["body_list"], body)
+
+    def test_parse_resp_body_dict(self):
+        self.rest_client.dict_tags = ["fake_dict", ]
+        body_dict = xml.Element(self.rest_client.dict_tags[0])
+
+        for i in range(2):
+            body_dict.append(xml.Element("fake_item", xml.Text(self.values[i]),
+                                         key=self.keys[i]))
+
+        body = self.rest_client._parse_resp(str(xml.Document(body_dict)))
+        self.assertEqual(self.dict_expected["body_dict"], body)
+
+
+class TestRestClientParseRespJSON(TestRestClientParseRespXML):
+    TYPE = "json"
+
+    def test_parse_resp_body_item(self):
+        body = self.rest_client._parse_resp(json.dumps(self.item_expected))
+        self.assertEqual(self.item_expected, body)
+
+    def test_parse_resp_body_list(self):
+        body = self.rest_client._parse_resp(json.dumps(self.list_expected))
+        self.assertEqual(self.list_expected["body_list"], body)
+
+    def test_parse_resp_body_dict(self):
+        body = self.rest_client._parse_resp(json.dumps(self.dict_expected))
+        self.assertEqual(self.dict_expected["body_dict"], body)
+
+    def test_parse_resp_two_top_keys(self):
+        dict_two_keys = self.dict_expected.copy()
+        dict_two_keys.update({"second_key": ""})
+        body = self.rest_client._parse_resp(json.dumps(dict_two_keys))
+        self.assertEqual(dict_two_keys, body)
+
+    def test_parse_resp_one_top_key_without_list_or_dict(self):
+        data = {"one_top_key": "not_list_or_dict_value"}
+        body = self.rest_client._parse_resp(json.dumps(data))
+        self.assertEqual(data, body)

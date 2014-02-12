@@ -51,7 +51,7 @@ class ObjectClient(RestClient):
         url = "%s/%s" % (str(container), str(object_name))
         if params:
             url += '?%s' % urllib.urlencode(params)
-        resp, body = self.delete(url)
+        resp, body = self.delete(url, headers={})
         return resp, body
 
     def update_object_metadata(self, container, object_name, metadata,

@@ -12,19 +12,22 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class IdentityClientJSON(RestClient):
+class IdentityClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(IdentityClientJSON, self).__init__(auth_provider)
         self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
+
+        # Needed for xml service client
+        self.list_tags = ["roles", "tenants", "users", "services"]
 
     def has_admin_extensions(self):
         """
@@ -43,9 +46,8 @@ class IdentityClientJSON(RestClient):
             'name': name,
         }
         post_body = json.dumps({'role': post_body})
-        resp, body = self.post('OS-KSADM/roles', post_body, self.headers)
-        body = json.loads(body)
-        return resp, body['role']
+        resp, body = self.post('OS-KSADM/roles', post_body)
+        return resp, self._parse_resp(body)
 
     def create_tenant(self, name, **kwargs):
         """
@@ -60,30 +62,24 @@ class IdentityClientJSON(RestClient):
             'enabled': kwargs.get('enabled', True),
         }
         post_body = json.dumps({'tenant': post_body})
-        resp, body = self.post('tenants', post_body, self.headers)
-        body = json.loads(body)
-        return resp, body['tenant']
+        resp, body = self.post('tenants', post_body)
+        return resp, self._parse_resp(body)
 
     def delete_role(self, role_id):
         """Delete a role."""
-        resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id))
-        return resp, body
+        return self.delete('OS-KSADM/roles/%s' % str(role_id))
 
     def list_user_roles(self, tenant_id, user_id):
         """Returns a list of roles assigned to a user for a tenant."""
         url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
         resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body['roles']
+        return resp, self._parse_resp(body)
 
     def assign_user_role(self, tenant_id, user_id, role_id):
         """Add roles to a user on a tenant."""
-        post_body = json.dumps({})
         resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
-                              (tenant_id, user_id, role_id), post_body,
-                              self.headers)
-        body = json.loads(body)
-        return resp, body['role']
+                              (tenant_id, user_id, role_id), "")
+        return resp, self._parse_resp(body)
 
     def remove_user_role(self, tenant_id, user_id, role_id):
         """Removes a role assignment for a user on a tenant."""
@@ -92,20 +88,17 @@ class IdentityClientJSON(RestClient):
 
     def delete_tenant(self, tenant_id):
         """Delete a tenant."""
-        resp, body = self.delete('tenants/%s' % str(tenant_id))
-        return resp, body
+        return self.delete('tenants/%s' % str(tenant_id))
 
     def get_tenant(self, tenant_id):
         """Get tenant details."""
         resp, body = self.get('tenants/%s' % str(tenant_id))
-        body = json.loads(body)
-        return resp, body['tenant']
+        return resp, self._parse_resp(body)
 
     def list_roles(self):
         """Returns roles."""
         resp, body = self.get('OS-KSADM/roles')
-        body = json.loads(body)
-        return resp, body['roles']
+        return resp, self._parse_resp(body)
 
     def list_tenants(self):
         """Returns tenants."""
@@ -133,10 +126,8 @@ class IdentityClientJSON(RestClient):
             'enabled': en,
         }
         post_body = json.dumps({'tenant': post_body})
-        resp, body = self.post('tenants/%s' % tenant_id, post_body,
-                               self.headers)
-        body = json.loads(body)
-        return resp, body['tenant']
+        resp, body = self.post('tenants/%s' % tenant_id, post_body)
+        return resp, self._parse_resp(body)
 
     def create_user(self, name, password, tenant_id, email, **kwargs):
         """Create a user."""
@@ -149,34 +140,28 @@ class IdentityClientJSON(RestClient):
         if kwargs.get('enabled') is not None:
             post_body['enabled'] = kwargs.get('enabled')
         post_body = json.dumps({'user': post_body})
-        resp, body = self.post('users', post_body, self.headers)
-        body = json.loads(body)
-        return resp, body['user']
+        resp, body = self.post('users', post_body)
+        return resp, self._parse_resp(body)
 
     def update_user(self, user_id, **kwargs):
         """Updates a user."""
         put_body = json.dumps({'user': kwargs})
-        resp, body = self.put('users/%s' % user_id, put_body,
-                              self.headers)
-        body = json.loads(body)
-        return resp, body['user']
+        resp, body = self.put('users/%s' % user_id, put_body)
+        return resp, self._parse_resp(body)
 
     def get_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
-        body = json.loads(body)
-        return resp, body['user']
+        return resp, self._parse_resp(body)
 
     def delete_user(self, user_id):
         """Delete a user."""
-        resp, body = self.delete("users/%s" % user_id)
-        return resp, body
+        return self.delete("users/%s" % user_id)
 
     def get_users(self):
         """Get the list of users."""
         resp, body = self.get("users")
-        body = json.loads(body)
-        return resp, body['users']
+        return resp, self._parse_resp(body)
 
     def enable_disable_user(self, user_id, enabled):
         """Enables or disables a user."""
@@ -184,21 +169,17 @@ class IdentityClientJSON(RestClient):
             'enabled': enabled
         }
         put_body = json.dumps({'user': put_body})
-        resp, body = self.put('users/%s/enabled' % user_id,
-                              put_body, self.headers)
-        body = json.loads(body)
-        return resp, body
+        resp, body = self.put('users/%s/enabled' % user_id, put_body)
+        return resp, self._parse_resp(body)
 
     def delete_token(self, token_id):
         """Delete a token."""
-        resp, body = self.delete("tokens/%s" % token_id)
-        return resp, body
+        return self.delete("tokens/%s" % token_id)
 
     def list_users_for_tenant(self, tenant_id):
         """List users for a Tenant."""
         resp, body = self.get('/tenants/%s/users' % tenant_id)
-        body = json.loads(body)
-        return resp, body['users']
+        return resp, self._parse_resp(body)
 
     def get_user_by_username(self, tenant_id, username):
         resp, users = self.list_users_for_tenant(tenant_id)
@@ -215,22 +196,19 @@ class IdentityClientJSON(RestClient):
             'description': kwargs.get('description')
         }
         post_body = json.dumps({'OS-KSADM:service': post_body})
-        resp, body = self.post('/OS-KSADM/services', post_body, self.headers)
-        body = json.loads(body)
-        return resp, body['OS-KSADM:service']
+        resp, body = self.post('/OS-KSADM/services', post_body)
+        return resp, self._parse_resp(body)
 
     def get_service(self, service_id):
         """Get Service."""
         url = '/OS-KSADM/services/%s' % service_id
         resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body['OS-KSADM:service']
+        return resp, self._parse_resp(body)
 
     def list_services(self):
         """List Service - Returns Services."""
         resp, body = self.get('/OS-KSADM/services/')
-        body = json.loads(body)
-        return resp, body['OS-KSADM:services']
+        return resp, self._parse_resp(body)
 
     def delete_service(self, service_id):
         """Delete Service."""
@@ -238,7 +216,7 @@ class IdentityClientJSON(RestClient):
         return self.delete(url)
 
 
-class TokenClientJSON(RestClient):
+class TokenClientJSON(IdentityClientJSON):
 
     def __init__(self):
         super(TokenClientJSON, self).__init__(None)
@@ -261,15 +239,17 @@ class TokenClientJSON(RestClient):
             }
         }
         body = json.dumps(creds)
-        resp, body = self.post(self.auth_url, headers=self.headers, body=body)
+        resp, body = self.post(self.auth_url, body=body)
 
         return resp, body['access']
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
         if headers is None:
-            headers = {}
-
+            # Always accept 'json', for TokenClientXML too.
+            # Because XML response is not easily
+            # converted to the corresponding JSON one
+            headers = self.get_headers(accept_type="json")
         self._log_request(method, url, headers, body)
         resp, resp_body = self.http_obj.request(url, method,
                                                 headers=headers, body=body)
@@ -282,7 +262,9 @@ class TokenClientJSON(RestClient):
             raise exceptions.IdentityError(
                 'Unexpected status code {0}'.format(resp.status))
 
-        return resp, json.loads(resp_body)
+        if isinstance(resp_body, str):
+            resp_body = json.loads(resp_body)
+        return resp, resp_body
 
     def get_token(self, user, password, tenant, auth_data=False):
         """
