@@ -30,7 +30,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.intersphinx',
               'sphinx.ext.todo',
               'sphinx.ext.viewcode',
-              'oslo.sphinx'
+              'oslosphinx'
              ]
 
 todo_include_todos = True

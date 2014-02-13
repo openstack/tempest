@@ -3,7 +3,7 @@ hacking>=0.8.0,<0.9
 docutils==0.9.1
 sphinx>=1.1.2,<1.2
 python-subunit>=0.0.18
-oslo.sphinx
+oslosphinx
 mox>=0.5.3
 mock>=1.0
 coverage>=3.6
