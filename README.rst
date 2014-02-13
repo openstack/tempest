@@ -118,3 +118,15 @@ tempest suite.
 Alternatively, you can use the run_tests.sh script which will create a venv and
 run the unit tests. There are also the py26, py27, or py33 tox jobs which will
 run the unit tests with the corresponding version of python.
+
+Python 2.6
+----------
+
+Tempest can be run with Python 2.6 however the unit tests and the gate
+currently only run with Python 2.7, so there are no guarantees about the state
+of tempest when running with Python 2.6. Additionally, to enable testr to work
+with tempest using python 2.6 the discover module from the unittest-ext
+project has to be patched to switch the unittest.TestSuite to use
+unittest2.TestSuite instead. See::
+
+https://code.google.com/p/unittest-ext/issues/detail?id=79
