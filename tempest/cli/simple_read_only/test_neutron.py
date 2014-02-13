@@ -74,13 +74,11 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     def test_neutron_floatingip_list(self):
         self.neutron('floatingip-list')
 
-    @test.skip_because(bug="1240694")
     @test.attr(type='smoke')
     @test.requires_ext(extension='metering', service='network')
     def test_neutron_meter_label_list(self):
         self.neutron('meter-label-list')
 
-    @test.skip_because(bug="1240694")
     @test.attr(type='smoke')
     @test.requires_ext(extension='metering', service='network')
     def test_neutron_meter_label_rule_list(self):
