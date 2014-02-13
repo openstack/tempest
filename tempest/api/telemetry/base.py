@@ -10,7 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
 import tempest.test
 
 CONF = config.CONF
@@ -22,6 +24,28 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(BaseTelemetryTest, cls).setUpClass()
         if not CONF.service_available.ceilometer:
             raise cls.skipException("Ceilometer support is required")
+        super(BaseTelemetryTest, cls).setUpClass()
+        os = cls.get_client_manager()
+        cls.telemetry_client = os.telemetry_client
+        cls.alarm_ids = []
+
+    @classmethod
+    def create_alarm(cls, **kwargs):
+        resp, body = cls.telemetry_client.create_alarm(
+            name=data_utils.rand_name('telemetry_alarm'),
+            type='threshold', **kwargs)
+        if resp['status'] == '201':
+            cls.alarm_ids.append(body['alarm_id'])
+        return resp, body
+
+    @classmethod
+    def tearDownClass(cls):
+        for alarm_id in cls.alarm_ids:
+            try:
+                cls.telemetry_client.delete_alarm(alarm_id)
+            except exceptions.NotFound:
+                pass
+        cls.clear_isolated_creds()
+        super(BaseTelemetryTest, cls).tearDownClass()
