@@ -25,12 +25,12 @@ import install_venv_common as install_venv  # noqa
 
 def print_help(venv, root):
     help = """
-    Openstack development environment setup is complete.
+    OpenStack development environment setup is complete.
 
-    Openstack development uses virtualenv to track and manage Python
+    OpenStack development uses virtualenv to track and manage Python
     dependencies while in development and testing.
 
-    To activate the Openstack virtualenv for the extent of your current shell
+    To activate the OpenStack virtualenv for the extent of your current shell
     session you can run:
 
     $ source %s/bin/activate
