@@ -16,7 +16,7 @@
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -46,6 +46,9 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(FloatingIPTestJSON, cls).setUpClass()
+        if not test.is_extension_enabled('router', 'network'):
+            msg = "router extension not enabled."
+            raise cls.skipException(msg)
         cls.ext_net_id = CONF.network.public_network_id
 
         # Create network, subnet, router and add interface
@@ -59,7 +62,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         for i in range(2):
             cls.create_port(cls.network)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_list_show_update_delete_floating_ip(self):
         # Creates a floating IP
         created_floating_ip = self.create_floating_ip(
@@ -110,7 +113,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(updated_floating_ip['fixed_ip_address'])
         self.assertIsNone(updated_floating_ip['router_id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_floating_ip_delete_port(self):
         # Create a floating IP
         created_floating_ip = self.create_floating_ip(self.ext_net_id)
@@ -133,7 +136,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertIsNone(shown_floating_ip['fixed_ip_address'])
         self.assertIsNone(shown_floating_ip['router_id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_floating_ip_update_different_router(self):
         # Associate a floating IP to a port on a router
         created_floating_ip = self.create_floating_ip(

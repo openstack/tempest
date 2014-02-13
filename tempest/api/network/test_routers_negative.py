@@ -16,7 +16,7 @@
 from tempest.api.network import base_routers as base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class RoutersNegativeTest(base.BaseRouterTest):
@@ -25,11 +25,14 @@ class RoutersNegativeTest(base.BaseRouterTest):
     @classmethod
     def setUpClass(cls):
         super(RoutersNegativeTest, cls).setUpClass()
+        if not test.is_extension_enabled('router', 'network'):
+            msg = "router extension not enabled."
+            raise cls.skipException(msg)
         cls.router = cls.create_router(data_utils.rand_name('router-'))
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_router_add_gateway_invalid_network_returns_404(self):
         self.assertRaises(exceptions.NotFound,
                           self.client.update_router,
@@ -37,7 +40,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
                           external_gateway_info={
                               'network_id': self.router['id']})
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_router_add_gateway_net_not_external_returns_400(self):
         self.create_subnet(self.network)
         self.assertRaises(exceptions.BadRequest,
@@ -46,7 +49,7 @@ class RoutersNegativeTest(base.BaseRouterTest):
                           external_gateway_info={
                               'network_id': self.network['id']})
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_router_remove_interface_in_use_returns_409(self):
         self.client.add_router_interface_with_subnet_id(
             self.router['id'], self.subnet['id'])

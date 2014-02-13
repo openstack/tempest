@@ -17,26 +17,33 @@ import uuid
 
 from tempest.api.network import base_security_groups as base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class NegativeSecGroupTest(base.BaseSecGroupTest):
     _interface = 'json'
 
-    @attr(type=['negative', 'gate'])
+    @classmethod
+    def setUpClass(cls):
+        super(NegativeSecGroupTest, cls).setUpClass()
+        if not test.is_extension_enabled('security-group', 'network'):
+            msg = "security-group extension not enabled."
+            raise cls.skipException(msg)
+
+    @test.attr(type=['negative', 'gate'])
     def test_show_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.show_security_group,
                           non_exist_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_show_non_existent_security_group_rule(self):
         non_exist_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound,
                           self.client.show_security_group_rule,
                           non_exist_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_non_existent_security_group(self):
         non_exist_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound,
@@ -44,7 +51,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           non_exist_id
                           )
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_security_group_rule_with_bad_protocol(self):
         group_create_body, _ = self._create_security_group()
 
@@ -55,7 +62,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           group_create_body['security_group']['id'],
                           protocol=pname)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_security_group_rule_with_invalid_ports(self):
         group_create_body, _ = self._create_security_group()
 
@@ -73,7 +80,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                                    port_range_max=pmax)
             self.assertIn(msg, str(ex))
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_additional_default_security_group_fails(self):
         # Create security group named 'default', it should be failed.
         name = 'default'
@@ -81,7 +88,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                           self.client.create_security_group,
                           name)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_non_existent_security_group(self):
         # Create security group rules with not existing security group.
         non_existent_sg = str(uuid.uuid4())

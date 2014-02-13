@@ -14,13 +14,20 @@
 #    under the License.
 
 from tempest.api.network import base_security_groups as base
-from tempest.test import attr
+from tempest import test
 
 
 class SecGroupTest(base.BaseSecGroupTest):
     _interface = 'json'
 
-    @attr(type='smoke')
+    @classmethod
+    def setUpClass(cls):
+        super(SecGroupTest, cls).setUpClass()
+        if not test.is_extension_enabled('security-group', 'network'):
+            msg = "security-group extension not enabled."
+            raise cls.skipException(msg)
+
+    @test.attr(type='smoke')
     def test_list_security_groups(self):
         # Verify the that security group belonging to tenant exist in list
         resp, body = self.client.list_security_groups()
@@ -33,7 +40,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         msg = "Security-group list doesn't contain default security-group"
         self.assertIsNotNone(found, msg)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_show_delete_security_group(self):
         group_create_body, name = self._create_security_group()
 
@@ -51,7 +58,7 @@ class SecGroupTest(base.BaseSecGroupTest):
             secgroup_list.append(secgroup['id'])
         self.assertIn(group_create_body['security_group']['id'], secgroup_list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_show_delete_security_group_rule(self):
         group_create_body, _ = self._create_security_group()
 
@@ -80,7 +87,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                      for rule in rule_list_body['security_group_rules']]
         self.assertIn(rule_create_body['security_group_rule']['id'], rule_list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_security_group_rule_with_additional_args(self):
         # Verify creating security group rule with the following
         # arguments works: "protocol": "tcp", "port_range_max": 77,

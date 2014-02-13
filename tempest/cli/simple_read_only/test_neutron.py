@@ -57,17 +57,20 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
         self.assertTableStruct(ext, ['alias', 'name'])
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='dhcp_agent_scheduler', service='network')
     def test_neutron_dhcp_agent_list_hosting_net(self):
         self.neutron('dhcp-agent-list-hosting-net',
                      params=CONF.compute.fixed_network_name)
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='agent', service='network')
     def test_neutron_agent_list(self):
         agents = self.parser.listing(self.neutron('agent-list'))
         field_names = ['id', 'agent_type', 'host', 'alive', 'admin_state_up']
         self.assertTableStruct(agents, field_names)
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='router', service='network')
     def test_neutron_floatingip_list(self):
         self.neutron('floatingip-list')
 
@@ -83,6 +86,7 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     def test_neutron_meter_label_rule_list(self):
         self.neutron('meter-label-rule-list')
 
+    @test.requires_ext(extension='lbaas_agent_scheduler', service='network')
     def _test_neutron_lbaas_command(self, command):
         try:
             self.neutron(command)
@@ -107,6 +111,7 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
         self._test_neutron_lbaas_command('lb-vip-list')
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='external-net', service='network')
     def test_neutron_net_external_list(self):
         self.neutron('net-external-list')
 
@@ -115,19 +120,23 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
         self.neutron('port-list')
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='quotas', service='network')
     def test_neutron_quota_list(self):
         self.neutron('quota-list')
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='router', service='network')
     def test_neutron_router_list(self):
         self.neutron('router-list')
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='security-group', service='network')
     def test_neutron_security_group_list(self):
         security_grp = self.parser.listing(self.neutron('security-group-list'))
         self.assertTableStruct(security_grp, ['id', 'name', 'description'])
 
     @test.attr(type='smoke')
+    @test.requires_ext(extension='security-group', service='network')
     def test_neutron_security_group_rule_list(self):
         self.neutron('security-group-rule-list')
 

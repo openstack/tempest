@@ -44,6 +44,8 @@ class ExtensionsTestJSON(base.BaseNetworkTest):
                           'agent', 'dhcp_agent_scheduler', 'provider',
                           'router', 'extraroute', 'external-net',
                           'allowed-address-pairs', 'extra_dhcp_opt']
+        expected_alias = [ext for ext in expected_alias if
+                          test.is_extension_enabled(ext, 'network')]
         actual_alias = list()
         resp, extensions = self.client.list_extensions()
         self.assertEqual('200', resp['status'])

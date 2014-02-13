@@ -19,9 +19,7 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-
-from tempest.test import attr
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -113,6 +111,10 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     @classmethod
     def setUpClass(cls):
         super(TestNetworkBasicOps, cls).setUpClass()
+        for ext in ['router', 'security-group']:
+            if not test.is_extension_enabled(ext, 'network'):
+                msg = "%s extension not enabled." % ext
+                raise cls.skipException(msg)
         cls.check_preconditions()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
@@ -235,8 +237,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self._associate_floating_ip(floating_ip, server)
             self.floating_ips[floating_ip] = server
 
-    @attr(type='smoke')
-    @services('compute', 'network')
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
     def test_network_basic_ops(self):
         self._create_security_groups()
         self._create_networks()

@@ -17,7 +17,7 @@
 from tempest.api.network import base
 from tempest import clients
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class QuotasTest(base.BaseNetworkTest):
@@ -46,11 +46,14 @@ class QuotasTest(base.BaseNetworkTest):
     @classmethod
     def setUpClass(cls):
         super(QuotasTest, cls).setUpClass()
+        if not test.is_extension_enabled('quotas', 'network'):
+            msg = "quotas extension not enabled."
+            raise cls.skipException(msg)
         admin_manager = clients.AdminManager()
         cls.admin_client = admin_manager.network_client
         cls.identity_admin_client = admin_manager.identity_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_quotas(self):
         # Add a tenant to conduct the test
         test_tenant = data_utils.rand_name('test_tenant_')
