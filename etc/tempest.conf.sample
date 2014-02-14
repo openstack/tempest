@@ -316,6 +316,10 @@
 # If false, skip disk config tests (boolean value)
 #disk_config=true
 
+# A list of enabled compute extensions with a special entry
+# all which indicates every extension is enabled (list value)
+#api_extensions=all
+
 # A list of enabled v3 extensions with a special entry all
 # which indicates every extension is enabled (list value)
 #api_v3_extensions=all
@@ -563,16 +567,8 @@
 # Options defined in tempest.config
 #
 
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
-#api_extensions=all
-
-# A list of enabled extensions with a special entry all which
-# indicates every extension is enabled (list value)
+# A list of enabled network extensions with a special entry
+# all which indicates every extension is enabled (list value)
 #api_extensions=all
 
 
@@ -842,6 +838,10 @@
 
 # Runs Cinder volumes backup test (boolean value)
 #backup=true
+
+# A list of enabled volume extensions with a special entry all
+# which indicates every extension is enabled (list value)
+#api_extensions=all
 
 # Is the v1 volume API enabled (boolean value)
 #api_v1=true

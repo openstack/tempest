@@ -225,8 +225,8 @@ ComputeFeaturesGroup = [
                 help="If false, skip disk config tests"),
     cfg.ListOpt('api_extensions',
                 default=['all'],
-                help='A list of enabled extensions with a special entry all '
-                     'which indicates every extension is enabled'),
+                help='A list of enabled compute extensions with a special '
+                     'entry all which indicates every extension is enabled'),
     cfg.ListOpt('api_v3_extensions',
                 default=['all'],
                 help='A list of enabled v3 extensions with a special entry all'
@@ -349,8 +349,8 @@ network_feature_group = cfg.OptGroup(name='network-feature-enabled',
 NetworkFeaturesGroup = [
     cfg.ListOpt('api_extensions',
                 default=['all'],
-                help='A list of enabled extensions with a special entry all '
-                     'which indicates every extension is enabled'),
+                help='A list of enabled network extensions with a special '
+                     'entry all which indicates every extension is enabled'),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
@@ -402,8 +402,8 @@ VolumeFeaturesGroup = [
                 help='Runs Cinder volumes backup test'),
     cfg.ListOpt('api_extensions',
                 default=['all'],
-                help='A list of enabled extensions with a special entry all '
-                     'which indicates every extension is enabled'),
+                help='A list of enabled volume extensions with a special '
+                     'entry all which indicates every extension is enabled'),
     cfg.BoolOpt('api_v1',
                 default=True,
                 help="Is the v1 volume API enabled"),
