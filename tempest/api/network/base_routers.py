@@ -38,11 +38,13 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
         self.assertNotIn(router_id, routers_list)
 
     def _remove_router_interface_with_subnet_id(self, router_id, subnet_id):
-        resp, _ = self.client.remove_router_interface_with_subnet_id(
+        resp, body = self.client.remove_router_interface_with_subnet_id(
             router_id, subnet_id)
         self.assertEqual('200', resp['status'])
+        self.assertEqual(subnet_id, body['subnet_id'])
 
     def _remove_router_interface_with_port_id(self, router_id, port_id):
-        resp, _ = self.client.remove_router_interface_with_port_id(
+        resp, body = self.client.remove_router_interface_with_port_id(
             router_id, port_id)
         self.assertEqual('200', resp['status'])
+        self.assertEqual(port_id, body['port_id'])

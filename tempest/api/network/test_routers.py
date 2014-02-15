@@ -234,3 +234,48 @@ class RoutersTest(base.BaseRouterTest):
 
     def _delete_extra_routes(self, router_id):
         resp, _ = self.client.delete_extra_routes(router_id)
+
+    @test.attr(type='smoke')
+    def test_update_router_admin_state(self):
+        self.router = self.create_router(data_utils.rand_name('router-'))
+        self.assertFalse(self.router['admin_state_up'])
+        # Update router admin state
+        resp, update_body = self.client.update_router(self.router['id'],
+                                                      admin_state_up=True)
+        self.assertEqual('200', resp['status'])
+        self.assertTrue(update_body['router']['admin_state_up'])
+        resp, show_body = self.client.show_router(self.router['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertTrue(show_body['router']['admin_state_up'])
+
+    @test.attr(type='smoke')
+    def test_add_multiple_router_interfaces(self):
+        network = self.create_network()
+        subnet01 = self.create_subnet(network)
+        subnet02 = self.create_subnet(network)
+        router = self.create_router(data_utils.rand_name('router-'))
+        interface01 = self._add_router_interface_with_subnet_id(router['id'],
+                                                                subnet01['id'])
+        self._verify_router_interface(router['id'], subnet01['id'],
+                                      interface01['port_id'])
+        interface02 = self._add_router_interface_with_subnet_id(router['id'],
+                                                                subnet02['id'])
+        self._verify_router_interface(router['id'], subnet02['id'],
+                                      interface02['port_id'])
+
+    def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
+        resp, interface = self.client.add_router_interface_with_subnet_id(
+            router_id, subnet_id)
+        self.assertEqual('200', resp['status'])
+        self.addCleanup(self._remove_router_interface_with_subnet_id,
+                        router_id, subnet_id)
+        self.assertEqual(subnet_id, interface['subnet_id'])
+        return interface
+
+    def _verify_router_interface(self, router_id, subnet_id, port_id):
+        resp, show_port_body = self.client.show_port(port_id)
+        self.assertEqual('200', resp['status'])
+        interface_port = show_port_body['port']
+        self.assertEqual(router_id, interface_port['device_id'])
+        self.assertEqual(subnet_id,
+                         interface_port['fixed_ips'][0]['subnet_id'])
