@@ -702,7 +702,7 @@ class NetworkScenarioTest(OfficialClientTest):
         :param floating_ip: type DeletableFloatingIp
         """
         floating_ip.update(port_id=None)
-        self.assertEqual(None, floating_ip.port_id)
+        self.assertIsNone(floating_ip.port_id)
         return floating_ip
 
     def _ping_ip_address(self, ip_address, should_succeed=True):

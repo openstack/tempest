@@ -47,7 +47,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, aggregate = self.client.create_aggregate(name=aggregate_name)
         self.assertEqual(200, resp.status)
         self.assertEqual(aggregate_name, aggregate['name'])
-        self.assertEqual(None, aggregate['availability_zone'])
+        self.assertIsNone(aggregate['availability_zone'])
 
         resp, _ = self.client.delete_aggregate(aggregate['id'])
         self.assertEqual(200, resp.status)
@@ -175,7 +175,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(1, len(aggs))
         agg = aggs[0]
         self.assertEqual(aggregate_name, agg['name'])
-        self.assertEqual(None, agg['availability_zone'])
+        self.assertIsNone(agg['availability_zone'])
         self.assertIn(self.host, agg['hosts'])
 
     @attr(type='gate')
@@ -190,7 +190,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         resp, body = self.client.get_aggregate(aggregate['id'])
         self.assertEqual(aggregate_name, body['name'])
-        self.assertEqual(None, body['availability_zone'])
+        self.assertIsNone(body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
     @attr(type='gate')
