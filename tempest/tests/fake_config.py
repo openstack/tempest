@@ -22,5 +22,30 @@ class FakeConfig(object):
     class fake_identity(object):
         disable_ssl_certificate_validation = True
 
+    class fake_default_feature_enabled(object):
+        api_extensions = ['all']
+
+    class fake_compute_feature_enabled(fake_default_feature_enabled):
+        api_v3_extensions = ['all']
+
+    class fake_object_storage_discoverable_apis(object):
+        discoverable_apis = ['all']
+
+    class fake_service_available(object):
+        nova = True
+        glance = True
+        cinder = True
+        heat = True
+        neutron = True
+        swift = True
+        horizon = True
+
+    compute_feature_enabled = fake_compute_feature_enabled()
+    volume_feature_enabled = fake_default_feature_enabled()
+    network_feature_enabled = fake_default_feature_enabled()
+    object_storage_feature_enabled = fake_object_storage_discoverable_apis()
+
+    service_available = fake_service_available()
+
     compute = fake_compute()
     identity = fake_identity()
