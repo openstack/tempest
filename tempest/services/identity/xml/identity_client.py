@@ -97,7 +97,7 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
         """Enables or disables a user."""
         enable_user = xml.Element("user", enabled=str(enabled).lower())
         resp, body = self.put('users/%s/enabled' % user_id,
-                              str(xml.Document(enable_user)), self.headers)
+                              str(xml.Document(enable_user)))
         return resp, self._parse_resp(body)
 
     def create_service(self, name, service_type, **kwargs):

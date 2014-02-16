@@ -40,8 +40,7 @@ class CredentialsClientJSON(RestClient):
             "user_id": user_id
         }
         post_body = json.dumps({'credential': post_body})
-        resp, body = self.post('credentials', post_body,
-                               self.headers)
+        resp, body = self.post('credentials', post_body)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
         return resp, body['credential']
@@ -63,8 +62,7 @@ class CredentialsClientJSON(RestClient):
             "user_id": user_id
         }
         post_body = json.dumps({'credential': post_body})
-        resp, body = self.patch('credentials/%s' % credential_id, post_body,
-                                self.headers)
+        resp, body = self.patch('credentials/%s' % credential_id, post_body)
         body = json.loads(body)
         body['credential']['blob'] = json.loads(body['credential']['blob'])
         return resp, body['credential']

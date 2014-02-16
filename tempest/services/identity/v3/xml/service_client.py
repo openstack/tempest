@@ -57,14 +57,13 @@ class ServiceClientXML(RestClientXML):
                                  description=description,
                                  type=type)
         resp, body = self.patch('services/%s' % service_id,
-                                str(Document(update_service)),
-                                self.headers)
+                                str(Document(update_service)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_service(self, service_id):
         """Get Service."""
         url = 'services/%s' % service_id
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_body(etree.fromstring(body))
         return resp, body

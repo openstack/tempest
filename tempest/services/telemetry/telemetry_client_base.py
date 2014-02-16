@@ -38,7 +38,6 @@ class TelemetryClientBase(object):
     def __init__(self, auth_provider):
         self.rest_client = self.get_rest_client(auth_provider)
         self.rest_client.service = CONF.telemetry.catalog_type
-        self.headers = self.rest_client.headers
         self.version = '2'
         self.uri_prefix = "v%s" % self.version
 
@@ -69,15 +68,15 @@ class TelemetryClientBase(object):
 
     def post(self, uri, body):
         body = self.serialize(body)
-        resp, body = self.rest_client.post(uri, body, self.headers)
+        resp, body = self.rest_client.post(uri, body)
         body = self.deserialize(body)
         return resp, body
 
     def put(self, uri, body):
-        return self.rest_client.put(uri, body, self.headers)
+        return self.rest_client.put(uri, body)
 
     def get(self, uri):
-        resp, body = self.rest_client.get(uri, self.headers)
+        resp, body = self.rest_client.get(uri)
         body = self.deserialize(body)
         return resp, body
 

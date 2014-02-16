@@ -47,7 +47,7 @@ class EndPointClientJSON(RestClient):
             'enabled': enabled
         }
         post_body = json.dumps({'endpoint': post_body})
-        resp, body = self.post('endpoints', post_body, self.headers)
+        resp, body = self.post('endpoints', post_body)
         body = json.loads(body)
         return resp, body['endpoint']
 
@@ -66,8 +66,7 @@ class EndPointClientJSON(RestClient):
         if enabled is not None:
             post_body['enabled'] = enabled
         post_body = json.dumps({'endpoint': post_body})
-        resp, body = self.patch('endpoints/%s' % endpoint_id, post_body,
-                                self.headers)
+        resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)
         body = json.loads(body)
         return resp, body['endpoint']
 

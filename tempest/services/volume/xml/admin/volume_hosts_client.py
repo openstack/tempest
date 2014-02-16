@@ -67,6 +67,6 @@ class VolumeHostsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
         return resp, body

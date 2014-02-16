@@ -64,7 +64,7 @@ class VolumeTypesClientJSON(RestClient):
         }
 
         post_body = json.dumps({'volume_type': post_body})
-        resp, body = self.post('types', post_body, self.headers)
+        resp, body = self.post('types', post_body)
         body = json.loads(body)
         return resp, body['volume_type']
 
@@ -98,7 +98,7 @@ class VolumeTypesClientJSON(RestClient):
         """
         url = "types/%s/extra_specs" % str(vol_type_id)
         post_body = json.dumps({'extra_specs': extra_spec})
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
         body = json.loads(body)
         return resp, body['extra_specs']
 
@@ -119,6 +119,6 @@ class VolumeTypesClientJSON(RestClient):
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
         put_body = json.dumps(extra_spec)
-        resp, body = self.put(url, put_body, self.headers)
+        resp, body = self.put(url, put_body)
         body = json.loads(body)
         return resp, body

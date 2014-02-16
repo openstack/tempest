@@ -36,7 +36,7 @@ class PolicyClientJSON(RestClient):
             "type": type
         }
         post_body = json.dumps({'policy': post_body})
-        resp, body = self.post('policies', post_body, self.headers)
+        resp, body = self.post('policies', post_body)
         body = json.loads(body)
         return resp, body['policy']
 
@@ -62,8 +62,7 @@ class PolicyClientJSON(RestClient):
         }
         post_body = json.dumps({'policy': post_body})
         url = 'policies/%s' % policy_id
-        resp, body = self.patch(url, post_body,
-                                self.headers)
+        resp, body = self.patch(url, post_body)
         body = json.loads(body)
         return resp, body['policy']
 

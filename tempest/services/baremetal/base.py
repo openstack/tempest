@@ -114,7 +114,7 @@ class BaremetalClient(rest_client.RestClient):
         """
         uri = self._get_uri(resource, permanent=permanent)
 
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.get(uri)
 
         return resp, self.deserialize(body)
 
@@ -127,7 +127,7 @@ class BaremetalClient(rest_client.RestClient):
 
         """
         uri = self._get_uri(resource, uuid=uuid, permanent=permanent)
-        resp, body = self.get(uri, self.headers)
+        resp, body = self.get(uri)
 
         return resp, self.deserialize(body)
 
@@ -145,7 +145,7 @@ class BaremetalClient(rest_client.RestClient):
         body = self.serialize(object_type, object_dict)
         uri = self._get_uri(resource)
 
-        resp, body = self.post(uri, headers=self.headers, body=body)
+        resp, body = self.post(uri, body=body)
 
         return resp, self.deserialize(body)
 
@@ -160,7 +160,7 @@ class BaremetalClient(rest_client.RestClient):
         """
         uri = self._get_uri(resource, uuid)
 
-        resp, body = self.delete(uri, self.headers)
+        resp, body = self.delete(uri)
         return resp, body
 
     def _patch_request(self, resource, uuid, patch_object):
@@ -176,7 +176,7 @@ class BaremetalClient(rest_client.RestClient):
         uri = self._get_uri(resource, uuid)
         patch_body = json.dumps(patch_object)
 
-        resp, body = self.patch(uri, headers=self.headers, body=patch_body)
+        resp, body = self.patch(uri, body=patch_body)
         return resp, self.deserialize(body)
 
     @handle_errors

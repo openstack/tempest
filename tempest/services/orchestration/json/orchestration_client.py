@@ -90,7 +90,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         # Password must be provided on stack create so that heat
         # can perform future operations on behalf of the user
-        headers = dict(self.headers)
+        headers = self.get_headers()
         headers['X-Auth-Key'] = self.password
         headers['X-Auth-User'] = self.user
         return headers, body
@@ -106,14 +106,14 @@ class OrchestrationClient(rest_client.RestClient):
         """Suspend a stack."""
         url = 'stacks/%s/actions' % stack_identifier
         body = {'suspend': None}
-        resp, body = self.post(url, json.dumps(body), self.headers)
+        resp, body = self.post(url, json.dumps(body))
         return resp, body
 
     def resume_stack(self, stack_identifier):
         """Resume a stack."""
         url = 'stacks/%s/actions' % stack_identifier
         body = {'resume': None}
-        resp, body = self.post(url, json.dumps(body), self.headers)
+        resp, body = self.post(url, json.dumps(body))
         return resp, body
 
     def list_resources(self, stack_identifier):
@@ -232,7 +232,7 @@ class OrchestrationClient(rest_client.RestClient):
     def _validate_template(self, post_body):
         """Returns the validation request result."""
         post_body = json.dumps(post_body)
-        resp, body = self.post('validate', post_body, self.headers)
+        resp, body = self.post('validate', post_body)
         body = json.loads(body)
         return resp, body
 

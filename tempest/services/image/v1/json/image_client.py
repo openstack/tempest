@@ -241,7 +241,7 @@ class ImageClientJSON(RestClient):
         body = None
         if can_share:
             body = json.dumps({'member': {'can_share': True}})
-        resp, __ = self.put(url, body, self.headers)
+        resp, __ = self.put(url, body)
         return resp
 
     def delete_member(self, member_id, image_id):
@@ -252,7 +252,7 @@ class ImageClientJSON(RestClient):
     def replace_membership_list(self, image_id, member_list):
         url = 'v1/images/%s/members' % image_id
         body = json.dumps({'membership': member_list})
-        resp, data = self.put(url, body, self.headers)
+        resp, data = self.put(url, body)
         data = json.loads(data)
         return resp, data
 
