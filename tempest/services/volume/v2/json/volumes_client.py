@@ -24,14 +24,15 @@ from tempest import exceptions
 CONF = config.CONF
 
 
-class VolumesClientJSON(RestClient):
+class VolumesV2ClientJSON(RestClient):
     """
-    Client class to send CRUD Volume API requests to a Cinder endpoint
+    Client class to send CRUD Volume V2 API requests to a Cinder endpoint
     """
 
     def __init__(self, auth_provider):
-        super(VolumesClientJSON, self).__init__(auth_provider)
+        super(VolumesV2ClientJSON, self).__init__(auth_provider)
 
+        self.api_version = "v2"
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval
         self.build_timeout = CONF.volume.build_timeout
@@ -72,7 +73,7 @@ class VolumesClientJSON(RestClient):
         Creates a new Volume.
         size(Required): Size of volume in GB.
         Following optional keyword arguments are accepted:
-        display_name: Optional Volume Name.
+        name: Optional Volume Name.
         metadata: A dictionary of values to be used as metadata.
         volume_type: Optional Name of volume_type for the volume
         snapshot_id: When specified the volume is created from this snapshot
@@ -147,7 +148,7 @@ class VolumesClientJSON(RestClient):
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
         resp, body = self.get_volume(volume_id)
-        volume_name = body['display_name']
+        volume_name = body['name']
         volume_status = body['status']
         start = int(time.time())
 
@@ -202,13 +203,13 @@ class VolumesClientJSON(RestClient):
                                self.headers)
         return resp, body
 
-    def create_volume_transfer(self, vol_id, display_name=None):
+    def create_volume_transfer(self, vol_id, name=None):
         """Create a volume transfer."""
         post_body = {
             'volume_id': vol_id
         }
-        if display_name:
-            post_body['name'] = display_name
+        if name:
+            post_body['name'] = name
         post_body = json.dumps({'transfer': post_body})
         resp, body = self.post('os-volume-transfer',
                                post_body,

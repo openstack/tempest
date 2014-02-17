@@ -825,4 +825,7 @@
 # Is the v1 volume API enabled (boolean value)
 #api_v1=true
 
+# Is the v2 volume API enabled (boolean value)
+#api_v2=true
+
 
