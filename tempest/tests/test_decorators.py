@@ -148,21 +148,21 @@ class TestSkipBecauseDecorator(BaseDecoratorsTest):
             self.assertEqual(TestFoo('test_bar').test_bar(), 0)
 
     def test_skip_because_bug(self):
-        self._test_skip_because_helper(bug='critical_bug')
+        self._test_skip_because_helper(bug='12345')
 
     def test_skip_because_bug_and_interface_match(self):
-        self._test_skip_because_helper(bug='critical_bug', interface='json')
+        self._test_skip_because_helper(bug='12346', interface='json')
 
     def test_skip_because_bug_interface_not_match(self):
         self._test_skip_because_helper(expected_to_skip=False,
-                                       bug='critical_bug', interface='xml')
+                                       bug='12347', interface='xml')
 
     def test_skip_because_bug_and_condition_true(self):
-        self._test_skip_because_helper(bug='critical_bug', condition=True)
+        self._test_skip_because_helper(bug='12348', condition=True)
 
     def test_skip_because_bug_and_condition_false(self):
         self._test_skip_because_helper(expected_to_skip=False,
-                                       bug='critical_bug', condition=False)
+                                       bug='12349', condition=False)
 
     def test_skip_because_bug_condition_false_and_interface_match(self):
         """
@@ -170,7 +170,7 @@ class TestSkipBecauseDecorator(BaseDecoratorsTest):
         passed.
         """
         self._test_skip_because_helper(expected_to_skip=False,
-                                       bug='critical_bug', condition=False,
+                                       bug='12350', condition=False,
                                        interface='json')
 
     def test_skip_because_bug_condition_true_and_interface_not_match(self):
@@ -178,7 +178,7 @@ class TestSkipBecauseDecorator(BaseDecoratorsTest):
         Assure that only condition will be evaluated if both parameters are
         passed.
         """
-        self._test_skip_because_helper(bug='critical_bug', condition=True,
+        self._test_skip_because_helper(bug='12351', condition=True,
                                        interface='xml')
 
     def test_skip_because_bug_without_bug_never_skips(self):
@@ -187,6 +187,11 @@ class TestSkipBecauseDecorator(BaseDecoratorsTest):
                                        condition=True)
         self._test_skip_because_helper(expected_to_skip=False,
                                        interface='json')
+
+    def test_skip_because_invalid_bug_number(self):
+        """Raise ValueError if with an invalid bug number"""
+        self.assertRaises(ValueError, self._test_skip_because_helper,
+                          bug='critical_bug')
 
 
 class TestRequiresExtDecorator(BaseDecoratorsTest):

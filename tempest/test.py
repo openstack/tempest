@@ -149,6 +149,8 @@ def skip_because(*args, **kwargs):
             else:
                 skip = True
             if "bug" in kwargs and skip is True:
+                if not kwargs['bug'].isdigit():
+                    raise ValueError('bug must be a valid bug number')
                 msg = "Skipped until Bug: %s is resolved." % kwargs["bug"]
                 raise testtools.TestCase.skipException(msg)
             return f(self, *func_args, **func_kwargs)
