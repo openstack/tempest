@@ -213,12 +213,17 @@ class NetworksTestJSON(base.BaseNetworkTest):
             network_id=self.network['id'])
         self.assertEqual('201', resp['status'])
         port = body['port']
+        self.assertTrue(port['admin_state_up'])
         # Verification of port update
         new_port = "New_Port"
-        resp, body = self.client.update_port(port['id'], name=new_port)
+        resp, body = self.client.update_port(
+            port['id'],
+            name=new_port,
+            admin_state_up=False)
         self.assertEqual('200', resp['status'])
         updated_port = body['port']
         self.assertEqual(updated_port['name'], new_port)
+        self.assertFalse(updated_port['admin_state_up'])
         # Verification of port delete
         resp, body = self.client.delete_port(port['id'])
         self.assertEqual('204', resp['status'])
