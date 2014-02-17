@@ -14,11 +14,11 @@
 #    under the License.
 
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 
@@ -53,7 +53,8 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
         LOG.debug('Swift status information obtained successfully')
 
     def _create_container(self, container_name=None):
-        name = container_name or rand_name('swift-scenario-container')
+        name = container_name or data_utils.rand_name(
+            'swift-scenario-container')
         self.object_storage_client.put_container(name)
         # look for the container to assure it is created
         self._list_and_check_container_objects(name)
@@ -65,9 +66,9 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
         LOG.debug('Container %s deleted' % (container_name))
 
     def _upload_object_to_container(self, container_name, obj_name=None):
-        obj_name = obj_name or rand_name('swift-scenario-object')
+        obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
         self.object_storage_client.put_object(container_name, obj_name,
-                                              rand_name('obj_data'),
+                                              data_utils.rand_name('obj_data'),
                                               content_type='text/plain')
         return obj_name
 
@@ -93,7 +94,7 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
             for obj in not_present_obj:
                 self.assertNotIn(obj, object_list)
 
-    @services('object_storage')
+    @test.services('object_storage')
     def test_swift_basic_ops(self):
         self._get_swift_stat()
         container_name = self._create_container()

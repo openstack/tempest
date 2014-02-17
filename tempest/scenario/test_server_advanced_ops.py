@@ -16,7 +16,7 @@
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 
@@ -47,7 +47,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise cls.skipException(msg)
 
-    @services('compute')
+    @test.services('compute')
     def test_resize_server_confirm(self):
         # We create an instance for use in this test
         instance = self.create_server()
@@ -65,7 +65,7 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
         self.status_timeout(
             self.compute_client.servers, instance_id, 'ACTIVE')
 
-    @services('compute')
+    @test.services('compute')
     def test_server_sequence_suspend_resume(self):
         # We create an instance for use in this test
         instance = self.create_server()

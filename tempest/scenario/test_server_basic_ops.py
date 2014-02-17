@@ -18,7 +18,7 @@ from tempest.common.utils import test_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
 import testscenarios
 
@@ -162,7 +162,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
                 self._log_console_output()
                 raise
 
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_basicops(self):
         self.add_keypair()
         self.create_security_group()

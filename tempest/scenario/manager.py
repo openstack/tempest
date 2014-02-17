@@ -26,7 +26,7 @@ from tempest.api.network import common as net_common
 from tempest import clients
 from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
-from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log
@@ -358,7 +358,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             username = CONF.scenario.ssh_user
         if private_key is None:
             private_key = self.keypair.private_key
-        return RemoteClient(ip, username, pkey=private_key)
+        return remote_client.RemoteClient(ip, username, pkey=private_key)
 
     def _log_console_output(self, servers=None):
         if not servers:

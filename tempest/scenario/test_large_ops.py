@@ -17,7 +17,7 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 
@@ -63,7 +63,7 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
             self.set_resource(server.name, server)
         self._wait_for_server_status('ACTIVE')
 
-    @services('compute', 'image')
+    @test.services('compute', 'image')
     def test_large_ops_scenario(self):
         if CONF.scenario.large_ops_number < 1:
             return
