@@ -90,6 +90,7 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         # Verification of vip delete
         resp, body = self.client.delete_vip(vip['id'])
         self.assertEqual('204', resp['status'])
+        self.client.wait_for_resource_deletion('vip', vip['id'])
         # Verification of pool update
         new_name = "New_pool"
         resp, body = self.client.update_pool(pool['id'],

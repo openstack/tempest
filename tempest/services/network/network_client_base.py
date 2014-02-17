@@ -10,9 +10,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import time
 import urllib
 
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -52,6 +54,8 @@ class NetworkClientBase(object):
         self.rest_client.service = CONF.network.catalog_type
         self.version = '2.0'
         self.uri_prefix = "v%s" % (self.version)
+        self.build_timeout = CONF.network.build_timeout
+        self.build_interval = CONF.network.build_interval
 
     def get_rest_client(self, auth_provider):
         raise NotImplementedError
@@ -191,3 +195,23 @@ class NetworkClientBase(object):
         resp, body = self.post(uri, body)
         body = {'ports': self.deserialize_list(body)}
         return resp, body
+
+    def wait_for_resource_deletion(self, resource_type, id):
+        """Waits for a resource to be deleted."""
+        start_time = int(time.time())
+        while True:
+            if self.is_resource_deleted(resource_type, id):
+                return
+            if int(time.time()) - start_time >= self.build_timeout:
+                raise exceptions.TimeoutException
+            time.sleep(self.build_interval)
+
+    def is_resource_deleted(self, resource_type, id):
+        method = 'show_' + resource_type
+        try:
+            getattr(self, method)(id)
+        except AttributeError:
+            raise Exception("Unknown resource type %s " % resource_type)
+        except exceptions.NotFound:
+            return True
+        return False
