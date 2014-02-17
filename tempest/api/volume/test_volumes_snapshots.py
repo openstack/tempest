@@ -12,10 +12,12 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
 LOG = logging.getLogger(__name__)
+CONF = config.CONF
 
 
 class VolumesSnapshotTest(base.BaseVolumeV1Test):
@@ -34,6 +36,11 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
     @classmethod
     def tearDownClass(cls):
         super(VolumesSnapshotTest, cls).tearDownClass()
+
+    def _detach(self, volume_id):
+        """Detach volume."""
+        self.volumes_client.detach_volume(volume_id)
+        self.volumes_client.wait_for_volume_status(volume_id, 'available')
 
     def _list_by_param_values_and_assert(self, params, with_detail=False):
         """
@@ -55,6 +62,32 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                 msg = "Failed to list snapshots %s by %s" % \
                       ('details' if with_detail else '', key)
                 self.assertEqual(params[key], snap[key], msg)
+
+    @attr(type='gate')
+    def test_snapshot_create_with_volume_in_use(self):
+        # Create a snapshot when volume status is in-use
+        # Create a test instance
+        server_name = data_utils.rand_name('instance-')
+        resp, server = self.servers_client.create_server(server_name,
+                                                         self.image_ref,
+                                                         self.flavor_ref)
+        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+        mountpoint = '/dev/%s' % CONF.compute.volume_device_name
+        resp, body = self.volumes_client.attach_volume(
+            self.volume_origin['id'], server['id'], mountpoint)
+        self.assertEqual(202, resp.status)
+        self.volumes_client.wait_for_volume_status(self.volume_origin['id'],
+                                                   'in-use')
+        self.addCleanup(self._detach, self.volume_origin['id'])
+        # Snapshot a volume even if it's attached to an instance
+        snapshot = self.create_snapshot(self.volume_origin['id'],
+                                        force=True)
+        # Delete the snapshot
+        self.snapshots_client.delete_snapshot(snapshot['id'])
+        self.assertEqual(202, resp.status)
+        self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
+        self.snapshots.remove(snapshot)
 
     @attr(type='gate')
     def test_snapshot_create_get_list_update_delete(self):
