@@ -15,7 +15,7 @@
 
 """Common utilities used in testing."""
 
-from tempest.test import BaseTestCase
+from tempest import test
 
 
 class skip_unless_attr(object):
@@ -30,7 +30,7 @@ class skip_unless_attr(object):
             """Wrapped skipper function."""
             testobj = args[0]
             if not getattr(testobj, self.attr, False):
-                raise BaseTestCase.skipException(self.message)
+                raise test.BaseTestCase.skipException(self.message)
             func(*args, **kw)
         _skipper.__name__ = func.__name__
         _skipper.__doc__ = func.__doc__

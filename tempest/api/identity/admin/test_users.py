@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from testtools.matchers import Contains
+from testtools import matchers
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class UsersTestJSON(base.BaseIdentityV2AdminTest):
@@ -30,7 +30,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         cls.alt_password = data_utils.rand_name('pass_')
         cls.alt_email = cls.alt_user + '@testmail.tm'
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_user(self):
         # Create a user
         self.data.setup_test_tenant()
@@ -41,7 +41,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual(self.alt_user, user['name'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_user_with_enabled(self):
         # Create a user with enabled : False
         self.data.setup_test_tenant()
@@ -55,7 +55,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual('false', str(user['enabled']).lower())
         self.assertEqual(self.alt_email, user['email'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_user(self):
         # Test case to check if updating of user attributes is successful.
         test_user = data_utils.rand_name('test_user_')
@@ -83,7 +83,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(u_email2, updated_user['email'])
         self.assertEqual('false', str(updated_user['enabled']).lower())
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_delete_user(self):
         # Delete a user
         test_user = data_utils.rand_name('test_user_')
@@ -95,7 +95,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         resp, body = self.client.delete_user(user['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_user_authentication(self):
         # Valid user's token is authenticated
         self.data.setup_test_user()
@@ -108,7 +108,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                                             self.data.test_tenant)
         self.assertEqual('200', resp['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_authentication_request_without_token(self):
         # Request for token authentication with a valid token in header
         self.data.setup_test_user()
@@ -125,16 +125,16 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual('200', resp['status'])
         self.client.auth_provider.clear_auth()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()
         resp, users = self.client.get_users()
         self.assertThat([u['name'] for u in users],
-                        Contains(self.data.test_user),
+                        matchers.Contains(self.data.test_user),
                         "Could not find %s" % self.data.test_user)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_users_for_tenant(self):
         # Return a list of all users for a tenant
         self.data.setup_test_tenant()
@@ -167,7 +167,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_users_with_roles_for_tenant(self):
         # Return list of users on tenant when roles are assigned to users
         self.data.setup_test_user()

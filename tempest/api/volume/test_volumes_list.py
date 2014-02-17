@@ -18,8 +18,8 @@ import operator
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
-from tempest.test import attr
-from testtools.matchers import ContainsAll
+from tempest import test
+from testtools import matchers
 
 LOG = logging.getLogger(__name__)
 
@@ -111,12 +111,12 @@ class VolumesListTest(base.BaseVolumeV1Test):
                       ('details' if with_detail else '', key)
                 if key == 'metadata':
                     self.assertThat(volume[key].items(),
-                                    ContainsAll(params[key].items()),
+                                    matchers.ContainsAll(params[key].items()),
                                     msg)
                 else:
                     self.assertEqual(params[key], volume[key], msg)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_list(self):
         # Get a list of Volumes
         # Fetch all volumes
@@ -125,7 +125,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
         self.assertVolumesIn(fetched_list, self.volume_list,
                              fields=VOLUME_FIELDS)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_with_details(self):
         # Get a list of Volumes with details
         # Fetch all Volumes
@@ -133,7 +133,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
         self.assertEqual(200, resp.status)
         self.assertVolumesIn(fetched_list, self.volume_list)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_by_name(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {'display_name': volume['display_name']}
@@ -143,7 +143,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
         self.assertEqual(fetched_vol[0]['display_name'],
                          volume['display_name'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_details_by_name(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {'display_name': volume['display_name']}
@@ -153,7 +153,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
         self.assertEqual(fetched_vol[0]['display_name'],
                          volume['display_name'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volumes_list_by_status(self):
         params = {'status': 'available'}
         resp, fetched_list = self.client.list_volumes(params)
@@ -163,7 +163,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
         self.assertVolumesIn(fetched_list, self.volume_list,
                              fields=VOLUME_FIELDS)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volumes_list_details_by_status(self):
         params = {'status': 'available'}
         resp, fetched_list = self.client.list_volumes_with_detail(params)
@@ -172,7 +172,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
             self.assertEqual('available', volume['status'])
         self.assertVolumesIn(fetched_list, self.volume_list)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volumes_list_by_availability_zone(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
@@ -184,7 +184,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
         self.assertVolumesIn(fetched_list, self.volume_list,
                              fields=VOLUME_FIELDS)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volumes_list_details_by_availability_zone(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
@@ -195,19 +195,19 @@ class VolumesListTest(base.BaseVolumeV1Test):
             self.assertEqual(zone, volume['availability_zone'])
         self.assertVolumesIn(fetched_list, self.volume_list)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_with_param_metadata(self):
         # Test to list volumes when metadata param is given
         params = {'metadata': self.metadata}
         self._list_by_param_value_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_with_detail_param_metadata(self):
         # Test to list volumes details when metadata param is given
         params = {'metadata': self.metadata}
         self._list_by_param_value_and_assert(params, with_detail=True)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_param_display_name_and_status(self):
         # Test to list volume when display name and status param is given
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
@@ -215,7 +215,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
                   'status': 'available'}
         self._list_by_param_value_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_with_detail_param_display_name_and_status(self):
         # Test to list volume when name and status param is given
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]

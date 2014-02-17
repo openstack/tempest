@@ -14,11 +14,11 @@ import datetime
 import re
 from tempest.api.identity import base
 from tempest import clients
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import timeutils
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -49,10 +49,10 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(self.trustor_project_id)
 
         # Create a trustor User
-        self.trustor_username = rand_name('user-')
+        self.trustor_username = data_utils.rand_name('user-')
         u_desc = self.trustor_username + 'description'
         u_email = self.trustor_username + '@testmail.xx'
-        self.trustor_password = rand_name('pass-')
+        self.trustor_password = data_utils.rand_name('pass-')
         resp, user = self.client.create_user(
             self.trustor_username,
             description=u_desc,
@@ -63,8 +63,8 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
-        self.delegated_role = rand_name('DelegatedRole-')
-        self.not_delegated_role = rand_name('NotDelegatedRole-')
+        self.delegated_role = data_utils.rand_name('DelegatedRole-')
+        self.not_delegated_role = data_utils.rand_name('NotDelegatedRole-')
 
         resp, role = self.client.create_role(self.delegated_role)
         self.assertEqual(resp['status'], '201')
@@ -196,7 +196,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.create_trustor_and_roles()
         self.addCleanup(self.cleanup_user_and_roles)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_trust_impersonate(self):
         # Test case to check we can create, get and delete a trust
         # updates are not supported for trusts
@@ -208,7 +208,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
 
         self.check_trust_roles()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_trust_noimpersonate(self):
         # Test case to check we can create, get and delete a trust
         # with impersonation=False
@@ -220,7 +220,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
 
         self.check_trust_roles()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_trust_expire(self):
         # Test case to check we can create, get and delete a trust
         # with an expiry specified
@@ -236,7 +236,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
 
         self.check_trust_roles()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_trust_expire_invalid(self):
         # Test case to check we can check an invlaid expiry time
         # is rejected with the correct error
@@ -246,7 +246,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
                           self.create_trust,
                           expires=expires_str)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_trusts_query(self):
         self.create_trust()
         resp, trusts_get = self.trustor_client.get_trusts(
@@ -255,7 +255,7 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
         self.assertEqual(1, len(trusts_get))
         self.validate_trust(trusts_get[0], summary=True)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_trusts_all(self):
         self.create_trust()
         resp, trusts_get = self.client.get_trusts()

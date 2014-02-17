@@ -15,10 +15,10 @@ import testtools
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
-from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -147,7 +147,7 @@ Outputs:
                 'network': cls._get_default_network()['id']
             })
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     @testtools.skipIf(existing_keypair, 'Server ssh tests are disabled.')
     def test_can_log_into_created_server(self):
 
@@ -166,11 +166,12 @@ Outputs:
             body['physical_resource_id'])
 
         # Check that the user can authenticate with the generated password
-        linux_client = RemoteClient(server, 'ec2-user',
-                                    pkey=self.keypair['private_key'])
+        linux_client = remote_client.RemoteClient(server, 'ec2-user',
+                                                  pkey=self.keypair[
+                                                      'private_key'])
         linux_client.validate_authentication()
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_stack_wait_condition_data(self):
 
         sid = self.stack_identifier

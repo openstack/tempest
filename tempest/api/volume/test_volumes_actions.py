@@ -16,9 +16,7 @@
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
-from tempest.test import services
-from tempest.test import stresstest
+from tempest import test
 
 CONF = config.CONF
 
@@ -50,9 +48,9 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
 
         super(VolumesActionsTest, cls).tearDownClass()
 
-    @stresstest(class_setup_per='process')
-    @attr(type='smoke')
-    @services('compute')
+    @test.stresstest(class_setup_per='process')
+    @test.attr(type='smoke')
+    @test.services('compute')
     def test_attach_detach_volume_to_instance(self):
         # Volume is attached and detached successfully from an instance
         mountpoint = '/dev/vdc'
@@ -65,9 +63,9 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
         self.assertEqual(202, resp.status)
         self.client.wait_for_volume_status(self.volume['id'], 'available')
 
-    @stresstest(class_setup_per='process')
-    @attr(type='gate')
-    @services('compute')
+    @test.stresstest(class_setup_per='process')
+    @test.attr(type='gate')
+    @test.services('compute')
     def test_get_volume_attachment(self):
         # Verify that a volume's attachment information is retrieved
         mountpoint = '/dev/vdc'
@@ -91,8 +89,8 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
         self.assertEqual(self.volume['id'], attachment['id'])
         self.assertEqual(self.volume['id'], attachment['volume_id'])
 
-    @attr(type='gate')
-    @services('image')
+    @test.attr(type='gate')
+    @test.services('image')
     def test_volume_upload(self):
         # NOTE(gfidente): the volume uploaded in Glance comes from setUpClass,
         # it is shared with the other tests. After it is uploaded in Glance,
@@ -108,7 +106,7 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
         self.image_client.wait_for_image_status(image_id, 'active')
         self.client.wait_for_volume_status(self.volume['id'], 'available')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_extend(self):
         # Extend Volume Test.
         extend_size = int(self.volume['size']) + 1
@@ -119,7 +117,7 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
         self.assertEqual(200, resp.status)
         self.assertEqual(int(volume['size']), extend_size)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_reserve_unreserve_volume(self):
         # Mark volume as reserved.
         resp, body = self.client.reserve_volume(self.volume['id'])
@@ -139,7 +137,7 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
     def _is_true(self, val):
         return val in ['true', 'True', True]
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_readonly_update(self):
         # Update volume readonly true
         readonly = True
