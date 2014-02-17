@@ -17,14 +17,14 @@ import os
 
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
-from tempest.thirdparty.boto.test import BotoTestCase
-from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
+from tempest import test
+from tempest.thirdparty.boto import test as boto_test
+from tempest.thirdparty.boto.utils import s3
 
 CONF = config.CONF
 
 
-class S3ImagesTest(BotoTestCase):
+class S3ImagesTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -46,9 +46,9 @@ class S3ImagesTest(BotoTestCase):
         cls.addResourceCleanUp(cls.destroy_bucket,
                                cls.s3_client.connection_data,
                                cls.bucket_name)
-        s3_upload_dir(bucket, cls.materials_path)
+        s3.s3_upload_dir(bucket, cls.materials_path)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_register_get_deregister_ami_image(self):
         # Register and deregister ami image
         image = {"name": data_utils.rand_name("ami-name-"),

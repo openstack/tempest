@@ -26,14 +26,12 @@ from boto import s3
 import keystoneclient.exceptions
 
 import tempest.clients
-from tempest.common.utils.file_utils import have_effective_read_access
+from tempest.common.utils import file_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
-from tempest.thirdparty.boto.utils.wait import re_search_wait
-from tempest.thirdparty.boto.utils.wait import state_wait
-from tempest.thirdparty.boto.utils.wait import wait_exception
+from tempest.thirdparty.boto.utils import wait
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -47,7 +45,7 @@ def decision_maker():
     id_matcher = re.compile("[A-Za-z0-9]{20,}")
 
     def all_read(*args):
-        return all(map(have_effective_read_access, args))
+        return all(map(file_utils.have_effective_read_access, args))
 
     materials_path = CONF.boto.s3_materials_path
     ami_path = materials_path + os.sep + CONF.boto.ami_manifest
@@ -327,7 +325,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             final_set = set((final_set,))
         final_set |= self.gone_set
         lfunction = self.get_lfunction_gone(lfunction)
-        state = state_wait(lfunction, final_set, valid_set)
+        state = wait.state_wait(lfunction, final_set, valid_set)
         self.assertIn(state, valid_set | self.gone_set)
         return state
 
@@ -377,8 +375,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 return "ASSOCIATED"
             return "DISASSOCIATED"
 
-        state = state_wait(_disassociate, "DISASSOCIATED",
-                           set(("ASSOCIATED", "DISASSOCIATED")))
+        state = wait.state_wait(_disassociate, "DISASSOCIATED",
+                                set(("ASSOCIATED", "DISASSOCIATED")))
         self.assertEqual(state, "DISASSOCIATED")
 
     def assertAddressReleasedWait(self, address):
@@ -391,7 +389,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                     return "DELETED"
             return "NOTDELETED"
 
-        state = state_wait(_address_delete, "DELETED")
+        state = wait.state_wait(_address_delete, "DELETED")
         self.assertEqual(state, "DELETED")
 
     def assertReSearch(self, regexp, string):
@@ -462,7 +460,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         for instance in reservation.instances:
             try:
                 instance.terminate()
-                re_search_wait(_instance_state, "_GONE")
+                wait.re_search_wait(_instance_state, "_GONE")
             except BaseException:
                 LOG.exception("Failed to terminate instance %s " % instance)
                 exc_num += 1
@@ -503,7 +501,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
             return volume.status
 
         try:
-            re_search_wait(_volume_state, "available")  # not validates status
+            wait.re_search_wait(_volume_state, "available")
+            # not validates status
             LOG.info(_volume_state())
             volume.delete()
         except BaseException:
@@ -520,7 +519,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         def _update():
             snapshot.update(validate=True)
 
-        wait_exception(_update)
+        wait.wait_exception(_update)
 
 
 # you can specify tuples if you want to specify the status pattern

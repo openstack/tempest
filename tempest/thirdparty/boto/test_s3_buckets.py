@@ -14,20 +14,19 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
-from tempest.test import attr
-from tempest.test import skip_because
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest import test
+from tempest.thirdparty.boto import test as boto_test
 
 
-class S3BucketsTest(BotoTestCase):
+class S3BucketsTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
         super(S3BucketsTest, cls).setUpClass()
         cls.client = cls.os.s3_client
 
-    @skip_because(bug="1076965")
-    @attr(type='smoke')
+    @test.skip_because(bug="1076965")
+    @test.attr(type='smoke')
     def test_create_and_get_delete_bucket(self):
         # S3 Create, get and delete bucket
         bucket_name = data_utils.rand_name("s3bucket-")

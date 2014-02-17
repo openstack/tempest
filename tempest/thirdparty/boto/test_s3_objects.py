@@ -18,18 +18,18 @@ import contextlib
 import boto.s3.key
 
 from tempest.common.utils import data_utils
-from tempest.test import attr
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest import test
+from tempest.thirdparty.boto import test as boto_test
 
 
-class S3BucketsTest(BotoTestCase):
+class S3BucketsTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
         super(S3BucketsTest, cls).setUpClass()
         cls.client = cls.os.s3_client
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_get_delete_object(self):
         # S3 Create, get and delete object
         bucket_name = data_utils.rand_name("s3bucket-")
