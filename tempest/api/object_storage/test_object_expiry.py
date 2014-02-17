@@ -18,7 +18,7 @@ import time
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ObjectExpiryTest(base.BaseObjectTest):
@@ -67,12 +67,12 @@ class ObjectExpiryTest(base.BaseObjectTest):
         self.assertRaises(exceptions.NotFound, self.object_client.get_object,
                           self.container_name, self.object_name)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_object_after_expiry_time(self):
         metadata = {'X-Delete-After': '3'}
         self._test_object_expiry(metadata)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_object_at_expiry_time(self):
         metadata = {'X-Delete-At': str(int(time.time()) + 3)}
         self._test_object_expiry(metadata)

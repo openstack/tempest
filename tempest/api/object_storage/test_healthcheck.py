@@ -17,8 +17,7 @@
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 
 class HealthcheckTest(base.BaseObjectTest):
@@ -32,13 +31,13 @@ class HealthcheckTest(base.BaseObjectTest):
         # Turning http://.../v1/foobar into http://.../
         self.account_client.skip_path()
 
-    @attr('gate')
+    @test.attr('gate')
     def test_get_healthcheck(self):
 
         resp, _ = self.account_client.get("healthcheck", {})
 
         # The status is expected to be 200
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
 
         # The target of the request is not any Swift resource. Therefore, the
         # existence of response header is checked without a custom matcher.

@@ -18,8 +18,7 @@ import hashlib
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 
 class ObjectTest(base.BaseObjectTest):
@@ -35,7 +34,7 @@ class ObjectTest(base.BaseObjectTest):
         cls.delete_containers(cls.containers)
         super(ObjectTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_object(self):
         # create object
         object_name = data_utils.rand_name(name='TestObject')
@@ -50,7 +49,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_delete_object(self):
         # create object
         object_name = data_utils.rand_name(name='TestObject')
@@ -60,10 +59,10 @@ class ObjectTest(base.BaseObjectTest):
         # delete object
         resp, _ = self.object_client.delete_object(self.container_name,
                                                    object_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'DELETE')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_object_metadata(self):
         # add metadata to storage object, test if metadata is retrievable
 
@@ -78,20 +77,20 @@ class ObjectTest(base.BaseObjectTest):
         orig_metadata = {meta_key: meta_value}
         resp, _ = self.object_client.update_object_metadata(
             self.container_name, object_name, orig_metadata)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'POST')
 
         # get object metadata
         resp, resp_metadata = self.object_client.list_object_metadata(
             self.container_name, object_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
 
         actual_meta_key = 'x-object-meta-' + meta_key
         self.assertIn(actual_meta_key, resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_object(self):
         # retrieve object's data (in response body)
 
@@ -103,12 +102,12 @@ class ObjectTest(base.BaseObjectTest):
         # get object
         resp, body = self.object_client.get_object(self.container_name,
                                                    object_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
 
         self.assertEqual(body, data)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_copy_object_in_same_container(self):
         # create source object
         src_object_name = data_utils.rand_name(name='SrcObject')
@@ -135,7 +134,7 @@ class ObjectTest(base.BaseObjectTest):
                                                    dst_object_name)
         self.assertEqual(body, src_data)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_copy_object_to_itself(self):
         # change the content type of an existing object
 
@@ -160,7 +159,7 @@ class ObjectTest(base.BaseObjectTest):
                                                           object_name)
         self.assertEqual(resp['content-type'], metadata['content-type'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_copy_object_2d_way(self):
         # create source object
         src_object_name = data_utils.rand_name(name='SrcObject')
@@ -195,7 +194,7 @@ class ObjectTest(base.BaseObjectTest):
                                                    dst_object_name)
         self.assertEqual(body, src_data)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_copy_object_across_containers(self):
         # create a container to use as  asource container
         src_container_name = data_utils.rand_name(name='TestSourceContainer')
@@ -219,7 +218,7 @@ class ObjectTest(base.BaseObjectTest):
         resp, _ = self.object_client.update_object_metadata(src_container_name,
                                                             object_name,
                                                             orig_metadata)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'POST')
 
         # copy object from source container to destination container
@@ -237,7 +236,7 @@ class ObjectTest(base.BaseObjectTest):
         self.assertIn(actual_meta_key, resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_object_upload_in_segments(self):
         # create object
         object_name = data_utils.rand_name(name='LObject')
@@ -280,7 +279,7 @@ class ObjectTest(base.BaseObjectTest):
             self.container_name, object_name)
         self.assertEqual(''.join(data_segments), body)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_object_if_different(self):
         # http://en.wikipedia.org/wiki/HTTP_ETag
         # Make a conditional request for an object using the If-None-Match
@@ -312,7 +311,7 @@ class ObjectTest(base.BaseObjectTest):
         md5 = hashlib.md5(local_data).hexdigest()
         headers = {'If-None-Match': md5}
         resp, body = self.object_client.get(url, headers=headers)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
 
 
@@ -326,7 +325,7 @@ class PublicObjectTest(base.BaseObjectTest):
         self.delete_containers([self.container_name])
         super(PublicObjectTest, self).tearDown()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_access_public_container_object_without_using_creds(self):
         # make container public-readable and access an object in it object
         # anonymously, without using credentials
@@ -335,7 +334,7 @@ class PublicObjectTest(base.BaseObjectTest):
         cont_headers = {'X-Container-Read': '.r:*,.rlistings'}
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers, metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
 
         # create object
@@ -350,7 +349,7 @@ class PublicObjectTest(base.BaseObjectTest):
         # list container metadata
         resp_meta, _ = self.container_client.list_container_metadata(
             self.container_name)
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'HEAD')
 
         self.assertIn('x-container-read', resp_meta)
@@ -367,7 +366,7 @@ class PublicObjectTest(base.BaseObjectTest):
 
         self.assertEqual(body, data)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_access_public_object_with_another_user_creds(self):
         # make container public-readable and access an object in it using
         # another user's credentials
@@ -375,7 +374,7 @@ class PublicObjectTest(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
 
         # create object
@@ -390,7 +389,7 @@ class PublicObjectTest(base.BaseObjectTest):
         # list container metadata
         resp, _ = self.container_client.list_container_metadata(
             self.container_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'HEAD')
 
         self.assertIn('x-container-read', resp)
