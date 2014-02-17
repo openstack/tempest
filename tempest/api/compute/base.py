@@ -296,8 +296,6 @@ class BaseV3ComputeTest(BaseComputeTest):
         cls.extensions_client = cls.os.extensions_v3_client
         cls.availability_zone_client = cls.os.availability_zone_v3_client
         cls.interfaces_client = cls.os.interfaces_v3_client
-        cls.instance_usages_audit_log_client = \
-            cls.os.instance_usages_audit_log_v3_client
         cls.hypervisor_client = cls.os.hypervisor_v3_client
         cls.keypairs_client = cls.os.keypairs_v3_client
         cls.volumes_client = cls.os.volumes_client
@@ -371,8 +369,6 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
 
         cls.os_adm = os_adm
         cls.servers_admin_client = cls.os_adm.servers_v3_client
-        cls.instance_usages_audit_log_admin_client = \
-            cls.os_adm.instance_usages_audit_log_v3_client
         cls.services_admin_client = cls.os_adm.services_v3_client
         cls.availability_zone_admin_client = \
             cls.os_adm.availability_zone_v3_client
