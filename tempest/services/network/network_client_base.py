@@ -115,9 +115,14 @@ class NetworkClientBase(object):
         return _delete
 
     def _shower(self, resource_name):
-        def _show(resource_id):
+        def _show(resource_id, field_list=[]):
+            # field_list is a sequence of two-element tuples, with the
+            # first element being 'fields'. An example:
+            # [('fields', 'id'), ('fields', 'name')]
             plural = self.pluralize(resource_name)
             uri = '%s/%s' % (self.get_uri(plural), resource_id)
+            if field_list:
+                uri += '?' + urllib.urlencode(field_list)
             resp, body = self.get(uri)
             body = self.deserialize_single(body)
             return resp, body

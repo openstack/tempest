@@ -118,6 +118,18 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertEqual(self.name, network['name'])
 
     @attr(type='smoke')
+    def test_show_network_fields(self):
+        # Verifies showing some fields of a network works
+        field_list = [('fields', 'id'), ('fields', 'name'), ]
+        resp, body = self.client.show_network(self.network['id'],
+                                              field_list=field_list)
+        self.assertEqual('200', resp['status'])
+        network = body['network']
+        self.assertEqual(len(network), 2)
+        self.assertEqual(self.network['id'], network['id'])
+        self.assertEqual(self.name, network['name'])
+
+    @attr(type='smoke')
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
         resp, body = self.client.list_networks()
@@ -151,6 +163,18 @@ class NetworksTestJSON(base.BaseNetworkTest):
         resp, body = self.client.show_subnet(self.subnet['id'])
         self.assertEqual('200', resp['status'])
         subnet = body['subnet']
+        self.assertEqual(self.subnet['id'], subnet['id'])
+        self.assertEqual(self.cidr, subnet['cidr'])
+
+    @attr(type='smoke')
+    def test_show_subnet_fields(self):
+        # Verifies showing some fields of a subnet works
+        field_list = [('fields', 'id'), ('fields', 'cidr'), ]
+        resp, body = self.client.show_subnet(self.subnet['id'],
+                                             field_list=field_list)
+        self.assertEqual('200', resp['status'])
+        subnet = body['subnet']
+        self.assertEqual(len(subnet), 2)
         self.assertEqual(self.subnet['id'], subnet['id'])
         self.assertEqual(self.cidr, subnet['cidr'])
 
@@ -205,6 +229,17 @@ class NetworksTestJSON(base.BaseNetworkTest):
         resp, body = self.client.show_port(self.port['id'])
         self.assertEqual('200', resp['status'])
         port = body['port']
+        self.assertEqual(self.port['id'], port['id'])
+
+    @attr(type='smoke')
+    def test_show_port_fields(self):
+        # Verifies showing fields of a port works
+        field_list = [('fields', 'id'), ]
+        resp, body = self.client.show_port(self.port['id'],
+                                           field_list=field_list)
+        self.assertEqual('200', resp['status'])
+        port = body['port']
+        self.assertEqual(len(port), 1)
         self.assertEqual(self.port['id'], port['id'])
 
     @attr(type='smoke')
