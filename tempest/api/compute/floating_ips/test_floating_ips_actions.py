@@ -14,9 +14,9 @@
 #    under the License.
 
 from tempest.api.compute.floating_ips import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
@@ -44,7 +44,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
         super(FloatingIPsTestJSON, cls).tearDownClass()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
@@ -59,7 +59,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         resp, body = self.client.list_floating_ips()
         self.assertIn(floating_ip_details, body)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
@@ -74,7 +74,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # Check it was really deleted.
         self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_associate_disassociate_floating_ip(self):
         # Positive test:Associate and disassociate the provided floating IP
         # to a specific server should be successful
@@ -90,12 +90,12 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             self.server_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_associate_already_associated_floating_ip(self):
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP
         # Create server so as to use for Multiple association
-        new_name = rand_name('floating_server')
+        new_name = data_utils.rand_name('floating_server')
         resp, body = self.create_test_server(name=new_name)
         self.servers_client.wait_for_server_status(body['id'], 'ACTIVE')
         self.new_server_id = body['id']

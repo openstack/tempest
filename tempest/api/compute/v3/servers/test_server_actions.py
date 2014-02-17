@@ -19,11 +19,10 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 CONF = config.CONF
 
@@ -52,7 +51,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_change_server_password(self):
         # The server's password should be set to the provided password
         new_password = 'Newpass1234'
@@ -63,16 +62,18 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         if self.run_ssh:
             # Verify that the user can authenticate with the new password
             resp, server = self.client.get_server(self.server_id)
-            linux_client = RemoteClient(server, self.ssh_user, new_password)
+            linux_client = remote_client.RemoteClient(server, self.ssh_user,
+                                                      new_password)
             linux_client.validate_authentication()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_reboot_server_hard(self):
         # The server should be power cycled
         if self.run_ssh:
             # Get the time the server was last rebooted,
             resp, server = self.client.get_server(self.server_id)
-            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            linux_client = remote_client.RemoteClient(server, self.ssh_user,
+                                                      self.password)
             boot_time = linux_client.get_boot_time()
 
         resp, body = self.client.reboot(self.server_id, 'HARD')
@@ -81,18 +82,20 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         if self.run_ssh:
             # Log in and verify the boot time has changed
-            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            linux_client = remote_client.RemoteClient(server, self.ssh_user,
+                                                      self.password)
             new_boot_time = linux_client.get_boot_time()
             self.assertGreater(new_boot_time, boot_time)
 
-    @skip_because(bug="1014647")
-    @attr(type='smoke')
+    @test.skip_because(bug="1014647")
+    @test.attr(type='smoke')
     def test_reboot_server_soft(self):
         # The server should be signaled to reboot gracefully
         if self.run_ssh:
             # Get the time the server was last rebooted,
             resp, server = self.client.get_server(self.server_id)
-            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            linux_client = remote_client.RemoteClient(server, self.ssh_user,
+                                                      self.password)
             boot_time = linux_client.get_boot_time()
 
         resp, body = self.client.reboot(self.server_id, 'SOFT')
@@ -101,11 +104,12 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         if self.run_ssh:
             # Log in and verify the boot time has changed
-            linux_client = RemoteClient(server, self.ssh_user, self.password)
+            linux_client = remote_client.RemoteClient(server, self.ssh_user,
+                                                      self.password)
             new_boot_time = linux_client.get_boot_time()
             self.assertGreater(new_boot_time, boot_time)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_rebuild_server(self):
         # The server should be rebuilt using the provided image and data
         meta = {'rebuild': 'server'}
@@ -133,10 +137,11 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
-            linux_client = RemoteClient(server, self.ssh_user, password)
+            linux_client = remote_client.RemoteClient(server, self.ssh_user,
+                                                      password)
             linux_client.validate_authentication()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rebuild_server_in_stop_state(self):
         # The server in stop state  should be rebuilt using the provided
         # image and remain in SHUTOFF state
@@ -174,7 +179,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         return current_flavor, new_flavor_ref
 
     @testtools.skipIf(not resize_available, 'Resize not available.')
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_resize_server_confirm(self):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
@@ -193,7 +198,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(new_flavor_ref, server['flavor']['id'])
 
     @testtools.skipIf(not resize_available, 'Resize not available.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_resize_server_revert(self):
         # The server's RAM and disk space should return to its original
         # values after a resize is reverted
@@ -221,7 +226,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
                 required time (%s s).' % (self.server_id, self.build_timeout)
                 raise exceptions.TimeoutException(message)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
         # create the first and the second backup
@@ -303,7 +308,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id and number of lines
@@ -319,7 +324,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         self.wait_for(self._get_output)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_console_output_server_id_in_shutoff_status(self):
         # Positive test:Should be able to GET the console output
         # for a given server_id in SHUTOFF status
@@ -336,7 +341,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         self.wait_for(self._get_output)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_pause_unpause_server(self):
         resp, server = self.client.pause_server(self.server_id)
         self.assertEqual(202, resp.status)
@@ -345,7 +350,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_suspend_resume_server(self):
         resp, server = self.client.suspend_server(self.server_id)
         self.assertEqual(202, resp.status)
@@ -354,7 +359,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_shelve_unshelve_server(self):
         resp, server = self.client.shelve_server(self.server_id)
         self.assertEqual(202, resp.status)
@@ -378,7 +383,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_stop_start_server(self):
         resp, server = self.servers_client.stop(self.server_id)
         self.assertEqual(202, resp.status)
@@ -387,7 +392,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_lock_unlock_server(self):
         # Lock the server,try server stop(exceptions throw),unlock it and retry
         resp, server = self.servers_client.lock_server(self.server_id)

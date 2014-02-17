@@ -16,8 +16,8 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
-from testtools.matchers import ContainsAll
+from tempest import test
+from testtools import matchers
 
 CONF = config.CONF
 
@@ -34,7 +34,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         volume = None
@@ -68,7 +68,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
                          'The fetched Volume is different '
                          'from the created Volume')
         self.assertThat(fetched_volume['metadata'].items(),
-                        ContainsAll(metadata.items()),
+                        matchers.ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
 

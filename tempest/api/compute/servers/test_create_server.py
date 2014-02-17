@@ -20,9 +20,9 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest.common.utils.linux import remote_client
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -54,14 +54,14 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_server_response(self):
         # Check that the required fields are returned with values
         self.assertEqual(202, self.resp.status)
         self.assertTrue(self.server_initial['id'] is not None)
         self.assertTrue(self.server_initial['adminPass'] is not None)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_verify_server_details(self):
         # Verify the specified server attributes are set correctly
         self.assertEqual(self.accessIPv4, self.server['accessIPv4'])
@@ -74,7 +74,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.flavor_ref, self.server['flavor']['id'])
         self.assertEqual(self.meta, self.server['metadata'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_servers(self):
         # The created server should be in the list of all servers
         resp, body = self.client.list_servers()
@@ -82,7 +82,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         found = any([i for i in servers if i['id'] == self.server['id']])
         self.assertTrue(found)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_servers_with_detail(self):
         # The created server should be in the detailed list of all servers
         resp, body = self.client.list_servers_with_detail()
@@ -91,19 +91,21 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(found)
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
         resp, flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
-        linux_client = RemoteClient(self.server, self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(self.server, self.ssh_user,
+                                                  self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
-        linux_client = RemoteClient(self.server, self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(self.server, self.ssh_user,
+                                                  self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
 
@@ -136,7 +138,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_verify_created_server_ephemeral_disk(self):
         # Verify that the ephemeral disk is created when creating server
 
@@ -196,12 +198,12 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                                       adminPass=admin_pass,
                                       flavor=flavor_with_eph_disk_id))
         # Get partition number of server without extra specs.
-        linux_client = RemoteClient(server_no_eph_disk,
-                                    self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(server_no_eph_disk,
+                                                  self.ssh_user, self.password)
         partition_num = len(linux_client.get_partitions())
 
-        linux_client = RemoteClient(server_with_eph_disk,
-                                    self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(server_with_eph_disk,
+                                                  self.ssh_user, self.password)
         self.assertEqual(partition_num + 1, linux_client.get_partitions())
 
 

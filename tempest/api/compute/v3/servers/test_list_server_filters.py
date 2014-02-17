@@ -18,8 +18,7 @@ from tempest.api import utils
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 CONF = config.CONF
 
@@ -74,7 +73,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         cls.fixed_network_name = CONF.compute.fixed_network_name
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_image(self):
         # Filter the list of servers by image
         params = {'image': self.image_ref}
@@ -85,7 +84,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_flavor(self):
         # Filter the list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
@@ -96,7 +95,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_server_name(self):
         # Filter the list of servers by server name
         params = {'name': self.s1_name}
@@ -107,7 +106,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_server_status(self):
         # Filter the list of servers by server status
         params = {'status': 'active'}
@@ -118,21 +117,21 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 1}
         resp, servers = self.client.list_servers(params)
         self.assertEqual(1, len([x for x in servers['servers'] if 'id' in x]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_zero_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 0}
         resp, servers = self.client.list_servers(params)
         self.assertEqual(0, len(servers['servers']))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_exceed_limit(self):
         # Verify only the expected number of servers are returned
         params = {'limit': 100000}
@@ -142,7 +141,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
                          len([x for x in servers['servers'] if 'id' in x]))
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_detailed_filter_by_image(self):
         # Filter the detailed list of servers by image
         params = {'image': self.image_ref}
@@ -153,7 +152,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_detailed_filter_by_flavor(self):
         # Filter the detailed list of servers by flavor
         params = {'flavor': self.flavor_ref_alt}
@@ -164,7 +163,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_detailed_filter_by_server_name(self):
         # Filter the detailed list of servers by server name
         params = {'name': self.s1_name}
@@ -175,7 +174,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_detailed_filter_by_server_status(self):
         # Filter the detailed list of servers by server status
         params = {'status': 'active'}
@@ -188,7 +187,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
         self.assertEqual(['ACTIVE'] * 3, [x['status'] for x in servers])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_shutoff_status(self):
         # Filter the list of servers by server shutoff status
         params = {'status': 'shutoff'}
@@ -205,7 +204,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertNotIn(self.s3['id'], map(lambda x: x['id'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filtered_by_name_wildcard(self):
         # List all servers that contains '-instance' in name
         params = {'name': '-instance'}
@@ -227,8 +226,8 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @skip_because(bug="1170718")
-    @attr(type='gate')
+    @test.skip_because(bug="1170718")
+    @test.attr(type='gate')
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
@@ -242,9 +241,9 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @skip_because(bug="1182883",
-                  condition=CONF.service_available.neutron)
-    @attr(type='gate')
+    @test.skip_because(bug="1182883",
+                       condition=CONF.service_available.neutron)
+    @test.attr(type='gate')
     def test_list_servers_filtered_by_ip_regex(self):
         # Filter servers by regex ip
         # List all servers filtered by part of ip address.
@@ -259,7 +258,7 @@ class ListServerFiltersV3Test(base.BaseV3ComputeTest):
         self.assertIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_detailed_limit_results(self):
         # Verify only the expected number of detailed results are returned
         params = {'limit': 1}

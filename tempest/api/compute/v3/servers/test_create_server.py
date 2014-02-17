@@ -20,7 +20,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import test
 
@@ -95,7 +95,8 @@ class ServersV3Test(base.BaseV3ComputeTest):
     @test.attr(type='gate')
     def test_can_log_into_created_server(self):
         # Check that the user can authenticate with the generated password
-        linux_client = RemoteClient(self.server, self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(self.server,
+                                                  self.ssh_user, self.password)
         self.assertTrue(linux_client.can_authenticate())
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
@@ -104,14 +105,16 @@ class ServersV3Test(base.BaseV3ComputeTest):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
         resp, flavor = self.flavors_client.get_flavor_details(self.flavor_ref)
-        linux_client = RemoteClient(self.server, self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(self.server,
+                                                  self.ssh_user, self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     @test.attr(type='gate')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
-        linux_client = RemoteClient(self.server, self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(self.server,
+                                                  self.ssh_user, self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
 
@@ -204,12 +207,12 @@ class ServersWithSpecificFlavorV3Test(base.BaseV3ComputeAdminTest):
                                       adminPass=admin_pass,
                                       flavor=flavor_with_eph_disk_id))
         # Get partition number of server without extra specs.
-        linux_client = RemoteClient(server_no_eph_disk,
-                                    self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(server_no_eph_disk,
+                                                  self.ssh_user, self.password)
         partition_num = len(linux_client.get_partitions())
 
-        linux_client = RemoteClient(server_with_eph_disk,
-                                    self.ssh_user, self.password)
+        linux_client = remote_client.RemoteClient(server_with_eph_disk,
+                                                  self.ssh_user, self.password)
         self.assertEqual(partition_num + 1, linux_client.get_partitions())
 
 

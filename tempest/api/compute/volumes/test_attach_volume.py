@@ -16,9 +16,9 @@
 import testtools
 
 from tempest.api.compute import base
-from tempest.common.utils.linux.remote_client import RemoteClient
+from tempest.common.utils.linux import remote_client
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -78,7 +78,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.addCleanup(self._detach, server['id'], volume['id'])
 
     @testtools.skipIf(not run_ssh, 'SSH required for this test')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
@@ -92,8 +92,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.start(server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
-        linux_client = RemoteClient(server,
-                                    self.image_ssh_user, server['adminPass'])
+        linux_client = remote_client.RemoteClient(server, self.image_ssh_user,
+                                                  server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertIn(self.device, partitions)
 
@@ -106,8 +106,8 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         self.servers_client.start(server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
 
-        linux_client = RemoteClient(server,
-                                    self.image_ssh_user, server['adminPass'])
+        linux_client = remote_client.RemoteClient(server, self.image_ssh_user,
+                                                  server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 
