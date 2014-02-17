@@ -14,11 +14,7 @@ from lxml import etree
 import xml.etree.ElementTree as ET
 
 from tempest.common import rest_client
-from tempest.services.compute.xml.common import deep_dict_to_xml
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import parse_array
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 from tempest.services.network import network_client_base as client_base
 
 
@@ -37,11 +33,11 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
-            array.append(xml_to_json(child))
+            array.append(common.xml_to_json(child))
         return array
 
     def deserialize_list(self, body):
-        return parse_array(etree.fromstring(body), self.PLURALS)
+        return common.parse_array(etree.fromstring(body), self.PLURALS)
 
     def deserialize_single(self, body):
         return _root_tag_fetcher_and_xml_to_json_parse(body)
@@ -50,91 +46,91 @@ class NetworkClientXML(client_base.NetworkClientBase):
         #TODO(enikanorov): implement better json to xml conversion
         # expecting the dict with single key
         root = body.keys()[0]
-        post_body = Element(root)
+        post_body = common.Element(root)
         post_body.add_attr('xmlns:xsi',
                            'http://www.w3.org/2001/XMLSchema-instance')
         for name, attr in body[root].items():
             elt = self._get_element(name, attr)
             post_body.append(elt)
-        return str(Document(post_body))
+        return str(common.Document(post_body))
 
     def serialize_list(self, body, root_name=None, item_name=None):
         # expecting dict in form
         # body = {'resources': [res_dict1, res_dict2, ...]
-        post_body = Element(root_name)
+        post_body = common.Element(root_name)
         post_body.add_attr('xmlns:xsi',
                            'http://www.w3.org/2001/XMLSchema-instance')
         for item in body[body.keys()[0]]:
-            elt = Element(item_name)
+            elt = common.Element(item_name)
             for name, attr in item.items():
                 elt_content = self._get_element(name, attr)
                 elt.append(elt_content)
             post_body.append(elt)
-        return str(Document(post_body))
+        return str(common.Document(post_body))
 
     def _get_element(self, name, value):
         if value is None:
-            xml_elem = Element(name)
+            xml_elem = common.Element(name)
             xml_elem.add_attr("xsi:nil", "true")
             return xml_elem
         elif isinstance(value, dict):
-            dict_element = Element(name)
+            dict_element = common.Element(name)
             for key, value in value.iteritems():
                 elem = self._get_element(key, value)
                 dict_element.append(elem)
             return dict_element
         elif isinstance(value, list):
-            list_element = Element(name)
+            list_element = common.Element(name)
             for element in value:
                 elem = self._get_element(name[:-1], element)
                 list_element.append(elem)
             return list_element
         else:
-            return Element(name, value)
+            return common.Element(name, value)
 
     def create_security_group(self, name):
         uri = '%s/security-groups' % (self.uri_prefix)
-        post_body = Element("security_group")
-        p2 = Element("name", name)
+        post_body = common.Element("security_group")
+        p2 = common.Element("name", name)
         post_body.append(p2)
-        resp, body = self.post(uri, str(Document(post_body)))
+        resp, body = self.post(uri, str(common.Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def create_security_group_rule(self, secgroup_id,
                                    direction='ingress', **kwargs):
         uri = '%s/security-group-rules' % (self.uri_prefix)
-        rule = Element("security_group_rule")
-        p1 = Element('security_group_id', secgroup_id)
-        p2 = Element('direction', direction)
+        rule = common.Element("security_group_rule")
+        p1 = common.Element('security_group_id', secgroup_id)
+        p2 = common.Element('direction', direction)
         rule.append(p1)
         rule.append(p2)
         for key, val in kwargs.items():
-            key = Element(key, val)
+            key = common.Element(key, val)
             rule.append(key)
-        resp, body = self.post(uri, str(Document(rule)))
+        resp, body = self.post(uri, str(common.Document(rule)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def create_member(self, address, protocol_port, pool_id):
         uri = '%s/lb/members' % (self.uri_prefix)
-        post_body = Element("member")
-        p1 = Element("address", address)
-        p2 = Element("protocol_port", protocol_port)
-        p3 = Element("pool_id", pool_id)
+        post_body = common.Element("member")
+        p1 = common.Element("address", address)
+        p2 = common.Element("protocol_port", protocol_port)
+        p3 = common.Element("pool_id", pool_id)
         post_body.append(p1)
         post_body.append(p2)
         post_body.append(p3)
-        resp, body = self.post(uri, str(Document(post_body)))
+        resp, body = self.post(uri, str(common.Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def update_member(self, admin_state_up, member_id):
         uri = '%s/lb/members/%s' % (self.uri_prefix, str(member_id))
-        put_body = Element("member")
-        p2 = Element("admin_state_up", admin_state_up)
+        put_body = common.Element("member")
+        p2 = common.Element("admin_state_up", admin_state_up)
         put_body.append(p2)
-        resp, body = self.put(uri, str(Document(put_body)))
+        resp, body = self.put(uri, str(common.Document(put_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -142,10 +138,10 @@ class NetworkClientXML(client_base.NetworkClientBase):
                                            pool_id):
         uri = '%s/lb/pools/%s/health_monitors' % (self.uri_prefix,
                                                   pool_id)
-        post_body = Element("health_monitor")
-        p1 = Element("id", health_monitor_id,)
+        post_body = common.Element("health_monitor")
+        p1 = common.Element("id", health_monitor_id,)
         post_body.append(p1)
-        resp, body = self.post(uri, str(Document(post_body)))
+        resp, body = self.post(uri, str(common.Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -163,101 +159,102 @@ class NetworkClientXML(client_base.NetworkClientBase):
 
     def create_router(self, name, **kwargs):
         uri = '%s/routers' % (self.uri_prefix)
-        router = Element("router")
-        router.append(Element("name", name))
-        deep_dict_to_xml(router, kwargs)
-        resp, body = self.post(uri, str(Document(router)))
+        router = common.Element("router")
+        router.append(common.Element("name", name))
+        common.deep_dict_to_xml(router, kwargs)
+        resp, body = self.post(uri, str(common.Document(router)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def update_router(self, router_id, **kwargs):
         uri = '%s/routers/%s' % (self.uri_prefix, router_id)
-        router = Element("router")
+        router = common.Element("router")
         for element, content in kwargs.iteritems():
-            router.append(Element(element, content))
-        resp, body = self.put(uri, str(Document(router)))
+            router.append(common.Element(element, content))
+        resp, body = self.put(uri, str(common.Document(router)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def add_router_interface_with_subnet_id(self, router_id, subnet_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
               router_id)
-        subnet = Element("subnet_id", subnet_id)
-        resp, body = self.put(uri, str(Document(subnet)))
+        subnet = common.Element("subnet_id", subnet_id)
+        resp, body = self.put(uri, str(common.Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def add_router_interface_with_port_id(self, router_id, port_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
               router_id)
-        port = Element("port_id", port_id)
-        resp, body = self.put(uri, str(Document(port)))
+        port = common.Element("port_id", port_id)
+        resp, body = self.put(uri, str(common.Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def remove_router_interface_with_subnet_id(self, router_id, subnet_id):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
               router_id)
-        subnet = Element("subnet_id", subnet_id)
-        resp, body = self.put(uri, str(Document(subnet)))
+        subnet = common.Element("subnet_id", subnet_id)
+        resp, body = self.put(uri, str(common.Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def remove_router_interface_with_port_id(self, router_id, port_id):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
               router_id)
-        port = Element("port_id", port_id)
-        resp, body = self.put(uri, str(Document(port)))
+        port = common.Element("port_id", port_id)
+        resp, body = self.put(uri, str(common.Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def create_floating_ip(self, ext_network_id, **kwargs):
         uri = '%s/floatingips' % (self.uri_prefix)
-        floatingip = Element('floatingip')
-        floatingip.append(Element("floating_network_id", ext_network_id))
+        floatingip = common.Element('floatingip')
+        floatingip.append(common.Element("floating_network_id",
+                                         ext_network_id))
         for element, content in kwargs.iteritems():
-            floatingip.append(Element(element, content))
-        resp, body = self.post(uri, str(Document(floatingip)))
+            floatingip.append(common.Element(element, content))
+        resp, body = self.post(uri, str(common.Document(floatingip)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def update_floating_ip(self, floating_ip_id, **kwargs):
         uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
-        floatingip = Element('floatingip')
+        floatingip = common.Element('floatingip')
         floatingip.add_attr('xmlns:xsi',
                             'http://www.w3.org/2001/XMLSchema-instance')
         for element, content in kwargs.iteritems():
             if content is None:
-                xml_elem = Element(element)
+                xml_elem = common.Element(element)
                 xml_elem.add_attr("xsi:nil", "true")
                 floatingip.append(xml_elem)
             else:
-                floatingip.append(Element(element, content))
-        resp, body = self.put(uri, str(Document(floatingip)))
+                floatingip.append(common.Element(element, content))
+        resp, body = self.put(uri, str(common.Document(floatingip)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
-        ports = parse_array(etree.fromstring(body), self.PLURALS)
+        ports = common.parse_array(etree.fromstring(body), self.PLURALS)
         ports = {"ports": ports}
         return resp, ports
 
     def update_agent(self, agent_id, agent_info):
         uri = '%s/agents/%s' % (self.uri_prefix, agent_id)
-        agent = Element('agent')
+        agent = common.Element('agent')
         for (key, value) in agent_info.items():
-            p = Element(key, value)
+            p = common.Element(key, value)
             agent.append(p)
-        resp, body = self.put(uri, str(Document(agent)))
+        resp, body = self.put(uri, str(common.Document(agent)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def list_pools_hosted_by_one_lbaas_agent(self, agent_id):
         uri = '%s/agents/%s/loadbalancer-pools' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
-        pools = parse_array(etree.fromstring(body))
+        pools = common.parse_array(etree.fromstring(body))
         body = {'pools': pools}
         return resp, body
 
@@ -283,14 +280,14 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
         resp, body = self.get(uri)
-        agents = parse_array(etree.fromstring(body))
+        agents = common.parse_array(etree.fromstring(body))
         body = {'agents': agents}
         return resp, body
 
     def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
-        networks = parse_array(etree.fromstring(body))
+        networks = common.parse_array(etree.fromstring(body))
         body = {'networks': networks}
         return resp, body
 
@@ -312,8 +309,8 @@ def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     root_tag = body.tag
     if root_tag.startswith("{"):
         ns, root_tag = root_tag.split("}", 1)
-    body = xml_to_json(etree.fromstring(xml_returned_body),
-                       NetworkClientXML.PLURALS)
+    body = common.xml_to_json(etree.fromstring(xml_returned_body),
+                              NetworkClientXML.PLURALS)
     nil = '{http://www.w3.org/2001/XMLSchema-instance}nil'
     for key, val in body.iteritems():
         if isinstance(val, dict):

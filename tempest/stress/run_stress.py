@@ -18,7 +18,7 @@ import argparse
 import inspect
 import json
 import sys
-from testtools.testsuite import iterate_tests
+from testtools import testsuite
 try:
     from unittest import loader
 except ImportError:
@@ -38,7 +38,7 @@ def discover_stress_tests(path="./", filter_attr=None, call_inherited=False):
     tests = []
     testloader = loader.TestLoader()
     list = testloader.discover(path)
-    for func in (iterate_tests(list)):
+    for func in (testsuite.iterate_tests(list)):
         attrs = []
         try:
             method_name = getattr(func, '_testMethodName')
