@@ -72,7 +72,7 @@ class VolumeTypesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         volume_types = []
         if body is not None:
@@ -83,7 +83,7 @@ class VolumeTypesClientXML(RestClientXML):
     def get_volume_type(self, type_id):
         """Returns the details of a single volume_type."""
         url = "types/%s" % str(type_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         return resp, self._parse_volume_type(body)
 
@@ -108,8 +108,7 @@ class VolumeTypesClientXML(RestClientXML):
                 spec.append(Text(value))
                 _extra_specs.append(spec)
 
-        resp, body = self.post('types', str(Document(vol_type)),
-                               self.headers)
+        resp, body = self.post('types', str(Document(vol_type)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -124,7 +123,7 @@ class VolumeTypesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         extra_specs = []
         if body is not None:
@@ -136,7 +135,7 @@ class VolumeTypesClientXML(RestClientXML):
         """Returns the details of a single volume_type extra spec."""
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         return resp, self._parse_volume_type_extra_specs(body)
 
@@ -160,8 +159,7 @@ class VolumeTypesClientXML(RestClientXML):
         else:
             extra_specs = None
 
-        resp, body = self.post(url, str(Document(extra_specs)),
-                               self.headers)
+        resp, body = self.post(url, str(Document(extra_specs)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -190,8 +188,7 @@ class VolumeTypesClientXML(RestClientXML):
                 spec.append(Text(value))
                 extra_specs.append(spec)
 
-        resp, body = self.put(url, str(Document(extra_specs)),
-                              self.headers)
+        resp, body = self.put(url, str(Document(extra_specs)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 

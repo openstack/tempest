@@ -98,8 +98,7 @@ class IdentityV3ClientXML(RestClientXML):
                             enabled=str(en).lower(),
                             project_id=project_id,
                             domain_id=domain_id)
-        resp, body = self.post('users', str(Document(post_body)),
-                               self.headers)
+        resp, body = self.post('users', str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -120,32 +119,31 @@ class IdentityV3ClientXML(RestClientXML):
                               description=description,
                               enabled=str(en).lower())
         resp, body = self.patch('users/%s' % user_id,
-                                str(Document(update_user)),
-                                self.headers)
+                                str(Document(update_user)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_user_projects(self, user_id):
         """Lists the projects on which a user has roles assigned."""
-        resp, body = self.get('users/%s/projects' % user_id, self.headers)
+        resp, body = self.get('users/%s/projects' % user_id)
         body = self._parse_projects(etree.fromstring(body))
         return resp, body
 
     def get_users(self):
         """Get the list of users."""
-        resp, body = self.get("users", self.headers)
+        resp, body = self.get("users")
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_user(self, user_id):
         """GET a user."""
-        resp, body = self.get("users/%s" % user_id, self.headers)
+        resp, body = self.get("users/%s" % user_id)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_user(self, user_id):
         """Deletes a User."""
-        resp, body = self.delete("users/%s" % user_id, self.headers)
+        resp, body = self.delete("users/%s" % user_id)
         return resp, body
 
     def create_project(self, name, **kwargs):
@@ -160,14 +158,13 @@ class IdentityV3ClientXML(RestClientXML):
                             enabled=str(en).lower(),
                             name=name)
         resp, body = self.post('projects',
-                               str(Document(post_body)),
-                               self.headers)
+                               str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_projects(self):
         """Get the list of projects."""
-        resp, body = self.get("projects", self.headers)
+        resp, body = self.get("projects")
         body = self._parse_projects(etree.fromstring(body))
         return resp, body
 
@@ -185,14 +182,13 @@ class IdentityV3ClientXML(RestClientXML):
                             enabled=str(en).lower(),
                             domain_id=domain_id)
         resp, body = self.patch('projects/%s' % project_id,
-                                str(Document(post_body)),
-                                self.headers)
+                                str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_project(self, project_id):
         """GET a Project."""
-        resp, body = self.get("projects/%s" % project_id, self.headers)
+        resp, body = self.get("projects/%s" % project_id)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -206,15 +202,13 @@ class IdentityV3ClientXML(RestClientXML):
         post_body = Element("role",
                             xmlns=XMLNS,
                             name=name)
-        resp, body = self.post('roles',
-                               str(Document(post_body)),
-                               self.headers)
+        resp, body = self.post('roles', str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_role(self, role_id):
         """GET a Role."""
-        resp, body = self.get('roles/%s' % str(role_id), self.headers)
+        resp, body = self.get('roles/%s' % str(role_id))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -224,21 +218,19 @@ class IdentityV3ClientXML(RestClientXML):
                             xmlns=XMLNS,
                             name=name)
         resp, body = self.patch('roles/%s' % str(role_id),
-                                str(Document(post_body)),
-                                self.headers)
+                                str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_role(self, role_id):
         """Delete a role."""
-        resp, body = self.delete('roles/%s' % str(role_id),
-                                 self.headers)
+        resp, body = self.delete('roles/%s' % str(role_id))
         return resp, body
 
     def assign_user_role(self, project_id, user_id, role_id):
         """Add roles to a user on a tenant."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
-                              (project_id, user_id, role_id), '', self.headers)
+                              (project_id, user_id, role_id), '')
         return resp, body
 
     def create_domain(self, name, **kwargs):
@@ -250,20 +242,19 @@ class IdentityV3ClientXML(RestClientXML):
                             name=name,
                             description=description,
                             enabled=str(en).lower())
-        resp, body = self.post('domains', str(Document(post_body)),
-                               self.headers)
+        resp, body = self.post('domains', str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_domains(self):
         """Get the list of domains."""
-        resp, body = self.get("domains", self.headers)
+        resp, body = self.get("domains")
         body = self._parse_domains(etree.fromstring(body))
         return resp, body
 
     def delete_domain(self, domain_id):
         """Delete a domain."""
-        resp, body = self.delete('domains/%s' % domain_id, self.headers)
+        resp, body = self.delete('domains/%s' % domain_id)
         return resp, body
 
     def update_domain(self, domain_id, **kwargs):
@@ -278,14 +269,13 @@ class IdentityV3ClientXML(RestClientXML):
                             description=description,
                             enabled=str(en).lower())
         resp, body = self.patch('domains/%s' % domain_id,
-                                str(Document(post_body)),
-                                self.headers)
+                                str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_domain(self, domain_id):
         """Get Domain details."""
-        resp, body = self.get('domains/%s' % domain_id, self.headers)
+        resp, body = self.get('domains/%s' % domain_id)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -315,14 +305,13 @@ class IdentityV3ClientXML(RestClientXML):
                             description=description,
                             domain_id=domain_id,
                             project_id=project_id)
-        resp, body = self.post('groups', str(Document(post_body)),
-                               self.headers)
+        resp, body = self.post('groups', str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_group(self, group_id):
         """Get group details."""
-        resp, body = self.get('groups/%s' % group_id, self.headers)
+        resp, body = self.get('groups/%s' % group_id)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -336,112 +325,105 @@ class IdentityV3ClientXML(RestClientXML):
                             name=name,
                             description=description)
         resp, body = self.patch('groups/%s' % group_id,
-                                str(Document(post_body)),
-                                self.headers)
+                                str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_group(self, group_id):
         """Delete a group."""
-        resp, body = self.delete('groups/%s' % group_id, self.headers)
+        resp, body = self.delete('groups/%s' % group_id)
         return resp, body
 
     def add_group_user(self, group_id, user_id):
         """Add user into group."""
-        resp, body = self.put('groups/%s/users/%s' % (group_id, user_id),
-                              '', self.headers)
+        resp, body = self.put('groups/%s/users/%s' % (group_id, user_id), '')
         return resp, body
 
     def list_group_users(self, group_id):
         """List users in group."""
-        resp, body = self.get('groups/%s/users' % group_id, self.headers)
+        resp, body = self.get('groups/%s/users' % group_id)
         body = self._parse_group_users(etree.fromstring(body))
         return resp, body
 
     def delete_group_user(self, group_id, user_id):
         """Delete user in group."""
-        resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id),
-                                 self.headers)
+        resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id))
         return resp, body
 
     def assign_user_role_on_project(self, project_id, user_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
-                              (project_id, user_id, role_id), '',
-                              self.headers)
+                              (project_id, user_id, role_id), '')
         return resp, body
 
     def assign_user_role_on_domain(self, domain_id, user_id, role_id):
         """Add roles to a user on a domain."""
         resp, body = self.put('domains/%s/users/%s/roles/%s' %
-                              (domain_id, user_id, role_id), '',
-                              self.headers)
+                              (domain_id, user_id, role_id), '')
         return resp, body
 
     def list_user_roles_on_project(self, project_id, user_id):
         """list roles of a user on a project."""
         resp, body = self.get('projects/%s/users/%s/roles' %
-                              (project_id, user_id), self.headers)
+                              (project_id, user_id))
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
     def list_user_roles_on_domain(self, domain_id, user_id):
         """list roles of a user on a domain."""
         resp, body = self.get('domains/%s/users/%s/roles' %
-                              (domain_id, user_id), self.headers)
+                              (domain_id, user_id))
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
     def revoke_role_from_user_on_project(self, project_id, user_id, role_id):
         """Delete role of a user on a project."""
         resp, body = self.delete('projects/%s/users/%s/roles/%s' %
-                                 (project_id, user_id, role_id), self.headers)
+                                 (project_id, user_id, role_id))
         return resp, body
 
     def revoke_role_from_user_on_domain(self, domain_id, user_id, role_id):
         """Delete role of a user on a domain."""
         resp, body = self.delete('domains/%s/users/%s/roles/%s' %
-                                 (domain_id, user_id, role_id), self.headers)
+                                 (domain_id, user_id, role_id))
         return resp, body
 
     def assign_group_role_on_project(self, project_id, group_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/groups/%s/roles/%s' %
-                              (project_id, group_id, role_id), '',
-                              self.headers)
+                              (project_id, group_id, role_id), '')
         return resp, body
 
     def assign_group_role_on_domain(self, domain_id, group_id, role_id):
         """Add roles to a user on a domain."""
         resp, body = self.put('domains/%s/groups/%s/roles/%s' %
-                              (domain_id, group_id, role_id), '',
-                              self.headers)
+                              (domain_id, group_id, role_id), '')
         return resp, body
 
     def list_group_roles_on_project(self, project_id, group_id):
         """list roles of a user on a project."""
         resp, body = self.get('projects/%s/groups/%s/roles' %
-                              (project_id, group_id), self.headers)
+                              (project_id, group_id))
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
     def list_group_roles_on_domain(self, domain_id, group_id):
         """list roles of a user on a domain."""
         resp, body = self.get('domains/%s/groups/%s/roles' %
-                              (domain_id, group_id), self.headers)
+                              (domain_id, group_id))
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
     def revoke_role_from_group_on_project(self, project_id, group_id, role_id):
         """Delete role of a user on a project."""
         resp, body = self.delete('projects/%s/groups/%s/roles/%s' %
-                                 (project_id, group_id, role_id), self.headers)
+                                 (project_id, group_id, role_id))
         return resp, body
 
     def revoke_role_from_group_on_domain(self, domain_id, group_id, role_id):
         """Delete role of a user on a domain."""
         resp, body = self.delete('domains/%s/groups/%s/roles/%s' %
-                                 (domain_id, group_id, role_id), self.headers)
+                                 (domain_id, group_id, role_id))
         return resp, body
 
 
@@ -501,15 +483,16 @@ class V3TokenClientXML(RestClientXML):
             scope.append(project)
             auth.append(scope)
 
-        resp, body = self.post(self.auth_url, headers=self.headers,
-                               body=str(Document(auth)))
+        resp, body = self.post(self.auth_url, body=str(Document(auth)))
         return resp, body
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
-        # Send XML, accept JSON. XML response is not easily
-        # converted to the corresponding JSON one
-        headers['Accept'] = 'application/json'
+        if headers is None:
+            # Always accept 'json', for xml token client too.
+            # Because XML response is not easily
+            # converted to the corresponding JSON one
+            headers = self.get_headers(accept_type="json")
         self._log_request(method, url, headers, body)
         resp, resp_body = self.http_obj.request(url, method,
                                                 headers=headers, body=body)

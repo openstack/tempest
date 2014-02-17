@@ -49,8 +49,7 @@ class IdentityV3ClientJSON(RestClient):
             'password': password
         }
         post_body = json.dumps({'user': post_body})
-        resp, body = self.post('users', post_body,
-                               self.headers)
+        resp, body = self.post('users', post_body)
         body = json.loads(body)
         return resp, body['user']
 
@@ -72,14 +71,13 @@ class IdentityV3ClientJSON(RestClient):
             'description': description
         }
         post_body = json.dumps({'user': post_body})
-        resp, body = self.patch('users/%s' % user_id, post_body,
-                                self.headers)
+        resp, body = self.patch('users/%s' % user_id, post_body)
         body = json.loads(body)
         return resp, body['user']
 
     def list_user_projects(self, user_id):
         """Lists the projects on which a user has roles assigned."""
-        resp, body = self.get('users/%s/projects' % user_id, self.headers)
+        resp, body = self.get('users/%s/projects' % user_id)
         body = json.loads(body)
         return resp, body['projects']
 
@@ -112,7 +110,7 @@ class IdentityV3ClientJSON(RestClient):
             'name': name
         }
         post_body = json.dumps({'project': post_body})
-        resp, body = self.post('projects', post_body, self.headers)
+        resp, body = self.post('projects', post_body)
         body = json.loads(body)
         return resp, body['project']
 
@@ -135,8 +133,7 @@ class IdentityV3ClientJSON(RestClient):
             'domain_id': domain_id,
         }
         post_body = json.dumps({'project': post_body})
-        resp, body = self.patch('projects/%s' % project_id, post_body,
-                                self.headers)
+        resp, body = self.patch('projects/%s' % project_id, post_body)
         body = json.loads(body)
         return resp, body['project']
 
@@ -157,7 +154,7 @@ class IdentityV3ClientJSON(RestClient):
             'name': name
         }
         post_body = json.dumps({'role': post_body})
-        resp, body = self.post('roles', post_body, self.headers)
+        resp, body = self.post('roles', post_body)
         body = json.loads(body)
         return resp, body['role']
 
@@ -173,8 +170,7 @@ class IdentityV3ClientJSON(RestClient):
             'name': name
         }
         post_body = json.dumps({'role': post_body})
-        resp, body = self.patch('roles/%s' % str(role_id), post_body,
-                                self.headers)
+        resp, body = self.patch('roles/%s' % str(role_id), post_body)
         body = json.loads(body)
         return resp, body['role']
 
@@ -186,8 +182,7 @@ class IdentityV3ClientJSON(RestClient):
     def assign_user_role(self, project_id, user_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
-                              (project_id, user_id, role_id), None,
-                              self.headers)
+                              (project_id, user_id, role_id), None)
         return resp, body
 
     def create_domain(self, name, **kwargs):
@@ -200,7 +195,7 @@ class IdentityV3ClientJSON(RestClient):
             'name': name
         }
         post_body = json.dumps({'domain': post_body})
-        resp, body = self.post('domains', post_body, self.headers)
+        resp, body = self.post('domains', post_body)
         body = json.loads(body)
         return resp, body['domain']
 
@@ -227,8 +222,7 @@ class IdentityV3ClientJSON(RestClient):
             'name': name
         }
         post_body = json.dumps({'domain': post_body})
-        resp, body = self.patch('domains/%s' % domain_id, post_body,
-                                self.headers)
+        resp, body = self.patch('domains/%s' % domain_id, post_body)
         body = json.loads(body)
         return resp, body['domain']
 
@@ -263,13 +257,13 @@ class IdentityV3ClientJSON(RestClient):
             'name': name
         }
         post_body = json.dumps({'group': post_body})
-        resp, body = self.post('groups', post_body, self.headers)
+        resp, body = self.post('groups', post_body)
         body = json.loads(body)
         return resp, body['group']
 
     def get_group(self, group_id):
         """Get group details."""
-        resp, body = self.get('groups/%s' % group_id, self.headers)
+        resp, body = self.get('groups/%s' % group_id)
         body = json.loads(body)
         return resp, body['group']
 
@@ -283,8 +277,7 @@ class IdentityV3ClientJSON(RestClient):
             'description': description
         }
         post_body = json.dumps({'group': post_body})
-        resp, body = self.patch('groups/%s' % group_id, post_body,
-                                self.headers)
+        resp, body = self.patch('groups/%s' % group_id, post_body)
         body = json.loads(body)
         return resp, body['group']
 
@@ -296,33 +289,30 @@ class IdentityV3ClientJSON(RestClient):
     def add_group_user(self, group_id, user_id):
         """Add user into group."""
         resp, body = self.put('groups/%s/users/%s' % (group_id, user_id),
-                              None, self.headers)
+                              None)
         return resp, body
 
     def list_group_users(self, group_id):
         """List users in group."""
-        resp, body = self.get('groups/%s/users' % group_id, self.headers)
+        resp, body = self.get('groups/%s/users' % group_id)
         body = json.loads(body)
         return resp, body['users']
 
     def delete_group_user(self, group_id, user_id):
         """Delete user in group."""
-        resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id),
-                                 self.headers)
+        resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id))
         return resp, body
 
     def assign_user_role_on_project(self, project_id, user_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
-                              (project_id, user_id, role_id), None,
-                              self.headers)
+                              (project_id, user_id, role_id), None)
         return resp, body
 
     def assign_user_role_on_domain(self, domain_id, user_id, role_id):
         """Add roles to a user on a domain."""
         resp, body = self.put('domains/%s/users/%s/roles/%s' %
-                              (domain_id, user_id, role_id), None,
-                              self.headers)
+                              (domain_id, user_id, role_id), None)
         return resp, body
 
     def list_user_roles_on_project(self, project_id, user_id):
@@ -354,15 +344,13 @@ class IdentityV3ClientJSON(RestClient):
     def assign_group_role_on_project(self, project_id, group_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/groups/%s/roles/%s' %
-                              (project_id, group_id, role_id), None,
-                              self.headers)
+                              (project_id, group_id, role_id), None)
         return resp, body
 
     def assign_group_role_on_domain(self, domain_id, group_id, role_id):
         """Add roles to a user on a domain."""
         resp, body = self.put('domains/%s/groups/%s/roles/%s' %
-                              (domain_id, group_id, role_id), None,
-                              self.headers)
+                              (domain_id, group_id, role_id), None)
         return resp, body
 
     def list_group_roles_on_project(self, project_id, group_id):
@@ -404,7 +392,7 @@ class IdentityV3ClientJSON(RestClient):
             'expires_at': expires_at
         }
         post_body = json.dumps({'trust': post_body})
-        resp, body = self.post('OS-TRUST/trusts', post_body, self.headers)
+        resp, body = self.post('OS-TRUST/trusts', post_body)
         body = json.loads(body)
         return resp, body['trust']
 
@@ -507,11 +495,16 @@ class V3TokenClientJSON(RestClient):
             creds['auth']['scope'] = scope
 
         body = json.dumps(creds)
-        resp, body = self.post(self.auth_url, headers=self.headers, body=body)
+        resp, body = self.post(self.auth_url, body=body)
         return resp, body
 
     def request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
+        if headers is None:
+            # Always accept 'json', for xml token client too.
+            # Because XML response is not easily
+            # converted to the corresponding JSON one
+            headers = self.get_headers(accept_type="json")
         self._log_request(method, url, headers, body)
         resp, resp_body = self.http_obj.request(url, method,
                                                 headers=headers, body=body)

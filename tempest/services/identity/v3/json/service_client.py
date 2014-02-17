@@ -41,8 +41,7 @@ class ServiceClientJSON(RestClient):
             'name': name
         }
         patch_body = json.dumps({'service': patch_body})
-        resp, body = self.patch('services/%s' % service_id,
-                                patch_body, self.headers)
+        resp, body = self.patch('services/%s' % service_id, patch_body)
         body = json.loads(body)
         return resp, body['service']
 

@@ -58,7 +58,7 @@ class EndPointClientXML(RestClientXML):
 
     def list_endpoints(self):
         """Get the list of endpoints."""
-        resp, body = self.get("endpoints", self.headers)
+        resp, body = self.get("endpoints")
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
@@ -72,8 +72,7 @@ class EndPointClientXML(RestClientXML):
                                   interface=interface,
                                   url=url, region=region,
                                   enabled=enabled)
-        resp, body = self.post('endpoints', str(Document(create_endpoint)),
-                               self.headers)
+        resp, body = self.post('endpoints', str(Document(create_endpoint)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -94,8 +93,7 @@ class EndPointClientXML(RestClientXML):
             endpoint.add_attr("region", region)
         if enabled is not None:
             endpoint.add_attr("enabled", enabled)
-        resp, body = self.patch('endpoints/%s' % str(endpoint_id),
-                                str(doc), self.headers)
+        resp, body = self.patch('endpoints/%s' % str(endpoint_id), str(doc))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 

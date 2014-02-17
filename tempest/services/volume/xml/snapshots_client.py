@@ -47,7 +47,7 @@ class SnapshotsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         snapshots = []
         for snap in body:
@@ -61,7 +61,7 @@ class SnapshotsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         snapshots = []
         for snap in body:
@@ -71,7 +71,7 @@ class SnapshotsClientXML(RestClientXML):
     def get_snapshot(self, snapshot_id):
         """Returns the details of a single snapshot."""
         url = "snapshots/%s" % str(snapshot_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         return resp, xml_to_json(body)
 
@@ -86,8 +86,7 @@ class SnapshotsClientXML(RestClientXML):
         snapshot = Element("snapshot", xmlns=XMLNS_11, volume_id=volume_id)
         for key, value in kwargs.items():
             snapshot.add_attr(key, value)
-        resp, body = self.post('snapshots', str(Document(snapshot)),
-                               self.headers)
+        resp, body = self.post('snapshots', str(Document(snapshot)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -96,8 +95,7 @@ class SnapshotsClientXML(RestClientXML):
         put_body = Element("snapshot", xmlns=XMLNS_11, **kwargs)
 
         resp, body = self.put('snapshots/%s' % snapshot_id,
-                              str(Document(put_body)),
-                              self.headers)
+                              str(Document(put_body)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -155,7 +153,7 @@ class SnapshotsClientXML(RestClientXML):
                             status=status
                             )
         url = 'snapshots/%s/action' % str(snapshot_id)
-        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        resp, body = self.post(url, str(Document(post_body)))
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
@@ -167,7 +165,7 @@ class SnapshotsClientXML(RestClientXML):
                             progress=progress
                             )
         url = 'snapshots/%s/action' % str(snapshot_id)
-        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        resp, body = self.post(url, str(Document(post_body)))
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
@@ -191,15 +189,14 @@ class SnapshotsClientXML(RestClientXML):
         """Create metadata for the snapshot."""
         post_body = self._metadata_body(metadata)
         resp, body = self.post('snapshots/%s/metadata' % snapshot_id,
-                               str(Document(post_body)),
-                               self.headers)
+                               str(Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
     def get_snapshot_metadata(self, snapshot_id):
         """Get metadata of the snapshot."""
         url = "snapshots/%s/metadata" % str(snapshot_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -207,7 +204,7 @@ class SnapshotsClientXML(RestClientXML):
         """Update metadata for the snapshot."""
         put_body = self._metadata_body(metadata)
         url = "snapshots/%s/metadata" % str(snapshot_id)
-        resp, body = self.put(url, str(Document(put_body)), self.headers)
+        resp, body = self.put(url, str(Document(put_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -217,7 +214,7 @@ class SnapshotsClientXML(RestClientXML):
             put_body = Element('meta', key=k)
             put_body.append(Text(v))
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
-        resp, body = self.put(url, str(Document(put_body)), self.headers)
+        resp, body = self.put(url, str(Document(put_body)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -230,7 +227,7 @@ class SnapshotsClientXML(RestClientXML):
         """Force Delete Snapshot."""
         post_body = Element("os-force_delete")
         url = 'snapshots/%s/action' % str(snapshot_id)
-        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        resp, body = self.post(url, str(Document(post_body)))
         if body:
             body = xml_to_json(etree.fromstring(body))
         return resp, body

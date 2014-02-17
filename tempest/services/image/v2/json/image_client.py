@@ -86,7 +86,7 @@ class ImageClientV2JSON(rest_client.RestClient):
         data = json.dumps(params)
         self._validate_schema(data)
 
-        resp, body = self.post('v2/images', data, self.headers)
+        resp, body = self.post('v2/images', data)
         body = json.loads(body)
         return resp, body
 
@@ -132,7 +132,7 @@ class ImageClientV2JSON(rest_client.RestClient):
 
     def add_image_tag(self, image_id, tag):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)
-        resp, body = self.put(url, body=None, headers=self.headers)
+        resp, body = self.put(url, body=None)
         return resp, body
 
     def delete_image_tag(self, image_id, tag):
@@ -150,7 +150,7 @@ class ImageClientV2JSON(rest_client.RestClient):
     def add_member(self, image_id, member_id):
         url = 'v2/images/%s/members' % image_id
         data = json.dumps({'member': member_id})
-        resp, body = self.post(url, data, self.headers)
+        resp, body = self.post(url, data)
         body = json.loads(body)
         self.expected_success(200, resp)
         return resp, body
@@ -159,7 +159,7 @@ class ImageClientV2JSON(rest_client.RestClient):
         """Valid status are: ``pending``, ``accepted``,  ``rejected``."""
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         data = json.dumps({'status': status})
-        resp, body = self.put(url, data, self.headers)
+        resp, body = self.put(url, data)
         body = json.loads(body)
         self.expected_success(200, resp)
         return resp, body

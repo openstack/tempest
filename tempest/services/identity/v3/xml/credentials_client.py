@@ -61,8 +61,7 @@ class CredentialsClientXML(RestClientXML):
         credential = Element('credential', project_id=project_id,
                              type=cred_type, user_id=user_id)
         credential.append(blob)
-        resp, body = self.post('credentials', str(Document(credential)),
-                               self.headers)
+        resp, body = self.post('credentials', str(Document(credential)))
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
@@ -85,27 +84,25 @@ class CredentialsClientXML(RestClientXML):
                              type=cred_type, user_id=user_id)
         credential.append(blob)
         resp, body = self.patch('credentials/%s' % credential_id,
-                                str(Document(credential)),
-                                self.headers)
+                                str(Document(credential)))
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
 
     def get_credential(self, credential_id):
         """To GET Details of a credential."""
-        resp, body = self.get('credentials/%s' % credential_id, self.headers)
+        resp, body = self.get('credentials/%s' % credential_id)
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
 
     def list_credentials(self):
         """Lists out all the available credentials."""
-        resp, body = self.get('credentials', self.headers)
+        resp, body = self.get('credentials')
         body = self._parse_creds(etree.fromstring(body))
         return resp, body
 
     def delete_credential(self, credential_id):
         """Deletes a credential."""
-        resp, body = self.delete('credentials/%s' % credential_id,
-                                 self.headers)
+        resp, body = self.delete('credentials/%s' % credential_id)
         return resp, body

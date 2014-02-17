@@ -32,7 +32,7 @@ class ObjectClient(RestClient):
     def create_object(self, container, object_name, data, params=None):
         """Create storage object."""
 
-        headers = dict(self.headers)
+        headers = self.get_headers()
         if not data:
             headers['content-length'] = '0'
         url = "%s/%s" % (str(container), str(object_name))
@@ -131,7 +131,7 @@ class ObjectClient(RestClient):
     def create_object_segments(self, container, object_name, segment, data):
         """Creates object segments."""
         url = "{0}/{1}/{2}".format(container, object_name, segment)
-        resp, body = self.put(url, data, self.headers)
+        resp, body = self.put(url, data)
         return resp, body
 
 

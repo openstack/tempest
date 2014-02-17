@@ -36,6 +36,6 @@ class ExtensionsClientXML(RestClientXML):
 
     def list_extensions(self):
         url = 'extensions'
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
         return resp, body

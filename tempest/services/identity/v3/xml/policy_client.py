@@ -59,21 +59,20 @@ class PolicyClientXML(RestClientXML):
     def create_policy(self, blob, type):
         """Creates a Policy."""
         create_policy = Element("policy", xmlns=XMLNS, blob=blob, type=type)
-        resp, body = self.post('policies', str(Document(create_policy)),
-                               self.headers)
+        resp, body = self.post('policies', str(Document(create_policy)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_policies(self):
         """Lists the policies."""
-        resp, body = self.get('policies', self.headers)
+        resp, body = self.get('policies')
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_policy(self, policy_id):
         """Lists out the given policy."""
         url = 'policies/%s' % policy_id
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -83,8 +82,7 @@ class PolicyClientXML(RestClientXML):
         type = kwargs.get('type')
         update_policy = Element("policy", xmlns=XMLNS, type=type)
         url = 'policies/%s' % policy_id
-        resp, body = self.patch(url, str(Document(update_policy)),
-                                self.headers)
+        resp, body = self.patch(url, str(Document(update_policy)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
