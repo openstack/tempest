@@ -43,6 +43,10 @@ class FakeConfig(object):
         swift = True
         horizon = True
 
+    class fake_negative(object):
+        test_generator = 'tempest.common.' \
+            'generator.negative_generator.NegativeTestGenerator'
+
     compute_feature_enabled = fake_compute_feature_enabled()
     volume_feature_enabled = fake_default_feature_enabled()
     network_feature_enabled = fake_default_feature_enabled()
@@ -52,3 +56,5 @@ class FakeConfig(object):
 
     compute = fake_compute()
     identity = fake_identity()
+
+    negative = fake_negative()

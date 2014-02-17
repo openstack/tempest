@@ -16,9 +16,11 @@
 import mock
 
 import tempest.test as test
+from tempest.tests import base
+from tempest.tests import fake_config
 
 
-class TestNegativeAutoTest(test.BaseTestCase):
+class TestNegativeAutoTest(base.TestCase):
     # Fake entries
     _interface = 'json'
     _service = 'compute'
@@ -33,6 +35,10 @@ class TestNegativeAutoTest(test.BaseTestCase):
                                        },
                        "resources": ["flavor", "volume", "image"]
                        }
+
+    def setUp(self):
+        super(TestNegativeAutoTest, self).setUp()
+        self.stubs.Set(test, 'CONF', fake_config.FakeConfig)
 
     def _check_prop_entries(self, result, entry):
         entries = [a for a in result if entry in a[0]]
