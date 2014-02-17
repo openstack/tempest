@@ -174,9 +174,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def _assign_floating_ip_to_vip(self, vip):
         public_network_id = config.network.public_network_id
         port_id = vip['port_id']
-        floating_ip = self._create_floating_ip(vip,
-                                               public_network_id,
-                                               port_filters=port_id)
+        floating_ip = self._create_floating_ip(vip, public_network_id,
+                                               port_id=port_id)
         self.floating_ips.setdefault(vip['id'], [])
         self.floating_ips[vip['id']].append(floating_ip)
 
