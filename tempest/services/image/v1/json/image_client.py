@@ -157,7 +157,7 @@ class ImageClientJSON(RestClient):
         return resp, body['image']
 
     def update_image(self, image_id, name=None, container_format=None,
-                     data=None):
+                     data=None, properties=None):
         params = {}
         headers = {}
         if name is not None:
@@ -165,6 +165,9 @@ class ImageClientJSON(RestClient):
 
         if container_format is not None:
             params['container_format'] = container_format
+
+        if properties is not None:
+            params['properties'] = properties
 
         headers.update(self._image_meta_to_headers(params))
 
@@ -190,7 +193,8 @@ class ImageClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['images']
 
-    def image_list_detail(self, properties=dict(), **kwargs):
+    def image_list_detail(self, properties=dict(), changes_since=None,
+                          **kwargs):
         url = 'v1/images/detail'
 
         params = {}
@@ -198,6 +202,9 @@ class ImageClientJSON(RestClient):
             params['property-%s' % key] = value
 
         kwargs.update(params)
+
+        if changes_since is not None:
+            kwargs['changes-since'] = changes_since
 
         if len(kwargs) > 0:
             url += '?%s' % urllib.urlencode(kwargs)

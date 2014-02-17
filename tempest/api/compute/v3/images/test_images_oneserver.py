@@ -20,13 +20,13 @@ from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ImagesOneServerTest(base.BaseV2ComputeTest):
+class ImagesOneServerV3Test(base.BaseV3ComputeTest):
     _interface = 'json'
 
     def tearDown(self):
@@ -34,12 +34,12 @@ class ImagesOneServerTest(base.BaseV2ComputeTest):
         for image_id in self.image_ids:
             self.client.delete_image(image_id)
             self.image_ids.remove(image_id)
-        super(ImagesOneServerTest, self).tearDown()
+        super(ImagesOneServerV3Test, self).tearDown()
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one
-        super(ImagesOneServerTest, self).setUp()
+        super(ImagesOneServerV3Test, self).setUp()
         # Check if the server is in a clean state after test
         try:
             self.servers_client.wait_for_server_status(self.server_id,
@@ -53,7 +53,7 @@ class ImagesOneServerTest(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ImagesOneServerTest, cls).setUpClass()
+        super(ImagesOneServerV3Test, cls).setUpClass()
         cls.client = cls.images_client
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
@@ -86,13 +86,14 @@ class ImagesOneServerTest(base.BaseV2ComputeTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.create_image,
                           'Environment unable to create images.')
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_delete_image(self):
 
         # Create a new image
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
-        resp, body = self.client.create_image(self.server_id, name, meta)
+        resp, body = self.servers_client.create_image(self.server_id,
+                                                      name, meta)
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
         self.client.wait_for_image_status(image_id, 'ACTIVE')
@@ -117,12 +118,13 @@ class ImagesOneServerTest(base.BaseV2ComputeTest):
         self.assertEqual('204', resp['status'])
         self.client.wait_for_resource_deletion(image_id)
 
-    @attr(type=['gate'])
+    @test.attr(type=['gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         # prefix character is:
         # http://www.fileformat.info/info/unicode/char/1F4A9/index.htm
         utf8_name = data_utils.rand_name(u'\xF0\x9F\x92\xA9')
-        resp, body = self.client.create_image(self.server_id, utf8_name)
+        resp, body = self.servers_client.create_image(self.server_id,
+                                                      utf8_name)
         image_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.client.delete_image, image_id)
         self.assertEqual('202', resp['status'])
