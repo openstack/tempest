@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class CredentialsTestJSON(base.BaseIdentityAdminTest):
+class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
@@ -32,23 +32,23 @@ class CredentialsTestJSON(base.BaseIdentityAdminTest):
         u_email = '%s@testmail.tm' % u_name
         u_password = data_utils.rand_name('pass-')
         for i in range(2):
-            resp, cls.project = cls.v3_client.create_project(
+            resp, cls.project = cls.client.create_project(
                 data_utils.rand_name('project-'),
                 description=data_utils.rand_name('project-desc-'))
             assert resp['status'] == '201', "Expected %s" % resp['status']
             cls.projects.append(cls.project['id'])
 
-        resp, cls.user_body = cls.v3_client.create_user(
+        resp, cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.projects[0])
         assert resp['status'] == '201', "Expected: %s" % resp['status']
 
     @classmethod
     def tearDownClass(cls):
-        resp, _ = cls.v3_client.delete_user(cls.user_body['id'])
+        resp, _ = cls.client.delete_user(cls.user_body['id'])
         assert resp['status'] == '204', "Expected: %s" % resp['status']
         for p in cls.projects:
-            resp, _ = cls.v3_client.delete_project(p)
+            resp, _ = cls.client.delete_project(p)
             assert resp['status'] == '204', "Expected: %s" % resp['status']
         super(CredentialsTestJSON, cls).tearDownClass()
 

@@ -20,7 +20,7 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class UsersTestJSON(base.BaseIdentityAdminTest):
+class UsersTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @classmethod

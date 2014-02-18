@@ -19,20 +19,20 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class ServicesTestJSON(base.BaseIdentityAdminTest):
+class ServicesTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @attr(type='gate')
     def test_update_service(self):
         # Update description attribute of service
         name = data_utils.rand_name('service-')
-        type = data_utils.rand_name('type--')
-        description = data_utils.rand_name('description-')
-        resp, body = self.client.create_service(
-            name, type, description=description)
-        self.assertEqual('200', resp['status'])
+        serv_type = data_utils.rand_name('type--')
+        desc = data_utils.rand_name('description-')
+        resp, body = self.service_client.create_service(name, serv_type,
+                                                        description=desc)
+        self.assertEqual('201', resp['status'])
         # Deleting the service created in this method
-        self.addCleanup(self.client.delete_service, body['id'])
+        self.addCleanup(self.service_client.delete_service, body['id'])
 
         s_id = body['id']
         resp1_desc = body['description']
@@ -45,7 +45,7 @@ class ServicesTestJSON(base.BaseIdentityAdminTest):
         self.assertNotEqual(resp1_desc, resp2_desc)
 
         # Get service
-        resp, body = self.client.get_service(s_id)
+        resp, body = self.service_client.get_service(s_id)
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)

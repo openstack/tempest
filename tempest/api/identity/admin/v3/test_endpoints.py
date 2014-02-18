@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class EndPointsTestJSON(base.BaseIdentityAdminTest):
+class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
@@ -31,8 +31,8 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         s_type = data_utils.rand_name('type--')
         s_description = data_utils.rand_name('description-')
         resp, cls.service_data =\
-            cls.identity_client.create_service(s_name, s_type,
-                                               description=s_description)
+            cls.service_client.create_service(s_name, s_type,
+                                              description=s_description)
         cls.service_id = cls.service_data['id']
         cls.service_ids.append(cls.service_id)
         # Create endpoints so as to use for LIST and GET test cases
@@ -50,7 +50,7 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         for e in cls.setup_endpoints:
             cls.client.delete_endpoint(e['id'])
         for s in cls.service_ids:
-            cls.identity_client.delete_service(s)
+            cls.service_client.delete_service(s)
         super(EndPointsTestJSON, cls).tearDownClass()
 
     @attr(type='gate')
@@ -107,8 +107,8 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         s_type = data_utils.rand_name('type--')
         s_description = data_utils.rand_name('description-')
         resp, self.service2 =\
-            self.identity_client.create_service(s_name, s_type,
-                                                description=s_description)
+            self.service_client.create_service(s_name, s_type,
+                                               description=s_description)
         self.service_ids.append(self.service2['id'])
         # Updating endpoint with new values
         region2 = data_utils.rand_name('region')

@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class TenantsNegativeTestJSON(base.BaseIdentityAdminTest):
+class TenantsNegativeTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @attr(type=['negative', 'gate'])

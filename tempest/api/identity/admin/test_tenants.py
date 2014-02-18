@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class TenantsTestJSON(base.BaseIdentityAdminTest):
+class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @attr(type='gate')

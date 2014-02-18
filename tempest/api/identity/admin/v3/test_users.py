@@ -18,7 +18,7 @@ from tempest.common.utils import data_utils
 from tempest.test import attr
 
 
-class UsersV3TestJSON(base.BaseIdentityAdminTest):
+class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @attr(type='gate')
@@ -29,22 +29,22 @@ class UsersV3TestJSON(base.BaseIdentityAdminTest):
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_name('pass-')
-        resp, user = self.v3_client.create_user(
+        resp, user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False)
         # Delete the User at the end of this method
-        self.addCleanup(self.v3_client.delete_user, user['id'])
+        self.addCleanup(self.client.delete_user, user['id'])
         # Creating second project for updation
-        resp, project = self.v3_client.create_project(
+        resp, project = self.client.create_project(
             data_utils.rand_name('project-'),
             description=data_utils.rand_name('project-desc-'))
         # Delete the Project at the end of this method
-        self.addCleanup(self.v3_client.delete_project, project['id'])
+        self.addCleanup(self.client.delete_project, project['id'])
         # Updating user details with new values
         u_name2 = data_utils.rand_name('user2-')
         u_email2 = u_name2 + '@testmail.tm'
         u_description2 = u_name2 + ' description'
-        resp, update_user = self.v3_client.update_user(
+        resp, update_user = self.client.update_user(
             user['id'], name=u_name2, description=u_description2,
             project_id=project['id'],
             email=u_email2, enabled=False)
@@ -57,7 +57,7 @@ class UsersV3TestJSON(base.BaseIdentityAdminTest):
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual('false', str(update_user['enabled']).lower())
         # GET by id after updation
-        resp, new_user_get = self.v3_client.get_user(user['id'])
+        resp, new_user_get = self.client.get_user(user['id'])
         # Assert response body of GET after updation
         self.assertEqual(u_name2, new_user_get['name'])
         self.assertEqual(u_description2, new_user_get['description'])
@@ -71,43 +71,43 @@ class UsersV3TestJSON(base.BaseIdentityAdminTest):
         # List the projects that a user has access upon
         assigned_project_ids = list()
         fetched_project_ids = list()
-        _, u_project = self.v3_client.create_project(
+        _, u_project = self.client.create_project(
             data_utils.rand_name('project-'),
             description=data_utils.rand_name('project-desc-'))
         # Delete the Project at the end of this method
-        self.addCleanup(self.v3_client.delete_project, u_project['id'])
+        self.addCleanup(self.client.delete_project, u_project['id'])
         # Create a user.
         u_name = data_utils.rand_name('user-')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_name('pass-')
-        _, user_body = self.v3_client.create_user(
+        _, user_body = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False, project_id=u_project['id'])
         # Delete the User at the end of this method
-        self.addCleanup(self.v3_client.delete_user, user_body['id'])
+        self.addCleanup(self.client.delete_user, user_body['id'])
         # Creating Role
-        _, role_body = self.v3_client.create_role(
+        _, role_body = self.client.create_role(
             data_utils.rand_name('role-'))
         # Delete the Role at the end of this method
-        self.addCleanup(self.v3_client.delete_role, role_body['id'])
+        self.addCleanup(self.client.delete_role, role_body['id'])
 
-        _, user = self.v3_client.get_user(user_body['id'])
-        _, role = self.v3_client.get_role(role_body['id'])
+        _, user = self.client.get_user(user_body['id'])
+        _, role = self.client.get_role(role_body['id'])
         for i in range(2):
             # Creating project so as to assign role
-            _, project_body = self.v3_client.create_project(
+            _, project_body = self.client.create_project(
                 data_utils.rand_name('project-'),
                 description=data_utils.rand_name('project-desc-'))
-            _, project = self.v3_client.get_project(project_body['id'])
+            _, project = self.client.get_project(project_body['id'])
             # Delete the Project at the end of this method
-            self.addCleanup(self.v3_client.delete_project, project_body['id'])
+            self.addCleanup(self.client.delete_project, project_body['id'])
             # Assigning roles to user on project
-            self.v3_client.assign_user_role(project['id'],
-                                            user['id'],
-                                            role['id'])
+            self.client.assign_user_role(project['id'],
+                                         user['id'],
+                                         role['id'])
             assigned_project_ids.append(project['id'])
-        resp, body = self.v3_client.list_user_projects(user['id'])
+        resp, body = self.client.list_user_projects(user['id'])
         self.assertEqual(200, resp.status)
         for i in body:
             fetched_project_ids.append(i['id'])
