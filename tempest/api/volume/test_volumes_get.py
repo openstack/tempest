@@ -91,6 +91,12 @@ class VolumesGetTest(base.BaseVolumeV1Test):
             self.assertEqual(boot_flag, False)
 
         # Update Volume
+        # Test volume update when display_name is same with original value
+        resp, update_volume = \
+            self.client.update_volume(volume['id'],
+                                      display_name=v_name)
+        self.assertEqual(200, resp.status)
+        # Test volume update when display_name is new
         new_v_name = data_utils.rand_name('new-Volume')
         new_desc = 'This is the new description of volume'
         resp, update_volume = \
@@ -111,6 +117,26 @@ class VolumesGetTest(base.BaseVolumeV1Test):
                         ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
+        # Test volume create when display_name is none and display_description
+        # contains specific characters,
+        # then test volume update if display_name is duplicated
+        new_volume = {}
+        new_v_desc = data_utils.rand_name('@#$%^* description')
+        resp, new_volume = \
+            self.client.create_volume(size=1,
+                                      display_description=new_v_desc,
+                                      availability_zone=volume[
+                                      'availability_zone'])
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', new_volume)
+        self.addCleanup(self._delete_volume, new_volume['id'])
+        self.client.wait_for_volume_status(new_volume['id'], 'available')
+        resp, update_volume = \
+            self.client.update_volume(new_volume['id'],
+                                      display_name=volume['display_name'],
+                                      display_description=volume[
+                                      'display_description'])
+        self.assertEqual(200, resp.status)
 
         # NOTE(jdg): Revert back to strict true/false checking
         # after fix for bug #1227837 merges
