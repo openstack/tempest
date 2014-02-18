@@ -456,7 +456,8 @@ class IsolatedCreds(object):
             port
             for port in self.ports
             if (port['network_id'] == network_id and
-                port['device_owner'] != 'network:router_interface')
+                port['device_owner'] != 'network:router_interface' and
+                port['device_owner'] != 'network:dhcp')
         ]
         for port in ports_to_delete:
             try:
