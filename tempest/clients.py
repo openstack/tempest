@@ -439,8 +439,12 @@ class OrchestrationManager(Manager):
     """
     def __init__(self, interface='json', service=None):
         base = super(OrchestrationManager, self)
+        # heat currently needs an admin user so that stacks can create users
+        # however the tests need the demo tenant so that the neutron
+        # private network is the default. DO NOT change this auth combination
+        # until heat can run with the demo user.
         base.__init__(CONF.identity.admin_username,
                       CONF.identity.admin_password,
-                      CONF.identity.admin_tenant_name,
+                      CONF.identity.tenant_name,
                       interface=interface,
                       service=service)
