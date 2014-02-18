@@ -15,7 +15,6 @@
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 
@@ -63,12 +62,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             LOG.exception('setUpClass failed')
             cls.tearDownClass()
             raise
-
-    @attr(type=['negative', 'gate'])
-    def test_get_image_not_existing(self):
-        # Check raises a NotFound
-        self.assertRaises(exceptions.NotFound, self.client.get_image,
-                          "nonexistingimageid")
 
     @attr(type='gate')
     def test_list_images_filter_by_status(self):
@@ -220,11 +213,6 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'changes-since': self.image1['created']}
         resp, images = self.client.list_images_with_detail(params)
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
-
-    @attr(type=['negative', 'gate'])
-    def test_get_nonexistent_image(self):
-        # Negative test: GET on non-existent image should fail
-        self.assertRaises(exceptions.NotFound, self.client.get_image, 999)
 
 
 class ListImageFiltersTestXML(ListImageFiltersTestJSON):
