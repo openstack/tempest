@@ -61,6 +61,7 @@ from tempest.services.compute.json.tenant_usages_client import \
     TenantUsagesClientJSON
 from tempest.services.compute.json.volumes_extensions_client import \
     VolumesExtensionsClientJSON
+from tempest.services.compute.v3.json.agents_client import AgentsV3ClientJSON
 from tempest.services.compute.v3.json.aggregates_client import \
     AggregatesV3ClientJSON
 from tempest.services.compute.v3.json.availability_zone_client import \
@@ -306,6 +307,7 @@ class Manager(manager.Manager):
             self.services_v3_client = ServicesV3ClientJSON(
                 self.auth_provider)
             self.service_client = ServiceClientJSON(self.auth_provider)
+            self.agents_v3_client = AgentsV3ClientJSON(self.auth_provider)
             self.aggregates_v3_client = AggregatesV3ClientJSON(
                 self.auth_provider)
             self.aggregates_client = AggregatesClientJSON(
