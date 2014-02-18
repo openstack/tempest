@@ -39,7 +39,7 @@ class TenantUsagesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         tenant_usage = self._parse_array(etree.fromstring(body))
         return resp, tenant_usage['tenant_usage']
 
@@ -48,6 +48,6 @@ class TenantUsagesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         tenant_usage = self._parse_array(etree.fromstring(body))
         return resp, tenant_usage

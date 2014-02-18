@@ -52,7 +52,7 @@ class FloatingIPsClientJSON(RestClient):
         url = 'os-floating-ips'
         post_body = {'pool': pool_name}
         post_body = json.dumps(post_body)
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
         body = json.loads(body)
         return resp, body['floating_ip']
 
@@ -72,7 +72,7 @@ class FloatingIPsClientJSON(RestClient):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
         return resp, body
 
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
@@ -85,7 +85,7 @@ class FloatingIPsClientJSON(RestClient):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
         return resp, body
 
     def is_resource_deleted(self, id):

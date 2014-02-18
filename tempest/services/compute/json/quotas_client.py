@@ -96,8 +96,7 @@ class QuotasClientJSON(RestClient):
             post_body['security_groups'] = security_groups
 
         post_body = json.dumps({'quota_set': post_body})
-        resp, body = self.put('os-quota-sets/%s' % str(tenant_id), post_body,
-                              self.headers)
+        resp, body = self.put('os-quota-sets/%s' % str(tenant_id), post_body)
 
         body = json.loads(body)
         return resp, body['quota_set']

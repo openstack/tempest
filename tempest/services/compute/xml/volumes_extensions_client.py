@@ -60,7 +60,7 @@ class VolumesExtensionsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         volumes = []
         if body is not None:
@@ -74,7 +74,7 @@ class VolumesExtensionsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         volumes = []
         if body is not None:
@@ -84,7 +84,7 @@ class VolumesExtensionsClientXML(RestClientXML):
     def get_volume(self, volume_id):
         """Returns the details of a single volume."""
         url = "os-volumes/%s" % str(volume_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         return resp, self._parse_volume(body)
 
@@ -110,8 +110,7 @@ class VolumesExtensionsClientXML(RestClientXML):
                 meta.append(Text(value))
                 _metadata.append(meta)
 
-        resp, body = self.post('os-volumes', str(Document(volume)),
-                               self.headers)
+        resp, body = self.post('os-volumes', str(Document(volume)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 

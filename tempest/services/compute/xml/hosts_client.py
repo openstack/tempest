@@ -37,7 +37,7 @@ class HostsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body
@@ -45,7 +45,7 @@ class HostsClientXML(RestClientXML):
     def show_host_detail(self, hostname):
         """Show detail information for the host."""
 
-        resp, body = self.get("os-hosts/%s" % str(hostname), self.headers)
+        resp, body = self.get("os-hosts/%s" % str(hostname))
         node = etree.fromstring(body)
         body = [xml_to_json(node)]
         return resp, body
@@ -58,8 +58,7 @@ class HostsClientXML(RestClientXML):
             for k, v in kwargs.iteritems():
                 request_body.append(Element(k, v))
         resp, body = self.put("os-hosts/%s" % str(hostname),
-                              str(Document(request_body)),
-                              self.headers)
+                              str(Document(request_body)))
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body
@@ -67,8 +66,7 @@ class HostsClientXML(RestClientXML):
     def startup_host(self, hostname):
         """Startup a host."""
 
-        resp, body = self.get("os-hosts/%s/startup" % str(hostname),
-                              self.headers)
+        resp, body = self.get("os-hosts/%s/startup" % str(hostname))
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body
@@ -76,8 +74,7 @@ class HostsClientXML(RestClientXML):
     def shutdown_host(self, hostname):
         """Shutdown a host."""
 
-        resp, body = self.get("os-hosts/%s/shutdown" % str(hostname),
-                              self.headers)
+        resp, body = self.get("os-hosts/%s/shutdown" % str(hostname))
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body
@@ -85,8 +82,7 @@ class HostsClientXML(RestClientXML):
     def reboot_host(self, hostname):
         """Reboot a host."""
 
-        resp, body = self.get("os-hosts/%s/reboot" % str(hostname),
-                              self.headers)
+        resp, body = self.get("os-hosts/%s/reboot" % str(hostname))
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body

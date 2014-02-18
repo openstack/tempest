@@ -36,6 +36,6 @@ class CertificatesV3ClientJSON(RestClient):
     def create_certificate(self):
         """create certificates."""
         url = "os-certificates"
-        resp, body = self.post(url, None, self.headers)
+        resp, body = self.post(url, None)
         body = json.loads(body)
         return resp, body['certificate']

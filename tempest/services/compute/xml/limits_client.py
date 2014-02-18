@@ -30,7 +30,7 @@ class LimitsClientXML(RestClientXML):
         self.service = CONF.compute.catalog_type
 
     def get_absolute_limits(self):
-        resp, body = self.get("limits", self.headers)
+        resp, body = self.get("limits")
         body = objectify.fromstring(body)
         lim = NS + 'absolute'
         ret = {}
@@ -41,7 +41,7 @@ class LimitsClientXML(RestClientXML):
         return resp, ret
 
     def get_specific_absolute_limit(self, absolute_limit):
-        resp, body = self.get("limits", self.headers)
+        resp, body = self.get("limits")
         body = objectify.fromstring(body)
         lim = NS + 'absolute'
         ret = {}

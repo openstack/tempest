@@ -46,7 +46,6 @@ class InterfacesClientJSON(RestClient):
             post_body['interfaceAttachment']['fixed_ips'] = [fip]
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/os-interface' % server,
-                               headers=self.headers,
                                body=post_body)
         body = json.loads(body)
         return resp, body['interfaceAttachment']

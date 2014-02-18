@@ -33,11 +33,11 @@ class AvailabilityZoneClientXML(RestClientXML):
         return [xml_to_json(x) for x in node]
 
     def get_availability_zone_list(self):
-        resp, body = self.get('os-availability-zone', self.headers)
+        resp, body = self.get('os-availability-zone')
         availability_zone = self._parse_array(etree.fromstring(body))
         return resp, availability_zone
 
     def get_availability_zone_list_detail(self):
-        resp, body = self.get('os-availability-zone/detail', self.headers)
+        resp, body = self.get('os-availability-zone/detail')
         availability_zone = self._parse_array(etree.fromstring(body))
         return resp, availability_zone

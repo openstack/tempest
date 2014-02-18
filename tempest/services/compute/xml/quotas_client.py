@@ -50,7 +50,7 @@ class QuotasClientXML(RestClientXML):
         """List the quota set for a tenant."""
 
         url = 'os-quota-sets/%s' % str(tenant_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body
@@ -59,7 +59,7 @@ class QuotasClientXML(RestClientXML):
         """List the default quota set for a tenant."""
 
         url = 'os-quota-sets/%s/defaults' % str(tenant_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body
@@ -119,8 +119,7 @@ class QuotasClientXML(RestClientXML):
             post_body.add_attr('security_groups', security_groups)
 
         resp, body = self.put('os-quota-sets/%s' % str(tenant_id),
-                              str(Document(post_body)),
-                              self.headers)
+                              str(Document(post_body)))
         body = xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body

@@ -186,7 +186,7 @@ class ServersClientXML(RestClientXML):
 
     def get_server(self, server_id):
         """Returns the details of an existing server."""
-        resp, body = self.get("servers/%s" % str(server_id), self.headers)
+        resp, body = self.get("servers/%s" % str(server_id))
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
@@ -245,7 +245,7 @@ class ServersClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         servers = self._parse_array(etree.fromstring(body))
         return resp, {"servers": servers}
 
@@ -254,7 +254,7 @@ class ServersClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         servers = self._parse_array(etree.fromstring(body))
         return resp, {"servers": servers}
 
@@ -282,8 +282,7 @@ class ServersClientXML(RestClientXML):
                 meta.append(Text(v))
                 metadata.append(meta)
 
-        resp, body = self.put('servers/%s' % str(server_id),
-                              str(doc), self.headers)
+        resp, body = self.put('servers/%s' % str(server_id), str(doc))
         return resp, xml_to_json(etree.fromstring(body))
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
@@ -356,7 +355,7 @@ class ServersClientXML(RestClientXML):
                 temp.append(Text(k['contents']))
                 personality.append(temp)
 
-        resp, body = self.post('servers', str(Document(server)), self.headers)
+        resp, body = self.post('servers', str(Document(server)))
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
@@ -394,7 +393,7 @@ class ServersClientXML(RestClientXML):
 
     def list_addresses(self, server_id):
         """Lists all addresses for a server."""
-        resp, body = self.get("servers/%s/ips" % str(server_id), self.headers)
+        resp, body = self.get("servers/%s/ips" % str(server_id))
 
         networks = {}
         xml_list = etree.fromstring(body)
@@ -407,8 +406,7 @@ class ServersClientXML(RestClientXML):
     def list_addresses_by_network(self, server_id, network_id):
         """Lists all addresses of a specific network type for a server."""
         resp, body = self.get("servers/%s/ips/%s" % (str(server_id),
-                                                     network_id),
-                              self.headers)
+                                                     network_id))
         network = self._parse_network(etree.fromstring(body))
 
         return resp, network
@@ -417,8 +415,7 @@ class ServersClientXML(RestClientXML):
         if 'xmlns' not in kwargs:
             kwargs['xmlns'] = XMLNS_11
         doc = Document((Element(action_name, **kwargs)))
-        resp, body = self.post("servers/%s/action" % server_id,
-                               str(doc), self.headers)
+        resp, body = self.post("servers/%s/action" % server_id, str(doc))
         if response_key is not None:
             body = xml_to_json(etree.fromstring(body))
         return resp, body
@@ -435,8 +432,7 @@ class ServersClientXML(RestClientXML):
                            adminPass=password)
 
     def get_password(self, server_id):
-        resp, body = self.get("servers/%s/os-server-password" %
-                              str(server_id), self.headers)
+        resp, body = self.get("servers/%s/os-server-password" % str(server_id))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -446,8 +442,7 @@ class ServersClientXML(RestClientXML):
         Note that this does not actually change the instance server
         password.
         """
-        return self.delete("servers/%s/os-server-password" %
-                           str(server_id))
+        return self.delete("servers/%s/os-server-password" % str(server_id))
 
     def reboot(self, server_id, reboot_type):
         return self.action(server_id, "reboot", None, type=reboot_type)
@@ -478,7 +473,7 @@ class ServersClientXML(RestClientXML):
                 metadata.append(meta)
 
         resp, body = self.post('servers/%s/action' % server_id,
-                               str(Document(rebuild)), self.headers)
+                               str(Document(rebuild)))
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
@@ -523,12 +518,11 @@ class ServersClientXML(RestClientXML):
                            host=dest_host)
 
         resp, body = self.post("servers/%s/action" % str(server_id),
-                               str(Document(req_body)), self.headers)
+                               str(Document(req_body)))
         return resp, body
 
     def list_server_metadata(self, server_id):
-        resp, body = self.get("servers/%s/metadata" % str(server_id),
-                              self.headers)
+        resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -541,8 +535,7 @@ class ServersClientXML(RestClientXML):
                 meta_element = Element("meta", key=k)
                 meta_element.append(Text(v))
                 metadata.append(meta_element)
-        resp, body = self.put('servers/%s/metadata' % str(server_id),
-                              str(doc), self.headers)
+        resp, body = self.put('servers/%s/metadata' % str(server_id), str(doc))
         return resp, xml_to_json(etree.fromstring(body))
 
     def update_server_metadata(self, server_id, meta):
@@ -554,13 +547,12 @@ class ServersClientXML(RestClientXML):
             meta_element.append(Text(v))
             metadata.append(meta_element)
         resp, body = self.post("/servers/%s/metadata" % str(server_id),
-                               str(doc), headers=self.headers)
+                               str(doc))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_server_metadata_item(self, server_id, key):
-        resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key),
-                              headers=self.headers)
+        resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key))
         return resp, dict([(etree.fromstring(body).attrib['key'],
                             xml_to_json(etree.fromstring(body)))])
 
@@ -571,7 +563,7 @@ class ServersClientXML(RestClientXML):
             meta_element.append(Text(v))
             doc.append(meta_element)
         resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
-                              str(doc), self.headers)
+                              str(doc))
         return resp, xml_to_json(etree.fromstring(body))
 
     def delete_server_metadata_item(self, server_id, key):
@@ -588,7 +580,7 @@ class ServersClientXML(RestClientXML):
         List the virtual interfaces used in an instance.
         """
         resp, body = self.get('/'.join(['servers', server_id,
-                              'os-virtual-interfaces']), self.headers)
+                              'os-virtual-interfaces']))
         virt_int = self._parse_xml_virtual_interfaces(etree.fromstring(body))
         return resp, virt_int
 
@@ -604,7 +596,7 @@ class ServersClientXML(RestClientXML):
         post_body = Element("volumeAttachment", volumeId=volume_id,
                             device=device)
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
-                               str(Document(post_body)), self.headers)
+                               str(Document(post_body)))
         return resp, body
 
     def detach_volume(self, server_id, volume_id):
@@ -616,22 +608,20 @@ class ServersClientXML(RestClientXML):
 
     def get_server_diagnostics(self, server_id):
         """Get the usage data for a server."""
-        resp, body = self.get("servers/%s/diagnostics" % server_id,
-                              self.headers)
+        resp, body = self.get("servers/%s/diagnostics" % server_id)
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
     def list_instance_actions(self, server_id):
         """List the provided server action."""
-        resp, body = self.get("servers/%s/os-instance-actions" % server_id,
-                              self.headers)
+        resp, body = self.get("servers/%s/os-instance-actions" % server_id)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_instance_action(self, server_id, request_id):
         """Returns the action details of the provided server."""
         resp, body = self.get("servers/%s/os-instance-actions/%s" %
-                              (server_id, request_id), self.headers)
+                              (server_id, request_id))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 

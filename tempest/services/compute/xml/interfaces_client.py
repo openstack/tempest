@@ -42,7 +42,7 @@ class InterfacesClientXML(RestClientXML):
         return iface
 
     def list_interfaces(self, server):
-        resp, body = self.get('servers/%s/os-interface' % server, self.headers)
+        resp, body = self.get('servers/%s/os-interface' % server)
         node = etree.fromstring(body)
         interfaces = [self._process_xml_interface(x)
                       for x in node.getchildren()]
@@ -70,14 +70,12 @@ class InterfacesClientXML(RestClientXML):
             iface.append(_fixed_ips)
         doc.append(iface)
         resp, body = self.post('servers/%s/os-interface' % server,
-                               headers=self.headers,
                                body=str(doc))
         body = self._process_xml_interface(etree.fromstring(body))
         return resp, body
 
     def show_interface(self, server, port_id):
-        resp, body = self.get('servers/%s/os-interface/%s' % (server, port_id),
-                              self.headers)
+        resp, body = self.get('servers/%s/os-interface/%s' % (server, port_id))
         body = self._process_xml_interface(etree.fromstring(body))
         return resp, body
 

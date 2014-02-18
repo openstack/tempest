@@ -33,46 +33,42 @@ class HypervisorClientXML(RestClientXML):
 
     def get_hypervisor_list(self):
         """List hypervisors information."""
-        resp, body = self.get('os-hypervisors', self.headers)
+        resp, body = self.get('os-hypervisors')
         hypervisors = self._parse_array(etree.fromstring(body))
         return resp, hypervisors
 
     def get_hypervisor_list_details(self):
         """Show detailed hypervisors information."""
-        resp, body = self.get('os-hypervisors/detail', self.headers)
+        resp, body = self.get('os-hypervisors/detail')
         hypervisors = self._parse_array(etree.fromstring(body))
         return resp, hypervisors
 
     def get_hypervisor_show_details(self, hyper_id):
         """Display the details of the specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s' % hyper_id,
-                              self.headers)
+        resp, body = self.get('os-hypervisors/%s' % hyper_id)
         hypervisor = xml_to_json(etree.fromstring(body))
         return resp, hypervisor
 
     def get_hypervisor_servers(self, hyper_name):
         """List instances belonging to the specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/servers' % hyper_name,
-                              self.headers)
+        resp, body = self.get('os-hypervisors/%s/servers' % hyper_name)
         hypervisors = self._parse_array(etree.fromstring(body))
         return resp, hypervisors
 
     def get_hypervisor_stats(self):
         """Get hypervisor statistics over all compute nodes."""
-        resp, body = self.get('os-hypervisors/statistics', self.headers)
+        resp, body = self.get('os-hypervisors/statistics')
         stats = xml_to_json(etree.fromstring(body))
         return resp, stats
 
     def get_hypervisor_uptime(self, hyper_id):
         """Display the uptime of the specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id,
-                              self.headers)
+        resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id)
         uptime = xml_to_json(etree.fromstring(body))
         return resp, uptime
 
     def search_hypervisor(self, hyper_name):
         """Search specified hypervisor."""
-        resp, body = self.get('os-hypervisors/%s/search' % hyper_name,
-                              self.headers)
+        resp, body = self.get('os-hypervisors/%s/search' % hyper_name)
         hypervisors = self._parse_array(etree.fromstring(body))
         return resp, hypervisors

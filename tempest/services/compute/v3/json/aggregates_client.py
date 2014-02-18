@@ -43,7 +43,7 @@ class AggregatesV3ClientJSON(RestClient):
     def create_aggregate(self, **kwargs):
         """Creates a new aggregate."""
         post_body = json.dumps({'aggregate': kwargs})
-        resp, body = self.post('os-aggregates', post_body, self.headers)
+        resp, body = self.post('os-aggregates', post_body)
 
         body = json.loads(body)
         return resp, body['aggregate']
@@ -55,8 +55,7 @@ class AggregatesV3ClientJSON(RestClient):
             'availability_zone': availability_zone
         }
         put_body = json.dumps({'aggregate': put_body})
-        resp, body = self.put('os-aggregates/%s' % str(aggregate_id),
-                              put_body, self.headers)
+        resp, body = self.put('os-aggregates/%s' % str(aggregate_id), put_body)
 
         body = json.loads(body)
         return resp, body['aggregate']
@@ -79,7 +78,7 @@ class AggregatesV3ClientJSON(RestClient):
         }
         post_body = json.dumps({'add_host': post_body})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               post_body, self.headers)
+                               post_body)
         body = json.loads(body)
         return resp, body['aggregate']
 
@@ -90,7 +89,7 @@ class AggregatesV3ClientJSON(RestClient):
         }
         post_body = json.dumps({'remove_host': post_body})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               post_body, self.headers)
+                               post_body)
         body = json.loads(body)
         return resp, body['aggregate']
 
@@ -101,6 +100,6 @@ class AggregatesV3ClientJSON(RestClient):
         }
         post_body = json.dumps({'set_metadata': post_body})
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               post_body, self.headers)
+                               post_body)
         body = json.loads(body)
         return resp, body['aggregate']

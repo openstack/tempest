@@ -51,14 +51,14 @@ class SecurityGroupsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_security_group(self, security_group_id):
         """Get the details of a Security Group."""
         url = "os-security-groups/%s" % str(security_group_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -73,8 +73,7 @@ class SecurityGroupsClientXML(RestClientXML):
         des.append(Text(content=description))
         security_group.append(des)
         resp, body = self.post('os-security-groups',
-                               str(Document(security_group)),
-                               self.headers)
+                               str(Document(security_group)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -97,15 +96,13 @@ class SecurityGroupsClientXML(RestClientXML):
             security_group.append(des)
         resp, body = self.put('os-security-groups/%s' %
                               str(security_group_id),
-                              str(Document(security_group)),
-                              self.headers)
+                              str(Document(security_group)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
-        return self.delete('os-security-groups/%s' %
-                           str(security_group_id), self.headers)
+        return self.delete('os-security-groups/%s' % str(security_group_id))
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
                                    to_port, **kwargs):
@@ -136,19 +133,19 @@ class SecurityGroupsClientXML(RestClientXML):
                 group_rule.append(element)
 
         url = 'os-security-group-rules'
-        resp, body = self.post(url, str(Document(group_rule)), self.headers)
+        resp, body = self.post(url, str(Document(group_rule)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule."""
         return self.delete('os-security-group-rules/%s' %
-                           str(group_rule_id), self.headers)
+                           str(group_rule_id))
 
     def list_security_group_rules(self, security_group_id):
         """List all rules for a security group."""
         url = "os-security-groups"
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         secgroups = body.getchildren()
         for secgroup in secgroups:

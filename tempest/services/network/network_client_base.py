@@ -59,19 +59,15 @@ class NetworkClientBase(object):
         raise NotImplementedError
 
     def post(self, uri, body, headers=None):
-        headers = headers or self.rest_client.headers
         return self.rest_client.post(uri, body, headers)
 
     def put(self, uri, body, headers=None):
-        headers = headers or self.rest_client.headers
         return self.rest_client.put(uri, body, headers)
 
     def get(self, uri, headers=None):
-        headers = headers or self.rest_client.headers
         return self.rest_client.get(uri, headers)
 
     def delete(self, uri, headers=None):
-        headers = headers or self.rest_client.headers
         return self.rest_client.delete(uri, headers)
 
     def deserialize_list(self, body):

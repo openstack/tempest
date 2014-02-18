@@ -36,5 +36,5 @@ class FixedIPsClientJSON(RestClient):
     def reserve_fixed_ip(self, ip, body):
         """This reserves and unreserves fixed ips."""
         url = "os-fixed-ips/%s/action" % (ip)
-        resp, body = self.post(url, json.dumps(body), self.headers)
+        resp, body = self.post(url, json.dumps(body))
         return resp, body

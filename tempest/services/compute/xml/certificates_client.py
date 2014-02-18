@@ -28,13 +28,13 @@ class CertificatesClientXML(RestClientXML):
 
     def get_certificate(self, id):
         url = "os-certificates/%s" % (id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_resp(body)
         return resp, body
 
     def create_certificate(self):
         """create certificates."""
         url = "os-certificates"
-        resp, body = self.post(url, None, self.headers)
+        resp, body = self.post(url, None)
         body = self._parse_resp(body)
         return resp, body
