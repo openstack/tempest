@@ -56,6 +56,22 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
 
+    @test.attr(type='smoke')
+    def test_get_quota_set_detail(self):
+        # Admin can get the detail of resource quota set for a tenant
+        expected_quota_set = self.default_quota_set | set(['id'])
+        expected_detail = {'reserved', 'limit', 'in_use'}
+        resp, quota_set = self.adm_client.get_quota_set_detail(
+            self.demo_tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(sorted(expected_quota_set), sorted(quota_set.keys()))
+        self.assertEqual(quota_set['id'], self.demo_tenant_id)
+        for quota in quota_set:
+            if quota == 'id':
+                continue
+            self.assertEqual(sorted(expected_detail),
+                             sorted(quota_set[quota].keys()))
+
     @test.attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
