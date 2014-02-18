@@ -228,10 +228,19 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_vip(cls, name, protocol, protocol_port, subnet, pool):
         """Wrapper utility that returns a test vip."""
-        resp, body = cls.client.create_vip(name, protocol, protocol_port,
-                                           subnet['id'], pool['id'])
+        resp, body = cls.client.create_vip(name=name,
+                                           protocol=protocol,
+                                           protocol_port=protocol_port,
+                                           subnet_id=subnet['id'],
+                                           pool_id=pool['id'])
         vip = body['vip']
         cls.vips.append(vip)
+        return vip
+
+    @classmethod
+    def update_vip(cls, name):
+        resp, body = cls.client.update_vip(name=name)
+        vip = body['vip']
         return vip
 
     @classmethod
@@ -247,11 +256,18 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_health_monitor(cls, delay, max_retries, Type, timeout):
         """Wrapper utility that returns a test health monitor."""
-        resp, body = cls.client.create_health_monitor(delay,
-                                                      max_retries,
-                                                      Type, timeout)
+        resp, body = cls.client.create_health_monitor(delay=delay,
+                                                      max_retries=max_retries,
+                                                      type=Type,
+                                                      timeout=timeout)
         health_monitor = body['health_monitor']
         cls.health_monitors.append(health_monitor)
+        return health_monitor
+
+    @classmethod
+    def update_health_monitor(cls, admin_state_up):
+        resp, body = cls.client.update_vip(admin_state_up=admin_state_up)
+        health_monitor = body['health_monitor']
         return health_monitor
 
     @classmethod

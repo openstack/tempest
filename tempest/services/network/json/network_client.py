@@ -193,34 +193,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.loads(body)
         return resp, body
 
-    def create_vip(self, name, protocol, protocol_port, subnet_id, pool_id):
-        post_body = {
-            "vip": {
-                "protocol": protocol,
-                "name": name,
-                "subnet_id": subnet_id,
-                "pool_id": pool_id,
-                "protocol_port": protocol_port
-            }
-        }
-        body = json.dumps(post_body)
-        uri = '%s/lb/vips' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_vip(self, vip_id, new_name):
-        put_body = {
-            "vip": {
-                "name": new_name,
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/lb/vips/%s' % (self.uri_prefix, vip_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
     def create_member(self, address, protocol_port, pool_id):
         post_body = {
             "member": {
@@ -243,33 +215,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         }
         body = json.dumps(put_body)
         uri = '%s/lb/members/%s' % (self.uri_prefix, member_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def create_health_monitor(self, delay, max_retries, Type, timeout):
-        post_body = {
-            "health_monitor": {
-                "delay": delay,
-                "max_retries": max_retries,
-                "type": Type,
-                "timeout": timeout
-            }
-        }
-        body = json.dumps(post_body)
-        uri = '%s/lb/health_monitors' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_health_monitor(self, admin_state_up, uuid):
-        put_body = {
-            "health_monitor": {
-                "admin_state_up": admin_state_up
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/lb/health_monitors/%s' % (self.uri_prefix, uuid)
         resp, body = self.put(uri, body)
         body = json.loads(body)
         return resp, body
