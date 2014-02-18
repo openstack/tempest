@@ -312,7 +312,7 @@ class BaseTestCase(BaseDeps):
     @classmethod
     def get_client_manager(cls, interface=None):
         """
-        Returns an Openstack client manager
+        Returns an OpenStack client manager
         """
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             cls.__name__, network_resources=cls.network_resources)

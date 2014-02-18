@@ -13,14 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 #
-# This script aims to configure an initial Openstack environment with all the
-# necessary configurations for tempest's run using nothing but Openstack's
+# This script aims to configure an initial OpenStack environment with all the
+# necessary configurations for tempest's run using nothing but OpenStack's
 # native API.
 # That includes, creating users, tenants, registering images (cirros),
 # configuring neutron and so on.
 #
 # ASSUMPTION: this script is run by an admin user as it is meant to configure
-# the Openstack environment prior to actual use.
+# the OpenStack environment prior to actual use.
 
 # Config
 import ConfigParser
@@ -32,7 +32,7 @@ import urllib2
 import glanceclient as glance_client
 import keystoneclient.v2_0.client as keystone_client
 
-# Import Openstack exceptions
+# Import OpenStack exceptions
 import glanceclient.exc as glance_exception
 import keystoneclient.exceptions as keystone_exception
 
@@ -88,7 +88,7 @@ class ClientManager(object):
 
     def get_image_client(self, version="1", *args, **kwargs):
         """
-        This method returns Openstack glance python client
+        This method returns OpenStack glance python client
         :param version: a string representing the version of the glance client
         to use.
         :param string endpoint: A user-supplied endpoint URL for the glance
@@ -333,7 +333,7 @@ def create_images(image_client, config, config_section,
     """
     Creates images for tempest's use and registers the environment variables
     IMAGE_ID and IMAGE_ID_ALT with registered images
-    :param image_client: Openstack python image client
+    :param image_client: OpenStack python image client
     :param config: a ConfigParser object representing the tempest config file
     :param config_section: the section name where the IMAGE ids are set
     :param download_url: the URL from which we should download the UEC tar
