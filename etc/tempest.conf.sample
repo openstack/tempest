@@ -524,12 +524,19 @@
 # value)
 #region=
 
-# The cidr block to allocate tenant networks from (string
+# The cidr block to allocate tenant ipv4 subnets from (string
 # value)
 #tenant_network_cidr=10.100.0.0/16
 
-# The mask bits for tenant networks (integer value)
+# The mask bits for tenant ipv4 subnets (integer value)
 #tenant_network_mask_bits=28
+
+# The cidr block to allocate tenant ipv6 subnets from (string
+# value)
+#tenant_network_v6_cidr=2003::/64
+
+# The mask bits for tenant ipv6 subnets (integer value)
+#tenant_network_v6_mask_bits=96
 
 # Whether tenant network connectivity should be evaluated
 # directly (boolean value)

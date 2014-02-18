@@ -51,6 +51,11 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     force_tenant_isolation = False
 
+    # Default to ipv4.
+    _ip_version = 4
+    _tenant_network_cidr = CONF.network.tenant_network_cidr
+    _tenant_network_mask_bits = CONF.network.tenant_network_mask_bits
+
     @classmethod
     def setUpClass(cls):
         # Create no network resources for these test.
@@ -139,10 +144,11 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return network
 
     @classmethod
-    def create_subnet(cls, network, ip_version=4):
+    def create_subnet(cls, network):
         """Wrapper utility that returns a test subnet."""
-        cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        # The cidr and mask_bits depend on the ip version.
+        cidr = netaddr.IPNetwork(cls._tenant_network_cidr)
+        mask_bits = cls._tenant_network_mask_bits
         # Find a cidr that is not in use yet and create a subnet with it
         body = None
         failure = None
@@ -151,7 +157,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                 resp, body = cls.client.create_subnet(
                     network_id=network['id'],
                     cidr=str(subnet_cidr),
-                    ip_version=ip_version)
+                    ip_version=cls._ip_version)
                 break
             except exceptions.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
