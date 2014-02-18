@@ -21,7 +21,7 @@ from tempest import exceptions
 from tempest import test
 
 
-class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
+class FlavorsAdminV3Test(base.BaseV3ComputeAdminTest):
 
     """
     Tests Flavors API Create and Delete that require admin privileges
@@ -31,13 +31,10 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsAdminTestJSON, cls).setUpClass()
-        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
-            msg = "FlavorExtraData extension not enabled."
-            raise cls.skipException(msg)
+        super(FlavorsAdminV3Test, cls).setUpClass()
 
-        cls.client = cls.os_adm.flavors_client
-        cls.user_client = cls.os.flavors_client
+        cls.client = cls.flavors_admin_client
+        cls.user_client = cls.flavors_client
         cls.flavor_name_prefix = 'test_flavor_'
         cls.ram = 512
         cls.vcpus = 1
@@ -48,7 +45,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     def flavor_clean_up(self, flavor_id):
         resp, body = self.client.delete_flavor(flavor_id)
-        self.assertEqual(resp.status, 202)
+        self.assertEqual(resp.status, 204)
         self.client.wait_for_resource_deletion(flavor_id)
 
     def _create_flavor(self, flavor_id):
@@ -65,16 +62,17 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                  swap=self.swap,
                                                  rxtx=self.rxtx)
         self.addCleanup(self.flavor_clean_up, flavor['id'])
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
         self.assertEqual(flavor['name'], flavor_name)
         self.assertEqual(flavor['vcpus'], self.vcpus)
         self.assertEqual(flavor['disk'], self.disk)
         self.assertEqual(flavor['ram'], self.ram)
         self.assertEqual(flavor['swap'], self.swap)
-        self.assertEqual(flavor['rxtx_factor'], self.rxtx)
-        self.assertEqual(flavor['OS-FLV-EXT-DATA:ephemeral'],
+        if test.is_extension_enabled("os-flavor-rxtx", "compute_v3"):
+            self.assertEqual(flavor['os-flavor-rxtx:rxtx_factor'], self.rxtx)
+        self.assertEqual(flavor['ephemeral'],
                          self.ephemeral)
-        self.assertEqual(flavor['os-flavor-access:is_public'], True)
+        self.assertEqual(flavor['flavor-access:is_public'], True)
 
         # Verify flavor is retrieved
         resp, flavor = self.client.get_flavor_details(flavor['id'])
@@ -135,10 +133,11 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
 
         def verify_flavor_response_extension(flavor):
             # check some extensions for the flavor create/show/detail response
-            self.assertEqual(flavor['swap'], '')
-            self.assertEqual(int(flavor['rxtx_factor']), 1)
-            self.assertEqual(int(flavor['OS-FLV-EXT-DATA:ephemeral']), 0)
-            self.assertEqual(flavor['os-flavor-access:is_public'], True)
+            self.assertEqual(flavor['swap'], 0)
+            if test.is_extension_enabled("os-flavor-rxtx", "compute_v3"):
+                self.assertEqual(int(flavor['os-flavor-rxtx:rxtx_factor']), 1)
+            self.assertEqual(int(flavor['ephemeral']), 0)
+            self.assertEqual(flavor['flavor-access:is_public'], True)
 
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
@@ -149,7 +148,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                  self.disk,
                                                  new_flavor_id)
         self.addCleanup(self.flavor_clean_up, flavor['id'])
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
         self.assertEqual(flavor['name'], flavor_name)
         self.assertEqual(flavor['ram'], self.ram)
         self.assertEqual(flavor['vcpus'], self.vcpus)
@@ -219,11 +218,11 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                  new_flavor_id,
                                                  is_public="False")
         self.addCleanup(self.flavor_clean_up, flavor['id'])
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
 
         # Verify flavor is not used by other user
         self.assertRaises(exceptions.BadRequest,
-                          self.os.servers_client.create_server,
+                          self.servers_client.create_server,
                           'test', self.image_ref, flavor['id'])
 
     @test.attr(type='gate')
@@ -304,13 +303,9 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                                                  self.disk,
                                                  new_flavor_id)
         self.addCleanup(self.flavor_clean_up, flavor['id'])
-        self.assertEqual(200, resp.status)
+        self.assertEqual(201, resp.status)
         self.assertEqual(flavor['name'], flavor_name)
         self.assertEqual(flavor['vcpus'], self.vcpus)
         self.assertEqual(flavor['disk'], self.disk)
         self.assertEqual(flavor['ram'], int(ram))
         self.assertEqual(int(flavor['id']), new_flavor_id)
-
-
-class FlavorsAdminTestXML(FlavorsAdminTestJSON):
-    _interface = 'xml'

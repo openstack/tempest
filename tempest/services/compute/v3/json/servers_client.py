@@ -216,6 +216,21 @@ class ServersV3ClientJSON(RestClient):
         return self.action(server_id, 'change_password', None,
                            admin_password=admin_password)
 
+    def get_password(self, server_id):
+        resp, body = self.get("servers/%s/os-server-password" %
+                              str(server_id))
+        body = json.loads(body)
+        return resp, body
+
+    def delete_password(self, server_id):
+        """
+        Removes the encrypted server password from the metadata server
+        Note that this does not actually change the instance server
+        password.
+        """
+        return self.delete("servers/%s/os-server-password" %
+                           str(server_id))
+
     def reboot(self, server_id, reboot_type):
         """Reboots a server."""
         return self.action(server_id, 'reboot', None, type=reboot_type)
