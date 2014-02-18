@@ -204,7 +204,6 @@ class RestClient(object):
     def get_versions(self):
         resp, body = self.get('')
         body = self._parse_resp(body)
-        body = body['versions']
         versions = map(lambda x: x['id'], body)
         return resp, versions
 
