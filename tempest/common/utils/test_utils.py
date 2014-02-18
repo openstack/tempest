@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import clients
 from tempest.common.utils import misc
 from tempest import config
-from tempest.scenario import manager
 
 import json
 import re
@@ -35,7 +35,7 @@ class ImageUtils(object):
         self.non_ssh_image_pattern = \
             CONF.input_scenario.non_ssh_image_regex
         # Setup clients
-        ocm = manager.OfficialClientManager(CONF.identity.username,
+        ocm = clients.OfficialClientManager(CONF.identity.username,
                                             CONF.identity.password,
                                             CONF.identity.tenant_name)
         self.client = ocm.compute_client
@@ -95,7 +95,7 @@ class InputScenarioUtils(object):
                                             digit=string.digits)
 
     def __init__(self):
-        ocm = manager.OfficialClientManager(CONF.identity.username,
+        ocm = clients.OfficialClientManager(CONF.identity.username,
                                             CONF.identity.password,
                                             CONF.identity.tenant_name)
         self.client = ocm.compute_client

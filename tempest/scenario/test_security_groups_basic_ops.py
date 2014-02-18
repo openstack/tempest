@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import clients
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.scenario.manager import OfficialClientManager
 from tempest.test import attr
 from tempest.test import call_until_true
 from tempest.test import services
@@ -102,7 +102,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         """
 
         def __init__(self, tenant_id, tenant_user, tenant_pass, tenant_name):
-            self.manager = OfficialClientManager(
+            self.manager = clients.OfficialClientManager(
                 tenant_user,
                 tenant_pass,
                 tenant_name

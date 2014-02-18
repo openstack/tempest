@@ -18,26 +18,17 @@ import logging
 import os
 import subprocess
 
-# Default client libs
-import cinderclient.client
-import glanceclient
-import heatclient.client
-import keystoneclient.exceptions
-import keystoneclient.v2_0.client
 import netaddr
 from neutronclient.common import exceptions as exc
-import neutronclient.v2_0.client
-import novaclient.client
 from novaclient import exceptions as nova_exceptions
-import swiftclient
 
 from tempest.api.network import common as net_common
+from tempest import clients
 from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux.remote_client import RemoteClient
 from tempest import config
 from tempest import exceptions
-import tempest.manager
 from tempest.openstack.common import log
 import tempest.test
 
@@ -51,184 +42,6 @@ LOG_nova_client.addHandler(log.NullHandler())
 
 LOG_cinder_client = logging.getLogger('cinderclient.client')
 LOG_cinder_client.addHandler(log.NullHandler())
-
-
-class OfficialClientManager(tempest.manager.Manager):
-    """
-    Manager that provides access to the official python clients for
-    calling various OpenStack APIs.
-    """
-
-    NOVACLIENT_VERSION = '2'
-    CINDERCLIENT_VERSION = '1'
-    HEATCLIENT_VERSION = '1'
-
-    def __init__(self, username, password, tenant_name):
-        super(OfficialClientManager, self).__init__()
-        self.compute_client = self._get_compute_client(username,
-                                                       password,
-                                                       tenant_name)
-        self.identity_client = self._get_identity_client(username,
-                                                         password,
-                                                         tenant_name)
-        self.image_client = self._get_image_client()
-        self.network_client = self._get_network_client()
-        self.volume_client = self._get_volume_client(username,
-                                                     password,
-                                                     tenant_name)
-        self.object_storage_client = self._get_object_storage_client(
-            username,
-            password,
-            tenant_name)
-        self.orchestration_client = self._get_orchestration_client(
-            username,
-            password,
-            tenant_name)
-
-    def _get_compute_client(self, username, password, tenant_name):
-        # Novaclient will not execute operations for anyone but the
-        # identified user, so a new client needs to be created for
-        # each user that operations need to be performed for.
-        self._validate_credentials(username, password, tenant_name)
-
-        auth_url = CONF.identity.uri
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        region = CONF.identity.region
-
-        client_args = (username, password, tenant_name, auth_url)
-
-        # Create our default Nova client to use in testing
-        service_type = CONF.compute.catalog_type
-        endpoint_type = CONF.compute.endpoint_type
-        return novaclient.client.Client(self.NOVACLIENT_VERSION,
-                                        *client_args,
-                                        service_type=service_type,
-                                        endpoint_type=endpoint_type,
-                                        region_name=region,
-                                        no_cache=True,
-                                        insecure=dscv,
-                                        http_log_debug=True)
-
-    def _get_image_client(self):
-        token = self.identity_client.auth_token
-        region = CONF.identity.region
-        endpoint_type = CONF.image.endpoint_type
-        endpoint = self.identity_client.service_catalog.url_for(
-            attr='region', filter_value=region,
-            service_type=CONF.image.catalog_type, endpoint_type=endpoint_type)
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        return glanceclient.Client('1', endpoint=endpoint, token=token,
-                                   insecure=dscv)
-
-    def _get_volume_client(self, username, password, tenant_name):
-        auth_url = CONF.identity.uri
-        region = CONF.identity.region
-        endpoint_type = CONF.volume.endpoint_type
-        return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
-                                          username,
-                                          password,
-                                          tenant_name,
-                                          auth_url,
-                                          region_name=region,
-                                          endpoint_type=endpoint_type,
-                                          http_log_debug=True)
-
-    def _get_object_storage_client(self, username, password, tenant_name):
-        auth_url = CONF.identity.uri
-        # add current tenant to swift operator role group.
-        keystone_admin = self._get_identity_client(
-            CONF.identity.admin_username,
-            CONF.identity.admin_password,
-            CONF.identity.admin_tenant_name)
-
-        # enable test user to operate swift by adding operator role to him.
-        roles = keystone_admin.roles.list()
-        operator_role = CONF.object_storage.operator_role
-        member_role = [role for role in roles if role.name == operator_role][0]
-        # NOTE(maurosr): This is surrounded in the try-except block cause
-        # neutron tests doesn't have tenant isolation.
-        try:
-            keystone_admin.roles.add_user_role(self.identity_client.user_id,
-                                               member_role.id,
-                                               self.identity_client.tenant_id)
-        except keystoneclient.exceptions.Conflict:
-            pass
-
-        endpoint_type = CONF.object_storage.endpoint_type
-        os_options = {'endpoint_type': endpoint_type}
-        return swiftclient.Connection(auth_url, username, password,
-                                      tenant_name=tenant_name,
-                                      auth_version='2',
-                                      os_options=os_options)
-
-    def _get_orchestration_client(self, username=None, password=None,
-                                  tenant_name=None):
-        if not username:
-            username = CONF.identity.admin_username
-        if not password:
-            password = CONF.identity.admin_password
-        if not tenant_name:
-            tenant_name = CONF.identity.tenant_name
-
-        self._validate_credentials(username, password, tenant_name)
-
-        keystone = self._get_identity_client(username, password, tenant_name)
-        region = CONF.identity.region
-        endpoint_type = CONF.orchestration.endpoint_type
-        token = keystone.auth_token
-        service_type = CONF.orchestration.catalog_type
-        try:
-            endpoint = keystone.service_catalog.url_for(
-                attr='region',
-                filter_value=region,
-                service_type=service_type,
-                endpoint_type=endpoint_type)
-        except keystoneclient.exceptions.EndpointNotFound:
-            return None
-        else:
-            return heatclient.client.Client(self.HEATCLIENT_VERSION,
-                                            endpoint,
-                                            token=token,
-                                            username=username,
-                                            password=password)
-
-    def _get_identity_client(self, username, password, tenant_name):
-        # This identity client is not intended to check the security
-        # of the identity service, so use admin credentials by default.
-        self._validate_credentials(username, password, tenant_name)
-
-        auth_url = CONF.identity.uri
-        dscv = CONF.identity.disable_ssl_certificate_validation
-
-        return keystoneclient.v2_0.client.Client(username=username,
-                                                 password=password,
-                                                 tenant_name=tenant_name,
-                                                 auth_url=auth_url,
-                                                 insecure=dscv)
-
-    def _get_network_client(self):
-        # The intended configuration is for the network client to have
-        # admin privileges and indicate for whom resources are being
-        # created via a 'tenant_id' parameter.  This will often be
-        # preferable to authenticating as a specific user because
-        # working with certain resources (public routers and networks)
-        # often requires admin privileges anyway.
-        username = CONF.identity.admin_username
-        password = CONF.identity.admin_password
-        tenant_name = CONF.identity.admin_tenant_name
-
-        self._validate_credentials(username, password, tenant_name)
-
-        auth_url = CONF.identity.uri
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        endpoint_type = CONF.network.endpoint_type
-
-        return neutronclient.v2_0.client.Client(username=username,
-                                                password=password,
-                                                tenant_name=tenant_name,
-                                                endpoint_type=endpoint_type,
-                                                auth_url=auth_url,
-                                                insecure=dscv)
 
 
 class OfficialClientTest(tempest.test.BaseTestCase):
@@ -253,7 +66,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
         username, password, tenant_name = cls.credentials()
 
-        cls.manager = OfficialClientManager(username, password, tenant_name)
+        cls.manager = clients.OfficialClientManager(
+            username, password, tenant_name)
         cls.compute_client = cls.manager.compute_client
         cls.image_client = cls.manager.image_client
         cls.identity_client = cls.manager.identity_client
