@@ -15,8 +15,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
 
 
 class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -25,6 +24,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     Tests Servers API using admin privileges
     """
 
+    _host_key = 'OS-EXT-SRV-ATTR:host'
     _interface = 'json'
 
     @classmethod
@@ -54,7 +54,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
             flavor_id = data_utils.rand_int_id(start=1000)
         return flavor_id
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_by_admin(self):
         # Listing servers by admin user returns empty list by default
         resp, body = self.client.list_servers_with_detail()
@@ -62,7 +62,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_filter_by_error_status(self):
         # Filter the list of servers by server error status
         params = {'status': 'error'}
@@ -78,7 +78,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s1_id, map(lambda x: x['id'], servers))
         self.assertNotIn(self.s2_id, map(lambda x: x['id'], servers))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_by_admin_with_all_tenants(self):
         # Listing servers by admin user with all tenants parameter
         # Here should be listed all servers
@@ -90,7 +90,34 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIn(self.s1_name, servers_name)
         self.assertIn(self.s2_name, servers_name)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
+    def test_list_servers_filter_by_exist_host(self):
+        # Filter the list of servers by existent host
+        name = data_utils.rand_name('server')
+        flavor = self.flavor_ref
+        image_id = self.image_ref
+        resp, test_server = self.client.create_server(
+            name, image_id, flavor)
+        self.assertEqual('202', resp['status'])
+        self.addCleanup(self.client.delete_server, test_server['id'])
+        self.client.wait_for_server_status(test_server['id'], 'ACTIVE')
+        resp, server = self.client.get_server(test_server['id'])
+        self.assertEqual(server['status'], 'ACTIVE')
+        hostname = server[self._host_key]
+        params = {'host': hostname}
+        resp, body = self.client.list_servers(params)
+        self.assertEqual('200', resp['status'])
+        servers = body['servers']
+        nonexistent_params = {'host': 'nonexistent_host'}
+        resp, nonexistent_body = self.client.list_servers(
+            nonexistent_params)
+        self.assertEqual('200', resp['status'])
+        nonexistent_servers = nonexistent_body['servers']
+        self.assertIn(test_server['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(test_server['id'],
+                         map(lambda x: x['id'], nonexistent_servers))
+
+    @test.attr(type='gate')
     def test_admin_delete_servers_of_others(self):
         # Administrator can delete servers of others
         _, server = self.create_test_server()
@@ -98,7 +125,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual('204', resp['status'])
         self.servers_client.wait_for_server_termination(server['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_delete_server_while_in_error_state(self):
         # Delete a server while it's VM state is error
         resp, server = self.create_test_server(wait_until='ACTIVE')
@@ -110,7 +137,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_reset_state_server(self):
         # Reset server's state to 'error'
         resp, server = self.client.reset_state(self.s1_id)
@@ -128,8 +155,8 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, server = self.client.get_server(self.s1_id)
         self.assertEqual(server['status'], 'ACTIVE')
 
-    @attr(type='gate')
-    @skip_because(bug="1240043")
+    @test.attr(type='gate')
+    @test.skip_because(bug="1240043")
     def test_get_server_diagnostics_by_admin(self):
         # Retrieve server diagnostics by admin user
         resp, diagnostic = self.client.get_server_diagnostics(self.s1_id)
@@ -140,7 +167,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         for key in basic_attrs:
             self.assertIn(key, str(diagnostic.keys()))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rebuild_server_in_error_state(self):
         # The server in error state should be rebuilt using the provided
         # image and changed to ACTIVE state
@@ -170,4 +197,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
 
 
 class ServersAdminTestXML(ServersAdminTestJSON):
+    _host_key = (
+        '{http://docs.openstack.org/compute/ext/extended_status/api/v1.1}host')
     _interface = 'xml'
