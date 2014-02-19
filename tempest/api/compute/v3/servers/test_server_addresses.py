@@ -14,8 +14,11 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
+
+CONF = config.CONF
 
 
 class ServerAddressesV3Test(base.BaseV3ComputeTest):
@@ -30,20 +33,22 @@ class ServerAddressesV3Test(base.BaseV3ComputeTest):
 
         resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_server_addresses_invalid_server_id(self):
         # List addresses request should fail if server id not in system
         self.assertRaises(exceptions.NotFound, self.client.list_addresses,
                           '999')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_server_addresses_by_network_neg(self):
         # List addresses by network should fail if network name not valid
         self.assertRaises(exceptions.NotFound,
                           self.client.list_addresses_by_network,
                           self.server['id'], 'invalid')
 
-    @attr(type='smoke')
+    @test.skip_because(bug="1210483",
+                       condition=CONF.service_available.neutron)
+    @test.attr(type='smoke')
     def test_list_server_addresses(self):
         # All public and private addresses for
         # a server should be returned
@@ -60,7 +65,7 @@ class ServerAddressesV3Test(base.BaseV3ComputeTest):
                 self.assertTrue(address['addr'])
                 self.assertTrue(address['version'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_server_addresses_by_network(self):
         # Providing a network type should filter
         # the addresses return by that type

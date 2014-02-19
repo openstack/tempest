@@ -14,7 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
@@ -29,6 +32,8 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
 
         resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
 
+    @test.skip_because(bug="1210483",
+                       condition=CONF.service_available.neutron)
     @test.attr(type='smoke')
     def test_list_server_addresses(self):
         # All public and private addresses for
