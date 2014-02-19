@@ -17,7 +17,7 @@ import httplib2
 
 class fake_httplib2(object):
 
-    def __init__(self, return_type=None):
+    def __init__(self, return_type=None, *args, **kwargs):
         self.return_type = return_type
 
     def request(self, uri, method="GET", body=None, headers=None,

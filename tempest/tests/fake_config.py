@@ -21,6 +21,9 @@ class FakeConfig(object):
 
     class fake_identity(object):
         disable_ssl_certificate_validation = True
+        catalog_type = 'identity'
+        uri = 'http://fake_uri.com/auth'
+        uri_v3 = 'http://fake_uri_v3.com/auth'
 
     class fake_default_feature_enabled(object):
         api_extensions = ['all']
