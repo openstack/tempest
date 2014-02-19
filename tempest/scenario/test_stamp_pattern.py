@@ -114,7 +114,7 @@ class TestStampPattern(manager.OfficialClientTest):
         detach_volume_client(server.id, volume.id)
         self._wait_for_volume_status(volume, 'available')
 
-    def _wait_for_volume_availible_on_the_system(self, server_or_ip):
+    def _wait_for_volume_available_on_the_system(self, server_or_ip):
         ssh = self.get_remote_client(server_or_ip)
 
         def _func():
@@ -161,7 +161,7 @@ class TestStampPattern(manager.OfficialClientTest):
             ip_for_server = server
 
         self._attach_volume(server, volume)
-        self._wait_for_volume_availible_on_the_system(ip_for_server)
+        self._wait_for_volume_available_on_the_system(ip_for_server)
         self._create_timestamp(ip_for_server)
         self._detach_volume(server, volume)
 
@@ -189,7 +189,7 @@ class TestStampPattern(manager.OfficialClientTest):
 
         # attach volume2 to instance2
         self._attach_volume(server_from_snapshot, volume_from_snapshot)
-        self._wait_for_volume_availible_on_the_system(ip_for_snapshot)
+        self._wait_for_volume_available_on_the_system(ip_for_snapshot)
 
         # check the existence of the timestamp file in the volume2
         self._check_timestamp(ip_for_snapshot)

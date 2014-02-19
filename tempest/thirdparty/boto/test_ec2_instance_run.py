@@ -278,7 +278,7 @@ class InstanceRunTest(BotoTestCase):
         # TODO(afazekas): ping test. dependecy/permission ?
 
         self.assertVolumeStatusWait(volume, "available")
-        # NOTE(afazekas): it may be reports availble before it is available
+        # NOTE(afazekas): it may be reports available before it is available
 
         ssh = RemoteClient(address.public_ip,
                            CONF.compute.ssh_user,
