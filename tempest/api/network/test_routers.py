@@ -16,6 +16,7 @@
 import netaddr
 
 from tempest.api.network import base_routers as base
+from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
@@ -32,6 +33,8 @@ class RoutersTest(base.BaseRouterTest):
         if not test.is_extension_enabled('router', 'network'):
             msg = "router extension not enabled."
             raise cls.skipException(msg)
+        admin_manager = clients.AdminManager()
+        cls.identity_admin_client = admin_manager.identity_client
 
     @test.attr(type='smoke')
     def test_create_show_list_update_delete_router(self):
@@ -75,6 +78,25 @@ class RoutersTest(base.BaseRouterTest):
         resp, show_body = self.client.show_router(
             create_body['router']['id'])
         self.assertEqual(show_body['router']['name'], updated_name)
+
+    @test.attr(type='smoke')
+    def test_create_router_setting_tenant_id(self):
+        # Test creating router from admin user setting tenant_id.
+        test_tenant = data_utils.rand_name('test_tenant_')
+        test_description = data_utils.rand_name('desc_')
+        _, tenant = self.identity_admin_client.create_tenant(
+            name=test_tenant,
+            description=test_description)
+        tenant_id = tenant['id']
+        self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)
+
+        name = data_utils.rand_name('router-')
+        resp, create_body = self.admin_client.create_router(
+            name, tenant_id=tenant_id)
+        self.assertEqual('201', resp['status'])
+        self.addCleanup(self.admin_client.delete_router,
+                        create_body['router']['id'])
+        self.assertEqual(tenant_id, create_body['router']['tenant_id'])
 
     @test.attr(type='smoke')
     def test_add_remove_router_interface_with_subnet_id(self):
