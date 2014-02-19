@@ -25,7 +25,6 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(QuotasAdminTestJSON, cls).setUpClass()
-        cls.client = cls.os.quotas_client
         cls.adm_client = cls.os_adm.quotas_client
 
         # NOTE(afazekas): these test cases should always create and use a new
@@ -45,7 +44,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        resp, quota_set = self.client.get_default_quota_set(
+        resp, quota_set = self.adm_client.get_default_quota_set(
             self.demo_tenant_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(sorted(expected_quota_set),
@@ -55,7 +54,7 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
     @test.attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        resp, default_quota_set = self.client.get_default_quota_set(
+        resp, default_quota_set = self.adm_client.get_default_quota_set(
             self.demo_tenant_id)
         new_quota_set = {'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,

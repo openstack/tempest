@@ -29,10 +29,8 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(QuotasAdminV3Test, cls).setUpClass()
-        cls.auth_url = CONF.identity.uri
         cls.client = cls.quotas_client
         cls.adm_client = cls.quotas_admin_client
-        cls.identity_admin_client = cls._get_identity_admin_client()
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
@@ -49,7 +47,7 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        resp, quota_set = self.client.get_default_quota_set(
+        resp, quota_set = self.adm_client.get_default_quota_set(
             self.demo_tenant_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(sorted(expected_quota_set),
@@ -59,7 +57,7 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     @test.attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        resp, default_quota_set = self.client.get_default_quota_set(
+        resp, default_quota_set = self.adm_client.get_default_quota_set(
             self.demo_tenant_id)
         new_quota_set = {'metadata_items': 256,
                          'ram': 10240, 'floating_ips': 20, 'fixed_ips': 10,
@@ -103,7 +101,7 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     @test.attr(type='gate')
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
+        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_vcpu_quota = quota_set['cores']
         vcpu_quota = 0  # Set the quota to zero to conserve resources
 
@@ -118,7 +116,7 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     @test.attr(type='gate')
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
+        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_mem_quota = quota_set['ram']
         mem_quota = 0  # Set the quota to zero to conserve resources
 
@@ -140,7 +138,7 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
+        resp, quota_set = self.adm_client.get_quota_set(self.demo_tenant_id)
         default_instances_quota = quota_set['instances']
         instances_quota = 0  # Set quota to zero to disallow server creation
 
