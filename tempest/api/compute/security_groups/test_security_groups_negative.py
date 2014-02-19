@@ -33,10 +33,6 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
 
-    def _delete_security_group(self, securitygroup_id):
-        resp, _ = self.client.delete_security_group(securitygroup_id)
-        self.assertEqual(202, resp.status)
-
     def _generate_a_non_existent_security_group_id(self):
         security_group_id = []
         resp, body = self.client.list_security_groups()
@@ -107,11 +103,8 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
         s_name = data_utils.rand_name('securitygroup-')
         s_description = data_utils.rand_name('description-')
         resp, security_group =\
-            self.client.create_security_group(s_name, s_description)
+            self.create_security_group(s_name, s_description)
         self.assertEqual(200, resp.status)
-
-        self.addCleanup(self.client.delete_security_group,
-                        security_group['id'])
         # Now try the Security Group with the same 'Name'
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_security_group, s_name,
@@ -163,15 +156,10 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.attr(type=['negative', 'gate'])
     def test_update_security_group_with_invalid_sg_name(self):
         # Update security_group with invalid sg_name should fail
-        s_name = data_utils.rand_name('sg-')
-        s_description = data_utils.rand_name('description-')
-        resp, securitygroup = \
-            self.client.create_security_group(s_name, s_description)
+        resp, securitygroup = self.create_security_group()
         self.assertEqual(200, resp.status)
         self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
-        self.addCleanup(self._delete_security_group,
-                        securitygroup_id)
         # Update Security Group with group name longer than 255 chars
         s_new_name = 'securitygroup-'.ljust(260, '0')
         self.assertRaises(exceptions.BadRequest,
@@ -183,15 +171,10 @@ class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
     @test.attr(type=['negative', 'gate'])
     def test_update_security_group_with_invalid_sg_des(self):
         # Update security_group with invalid sg_des should fail
-        s_name = data_utils.rand_name('sg-')
-        s_description = data_utils.rand_name('description-')
-        resp, securitygroup = \
-            self.client.create_security_group(s_name, s_description)
+        resp, securitygroup = self.create_security_group()
         self.assertEqual(200, resp.status)
         self.assertIn('id', securitygroup)
         securitygroup_id = securitygroup['id']
-        self.addCleanup(self._delete_security_group,
-                        securitygroup_id)
         # Update Security Group with group description longer than 255 chars
         s_new_des = 'des-'.ljust(260, '0')
         self.assertRaises(exceptions.BadRequest,

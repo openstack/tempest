@@ -51,6 +51,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.servers = []
         cls.images = []
         cls.multi_user = cls.get_multi_user()
+        cls.security_groups = []
 
     @classmethod
     def get_multi_user(cls):
@@ -102,9 +103,25 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
+    def clear_security_groups(cls):
+        for sg in cls.security_groups:
+            try:
+                resp, body =\
+                    cls.security_groups_client.delete_security_group(sg['id'])
+            except exceptions.NotFound:
+                # The security group may have already been deleted which is OK.
+                pass
+            except Exception as exc:
+                LOG.info('Exception raised deleting security group %s',
+                         sg['id'])
+                LOG.exception(exc)
+                pass
+
+    @classmethod
     def tearDownClass(cls):
         cls.clear_images()
         cls.clear_servers()
+        cls.clear_security_groups()
         cls.clear_isolated_creds()
         super(BaseComputeTest, cls).tearDownClass()
 
@@ -143,6 +160,19 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                     raise ex
 
         cls.servers.extend(servers)
+
+        return resp, body
+
+    @classmethod
+    def create_security_group(cls, name=None, description=None):
+        if name is None:
+            name = data_utils.rand_name(cls.__name__ + "-securitygroup")
+        if description is None:
+            description = data_utils.rand_name('description-')
+        resp, body = \
+            cls.security_groups_client.create_security_group(name,
+                                                             description)
+        cls.security_groups.append(body)
 
         return resp, body
 

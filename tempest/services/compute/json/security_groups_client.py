@@ -123,3 +123,10 @@ class SecurityGroupsClientJSON(RestClient):
             if sg['id'] == security_group_id:
                 return resp, sg['rules']
         raise exceptions.NotFound('No such Security Group')
+
+    def is_resource_deleted(self, id):
+        try:
+            self.get_security_group(id)
+        except exceptions.NotFound:
+            return True
+        return False

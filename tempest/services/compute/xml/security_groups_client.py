@@ -154,3 +154,10 @@ class SecurityGroupsClientXML(RestClientXML):
                 rules = [xml_to_json(x) for x in node.getchildren()]
                 return resp, rules
         raise exceptions.NotFound('No such Security Group')
+
+    def is_resource_deleted(self, id):
+        try:
+            self.get_security_group(id)
+        except exceptions.NotFound:
+            return True
+        return False
