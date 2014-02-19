@@ -21,6 +21,7 @@ PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 TEST_DEFINITION = re.compile(r'^\s*def test.*')
 SETUPCLASS_DEFINITION = re.compile(r'^\s*def setUpClass')
 SCENARIO_DECORATOR = re.compile(r'\s*@.*services\(')
+VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
 
 
 def import_no_clients_in_api(physical_line, filename):
@@ -58,7 +59,22 @@ def no_setupclass_for_unit_tests(physical_line, filename):
                     "T105: setUpClass can not be used with unit tests")
 
 
+def no_vi_headers(physical_line, line_number, lines):
+    """Check for vi editor configuration in source files.
+
+    By default vi modelines can only appear in the first or
+    last 5 lines of a source file.
+
+    T106
+    """
+    # NOTE(gilliard): line_number is 1-indexed
+    if line_number <= 5 or line_number > len(lines) - 5:
+        if VI_HEADER_RE.match(physical_line):
+            return 0, "T106: Don't put vi configuration in source files"
+
+
 def factory(register):
     register(import_no_clients_in_api)
     register(scenario_tests_need_service_tags)
     register(no_setupclass_for_unit_tests)
+    register(no_vi_headers)
