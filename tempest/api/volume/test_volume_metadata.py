@@ -43,7 +43,8 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Create metadata for the volume
         metadata = {"key1": "value1",
                     "key2": "value2",
-                    "key3": "value3"}
+                    "key3": "value3",
+                    "key4": "<value&special_chars>"}
 
         rsp, body = self.volumes_client.create_volume_metadata(self.volume_id,
                                                                metadata)
@@ -59,6 +60,8 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         self.assertEqual(200, rsp.status)
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertNotIn("key1", body)
+        del metadata["key1"]
+        self.assertThat(body.items(), ContainsAll(metadata.items()))
 
     @test.attr(type='gate')
     def test_update_volume_metadata(self):

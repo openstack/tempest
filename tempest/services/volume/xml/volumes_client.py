@@ -17,6 +17,7 @@ import time
 import urllib
 
 from lxml import etree
+from xml.sax.saxutils import escape
 
 from tempest.common.rest_client import RestClientXML
 from tempest import config
@@ -358,7 +359,8 @@ class VolumesClientXML(RestClientXML):
         post_body = Element('metadata')
         for k, v in meta.items():
             data = Element('meta', key=k)
-            data.append(Text(v))
+            # Escape value to allow for special XML chars
+            data.append(Text(escape(v)))
             post_body.append(data)
         return post_body
 
