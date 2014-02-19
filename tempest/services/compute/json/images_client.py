@@ -46,7 +46,7 @@ class ImagesClientJSON(RestClient):
 
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % str(server_id),
-                               post_body, self.headers)
+                               post_body)
         return resp, body
 
     def list_images(self, params=None):
@@ -93,16 +93,14 @@ class ImagesClientJSON(RestClient):
     def set_image_metadata(self, image_id, meta):
         """Sets the metadata for an image."""
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.put('images/%s/metadata' % str(image_id),
-                              post_body, self.headers)
+        resp, body = self.put('images/%s/metadata' % str(image_id), post_body)
         body = json.loads(body)
         return resp, body['metadata']
 
     def update_image_metadata(self, image_id, meta):
         """Updates the metadata for an image."""
         post_body = json.dumps({'metadata': meta})
-        resp, body = self.post('images/%s/metadata' % str(image_id),
-                               post_body, self.headers)
+        resp, body = self.post('images/%s/metadata' % str(image_id), post_body)
         body = json.loads(body)
         return resp, body['metadata']
 
@@ -116,7 +114,7 @@ class ImagesClientJSON(RestClient):
         """Sets the value for a specific image metadata key."""
         post_body = json.dumps({'meta': meta})
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
-                              post_body, self.headers)
+                              post_body)
         body = json.loads(body)
         return resp, body['meta']
 

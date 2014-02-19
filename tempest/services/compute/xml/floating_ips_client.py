@@ -48,14 +48,14 @@ class FloatingIPsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_floating_ip_details(self, floating_ip_id):
         """Get the details of a floating IP."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_floating_ip(etree.fromstring(body))
         if resp.status == 404:
             raise exceptions.NotFound(body)
@@ -69,16 +69,16 @@ class FloatingIPsClientXML(RestClientXML):
             pool = Element("pool")
             pool.append(Text(pool_name))
             doc.append(pool)
-            resp, body = self.post(url, str(doc), self.headers)
+            resp, body = self.post(url, str(doc))
         else:
-            resp, body = self.post(url, None, self.headers)
+            resp, body = self.post(url, None)
         body = self._parse_floating_ip(etree.fromstring(body))
         return resp, body
 
     def delete_floating_ip(self, floating_ip_id):
         """Deletes the provided floating IP from the project."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
-        resp, body = self.delete(url, self.headers)
+        resp, body = self.delete(url)
         return resp, body
 
     def associate_floating_ip_to_server(self, floating_ip, server_id):
@@ -88,7 +88,7 @@ class FloatingIPsClientXML(RestClientXML):
         server = Element("addFloatingIp")
         doc.append(server)
         server.add_attr("address", floating_ip)
-        resp, body = self.post(url, str(doc), self.headers)
+        resp, body = self.post(url, str(doc))
         return resp, body
 
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
@@ -98,7 +98,7 @@ class FloatingIPsClientXML(RestClientXML):
         server = Element("removeFloatingIp")
         doc.append(server)
         server.add_attr("address", floating_ip)
-        resp, body = self.post(url, str(doc), self.headers)
+        resp, body = self.post(url, str(doc))
         return resp, body
 
     def is_resource_deleted(self, id):
@@ -114,6 +114,6 @@ class FloatingIPsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
         return resp, body

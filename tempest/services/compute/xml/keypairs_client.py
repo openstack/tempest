@@ -33,13 +33,13 @@ class KeyPairsClientXML(RestClientXML):
         self.service = CONF.compute.catalog_type
 
     def list_keypairs(self):
-        resp, body = self.get("os-keypairs", self.headers)
+        resp, body = self.get("os-keypairs")
         node = etree.fromstring(body)
         body = [{'keypair': xml_to_json(x)} for x in node.getchildren()]
         return resp, body
 
     def get_keypair(self, key_name):
-        resp, body = self.get("os-keypairs/%s" % str(key_name), self.headers)
+        resp, body = self.get("os-keypairs/%s" % str(key_name))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -61,8 +61,7 @@ class KeyPairsClientXML(RestClientXML):
 
         doc.append(keypair_element)
 
-        resp, body = self.post("os-keypairs",
-                               headers=self.headers, body=str(doc))
+        resp, body = self.post("os-keypairs", body=str(doc))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 

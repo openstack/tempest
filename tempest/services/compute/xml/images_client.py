@@ -102,7 +102,7 @@ class ImagesClientXML(RestClientXML):
                 data.append(Text(v))
                 metadata.append(data)
         resp, body = self.post('servers/%s/action' % str(server_id),
-                               str(Document(post_body)), self.headers)
+                               str(Document(post_body)))
         return resp, body
 
     def list_images(self, params=None):
@@ -111,7 +111,7 @@ class ImagesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_images(etree.fromstring(body))
         return resp, body['images']
 
@@ -123,20 +123,20 @@ class ImagesClientXML(RestClientXML):
 
             url = "images/detail?" + param_list
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_images(etree.fromstring(body))
         return resp, body['images']
 
     def get_image(self, image_id):
         """Returns the details of a single image."""
-        resp, body = self.get("images/%s" % str(image_id), self.headers)
+        resp, body = self.get("images/%s" % str(image_id))
         self.expected_success(200, resp)
         body = self._parse_image(etree.fromstring(body))
         return resp, body
 
     def delete_image(self, image_id):
         """Deletes the provided image."""
-        return self.delete("images/%s" % str(image_id), self.headers)
+        return self.delete("images/%s" % str(image_id))
 
     def wait_for_image_status(self, image_id, status):
         """Waits for an image to reach a given status."""
@@ -152,8 +152,7 @@ class ImagesClientXML(RestClientXML):
 
     def list_image_metadata(self, image_id):
         """Lists all metadata items for an image."""
-        resp, body = self.get("images/%s/metadata" % str(image_id),
-                              self.headers)
+        resp, body = self.get("images/%s/metadata" % str(image_id))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -161,7 +160,7 @@ class ImagesClientXML(RestClientXML):
         """Sets the metadata for an image."""
         post_body = self._metadata_body(meta)
         resp, body = self.put('images/%s/metadata' % image_id,
-                              str(Document(post_body)), self.headers)
+                              str(Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -169,14 +168,14 @@ class ImagesClientXML(RestClientXML):
         """Updates the metadata for an image."""
         post_body = self._metadata_body(meta)
         resp, body = self.post('images/%s/metadata' % str(image_id),
-                               str(Document(post_body)), self.headers)
+                               str(Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
     def get_image_metadata_item(self, image_id, key):
         """Returns the value for a specific image metadata key."""
         resp, body = self.get("images/%s/metadata/%s.xml" %
-                              (str(image_id), key), self.headers)
+                              (str(image_id), key))
         body = self._parse_metadata(etree.fromstring(body))
         return resp, body
 
@@ -186,7 +185,7 @@ class ImagesClientXML(RestClientXML):
             post_body = Element('meta', key=key)
             post_body.append(Text(v))
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
-                              str(Document(post_body)), self.headers)
+                              str(Document(post_body)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -194,14 +193,13 @@ class ImagesClientXML(RestClientXML):
         """Sets the value for a specific image metadata key."""
         post_body = Document('meta', Text(meta), key=key)
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
-                              post_body, self.headers)
+                              post_body)
         body = xml_to_json(etree.fromstring(body))
         return resp, body['meta']
 
     def delete_image_metadata_item(self, image_id, key):
         """Deletes a single image metadata key/value pair."""
-        return self.delete("images/%s/metadata/%s" % (str(image_id), key),
-                           self.headers)
+        return self.delete("images/%s/metadata/%s" % (str(image_id), key))
 
     def is_resource_deleted(self, id):
         try:

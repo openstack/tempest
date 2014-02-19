@@ -55,8 +55,7 @@ class HostsClientJSON(RestClient):
         request_body.update(**kwargs)
         request_body = json.dumps(request_body)
 
-        resp, body = self.put("os-hosts/%s" % str(hostname), request_body,
-                              self.headers)
+        resp, body = self.put("os-hosts/%s" % str(hostname), request_body)
         body = json.loads(body)
         return resp, body
 

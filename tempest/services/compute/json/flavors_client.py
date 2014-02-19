@@ -69,7 +69,7 @@ class FlavorsClientJSON(RestClient):
         if kwargs.get('is_public'):
             post_body['os-flavor-access:is_public'] = kwargs.get('is_public')
         post_body = json.dumps({'flavor': post_body})
-        resp, body = self.post('flavors', post_body, self.headers)
+        resp, body = self.post('flavors', post_body)
 
         body = json.loads(body)
         return resp, body['flavor']
@@ -92,7 +92,7 @@ class FlavorsClientJSON(RestClient):
         """Sets extra Specs to the mentioned flavor."""
         post_body = json.dumps({'extra_specs': specs})
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
-                               post_body, self.headers)
+                               post_body)
         body = json.loads(body)
         return resp, body['extra_specs']
 
@@ -112,8 +112,7 @@ class FlavorsClientJSON(RestClient):
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
         """Update specified extra Specs of the mentioned flavor and key."""
         resp, body = self.put('flavors/%s/os-extra_specs/%s' %
-                              (flavor_id, key),
-                              json.dumps(kwargs), self.headers)
+                              (flavor_id, key), json.dumps(kwargs))
         body = json.loads(body)
         return resp, body
 
@@ -124,8 +123,7 @@ class FlavorsClientJSON(RestClient):
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
-        resp, body = self.get('flavors/%s/os-flavor-access' % flavor_id,
-                              self.headers)
+        resp, body = self.get('flavors/%s/os-flavor-access' % flavor_id)
         body = json.loads(body)
         return resp, body['flavor_access']
 
@@ -137,8 +135,7 @@ class FlavorsClientJSON(RestClient):
             }
         }
         post_body = json.dumps(post_body)
-        resp, body = self.post('flavors/%s/action' % flavor_id,
-                               post_body, self.headers)
+        resp, body = self.post('flavors/%s/action' % flavor_id, post_body)
         body = json.loads(body)
         return resp, body['flavor_access']
 
@@ -150,7 +147,6 @@ class FlavorsClientJSON(RestClient):
             }
         }
         post_body = json.dumps(post_body)
-        resp, body = self.post('flavors/%s/action' % flavor_id,
-                               post_body, self.headers)
+        resp, body = self.post('flavors/%s/action' % flavor_id, post_body)
         body = json.loads(body)
         return resp, body['flavor_access']

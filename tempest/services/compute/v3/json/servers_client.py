@@ -84,7 +84,7 @@ class ServersV3ClientJSON(RestClient):
             if value is not None:
                 post_body[post_param] = value
         post_body = json.dumps({'server': post_body})
-        resp, body = self.post('servers', post_body, self.headers)
+        resp, body = self.post('servers', post_body)
 
         body = json.loads(body)
         # NOTE(maurosr): this deals with the case of multiple server create
@@ -121,8 +121,7 @@ class ServersV3ClientJSON(RestClient):
             post_body['os-disk-config:disk_config'] = disk_config
 
         post_body = json.dumps({'server': post_body})
-        resp, body = self.put("servers/%s" % str(server_id),
-                              post_body, self.headers)
+        resp, body = self.put("servers/%s" % str(server_id), post_body)
         body = json.loads(body)
         return resp, body['server']
 
@@ -199,7 +198,7 @@ class ServersV3ClientJSON(RestClient):
     def action(self, server_id, action_name, response_key, **kwargs):
         post_body = json.dumps({action_name: kwargs})
         resp, body = self.post('servers/%s/action' % str(server_id),
-                               post_body, self.headers)
+                               post_body)
         if response_key is not None:
             body = json.loads(body)[response_key]
         return resp, body
@@ -273,7 +272,7 @@ class ServersV3ClientJSON(RestClient):
 
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % str(server_id),
-                               post_body, self.headers)
+                               post_body)
         return resp, body
 
     def list_server_metadata(self, server_id):
@@ -287,14 +286,14 @@ class ServersV3ClientJSON(RestClient):
         else:
             post_body = json.dumps({'metadata': meta})
         resp, body = self.put('servers/%s/metadata' % str(server_id),
-                              post_body, self.headers)
+                              post_body)
         body = json.loads(body)
         return resp, body['metadata']
 
     def update_server_metadata(self, server_id, meta):
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('servers/%s/metadata' % str(server_id),
-                               post_body, self.headers)
+                               post_body)
         body = json.loads(body)
         return resp, body['metadata']
 
@@ -306,7 +305,7 @@ class ServersV3ClientJSON(RestClient):
     def set_server_metadata_item(self, server_id, key, meta):
         post_body = json.dumps({'metadata': meta})
         resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
-                              post_body, self.headers)
+                              post_body)
         body = json.loads(body)
         return resp, body['metadata']
 
@@ -342,7 +341,7 @@ class ServersV3ClientJSON(RestClient):
         req_body = json.dumps({'migrate_live': migrate_params})
 
         resp, body = self.post("servers/%s/action" % str(server_id),
-                               req_body, self.headers)
+                               req_body)
         return resp, body
 
     def migrate_server(self, server_id, **kwargs):

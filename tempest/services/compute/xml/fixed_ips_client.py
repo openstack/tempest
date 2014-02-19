@@ -31,7 +31,7 @@ class FixedIPsClientXML(RestClientXML):
 
     def get_fixed_ip_details(self, fixed_ip):
         url = "os-fixed-ips/%s" % (fixed_ip)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_resp(body)
         return resp, body
 
@@ -44,5 +44,5 @@ class FixedIPsClientXML(RestClientXML):
         key, value = body.popitem()
         xml_body = Element(key)
         xml_body.append(Text(value))
-        resp, body = self.post(url, str(Document(xml_body)), self.headers)
+        resp, body = self.post(url, str(Document(xml_body)))
         return resp, body

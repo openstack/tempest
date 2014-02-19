@@ -51,14 +51,13 @@ class AggregatesClientXML(RestClientXML):
 
     def list_aggregates(self):
         """Get aggregate list."""
-        resp, body = self.get("os-aggregates", self.headers)
+        resp, body = self.get("os-aggregates")
         aggregates = self._parse_array(etree.fromstring(body))
         return resp, aggregates
 
     def get_aggregate(self, aggregate_id):
         """Get details of the given aggregate."""
-        resp, body = self.get("os-aggregates/%s" % str(aggregate_id),
-                              self.headers)
+        resp, body = self.get("os-aggregates/%s" % str(aggregate_id))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
@@ -68,8 +67,7 @@ class AggregatesClientXML(RestClientXML):
                             name=name,
                             availability_zone=availability_zone)
         resp, body = self.post('os-aggregates',
-                               str(Document(post_body)),
-                               self.headers)
+                               str(Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
@@ -79,15 +77,13 @@ class AggregatesClientXML(RestClientXML):
                            name=name,
                            availability_zone=availability_zone)
         resp, body = self.put('os-aggregates/%s' % str(aggregate_id),
-                              str(Document(put_body)),
-                              self.headers)
+                              str(Document(put_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
-        return self.delete("os-aggregates/%s" % str(aggregate_id),
-                           self.headers)
+        return self.delete("os-aggregates/%s" % str(aggregate_id))
 
     def is_resource_deleted(self, id):
         try:
@@ -100,8 +96,7 @@ class AggregatesClientXML(RestClientXML):
         """Adds a host to the given aggregate."""
         post_body = Element("add_host", host=host)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)),
-                               self.headers)
+                               str(Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
@@ -109,8 +104,7 @@ class AggregatesClientXML(RestClientXML):
         """Removes a host from the given aggregate."""
         post_body = Element("remove_host", host=host)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)),
-                               self.headers)
+                               str(Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
@@ -124,7 +118,6 @@ class AggregatesClientXML(RestClientXML):
             meta.append(Text(v))
             metadata.append(meta)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)),
-                               self.headers)
+                               str(Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate

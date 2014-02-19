@@ -75,7 +75,7 @@ class VolumesExtensionsClientJSON(RestClient):
         }
 
         post_body = json.dumps({'volume': post_body})
-        resp, body = self.post('os-volumes', post_body, self.headers)
+        resp, body = self.post('os-volumes', post_body)
         body = json.loads(body)
         return resp, body['volume']
 

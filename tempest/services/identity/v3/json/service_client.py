@@ -61,11 +61,11 @@ class ServiceClientJSON(RestClient):
             "description": description,
         }
         body = json.dumps({'service': body_dict})
-        resp, body = self.post("services", body, self.headers)
+        resp, body = self.post("services", body)
         body = json.loads(body)
         return resp, body["service"]
 
     def delete_service(self, serv_id):
         url = "services/" + serv_id
-        resp, body = self.delete(url, self.headers)
+        resp, body = self.delete(url)
         return resp, body

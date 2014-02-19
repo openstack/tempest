@@ -47,8 +47,7 @@ class KeyPairsV3ClientJSON(RestClient):
         if pub_key:
             post_body['keypair']['public_key'] = pub_key
         post_body = json.dumps(post_body)
-        resp, body = self.post("keypairs",
-                               headers=self.headers, body=post_body)
+        resp, body = self.post("keypairs", body=post_body)
         body = json.loads(body)
         return resp, body['keypair']
 

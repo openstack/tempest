@@ -38,7 +38,7 @@ class ServicesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         node = etree.fromstring(body)
         body = [xml_to_json(x) for x in node.getchildren()]
         return resp, body
@@ -53,8 +53,7 @@ class ServicesClientXML(RestClientXML):
         post_body.add_attr('binary', binary)
         post_body.add_attr('host', host_name)
 
-        resp, body = self.put('os-services/enable', str(Document(post_body)),
-                              self.headers)
+        resp, body = self.put('os-services/enable', str(Document(post_body)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
@@ -68,7 +67,6 @@ class ServicesClientXML(RestClientXML):
         post_body.add_attr('binary', binary)
         post_body.add_attr('host', host_name)
 
-        resp, body = self.put('os-services/disable', str(Document(post_body)),
-                              self.headers)
+        resp, body = self.put('os-services/disable', str(Document(post_body)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body

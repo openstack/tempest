@@ -74,12 +74,11 @@ class ServiceClientXML(RestClientXML):
                             name=name,
                             description=description,
                             type=serv_type)
-        resp, body = self.post("services", str(Document(post_body)),
-                               self.headers)
+        resp, body = self.post("services", str(Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_service(self, serv_id):
         url = "services/" + serv_id
-        resp, body = self.delete(url, self.headers)
+        resp, body = self.delete(url)
         return resp, body

@@ -81,7 +81,7 @@ class FlavorsClientXML(RestClientXML):
         if params:
             url += "?%s" % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         flavors = self._parse_array(etree.fromstring(body))
         return resp, flavors
 
@@ -94,7 +94,7 @@ class FlavorsClientXML(RestClientXML):
         return self._list_flavors(url, params)
 
     def get_flavor_details(self, flavor_id):
-        resp, body = self.get("flavors/%s" % str(flavor_id), self.headers)
+        resp, body = self.get("flavors/%s" % str(flavor_id))
         body = xml_to_json(etree.fromstring(body))
         flavor = self._format_flavor(body)
         return resp, flavor
@@ -120,14 +120,14 @@ class FlavorsClientXML(RestClientXML):
                             kwargs.get('is_public'))
         flavor.add_attr('xmlns:OS-FLV-EXT-DATA', XMLNS_OS_FLV_EXT_DATA)
         flavor.add_attr('xmlns:os-flavor-access', XMLNS_OS_FLV_ACCESS)
-        resp, body = self.post('flavors', str(Document(flavor)), self.headers)
+        resp, body = self.post('flavors', str(Document(flavor)))
         body = xml_to_json(etree.fromstring(body))
         flavor = self._format_flavor(body)
         return resp, flavor
 
     def delete_flavor(self, flavor_id):
         """Deletes the given flavor."""
-        return self.delete("flavors/%s" % str(flavor_id), self.headers)
+        return self.delete("flavors/%s" % str(flavor_id))
 
     def is_resource_deleted(self, id):
         # Did not use get_flavor_details(id) for verification as it gives
@@ -145,21 +145,20 @@ class FlavorsClientXML(RestClientXML):
         for key in specs.keys():
             extra_specs.add_attr(key, specs[key])
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
-                               str(Document(extra_specs)), self.headers)
+                               str(Document(extra_specs)))
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_flavor_extra_spec(self, flavor_id):
         """Gets extra Specs of the mentioned flavor."""
-        resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id,
-                              self.headers)
+        resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id)
         body = xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
         """Gets extra Specs key-value of the mentioned flavor and key."""
         resp, xml_body = self.get('flavors/%s/os-extra_specs/%s' %
-                                  (str(flavor_id), key), self.headers)
+                                  (str(flavor_id), key))
         body = {}
         element = etree.fromstring(xml_body)
         key = element.get('key')
@@ -176,8 +175,7 @@ class FlavorsClientXML(RestClientXML):
             element.append(value)
 
         resp, body = self.put('flavors/%s/os-extra_specs/%s' %
-                              (flavor_id, key),
-                              str(doc), self.headers)
+                              (flavor_id, key), str(doc))
         body = xml_to_json(etree.fromstring(body))
         return resp, {key: body}
 
@@ -191,8 +189,7 @@ class FlavorsClientXML(RestClientXML):
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
-        resp, body = self.get('flavors/%s/os-flavor-access' % str(flavor_id),
-                              self.headers)
+        resp, body = self.get('flavors/%s/os-flavor-access' % str(flavor_id))
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
@@ -202,8 +199,7 @@ class FlavorsClientXML(RestClientXML):
         server = Element("addTenantAccess")
         doc.append(server)
         server.add_attr("tenant", tenant_id)
-        resp, body = self.post('flavors/%s/action' % str(flavor_id),
-                               str(doc), self.headers)
+        resp, body = self.post('flavors/%s/action' % str(flavor_id), str(doc))
         body = self._parse_array_access(etree.fromstring(body))
         return resp, body
 
@@ -213,7 +209,6 @@ class FlavorsClientXML(RestClientXML):
         server = Element("removeTenantAccess")
         doc.append(server)
         server.add_attr("tenant", tenant_id)
-        resp, body = self.post('flavors/%s/action' % str(flavor_id),
-                               str(doc), self.headers)
+        resp, body = self.post('flavors/%s/action' % str(flavor_id), str(doc))
         body = self._parse_array_access(etree.fromstring(body))
         return resp, body

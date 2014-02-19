@@ -45,7 +45,6 @@ class InterfacesV3ClientJSON(RestClient):
             post_body['fixed_ips'] = [dict(ip_address=fixed_ip)]
         post_body = json.dumps({'interface_attachment': post_body})
         resp, body = self.post('servers/%s/os-attach-interfaces' % server,
-                               headers=self.headers,
                                body=post_body)
         body = json.loads(body)
         return resp, body['interface_attachment']

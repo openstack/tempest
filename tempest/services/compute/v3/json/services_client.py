@@ -50,7 +50,7 @@ class ServicesV3ClientJSON(RestClient):
                 'host': host_name
             }
         })
-        resp, body = self.put('os-services/enable', post_body, self.headers)
+        resp, body = self.put('os-services/enable', post_body)
         body = json.loads(body)
         return resp, body['service']
 
@@ -66,6 +66,6 @@ class ServicesV3ClientJSON(RestClient):
                 'host': host_name
             }
         })
-        resp, body = self.put('os-services/disable', post_body, self.headers)
+        resp, body = self.put('os-services/disable', post_body)
         body = json.loads(body)
         return resp, body['service']

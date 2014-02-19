@@ -63,11 +63,6 @@ class RestClient(object):
         # The version of the API this client implements
         self.api_version = None
         self._skip_path = False
-        # NOTE(vponomaryov): self.headers is deprecated now.
-        # should be removed after excluding it from all use places.
-        # Insted of this should be used 'get_headers' method
-        self.headers = {'Content-Type': 'application/%s' % self.TYPE,
-                        'Accept': 'application/%s' % self.TYPE}
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout
         self.general_header_lc = set(('cache-control', 'connection',
@@ -86,8 +81,6 @@ class RestClient(object):
         return self.TYPE
 
     def get_headers(self, accept_type=None, send_type=None):
-        # This method should be used instead of
-        # deprecated 'self.headers'
         if accept_type is None:
             accept_type = self._get_type()
         if send_type is None:
