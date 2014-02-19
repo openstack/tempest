@@ -177,7 +177,7 @@ class KeystoneAuthProvider(AuthProvider):
         base_url = self.base_url(filters=filters, auth_data=auth_data)
         # build authenticated request
         # returns new request, it does not touch the original values
-        _headers = copy.deepcopy(headers)
+        _headers = copy.deepcopy(headers) if headers is not None else {}
         _headers['X-Auth-Token'] = token
         if url is None or url == "":
             _url = base_url
@@ -371,7 +371,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
                             ep['region'] == region]
         if len(filtered_catalog) == 0:
             # No matching region, take the first endpoint
-            filtered_catalog = [filtered_catalog[0]]
+            filtered_catalog = [service_catalog[0]]
         # There should be only one match. If not take the first.
         _base_url = filtered_catalog[0].get('url', None)
         if _base_url is None:
