@@ -19,7 +19,7 @@ from tempest import exceptions
 from tempest.test import attr
 
 
-class UsersTestJSON(base.BaseIdentityV3AdminTest):
+class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @attr(type='smoke')
@@ -51,5 +51,5 @@ class UsersTestJSON(base.BaseIdentityV3AdminTest):
                           subject_token)
 
 
-class UsersTestXML(UsersTestJSON):
+class TokensV3TestXML(TokensV3TestJSON):
     _interface = 'xml'
