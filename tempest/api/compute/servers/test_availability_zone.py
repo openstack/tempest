@@ -1,4 +1,4 @@
-# Copyright 2013 NEC Corporation
+# Copyright 2014 NEC Corporation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,10 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
-class AZAdminV3Test(base.BaseV3ComputeAdminTest):
+class AZTestJSON(base.BaseV2ComputeTest):
 
     """
     Tests Availability Zone API List
@@ -27,20 +27,16 @@ class AZAdminV3Test(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
-        super(AZAdminV3Test, cls).setUpClass()
-        cls.client = cls.availability_zone_admin_client
+        super(AZTestJSON, cls).setUpClass()
+        cls.client = cls.availability_zone_client
 
-    @attr(type='gate')
-    def test_get_availability_zone_list(self):
-        # List of availability zone
+    @test.attr(type='gate')
+    def test_get_availability_zone_list_with_non_admin_user(self):
+        # List of availability zone with non-administrator user
         resp, availability_zone = self.client.get_availability_zone_list()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
 
-    @attr(type='gate')
-    def test_get_availability_zone_list_detail(self):
-        # List of availability zones and available services
-        resp, availability_zone = \
-            self.client.get_availability_zone_list_detail()
-        self.assertEqual(200, resp.status)
-        self.assertTrue(len(availability_zone) > 0)
+
+class AZTestXML(AZTestJSON):
+    _interface = 'xml'

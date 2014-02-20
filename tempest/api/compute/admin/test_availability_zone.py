@@ -29,7 +29,6 @@ class AZAdminTestJSON(base.BaseV2ComputeAdminTest):
     def setUpClass(cls):
         super(AZAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.availability_zone_client
-        cls.non_adm_client = cls.availability_zone_client
 
     @attr(type='gate')
     def test_get_availability_zone_list(self):
@@ -43,14 +42,6 @@ class AZAdminTestJSON(base.BaseV2ComputeAdminTest):
         # List of availability zones and available services
         resp, availability_zone = \
             self.client.get_availability_zone_list_detail()
-        self.assertEqual(200, resp.status)
-        self.assertTrue(len(availability_zone) > 0)
-
-    @attr(type='gate')
-    def test_get_availability_zone_list_with_non_admin_user(self):
-        # List of availability zone with non-administrator user
-        resp, availability_zone = \
-            self.non_adm_client.get_availability_zone_list()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
 
