@@ -397,6 +397,9 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('multi_backend',
                 default=False,
                 help="Runs Cinder multi-backend test (requires 2 backends)"),
+    cfg.BoolOpt('backup',
+                default=True,
+                help='Runs Cinder volumes backup test'),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled extensions with a special entry all '

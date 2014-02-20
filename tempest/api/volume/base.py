@@ -106,6 +106,7 @@ class BaseVolumeV1Test(BaseVolumeTest):
         super(BaseVolumeV1Test, cls).setUpClass()
         cls.snapshots_client = cls.os.snapshots_client
         cls.volumes_client = cls.os.volumes_client
+        cls.backups_client = cls.os.backups_client
         cls.volumes_extension_client = cls.os.volumes_extension_client
 
     @classmethod
