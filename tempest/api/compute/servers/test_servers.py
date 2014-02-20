@@ -104,38 +104,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('::babe:202:202', server['accessIPv6'])
 
     @attr(type='gate')
-    def test_delete_server_while_in_shutoff_state(self):
-        # Delete a server while it's VM state is Shutoff
-        resp, server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.client.stop(server['id'])
-        self.client.wait_for_server_status(server['id'], 'SHUTOFF')
-        resp, _ = self.client.delete_server(server['id'])
-        self.assertEqual('204', resp['status'])
-
-    @attr(type='gate')
-    def test_delete_server_while_in_pause_state(self):
-        # Delete a server while it's VM state is Pause
-        resp, server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.client.pause_server(server['id'])
-        self.client.wait_for_server_status(server['id'], 'PAUSED')
-        resp, _ = self.client.delete_server(server['id'])
-        self.assertEqual('204', resp['status'])
-
-    @attr(type='gate')
-    def test_delete_server_while_in_building_state(self):
-        # Delete a server while it's VM state is Building
-        resp, server = self.create_test_server(wait_until='BUILD')
-        resp, _ = self.client.delete_server(server['id'])
-        self.assertEqual('204', resp['status'])
-
-    @attr(type='gate')
-    def test_delete_active_server(self):
-        # Delete a server while it's VM state is Active
-        resp, server = self.create_test_server(wait_until='ACTIVE')
-        resp, _ = self.client.delete_server(server['id'])
-        self.assertEqual('204', resp['status'])
-
-    @attr(type='gate')
     def test_create_server_with_ipv6_addr_only(self):
         # Create a server without an IPv4 address(only IPv6 address).
         resp, server = self.create_test_server(accessIPv6='2001:2001::3')
