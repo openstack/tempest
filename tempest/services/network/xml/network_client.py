@@ -30,12 +30,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         rc.TYPE = self.TYPE
         return rc
 
-    def _parse_array(self, node):
-        array = []
-        for child in node.getchildren():
-            array.append(common.xml_to_json(child))
-        return array
-
     def deserialize_list(self, body):
         return common.parse_array(etree.fromstring(body), self.PLURALS)
 

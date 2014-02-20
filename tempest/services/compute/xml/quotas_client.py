@@ -44,9 +44,6 @@ class QuotasClientXML(rest_client.RestClient):
 
         return quota
 
-    def _parse_array(self, node):
-        return [self._format_quota(xml_to_json(x)) for x in node]
-
     def get_quota_set(self, tenant_id):
         """List the quota set for a tenant."""
 
