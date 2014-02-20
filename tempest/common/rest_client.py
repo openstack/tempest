@@ -224,10 +224,10 @@ class RestClient(object):
         headers = resp.copy()
         del headers['status']
         if headers.get('x-compute-request-id'):
-            self.LOG.info("Nova request id: %s" %
+            self.LOG.info("Nova/Cinder request id: %s" %
                           headers.pop('x-compute-request-id'))
         elif headers.get('x-openstack-request-id'):
-            self.LOG.info("Glance request id %s" %
+            self.LOG.info("OpenStack request id %s" %
                           headers.pop('x-openstack-request-id'))
         if len(headers):
             self.LOG.debug('Response Headers: ' + str(headers))
