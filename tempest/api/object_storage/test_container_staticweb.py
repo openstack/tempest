@@ -49,6 +49,7 @@ class StaticWebTest(base.BaseObjectTest):
         cls.data.teardown_all()
         super(StaticWebTest, cls).tearDownClass()
 
+    @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_index(self):
         headers = {'web-index': self.object_name}
@@ -79,6 +80,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-index', body)
 
+    @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_listing(self):
         headers = {'web-listings': 'true'}
@@ -110,6 +112,7 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
 
+    @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_listing_css(self):
         headers = {'web-listings': 'true',
@@ -133,6 +136,7 @@ class StaticWebTest(base.BaseObjectTest):
         css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
         self.assertIn(css, body)
 
+    @test.requires_ext(extension='staticweb', service='object')
     @test.attr('gate')
     def test_web_error(self):
         headers = {'web-listings': 'true',

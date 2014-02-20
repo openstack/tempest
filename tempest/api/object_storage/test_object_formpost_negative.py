@@ -20,7 +20,7 @@ import urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class ObjectFormPostNegativeTest(base.BaseObjectTest):
@@ -91,7 +91,8 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @attr(type=['gate', 'negative'])
+    @test.requires_ext(extension='formpost', service='object')
+    @test.attr(type=['gate', 'negative'])
     def test_post_object_using_form_expired(self):
         body, content_type = self.get_multipart_form(expires=1)
         time.sleep(2)
