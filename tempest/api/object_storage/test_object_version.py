@@ -15,7 +15,7 @@
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class ContainerTest(base.BaseObjectTest):
@@ -40,7 +40,7 @@ class ContainerTest(base.BaseObjectTest):
         header_value = resp.get('x-versions-location', 'Missing Header')
         self.assertEqual(header_value, versioned)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_versioned_container(self):
         # create container
         vers_container_name = data_utils.rand_name(name='TestVersionContainer')

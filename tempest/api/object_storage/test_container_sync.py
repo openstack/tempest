@@ -19,8 +19,7 @@ import urlparse
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 CONF = config.CONF
 
@@ -66,7 +65,7 @@ class ContainerSyncTest(base.BaseObjectTest):
             cls.delete_containers(cls.containers, client[0], client[1])
         super(ContainerSyncTest, cls).tearDownClass()
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_container_synchronization(self):
         # container to container synchronization
         # to allow/accept sync requests to/from other accounts
@@ -86,12 +85,12 @@ class ContainerSyncTest(base.BaseObjectTest):
                        (client_base_url, str(cont[1]))}
             resp, body = \
                 cont_client[0].put(str(cont[0]), body=None, headers=headers)
-            self.assertIn(int(resp['status']), HTTP_SUCCESS)
+            self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
             # create object in container
             object_name = data_utils.rand_name(name='TestSyncObject')
             data = object_name[::-1]  # data_utils.arbitrary_string()
             resp, _ = obj_client[0].create_object(cont[0], object_name, data)
-            self.assertIn(int(resp['status']), HTTP_SUCCESS)
+            self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
             self.objects.append(object_name)
 
         # wait until container contents list is not empty
@@ -104,7 +103,7 @@ class ContainerSyncTest(base.BaseObjectTest):
                     cont_client[client_index].\
                     list_container_contents(self.containers[client_index],
                                             params=params)
-                self.assertIn(int(resp['status']), HTTP_SUCCESS)
+                self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
                 object_lists.append(dict(
                     (obj['name'], obj) for obj in object_list))
             # check that containers are not empty and have equal keys()
@@ -124,5 +123,5 @@ class ContainerSyncTest(base.BaseObjectTest):
         for obj_client, cont in obj_clients:
             for obj_name in object_lists[0]:
                 resp, object_content = obj_client.get_object(cont, obj_name)
-                self.assertIn(int(resp['status']), HTTP_SUCCESS)
+                self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
                 self.assertEqual(object_content, obj_name[::-1])

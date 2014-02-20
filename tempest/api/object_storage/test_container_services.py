@@ -15,8 +15,7 @@
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 
 class ContainerTest(base.BaseObjectTest):
@@ -47,7 +46,7 @@ class ContainerTest(base.BaseObjectTest):
 
         return object_name
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_container(self):
         container_name = data_utils.rand_name(name='TestContainer')
         resp, body = self.container_client.create_container(container_name)
@@ -55,7 +54,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertIn(resp['status'], ('202', '201'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_container_overwrite(self):
         # overwrite container with the same name
         container_name = data_utils.rand_name(name='TestContainer')
@@ -66,7 +65,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertIn(resp['status'], ('202', '201'))
         self.assertHeaders(resp, 'Container', 'PUT')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_container_with_metadata_key(self):
         # create container with the blank value of metadata
         container_name = data_utils.rand_name(name='TestContainer')
@@ -84,7 +83,7 @@ class ContainerTest(base.BaseObjectTest):
         # in the server
         self.assertNotIn('x-container-meta-test-container-meta', resp)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_container_with_metadata_value(self):
         # create container with metadata value
         container_name = data_utils.rand_name(name='TestContainer')
@@ -103,7 +102,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-test-container-meta'],
                          metadata['test-container-meta'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_container_with_remove_metadata_key(self):
         # create container with the blank value of remove metadata
         container_name = data_utils.rand_name(name='TestContainer')
@@ -124,7 +123,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta', resp)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_container_with_remove_metadata_value(self):
         # create container with remove metadata
         container_name = data_utils.rand_name(name='TestContainer')
@@ -143,18 +142,18 @@ class ContainerTest(base.BaseObjectTest):
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta', resp)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_delete_container(self):
         # create a container
         container_name = self._create_container()
         # delete container
         resp, _ = self.container_client.delete_container(container_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'DELETE')
 
         self.containers.remove(container_name)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents(self):
         # get container contents list
         container_name = self._create_container()
@@ -162,22 +161,22 @@ class ContainerTest(base.BaseObjectTest):
 
         resp, object_list = self.container_client.list_container_contents(
             container_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_no_object(self):
         # get empty container contents list
         container_name = self._create_container()
 
         resp, object_list = self.container_client.list_container_contents(
             container_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual('', object_list.strip('\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_delimiter(self):
         # get container contents list using delimiter param
         container_name = self._create_container()
@@ -188,11 +187,11 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name.split('/')[0], object_list.strip('/\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_end_marker(self):
         # get container contents list using end_marker param
         container_name = self._create_container()
@@ -202,11 +201,11 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_format_json(self):
         # get container contents list using format_json param
         container_name = self._create_container()
@@ -216,7 +215,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
 
         self.assertIsNotNone(object_list)
@@ -226,7 +225,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertTrue([c['content_type'] for c in object_list])
         self.assertTrue([c['last_modified'] for c in object_list])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_format_xml(self):
         # get container contents list using format_xml param
         container_name = self._create_container()
@@ -236,7 +235,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
 
         self.assertIsNotNone(object_list)
@@ -251,7 +250,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(object_list.find(".//last_modified").tag,
                          'last_modified')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_limit(self):
         # get container contents list using limit param
         container_name = self._create_container()
@@ -261,11 +260,11 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_marker(self):
         # get container contents list using marker param
         container_name = self._create_container()
@@ -275,11 +274,11 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_path(self):
         # get container contents list using path param
         container_name = self._create_container()
@@ -290,11 +289,11 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_contents_with_prefix(self):
         # get container contents list using prefix param
         container_name = self._create_container()
@@ -305,11 +304,11 @@ class ContainerTest(base.BaseObjectTest):
         resp, object_list = self.container_client.list_container_contents(
             container_name,
             params=params)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'GET')
         self.assertEqual(object_name, object_list.strip('\n'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_container_metadata(self):
         # List container metadata
         container_name = self._create_container()
@@ -321,23 +320,23 @@ class ContainerTest(base.BaseObjectTest):
 
         resp, _ = self.container_client.list_container_metadata(
             container_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'HEAD')
         self.assertIn('x-container-meta-name', resp)
         self.assertEqual(resp['x-container-meta-name'], metadata['name'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_no_container_metadata(self):
         # HEAD container without metadata
         container_name = self._create_container()
 
         resp, _ = self.container_client.list_container_metadata(
             container_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'HEAD')
         self.assertNotIn('x-container-meta-', str(resp))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_container_metadata_with_create_and_delete_matadata(self):
         # Send one request of adding and deleting metadata
         container_name = data_utils.rand_name(name='TestContainer')
@@ -351,7 +350,7 @@ class ContainerTest(base.BaseObjectTest):
             container_name,
             metadata=metadata_2,
             remove_metadata=metadata_1)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -361,7 +360,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-test-container-meta2'],
                          metadata_2['test-container-meta2'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_container_metadata_with_create_metadata(self):
         # update container metadata using add metadata
         container_name = self._create_container()
@@ -370,7 +369,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.update_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
@@ -379,7 +378,7 @@ class ContainerTest(base.BaseObjectTest):
         self.assertEqual(resp['x-container-meta-test-container-meta1'],
                          metadata['test-container-meta1'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_container_metadata_with_delete_metadata(self):
         # update container metadata using delete metadata
         container_name = data_utils.rand_name(name='TestContainer')
@@ -391,14 +390,14 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.delete_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta1', resp)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_container_metadata_with_create_matadata_key(self):
         # update container metadata with a blenk value of metadata
         container_name = self._create_container()
@@ -407,14 +406,14 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.update_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(
             container_name)
         self.assertNotIn('x-container-meta-test-container-meta1', resp)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_container_metadata_with_delete_metadata_key(self):
         # update container metadata with a blank value of matadata
         container_name = data_utils.rand_name(name='TestContainer')
@@ -427,7 +426,7 @@ class ContainerTest(base.BaseObjectTest):
         resp, _ = self.container_client.delete_container_metadata(
             container_name,
             metadata=metadata)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Container', 'POST')
 
         resp, _ = self.container_client.list_container_metadata(container_name)

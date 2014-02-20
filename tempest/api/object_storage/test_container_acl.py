@@ -16,8 +16,7 @@
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 
 class ObjectTestACLs(base.BaseObjectTest):
@@ -44,7 +43,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         self.delete_containers([self.container_name])
         super(ObjectTestACLs, self).tearDown()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_read_object_with_rights(self):
         # attempt to read object using authorized user
         # update X-Container-Read metadata ACL
@@ -53,7 +52,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
@@ -68,10 +67,10 @@ class ObjectTestACLs(base.BaseObjectTest):
         )
         resp, _ = self.custom_object_client.get_object(
             self.container_name, object_name)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_write_object_with_rights(self):
         # attempt to write object using authorized user
         # update X-Container-Write metadata ACL
@@ -80,7 +79,7 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object with rights
         self.custom_object_client.auth_provider.set_alt_auth_data(
@@ -91,5 +90,5 @@ class ObjectTestACLs(base.BaseObjectTest):
         resp, _ = self.custom_object_client.create_object(
             self.container_name,
             object_name, 'data')
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'PUT')

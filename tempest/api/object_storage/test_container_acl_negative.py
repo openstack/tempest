@@ -18,8 +18,7 @@ from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 
 class ObjectACLsNegativeTest(base.BaseObjectTest):
@@ -46,7 +45,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         self.delete_containers([self.container_name])
         super(ObjectACLsNegativeTest, self).tearDown()
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_write_object_without_using_creds(self):
         # trying to create object with empty headers
         # X-Auth-Token is not provided
@@ -59,7 +58,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.custom_object_client.create_object,
                           self.container_name, object_name, 'data')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_object_without_using_creds(self):
         # create object
         object_name = data_utils.rand_name(name='Object')
@@ -75,7 +74,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.custom_object_client.delete_object,
                           self.container_name, object_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_write_object_with_non_authorized_user(self):
         # attempt to upload another file using non-authorized user
         # User provided token is forbidden. ACL are not set
@@ -89,7 +88,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.custom_object_client.create_object,
                           self.container_name, object_name, 'data')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_read_object_with_non_authorized_user(self):
         # attempt to read object using non-authorized user
         # User provided token is forbidden. ACL are not set
@@ -107,7 +106,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.custom_object_client.get_object,
                           self.container_name, object_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_object_with_non_authorized_user(self):
         # attempt to delete object using non-authorized user
         # User provided token is forbidden. ACL are not set
@@ -125,7 +124,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.custom_object_client.delete_object,
                           self.container_name, object_name)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_read_object_without_rights(self):
         # attempt to read object using non-authorized user
         # update X-Container-Read metadata ACL
@@ -133,7 +132,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')
@@ -150,7 +149,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.custom_object_client.get_object,
                           self.container_name, object_name)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_write_object_without_rights(self):
         # attempt to write object using non-authorized user
         # update X-Container-Write metadata ACL
@@ -158,7 +157,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without rights
         self.custom_object_client.auth_provider.set_alt_auth_data(
@@ -171,7 +170,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.container_name,
                           object_name, 'data')
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_write_object_without_write_rights(self):
         # attempt to write object using non-authorized user
         # update X-Container-Read and X-Container-Write metadata ACL
@@ -181,7 +180,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # Trying to write the object without write rights
         self.custom_object_client.auth_provider.set_alt_auth_data(
@@ -194,7 +193,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
                           self.container_name,
                           object_name, 'data')
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_delete_object_without_write_rights(self):
         # attempt to delete object using non-authorized user
         # update X-Container-Read and X-Container-Write metadata ACL
@@ -204,7 +203,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         resp_meta, body = self.container_client.update_container_metadata(
             self.container_name, metadata=cont_headers,
             metadata_prefix='')
-        self.assertIn(int(resp_meta['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp_meta['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp_meta, 'Container', 'POST')
         # create object
         object_name = data_utils.rand_name(name='Object')

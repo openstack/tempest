@@ -14,7 +14,7 @@
 #    under the License.
 
 
-from tempest.api.identity.base import DataGenerator
+from tempest.api.identity import base
 from tempest import clients
 from tempest.common import custom_matchers
 from tempest.common import isolated_creds
@@ -83,7 +83,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.object_client_alt.auth_provider.clear_auth()
         cls.container_client_alt.auth_provider.clear_auth()
 
-        cls.data = DataGenerator(cls.identity_admin_client)
+        cls.data = base.DataGenerator(cls.identity_admin_client)
 
     @classmethod
     def tearDownClass(cls):

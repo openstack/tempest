@@ -21,8 +21,7 @@ import urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 
 class ObjectFormPostTest(base.BaseObjectTest):
@@ -93,7 +92,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_post_object_using_form(self):
         body, content_type = self.get_multipart_form()
 
@@ -107,12 +106,12 @@ class ObjectFormPostTest(base.BaseObjectTest):
         # Use a raw request, otherwise authentication headers are used
         resp, body = self.object_client.http_obj.request(url, "POST",
                                                          body, headers=headers)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, "Object", "POST")
 
         # Ensure object is available
         resp, body = self.object_client.get("%s/%s%s" % (
             self.container_name, self.object_name, "testfile"))
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, "Object", "GET")
         self.assertEqual(body, "hello world")

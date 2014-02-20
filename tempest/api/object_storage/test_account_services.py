@@ -18,8 +18,7 @@ import random
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
 
 class AccountTest(base.BaseObjectTest):
@@ -38,7 +37,7 @@ class AccountTest(base.BaseObjectTest):
         cls.delete_containers(cls.containers)
         super(AccountTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_containers(self):
         # list of all containers should not be empty
         params = {'format': 'json'}
@@ -51,14 +50,14 @@ class AccountTest(base.BaseObjectTest):
         for container_name in self.containers:
             self.assertIn(container_name, container_names)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_extensions(self):
         resp, extensions = self.account_client.list_extensions()
 
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertThat(resp, custom_matchers.AreAllWellFormatted())
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_containers_with_limit(self):
         # list containers one of them, half of them then all of them
         for limit in (1, self.containers_count / 2, self.containers_count):
@@ -69,7 +68,7 @@ class AccountTest(base.BaseObjectTest):
 
             self.assertEqual(len(container_list), limit)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_containers_with_marker(self):
         # list containers using marker param
         # first expect to get 0 container as we specified last
@@ -89,7 +88,7 @@ class AccountTest(base.BaseObjectTest):
 
         self.assertEqual(len(container_list), self.containers_count / 2 - 1)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_containers_with_end_marker(self):
         # list containers using end_marker param
         # first expect to get 0 container as we specified first container as
@@ -107,7 +106,7 @@ class AccountTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Account', 'GET')
         self.assertEqual(len(container_list), self.containers_count / 2)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_containers_with_limit_and_marker(self):
         # list containers combining marker and limit param
         # result are always limitated by the limit whatever the marker
@@ -121,21 +120,21 @@ class AccountTest(base.BaseObjectTest):
 
             self.assertTrue(len(container_list) <= limit, str(container_list))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_account_metadata(self):
         # list all account metadata
         resp, metadata = self.account_client.list_account_metadata()
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'HEAD')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_and_delete_account_metadata(self):
         header = 'test-account-meta'
         data = 'Meta!'
         # add metadata to account
         resp, _ = self.account_client.create_account_metadata(
             metadata={header: data})
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
@@ -147,7 +146,7 @@ class AccountTest(base.BaseObjectTest):
         # delete metadata from account
         resp, _ = \
             self.account_client.delete_account_metadata(metadata=[header])
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Account', 'POST')
 
         resp, _ = self.account_client.list_account_metadata()
