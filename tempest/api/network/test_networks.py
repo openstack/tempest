@@ -467,6 +467,14 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
     _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
+    @classmethod
+    def setUpClass(cls):
+        super(NetworksIpV6TestJSON, cls).setUpClass()
+        if not CONF.network.ipv6_enabled:
+            cls.tearDownClass()
+            skip_msg = "IPv6 Tests are disabled."
+            raise cls.skipException(skip_msg)
+
 
 class NetworksIpV6TestXML(NetworksIpV6TestJSON):
     _interface = 'xml'

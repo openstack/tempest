@@ -537,6 +537,9 @@
 # The mask bits for tenant ipv4 subnets (integer value)
 #tenant_network_mask_bits=28
 
+# Allow the execution of IPv6 tests (boolean value)
+#ipv6_enabled=true
+
 # The cidr block to allocate tenant ipv6 subnets from (string
 # value)
 #tenant_network_v6_cidr=2003::/64
