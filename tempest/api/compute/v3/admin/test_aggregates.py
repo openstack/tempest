@@ -32,7 +32,6 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
     def setUpClass(cls):
         super(AggregatesAdminV3Test, cls).setUpClass()
         cls.client = cls.aggregates_admin_client
-        cls.user_client = cls.aggregates_client
         cls.aggregate_name_prefix = 'test_aggregate_'
         cls.az_name_prefix = 'test_az_'
 
