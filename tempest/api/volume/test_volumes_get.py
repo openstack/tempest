@@ -13,13 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from testtools.matchers import ContainsAll
+from testtools import matchers
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 
@@ -78,7 +77,7 @@ class VolumesGetTest(base.BaseVolumeV1Test):
                          'The fetched Volume id is different '
                          'from the created Volume')
         self.assertThat(fetched_volume['metadata'].items(),
-                        ContainsAll(metadata.items()),
+                        matchers.ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
 
@@ -114,7 +113,7 @@ class VolumesGetTest(base.BaseVolumeV1Test):
         self.assertEqual(new_v_name, updated_volume['display_name'])
         self.assertEqual(new_desc, updated_volume['display_description'])
         self.assertThat(updated_volume['metadata'].items(),
-                        ContainsAll(metadata.items()),
+                        matchers.ContainsAll(metadata.items()),
                         'The fetched Volume metadata misses data '
                         'from the created Volume')
         # Test volume create when display_name is none and display_description
@@ -146,16 +145,16 @@ class VolumesGetTest(base.BaseVolumeV1Test):
         if 'imageRef' not in kwargs:
             self.assertEqual(boot_flag, False)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_create_get_update_delete(self):
         self._volume_create_get_update_delete()
 
-    @attr(type='smoke')
-    @services('image')
+    @test.attr(type='smoke')
+    @test.services('image')
     def test_volume_create_get_update_delete_from_image(self):
         self._volume_create_get_update_delete(imageRef=CONF.compute.image_ref)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_create_get_update_delete_as_clone(self):
         origin = self.create_volume()
         self._volume_create_get_update_delete(source_volid=origin['id'])

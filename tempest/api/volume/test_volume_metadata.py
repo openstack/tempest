@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from testtools.matchers import ContainsAll
+from testtools import matchers
 
 from tempest.api.volume import base
 from tempest import test
@@ -52,7 +52,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertThat(body.items(), ContainsAll(metadata.items()))
+        self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Delete one item metadata of the volume
         rsp, body = self.volumes_client.delete_volume_metadata_item(
             self.volume_id,
@@ -61,7 +61,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertNotIn("key1", body)
         del metadata["key1"]
-        self.assertThat(body.items(), ContainsAll(metadata.items()))
+        self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
 
     @test.attr(type='gate')
     def test_update_volume_metadata(self):
@@ -81,7 +81,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertThat(body.items(), ContainsAll(metadata.items()))
+        self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata
         resp, body = self.volumes_client.update_volume_metadata(
             self.volume_id,
@@ -90,7 +90,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertThat(body.items(), ContainsAll(update.items()))
+        self.assertThat(body.items(), matchers.ContainsAll(update.items()))
 
     @test.attr(type='gate')
     def test_update_volume_metadata_item(self):
@@ -107,7 +107,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
             self.volume_id,
             metadata)
         self.assertEqual(200, resp.status)
-        self.assertThat(body.items(), ContainsAll(metadata.items()))
+        self.assertThat(body.items(), matchers.ContainsAll(metadata.items()))
         # Update metadata item
         resp, body = self.volumes_client.update_volume_metadata_item(
             self.volume_id,
@@ -117,7 +117,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         # Get the metadata of the volume
         resp, body = self.volumes_client.get_volume_metadata(self.volume_id)
         self.assertEqual(200, resp.status)
-        self.assertThat(body.items(), ContainsAll(expect.items()))
+        self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
 
 
 class VolumeMetadataTestXML(VolumeMetadataTest):
