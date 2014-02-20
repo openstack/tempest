@@ -770,6 +770,11 @@
 # value)
 #leave_dirty_stack=false
 
+# Allows a full cleaning process after a stress test. Caution
+# : this cleanup will remove every objects of every tenant.
+# (boolean value)
+#full_clean_stack=false
+
 
 [telemetry]
 

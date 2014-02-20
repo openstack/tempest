@@ -606,7 +606,12 @@ StressGroup = [
                 default=False,
                 help='Prevent the cleaning (tearDownClass()) between'
                      ' each stress test run if an exception occurs'
-                     ' during this run.')
+                     ' during this run.'),
+    cfg.BoolOpt('full_clean_stack',
+                default=False,
+                help='Allows a full cleaning process after a stress test.'
+                     ' Caution : this cleanup will remove every objects of'
+                     ' every tenant.')
 ]
 
 

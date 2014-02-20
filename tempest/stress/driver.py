@@ -220,7 +220,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
     LOG.info("Run %d actions (%d failed)" %
              (sum_runs, sum_fails))
 
-    if not had_errors:
+    if not had_errors and CONF.stress.full_clean_stack:
         LOG.info("cleaning up")
         cleanup.cleanup()
     if had_errors:
