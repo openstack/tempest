@@ -239,6 +239,20 @@ class NetworkClientXML(client_base.NetworkClientBase):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def list_pools_hosted_by_one_lbaas_agent(self, agent_id):
+        uri = '%s/agents/%s/loadbalancer-pools' % (self.uri_prefix, agent_id)
+        resp, body = self.get(uri)
+        pools = parse_array(etree.fromstring(body))
+        body = {'pools': pools}
+        return resp, body
+
+    def show_lbaas_agent_hosting_pool(self, pool_id):
+        uri = ('%s/lb/pools/%s/loadbalancer-agent' %
+               (self.uri_prefix, pool_id))
+        resp, body = self.get(uri)
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
     def list_routers_on_l3_agent(self, agent_id):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
