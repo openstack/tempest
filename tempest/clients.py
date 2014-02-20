@@ -156,6 +156,8 @@ from tempest.services.telemetry.xml.telemetry_client import \
     TelemetryClientXML
 from tempest.services.volume.json.admin.volume_hosts_client import \
     VolumeHostsClientJSON
+from tempest.services.volume.json.admin.volume_quotas_client import \
+    VolumeQuotasClientJSON
 from tempest.services.volume.json.admin.volume_types_client import \
     VolumeTypesClientJSON
 from tempest.services.volume.json.backups_client import BackupsClientJSON
@@ -167,6 +169,8 @@ from tempest.services.volume.v2.json.volumes_client import VolumesV2ClientJSON
 from tempest.services.volume.v2.xml.volumes_client import VolumesV2ClientXML
 from tempest.services.volume.xml.admin.volume_hosts_client import \
     VolumeHostsClientXML
+from tempest.services.volume.xml.admin.volume_quotas_client import \
+    VolumeQuotasClientXML
 from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
 from tempest.services.volume.xml.backups_client import BackupsClientXML
@@ -247,6 +251,8 @@ class Manager(manager.Manager):
                 InstanceUsagesAuditLogClientXML(self.auth_provider)
             self.volume_hosts_client = VolumeHostsClientXML(
                 self.auth_provider)
+            self.volume_quotas_client = VolumeQuotasClientXML(
+                self.auth_provider)
             self.volumes_extension_client = VolumeExtensionClientXML(
                 self.auth_provider)
             if CONF.service_available.ceilometer:
@@ -326,6 +332,8 @@ class Manager(manager.Manager):
             self.instance_usages_audit_log_client = \
                 InstanceUsagesAuditLogClientJSON(self.auth_provider)
             self.volume_hosts_client = VolumeHostsClientJSON(
+                self.auth_provider)
+            self.volume_quotas_client = VolumeQuotasClientJSON(
                 self.auth_provider)
             self.volumes_extension_client = VolumeExtensionClientJSON(
                 self.auth_provider)
