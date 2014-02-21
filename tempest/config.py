@@ -594,6 +594,9 @@ BotoGroup = [
     cfg.StrOpt('aws_access',
                default=None,
                help="AWS Access Key"),
+    cfg.StrOpt('aws_zone',
+               default="nova",
+               help="AWS Zone for EC2 tests"),
     cfg.StrOpt('s3_materials_path',
                default="/opt/stack/devstack/files/images/"
                        "s3-materials/cirros-0.3.0",
