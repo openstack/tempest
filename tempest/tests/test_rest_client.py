@@ -164,7 +164,7 @@ class TestRestClientParseRespXML(BaseRestClientTestClass):
 
     keys = ["fake_key1", "fake_key2"]
     values = ["fake_value1", "fake_value2"]
-    item_expected = {key: value for key, value in zip(keys, values)}
+    item_expected = dict((key, value) for (key, value) in zip(keys, values))
     list_expected = {"body_list": [
         {keys[0]: values[0]},
         {keys[1]: values[1]},
