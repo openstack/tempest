@@ -13,10 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.test import attr
 from tempest.thirdparty.boto.test import BotoTestCase
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -30,6 +32,11 @@ class EC2VolumesTest(BotoTestCase):
     @classmethod
     def setUpClass(cls):
         super(EC2VolumesTest, cls).setUpClass()
+
+        if not CONF.service_available.cinder:
+            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
         cls.client = cls.os.ec2api_client
         cls.zone = cls.client.get_good_zone()
 
