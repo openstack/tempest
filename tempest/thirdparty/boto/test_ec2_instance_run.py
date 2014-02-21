@@ -123,15 +123,6 @@ class InstanceRunTest(BotoTestCase):
         _terminate_reservation(reservation_1, rcuk_1)
         _terminate_reservation(reservation_2, rcuk_2)
 
-        reservation_3, rcuk_3 = _run_instance('token_1')
-        self.assertIsNotNone(reservation_3)
-
-        # make sure we don't get the old reservation back
-        self.assertNotEqual(reservation_1.id, reservation_3.id)
-
-        # clean up
-        _terminate_reservation(reservation_3, rcuk_3)
-
     @attr(type='smoke')
     def test_run_stop_terminate_instance(self):
         # EC2 run, stop and terminate instance
