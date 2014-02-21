@@ -625,6 +625,9 @@ ScenarioGroup = [
                default='/opt/stack/new/devstack/files/images/'
                'cirros-0.3.1-x86_64-uec',
                help='Directory containing image files'),
+    cfg.StrOpt('qcow2_img_file',
+               default='cirros-0.3.1-x86_64-disk.img',
+               help='QCOW2 image file name'),
     cfg.StrOpt('ami_img_file',
                default='cirros-0.3.1-x86_64-blank.img',
                help='AMI image file name'),
