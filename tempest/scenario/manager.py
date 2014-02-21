@@ -276,6 +276,41 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return cls._get_credentials(cls.isolated_creds.get_admin_creds,
                                     'admin_')
 
+    @staticmethod
+    def cleanup_resource(resource, test_name):
+
+        LOG.debug("Deleting %r from shared resources of %s" %
+                  (resource, test_name))
+        try:
+            # OpenStack resources are assumed to have a delete()
+            # method which destroys the resource...
+            resource.delete()
+        except Exception as e:
+            # If the resource is already missing, mission accomplished.
+            # add status code as workaround for bug 1247568
+            if (e.__class__.__name__ == 'NotFound' or
+                    (hasattr(e, 'status_code') and e.status_code == 404)):
+                return
+            raise
+
+        def is_deletion_complete():
+            # Deletion testing is only required for objects whose
+            # existence cannot be checked via retrieval.
+            if isinstance(resource, dict):
+                return True
+            try:
+                resource.get()
+            except Exception as e:
+                # Clients are expected to return an exception
+                # called 'NotFound' if retrieval fails.
+                if e.__class__.__name__ == 'NotFound':
+                    return True
+                raise
+            return False
+
+        # Block until resource deletion has completed or timed-out
+        tempest.test.call_until_true(is_deletion_complete, 10, 1)
+
     @classmethod
     def tearDownClass(cls):
         # NOTE(jaypipes): Because scenario tests are typically run in a
@@ -285,38 +320,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         # the scenario test class object
         while cls.os_resources:
             thing = cls.os_resources.pop()
-            LOG.debug("Deleting %r from shared resources of %s" %
-                      (thing, cls.__name__))
-
-            try:
-                # OpenStack resources are assumed to have a delete()
-                # method which destroys the resource...
-                thing.delete()
-            except Exception as e:
-                # If the resource is already missing, mission accomplished.
-                # add status code as workaround for bug 1247568
-                if (e.__class__.__name__ == 'NotFound' or
-                    hasattr(e, 'status_code') and e.status_code == 404):
-                    continue
-                raise
-
-            def is_deletion_complete():
-                # Deletion testing is only required for objects whose
-                # existence cannot be checked via retrieval.
-                if isinstance(thing, dict):
-                    return True
-                try:
-                    thing.get()
-                except Exception as e:
-                    # Clients are expected to return an exception
-                    # called 'NotFound' if retrieval fails.
-                    if e.__class__.__name__ == 'NotFound':
-                        return True
-                    raise
-                return False
-
-            # Block until resource deletion has completed or timed-out
-            tempest.test.call_until_true(is_deletion_complete, 10, 1)
+            cls.cleanup_resource(thing, cls.__name__)
         cls.isolated_creds.clear_isolated_creds()
         super(OfficialClientTest, cls).tearDownClass()
 
