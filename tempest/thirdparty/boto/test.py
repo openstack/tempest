@@ -109,6 +109,9 @@ class BotoExceptionMatcher(object):
     CODE_RE = '.*'  # regexp makes sense in group match
 
     def match(self, exc):
+        """:returns: Retruns with an error string if not matches,
+               returns with None when matches.
+        """
         if not isinstance(exc, exception.BotoServerError):
             return "%r not an BotoServerError instance" % exc
         LOG.info("Status: %s , error_code: %s", exc.status, exc.error_code)
@@ -120,6 +123,7 @@ class BotoExceptionMatcher(object):
             return ("Error code (%s) does not match" +
                     "the expected re pattern \"%s\"") %\
                    (exc.error_code, self.CODE_RE)
+        return None
 
 
 class ClientError(BotoExceptionMatcher):
@@ -314,7 +318,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             except ValueError:
                 return "_GONE"
             except exception.EC2ResponseError as exc:
-                if colusure_matcher.match(exc):
+                if colusure_matcher.match(exc) is None:
                     return "_GONE"
                 else:
                     raise
@@ -450,7 +454,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 return "_GONE"
             except exception.EC2ResponseError as exc:
                 if cls.ec2_error_code.\
-                        client.InvalidInstanceID.NotFound.match(exc):
+                        client.InvalidInstanceID.NotFound.match(exc) is None:
                     return "_GONE"
                 # NOTE(afazekas): incorrect code,
                 # but the resource must be destoreyd
