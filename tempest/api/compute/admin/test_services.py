@@ -30,7 +30,6 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
     def setUpClass(cls):
         super(ServicesAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.services_client
-        cls.non_admin_client = cls.services_client
 
     @attr(type='gate')
     def test_list_services(self):
