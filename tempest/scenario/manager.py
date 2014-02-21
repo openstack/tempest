@@ -561,19 +561,30 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return image.id
 
     def glance_image_create(self):
+        qcow2_img_path = (CONF.scenario.img_dir + "/" +
+                          CONF.scenario.qcow2_img_file)
         aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
         ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
         ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
-        LOG.debug("paths: ami: %s, ari: %s, aki: %s"
-                  % (ami_img_path, ari_img_path, aki_img_path))
-        kernel_id = self._image_create('scenario-aki', 'aki', aki_img_path)
-        ramdisk_id = self._image_create('scenario-ari', 'ari', ari_img_path)
-        properties = {
-            'properties': {'kernel_id': kernel_id, 'ramdisk_id': ramdisk_id}
-        }
-        self.image = self._image_create('scenario-ami', 'ami',
-                                        path=ami_img_path,
-                                        properties=properties)
+        LOG.debug("paths: img: %s, ami: %s, ari: %s, aki: %s"
+                  % (qcow2_img_path, ami_img_path, ari_img_path, aki_img_path))
+        try:
+            self.image = self._image_create('scenario-img',
+                                            'bare',
+                                            qcow2_img_path,
+                                            properties={'disk_format':
+                                                        'qcow2'})
+        except IOError:
+            LOG.debug("A qcow2 image was not got. Try to get a uec image.")
+            kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
+            ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
+            properties = {
+                'properties': {'kernel_id': kernel, 'ramdisk_id': ramdisk}
+            }
+            self.image = self._image_create('scenario-ami', 'ami',
+                                            path=ami_img_path,
+                                            properties=properties)
+        LOG.debug("image:%s" % self.image)
 
 
 class NetworkScenarioTest(OfficialClientTest):
