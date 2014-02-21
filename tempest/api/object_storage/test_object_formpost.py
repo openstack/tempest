@@ -92,6 +92,7 @@ class ObjectFormPostTest(base.BaseObjectTest):
         content_type = 'multipart/form-data; boundary=%s' % boundary
         return body, content_type
 
+    @test.requires_ext(extension='formpost', service='object')
     @test.attr(type='gate')
     def test_post_object_using_form(self):
         body, content_type = self.get_multipart_form()
