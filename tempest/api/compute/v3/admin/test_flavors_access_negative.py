@@ -28,8 +28,6 @@ class FlavorsAccessNegativeV3Test(base.BaseV3ComputeAdminTest):
     Add and remove Flavor Access require admin privileges.
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(FlavorsAccessNegativeV3Test, cls).setUpClass()

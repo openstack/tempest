@@ -27,7 +27,6 @@ CONF = config.CONF
 
 
 class ServersNegativeV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     def setUp(self):
         super(ServersNegativeV3Test, self).setUp()

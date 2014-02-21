@@ -303,6 +303,8 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
 
 class BaseV3ComputeTest(BaseComputeTest):
 
+    _interface = "json"
+
     @classmethod
     def setUpClass(cls):
         # By default compute tests do not create network resources

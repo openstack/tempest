@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class ServerAddressesV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

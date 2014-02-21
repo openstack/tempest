@@ -25,8 +25,6 @@ class ServicesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     Tests Services API. List and Enable/Disable require admin privileges.
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(ServicesAdminNegativeV3Test, cls).setUpClass()

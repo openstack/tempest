@@ -19,7 +19,6 @@ from tempest import test
 
 
 class MultipleCreateV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
     _name = 'multiple-create-test'
 
     def _generate_name(self):

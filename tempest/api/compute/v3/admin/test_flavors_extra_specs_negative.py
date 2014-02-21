@@ -27,8 +27,6 @@ class FlavorsExtraSpecsNegativeV3Test(base.BaseV3ComputeAdminTest):
     SET, UNSET, UPDATE Flavor Extra specs require admin privileges.
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(FlavorsExtraSpecsNegativeV3Test, cls).setUpClass()

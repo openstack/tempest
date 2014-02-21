@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class ListServerFiltersV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

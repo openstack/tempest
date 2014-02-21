@@ -24,8 +24,6 @@ class AZAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     Tests Availability Zone API List
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(AZAdminNegativeV3Test, cls).setUpClass()

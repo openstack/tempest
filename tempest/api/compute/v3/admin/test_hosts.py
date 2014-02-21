@@ -23,8 +23,6 @@ class HostsAdminV3Test(base.BaseV3ComputeAdminTest):
     Tests hosts API using admin privileges.
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(HostsAdminV3Test, cls).setUpClass()

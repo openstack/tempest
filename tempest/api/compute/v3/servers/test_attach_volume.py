@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class AttachVolumeV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
     run_ssh = CONF.compute.run_ssh
 
     def __init__(self, *args, **kwargs):

@@ -19,7 +19,6 @@ from tempest import test
 
 
 class VersionV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_version(self):

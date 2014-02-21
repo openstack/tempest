@@ -28,7 +28,6 @@ CONF = config.CONF
 
 
 class ServersV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
     run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
@@ -119,7 +118,6 @@ class ServersV3Test(base.BaseV3ComputeTest):
 
 
 class ServersWithSpecificFlavorV3Test(base.BaseV3ComputeAdminTest):
-    _interface = 'json'
     run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 

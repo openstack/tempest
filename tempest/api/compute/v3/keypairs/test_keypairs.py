@@ -19,7 +19,6 @@ from tempest import test
 
 
 class KeyPairsV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

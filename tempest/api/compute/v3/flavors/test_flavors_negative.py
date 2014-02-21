@@ -24,7 +24,6 @@ load_tests = testscenarios.load_tests_apply_scenarios
 
 class FlavorsListNegativeV3Test(base.BaseV3ComputeTest,
                                 test.NegativeAutoTest):
-    _interface = 'json'
     _service = 'computev3'
     _schema_file = 'compute/flavors/flavors_list_v3.json'
 
@@ -37,7 +36,6 @@ class FlavorsListNegativeV3Test(base.BaseV3ComputeTest,
 
 class FlavorDetailsNegativeV3Test(base.BaseV3ComputeTest,
                                   test.NegativeAutoTest):
-    _interface = 'json'
     _service = 'computev3'
     _schema_file = 'compute/flavors/flavor_details_v3.json'
 

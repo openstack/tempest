@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
-    _interface = 'json'
     force_tenant_isolation = True
 
     @classmethod
