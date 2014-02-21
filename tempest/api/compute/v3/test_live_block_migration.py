@@ -13,14 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import random
-import string
-
 import testtools
 
 from tempest.api.compute import base
 from tempest import config
-from tempest import exceptions
 from tempest.test import attr
 
 CONF = config.CONF
@@ -66,14 +62,6 @@ class LiveBlockMigrationV3Test(base.BaseV3ComputeAdminTest):
             if host != target_host:
                 return target_host
 
-    def _get_non_existing_host_name(self):
-        random_name = ''.join(
-            random.choice(string.ascii_uppercase) for x in range(20))
-
-        self.assertNotIn(random_name, self._get_compute_hostnames())
-
-        return random_name
-
     def _get_server_status(self, server_id):
         return self._get_server_details(server_id)['status']
 
@@ -111,18 +99,6 @@ class LiveBlockMigrationV3Test(base.BaseV3ComputeAdminTest):
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         self.assertEqual(target_host, self._get_host_for_server(server_id))
 
-    @testtools.skipIf(not CONF.compute_feature_enabled.live_migration,
-                      'Live migration not available')
-    @attr(type='gate')
-    def test_invalid_host_for_migration(self):
-        # Migrating to an invalid host should not change the status
-        server_id = self._get_an_active_server()
-        target_host = self._get_non_existing_host_name()
-
-        self.assertRaises(exceptions.BadRequest, self._migrate_server_to,
-                          server_id, target_host)
-        self.assertEqual('ACTIVE', self._get_server_status(server_id))
-
     @testtools.skipIf(not CONF.compute_feature_enabled.live_migration or not
                       CONF.compute_feature_enabled.
                       block_migration_for_live_migration,
@@ -155,10 +131,3 @@ class LiveBlockMigrationV3Test(base.BaseV3ComputeAdminTest):
         self._migrate_server_to(server_id, target_host)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
         self.assertEqual(target_host, self._get_host_for_server(server_id))
-
-    @classmethod
-    def tearDownClass(cls):
-        for server_id in cls.created_server_ids:
-            cls.servers_client.delete_server(server_id)
-
-        super(LiveBlockMigrationV3Test, cls).tearDownClass()
