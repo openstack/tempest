@@ -14,7 +14,10 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class DeleteServersTestJSON(base.BaseV2ComputeTest):
@@ -56,6 +59,24 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.create_test_server(wait_until='ACTIVE')
         resp, body = self.client.pause_server(server['id'])
         self.client.wait_for_server_status(server['id'], 'PAUSED')
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+
+    @test.attr(type='gate')
+    def test_delete_server_while_in_shelved_state(self):
+        # Delete a server while it's VM state is Shelved
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        resp, body = self.client.shelve_server(server['id'])
+        self.assertEqual(202, resp.status)
+
+        offload_time = CONF.compute.shelved_offload_time
+        if offload_time >= 0:
+            self.client.wait_for_server_status(server['id'],
+                                               'SHELVED_OFFLOADED',
+                                               extra_timeout=offload_time)
+        else:
+            self.client.wait_for_server_status(server['id'],
+                                               'SHELVED')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
 
