@@ -116,46 +116,57 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 msg = "%s extension not enabled." % ext
                 raise cls.skipException(msg)
         cls.check_preconditions()
-        # TODO(mnewby) Consider looking up entities as needed instead
-        # of storing them as collections on the class.
-        cls.security_groups = {}
-        cls.networks = []
-        cls.subnets = []
-        cls.routers = []
-        cls.servers = {}
-        cls.floating_ips = {}
 
-    def _create_security_groups(self):
-        self.security_groups[self.tenant_id] =\
+    def cleanup_wrapper(self, resource):
+        self.cleanup_resource(resource, self.__class__.__name__)
+
+    def setUp(self):
+        super(TestNetworkBasicOps, self).setUp()
+        self.security_group = \
             self._create_security_group_neutron(tenant_id=self.tenant_id)
+        self.addCleanup(self.cleanup_wrapper, self.security_group)
+        self.network, self.subnet, self.router = self._create_networks()
+        for r in [self.network, self.router, self.subnet]:
+            self.addCleanup(self.cleanup_wrapper, r)
+        self.check_networks()
+        self.servers = {}
+        name = data_utils.rand_name('server-smoke')
+        serv_dict = self._create_server(name, self.network)
+        self.servers[serv_dict['server']] = serv_dict['keypair']
+        self._check_tenant_network_connectivity()
+        self.floating_ips = {}
+        self._create_and_associate_floating_ips()
 
-    def _check_networks(self):
-        # Checks that we see the newly created network/subnet/router via
-        # checking the result of list_[networks,routers,subnets]
+    def check_networks(self):
+        """
+        Checks that we see the newly created network/subnet/router via
+        checking the result of list_[networks,routers,subnets]
+        """
+
         seen_nets = self._list_networks()
         seen_names = [n['name'] for n in seen_nets]
         seen_ids = [n['id'] for n in seen_nets]
-        for mynet in self.networks:
-            self.assertIn(mynet.name, seen_names)
-            self.assertIn(mynet.id, seen_ids)
+        self.assertIn(self.network.name, seen_names)
+        self.assertIn(self.network.id, seen_ids)
+
         seen_subnets = self._list_subnets()
         seen_net_ids = [n['network_id'] for n in seen_subnets]
         seen_subnet_ids = [n['id'] for n in seen_subnets]
-        for mynet in self.networks:
-            self.assertIn(mynet.id, seen_net_ids)
-        for mysubnet in self.subnets:
-            self.assertIn(mysubnet.id, seen_subnet_ids)
+        self.assertIn(self.network.id, seen_net_ids)
+        self.assertIn(self.subnet.id, seen_subnet_ids)
+
         seen_routers = self._list_routers()
         seen_router_ids = [n['id'] for n in seen_routers]
         seen_router_names = [n['name'] for n in seen_routers]
-        for myrouter in self.routers:
-            self.assertIn(myrouter.name, seen_router_names)
-            self.assertIn(myrouter.id, seen_router_ids)
+        self.assertIn(self.router.name,
+                      seen_router_names)
+        self.assertIn(self.router.id,
+                      seen_router_ids)
 
     def _create_server(self, name, network):
-        tenant_id = network.tenant_id
         keypair = self.create_keypair(name='keypair-%s' % name)
-        security_groups = [self.security_groups[tenant_id].name]
+        self.addCleanup(self.cleanup_wrapper, keypair)
+        security_groups = [self.security_group.name]
         create_kwargs = {
             'nics': [
                 {'net-id': network.id},
@@ -164,8 +175,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             'security_groups': security_groups,
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
-        self.servers[server] = keypair
-        return server
+        self.addCleanup(self.cleanup_wrapper, server)
+        return dict(server=server, keypair=keypair)
 
     def _create_servers(self):
         for i, network in enumerate(self.networks):
@@ -181,7 +192,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # key-based authentication by cloud-init.
         ssh_login = CONF.compute.image_ssh_user
         try:
-            for server, key in self.servers.items():
+            for server, key in self.servers.iteritems():
                 for net_name, ip_addresses in server.networks.iteritems():
                     for ip_address in ip_addresses:
                         self._check_vm_connectivity(ip_address, ssh_login,
@@ -197,6 +208,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         for server in self.servers.keys():
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips[floating_ip] = server
+            self.addCleanup(self.cleanup_wrapper, floating_ip)
 
     def _check_public_network_connectivity(self, should_connect=True,
                                            msg=None):
@@ -229,23 +241,17 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             self.floating_ips[floating_ip] = None
 
     def _reassociate_floating_ips(self):
-        network = self.networks[0]
         for floating_ip in self.floating_ips.keys():
             name = data_utils.rand_name('new_server-smoke-')
             # create a new server for the floating ip
-            server = self._create_server(name, network)
-            self._associate_floating_ip(floating_ip, server)
-            self.floating_ips[floating_ip] = server
+            serv_dict = self._create_server(name, self.network)
+            self.servers[serv_dict['server']] = serv_dict['keypair']
+            self._associate_floating_ip(floating_ip, serv_dict['server'])
+            self.floating_ips[floating_ip] = serv_dict['server']
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_network_basic_ops(self):
-        self._create_security_groups()
-        self._create_networks()
-        self._check_networks()
-        self._create_servers()
-        self._create_and_associate_floating_ips()
-        self._check_tenant_network_connectivity()
         self._check_public_network_connectivity(should_connect=True)
         self._disassociate_floating_ips()
         self._check_public_network_connectivity(should_connect=False,
