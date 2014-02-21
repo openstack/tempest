@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
@@ -41,43 +40,6 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         server_id = self.server.id
         self.status_timeout(
             self.compute_client.servers, server_id, status)
-
-    def _wait_for_volume_status(self, status):
-        volume_id = self.volume.id
-        self.status_timeout(
-            self.volume_client.volumes, volume_id, status)
-
-    def _image_create(self, name, fmt, path, properties={}):
-        name = data_utils.rand_name('%s-' % name)
-        image_file = open(path, 'rb')
-        self.addCleanup(image_file.close)
-        params = {
-            'name': name,
-            'container_format': fmt,
-            'disk_format': fmt,
-            'is_public': 'True',
-        }
-        params.update(properties)
-        image = self.image_client.images.create(**params)
-        self.addCleanup(self.image_client.images.delete, image)
-        self.assertEqual("queued", image.status)
-        image.update(data=image_file)
-        return image.id
-
-    def glance_image_create(self):
-        aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
-        ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
-        ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
-        LOG.debug("paths: ami: %s, ari: %s, aki: %s"
-                  % (ami_img_path, ari_img_path, aki_img_path))
-        kernel_id = self._image_create('scenario-aki', 'aki', aki_img_path)
-        ramdisk_id = self._image_create('scenario-ari', 'ari', ari_img_path)
-        properties = {
-            'properties': {'kernel_id': kernel_id, 'ramdisk_id': ramdisk_id}
-        }
-        self.image = self._image_create('scenario-ami', 'ami',
-                                        path=ami_img_path,
-                                        properties=properties)
 
     def nova_keypair_add(self):
         self.keypair = self.create_keypair()
@@ -114,7 +76,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
                                       self.volume.id,
                                       '/dev/vdb')
         self.assertEqual(self.volume.id, volume.id)
-        self._wait_for_volume_status('in-use')
+        self.wait_for_volume_status('in-use')
 
     def nova_reboot(self):
         self.server.reboot()
@@ -143,7 +105,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
     def nova_volume_detach(self):
         detach_volume_client = self.compute_client.volumes.delete_server_volume
         detach_volume_client(self.server.id, self.volume.id)
-        self._wait_for_volume_status('available')
+        self.wait_for_volume_status('available')
 
         volume = self.volume_client.volumes.get(self.volume.id)
         self.assertEqual('available', volume.status)
