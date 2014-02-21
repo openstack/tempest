@@ -585,38 +585,33 @@ class NetworkScenarioTest(OfficialClientTest):
         self.set_resource(name, network)
         return network
 
-    def _list_networks(self):
-        nets = self.network_client.list_networks()
+    def _list_networks(self, **kwargs):
+        nets = self.network_client.list_networks(**kwargs)
         return nets['networks']
 
-    def _list_subnets(self):
-        subnets = self.network_client.list_subnets()
+    def _list_subnets(self, **kwargs):
+        subnets = self.network_client.list_subnets(**kwargs)
         return subnets['subnets']
 
-    def _list_routers(self):
-        routers = self.network_client.list_routers()
+    def _list_routers(self, **kwargs):
+        routers = self.network_client.list_routers(**kwargs)
         return routers['routers']
 
-    def _list_ports(self):
-        ports = self.network_client.list_ports()
+    def _list_ports(self, **kwargs):
+        ports = self.network_client.list_ports(**kwargs)
         return ports['ports']
 
     def _get_tenant_own_network_num(self, tenant_id):
-        nets = self._list_networks()
-        ownnets = [value for value in nets if tenant_id == value['tenant_id']]
-        return len(ownnets)
+        nets = self._list_networks(tenant_id=tenant_id)
+        return len(nets)
 
     def _get_tenant_own_subnet_num(self, tenant_id):
-        subnets = self._list_subnets()
-        ownsubnets = ([value for value in subnets
-                      if tenant_id == value['tenant_id']])
-        return len(ownsubnets)
+        subnets = self._list_subnets(tenant_id=tenant_id)
+        return len(subnets)
 
     def _get_tenant_own_port_num(self, tenant_id):
-        ports = self._list_ports()
-        ownports = ([value for value in ports
-                    if tenant_id == value['tenant_id']])
-        return len(ownports)
+        ports = self._list_ports(tenant_id=tenant_id)
+        return len(ports)
 
     def _create_subnet(self, network, namestart='subnet-smoke-'):
         """
@@ -664,19 +659,15 @@ class NetworkScenarioTest(OfficialClientTest):
         self.set_resource(name, port)
         return port
 
-    def _get_server_port_id(self, server):
-        result = self.network_client.list_ports(device_id=server.id)
-        ports = result.get('ports', [])
+    def _get_server_port_id(self, server, ip_addr=None):
+        ports = self._list_ports(device_id=server.id, fixed_ip=ip_addr)
         self.assertEqual(len(ports), 1,
                          "Unable to determine which port to target.")
         return ports[0]['id']
 
-    def _create_floating_ip(self, thing, external_network_id,
-                            port_filters=None):
-        if port_filters is None:
+    def _create_floating_ip(self, thing, external_network_id, port_id=None):
+        if not port_id:
             port_id = self._get_server_port_id(thing)
-        else:
-            port_id = port_filters
         body = dict(
             floatingip=dict(
                 floating_network_id=external_network_id,
