@@ -542,6 +542,43 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             LOG.debug('Console output for %s', server.id)
             LOG.debug(server.get_console_output())
 
+    def wait_for_volume_status(self, status):
+        volume_id = self.volume.id
+        self.status_timeout(
+            self.volume_client.volumes, volume_id, status)
+
+    def _image_create(self, name, fmt, path, properties={}):
+        name = data_utils.rand_name('%s-' % name)
+        image_file = open(path, 'rb')
+        self.addCleanup(image_file.close)
+        params = {
+            'name': name,
+            'container_format': fmt,
+            'disk_format': fmt,
+            'is_public': 'True',
+        }
+        params.update(properties)
+        image = self.image_client.images.create(**params)
+        self.addCleanup(self.image_client.images.delete, image)
+        self.assertEqual("queued", image.status)
+        image.update(data=image_file)
+        return image.id
+
+    def glance_image_create(self):
+        aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
+        ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
+        ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
+        LOG.debug("paths: ami: %s, ari: %s, aki: %s"
+                  % (ami_img_path, ari_img_path, aki_img_path))
+        kernel_id = self._image_create('scenario-aki', 'aki', aki_img_path)
+        ramdisk_id = self._image_create('scenario-ari', 'ari', ari_img_path)
+        properties = {
+            'properties': {'kernel_id': kernel_id, 'ramdisk_id': ramdisk_id}
+        }
+        self.image = self._image_create('scenario-ami', 'ami',
+                                        path=ami_img_path,
+                                        properties=properties)
+
 
 class NetworkScenarioTest(OfficialClientTest):
     """
