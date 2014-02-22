@@ -53,6 +53,11 @@ IdentityGroup = [
                     "services' region name unless they are set explicitly. "
                     "If no such region is found in the service catalog, the "
                     "first found one is used."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the identity service."),
     cfg.StrOpt('username',
                default='demo',
                help="Username to use for Nova API requests."),
@@ -193,6 +198,11 @@ ComputeGroup = [
                     "of identity.region is used instead. If no such region "
                     "is found in the service catalog, the first found one is "
                     "used."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the compute service."),
     cfg.StrOpt('catalog_v3_type',
                default='computev3',
                help="Catalog type of the Compute v3 service."),
@@ -286,6 +296,11 @@ ImageGroup = [
                     "of identity.region is used instead. If no such region "
                     "is found in the service catalog, the first found one is "
                     "used."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the image service."),
     cfg.StrOpt('http_image',
                default='http://download.cirros-cloud.net/0.3.1/'
                'cirros-0.3.1-x86_64-uec.tar.gz',
@@ -317,6 +332,11 @@ NetworkGroup = [
                     "of identity.region is used instead. If no such region "
                     "is found in the service catalog, the first found one is "
                     "used."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the network service."),
     cfg.StrOpt('tenant_network_cidr',
                default="10.100.0.0/16",
                help="The cidr block to allocate tenant ipv4 subnets from"),
@@ -373,6 +393,11 @@ VolumeGroup = [
                     "of identity.region is used instead. If no such region "
                     "is found in the service catalog, the first found one is "
                     "used."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the volume service."),
     cfg.StrOpt('backend1_name',
                default='BACKEND_1',
                help="Name of the backend1 (must be declared in cinder.conf)"),
@@ -426,6 +451,11 @@ ObjectStoreGroup = [
                     "value of identity.region is used instead. If no such "
                     "region is found in the service catalog, the first found "
                     "one is used."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the object-store service."),
     cfg.IntOpt('container_sync_timeout',
                default=120,
                help="Number of seconds to time on waiting for a container "
@@ -466,6 +496,11 @@ OrchestrationGroup = [
                     "value of identity.region is used instead. If no such "
                     "region is found in the service catalog, the first found "
                     "one is used."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the orchestration service."),
     cfg.BoolOpt('allow_tenant_isolation',
                 default=False,
                 help="Allows test cases to create/destroy tenants and "

@@ -261,6 +261,10 @@
 # value)
 #region=
 
+# The endpoint type to use for the compute service. (string
+# value)
+#endpoint_type=publicURL
+
 # Catalog type of the Compute v3 service. (string value)
 #catalog_v3_type=computev3
 
@@ -407,6 +411,10 @@
 # one is used. (string value)
 #region=RegionOne
 
+# The endpoint type to use for the identity service. (string
+# value)
+#endpoint_type=publicURL
+
 # Username to use for Nova API requests. (string value)
 #username=demo
 
@@ -475,6 +483,10 @@
 # value)
 #region=
 
+# The endpoint type to use for the image service. (string
+# value)
+#endpoint_type=publicURL
+
 # http accessible image (string value)
 #http_image=http://download.cirros-cloud.net/0.3.1/cirros-0.3.1-x86_64-uec.tar.gz
 
@@ -529,6 +541,10 @@
 # in the service catalog, the first found one is used. (string
 # value)
 #region=
+
+# The endpoint type to use for the network service. (string
+# value)
+#endpoint_type=publicURL
 
 # The cidr block to allocate tenant ipv4 subnets from (string
 # value)
@@ -591,6 +607,10 @@
 # (string value)
 #region=
 
+# The endpoint type to use for the object-store service.
+# (string value)
+#endpoint_type=publicURL
+
 # Number of seconds to time on waiting for a container to
 # container synchronization complete. (integer value)
 #container_sync_timeout=120
@@ -630,6 +650,10 @@
 # in the service catalog, the first found one is used. (string
 # value)
 #region=
+
+# The endpoint type to use for the orchestration service.
+# (string value)
+#endpoint_type=publicURL
 
 # Time in seconds between build status checks. (integer value)
 #build_interval=1
@@ -811,6 +835,10 @@
 # in the service catalog, the first found one is used. (string
 # value)
 #region=
+
+# The endpoint type to use for the volume service. (string
+# value)
+#endpoint_type=publicURL
 
 # Name of the backend1 (must be declared in cinder.conf)
 # (string value)

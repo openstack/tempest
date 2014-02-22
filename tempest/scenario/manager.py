@@ -99,9 +99,11 @@ class OfficialClientManager(tempest.manager.Manager):
 
         # Create our default Nova client to use in testing
         service_type = CONF.compute.catalog_type
+        endpoint_type = CONF.compute.endpoint_type
         return novaclient.client.Client(self.NOVACLIENT_VERSION,
                                         *client_args,
                                         service_type=service_type,
+                                        endpoint_type=endpoint_type,
                                         region_name=region,
                                         no_cache=True,
                                         insecure=dscv,
@@ -110,9 +112,10 @@ class OfficialClientManager(tempest.manager.Manager):
     def _get_image_client(self):
         token = self.identity_client.auth_token
         region = CONF.identity.region
+        endpoint_type = CONF.image.endpoint_type
         endpoint = self.identity_client.service_catalog.url_for(
             attr='region', filter_value=region,
-            service_type=CONF.image.catalog_type, endpoint_type='publicURL')
+            service_type=CONF.image.catalog_type, endpoint_type=endpoint_type)
         dscv = CONF.identity.disable_ssl_certificate_validation
         return glanceclient.Client('1', endpoint=endpoint, token=token,
                                    insecure=dscv)
@@ -120,12 +123,14 @@ class OfficialClientManager(tempest.manager.Manager):
     def _get_volume_client(self, username, password, tenant_name):
         auth_url = CONF.identity.uri
         region = CONF.identity.region
+        endpoint_type = CONF.volume.endpoint_type
         return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
                                           username,
                                           password,
                                           tenant_name,
                                           auth_url,
                                           region_name=region,
+                                          endpoint_type=endpoint_type,
                                           http_log_debug=True)
 
     def _get_object_storage_client(self, username, password, tenant_name):
@@ -149,9 +154,12 @@ class OfficialClientManager(tempest.manager.Manager):
         except keystoneclient.exceptions.Conflict:
             pass
 
+        endpoint_type = CONF.object_storage.endpoint_type
+        os_options = {'endpoint_type': endpoint_type}
         return swiftclient.Connection(auth_url, username, password,
                                       tenant_name=tenant_name,
-                                      auth_version='2')
+                                      auth_version='2',
+                                      os_options=os_options)
 
     def _get_orchestration_client(self, username=None, password=None,
                                   tenant_name=None):
@@ -166,6 +174,7 @@ class OfficialClientManager(tempest.manager.Manager):
 
         keystone = self._get_identity_client(username, password, tenant_name)
         region = CONF.identity.region
+        endpoint_type = CONF.orchestration.endpoint_type
         token = keystone.auth_token
         service_type = CONF.orchestration.catalog_type
         try:
@@ -173,7 +182,7 @@ class OfficialClientManager(tempest.manager.Manager):
                 attr='region',
                 filter_value=region,
                 service_type=service_type,
-                endpoint_type='publicURL')
+                endpoint_type=endpoint_type)
         except keystoneclient.exceptions.EndpointNotFound:
             return None
         else:
@@ -212,10 +221,12 @@ class OfficialClientManager(tempest.manager.Manager):
 
         auth_url = CONF.identity.uri
         dscv = CONF.identity.disable_ssl_certificate_validation
+        endpoint_type = CONF.network.endpoint_type
 
         return neutronclient.v2_0.client.Client(username=username,
                                                 password=password,
                                                 tenant_name=tenant_name,
+                                                endpoint_type=endpoint_type,
                                                 auth_url=auth_url,
                                                 insecure=dscv)
 

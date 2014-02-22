@@ -58,7 +58,7 @@ class RestClient(object):
     def __init__(self, auth_provider):
         self.auth_provider = auth_provider
 
-        self.endpoint_url = 'publicURL'
+        self.endpoint_url = None
         self.service = None
         # The version of the API this client implements
         self.api_version = None
@@ -114,6 +114,28 @@ class RestClient(object):
             service_region = CONF.identity.region
         return service_region
 
+    def _get_endpoint_type(self, service):
+        """
+        Returns the endpoint type for a specific service
+        """
+        # If the client requests a specific endpoint type, then be it
+        if self.endpoint_url:
+            return self.endpoint_url
+        endpoint_type = None
+        for cfgname in dir(CONF._config):
+            # Find all config.FOO.catalog_type and assume FOO is a service.
+            cfg = getattr(CONF, cfgname)
+            catalog_type = getattr(cfg, 'catalog_type', None)
+            if catalog_type == service:
+                endpoint_type = getattr(cfg, 'endpoint_type', 'publicURL')
+                break
+        # Special case for compute v3 service which hasn't its own
+        # configuration group
+        else:
+            if service == CONF.compute.catalog_v3_type:
+                endpoint_type = CONF.compute.endpoint_type
+        return endpoint_type
+
     @property
     def user(self):
         return self.auth_provider.credentials.get('username', None)
@@ -138,7 +160,7 @@ class RestClient(object):
     def filters(self):
         _filters = dict(
             service=self.service,
-            endpoint_type=self.endpoint_url,
+            endpoint_type=self._get_endpoint_type(self.service),
             region=self._get_region(self.service)
         )
         if self.api_version is not None:
