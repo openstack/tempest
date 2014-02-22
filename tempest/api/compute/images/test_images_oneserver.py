@@ -16,11 +16,10 @@
 import testtools
 
 from tempest.api.compute import base
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -28,13 +27,6 @@ LOG = logging.getLogger(__name__)
 
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
     _interface = 'json'
-
-    def tearDown(self):
-        """Terminate test instances created after a test is executed."""
-        for image_id in self.image_ids:
-            self.client.delete_image(image_id)
-            self.image_ids.remove(image_id)
-        super(ImagesOneServerTestJSON, self).tearDown()
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
@@ -66,27 +58,13 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
             cls.tearDownClass()
             raise
 
-        cls.image_ids = []
-
-        if cls.multi_user:
-            if CONF.compute.allow_tenant_isolation:
-                creds = cls.isolated_creds.get_alt_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.images_client
-
     def _get_default_flavor_disk_size(self, flavor_id):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
     @testtools.skipUnless(CONF.compute_feature_enabled.create_image,
                           'Environment unable to create images.')
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_delete_image(self):
 
         # Create a new image
@@ -117,7 +95,7 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('204', resp['status'])
         self.client.wait_for_resource_deletion(image_id)
 
-    @attr(type=['gate'])
+    @test.attr(type=['gate'])
     def test_create_image_specify_multibyte_character_image_name(self):
         if self.__class__._interface == "xml":
             # NOTE(sdague): not entirely accurage, but we'd need a ton of work

@@ -15,7 +15,6 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -71,18 +70,6 @@ class ImagesOneServerNegativeV3Test(base.BaseV3ComputeTest):
             raise
 
         cls.image_ids = []
-
-        if cls.multi_user:
-            if CONF.compute.allow_tenant_isolation:
-                creds = cls.isolated_creds.get_alt_creds()
-                username, tenant_name, password = creds
-                cls.alt_manager = clients.Manager(username=username,
-                                                  password=password,
-                                                  tenant_name=tenant_name)
-            else:
-                # Use the alt_XXX credentials in the config file
-                cls.alt_manager = clients.AltManager()
-            cls.alt_client = cls.alt_manager.images_client
 
     @test.skip_because(bug="1006725")
     @test.attr(type=['negative', 'gate'])
