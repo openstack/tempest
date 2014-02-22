@@ -590,7 +590,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                                             properties={'disk_format':
                                                         'qcow2'})
         except IOError:
-            LOG.debug("A qcow2 image was not got. Try to get a uec image.")
+            LOG.debug("A qcow2 image was not found. Try to get a uec image.")
             kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
             ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
             properties = {
