@@ -17,6 +17,7 @@ from tempest.api.orchestration import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
 from tempest.test import attr
 
 CONF = config.CONF
@@ -28,25 +29,28 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     _interface = 'json'
 
     template = """
-HeatTemplateFormatVersion: '2012-12-12'
-Description: |
+heat_template_version: '2013-05-23'
+description: |
   Template which creates single EC2 instance
-Parameters:
+parameters:
   KeyName:
-    Type: String
+    type: string
   InstanceType:
-    Type: String
+    type: string
   ImageId:
-    Type: String
+    type: string
   ExternalRouterId:
-    Type: String
-Resources:
+    type: string
+  ExternalNetworkId:
+    type: string
+resources:
   Network:
-    Type: OS::Quantum::Net
-    Properties: {name: NewNetwork}
+    type: OS::Neutron::Net
+    properties:
+      name: NewNetwork
   Subnet:
-    Type: OS::Quantum::Subnet
-    Properties:
+    type: OS::Neutron::Subnet
+    properties:
       network_id: {Ref: Network}
       name: NewSubnet
       ip_version: 4
@@ -54,39 +58,44 @@ Resources:
       dns_nameservers: ["8.8.8.8"]
       allocation_pools:
       - {end: 10.0.3.150, start: 10.0.3.20}
+  Router:
+    type: OS::Neutron::Router
+    properties:
+      name: NewRouter
+      admin_state_up: false
+      external_gateway_info:
+        network: {get_param: ExternalNetworkId}
+        enable_snat: false
   RouterInterface:
-    Type: OS::Quantum::RouterInterface
-    Properties:
-      router_id: {Ref: ExternalRouterId}
-      subnet_id: {Ref: Subnet}
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: {get_param: ExternalRouterId}
+      subnet_id: {get_resource: Subnet}
   Server:
-    Type: AWS::EC2::Instance
+    type: AWS::EC2::Instance
     Metadata:
-      Name: SmokeServer
-    Properties:
-      ImageId: {Ref: ImageId}
-      InstanceType: {Ref: InstanceType}
-      KeyName: {Ref: KeyName}
-      SubnetId: {Ref: Subnet}
+      Name: SmokeServerNeutron
+    properties:
+      ImageId: {get_param: ImageId}
+      InstanceType: {get_param: InstanceType}
+      KeyName: {get_param: KeyName}
+      SubnetId: {get_resource: Subnet}
       UserData:
-        Fn::Base64:
-          Fn::Join:
-          - ''
-          - - '#!/bin/bash -v
+        str_replace:
+          template: |
+            #!/bin/bash -v
 
-              '
-            - /opt/aws/bin/cfn-signal -e 0 -r "SmokeServer created" '
-            - {Ref: WaitHandle}
-            - '''
-
-              '
-  WaitHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
+            /opt/aws/bin/cfn-signal -e 0 -r "SmokeServerNeutron created" \
+            'wait_handle'
+          params:
+            wait_handle: {get_resource: WaitHandleNeutron}
+  WaitHandleNeutron:
+    type: AWS::CloudFormation::WaitConditionHandle
   WaitCondition:
-    Type: AWS::CloudFormation::WaitCondition
+    type: AWS::CloudFormation::WaitCondition
     DependsOn: Server
-    Properties:
-      Handle: {Ref: WaitHandle}
+    properties:
+      Handle: {get_resource: WaitHandleNeutron}
       Timeout: '600'
 """
 
@@ -104,6 +113,7 @@ Resources:
         cls.keypair_name = (CONF.orchestration.keypair_name or
                             cls._create_keypair()['name'])
         cls.external_router_id = cls._get_external_router_id()
+        cls.external_network_id = CONF.network.public_network_id
 
         # create the stack
         cls.stack_identifier = cls.create_stack(
@@ -113,11 +123,26 @@ Resources:
                 'KeyName': cls.keypair_name,
                 'InstanceType': CONF.orchestration.instance_type,
                 'ImageId': CONF.orchestration.image_ref,
-                'ExternalRouterId': cls.external_router_id
+                'ExternalRouterId': cls.external_router_id,
+                'ExternalNetworkId': cls.external_network_id
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]
-        cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
-        _, resources = cls.client.list_resources(cls.stack_identifier)
+        try:
+            cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
+            _, resources = cls.client.list_resources(cls.stack_identifier)
+        except exceptions.TimeoutException as e:
+            # attempt to log the server console to help with debugging
+            # the cause of the server not signalling the waitcondition
+            # to heat.
+            resp, body = cls.client.get_resource(cls.stack_identifier,
+                                                 'SmokeServerNeutron')
+            server_id = body['physical_resource_id']
+            LOG.debug('Console output for %s', server_id)
+            resp, output = cls.servers_client.get_console_output(
+                server_id, None)
+            LOG.debug(output)
+            raise e
+
         cls.test_resources = {}
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
@@ -133,9 +158,9 @@ Resources:
     @attr(type='slow')
     def test_created_resources(self):
         """Verifies created neutron resources."""
-        resources = [('Network', 'OS::Quantum::Net'),
-                     ('Subnet', 'OS::Quantum::Subnet'),
-                     ('RouterInterface', 'OS::Quantum::RouterInterface'),
+        resources = [('Network', 'OS::Neutron::Net'),
+                     ('Subnet', 'OS::Neutron::Subnet'),
+                     ('RouterInterface', 'OS::Neutron::RouterInterface'),
                      ('Server', 'AWS::EC2::Instance')]
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name, None)
@@ -171,6 +196,20 @@ Resources:
         self.assertEqual('10.0.3.150', subnet['allocation_pools'][0]['end'])
         self.assertEqual(4, subnet['ip_version'])
         self.assertEqual('10.0.3.0/24', subnet['cidr'])
+
+    @attr(type='slow')
+    def test_created_router(self):
+        """Verifies created router."""
+        router_id = self.test_resources.get('Router')['physical_resource_id']
+        resp, body = self.network_client.show_router(router_id)
+        self.assertEqual('200', resp['status'])
+        router = body['router']
+        self.assertEqual('NewRouter', router['name'])
+        self.assertEqual(self.external_network_id,
+                         router['external_gateway_info']['network_id'])
+        self.assertEqual(False,
+                         router['external_gateway_info']['enable_snat'])
+        self.assertEqual(False, router['admin_state_up'])
 
     @attr(type='slow')
     def test_created_router_interface(self):
