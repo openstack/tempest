@@ -15,6 +15,8 @@
 
 import random
 
+from six import moves
+
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
@@ -26,7 +28,7 @@ class AccountTest(base.BaseObjectTest):
     def setUpClass(cls):
         super(AccountTest, cls).setUpClass()
         cls.containers = []
-        for i in xrange(ord('a'), ord('f') + 1):
+        for i in moves.xrange(ord('a'), ord('f') + 1):
             name = data_utils.rand_name(name='%s-' % chr(i))
             cls.container_client.create_container(name)
             cls.containers.append(name)

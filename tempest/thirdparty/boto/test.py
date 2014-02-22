@@ -17,6 +17,7 @@ import contextlib
 import logging as orig_logging
 import os
 import re
+import six
 import urlparse
 
 import boto
@@ -134,7 +135,7 @@ def _add_matcher_class(error_cls, error_data, base=BotoExceptionMatcher):
         The not leaf elements does wildcard match
     """
     # in error_code just literal and '.' characters expected
-    if not isinstance(error_data, basestring):
+    if not isinstance(error_data, six.string_types):
         (error_code, status_code) = map(str, error_data)
     else:
         status_code = None
@@ -144,7 +145,7 @@ def _add_matcher_class(error_cls, error_data, base=BotoExceptionMatcher):
     num_parts = len(parts)
     max_index = num_parts - 1
     add_cls = error_cls
-    for i_part in xrange(num_parts):
+    for i_part in six.moves.xrange(num_parts):
         part = parts[i_part]
         leaf = i_part == max_index
         if not leaf:

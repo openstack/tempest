@@ -16,6 +16,7 @@
 
 import logging
 import os
+import six
 import subprocess
 
 import netaddr
@@ -371,7 +372,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return keypair
 
     def get_remote_client(self, server_or_ip, username=None, private_key=None):
-        if isinstance(server_or_ip, basestring):
+        if isinstance(server_or_ip, six.string_types):
             ip = server_or_ip
         else:
             network_name_for_ssh = CONF.compute.network_for_ssh

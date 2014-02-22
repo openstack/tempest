@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from six import moves
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
@@ -31,7 +33,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='gate')
     def test_project_list_delete(self):
         # Create several projects and delete them
-        for _ in xrange(3):
+        for _ in moves.xrange(3):
             resp, project = self.client.create_project(
                 data_utils.rand_name('project-new'))
             self.addCleanup(self._delete_project, project['id'])
