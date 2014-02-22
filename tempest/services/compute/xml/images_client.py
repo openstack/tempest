@@ -17,7 +17,7 @@ import urllib
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -30,7 +30,8 @@ from tempest.services.compute.xml.common import XMLNS_11
 CONF = config.CONF
 
 
-class ImagesClientXML(RestClientXML):
+class ImagesClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(ImagesClientXML, self).__init__(auth_provider)

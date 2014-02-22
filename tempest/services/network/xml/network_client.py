@@ -13,7 +13,7 @@
 from lxml import etree
 import xml.etree.ElementTree as ET
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest.services.compute.xml.common import deep_dict_to_xml
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
@@ -23,13 +23,16 @@ from tempest.services.network import network_client_base as client_base
 
 
 class NetworkClientXML(client_base.NetworkClientBase):
+    TYPE = "xml"
 
     # list of plurals used for xml serialization
     PLURALS = ['dns_nameservers', 'host_routes', 'allocation_pools',
                'fixed_ips', 'extensions']
 
     def get_rest_client(self, auth_provider):
-        return RestClientXML(auth_provider)
+        rc = rest_client.RestClient(auth_provider)
+        rc.TYPE = self.TYPE
+        return rc
 
     def _parse_array(self, node):
         array = []

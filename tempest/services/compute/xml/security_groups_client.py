@@ -16,7 +16,7 @@
 from lxml import etree
 import urllib
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
@@ -28,7 +28,8 @@ from tempest.services.compute.xml.common import XMLNS_11
 CONF = config.CONF
 
 
-class SecurityGroupsClientXML(RestClientXML):
+class SecurityGroupsClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(SecurityGroupsClientXML, self).__init__(auth_provider)

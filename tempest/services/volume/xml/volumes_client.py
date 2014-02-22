@@ -19,7 +19,7 @@ import urllib
 from lxml import etree
 from xml.sax.saxutils import escape
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
@@ -31,10 +31,11 @@ from tempest.services.compute.xml.common import XMLNS_11
 CONF = config.CONF
 
 
-class VolumesClientXML(RestClientXML):
+class VolumesClientXML(rest_client.RestClient):
     """
     Client class to send CRUD Volume API requests to a Cinder endpoint
     """
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(VolumesClientXML, self).__init__(auth_provider)

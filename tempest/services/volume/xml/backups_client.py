@@ -13,13 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.rest_client import RestClientXML
+from tempest.services.volume.json import backups_client
 
 
-class BackupsClientXML(RestClientXML):
+class BackupsClientXML(backups_client.BackupsClientJSON):
     """
     Client class to send CRUD Volume Backup API requests to a Cinder endpoint
     """
+    TYPE = "xml"
 
     #TODO(gfidente): XML client isn't yet implemented because of bug 1270589
     pass

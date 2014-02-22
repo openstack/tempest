@@ -17,7 +17,7 @@ import json
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
@@ -30,7 +30,8 @@ CONF = config.CONF
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 
-class IdentityV3ClientXML(RestClientXML):
+class IdentityV3ClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(IdentityV3ClientXML, self).__init__(auth_provider)
@@ -426,7 +427,8 @@ class IdentityV3ClientXML(RestClientXML):
         return resp, body
 
 
-class V3TokenClientXML(RestClientXML):
+class V3TokenClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self):
         super(V3TokenClientXML, self).__init__(None)

@@ -19,7 +19,7 @@ import urllib
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -139,7 +139,8 @@ def _translate_server_xml_to_json(xml_dom):
     return json
 
 
-class ServersClientXML(RestClientXML):
+class ServersClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(ServersClientXML, self).__init__(auth_provider)

@@ -14,7 +14,7 @@
 #    under the License.
 
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
@@ -23,7 +23,8 @@ from tempest.services.compute.xml.common import Text
 CONF = config.CONF
 
 
-class FixedIPsClientXML(RestClientXML):
+class FixedIPsClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(FixedIPsClientXML, self).__init__(auth_provider)

@@ -15,16 +15,19 @@
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import xml_to_json
 import tempest.services.telemetry.telemetry_client_base as client
 
 
 class TelemetryClientXML(client.TelemetryClientBase):
+    TYPE = "xml"
 
     def get_rest_client(self, auth_provider):
-        return RestClientXML(auth_provider)
+        rc = rest_client.RestClient(auth_provider)
+        rc.TYPE = self.TYPE
+        return rc
 
     def _parse_array(self, body):
         array = []

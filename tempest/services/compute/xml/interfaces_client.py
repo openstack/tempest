@@ -17,7 +17,7 @@ import time
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.services.compute.xml.common import Document
@@ -28,7 +28,8 @@ from tempest.services.compute.xml.common import xml_to_json
 CONF = config.CONF
 
 
-class InterfacesClientXML(RestClientXML):
+class InterfacesClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(InterfacesClientXML, self).__init__(auth_provider)

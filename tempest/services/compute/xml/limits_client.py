@@ -15,7 +15,7 @@
 
 from lxml import objectify
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 
 CONF = config.CONF
@@ -23,7 +23,8 @@ CONF = config.CONF
 NS = "{http://docs.openstack.org/common/api/v1.0}"
 
 
-class LimitsClientXML(RestClientXML):
+class LimitsClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(LimitsClientXML, self).__init__(auth_provider)

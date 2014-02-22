@@ -17,7 +17,7 @@ import urllib
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
@@ -33,7 +33,8 @@ XMLNS_OS_FLV_ACCESS = \
     "http://docs.openstack.org/compute/ext/flavor_access/api/v2"
 
 
-class FlavorsClientXML(RestClientXML):
+class FlavorsClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(FlavorsClientXML, self).__init__(auth_provider)
