@@ -13,175 +13,136 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
+from tempest.exceptions import base
 
 
-class TempestException(Exception):
-    """
-    Base Tempest Exception
-
-    To correctly use this class, inherit from it and define
-    a 'message' property. That message will get printf'd
-    with the keyword arguments provided to the constructor.
-    """
-    message = "An unknown exception occurred"
-
-    def __init__(self, *args, **kwargs):
-        super(TempestException, self).__init__()
-        try:
-            self._error_string = self.message % kwargs
-        except Exception:
-            # at least get the core message out if something happened
-            self._error_string = self.message
-        if len(args) > 0:
-            # If there is a non-kwarg parameter, assume it's the error
-            # message or reason description and tack it on to the end
-            # of the exception message
-            # Convert all arguments into their string representations...
-            args = ["%s" % arg for arg in args]
-            self._error_string = (self._error_string +
-                                  "\nDetails: %s" % '\n'.join(args))
-
-    def __str__(self):
-        return self._error_string
-
-
-class InvalidConfiguration(TempestException):
+class InvalidConfiguration(base.TempestException):
     message = "Invalid Configuration"
 
 
-class RestClientException(TempestException,
-                          testtools.TestCase.failureException):
-    pass
-
-
-class InvalidHttpSuccessCode(RestClientException):
+class InvalidHttpSuccessCode(base.RestClientException):
     message = "The success code is different than the expected one"
 
 
-class NotFound(RestClientException):
+class NotFound(base.RestClientException):
     message = "Object not found"
 
 
-class Unauthorized(RestClientException):
+class Unauthorized(base.RestClientException):
     message = 'Unauthorized'
 
 
-class InvalidServiceTag(RestClientException):
+class InvalidServiceTag(base.RestClientException):
     message = "Invalid service tag"
 
 
-class TimeoutException(TempestException):
+class TimeoutException(base.TempestException):
     message = "Request timed out"
 
 
-class BuildErrorException(TempestException):
+class BuildErrorException(base.TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
-class ImageKilledException(TempestException):
+class ImageKilledException(base.TempestException):
     message = "Image %(image_id)s 'killed' while waiting for '%(status)s'"
 
 
-class AddImageException(TempestException):
+class AddImageException(base.TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
 
-class EC2RegisterImageException(TempestException):
+class EC2RegisterImageException(base.TempestException):
     message = ("Image %(image_id)s failed to become 'available' "
                "in the allotted time")
 
 
-class VolumeBuildErrorException(TempestException):
+class VolumeBuildErrorException(base.TempestException):
     message = "Volume %(volume_id)s failed to build and is in ERROR status"
 
 
-class SnapshotBuildErrorException(TempestException):
+class SnapshotBuildErrorException(base.TempestException):
     message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
 
 
-class VolumeBackupException(TempestException):
+class VolumeBackupException(base.TempestException):
     message = "Volume backup %(backup_id)s failed and is in ERROR status"
 
 
-class StackBuildErrorException(TempestException):
+class StackBuildErrorException(base.TempestException):
     message = ("Stack %(stack_identifier)s is in %(stack_status)s status "
                "due to '%(stack_status_reason)s'")
 
 
-class BadRequest(RestClientException):
+class BadRequest(base.RestClientException):
     message = "Bad request"
 
 
-class UnprocessableEntity(RestClientException):
+class UnprocessableEntity(base.RestClientException):
     message = "Unprocessable entity"
 
 
-class AuthenticationFailure(RestClientException):
+class AuthenticationFailure(base.RestClientException):
     message = ("Authentication with user %(user)s and password "
                "%(password)s failed auth using tenant %(tenant)s.")
 
 
-class EndpointNotFound(TempestException):
+class EndpointNotFound(base.TempestException):
     message = "Endpoint not found"
 
 
-class RateLimitExceeded(TempestException):
+class RateLimitExceeded(base.TempestException):
     message = "Rate limit exceeded"
 
 
-class OverLimit(TempestException):
+class OverLimit(base.TempestException):
     message = "Quota exceeded"
 
 
-class ServerFault(TempestException):
+class ServerFault(base.TempestException):
     message = "Got server fault"
 
 
-class ImageFault(TempestException):
+class ImageFault(base.TempestException):
     message = "Got image fault"
 
 
-class IdentityError(TempestException):
+class IdentityError(base.TempestException):
     message = "Got identity error"
 
 
-class Conflict(RestClientException):
+class Conflict(base.RestClientException):
     message = "An object with that identifier already exists"
 
 
-class SSHTimeout(TempestException):
+class SSHTimeout(base.TempestException):
     message = ("Connection to the %(host)s via SSH timed out.\n"
                "User: %(user)s, Password: %(password)s")
 
 
-class SSHExecCommandFailed(TempestException):
+class SSHExecCommandFailed(base.TempestException):
     """Raised when remotely executed command returns nonzero status."""
     message = ("Command '%(command)s', exit status: %(exit_status)d, "
                "Error:\n%(strerror)s")
 
 
-class ServerUnreachable(TempestException):
+class ServerUnreachable(base.TempestException):
     message = "The server is not reachable via the configured network"
 
 
-class TearDownException(TempestException):
+class TearDownException(base.TempestException):
     message = "%(num)d cleanUp operation failed"
 
 
-class RFCViolation(RestClientException):
-    message = "RFC Violation"
-
-
-class ResponseWithNonEmptyBody(RFCViolation):
+class ResponseWithNonEmptyBody(base.RFCViolation):
     message = ("RFC Violation! Response with %(status)d HTTP Status Code "
                "MUST NOT have a body")
 
 
-class ResponseWithEntity(RFCViolation):
+class ResponseWithEntity(base.RFCViolation):
     message = ("RFC Violation! Response with 205 HTTP Status Code "
                "MUST NOT have an entity")
 
 
-class InvalidHTTPResponseBody(RestClientException):
+class InvalidHTTPResponseBody(base.RestClientException):
     message = "HTTP response body is invalid json or xml"
