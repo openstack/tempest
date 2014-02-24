@@ -87,8 +87,13 @@ def main(ns):
             # NOTE(mkoderer): we just save the last result code
             if (step_result != 0):
                 result = step_result
+                if ns.stop:
+                    return result
     else:
-        driver.stress_openstack(tests, ns.duration, ns.number, ns.stop)
+        result = driver.stress_openstack(tests,
+                                         ns.duration,
+                                         ns.number,
+                                         ns.stop)
     return result
 
 
