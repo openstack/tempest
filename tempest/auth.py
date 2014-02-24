@@ -382,7 +382,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             path = "/" + filters['api_version']
             noversion_path = "/".join(parts.path.split("/")[2:])
             if noversion_path != "":
-                path += noversion_path
+                path += "/" + noversion_path
             _base_url = _base_url.replace(parts.path, path)
         if filters.get('skip_path', None) is not None:
             _base_url = _base_url.replace(parts.path, "/")
