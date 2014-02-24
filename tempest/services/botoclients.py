@@ -35,6 +35,7 @@ class BotoClientBase(object):
     def __init__(self, username=None, password=None,
                  auth_url=None, tenant_name=None,
                  *args, **kwargs):
+        # FIXME(andreaf) replace credentials and auth_url with auth_provider
 
         self.connection_timeout = str(CONF.boto.http_socket_timeout)
         self.num_retries = str(CONF.boto.num_retries)
@@ -45,6 +46,7 @@ class BotoClientBase(object):
                         "tenant_name": tenant_name}
 
     def _keystone_aws_get(self):
+        # FIXME(andreaf) Move EC2 credentials to AuthProvider
         import keystoneclient.v2_0.client
 
         keystone = keystoneclient.v2_0.client.Client(**self.ks_cred)
