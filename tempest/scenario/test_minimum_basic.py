@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.common import debug
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
@@ -96,6 +97,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         except Exception:
             LOG.exception('ssh to server failed')
             self._log_console_output()
+            debug.log_ip_ns()
             raise
 
     def check_partitions(self):
