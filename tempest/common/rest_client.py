@@ -502,24 +502,6 @@ class RestClient(object):
         raise NotImplementedError(message)
 
 
-class RestClientXML(RestClient):
-
-    # NOTE(vponomaryov): This is deprecated class
-    # and should be removed after excluding it
-    # from all service clients
-
-    TYPE = "xml"
-
-    def _parse_resp(self, body):
-        return xml_to_json(etree.fromstring(body))
-
-    def is_absolute_limit(self, resp, resp_body):
-        if (not isinstance(resp_body, collections.Mapping) or
-                'retry-after' not in resp):
-            return True
-        return 'exceed' in resp_body.get('message', 'blabla')
-
-
 class NegativeRestClient(RestClient):
     """
     Version of RestClient that does not raise exceptions.

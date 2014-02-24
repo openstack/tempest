@@ -15,7 +15,7 @@
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
@@ -26,7 +26,8 @@ CONF = config.CONF
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 
-class ServiceClientXML(RestClientXML):
+class ServiceClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(ServiceClientXML, self).__init__(auth_provider)

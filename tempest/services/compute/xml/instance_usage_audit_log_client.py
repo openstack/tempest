@@ -15,14 +15,15 @@
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
 
-class InstanceUsagesAuditLogClientXML(RestClientXML):
+class InstanceUsagesAuditLogClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(InstanceUsagesAuditLogClientXML, self).__init__(

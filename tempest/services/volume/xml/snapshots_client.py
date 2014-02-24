@@ -15,7 +15,7 @@ import urllib
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -30,8 +30,9 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SnapshotsClientXML(RestClientXML):
+class SnapshotsClientXML(rest_client.RestClient):
     """Client class to send CRUD Volume API requests."""
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(SnapshotsClientXML, self).__init__(auth_provider)

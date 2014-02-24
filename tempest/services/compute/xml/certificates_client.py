@@ -14,13 +14,14 @@
 #    under the License.
 
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class CertificatesClientXML(RestClientXML):
+class CertificatesClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(CertificatesClientXML, self).__init__(auth_provider)
