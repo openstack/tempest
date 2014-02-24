@@ -25,16 +25,16 @@ ALT_TOKEN = "alt_fake_token"
 COMPUTE_ENDPOINTS_V2 = {
     "endpoints": [
         {
-            "adminURL": "http://fake_url/api/admin",
+            "adminURL": "http://fake_url/v2/first_endpoint/admin",
             "region": "NoMatchRegion",
-            "internalURL": "http://fake_url/api/internal",
-            "publicURL": "http://fake_url/api/public"
+            "internalURL": "http://fake_url/v2/first_endpoint/internal",
+            "publicURL": "http://fake_url/v2/first_endpoint/public"
         },
         {
-            "adminURL": "http://fake_url/api/admin",
+            "adminURL": "http://fake_url/v2/second_endpoint/admin",
             "region": "FakeRegion",
-            "internalURL": "http://fake_url/api/internal",
-            "publicURL": "http://fake_url/api/public"
+            "internalURL": "http://fake_url/v2/second_endpoint/internal",
+            "publicURL": "http://fake_url/v2/second_endpoint/public"
         },
     ],
     "type": "compute",
@@ -79,17 +79,24 @@ IDENTITY_V2_RESPONSE = {
 COMPUTE_ENDPOINTS_V3 = {
     "endpoints": [
         {
-            "id": "fake_service",
+            "id": "first_compute_fake_service",
             "interface": "public",
             "region": "NoMatchRegion",
-            "url": "http://fake_url/v3"
+            "url": "http://fake_url/v3/first_endpoint/api"
         },
         {
-            "id": "another_fake_service",
+            "id": "second_fake_service",
             "interface": "public",
             "region": "FakeRegion",
-            "url": "http://fake_url/v3"
+            "url": "http://fake_url/v3/second_endpoint/api"
+        },
+        {
+            "id": "third_fake_service",
+            "interface": "admin",
+            "region": "MiddleEarthRegion",
+            "url": "http://fake_url/v3/third_endpoint/api"
         }
+
     ],
     "type": "compute",
     "id": "fake_compute_endpoint"
