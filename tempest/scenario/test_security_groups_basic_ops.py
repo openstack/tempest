@@ -318,10 +318,13 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         returns the ip (floating/internal) of a server
         """
         if floating:
-            return self.floating_ips[server].floating_ip_address
+            server_ip = self.floating_ips[server].floating_ip_address
         else:
+            server_ip = None
             network_name = self.tenants[server.tenant_id].network.name
-            return server.networks[network_name][0]
+            if network_name in server.networks:
+                server_ip = server.networks[network_name][0]
+        return server_ip
 
     def _connect_to_access_point(self, tenant):
         """
