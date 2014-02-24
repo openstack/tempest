@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.api.compute import base
 from tempest import config
 from tempest import test
@@ -81,6 +83,19 @@ class DeleteServersV3Test(base.BaseV3ComputeTest):
             self.client.wait_for_server_status(server['id'],
                                                'SHELVED')
 
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
+
+    @testtools.skipIf(not CONF.compute_feature_enabled.resize,
+                      'Resize not available.')
+    @test.attr(type='gate')
+    def test_delete_server_while_in_verify_resize_state(self):
+        # Delete a server while it's VM state is VERIFY_RESIZE
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        resp, body = self.client.resize(server['id'], self.flavor_ref_alt)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(server['id'], 'VERIFY_RESIZE')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
         self.client.wait_for_server_termination(server['id'])
