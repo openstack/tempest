@@ -148,9 +148,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         cls.check_preconditions()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
-        cls.networks = []
-        cls.subnets = []
-        cls.routers = []
         cls.floating_ips = {}
         cls.tenants = {}
         cls.primary_tenant = cls.TenantProperties(cls.tenant_id,

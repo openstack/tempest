@@ -13,6 +13,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import collections
 
 from tempest.common import debug
 from tempest.common.utils import data_utils
@@ -23,6 +24,9 @@ from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
+
+Floating_IP_tuple = collections.namedtuple('Floating_IP_tuple',
+                                           ['floating_ip', 'server'])
 
 
 class TestNetworkBasicOps(manager.NetworkScenarioTest):
@@ -134,7 +138,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         serv_dict = self._create_server(name, self.network)
         self.servers[serv_dict['server']] = serv_dict['keypair']
         self._check_tenant_network_connectivity()
-        self.floating_ips = {}
+
         self._create_and_associate_floating_ips()
 
     def check_networks(self):
@@ -178,11 +182,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.addCleanup(self.cleanup_wrapper, server)
         return dict(server=server, keypair=keypair)
 
-    def _create_servers(self):
-        for i, network in enumerate(self.networks):
-            name = data_utils.rand_name('server-smoke-%d-' % i)
-            self._create_server(name, network)
-
     def _check_tenant_network_connectivity(self):
         if not CONF.network.tenant_networks_reachable:
             msg = 'Tenant networks not configured to be reachable.'
@@ -207,7 +206,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         public_network_id = CONF.network.public_network_id
         for server in self.servers.keys():
             floating_ip = self._create_floating_ip(server, public_network_id)
-            self.floating_ips[floating_ip] = server
+            self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
             self.addCleanup(self.cleanup_wrapper, floating_ip)
 
     def _check_public_network_connectivity(self, should_connect=True,
@@ -216,16 +215,16 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         # key-based authentication by cloud-init.
         ssh_login = CONF.compute.image_ssh_user
         LOG.debug('checking network connections')
+        floating_ip, server = self.floating_ip_tuple
+        ip_address = floating_ip.floating_ip_address
+        private_key = None
+        if should_connect:
+            private_key = self.servers[server].private_key
         try:
-            for floating_ip, server in self.floating_ips.iteritems():
-                ip_address = floating_ip.floating_ip_address
-                private_key = None
-                if should_connect:
-                    private_key = self.servers[server].private_key
-                self._check_vm_connectivity(ip_address,
-                                            ssh_login,
-                                            private_key,
-                                            should_connect=should_connect)
+            self._check_vm_connectivity(ip_address,
+                                        ssh_login,
+                                        private_key,
+                                        should_connect=should_connect)
         except Exception:
             ex_msg = 'Public network connectivity check failed'
             if msg:
@@ -236,18 +235,20 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
             raise
 
     def _disassociate_floating_ips(self):
-        for floating_ip, server in self.floating_ips.iteritems():
-            self._disassociate_floating_ip(floating_ip)
-            self.floating_ips[floating_ip] = None
+        floating_ip, server = self.floating_ip_tuple
+        self._disassociate_floating_ip(floating_ip)
+        self.floating_ip_tuple = Floating_IP_tuple(
+            floating_ip, None)
 
     def _reassociate_floating_ips(self):
-        for floating_ip in self.floating_ips.keys():
-            name = data_utils.rand_name('new_server-smoke-')
-            # create a new server for the floating ip
-            serv_dict = self._create_server(name, self.network)
-            self.servers[serv_dict['server']] = serv_dict['keypair']
-            self._associate_floating_ip(floating_ip, serv_dict['server'])
-            self.floating_ips[floating_ip] = serv_dict['server']
+        floating_ip, server = self.floating_ip_tuple
+        name = data_utils.rand_name('new_server-smoke-')
+        # create a new server for the floating ip
+        serv_dict = self._create_server(name, self.network)
+        self.servers[serv_dict['server']] = serv_dict['keypair']
+        self._associate_floating_ip(floating_ip, serv_dict['server'])
+        self.floating_ip_tuple = Floating_IP_tuple(
+            floating_ip, serv_dict['server'])
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')

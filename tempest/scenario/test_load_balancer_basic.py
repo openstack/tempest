@@ -61,12 +61,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         super(TestLoadBalancerBasic, cls).setUpClass()
         cls.check_preconditions()
         cls.security_groups = {}
-        cls.networks = []
-        cls.subnets = []
         cls.servers_keypairs = {}
-        cls.pools = []
         cls.members = []
-        cls.vips = []
         cls.floating_ips = {}
         cls.port1 = 80
         cls.port2 = 88
@@ -80,21 +76,19 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         name = data_utils.rand_name("smoke_server-")
         keypair = self.create_keypair(name='keypair-%s' % name)
         security_groups = [self.security_groups[tenant_id].name]
-        nets = self.network_client.list_networks()
-        for net in nets['networks']:
-            if net['tenant_id'] == self.tenant_id:
-                self.networks.append(net)
-                create_kwargs = {
-                    'nics': [
-                        {'net-id': net['id']},
-                    ],
-                    'key_name': keypair.name,
-                    'security_groups': security_groups,
-                }
-                server = self.create_server(name=name,
-                                            create_kwargs=create_kwargs)
-                self.servers_keypairs[server] = keypair
-                break
+        net = self.list_networks(tenant_id=self.tenant_id)[0]
+        self.network = net_common.DeletableNetwork(client=self.network_client,
+                                                   **net['network'])
+        create_kwargs = {
+            'nics': [
+                {'net-id': self.network.id},
+            ],
+            'key_name': keypair.name,
+            'security_groups': security_groups,
+        }
+        server = self.create_server(name=name,
+                                    create_kwargs=create_kwargs)
+        self.servers_keypairs[server] = keypair
         self.assertTrue(self.servers_keypairs)
 
     def _start_servers(self):
@@ -105,7 +99,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         for server in self.servers_keypairs.keys():
             ssh_login = config.compute.image_ssh_user
             private_key = self.servers_keypairs[server].private_key
-            network_name = self.networks[0]['name']
+            network_name = self.network.name
 
             ip_address = server.networks[network_name][0]
             ssh_client = ssh.Client(ip_address, ssh_login,
@@ -138,17 +132,15 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _create_pool(self):
         """Create a pool with ROUND_ROBIN algorithm."""
-        subnets = self.network_client.list_subnets()
-        for subnet in subnets['subnets']:
-            if subnet['tenant_id'] == self.tenant_id:
-                self.subnets.append(subnet)
-                pool = super(TestLoadBalancerBasic, self)._create_pool(
-                    'ROUND_ROBIN',
-                    'HTTP',
-                    subnet['id'])
-                self.pools.append(pool)
-                break
-        self.assertTrue(self.pools)
+        # get tenant subnet and verify there's only one
+        subnet = self._list_subnets(tenant_id=self.tenant_id)[0]
+        self.subnet = net_common.DeletableSubnet(client=self.network_client,
+                                                 **subnet['subnet'])
+        self.pool = super(TestLoadBalancerBasic, self)._create_pool(
+            'ROUND_ROBIN',
+            'HTTP',
+            self.subnet.id)
+        self.assertTrue(self.pool)
 
     def _create_members(self, network_name, server_ids):
         """
@@ -161,7 +153,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         for server in servers:
             if server.id in server_ids:
                 ip = server.networks[network_name][0]
-                pool_id = self.pools[0]['id']
+                pool_id = self.pool.id
                 if len(set(server_ids)) == 1 or len(servers) == 1:
                     member1 = self._create_member(ip, self.port1, pool_id)
                     member2 = self._create_member(ip, self.port2, pool_id)
@@ -173,28 +165,27 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _assign_floating_ip_to_vip(self, vip):
         public_network_id = config.network.public_network_id
-        port_id = vip['port_id']
+        port_id = vip.port_id
         floating_ip = self._create_floating_ip(vip, public_network_id,
                                                port_id=port_id)
-        self.floating_ips.setdefault(vip['id'], [])
-        self.floating_ips[vip['id']].append(floating_ip)
+        self.floating_ips.setdefault(vip.id, [])
+        self.floating_ips[vip.id].append(floating_ip)
 
     def _create_load_balancer(self):
         self._create_pool()
-        self._create_members(self.networks[0]['name'],
+        self._create_members(self.network.name,
                              [self.servers_keypairs.keys()[0].id])
-        subnet_id = self.subnets[0]['id']
-        pool_id = self.pools[0]['id']
-        vip = super(TestLoadBalancerBasic, self)._create_vip('HTTP', 80,
-                                                             subnet_id,
-                                                             pool_id)
-        self.vips.append(vip)
+        subnet_id = self.subnet.id
+        pool_id = self.pool.id
+        self.vip = super(TestLoadBalancerBasic, self)._create_vip('HTTP', 80,
+                                                                  subnet_id,
+                                                                  pool_id)
         self._status_timeout(NeutronRetriever(self.network_client,
                                               self.network_client.vip_path,
                                               net_common.DeletableVip),
-                             self.vips[0]['id'],
+                             self.vip.id,
                              expected_status='ACTIVE')
-        self._assign_floating_ip_to_vip(self.vips[0])
+        self._assign_floating_ip_to_vip(self.vip)
 
     def _check_load_balancing(self):
         """
@@ -204,9 +195,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
            of the requests
         """
 
-        vip = self.vips[0]
-        floating_ip_vip = self.floating_ips[
-            vip['id']][0]['floating_ip_address']
+        vip = self.vip
+        floating_ip_vip = self.floating_ips[vip.id][0]['floating_ip_address']
         self._check_connection(floating_ip_vip)
         resp = []
         for count in range(10):
