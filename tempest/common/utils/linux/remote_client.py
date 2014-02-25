@@ -13,9 +13,9 @@
 import re
 import time
 
-from tempest.common.ssh import Client
+from tempest.common import ssh
 from tempest import config
-from tempest.exceptions import ServerUnreachable
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -37,10 +37,10 @@ class RemoteClient():
                     ip_address = address['addr']
                     break
             else:
-                raise ServerUnreachable()
-        self.ssh_client = Client(ip_address, username, password, ssh_timeout,
-                                 pkey=pkey,
-                                 channel_timeout=ssh_channel_timeout)
+                raise exceptions.ServerUnreachable()
+        self.ssh_client = ssh.Client(ip_address, username, password,
+                                     ssh_timeout, pkey=pkey,
+                                     channel_timeout=ssh_channel_timeout)
 
     def validate_authentication(self):
         """Validate ssh connection and authentication
