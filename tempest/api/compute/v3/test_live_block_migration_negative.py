@@ -39,7 +39,7 @@ class LiveBlockMigrationV3NegativeTest(base.BaseV3ComputeAdminTest):
     def _migrate_server_to(self, server_id, dest_host):
         _resp, body = self.admin_servers_client.live_migrate_server(
             server_id, dest_host,
-            self.config.compute_feature_enabled.
+            CONF.compute_feature_enabled.
             block_migration_for_live_migration)
         return body
 
