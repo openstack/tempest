@@ -130,7 +130,10 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 objlist = container_client.list_all_container_objects(cont)
                 # delete every object in the container
                 for obj in objlist:
-                    object_client.delete_object(cont, obj['name'])
+                    try:
+                        object_client.delete_object(cont, obj['name'])
+                    except exceptions.NotFound:
+                        pass
                 container_client.delete_container(cont)
             except exceptions.NotFound:
                 pass
