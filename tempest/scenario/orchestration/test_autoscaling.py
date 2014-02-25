@@ -15,10 +15,7 @@ import time
 
 from tempest import config
 from tempest.scenario import manager
-from tempest.test import attr
-from tempest.test import call_until_true
-from tempest.test import services
-from tempest.test import skip_because
+from tempest import test
 
 CONF = config.CONF
 
@@ -64,9 +61,9 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
         if not CONF.orchestration.keypair_name:
             self.set_resource('stack', self.stack)
 
-    @skip_because(bug="1257575")
-    @attr(type='slow')
-    @services('orchestration', 'compute')
+    @test.skip_because(bug="1257575")
+    @test.attr(type='slow')
+    @test.services('orchestration', 'compute')
     def test_scale_up_then_down(self):
 
         self.assign_keypair()
@@ -98,8 +95,8 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
             return self.server_count
 
         def assertScale(from_servers, to_servers):
-            call_until_true(lambda: server_count() == to_servers,
-                            timeout, interval)
+            test.call_until_true(lambda: server_count() == to_servers,
+                                 timeout, interval)
             self.assertEqual(to_servers, self.server_count,
                              'Failed scaling from %d to %d servers. '
                              'Current server count: %s' % (

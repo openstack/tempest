@@ -20,9 +20,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import attr
-from tempest.test import call_until_true
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 
@@ -355,9 +353,9 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 return not should_succeed
             return should_succeed
 
-        return call_until_true(ping_remote,
-                               CONF.compute.ping_timeout,
-                               1)
+        return test.call_until_true(ping_remote,
+                                    CONF.compute.ping_timeout,
+                                    1)
 
     def _check_connectivity(self, access_point, ip, should_succeed=True):
         if should_succeed:
@@ -460,8 +458,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         subnet_id = tenant.subnet.id
         self.assertIn((subnet_id, server_ip, mac_addr), port_detail_list)
 
-    @attr(type='smoke')
-    @services('compute', 'network')
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
     def test_cross_tenant_traffic(self):
         try:
             # deploy new tenant
@@ -479,8 +477,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                 self._log_console_output(servers=tenant.servers)
             raise
 
-    @attr(type='smoke')
-    @services('compute', 'network')
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
     def test_in_tenant_traffic(self):
         try:
             self._create_tenant_servers(self.primary_tenant, num=1)

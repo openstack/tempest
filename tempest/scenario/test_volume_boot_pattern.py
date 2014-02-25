@@ -14,7 +14,7 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 
@@ -127,7 +127,7 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
         actual = self._get_content(ssh_client)
         self.assertEqual(expected, actual)
 
-    @services('compute', 'volume', 'image')
+    @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
         self._create_loginable_secgroup_rule_nova()

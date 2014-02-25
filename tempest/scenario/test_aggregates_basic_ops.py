@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.common import tempest_fixtures as fixtures
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
@@ -107,7 +107,7 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
     def test_aggregate_basic_ops(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         az = 'foo_zone'
-        aggregate_name = rand_name('aggregate-scenario')
+        aggregate_name = data_utils.rand_name('aggregate-scenario')
         aggregate = self._create_aggregate(name=aggregate_name,
                                            availability_zone=az)
 
@@ -119,7 +119,7 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
         self._check_aggregate_details(aggregate, aggregate_name, az, [host],
                                       metadata)
 
-        aggregate_name = rand_name('renamed-aggregate-scenario')
+        aggregate_name = data_utils.rand_name('renamed-aggregate-scenario')
         aggregate = self._update_aggregate(aggregate, aggregate_name, None)
 
         additional_metadata = {'foo': 'bar'}

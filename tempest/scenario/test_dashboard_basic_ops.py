@@ -19,7 +19,7 @@ from lxml import html
 
 from tempest import config
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 
@@ -69,7 +69,7 @@ class TestDashboardBasicOps(manager.OfficialClientTest):
         response = self.opener.open(CONF.dashboard.dashboard_url)
         self.assertIn('Overview', response.read())
 
-    @services('dashboard')
+    @test.services('dashboard')
     def test_basic_scenario(self):
         self.check_login_page()
         self.user_login()
