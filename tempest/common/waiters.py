@@ -42,7 +42,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
     timeout = client.build_timeout + extra_timeout
     while True:
         # NOTE(afazekas): Now the BUILD status only reached
-        # between the UNKOWN->ACTIVE transition.
+        # between the UNKNOWN->ACTIVE transition.
         # TODO(afazekas): enumerate and validate the stable status set
         if status == 'BUILD' and server_status != 'UNKNOWN':
             return
