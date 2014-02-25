@@ -105,6 +105,7 @@ class AdminClientManager(object):
             for tenant in tenant_list:
                 if tenant.name == tenant_name:
                     tenant_id = tenant.id
+                    break
 
         try:
             email = "%s@test.com" % username
@@ -113,7 +114,12 @@ class AdminClientManager(object):
                                               email=email,
                                               tenant_id=tenant_id)
         except keystone_exception.Conflict:
-            pass
+            # if already exist, use existing user but set password
+            user_list = self.identity_client.users.list()
+            for user in user_list:
+                if user.name == username:
+                    self.identity_client.users.update_password(user, password)
+                    break
 
     def create_flavors(self):
         LOG.debug("Creating flavors")
@@ -319,6 +325,9 @@ def configure_tempest(sample=None, out=None, query=False, create=False,
         assert len(keyparts) == 2, keyparts
         conf.set(keyparts[0], keyparts[1], overrides[i + 1])
         i += 2
+    if not conf.is_modified("identity", "uri_v3"):
+        uri =  conf.get("identity", "uri")
+        conf.set("identity", "uri_v3", uri.replace("v2.0", "v3"))
     services = conf.get_services(create)
     if create:
         if image is None:
@@ -333,7 +342,7 @@ def configure_tempest(sample=None, out=None, query=False, create=False,
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser("Generate the tempest.conf file")
-    parser.add_argument('--query', action='store_true', default=False,
+    parser.add_argument('--query', action='store_true', default=True,
                         help='query the endpoint for services')
     parser.add_argument('--create', action='store_true', default=False,
                         help='create default tempest resources')
