@@ -12,6 +12,8 @@ lock_path=/tmp
 
 default_log_levels=tempest.stress=INFO,amqplib=WARN,sqlalchemy=WARN,boto=WARN,suds=INFO,keystone=INFO,eventlet.wsgi.server=WARN
 
+debug=True
+
 [identity]
 # This section contains configuration options that a variety of Tempest
 # test clients use when authenticating with different user/tenant
@@ -383,7 +385,10 @@ login_url = 'http://localhost/auth/login/'
 
 [scenario]
 # Directory containing image files
-img_dir = /opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
+img_dir = etc
+
+# QCOW2 image file name (string value)
+qcow2_img_file=cirros-0.3.1-x86_64-disk.img
 
 # AMI image file name
 ami_img_file = cirros-0.3.1-x86_64-blank.img
@@ -406,6 +411,8 @@ large_ops_number = 0
 enabled = True
 # directory where python client binaries are located
 cli_dir = /usr/local/bin
+# Whether the tempest run location has access to the *-manage commands.
+has_manage=False
 # Number of seconds to wait on a CLI timeout
 timeout = 15
 

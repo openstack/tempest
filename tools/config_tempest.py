@@ -22,9 +22,13 @@ import keystoneclient.v2_0.client as keystone_client
 import logging
 import neutronclient.v2_0.client as neutron_client
 import novaclient.client as nova_client
+import os
+import shutil
+import subprocess
 import sys
 import tempfile
 import urllib2
+import urlparse
 
 LOG = logging.getLogger(__name__)
 
@@ -105,6 +109,7 @@ class AdminClientManager(object):
             for tenant in tenant_list:
                 if tenant.name == tenant_name:
                     tenant_id = tenant.id
+                    LOG.debug("Tenant %s exists: %s" % (tenant_name, tenant_id))
                     break
 
         try:
@@ -118,10 +123,12 @@ class AdminClientManager(object):
             user_list = self.identity_client.users.list()
             for user in user_list:
                 if user.name == username:
+                    LOG.debug("User %s existed. Setting password to %s" %
+                              (username, password))
                     self.identity_client.users.update_password(user, password)
                     break
 
-    def create_flavors(self):
+    def do_flavors(self, create):
         LOG.debug("Creating flavors")
         flavor_id = None
         flavor_alt_id = None
@@ -135,11 +142,11 @@ class AdminClientManager(object):
                 max_id = max(max_id, int(flavor.id))
             except ValueError:
                 pass
-        if not flavor_id:
+        if create and not flavor_id:
             flavor = self.compute_client.flavors.create("m1.nano", 64, 1, 0,
                                                         flavorid=max_id + 1)
             flavor_id = flavor.id
-        if not flavor_alt_id:
+        if create and not flavor_alt_id:
             flavor = self.compute_client.flavors.create("m1.micro", 128, 1, 0,
                                                         flavorid=max_id + 2)
             flavor_alt_id = flavor.id
@@ -156,7 +163,7 @@ class AdminClientManager(object):
                                                data=data,
                                                is_public="true")
 
-    def create_images(self, path):
+    def do_images(self, path, create):
         LOG.debug("Creating images")
         name = path[path.rfind('/') + 1:]
         name_alt = name + "_alt"
@@ -167,7 +174,12 @@ class AdminClientManager(object):
                 image_id = image.id
             if image.name == name_alt:
                 image_alt_id = image.id
-        if not (image_id and image_alt_id):
+        if create and not (image_id and image_alt_id):
+            qcow2_img_path = "%s/%s" % (self.conf.get("scenario", "img_dir"),
+                                        self.conf.get("scenario",
+                                                      "qcow2_img_file"))
+            # Make sure image location is writable beforeuploading
+            open(qcow2_img_path, "w")
             if path.startswith("http:") or path.startswith("https:"):
                 request = urllib2.urlopen(path)
                 with tempfile.NamedTemporaryFile() as data:
@@ -182,17 +194,19 @@ class AdminClientManager(object):
                         image_id = self.upload_image(name, data).id
                     if not image_alt_id:
                         image_alt_id = self.upload_image(name_alt, data).id
+                    shutil.copyfile(data.name, qcow2_img_path)
             else:
                 with open(path) as data:
                     if not image_id:
                         image_id = self.upload_image(name, data).id
                     if not image_alt_id:
                         image_alt_id = self.upload_image(name_alt, data).id
+                shutil.copyfile(path, qcow2_img_path)
 
         self.conf.set('compute', 'image_ref', image_id)
         self.conf.set('compute', 'image_ref_alt', image_alt_id)
 
-    def set_networks(self, has_neutron):
+    def do_networks(self, has_neutron, create):
         if has_neutron:
             for router in self.network_client.list_routers()['routers']:
                 if "external_gateway_info" in router:
@@ -234,17 +248,24 @@ class TempestConf():
             equal = stripped.find('=')
             key = stripped[:equal].strip()
             value = stripped[equal + 1:].strip()
+            if (value and
+                value[0] == value[-1] and
+                value.startswith(("\"", "'"))
+                ):
+                value = value[1:-1]
             section[key] = (value, index)
 
-    def write(self, conf_file):
+    def validate_and_write(self, conf_file):
         for section in self.modified.values():
             for (key, (value, index)) in section.iteritems():
                 if value.strip() != value:
                     value = '"%s"' % value
                 self.lines[index] = "%s=%s\n" % (key, value)
-        with open(conf_file, "w") as out:
+        with tempfile.NamedTemporaryFile() as out:
             for line in self.lines:
                 out.write(line)
+            out.flush()
+            shutil.copyfile(out.name, conf_file)
 
     def get(self, section, key):
         if key in self.modified[section]:
@@ -252,8 +273,10 @@ class TempestConf():
         return self.sections[section][key][0]
 
     def set(self, section, key, value):
+        assert isinstance(value, str) or isinstance(value, unicode),\
+         "Section: %s Key: %s Value: %s" % (section, key, value)
         (_, index) = self.sections[section][key]
-        self.modified[section][key] = (value, index)
+        self.modified[section][key] = (str(value), index)
 
     def is_modified(self, section, key):
         return key in self.modified[section]
@@ -302,17 +325,50 @@ class TempestConf():
         self.set_service('ceilometer', 'telemetry', services)
         self.set_service('cinder', 'volume', services)
 
-    def create_resources(self, image, has_neutron):
+    def do_resources(self, image, has_neutron, create):
         LOG.debug("Creating resources")
         manager = AdminClientManager(self, has_neutron)
-        manager.create_users_and_tenants()
-        manager.create_flavors()
-        manager.create_images(image)
-        manager.set_networks(has_neutron)
+        if create:
+            manager.create_users_and_tenants()
+        manager.do_flavors(create)
+        manager.do_images(image, create)
+        manager.do_networks(has_neutron, create)
+        
+    def set_paths(self, services, query):
+        if 'ec2' in services and query:
+            self.set('boto', 'ec2_url', services['ec2'][0]['publicURL'])
+        if 's3' in services and query:
+            self.set('boto', 's3_url', services['s3'][0]['publicURL'])
+        if not self.is_modified('cli', 'cli_dir'):
+            devnull = open(os.devnull, 'w')
+            try:
+                path = subprocess.check_output(["which", "nova"],
+                                               stderr=devnull)
+                self.set('cli', 'cli_dir', os.path.dirname(path.strip()))
+            except:
+                self.set('cli', 'enabled', 'False')
+            try:
+                subprocess.check_output(["which", "nova-manage"],
+                                        stderr=devnull)
+                self.set('cli', 'has_manage', 'True')
+            except:
+                self.set('cli', 'has_manage', 'False')
+        uri = self.get('identity', 'uri')
+        base = uri[:uri.rfind(':')]
+        assert base.startswith('http:') or base.startswith('https:')
+        if query:
+            has_horizon = True
+            try:
+                urllib2.urlopen(base)
+            except:
+                has_horizon = False
+            self.set('service_available', 'horizon', str(has_horizon))
+            self.set('dashboard', 'dashboard_url', base + '/')
+            self.set('dashboard', 'login_url', base + '/auth/login/')
+        
 
-
-def configure_tempest(sample=None, out=None, query=False, create=False,
-                      overrides=[], image=None, patch=None):
+def configure_tempest(sample=None, out=None, no_query=False, create=False,
+                      overrides=[], image=None, patch=None, non_admin=False):
     LOG.debug("Configuring from %s to %s" % (sample, out))
     conf = TempestConf(sample)
     if patch:
@@ -328,22 +384,22 @@ def configure_tempest(sample=None, out=None, query=False, create=False,
     if not conf.is_modified("identity", "uri_v3"):
         uri =  conf.get("identity", "uri")
         conf.set("identity", "uri_v3", uri.replace("v2.0", "v3"))
-    services = conf.get_services(create)
-    if create:
-        if image is None:
-            image = "http://download.cirros-cloud.net/0.3.1/" \
-                    "cirros-0.3.1-x86_64-disk.img"
-        conf.create_resources(image, "network" in services)
-    if query:
+    services = conf.get_services(not non_admin)
+    if image is None:
+        image = "http://download.cirros-cloud.net/0.3.1/" \
+                "cirros-0.3.1-x86_64-disk.img"
+    conf.do_resources(image, "network" in services, create)
+    if not no_query:
         conf.set_service_available(services)
+    conf.set_paths(services, not no_query)
     LOG.debug("Writing conf file")
-    conf.write(out)
+    conf.validate_and_write(out)
 
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser("Generate the tempest.conf file")
-    parser.add_argument('--query', action='store_true', default=True,
-                        help='query the endpoint for services')
+    parser.add_argument('--no-query', action='store_true', default=False,
+                        help='Do not query the endpoint for services')
     parser.add_argument('--create', action='store_true', default=False,
                         help='create default tempest resources')
     parser.add_argument('--sample', default="etc/tempest.conf.sample",
@@ -365,6 +421,8 @@ if __name__ == "__main__":
                                  identity.password mypass""")
     parser.add_argument('--debug', action='store_true', default=False,
                         help='Send log to stdout')
+    parser.add_argument('--non-admin', action='store_true', default=False,
+                        help='Run without admin creds')
     parser.add_argument('--image', default=None,
                         help="""an image to be uploaded to glance. The name of
                                 the image is the leaf name of the path which
@@ -383,6 +441,6 @@ if __name__ == "__main__":
         LOG.setLevel(logging.DEBUG)
         LOG.addHandler(ch)
 
-    configure_tempest(sample=ns.sample, out=ns.out, query=ns.query,
+    configure_tempest(sample=ns.sample, out=ns.out, no_query=ns.no_query,
                       create=ns.create, overrides=ns.overrides, image=ns.image,
-                      patch=ns.patch)
+                      patch=ns.patch, non_admin=ns.non_admin)

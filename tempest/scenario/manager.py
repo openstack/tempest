@@ -465,6 +465,14 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             private_key = self.keypair.private_key
         return RemoteClient(ip, username, pkey=private_key)
 
+    def glance_image_create(self):
+        qcow2_img_path = self.config.scenario.img_dir + "/" + \
+            self.config.scenario.qcow2_img_file
+        LOG.debug("paths: img: %s" % qcow2_img_path)
+        self.image = self._image_create('scenario-img', 'bare',
+                                        path=qcow2_img_path,
+                                        properties={'disk_format': 'qcow2'})
+
 
 class NetworkScenarioTest(OfficialClientTest):
     """

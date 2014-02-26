@@ -64,24 +64,6 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         image.update(data=image_file)
         return image.id
 
-    def glance_image_create(self):
-        aki_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.aki_img_file
-        ari_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ari_img_file
-        ami_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ami_img_file
-        LOG.debug("paths: ami: %s, ari: %s, aki: %s"
-                  % (ami_img_path, ari_img_path, aki_img_path))
-        kernel_id = self._image_create('scenario-aki', 'aki', aki_img_path)
-        ramdisk_id = self._image_create('scenario-ari', 'ari', ari_img_path)
-        properties = {
-            'properties': {'kernel_id': kernel_id, 'ramdisk_id': ramdisk_id}
-        }
-        self.image = self._image_create('scenario-ami', 'ami',
-                                        path=ami_img_path,
-                                        properties=properties)
-
     def nova_keypair_add(self):
         self.keypair = self.create_keypair()
 

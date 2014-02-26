@@ -17,8 +17,11 @@
 
 import subprocess
 
+from oslo.config import cfg
 import tempest.cli
 from tempest.openstack.common import log as logging
+
+CONF = cfg.CONF
 
 
 LOG = logging.getLogger(__name__)
@@ -35,6 +38,12 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
     * initially just check return codes, and later test command outputs
 
     """
+
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.cli.has_manage:
+            raise cls.skipException("nova-manage not available")
+        super(SimpleReadOnlyNovaManageTest, cls).setUpClass()
 
     def test_admin_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
