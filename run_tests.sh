@@ -84,6 +84,11 @@ function run_tests {
       return $?
   fi
 
+  if [ $coverage -eq 1 ]; then
+      ${wrapper} python setup.py test --coverage
+      return $?
+  fi
+
   if [ $serial -eq 1 ]; then
       ${wrapper} testr run --subunit $testrargs | ${wrapper} subunit-2to1 | ${wrapper} tools/colorizer.py
   else
@@ -135,10 +140,6 @@ fi
 if [ $just_pep8 -eq 1 ]; then
     run_pep8
     exit
-fi
-
-if [ $coverage -eq 1 ]; then
-    $testrargs = "--coverage $testrargs"
 fi
 
 run_tests
