@@ -38,3 +38,15 @@ def log_ip_ns():
         for table in ['filter', 'nat', 'mangle']:
             LOG.info('ns(%s) table(%s):\n%s', ns, table,
                      commands.iptables_ns(ns, table))
+
+
+def log_ovs_db():
+    if not CONF.debug.enable or not CONF.service_available.neutron:
+        return
+    db_dump = commands.ovs_db_dump()
+    LOG.info("OVS DB:\n" + db_dump)
+
+
+def log_net_debug():
+    log_ip_ns()
+    log_ovs_db()

@@ -199,7 +199,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         except Exception:
             LOG.exception('Tenant connectivity check failed')
             self._log_console_output(servers=self.servers.keys())
-            debug.log_ip_ns()
+            debug.log_net_debug()
             raise
 
     def _create_and_associate_floating_ips(self):
@@ -231,7 +231,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                 ex_msg += ": " + msg
             LOG.exception(ex_msg)
             self._log_console_output(servers=self.servers.keys())
-            debug.log_ip_ns()
+            debug.log_net_debug()
             raise
 
     def _disassociate_floating_ips(self):
