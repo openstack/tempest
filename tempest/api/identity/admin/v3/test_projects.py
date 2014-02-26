@@ -16,7 +16,7 @@
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
@@ -28,7 +28,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(
             exceptions.NotFound, self.client.get_project, project_id)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_project_list_delete(self):
         # Create several projects and delete them
         for _ in xrange(3):
@@ -42,7 +42,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         resp, get_project = self.client.get_project(project['id'])
         self.assertIn(get_project, list_projects)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_project_create_with_description(self):
         # Create project with a description
         project_name = data_utils.rand_name('project-')
@@ -61,7 +61,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(desc2, project_desc, 'Description does not appear'
                          'to be set')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_project_create_enabled(self):
         # Create a project that is enabled
         project_name = data_utils.rand_name('project-')
@@ -77,7 +77,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         en2 = body['enabled']
         self.assertTrue(en2, 'Enable should be True in lookup')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_project_create_not_enabled(self):
         # Create a project that is not enabled
         project_name = data_utils.rand_name('project-')
@@ -94,7 +94,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual('false', str(en2).lower(),
                          'Enable should be False in lookup')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_project_update_name(self):
         # Update name attribute of a project
         p_name1 = data_utils.rand_name('project-')
@@ -117,7 +117,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(p_name1, resp1_name)
         self.assertEqual(resp2_name, resp3_name)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_project_update_desc(self):
         # Update description attribute of a project
         p_name = data_utils.rand_name('project-')
@@ -142,7 +142,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(p_desc, resp1_desc)
         self.assertEqual(resp2_desc, resp3_desc)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_project_update_enable(self):
         # Update the enabled attribute of a project
         p_name = data_utils.rand_name('project-')
@@ -167,7 +167,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual('false', str(resp1_en).lower())
         self.assertEqual(resp2_en, resp3_en)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_associate_user_to_project(self):
         #Associate a user to a project
         #Create a Project
@@ -195,59 +195,6 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(project['id'],
                          new_user_get['project_id'])
         self.assertEqual(u_email, new_user_get['email'])
-
-    @attr(type=['negative', 'gate'])
-    def test_list_projects_by_unauthorized_user(self):
-        # Non-admin user should not be able to list projects
-        self.assertRaises(exceptions.Unauthorized,
-                          self.non_admin_client.list_projects)
-
-    @attr(type=['negative', 'gate'])
-    def test_project_create_duplicate(self):
-        # Project names should be unique
-        project_name = data_utils.rand_name('project-dup-')
-        resp, project = self.client.create_project(project_name)
-        self.data.projects.append(project)
-
-        self.assertRaises(
-            exceptions.Conflict, self.client.create_project, project_name)
-
-    @attr(type=['negative', 'gate'])
-    def test_create_project_by_unauthorized_user(self):
-        # Non-admin user should not be authorized to create a project
-        project_name = data_utils.rand_name('project-')
-        self.assertRaises(
-            exceptions.Unauthorized, self.non_admin_client.create_project,
-            project_name)
-
-    @attr(type=['negative', 'gate'])
-    def test_create_project_with_empty_name(self):
-        # Project name should not be empty
-        self.assertRaises(exceptions.BadRequest, self.client.create_project,
-                          name='')
-
-    @attr(type=['negative', 'gate'])
-    def test_create_projects_name_length_over_64(self):
-        # Project name length should not be greater than 64 characters
-        project_name = 'a' * 65
-        self.assertRaises(exceptions.BadRequest, self.client.create_project,
-                          project_name)
-
-    @attr(type=['negative', 'gate'])
-    def test_project_delete_by_unauthorized_user(self):
-        # Non-admin user should not be able to delete a project
-        project_name = data_utils.rand_name('project-')
-        resp, project = self.client.create_project(project_name)
-        self.data.projects.append(project)
-        self.assertRaises(
-            exceptions.Unauthorized, self.non_admin_client.delete_project,
-            project['id'])
-
-    @attr(type=['negative', 'gate'])
-    def test_delete_non_existent_project(self):
-        # Attempt to delete a non existent project should fail
-        self.assertRaises(exceptions.NotFound, self.client.delete_project,
-                          'junk_Project_123456abc')
 
 
 class ProjectsTestXML(ProjectsTestJSON):
