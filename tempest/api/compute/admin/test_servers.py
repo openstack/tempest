@@ -118,26 +118,6 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
                          map(lambda x: x['id'], nonexistent_servers))
 
     @test.attr(type='gate')
-    def test_admin_delete_servers_of_others(self):
-        # Administrator can delete servers of others
-        _, server = self.create_test_server(wait_until='ACTIVE')
-        resp, _ = self.client.delete_server(server['id'])
-        self.assertEqual('204', resp['status'])
-        self.servers_client.wait_for_server_termination(server['id'])
-
-    @test.attr(type='gate')
-    def test_delete_server_while_in_error_state(self):
-        # Delete a server while it's VM state is error
-        resp, server = self.create_test_server(wait_until='ACTIVE')
-        resp, body = self.client.reset_state(server['id'], state='error')
-        self.assertEqual(202, resp.status)
-        # Verify server's state
-        resp, server = self.client.get_server(server['id'])
-        self.assertEqual(server['status'], 'ERROR')
-        resp, _ = self.client.delete_server(server['id'])
-        self.assertEqual('204', resp['status'])
-
-    @test.attr(type='gate')
     def test_reset_state_server(self):
         # Reset server's state to 'error'
         resp, server = self.client.reset_state(self.s1_id)
