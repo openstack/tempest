@@ -80,3 +80,25 @@ class InterfacesClientJSON(RestClient):
                 raise exceptions.TimeoutException(message)
 
         return resp, body
+
+    def add_fixed_ip(self, server_id, network_id):
+        """Add a fixed IP to input server instance."""
+        post_body = json.dumps({
+            'addFixedIp': {
+                'networkId': network_id
+            }
+        })
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        return resp, body
+
+    def remove_fixed_ip(self, server_id, ip_address):
+        """Remove input fixed IP from input server instance."""
+        post_body = json.dumps({
+            'removeFixedIp': {
+                'address': ip_address
+            }
+        })
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        return resp, body

@@ -123,6 +123,33 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         _ifs = self._test_delete_interface(server, ifs)
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
+    @attr(type='gate')
+    def test_add_remove_fixed_ip(self):
+        # Add and Remove the fixed IP to server.
+        server, ifs = self._create_server_get_interfaces()
+        interface_count = len(ifs)
+        self.assertTrue(interface_count > 0)
+        self._check_interface(ifs[0])
+        network_id = ifs[0]['net_id']
+        resp, body = self.client.add_fixed_ip(server['id'],
+                                              network_id)
+        self.assertEqual(202, resp.status)
+        # Remove the fixed IP from server.
+        server_resp, server_detail = self.os.servers_client.get_server(
+            server['id'])
+        # Get the Fixed IP from server.
+        fixed_ip = None
+        for ip_set in server_detail['addresses']:
+            for ip in server_detail['addresses'][ip_set]:
+                if ip['OS-EXT-IPS:type'] == 'fixed':
+                    fixed_ip = ip['addr']
+                    break
+            if fixed_ip is not None:
+                break
+        resp, body = self.client.remove_fixed_ip(server['id'],
+                                                 fixed_ip)
+        self.assertEqual(202, resp.status)
+
 
 class AttachInterfacesTestXML(AttachInterfacesTestJSON):
     _interface = 'xml'
