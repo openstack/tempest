@@ -15,6 +15,7 @@
 
 from __future__ import print_function
 
+import logging as std_logging
 import os
 
 from oslo.config import cfg
@@ -875,6 +876,9 @@ class TempestConfigPrivate(object):
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
             self.compute_admin.tenant_name = self.identity.admin_tenant_name
+
+        if parse_conf:
+            cfg.CONF.log_opt_values(LOG, std_logging.DEBUG)
 
 
 class TempestConfigProxy(object):
