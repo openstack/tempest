@@ -89,13 +89,24 @@ class AdminClientManager(object):
         conf = self.conf
         self.create_user_with_tenant(conf.get('identity', 'username'),
                                      conf.get('identity', 'password'),
-                                     conf.get('identity', 'tenant_name'))
+                                     conf.get('identity', 'tenant_name'),
+                                              add_admin_user=True)
 
         self.create_user_with_tenant(conf.get('identity', 'alt_username'),
                                      conf.get('identity', 'alt_password'),
                                      conf.get('identity', 'alt_tenant_name'))
 
-    def create_user_with_tenant(self, username, password, tenant_name):
+    def add_admin_user(self, tenant_id):
+        client = self.identity_client
+        admin_user = self.conf.get('identity', 'admin_username')
+        admin_role_id = [role.id for role in client.roles.list() 
+                         if role.name == 'admin'][0]
+        admin_user_id = [user.id for user in client.users.list()
+                         if user.name == admin_user][0]
+        client.tenants.add_user(tenant_id, admin_user_id, admin_role_id)
+
+    def create_user_with_tenant(self, username, password, tenant_name,
+                                add_admin_user=False):
         # Try to create the necessary tenant
         tenant_id = None
         try:
@@ -103,6 +114,8 @@ class AdminClientManager(object):
             tenant = self.identity_client.tenants.create(tenant_name,
                                                          tenant_description)
             tenant_id = tenant.id
+            if add_admin_user:
+                self.add_admin_user(tenant_id)
         except keystone_exception.Conflict:
             # if already exist, use existing tenant
             tenant_list = self.identity_client.tenants.list()
