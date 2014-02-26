@@ -66,8 +66,9 @@ class SecGroupTest(base.BaseSecGroupTest):
         protocols = ['tcp', 'udp', 'icmp']
         for protocol in protocols:
             resp, rule_create_body = self.client.create_security_group_rule(
-                group_create_body['security_group']['id'],
-                protocol=protocol
+                security_group_id=group_create_body['security_group']['id'],
+                protocol=protocol,
+                direction='ingress'
             )
             self.assertEqual('201', resp['status'])
             self.addCleanup(self._delete_security_group_rule,
@@ -99,7 +100,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         port_range_min = 77
         port_range_max = 77
         resp, rule_create_body = self.client.create_security_group_rule(
-            group_create_body['security_group']['id'],
+            security_group_id=group_create_body['security_group']['id'],
             direction=direction,
             protocol=protocol,
             port_range_min=port_range_min,

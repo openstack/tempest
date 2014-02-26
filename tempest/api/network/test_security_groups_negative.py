@@ -57,10 +57,10 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
 
         #Create rule with bad protocol name
         pname = 'bad_protocol_name'
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_security_group_rule,
-                          group_create_body['security_group']['id'],
-                          protocol=pname)
+        self.assertRaises(
+            exceptions.BadRequest, self.client.create_security_group_rule,
+            security_group_id=group_create_body['security_group']['id'],
+            protocol=pname, direction='ingress')
 
     @test.attr(type=['negative', 'gate'])
     def test_create_security_group_rule_with_invalid_ports(self):
@@ -72,12 +72,11 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
                   (80, 65536, 'Invalid value for port 65536'),
                   (-16, 65536, 'Invalid value for port')]
         for pmin, pmax, msg in states:
-            ex = self.assertRaises(exceptions.BadRequest,
-                                   self.client.create_security_group_rule,
-                                   group_create_body['security_group']['id'],
-                                   protocol='tcp',
-                                   port_range_min=pmin,
-                                   port_range_max=pmax)
+            ex = self.assertRaises(
+                exceptions.BadRequest, self.client.create_security_group_rule,
+                security_group_id=group_create_body['security_group']['id'],
+                protocol='tcp', port_range_min=pmin, port_range_max=pmax,
+                direction='ingress')
             self.assertIn(msg, str(ex))
 
     @test.attr(type=['negative', 'smoke'])
@@ -86,7 +85,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         name = 'default'
         self.assertRaises(exceptions.Conflict,
                           self.client.create_security_group,
-                          name)
+                          name=name)
 
     @test.attr(type=['negative', 'smoke'])
     def test_create_security_group_rule_with_non_existent_security_group(self):
@@ -94,7 +93,8 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
         non_existent_sg = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound,
                           self.client.create_security_group_rule,
-                          non_existent_sg)
+                          security_group_id=non_existent_sg,
+                          direction='ingress')
 
 
 class NegativeSecGroupTestXML(NegativeSecGroupTest):

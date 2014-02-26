@@ -154,42 +154,12 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.loads(body)
         return resp, body
 
-    def create_security_group(self, name, **kwargs):
-        post_body = {
-            'security_group': {
-                'name': name,
-            }
-        }
-        for key, value in kwargs.iteritems():
-            post_body['security_group'][str(key)] = value
-        body = json.dumps(post_body)
-        uri = '%s/security-groups' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
     def update_floating_ip(self, floating_ip_id, **kwargs):
         post_body = {
             'floatingip': kwargs}
         body = json.dumps(post_body)
         uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
         resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def create_security_group_rule(self, secgroup_id,
-                                   direction='ingress', **kwargs):
-        post_body = {
-            'security_group_rule': {
-                'direction': direction,
-                'security_group_id': secgroup_id
-            }
-        }
-        for key, value in kwargs.iteritems():
-            post_body['security_group_rule'][str(key)] = value
-        body = json.dumps(post_body)
-        uri = '%s/security-group-rules' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
         body = json.loads(body)
         return resp, body
 
