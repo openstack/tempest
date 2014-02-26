@@ -172,6 +172,11 @@ class IdentityClientJSON(rest_client.RestClient):
         resp, body = self.put('users/%s/enabled' % user_id, put_body)
         return resp, self._parse_resp(body)
 
+    def get_token(self, token_id):
+        """Get token details."""
+        resp, body = self.get("tokens/%s" % token_id)
+        return resp, self._parse_resp(body)
+
     def delete_token(self, token_id):
         """Delete a token."""
         return self.delete("tokens/%s" % token_id)
