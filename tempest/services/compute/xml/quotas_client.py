@@ -124,3 +124,7 @@ class QuotasClientXML(rest_client.RestClient):
         body = xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body
+
+    def delete_quota_set(self, tenant_id):
+        """Delete the tenant's quota set."""
+        return self.delete('os-quota-sets/%s' % str(tenant_id))
