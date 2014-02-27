@@ -25,7 +25,7 @@ class InstanceActionsV3Test(base.BaseV3ComputeTest):
         super(InstanceActionsV3Test, cls).setUpClass()
         cls.client = cls.servers_client
         resp, server = cls.create_test_server(wait_until='ACTIVE')
-        cls.request_id = resp['x-compute-request-id']
+        cls.resp = resp
         cls.server_id = server['id']
 
     @test.attr(type='gate')
@@ -41,10 +41,12 @@ class InstanceActionsV3Test(base.BaseV3ComputeTest):
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
 
     @test.attr(type='gate')
+    @test.skip_because(bug="1281915")
     def test_get_instance_action(self):
         # Get the action details of the provided server
+        request_id = self.resp['x-compute-request-id']
         resp, body = self.client.get_instance_action(self.server_id,
-                                                     self.request_id)
+                                                     request_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(self.server_id, body['instance_uuid'])
         self.assertEqual('create', body['action'])
