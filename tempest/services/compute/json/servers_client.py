@@ -428,3 +428,11 @@ class ServersClientJSON(RestClient):
     def restore_soft_deleted_server(self, server_id, **kwargs):
         """Restore a soft-deleted server."""
         return self.action(server_id, 'restore', None, **kwargs)
+
+    def reset_network(self, server_id, **kwargs):
+        """Resets the Network of a server"""
+        return self.action(server_id, 'resetNetwork', None, **kwargs)
+
+    def inject_network_info(self, server_id, **kwargs):
+        """Inject the Network Info into server"""
+        return self.action(server_id, 'injectNetworkInfo', None, **kwargs)
