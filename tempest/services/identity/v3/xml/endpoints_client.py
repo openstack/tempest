@@ -67,6 +67,8 @@ class EndPointClientXML(rest_client.RestClient):
         """Create endpoint."""
         region = kwargs.get('region', None)
         enabled = kwargs.get('enabled', None)
+        if enabled is not None:
+            enabled = str(enabled).lower()
         create_endpoint = Element("endpoint",
                                   xmlns=XMLNS,
                                   service_id=service_id,
@@ -93,7 +95,7 @@ class EndPointClientXML(rest_client.RestClient):
         if region:
             endpoint.add_attr("region", region)
         if enabled is not None:
-            endpoint.add_attr("enabled", enabled)
+            endpoint.add_attr("enabled", str(enabled).lower())
         resp, body = self.patch('endpoints/%s' % str(endpoint_id), str(doc))
         body = self._parse_body(etree.fromstring(body))
         return resp, body

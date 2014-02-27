@@ -125,7 +125,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(interface2, endpoint['interface'])
         self.assertEqual(url2, endpoint['url'])
         self.assertEqual(region2, endpoint['region'])
-        self.assertEqual('False', str(endpoint['enabled']))
+        self.assertEqual('false', str(endpoint['enabled']).lower())
         self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
 
 
