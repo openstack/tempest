@@ -63,6 +63,25 @@ def attr(*args, **kwargs):
     return decorator
 
 
+def safe_setup(f):
+    """A decorator used to wrap the setUpClass for cleaning up resources
+       when setUpClass failed.
+    """
+
+    def decorator(cls):
+            try:
+                f(cls)
+            except Exception as se:
+                LOG.exception("setUpClass failed: %s" % se)
+                try:
+                    cls.tearDownClass()
+                except Exception as te:
+                    LOG.exception("tearDownClass failed: %s" % te)
+                raise se
+
+    return decorator
+
+
 def services(*args, **kwargs):
     """A decorator used to set an attr for each service used in a test case
 

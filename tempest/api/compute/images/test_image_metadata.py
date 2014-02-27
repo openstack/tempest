@@ -16,7 +16,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -24,14 +24,15 @@ CONF = config.CONF
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ImagesMetadataTestJSON, cls).setUpClass()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        cls.servers_client = cls.servers_client
         cls.client = cls.images_client
+        cls.image_id = None
 
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
@@ -45,7 +46,8 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        cls.client.delete_image(cls.image_id)
+        if cls.image_id:
+            cls.client.delete_image(cls.image_id)
         super(ImagesMetadataTestJSON, cls).tearDownClass()
 
     def setUp(self):
@@ -54,14 +56,14 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         resp, _ = self.client.set_image_metadata(self.image_id, meta)
         self.assertEqual(resp.status, 200)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_image_metadata(self):
         # All metadata key/value pairs for an image should be returned
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
         expected = {'key1': 'value1', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_set_image_metadata(self):
         # The metadata for the image should match the new values
         req_metadata = {'meta2': 'value2', 'meta3': 'value3'}
@@ -71,7 +73,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         resp, resp_metadata = self.client.list_image_metadata(self.image_id)
         self.assertEqual(req_metadata, resp_metadata)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_image_metadata(self):
         # The metadata for the image should match the updated values
         req_metadata = {'key1': 'alt1', 'key3': 'value3'}
@@ -82,14 +84,14 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         expected = {'key1': 'alt1', 'key2': 'value2', 'key3': 'value3'}
         self.assertEqual(expected, resp_metadata)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_image_metadata_item(self):
         # The value for a specific metadata key should be returned
         resp, meta = self.client.get_image_metadata_item(self.image_id,
                                                          'key2')
         self.assertEqual('value2', meta['key2'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_set_image_metadata_item(self):
         # The value provided for the given meta item should be set for
         # the image
@@ -100,7 +102,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         expected = {'key1': 'alt', 'key2': 'value2'}
         self.assertEqual(expected, resp_metadata)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_delete_image_metadata_item(self):
         # The metadata value/key pair should be deleted from the image
         resp, body = self.client.delete_image_metadata_item(self.image_id,

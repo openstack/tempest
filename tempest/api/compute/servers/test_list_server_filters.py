@@ -26,6 +26,7 @@ CONF = config.CONF
 class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ListServerFiltersTestJSON, cls).setUpClass()
         cls.client = cls.servers_client

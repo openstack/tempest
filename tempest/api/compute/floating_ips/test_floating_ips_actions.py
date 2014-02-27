@@ -24,10 +24,11 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     floating_ip = None
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(FloatingIPsTestJSON, cls).setUpClass()
         cls.client = cls.floating_ips_client
-        #cls.servers_client = cls.servers_client
+        cls.floating_ip_id = None
 
         # Server creation
         resp, server = cls.create_test_server(wait_until='ACTIVE')
@@ -40,7 +41,8 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
     @classmethod
     def tearDownClass(cls):
         # Deleting the floating IP which is created in this method
-        resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
+        if cls.floating_ip_id:
+            resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
         super(FloatingIPsTestJSON, cls).tearDownClass()
 
     @test.attr(type='gate')
