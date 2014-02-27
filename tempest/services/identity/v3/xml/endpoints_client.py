@@ -62,11 +62,19 @@ class EndPointClientXML(rest_client.RestClient):
         return resp, body
 
     def create_endpoint(self, service_id, interface, url, **kwargs):
-        """Create endpoint."""
+        """Create endpoint.
+
+        Normally this function wouldn't allow setting values that are not
+        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
+
+        """
         region = kwargs.get('region', None)
-        enabled = kwargs.get('enabled', None)
-        if enabled is not None:
-            enabled = str(enabled).lower()
+        if 'force_enabled' in kwargs:
+            enabled = kwargs['force_enabled']
+        else:
+            enabled = kwargs.get('enabled', None)
+            if enabled is not None:
+                enabled = str(enabled).lower()
         create_endpoint = common.Element("endpoint",
                                          xmlns=XMLNS,
                                          service_id=service_id,
@@ -79,8 +87,13 @@ class EndPointClientXML(rest_client.RestClient):
         return resp, body
 
     def update_endpoint(self, endpoint_id, service_id=None, interface=None,
-                        url=None, region=None, enabled=None):
-        """Updates an endpoint with given parameters."""
+                        url=None, region=None, enabled=None, **kwargs):
+        """Updates an endpoint with given parameters.
+
+        Normally this function wouldn't allow setting values that are not
+        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
+
+        """
         doc = common.Document()
         endpoint = common.Element("endpoint")
         doc.append(endpoint)
@@ -93,8 +106,12 @@ class EndPointClientXML(rest_client.RestClient):
             endpoint.add_attr("url", url)
         if region:
             endpoint.add_attr("region", region)
-        if enabled is not None:
+
+        if 'force_enabled' in kwargs:
+            endpoint.add_attr("enabled", kwargs['force_enabled'])
+        elif enabled is not None:
             endpoint.add_attr("enabled", str(enabled).lower())
+
         resp, body = self.patch('endpoints/%s' % str(endpoint_id), str(doc))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
