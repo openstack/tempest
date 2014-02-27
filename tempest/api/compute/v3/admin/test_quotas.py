@@ -110,3 +110,26 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
         resp, quota_set = self.adm_client.get_quota_set(tenant_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(quota_set['ram'], 5120)
+
+    @test.attr(type='gate')
+    def test_delete_quota(self):
+        # Admin can delete the resource quota set for a tenant
+        tenant_name = data_utils.rand_name('cpu_quota_tenant_')
+        tenant_desc = tenant_name + '-desc'
+        identity_client = self.os_adm.identity_client
+        _, tenant = identity_client.create_tenant(name=tenant_name,
+                                                  description=tenant_desc)
+        tenant_id = tenant['id']
+        self.addCleanup(identity_client.delete_tenant, tenant_id)
+        resp, quota_set_default = self.adm_client.get_quota_set(tenant_id)
+        self.assertEqual(200, resp.status)
+        ram_default = quota_set_default['ram']
+
+        self.adm_client.update_quota_set(tenant_id, ram='5120')
+        self.assertEqual(200, resp.status)
+        resp, _ = self.adm_client.delete_quota_set(tenant_id)
+        self.assertEqual(204, resp.status)
+
+        resp, quota_set_new = self.adm_client.get_quota_set(tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(ram_default, quota_set_new['ram'])
