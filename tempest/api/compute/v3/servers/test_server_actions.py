@@ -410,3 +410,16 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         resp, server = self.servers_client.start(self.server_id)
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
+                          'VNC Console feature is disabled')
+    @test.attr(type='gate')
+    def test_get_vnc_console(self):
+        # Get the VNC console
+        console_types = ['novnc', 'xvpvnc']
+        for console_type in console_types:
+            resp, body = self.servers_client.get_vnc_console(self.server_id,
+                                                             console_type)
+            self.assertEqual(200, resp.status)
+            self.assertEqual(console_type, body['type'])
+            self.assertNotEqual('', body['url'])

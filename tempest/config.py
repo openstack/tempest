@@ -263,7 +263,11 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('block_migrate_cinder_iscsi',
                 default=False,
                 help="Does the test environment block migration support "
-                     "cinder iSCSI volumes")
+                     "cinder iSCSI volumes"),
+    cfg.BoolOpt('vnc_console',
+                default=False,
+                help='Enable VNC console. This configuration value should '
+                     'be same as [nova.vnc]->vnc_enabled in nova.conf')
 ]
 
 

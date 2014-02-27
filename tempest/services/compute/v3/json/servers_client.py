@@ -423,3 +423,15 @@ class ServersV3ClientJSON(RestClient):
     def restore_soft_deleted_server(self, server_id, **kwargs):
         """Restore a soft-deleted server."""
         return self.action(server_id, 'restore', None, **kwargs)
+
+    def get_vnc_console(self, server_id, type):
+        """Get URL of VNC console."""
+        post_body = json.dumps({
+            "get_vnc_console": {
+                "type": type
+            }
+        })
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        body = json.loads(body)
+        return resp, body['console']
