@@ -41,6 +41,10 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
         if not CONF.service_available.nova:
             msg = ("%s skipped as Nova is not available" % cls.__name__)
             raise cls.skipException(msg)
+        if not CONF.cli.has_manage:
+            msg = ("%s skipped as *-manage commands not available"
+                   % cls.__name__)
+            raise cls.skipException(msg)
         super(SimpleReadOnlyNovaManageTest, cls).setUpClass()
 
     def test_admin_fake_action(self):

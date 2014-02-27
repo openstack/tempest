@@ -772,6 +772,11 @@ CLIGroup = [
     cfg.StrOpt('cli_dir',
                default='/usr/local/bin',
                help="directory where python client binaries are located"),
+    cfg.BoolOpt('has_manage',
+                default=True,
+                help=("Whether the tempest run location has access to the "
+                      "*-manage commands. In a pure blackbox environment "
+                      "it will not.")),
     cfg.IntOpt('timeout',
                default=15,
                help="Number of seconds to wait on a CLI timeout"),
