@@ -14,8 +14,8 @@
 #    under the License.
 
 from tempest.openstack.common import log as logging
-from tempest.test import attr
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest import test
+from tempest.thirdparty.boto import test as boto_test
 
 LOG = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def compare_volumes(a, b):
             a.size == b.size)
 
 
-class EC2VolumesTest(BotoTestCase):
+class EC2VolumesTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -33,7 +33,7 @@ class EC2VolumesTest(BotoTestCase):
         cls.client = cls.os.ec2api_client
         cls.zone = cls.client.get_good_zone()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_get_delete(self):
         # EC2 Create, get, delete Volume
         volume = self.client.create_volume(1, self.zone)
@@ -46,7 +46,7 @@ class EC2VolumesTest(BotoTestCase):
         self.client.delete_volume(volume.id)
         self.cancelResourceCleanUp(cuk)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_volume_from_snapshot(self):
         # EC2 Create volume from snapshot
         volume = self.client.create_volume(1, self.zone)

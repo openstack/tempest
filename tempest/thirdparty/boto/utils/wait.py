@@ -17,7 +17,7 @@ import re
 import time
 
 import boto.exception
-from testtools import TestCase
+import testtools
 
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -44,10 +44,11 @@ def state_wait(lfunction, final_set=set(), valid_set=None):
             return status
         dtime = time.time() - start_time
         if dtime > CONF.boto.build_timeout:
-            raise TestCase.failureException("State change timeout exceeded!"
-                                            '(%ds) While waiting'
-                                            'for %s at "%s"' %
-                                            (dtime, final_set, status))
+            raise testtools.TestCase\
+                .failureException("State change timeout exceeded!"
+                                  '(%ds) While waiting'
+                                  'for %s at "%s"' %
+                                  (dtime, final_set, status))
         time.sleep(CONF.boto.build_interval)
         old_status = status
         status = lfunction()
@@ -67,10 +68,11 @@ def re_search_wait(lfunction, regexp):
             return result
         dtime = time.time() - start_time
         if dtime > CONF.boto.build_timeout:
-            raise TestCase.failureException('Pattern find timeout exceeded!'
-                                            '(%ds) While waiting for'
-                                            '"%s" pattern in "%s"' %
-                                            (dtime, regexp, text))
+            raise testtools.TestCase\
+                .failureException('Pattern find timeout exceeded!'
+                                  '(%ds) While waiting for'
+                                  '"%s" pattern in "%s"' %
+                                  (dtime, regexp, text))
         time.sleep(CONF.boto.build_interval)
 
 
@@ -98,8 +100,8 @@ def wait_no_exception(lfunction, exc_class=None, exc_matcher=None):
         # Let the other exceptions propagate
         dtime = time.time() - start_time
         if dtime > CONF.boto.build_timeout:
-            raise TestCase.failureException("Wait timeout exceeded! (%ds)" %
-                                            dtime)
+            raise testtools.TestCase\
+                .failureException("Wait timeout exceeded! (%ds)" % dtime)
         time.sleep(CONF.boto.build_interval)
 
 
@@ -116,8 +118,8 @@ def wait_exception(lfunction):
             return exc
         dtime = time.time() - start_time
         if dtime > CONF.boto.build_timeout:
-            raise TestCase.failureException("Wait timeout exceeded! (%ds)" %
-                                            dtime)
+            raise testtools.TestCase\
+                .failureException("Wait timeout exceeded! (%ds)" % dtime)
         time.sleep(CONF.boto.build_interval)
 
 # TODO(afazekas): consider strategy design pattern..
