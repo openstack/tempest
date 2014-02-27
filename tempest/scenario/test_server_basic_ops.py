@@ -26,10 +26,6 @@ CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
-# NOTE(andreaf) - nose does not honour the load_tests protocol
-# however it's test discovery regex will match anything
-# which includes _tests. So nose would require some further
-# investigation to be supported with this
 load_tests = testscenarios.load_tests_apply_scenarios
 
 

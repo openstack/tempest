@@ -41,10 +41,6 @@ class TestAttrDecorator(BaseDecoratorsTest):
             self.assertEqual(getattr(foo, '__testtools_attrs'),
                              set(expected_attrs))
 
-        # nose sets it anyway
-        for arg, value in decorator_args.items():
-            self.assertEqual(getattr(foo, arg), value)
-
     def test_attr_without_type(self):
         self._test_attr_helper(expected_attrs='baz', bar='baz')
 
@@ -74,7 +70,6 @@ class TestServicesDecorator(BaseDecoratorsTest):
         t = TestFoo('test_bar')
         self.assertEqual(set(decorator_args), getattr(t.test_bar,
                                                       '__testtools_attrs'))
-        self.assertEqual(list(decorator_args), t.test_bar.type)
         self.assertEqual(t.test_bar(), 0)
 
     def test_services_decorator_with_single_service(self):
@@ -110,7 +105,6 @@ class TestStressDecorator(BaseDecoratorsTest):
                          expected_frequency)
         self.assertEqual(getattr(foo, 'st_allow_inheritance'),
                          expected_inheritance)
-        self.assertEqual(foo.type, 'stress')
         self.assertEqual(set(['stress']), getattr(foo, '__testtools_attrs'))
 
     def test_stresstest_decorator_default(self):
