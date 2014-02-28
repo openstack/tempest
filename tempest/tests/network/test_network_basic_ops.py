@@ -71,7 +71,9 @@ class DeletableNetwork(DeletableResource):
 
 class DeletableSubnet(DeletableResource):
 
-    _router_ids = set()
+    def __init__(self, *args, **kwargs):
+        super(DeletableSubnet, self).__init__(*args, **kwargs)
+        self._router_ids = set()
 
     def add_to_router(self, router_id):
         self._router_ids.add(router_id)
