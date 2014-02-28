@@ -353,6 +353,12 @@ class BaseTestCase(BaseDeps):
                 'subnet': subnet,
                 'dhcp': dhcp}
 
+    def assertEmpty(self, list, msg=None):
+        self.assertTrue(len(list) == 0, msg)
+
+    def assertNotEmpty(self, list, msg=None):
+        self.assertTrue(len(list) > 0, msg)
+
 
 class NegativeAutoTest(BaseTestCase):
 
