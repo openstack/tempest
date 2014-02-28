@@ -35,12 +35,6 @@ class ServiceClientXML(rest_client.RestClient):
         self.endpoint_url = 'adminURL'
         self.api_version = "v3"
 
-    def _parse_array(self, node):
-        array = []
-        for child in node.getchildren():
-            array.append(xml_to_json(child))
-        return array
-
     def _parse_body(self, body):
         data = xml_to_json(body)
         return data
