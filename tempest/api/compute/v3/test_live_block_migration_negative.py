@@ -25,7 +25,6 @@ CONF = config.CONF
 
 class LiveBlockMigrationV3NegativeTest(base.BaseV3ComputeAdminTest):
     _host_key = 'os-extended-server-attributes:host'
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

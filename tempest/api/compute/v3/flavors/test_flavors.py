@@ -18,7 +18,6 @@ from tempest import test
 
 
 class FlavorsV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

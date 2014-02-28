@@ -26,8 +26,6 @@ class AggregatesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     Tests Aggregates API that require admin privileges
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(AggregatesAdminNegativeV3Test, cls).setUpClass()

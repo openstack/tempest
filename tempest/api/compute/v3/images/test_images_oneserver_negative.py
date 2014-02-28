@@ -27,7 +27,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ImagesOneServerNegativeV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     def tearDown(self):
         """Terminate test instances created after a test is executed."""

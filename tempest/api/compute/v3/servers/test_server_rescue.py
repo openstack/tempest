@@ -20,7 +20,6 @@ from tempest.test import attr
 
 
 class ServerRescueV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
