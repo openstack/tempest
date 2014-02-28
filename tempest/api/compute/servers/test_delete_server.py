@@ -36,6 +36,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.create_test_server(wait_until='BUILD')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
 
     @test.attr(type='gate')
     def test_delete_active_server(self):
@@ -43,6 +44,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.create_test_server(wait_until='ACTIVE')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
 
     @test.attr(type='gate')
     def test_delete_server_while_in_shutoff_state(self):
@@ -52,6 +54,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(server['id'], 'SHUTOFF')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
 
     @test.attr(type='gate')
     def test_delete_server_while_in_pause_state(self):
@@ -61,6 +64,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_server_status(server['id'], 'PAUSED')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
 
     @test.attr(type='gate')
     def test_delete_server_while_in_shelved_state(self):
@@ -79,6 +83,7 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
                                                'SHELVED')
         resp, _ = self.client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
 
 
 class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -103,6 +108,8 @@ class DeleteServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(server['status'], 'ERROR')
         resp, _ = self.non_admin_client.delete_server(server['id'])
         self.assertEqual('204', resp['status'])
+        self.servers_client.wait_for_server_termination(server['id'],
+                                                        ignore_error=True)
 
     @test.attr(type='gate')
     def test_admin_delete_servers_of_others(self):
