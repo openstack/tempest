@@ -31,5 +31,5 @@ from tempest.openstack.common.config import generator
 
 
 if __name__ == "__main__":
-    CONF = tempest.config.TempestConfigPrivate(False)
+    tempest.config.register_opts()
     generator.generate(sys.argv[1:])

@@ -800,6 +800,41 @@ CLIGroup = [
 ]
 
 
+def register_opts():
+    register_opt_group(cfg.CONF, compute_group, ComputeGroup)
+    register_opt_group(cfg.CONF, compute_features_group,
+                       ComputeFeaturesGroup)
+    register_opt_group(cfg.CONF, identity_group, IdentityGroup)
+    register_opt_group(cfg.CONF, identity_feature_group,
+                       IdentityFeatureGroup)
+    register_opt_group(cfg.CONF, image_group, ImageGroup)
+    register_opt_group(cfg.CONF, image_feature_group, ImageFeaturesGroup)
+    register_opt_group(cfg.CONF, network_group, NetworkGroup)
+    register_opt_group(cfg.CONF, network_feature_group,
+                       NetworkFeaturesGroup)
+    register_opt_group(cfg.CONF, volume_group, VolumeGroup)
+    register_opt_group(cfg.CONF, volume_feature_group,
+                       VolumeFeaturesGroup)
+    register_opt_group(cfg.CONF, object_storage_group, ObjectStoreGroup)
+    register_opt_group(cfg.CONF, object_storage_feature_group,
+                       ObjectStoreFeaturesGroup)
+    register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
+    register_opt_group(cfg.CONF, telemetry_group, TelemetryGroup)
+    register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
+    register_opt_group(cfg.CONF, data_processing_group,
+                       DataProcessingGroup)
+    register_opt_group(cfg.CONF, boto_group, BotoGroup)
+    register_opt_group(cfg.CONF, compute_admin_group, ComputeAdminGroup)
+    register_opt_group(cfg.CONF, stress_group, StressGroup)
+    register_opt_group(cfg.CONF, scenario_group, ScenarioGroup)
+    register_opt_group(cfg.CONF, service_available_group,
+                       ServiceAvailableGroup)
+    register_opt_group(cfg.CONF, debug_group, DebugGroup)
+    register_opt_group(cfg.CONF, baremetal_group, BaremetalGroup)
+    register_opt_group(cfg.CONF, input_scenario_group, InputScenarioGroup)
+    register_opt_group(cfg.CONF, cli_group, CLIGroup)
+
+
 # this should never be called outside of this class
 class TempestConfigPrivate(object):
     """Provides OpenStack configuration information."""
@@ -810,64 +845,7 @@ class TempestConfigPrivate(object):
 
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
-    def __init__(self, parse_conf=True):
-        """Initialize a configuration from a conf directory and conf file."""
-        super(TempestConfigPrivate, self).__init__()
-        config_files = []
-        failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
-
-        # Environment variables override defaults...
-        conf_dir = os.environ.get('TEMPEST_CONFIG_DIR',
-                                  self.DEFAULT_CONFIG_DIR)
-        conf_file = os.environ.get('TEMPEST_CONFIG', self.DEFAULT_CONFIG_FILE)
-
-        path = os.path.join(conf_dir, conf_file)
-
-        if not os.path.isfile(path):
-            path = failsafe_path
-
-        # only parse the config file if we expect one to exist. This is needed
-        # to remove an issue with the config file up to date checker.
-        if parse_conf:
-            config_files.append(path)
-
-        cfg.CONF([], project='tempest', default_config_files=config_files)
-        logging.setup('tempest')
-        LOG = logging.getLogger('tempest')
-        LOG.info("Using tempest config file %s" % path)
-
-        register_opt_group(cfg.CONF, compute_group, ComputeGroup)
-        register_opt_group(cfg.CONF, compute_features_group,
-                           ComputeFeaturesGroup)
-        register_opt_group(cfg.CONF, identity_group, IdentityGroup)
-        register_opt_group(cfg.CONF, identity_feature_group,
-                           IdentityFeatureGroup)
-        register_opt_group(cfg.CONF, image_group, ImageGroup)
-        register_opt_group(cfg.CONF, image_feature_group, ImageFeaturesGroup)
-        register_opt_group(cfg.CONF, network_group, NetworkGroup)
-        register_opt_group(cfg.CONF, network_feature_group,
-                           NetworkFeaturesGroup)
-        register_opt_group(cfg.CONF, volume_group, VolumeGroup)
-        register_opt_group(cfg.CONF, volume_feature_group,
-                           VolumeFeaturesGroup)
-        register_opt_group(cfg.CONF, object_storage_group, ObjectStoreGroup)
-        register_opt_group(cfg.CONF, object_storage_feature_group,
-                           ObjectStoreFeaturesGroup)
-        register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
-        register_opt_group(cfg.CONF, telemetry_group, TelemetryGroup)
-        register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
-        register_opt_group(cfg.CONF, data_processing_group,
-                           DataProcessingGroup)
-        register_opt_group(cfg.CONF, boto_group, BotoGroup)
-        register_opt_group(cfg.CONF, compute_admin_group, ComputeAdminGroup)
-        register_opt_group(cfg.CONF, stress_group, StressGroup)
-        register_opt_group(cfg.CONF, scenario_group, ScenarioGroup)
-        register_opt_group(cfg.CONF, service_available_group,
-                           ServiceAvailableGroup)
-        register_opt_group(cfg.CONF, debug_group, DebugGroup)
-        register_opt_group(cfg.CONF, baremetal_group, BaremetalGroup)
-        register_opt_group(cfg.CONF, input_scenario_group, InputScenarioGroup)
-        register_opt_group(cfg.CONF, cli_group, CLIGroup)
+    def _set_attrs(self):
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity
@@ -899,6 +877,33 @@ class TempestConfigPrivate(object):
             self.compute_admin.password = self.identity.admin_password
             self.compute_admin.tenant_name = self.identity.admin_tenant_name
 
+    def __init__(self, parse_conf=True):
+        """Initialize a configuration from a conf directory and conf file."""
+        super(TempestConfigPrivate, self).__init__()
+        config_files = []
+        failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
+
+        # Environment variables override defaults...
+        conf_dir = os.environ.get('TEMPEST_CONFIG_DIR',
+                                  self.DEFAULT_CONFIG_DIR)
+        conf_file = os.environ.get('TEMPEST_CONFIG', self.DEFAULT_CONFIG_FILE)
+
+        path = os.path.join(conf_dir, conf_file)
+
+        if not os.path.isfile(path):
+            path = failsafe_path
+
+        # only parse the config file if we expect one to exist. This is needed
+        # to remove an issue with the config file up to date checker.
+        if parse_conf:
+            config_files.append(path)
+
+        cfg.CONF([], project='tempest', default_config_files=config_files)
+        logging.setup('tempest')
+        LOG = logging.getLogger('tempest')
+        LOG.info("Using tempest config file %s" % path)
+        register_opts()
+        self._set_attrs()
         if parse_conf:
             cfg.CONF.log_opt_values(LOG, std_logging.DEBUG)
 
