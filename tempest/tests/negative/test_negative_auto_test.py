@@ -15,6 +15,7 @@
 
 import mock
 
+from tempest import config
 import tempest.test as test
 from tempest.tests import base
 from tempest.tests import fake_config
@@ -38,7 +39,8 @@ class TestNegativeAutoTest(base.TestCase):
 
     def setUp(self):
         super(TestNegativeAutoTest, self).setUp()
-        self.stubs.Set(test, 'CONF', fake_config.FakeConfig)
+        self.useFixture(fake_config.ConfigFixture())
+        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
 
     def _check_prop_entries(self, result, entry):
         entries = [a for a in result if entry in a[0]]

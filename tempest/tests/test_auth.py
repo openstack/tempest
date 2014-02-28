@@ -42,7 +42,8 @@ class BaseAuthTestsSetUp(base.TestCase):
 
     def setUp(self):
         super(BaseAuthTestsSetUp, self).setUp()
-        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakeConfig)
+        self.useFixture(fake_config.ConfigFixture())
+        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
         self.stubs.Set(http.ClosingHttp, 'request', self.fake_http.request)
         self.auth_provider = self._auth(self.credentials)

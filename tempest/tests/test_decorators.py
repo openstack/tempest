@@ -15,6 +15,9 @@
 
 import testtools
 
+from oslo.config import cfg
+
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
 from tempest import test
@@ -25,7 +28,8 @@ from tempest.tests import fake_config
 class BaseDecoratorsTest(base.TestCase):
     def setUp(self):
         super(BaseDecoratorsTest, self).setUp()
-        self.stubs.Set(test, 'CONF', fake_config.FakeConfig)
+        self.config_fixture = self.useFixture(fake_config.ConfigFixture())
+        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
 
 
 class TestAttrDecorator(BaseDecoratorsTest):
@@ -191,10 +195,8 @@ class TestSkipBecauseDecorator(BaseDecoratorsTest):
 class TestRequiresExtDecorator(BaseDecoratorsTest):
     def setUp(self):
         super(TestRequiresExtDecorator, self).setUp()
-        self.fixture = self.useFixture(mockpatch.PatchObject(
-                                       test.CONF.compute_feature_enabled,
-                                       'api_extensions',
-                                       new=['enabled_ext', 'another_ext']))
+        cfg.CONF.set_default('api_extensions', ['enabled_ext', 'another_ext'],
+                             'compute-feature-enabled')
 
     def _test_requires_ext_helper(self, expected_to_skip=True,
                                   **decorator_args):
@@ -220,7 +222,7 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
 
     def test_requires_ext_decorator_with_all_ext_enabled(self):
         # disable fixture so the default (all) is used.
-        self.fixture.cleanUp()
+        self.config_fixture.cleanUp()
         self._test_requires_ext_helper(expected_to_skip=False,
                                        extension='random_ext',
                                        service='compute')
