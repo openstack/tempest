@@ -105,6 +105,10 @@
 # value)
 #catalog_type=baremetal
 
+# The endpoint type to use for the baremetal provisioning
+# service. (string value)
+#endpoint_type=publicURL
+
 
 [boto]
 
@@ -377,6 +381,10 @@
 
 # Catalog type of the data processing service. (string value)
 #catalog_type=data_processing
+
+# The endpoint type to use for the data processing service.
+# (string value)
+#endpoint_type=publicURL
 
 
 [debug]
@@ -815,6 +823,10 @@
 
 # Catalog type of the Telemetry service. (string value)
 #catalog_type=metering
+
+# The endpoint type to use for the telemetry service. (string
+# value)
+#endpoint_type=publicURL
 
 
 [volume]

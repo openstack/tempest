@@ -541,6 +541,11 @@ TelemetryGroup = [
     cfg.StrOpt('catalog_type',
                default='metering',
                help="Catalog type of the Telemetry service."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the telemetry service."),
 ]
 
 
@@ -563,7 +568,13 @@ data_processing_group = cfg.OptGroup(name="data_processing",
 DataProcessingGroup = [
     cfg.StrOpt('catalog_type',
                default='data_processing',
-               help="Catalog type of the data processing service.")
+               help="Catalog type of the data processing service."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the data processing "
+                    "service."),
 ]
 
 
@@ -761,6 +772,12 @@ BaremetalGroup = [
     cfg.StrOpt('catalog_type',
                default='baremetal',
                help="Catalog type of the baremetal provisioning service."),
+    cfg.StrOpt('endpoint_type',
+               default='publicURL',
+               choices=['public', 'admin', 'internal',
+                        'publicURL', 'adminURL', 'internalURL'],
+               help="The endpoint type to use for the baremetal provisioning "
+                    "service."),
 ]
 
 cli_group = cfg.OptGroup(name='cli', title="cli Configuration Options")
