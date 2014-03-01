@@ -635,6 +635,9 @@
 # creating containers (string value)
 #operator_role=Member
 
+# User role that has reseller admin (string value)
+#reseller_admin_role=ResellerAdmin
+
 
 [object-storage-feature-enabled]
 

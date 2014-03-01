@@ -472,6 +472,9 @@ ObjectStoreGroup = [
                default='Member',
                help="Role to add to users created for swift tests to "
                     "enable creating containers"),
+    cfg.StrOpt('reseller_admin_role',
+               default='ResellerAdmin',
+               help="User role that has reseller admin"),
 ]
 
 object_storage_feature_group = cfg.OptGroup(
