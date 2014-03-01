@@ -53,8 +53,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     # Default to ipv4.
     _ip_version = 4
-    _tenant_network_cidr = CONF.network.tenant_network_cidr
-    _tenant_network_mask_bits = CONF.network.tenant_network_mask_bits
 
     @classmethod
     def setUpClass(cls):
@@ -147,8 +145,12 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_subnet(cls, network):
         """Wrapper utility that returns a test subnet."""
         # The cidr and mask_bits depend on the ip version.
-        cidr = netaddr.IPNetwork(cls._tenant_network_cidr)
-        mask_bits = cls._tenant_network_mask_bits
+        if cls._ip_version == 4:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
+        elif cls._ip_version == 6:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
         # Find a cidr that is not in use yet and create a subnet with it
         body = None
         failure = None

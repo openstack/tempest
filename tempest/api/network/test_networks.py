@@ -85,8 +85,12 @@ class NetworksTestJSON(base.BaseNetworkTest):
         updated_net = body['network']
         self.assertEqual(updated_net['name'], new_name)
         # Find a cidr that is not in use yet and create a subnet with it
-        cidr = netaddr.IPNetwork(self._tenant_network_cidr)
-        mask_bits = self._tenant_network_mask_bits
+        if self._ip_version == 4:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
+        elif self._ip_version == 6:
+            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
                 resp, body = self.client.create_subnet(
@@ -464,8 +468,6 @@ class BulkNetworkOpsTestXML(BulkNetworkOpsTestJSON):
 
 class NetworksIpV6TestJSON(NetworksTestJSON):
     _ip_version = 6
-    _tenant_network_cidr = CONF.network.tenant_network_v6_cidr
-    _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
     @classmethod
     def setUpClass(cls):
