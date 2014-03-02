@@ -16,6 +16,7 @@
 
 import json
 import sys
+import urlparse
 
 import httplib2
 
@@ -39,19 +40,37 @@ def verify_glance_api_versions(os):
             not CONF.image_feature_enabled.api_v2))
 
 
-def verify_nova_api_versions(os):
-    # Check nova api versions - only get base URL without PATH
-    os.servers_client.skip_path = True
-    # The nova base endpoint url includes the version but to get the versions
-    # list the unversioned endpoint is needed
-    v2_endpoint = os.servers_client.base_url
-    v2_endpoint_parts = v2_endpoint.split('/')
-    endpoint = v2_endpoint_parts[0] + '//' + v2_endpoint_parts[2]
+def _get_api_versions(os, service):
+    client_dict = {
+        'nova': os.servers_client,
+        'keystone': os.identity_client,
+    }
+    client_dict[service].skip_path()
+    endpoint_parts = urlparse.urlparse(client_dict[service])
+    endpoint = endpoint_parts.scheme + '//' + endpoint_parts.netloc
     __, body = RAW_HTTP.request(endpoint, 'GET')
+    client_dict[service].reset_path()
     body = json.loads(body)
-    # Restore full base_url
-    os.servers_client.skip_path = False
-    versions = map(lambda x: x['id'], body['versions'])
+    if service == 'keystone':
+        versions = map(lambda x: x['id'], body['versions']['values'])
+    else:
+        versions = map(lambda x: x['id'], body['versions'])
+    return versions
+
+
+def verify_keystone_api_versions(os):
+    # Check keystone api versions
+    versions = _get_api_versions(os, 'keystone')
+    if CONF.identity_feature_enabled.api_v2 != ('v2.0' in versions):
+        print('Config option identity api_v2 should be change to %s' % (
+            not CONF.identity_feature_enabled.api_v2))
+    if CONF.identity_feature_enabled.api_v3 != ('v3.0' in versions):
+        print('Config option identity api_v3 should be change to %s' % (
+            not CONF.identity_feature_enabled.api_v3))
+
+
+def verify_nova_api_versions(os):
+    versions = _get_api_versions(os, 'nova')
     if CONF.compute_feature_enabled.api_v3 != ('v3.0' in versions):
         print('Config option compute api_v3 should be change to: %s' % (
               not CONF.compute_feature_enabled.api_v3))
@@ -197,6 +216,7 @@ def main(argv):
         elif service not in services:
             continue
         results = verify_extensions(os, service, results)
+    verify_keystone_api_versions(os)
     verify_glance_api_versions(os)
     verify_nova_api_versions(os)
     display_results(results)
