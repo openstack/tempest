@@ -48,7 +48,7 @@ class EC2KeysTest(boto_test.BotoTestCase):
         key_name = data_utils.rand_name("keypair-")
         self.client.create_key_pair(key_name)
         self.client.delete_key_pair(key_name)
-        self.assertEqual(None, self.client.get_key_pair(key_name))
+        self.assertIsNone(self.client.get_key_pair(key_name))
 
     @test.attr(type='smoke')
     def test_get_ec2_keypair(self):
