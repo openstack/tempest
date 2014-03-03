@@ -70,7 +70,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
     @attr(type='gate')
     def test_delete_image(self):
-        # Deletes a image by image_id
+        # Deletes an image by image_id
 
         # Create image
         image_name = data_utils.rand_name('image')
@@ -89,6 +89,43 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         resp, images = self.client.image_list()
         self.assertEqual(resp.status, 200)
         self.assertNotIn(image_id, images)
+
+    @attr(type='gate')
+    def test_update_image(self):
+        # Updates an image by image_id
+
+        # Create image
+        image_name = data_utils.rand_name('image')
+        resp, body = self.client.create_image(name=image_name,
+                                              container_format='bare',
+                                              disk_format='iso',
+                                              visibility='public')
+        self.assertEqual(201, resp.status)
+        self.assertEqual('queued', body['status'])
+        image_id = body['id']
+
+        # Now try uploading an image file
+        file_content = '*' * 1024
+        image_file = StringIO.StringIO(file_content)
+        resp, body = self.client.store_image(image_id, image_file)
+        self.assertEqual(204, resp.status)
+
+        # Update Image
+        new_image_name = data_utils.rand_name('new-image')
+        new_visibility = 'private'
+        resp, body = self.client.update_image(image_id, [
+            dict(replace='/name', value=new_image_name),
+            dict(replace='/visibility', value=new_visibility)])
+
+        self.assertEqual(200, resp.status)
+
+        # Verifying updating
+
+        resp, body = self.client.get_image(image_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(image_id, body['id'])
+        self.assertEqual(new_image_name, body['name'])
+        self.assertEqual(new_visibility, body['visibility'])
 
 
 class ListImagesTest(base.BaseV2ImageTest):
