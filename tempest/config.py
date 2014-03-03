@@ -344,9 +344,6 @@ NetworkGroup = [
     cfg.IntOpt('tenant_network_mask_bits',
                default=28,
                help="The mask bits for tenant ipv4 subnets"),
-    cfg.BoolOpt('ipv6_enabled',
-                default=True,
-                help="Allow the execution of IPv6 tests"),
     cfg.StrOpt('tenant_network_v6_cidr',
                default="2003::/64",
                help="The cidr block to allocate tenant ipv6 subnets from"),
@@ -371,6 +368,9 @@ network_feature_group = cfg.OptGroup(name='network-feature-enabled',
                                      title='Enabled network service features')
 
 NetworkFeaturesGroup = [
+    cfg.BoolOpt('ipv6',
+                default=True,
+                help="Allow the execution of IPv6 tests"),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled network extensions with a special '
