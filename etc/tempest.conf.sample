@@ -307,14 +307,14 @@
 
 # Administrative Username to use for Nova API requests.
 # (string value)
-#username=admin
+#username=<None>
 
 # Administrative Tenant name to use for Nova API requests.
 # (string value)
-#tenant_name=admin
+#tenant_name=<None>
 
 # API key to use when authenticating as admin. (string value)
-#password=pass
+#password=<None>
 
 
 [compute-feature-enabled]
@@ -451,16 +451,16 @@
 #endpoint_type=publicURL
 
 # Username to use for Nova API requests. (string value)
-#username=demo
+#username=<None>
 
 # Tenant name to use for Nova API requests. (string value)
-#tenant_name=demo
+#tenant_name=<None>
 
 # Role required to administrate keystone. (string value)
 #admin_role=admin
 
 # API key to use when authenticating. (string value)
-#password=pass
+#password=<None>
 
 # Username of alternate user to use for Nova API requests.
 # (string value)
@@ -476,14 +476,14 @@
 
 # Administrative Username to use for Keystone API requests.
 # (string value)
-#admin_username=admin
+#admin_username=<None>
 
 # Administrative Tenant name to use for Keystone API requests.
 # (string value)
-#admin_tenant_name=admin
+#admin_tenant_name=<None>
 
 # API key to use when authenticating as admin. (string value)
-#admin_password=pass
+#admin_password=<None>
 
 
 [identity-feature-enabled]
