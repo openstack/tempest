@@ -493,6 +493,17 @@ ObjectStoreFeaturesGroup = [
                      "features are expected to be enabled"),
 ]
 
+database_group = cfg.OptGroup(name='database',
+                              title='Database Service Options')
+
+DatabaseGroup = [
+    cfg.StrOpt('catalog_type',
+               default='database',
+               help="Catalog type of the Database service."),
+    cfg.StrOpt('db_flavor_ref',
+               default="1",
+               help="Valid primary flavor to use in database tests."),
+]
 
 orchestration_group = cfg.OptGroup(name='orchestration',
                                    title='Orchestration Service Options')
@@ -739,6 +750,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('ironic',
                 default=False,
                 help="Whether or not Ironic is expected to be available"),
+    cfg.BoolOpt('trove',
+                default=False,
+                help="Whether or not Trove is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -825,6 +839,7 @@ def register_opts():
     register_opt_group(cfg.CONF, object_storage_group, ObjectStoreGroup)
     register_opt_group(cfg.CONF, object_storage_feature_group,
                        ObjectStoreFeaturesGroup)
+    register_opt_group(cfg.CONF, database_group, DatabaseGroup)
     register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
     register_opt_group(cfg.CONF, telemetry_group, TelemetryGroup)
     register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
@@ -866,6 +881,7 @@ class TempestConfigPrivate(object):
         self.object_storage = cfg.CONF['object-storage']
         self.object_storage_feature_enabled = cfg.CONF[
             'object-storage-feature-enabled']
+        self.database = cfg.CONF.database
         self.orchestration = cfg.CONF.orchestration
         self.telemetry = cfg.CONF.telemetry
         self.dashboard = cfg.CONF.dashboard
