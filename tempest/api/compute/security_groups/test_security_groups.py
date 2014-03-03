@@ -27,7 +27,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         super(SecurityGroupsTestJSON, cls).setUpClass()
         cls.client = cls.security_groups_client
 
-    @test.attr(type='gate')
+    @test.attr(type='smoke')
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
         # Create 3 Security Groups
@@ -59,7 +59,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                          "list" % ', '.join(m_group['name']
                                             for m_group in deleted_sgs))
 
-    @test.attr(type='gate')
+    @test.attr(type='smoke')
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
         s_name = data_utils.rand_name('securitygroup-')
@@ -77,7 +77,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
                          "The fetched Security Group is different "
                          "from the created Group")
 
-    @test.attr(type='gate')
+    @test.attr(type='smoke')
     def test_server_security_groups(self):
         # Checks that security groups may be added and linked to a server
         # and not deleted if the server is active.
@@ -123,7 +123,7 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.client.delete_security_group(sg2['id'])
         self.assertEqual(202, resp.status)
 
-    @test.attr(type='gate')
+    @test.attr(type='smoke')
     def test_update_security_groups(self):
         # Update security group name and description
         # Create a security group
