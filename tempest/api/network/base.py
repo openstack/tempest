@@ -61,7 +61,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         # Create no network resources for these test.
         cls.set_network_resources()
         super(BaseNetworkTest, cls).setUpClass()
-        os = clients.Manager(interface=cls._interface)
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
 
