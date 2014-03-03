@@ -18,7 +18,6 @@ import netaddr
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest.test import attr
 
 CONF = config.CONF
@@ -85,25 +84,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         updated_net = body['network']
         self.assertEqual(updated_net['name'], new_name)
         # Find a cidr that is not in use yet and create a subnet with it
-        if self._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
-        elif self._ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
-        for subnet_cidr in cidr.subnet(mask_bits):
-            try:
-                resp, body = self.client.create_subnet(
-                    network_id=net_id,
-                    cidr=str(subnet_cidr),
-                    ip_version=self._ip_version)
-                break
-            except exceptions.BadRequest as e:
-                is_overlapping_cidr = 'overlaps with another subnet' in str(e)
-                if not is_overlapping_cidr:
-                    raise
-        self.assertEqual('201', resp['status'])
-        subnet = body['subnet']
+        subnet = self.create_subnet(network)
         subnet_id = subnet['id']
         # Verification of subnet update
         new_subnet = "New_subnet"
@@ -115,6 +96,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
         # Delete subnet and network
         resp, body = self.client.delete_subnet(subnet_id)
         self.assertEqual('204', resp['status'])
+        # Remove subnet from cleanup list
+        self.subnets.pop()
         resp, body = self.client.delete_network(net_id)
         self.assertEqual('204', resp['status'])
 

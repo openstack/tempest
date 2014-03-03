@@ -152,8 +152,6 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
             mask_bits = CONF.network.tenant_network_v6_mask_bits
         # Find a cidr that is not in use yet and create a subnet with it
-        body = None
-        failure = None
         for subnet_cidr in cidr.subnet(mask_bits):
             try:
                 resp, body = cls.client.create_subnet(
@@ -165,12 +163,9 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
                 if not is_overlapping_cidr:
                     raise
-                # save the failure in case all of the CIDRs are overlapping
-                failure = e
-
-        if not body and failure:
-            raise failure
-
+        else:
+            message = 'Available CIDR for subnet creation could not be found'
+            raise exceptions.BuildErrorException(message)
         subnet = body['subnet']
         cls.subnets.append(subnet)
         return subnet
