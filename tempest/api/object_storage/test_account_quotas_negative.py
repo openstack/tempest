@@ -17,8 +17,11 @@
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 
 class AccountQuotasNegativeTest(base.BaseObjectTest):
@@ -41,7 +44,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         try:
             _, roles = cls.os_admin.identity_client.list_roles()
             reseller_role_id = next(r['id'] for r in roles if r['name']
-                                    == 'ResellerAdmin')
+                                    == CONF.object_storage.reseller_admin_role)
         except StopIteration:
             msg = "No ResellerAdmin role found"
             raise exceptions.NotFound(msg)
