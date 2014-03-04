@@ -174,3 +174,13 @@ class ServersAdminV3Test(base.BaseV3ComputeAdminTest):
         resp, server = self.non_admin_client.get_server(rebuilt_server['id'])
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
+
+    @test.attr(type='gate')
+    def test_reset_network_inject_network_info(self):
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        # Reset Network of a Server
+        resp, server_body = self.client.reset_network(server['id'])
+        self.assertEqual(202, resp.status)
+        # Inject the Network Info into Server
+        resp, server = self.client.inject_network_info(server['id'])
+        self.assertEqual(202, resp.status)

@@ -435,3 +435,11 @@ class ServersV3ClientJSON(RestClient):
                                post_body)
         body = json.loads(body)
         return resp, body['console']
+
+    def reset_network(self, server_id, **kwargs):
+        """Resets the Network of a server"""
+        return self.action(server_id, 'reset_network', None, **kwargs)
+
+    def inject_network_info(self, server_id, **kwargs):
+        """Inject the Network Info into server"""
+        return self.action(server_id, 'inject_network_info', None, **kwargs)
