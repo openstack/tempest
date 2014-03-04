@@ -17,7 +17,7 @@ from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -41,7 +41,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                     filter(lambda y: y['service'] == 'compute', hosts_all))
         cls.host = hosts[0]
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_create_as_user(self):
         # Regular user is not allowed to create an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -49,14 +49,14 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.user_client.create_aggregate,
                           name=aggregate_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_create_aggregate_name_length_less_than_1(self):
         # the length of aggregate name should >= 1 and <=255
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_aggregate,
                           name='')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_create_aggregate_name_length_exceeds_255(self):
         # the length of aggregate name should >= 1 and <=255
         aggregate_name = 'a' * 256
@@ -64,7 +64,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.create_aggregate,
                           name=aggregate_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_create_with_existent_aggregate_name(self):
         # creating an aggregate with existent aggregate name is forbidden
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -76,7 +76,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.create_aggregate,
                           name=aggregate_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_delete_as_user(self):
         # Regular user is not allowed to delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -88,13 +88,13 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.user_client.delete_aggregate,
                           aggregate['id'])
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_list_as_user(self):
         # Regular user is not allowed to list aggregates.
         self.assertRaises(exceptions.Unauthorized,
                           self.user_client.list_aggregates)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_get_details_as_user(self):
         # Regular user is not allowed to get aggregate details.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -106,19 +106,19 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.user_client.get_aggregate,
                           aggregate['id'])
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_delete_with_invalid_id(self):
         # Delete an aggregate with invalid id should raise exceptions.
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_aggregate, -1)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_get_details_with_invalid_id(self):
         # Get aggregate details with invalid id should raise exceptions.
         self.assertRaises(exceptions.NotFound,
                           self.client.get_aggregate, -1)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_add_non_exist_host(self):
         # Adding a non-exist host to an aggregate should raise exceptions.
         resp, hosts_all = self.os_adm.hosts_client.list_hosts()
@@ -135,7 +135,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(exceptions.NotFound, self.client.add_host,
                           aggregate['id'], non_exist_host)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_add_host_as_user(self):
         # Regular user is not allowed to add a host to an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -147,7 +147,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.user_client.add_host,
                           aggregate['id'], self.host)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_add_existent_host(self):
         self.useFixture(fixtures.LockFixture('availability_zone'))
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -162,7 +162,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertRaises(exceptions.Conflict, self.client.add_host,
                           aggregate['id'], self.host)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_remove_host_as_user(self):
         # Regular user is not allowed to remove a host from an aggregate.
         self.useFixture(fixtures.LockFixture('availability_zone'))
@@ -178,7 +178,7 @@ class AggregatesAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.user_client.remove_host,
                           aggregate['id'], self.host)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_aggregate_remove_nonexistent_host(self):
         non_exist_host = data_utils.rand_name('nonexist_host_')
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)

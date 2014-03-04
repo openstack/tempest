@@ -16,7 +16,7 @@
 import datetime
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 import time
 
 
@@ -48,7 +48,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         # Returns formatted datetime
         return at.strftime('%Y-%m-%dT%H:%M:%S.%f')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
         params = {'start': self.start,
@@ -58,7 +58,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_usage_tenant(self):
         # Get usage for a specific tenant
         params = {'start': self.start,
@@ -69,7 +69,7 @@ class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_usage_tenant_with_non_admin_user(self):
         # Get usage for a specific tenant with non admin user
         params = {'start': self.start,

@@ -17,7 +17,7 @@ import datetime
 
 from tempest.api.compute import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 import urllib
 
 
@@ -30,7 +30,7 @@ class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(InstanceUsageAuditLogNegativeTestJSON, cls).setUpClass()
         cls.adm_client = cls.os_adm.instance_usages_audit_log_client
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_instance_usage_audit_logs_with_nonadmin_user(self):
         # the instance_usage_audit_logs API just can be accessed by admin user
         self.assertRaises(exceptions.Unauthorized,
@@ -42,7 +42,7 @@ class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           get_instance_usage_audit_log,
                           urllib.quote(now.strftime("%Y-%m-%d %H:%M:%S")))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_instance_usage_audit_logs_with_invalid_time(self):
         self.assertRaises(exceptions.BadRequest,
                           self.adm_client.get_instance_usage_audit_log,

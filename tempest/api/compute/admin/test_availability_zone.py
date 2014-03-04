@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
 class AZAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -30,14 +30,14 @@ class AZAdminTestJSON(base.BaseV2ComputeAdminTest):
         super(AZAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.availability_zone_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_availability_zone_list(self):
         # List of availability zone
         resp, availability_zone = self.client.get_availability_zone_list()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_availability_zone_list_detail(self):
         # List of availability zones and available services
         resp, availability_zone = \

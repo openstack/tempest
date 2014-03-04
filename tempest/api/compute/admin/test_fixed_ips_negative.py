@@ -15,7 +15,7 @@
 from tempest.api.compute import base
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -41,26 +41,26 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
             if cls.ip:
                 break
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_fixed_ip_details_with_non_admin_user(self):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.get_fixed_ip_details, self.ip)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_set_reserve_with_non_admin_user(self):
         body = {"reserve": "None"}
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_set_unreserve_with_non_admin_user(self):
         body = {"unreserve": "None"}
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.reserve_fixed_ip,
                           self.ip, body)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_set_reserve_with_invalid_ip(self):
         # NOTE(maurosr): since this exercises the same code snippet, we do it
         # only for reserve action
@@ -69,7 +69,7 @@ class FixedIPsNegativeTestJson(base.BaseV2ComputeAdminTest):
                           self.client.reserve_fixed_ip,
                           "my.invalid.ip", body)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_fixed_ip_with_invalid_action(self):
         body = {"invalid_action": "None"}
         self.assertRaises(exceptions.BadRequest,

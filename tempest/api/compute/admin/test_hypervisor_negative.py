@@ -18,7 +18,7 @@ import uuid
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -41,7 +41,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         return hypers
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_show_nonexistent_hypervisor(self):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
@@ -50,7 +50,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.client.get_hypervisor_show_details,
             nonexistent_hypervisor_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_show_hypervisor_with_non_admin_user(self):
         hypers = self._list_hypervisors()
         self.assertTrue(len(hypers) > 0)
@@ -60,7 +60,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.non_adm_client.get_hypervisor_show_details,
             hypers[0]['id'])
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_show_servers_with_non_admin_user(self):
         hypers = self._list_hypervisors()
         self.assertTrue(len(hypers) > 0)
@@ -70,7 +70,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.non_adm_client.get_hypervisor_servers,
             hypers[0]['id'])
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_show_servers_with_nonexistent_hypervisor(self):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
@@ -79,13 +79,13 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.client.get_hypervisor_servers,
             nonexistent_hypervisor_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_hypervisor_stats_with_non_admin_user(self):
         self.assertRaises(
             exceptions.Unauthorized,
             self.non_adm_client.get_hypervisor_stats)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_nonexistent_hypervisor_uptime(self):
         nonexistent_hypervisor_id = str(uuid.uuid4())
 
@@ -94,7 +94,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.client.get_hypervisor_uptime,
             nonexistent_hypervisor_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_hypervisor_uptime_with_non_admin_user(self):
         hypers = self._list_hypervisors()
         self.assertTrue(len(hypers) > 0)
@@ -104,21 +104,21 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.non_adm_client.get_hypervisor_uptime,
             hypers[0]['id'])
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_hypervisor_list_with_non_admin_user(self):
         # List of hypervisor and available services with non admin user
         self.assertRaises(
             exceptions.Unauthorized,
             self.non_adm_client.get_hypervisor_list)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_hypervisor_list_details_with_non_admin_user(self):
         # List of hypervisor details and available services with non admin user
         self.assertRaises(
             exceptions.Unauthorized,
             self.non_adm_client.get_hypervisor_list_details)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_search_nonexistent_hypervisor(self):
         nonexistent_hypervisor_name = data_utils.rand_name('test_hypervisor')
 
@@ -127,7 +127,7 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             self.client.search_hypervisor,
             nonexistent_hypervisor_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_search_hypervisor_with_non_admin_user(self):
         hypers = self._list_hypervisors()
         self.assertTrue(len(hypers) > 0)
