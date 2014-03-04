@@ -16,14 +16,14 @@
 import json
 import time
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class InterfacesV3ClientJSON(RestClient):
+class InterfacesV3ClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(InterfacesV3ClientJSON, self).__init__(auth_provider)
