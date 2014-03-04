@@ -16,7 +16,7 @@
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -33,14 +33,14 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
         resp, _ = self.client.delete_volume_type(volume_type_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_type_list(self):
         # List Volume types.
         resp, body = self.client.list_volume_types()
         self.assertEqual(200, resp.status)
         self.assertIsInstance(body, list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
         # Create/get/delete volume with volume_type and extra spec.
         volume = {}
@@ -84,7 +84,7 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
                          'The fetched Volume is different '
                          'from the created Volume')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_type_create_get_delete(self):
         # Create/get volume type.
         body = {}

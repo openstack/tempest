@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.volume.base import BaseVolumeV1AdminTest
+from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -23,7 +23,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class VolumesBackupsTest(BaseVolumeV1AdminTest):
+class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod

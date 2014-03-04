@@ -17,7 +17,7 @@
 from tempest.api.volume import base
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 class ExtensionsTestJSON(base.BaseVolumeV1Test):
     _interface = 'json'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_extensions(self):
         # List of all extensions
         resp, extensions = self.volumes_extension_client.list_extensions()

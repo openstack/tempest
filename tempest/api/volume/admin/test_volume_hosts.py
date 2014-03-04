@@ -14,13 +14,13 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.test import attr
+from tempest import test
 
 
 class VolumeHostsAdminTestsJSON(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_hosts(self):
         resp, hosts = self.hosts_client.list_hosts()
         self.assertEqual(200, resp.status)
