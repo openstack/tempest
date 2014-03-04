@@ -175,6 +175,16 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         rebuilt_image_id = server['image']['id']
         self.assertEqual(self.image_ref_alt, rebuilt_image_id)
 
+    @test.attr(type='gate')
+    def test_reset_network_inject_network_info(self):
+        # Reset Network of a Server
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        resp, server_body = self.client.reset_network(server['id'])
+        self.assertEqual(202, resp.status)
+        # Inject the Network Info into Server
+        resp, server_body = self.client.inject_network_info(server['id'])
+        self.assertEqual(202, resp.status)
+
 
 class ServersAdminTestXML(ServersAdminTestJSON):
     _host_key = (
