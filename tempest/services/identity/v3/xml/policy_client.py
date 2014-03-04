@@ -18,9 +18,7 @@ from lxml import etree
 from tempest.common import http
 from tempest.common import rest_client
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -41,11 +39,11 @@ class PolicyClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "policy":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def _parse_body(self, body):
-        json = xml_to_json(body)
+        json = common.xml_to_json(body)
         return json
 
     def request(self, method, url, headers=None, body=None, wait=None):
@@ -59,8 +57,9 @@ class PolicyClientXML(rest_client.RestClient):
 
     def create_policy(self, blob, type):
         """Creates a Policy."""
-        create_policy = Element("policy", xmlns=XMLNS, blob=blob, type=type)
-        resp, body = self.post('policies', str(Document(create_policy)))
+        create_policy = common.Element("policy", xmlns=XMLNS,
+                                       blob=blob, type=type)
+        resp, body = self.post('policies', str(common.Document(create_policy)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -81,9 +80,9 @@ class PolicyClientXML(rest_client.RestClient):
         """Updates a policy."""
         resp, body = self.get_policy(policy_id)
         type = kwargs.get('type')
-        update_policy = Element("policy", xmlns=XMLNS, type=type)
+        update_policy = common.Element("policy", xmlns=XMLNS, type=type)
         url = 'policies/%s' % policy_id
-        resp, body = self.patch(url, str(Document(update_policy)))
+        resp, body = self.patch(url, str(common.Document(update_policy)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 

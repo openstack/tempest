@@ -19,10 +19,7 @@ from lxml import etree
 
 from tempest.common import rest_client
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -39,7 +36,7 @@ class CredentialsClientXML(rest_client.RestClient):
         self.api_version = "v3"
 
     def _parse_body(self, body):
-        data = xml_to_json(body)
+        data = common.xml_to_json(body)
         return data
 
     def _parse_creds(self, node):
@@ -47,7 +44,7 @@ class CredentialsClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "credential":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def create_credential(self, access_key, secret_key, user_id, project_id):
@@ -55,14 +52,14 @@ class CredentialsClientXML(rest_client.RestClient):
         cred_type = 'ec2'
         access = "&quot;access&quot;: &quot;%s&quot;" % access_key
         secret = "&quot;secret&quot;: &quot;%s&quot;" % secret_key
-        blob = Element('blob',
-                       xmlns=XMLNS)
-        blob.append(Text("{%s , %s}"
-                         % (access, secret)))
-        credential = Element('credential', project_id=project_id,
-                             type=cred_type, user_id=user_id)
+        blob = common.Element('blob',
+                              xmlns=XMLNS)
+        blob.append(common.Text("{%s , %s}"
+                                % (access, secret)))
+        credential = common.Element('credential', project_id=project_id,
+                                    type=cred_type, user_id=user_id)
         credential.append(blob)
-        resp, body = self.post('credentials', str(Document(credential)))
+        resp, body = self.post('credentials', str(common.Document(credential)))
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
@@ -77,15 +74,15 @@ class CredentialsClientXML(rest_client.RestClient):
         user_id = kwargs.get('user_id', body['user_id'])
         access = "&quot;access&quot;: &quot;%s&quot;" % access_key
         secret = "&quot;secret&quot;: &quot;%s&quot;" % secret_key
-        blob = Element('blob',
-                       xmlns=XMLNS)
-        blob.append(Text("{%s , %s}"
-                         % (access, secret)))
-        credential = Element('credential', project_id=project_id,
-                             type=cred_type, user_id=user_id)
+        blob = common.Element('blob',
+                              xmlns=XMLNS)
+        blob.append(common.Text("{%s , %s}"
+                                % (access, secret)))
+        credential = common.Element('credential', project_id=project_id,
+                                    type=cred_type, user_id=user_id)
         credential.append(blob)
         resp, body = self.patch('credentials/%s' % credential_id,
-                                str(Document(credential)))
+                                str(common.Document(credential)))
         body = self._parse_body(etree.fromstring(body))
         body['blob'] = json.loads(body['blob'])
         return resp, body
