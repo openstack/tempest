@@ -24,6 +24,7 @@ from tempest.services.compute.xml.common import Document
 from tempest.services.compute.xml.common import Element
 from tempest.services.compute.xml.common import Text
 from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml.common import XMLNS_11
 
 CONF = config.CONF
 
@@ -103,4 +104,22 @@ class InterfacesClientXML(rest_client.RestClient):
                            'the required time (%s s).' %
                            (port_id, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
+        return resp, body
+
+    def add_fixed_ip(self, server_id, network_id):
+        """Add a fixed IP to input server instance."""
+        post_body = Element("addFixedIp",
+                            xmlns=XMLNS_11,
+                            networkId=network_id)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               str(Document(post_body)))
+        return resp, body
+
+    def remove_fixed_ip(self, server_id, ip_address):
+        """Remove input fixed IP from input server instance."""
+        post_body = Element("removeFixedIp",
+                            xmlns=XMLNS_11,
+                            address=ip_address)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               str(Document(post_body)))
         return resp, body
