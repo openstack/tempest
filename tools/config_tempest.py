@@ -142,7 +142,7 @@ class AdminClientManager(object):
                     break
 
     def do_flavors(self, create):
-        LOG.debug("Creating flavors")
+        LOG.debug("Querying flavors")
         flavor_id = None
         flavor_alt_id = None
         max_id = 1
@@ -177,7 +177,7 @@ class AdminClientManager(object):
                                                is_public="true")
 
     def do_images(self, path, create):
-        LOG.debug("Creating images")
+        LOG.debug("Querying images")
         name = path[path.rfind('/') + 1:]
         name_alt = name + "_alt"
         image_id = None
@@ -339,7 +339,10 @@ class TempestConf():
         self.set_service('cinder', 'volume', services)
 
     def do_resources(self, image, has_neutron, create):
-        LOG.debug("Creating resources")
+        if create:
+            LOG.debug("Creating resources")
+        else:
+            LOG.debug("Querying resources")
         manager = AdminClientManager(self, has_neutron)
         if create:
             manager.create_users_and_tenants()
