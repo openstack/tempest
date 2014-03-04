@@ -16,12 +16,9 @@
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -34,7 +31,7 @@ class AggregatesClientXML(rest_client.RestClient):
         self.service = CONF.compute.catalog_type
 
     def _format_aggregate(self, g):
-        agg = xml_to_json(g)
+        agg = xml_utils.xml_to_json(g)
         aggregate = {}
         for key, value in agg.items():
             if key == 'hosts':
@@ -64,21 +61,21 @@ class AggregatesClientXML(rest_client.RestClient):
 
     def create_aggregate(self, name, availability_zone=None):
         """Creates a new aggregate."""
-        post_body = Element("aggregate",
-                            name=name,
-                            availability_zone=availability_zone)
+        post_body = xml_utils.Element("aggregate",
+                                      name=name,
+                                      availability_zone=availability_zone)
         resp, body = self.post('os-aggregates',
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def update_aggregate(self, aggregate_id, name, availability_zone=None):
         """Update a aggregate."""
-        put_body = Element("aggregate",
-                           name=name,
-                           availability_zone=availability_zone)
+        put_body = xml_utils.Element("aggregate",
+                                     name=name,
+                                     availability_zone=availability_zone)
         resp, body = self.put('os-aggregates/%s' % str(aggregate_id),
-                              str(Document(put_body)))
+                              str(xml_utils.Document(put_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
@@ -95,30 +92,30 @@ class AggregatesClientXML(rest_client.RestClient):
 
     def add_host(self, aggregate_id, host):
         """Adds a host to the given aggregate."""
-        post_body = Element("add_host", host=host)
+        post_body = xml_utils.Element("add_host", host=host)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def remove_host(self, aggregate_id, host):
         """Removes a host from the given aggregate."""
-        post_body = Element("remove_host", host=host)
+        post_body = xml_utils.Element("remove_host", host=host)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def set_metadata(self, aggregate_id, meta):
         """Replaces the aggregate's existing metadata with new metadata."""
-        post_body = Element("set_metadata")
-        metadata = Element("metadata")
+        post_body = xml_utils.Element("set_metadata")
+        metadata = xml_utils.Element("metadata")
         post_body.append(metadata)
         for k, v in meta.items():
-            meta = Element(k)
-            meta.append(Text(v))
+            meta = xml_utils.Element(k)
+            meta.append(xml_utils.Text(v))
             metadata.append(meta)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate

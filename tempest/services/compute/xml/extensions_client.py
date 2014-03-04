@@ -16,8 +16,8 @@
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -32,7 +32,7 @@ class ExtensionsClientXML(rest_client.RestClient):
     def _parse_array(self, node):
         array = []
         for child in node:
-            array.append(xml_to_json(child))
+            array.append(xml_utils.xml_to_json(child))
         return array
 
     def list_extensions(self):
@@ -48,5 +48,5 @@ class ExtensionsClientXML(rest_client.RestClient):
 
     def get_extension(self, extension_alias):
         resp, body = self.get('extensions/%s' % extension_alias)
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body

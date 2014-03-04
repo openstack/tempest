@@ -17,8 +17,8 @@
 from ast import literal_eval
 from lxml import etree
 
+from tempest.common import xml_utils as xml
 from tempest import config
-from tempest.services.compute.xml import common as xml
 from tempest.services.volume.json.admin import volume_quotas_client
 
 CONF = config.CONF

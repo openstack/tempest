@@ -19,13 +19,9 @@ from lxml import etree
 
 from tempest.common import rest_client
 from tempest.common import waiters
+from tempest.common import xml_utils
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
 CONF = config.CONF
 
@@ -40,24 +36,24 @@ class ImagesClientXML(rest_client.RestClient):
         self.build_timeout = CONF.compute.build_timeout
 
     def _parse_server(self, node):
-        data = xml_to_json(node)
+        data = xml_utils.xml_to_json(node)
         return self._parse_links(node, data)
 
     def _parse_image(self, node):
         """Parses detailed XML image information into dictionary."""
-        data = xml_to_json(node)
+        data = xml_utils.xml_to_json(node)
 
         self._parse_links(node, data)
 
         # parse all metadata
         if 'metadata' in data:
-            tag = node.find('{%s}metadata' % XMLNS_11)
+            tag = node.find('{%s}metadata' % xml_utils.XMLNS_11)
             data['metadata'] = dict((x.get('key'), x.text)
                                     for x in tag.getchildren())
 
         # parse server information
         if 'server' in data:
-            tag = node.find('{%s}server' % XMLNS_11)
+            tag = node.find('{%s}server' % xml_utils.XMLNS_11)
             data['server'] = self._parse_server(tag)
         return data
 
@@ -67,7 +63,7 @@ class ImagesClientXML(rest_client.RestClient):
         if 'link' in data:
             # remove single link element
             del data['link']
-            data['links'] = [xml_to_json(x) for x in
+            data['links'] = [xml_utils.xml_to_json(x) for x in
                              node.findall('{http://www.w3.org/2005/Atom}link')]
         return data
 
@@ -93,17 +89,17 @@ class ImagesClientXML(rest_client.RestClient):
 
     def create_image(self, server_id, name, meta=None):
         """Creates an image of the original server."""
-        post_body = Element('createImage', name=name)
+        post_body = xml_utils.Element('createImage', name=name)
 
         if meta:
-            metadata = Element('metadata')
+            metadata = xml_utils.Element('metadata')
             post_body.append(metadata)
             for k, v in meta.items():
-                data = Element('meta', key=k)
-                data.append(Text(v))
+                data = xml_utils.Element('meta', key=k)
+                data.append(xml_utils.Text(v))
                 metadata.append(data)
         resp, body = self.post('servers/%s/action' % str(server_id),
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         return resp, body
 
     def list_images(self, params=None):
@@ -144,10 +140,10 @@ class ImagesClientXML(rest_client.RestClient):
         waiters.wait_for_image_status(self, image_id, status)
 
     def _metadata_body(self, meta):
-        post_body = Element('metadata')
+        post_body = xml_utils.Element('metadata')
         for k, v in meta.items():
-            data = Element('meta', key=k)
-            data.append(Text(v))
+            data = xml_utils.Element('meta', key=k)
+            data.append(xml_utils.Text(v))
             post_body.append(data)
         return post_body
 
@@ -161,7 +157,7 @@ class ImagesClientXML(rest_client.RestClient):
         """Sets the metadata for an image."""
         post_body = self._metadata_body(meta)
         resp, body = self.put('images/%s/metadata' % image_id,
-                              str(Document(post_body)))
+                              str(xml_utils.Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -169,7 +165,7 @@ class ImagesClientXML(rest_client.RestClient):
         """Updates the metadata for an image."""
         post_body = self._metadata_body(meta)
         resp, body = self.post('images/%s/metadata' % str(image_id),
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -183,19 +179,19 @@ class ImagesClientXML(rest_client.RestClient):
     def set_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key."""
         for k, v in meta.items():
-            post_body = Element('meta', key=key)
-            post_body.append(Text(v))
+            post_body = xml_utils.Element('meta', key=key)
+            post_body.append(xml_utils.Text(v))
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
-                              str(Document(post_body)))
-        body = xml_to_json(etree.fromstring(body))
+                              str(xml_utils.Document(post_body)))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def update_image_metadata_item(self, image_id, key, meta):
         """Sets the value for a specific image metadata key."""
-        post_body = Document('meta', Text(meta), key=key)
+        post_body = xml_utils.Document('meta', xml_utils.Text(meta), key=key)
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
                               post_body)
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body['meta']
 
     def delete_image_metadata_item(self, image_id, key):

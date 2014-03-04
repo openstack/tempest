@@ -16,7 +16,7 @@
 from lxml import etree
 
 from tempest.common import rest_client
-from tempest.services.compute.xml import common
+from tempest.common import xml_utils as common
 import tempest.services.telemetry.telemetry_client_base as client
 
 

@@ -17,13 +17,9 @@ from lxml import etree
 import urllib
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
 CONF = config.CONF
 
@@ -38,11 +34,11 @@ class SecurityGroupsClientXML(rest_client.RestClient):
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
-            array.append(xml_to_json(child))
+            array.append(xml_utils.xml_to_json(child))
         return array
 
     def _parse_body(self, body):
-        json = xml_to_json(body)
+        json = xml_utils.xml_to_json(body)
         return json
 
     def list_security_groups(self, params=None):
@@ -69,12 +65,12 @@ class SecurityGroupsClientXML(rest_client.RestClient):
         name (Required): Name of security group.
         description (Required): Description of security group.
         """
-        security_group = Element("security_group", name=name)
-        des = Element("description")
-        des.append(Text(content=description))
+        security_group = xml_utils.Element("security_group", name=name)
+        des = xml_utils.Element("description")
+        des.append(xml_utils.Text(content=description))
         security_group.append(des)
         resp, body = self.post('os-security-groups',
-                               str(Document(security_group)))
+                               str(xml_utils.Document(security_group)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -86,18 +82,18 @@ class SecurityGroupsClientXML(rest_client.RestClient):
         name: new name of security group
         description: new description of security group
         """
-        security_group = Element("security_group")
+        security_group = xml_utils.Element("security_group")
         if name:
-            sg_name = Element("name")
-            sg_name.append(Text(content=name))
+            sg_name = xml_utils.Element("name")
+            sg_name.append(xml_utils.Text(content=name))
             security_group.append(sg_name)
         if description:
-            des = Element("description")
-            des.append(Text(content=description))
+            des = xml_utils.Element("description")
+            des.append(xml_utils.Text(content=description))
             security_group.append(des)
         resp, body = self.put('os-security-groups/%s' %
                               str(security_group_id),
-                              str(Document(security_group)))
+                              str(xml_utils.Document(security_group)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -117,7 +113,7 @@ class SecurityGroupsClientXML(rest_client.RestClient):
         cidr     : CIDR for address range.
         group_id : ID of the Source group
         """
-        group_rule = Element("security_group_rule")
+        group_rule = xml_utils.Element("security_group_rule")
 
         elements = dict()
         elements['cidr'] = kwargs.get('cidr')
@@ -129,12 +125,12 @@ class SecurityGroupsClientXML(rest_client.RestClient):
 
         for k, v in elements.items():
             if v is not None:
-                element = Element(k)
-                element.append(Text(content=str(v)))
+                element = xml_utils.Element(k)
+                element.append(xml_utils.Text(content=str(v)))
                 group_rule.append(element)
 
         url = 'os-security-group-rules'
-        resp, body = self.post(url, str(Document(group_rule)))
+        resp, body = self.post(url, str(xml_utils.Document(group_rule)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -151,8 +147,8 @@ class SecurityGroupsClientXML(rest_client.RestClient):
         secgroups = body.getchildren()
         for secgroup in secgroups:
             if secgroup.get('id') == security_group_id:
-                node = secgroup.find('{%s}rules' % XMLNS_11)
-                rules = [xml_to_json(x) for x in node.getchildren()]
+                node = secgroup.find('{%s}rules' % xml_utils.XMLNS_11)
+                rules = [xml_utils.xml_to_json(x) for x in node.getchildren()]
                 return resp, rules
         raise exceptions.NotFound('No such Security Group')
 

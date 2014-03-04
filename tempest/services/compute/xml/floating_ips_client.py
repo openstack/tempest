@@ -17,12 +17,9 @@ from lxml import etree
 import urllib
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -37,11 +34,11 @@ class FloatingIPsClientXML(rest_client.RestClient):
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
-            array.append(xml_to_json(child))
+            array.append(xml_utils.xml_to_json(child))
         return array
 
     def _parse_floating_ip(self, body):
-        json = xml_to_json(body)
+        json = xml_utils.xml_to_json(body)
         return json
 
     def list_floating_ips(self, params=None):
@@ -67,9 +64,9 @@ class FloatingIPsClientXML(rest_client.RestClient):
         """Allocate a floating IP to the project."""
         url = 'os-floating-ips'
         if pool_name:
-            doc = Document()
-            pool = Element("pool")
-            pool.append(Text(pool_name))
+            doc = xml_utils.Document()
+            pool = xml_utils.Element("pool")
+            pool.append(xml_utils.Text(pool_name))
             doc.append(pool)
             resp, body = self.post(url, str(doc))
         else:
@@ -86,8 +83,8 @@ class FloatingIPsClientXML(rest_client.RestClient):
     def associate_floating_ip_to_server(self, floating_ip, server_id):
         """Associate the provided floating IP to a specific server."""
         url = "servers/%s/action" % str(server_id)
-        doc = Document()
-        server = Element("addFloatingIp")
+        doc = xml_utils.Document()
+        server = xml_utils.Element("addFloatingIp")
         doc.append(server)
         server.add_attr("address", floating_ip)
         resp, body = self.post(url, str(doc))
@@ -96,8 +93,8 @@ class FloatingIPsClientXML(rest_client.RestClient):
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
         """Disassociate the provided floating IP from a specific server."""
         url = "servers/%s/action" % str(server_id)
-        doc = Document()
-        server = Element("removeFloatingIp")
+        doc = xml_utils.Document()
+        server = xml_utils.Element("removeFloatingIp")
         doc.append(server)
         server.add_attr("address", floating_ip)
         resp, body = self.post(url, str(doc))

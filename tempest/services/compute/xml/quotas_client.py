@@ -16,11 +16,8 @@
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
 CONF = config.CONF
 
@@ -51,7 +48,7 @@ class QuotasClientXML(rest_client.RestClient):
         if user_id:
             url += '?user_id=%s' % str(user_id)
         resp, body = self.get(url)
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body
 
@@ -60,7 +57,7 @@ class QuotasClientXML(rest_client.RestClient):
 
         url = 'os-quota-sets/%s/defaults' % str(tenant_id)
         resp, body = self.get(url)
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body
 
@@ -74,8 +71,8 @@ class QuotasClientXML(rest_client.RestClient):
         """
         Updates the tenant's quota limits for one or more resources
         """
-        post_body = Element("quota_set",
-                            xmlns=XMLNS_11)
+        post_body = xml_utils.Element("quota_set",
+                                      xmlns=xml_utils.XMLNS_11)
 
         if force is not None:
             post_body.add_attr('force', force)
@@ -119,8 +116,8 @@ class QuotasClientXML(rest_client.RestClient):
             post_body.add_attr('security_groups', security_groups)
 
         resp, body = self.put('os-quota-sets/%s' % str(tenant_id),
-                              str(Document(post_body)))
-        body = xml_to_json(etree.fromstring(body))
+                              str(xml_utils.Document(post_body)))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body
 

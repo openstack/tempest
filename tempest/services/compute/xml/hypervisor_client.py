@@ -16,8 +16,8 @@
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -30,7 +30,7 @@ class HypervisorClientXML(rest_client.RestClient):
         self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):
-        return [xml_to_json(x) for x in node]
+        return [xml_utils.xml_to_json(x) for x in node]
 
     def get_hypervisor_list(self):
         """List hypervisors information."""
@@ -47,7 +47,7 @@ class HypervisorClientXML(rest_client.RestClient):
     def get_hypervisor_show_details(self, hyper_id):
         """Display the details of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s' % hyper_id)
-        hypervisor = xml_to_json(etree.fromstring(body))
+        hypervisor = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, hypervisor
 
     def get_hypervisor_servers(self, hyper_name):
@@ -59,13 +59,13 @@ class HypervisorClientXML(rest_client.RestClient):
     def get_hypervisor_stats(self):
         """Get hypervisor statistics over all compute nodes."""
         resp, body = self.get('os-hypervisors/statistics')
-        stats = xml_to_json(etree.fromstring(body))
+        stats = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, stats
 
     def get_hypervisor_uptime(self, hyper_id):
         """Display the uptime of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id)
-        uptime = xml_to_json(etree.fromstring(body))
+        uptime = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, uptime
 
     def search_hypervisor(self, hyper_name):

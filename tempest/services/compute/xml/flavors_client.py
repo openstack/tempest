@@ -18,12 +18,8 @@ import urllib
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
 CONF = config.CONF
 
@@ -76,7 +72,7 @@ class FlavorsClientXML(rest_client.RestClient):
         return flavor
 
     def _parse_array(self, node):
-        return [self._format_flavor(xml_to_json(x)) for x in node]
+        return [self._format_flavor(xml_utils.xml_to_json(x)) for x in node]
 
     def _list_flavors(self, url, params):
         if params:
@@ -96,19 +92,19 @@ class FlavorsClientXML(rest_client.RestClient):
 
     def get_flavor_details(self, flavor_id):
         resp, body = self.get("flavors/%s" % str(flavor_id))
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         flavor = self._format_flavor(body)
         return resp, flavor
 
     def create_flavor(self, name, ram, vcpus, disk, flavor_id, **kwargs):
         """Creates a new flavor or instance type."""
-        flavor = Element("flavor",
-                         xmlns=XMLNS_11,
-                         ram=ram,
-                         vcpus=vcpus,
-                         disk=disk,
-                         id=flavor_id,
-                         name=name)
+        flavor = xml_utils.Element("flavor",
+                                   xmlns=xml_utils.XMLNS_11,
+                                   ram=ram,
+                                   vcpus=vcpus,
+                                   disk=disk,
+                                   id=flavor_id,
+                                   name=name)
         if kwargs.get('rxtx'):
             flavor.add_attr('rxtx_factor', kwargs.get('rxtx'))
         if kwargs.get('swap'):
@@ -121,8 +117,8 @@ class FlavorsClientXML(rest_client.RestClient):
                             kwargs.get('is_public'))
         flavor.add_attr('xmlns:OS-FLV-EXT-DATA', XMLNS_OS_FLV_EXT_DATA)
         flavor.add_attr('xmlns:os-flavor-access', XMLNS_OS_FLV_ACCESS)
-        resp, body = self.post('flavors', str(Document(flavor)))
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.post('flavors', str(xml_utils.Document(flavor)))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         flavor = self._format_flavor(body)
         return resp, flavor
 
@@ -142,18 +138,18 @@ class FlavorsClientXML(rest_client.RestClient):
 
     def set_flavor_extra_spec(self, flavor_id, specs):
         """Sets extra Specs to the mentioned flavor."""
-        extra_specs = Element("extra_specs")
+        extra_specs = xml_utils.Element("extra_specs")
         for key in specs.keys():
             extra_specs.add_attr(key, specs[key])
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
-                               str(Document(extra_specs)))
-        body = xml_to_json(etree.fromstring(body))
+                               str(xml_utils.Document(extra_specs)))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_flavor_extra_spec(self, flavor_id):
         """Gets extra Specs of the mentioned flavor."""
         resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id)
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
@@ -163,21 +159,21 @@ class FlavorsClientXML(rest_client.RestClient):
         body = {}
         element = etree.fromstring(xml_body)
         key = element.get('key')
-        body[key] = xml_to_json(element)
+        body[key] = xml_utils.xml_to_json(element)
         return resp, body
 
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
         """Update extra Specs details of the mentioned flavor and key."""
-        doc = Document()
+        doc = xml_utils.Document()
         for (k, v) in kwargs.items():
-            element = Element(k)
+            element = xml_utils.Element(k)
             doc.append(element)
-            value = Text(v)
+            value = xml_utils.Text(v)
             element.append(value)
 
         resp, body = self.put('flavors/%s/os-extra_specs/%s' %
                               (flavor_id, key), str(doc))
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, {key: body}
 
     def unset_flavor_extra_spec(self, flavor_id, key):
@@ -186,7 +182,7 @@ class FlavorsClientXML(rest_client.RestClient):
                            key))
 
     def _parse_array_access(self, node):
-        return [xml_to_json(x) for x in node]
+        return [xml_utils.xml_to_json(x) for x in node]
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
@@ -196,8 +192,8 @@ class FlavorsClientXML(rest_client.RestClient):
 
     def add_flavor_access(self, flavor_id, tenant_id):
         """Add flavor access for the specified tenant."""
-        doc = Document()
-        server = Element("addTenantAccess")
+        doc = xml_utils.Document()
+        server = xml_utils.Element("addTenantAccess")
         doc.append(server)
         server.add_attr("tenant", tenant_id)
         resp, body = self.post('flavors/%s/action' % str(flavor_id), str(doc))
@@ -206,8 +202,8 @@ class FlavorsClientXML(rest_client.RestClient):
 
     def remove_flavor_access(self, flavor_id, tenant_id):
         """Remove flavor access from the specified tenant."""
-        doc = Document()
-        server = Element("removeTenantAccess")
+        doc = xml_utils.Document()
+        server = xml_utils.Element("removeTenantAccess")
         doc.append(server)
         server.add_attr("tenant", tenant_id)
         resp, body = self.post('flavors/%s/action' % str(flavor_id), str(doc))

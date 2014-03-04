@@ -16,8 +16,8 @@
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -31,7 +31,7 @@ class AvailabilityZoneClientXML(rest_client.RestClient):
         self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):
-        return [xml_to_json(x) for x in node]
+        return [xml_utils.xml_to_json(x) for x in node]
 
     def get_availability_zone_list(self):
         resp, body = self.get('os-availability-zone')

@@ -19,13 +19,9 @@ import urllib
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
 CONF = config.CONF
 
@@ -51,7 +47,7 @@ class VolumesExtensionsClientXML(rest_client.RestClient):
                 vol['metadata'] = dict((meta.get('key'),
                                         meta.text) for meta in list(child))
             else:
-                vol[tag] = xml_to_json(child)
+                vol[tag] = xml_utils.xml_to_json(child)
         return vol
 
     def list_volumes(self, params=None):
@@ -96,23 +92,23 @@ class VolumesExtensionsClientXML(rest_client.RestClient):
         :param display_name: Optional Volume Name.
         :param metadata: An optional dictionary of values for metadata.
         """
-        volume = Element("volume",
-                         xmlns=XMLNS_11,
-                         size=size)
+        volume = xml_utils.Element("volume",
+                                   xmlns=xml_utils.XMLNS_11,
+                                   size=size)
         if display_name:
             volume.add_attr('display_name', display_name)
 
         if metadata:
-            _metadata = Element('metadata')
+            _metadata = xml_utils.Element('metadata')
             volume.append(_metadata)
             for key, value in metadata.items():
-                meta = Element('meta')
+                meta = xml_utils.Element('meta')
                 meta.add_attr('key', key)
-                meta.append(Text(value))
+                meta.append(xml_utils.Text(value))
                 _metadata.append(meta)
 
-        resp, body = self.post('os-volumes', str(Document(volume)))
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.post('os-volumes', str(xml_utils.Document(volume)))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_volume(self, volume_id):

@@ -17,11 +17,8 @@
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -36,34 +33,35 @@ class KeyPairsClientXML(rest_client.RestClient):
     def list_keypairs(self):
         resp, body = self.get("os-keypairs")
         node = etree.fromstring(body)
-        body = [{'keypair': xml_to_json(x)} for x in node.getchildren()]
+        body = [{'keypair': xml_utils.xml_to_json(x)} for x in
+                node.getchildren()]
         return resp, body
 
     def get_keypair(self, key_name):
         resp, body = self.get("os-keypairs/%s" % str(key_name))
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def create_keypair(self, name, pub_key=None):
-        doc = Document()
+        doc = xml_utils.Document()
 
-        keypair_element = Element("keypair")
+        keypair_element = xml_utils.Element("keypair")
 
         if pub_key:
-            public_key_element = Element("public_key")
-            public_key_text = Text(pub_key)
+            public_key_element = xml_utils.Element("public_key")
+            public_key_text = xml_utils.Text(pub_key)
             public_key_element.append(public_key_text)
             keypair_element.append(public_key_element)
 
-        name_element = Element("name")
-        name_text = Text(name)
+        name_element = xml_utils.Element("name")
+        name_text = xml_utils.Text(name)
         name_element.append(name_text)
         keypair_element.append(name_element)
 
         doc.append(keypair_element)
 
         resp, body = self.post("os-keypairs", body=str(doc))
-        body = xml_to_json(etree.fromstring(body))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_keypair(self, key_name):
