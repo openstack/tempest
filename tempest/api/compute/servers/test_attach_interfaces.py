@@ -48,6 +48,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
     def _create_server_get_interfaces(self):
         resp, server = self.create_test_server(wait_until='ACTIVE')
         resp, ifs = self.client.list_interfaces(server['id'])
+        self.assertEqual(200, resp.status)
         resp, body = self.client.wait_for_interface_status(
             server['id'], ifs[0]['port_id'], 'ACTIVE')
         ifs[0]['port_state'] = body['port_state']
@@ -55,6 +56,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
     def _test_create_interface(self, server):
         resp, iface = self.client.create_interface(server['id'])
+        self.assertEqual(200, resp.status)
         resp, iface = self.client.wait_for_interface_status(
             server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface)
@@ -64,6 +66,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         network_id = ifs[0]['net_id']
         resp, iface = self.client.create_interface(server['id'],
                                                    network_id=network_id)
+        self.assertEqual(200, resp.status)
         resp, iface = self.client.wait_for_interface_status(
             server['id'], iface['port_id'], 'ACTIVE')
         self._check_interface(iface, network_id=network_id)
@@ -73,12 +76,14 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         iface = ifs[0]
         resp, _iface = self.client.show_interface(server['id'],
                                                   iface['port_id'])
+        self.assertEqual(200, resp.status)
         self.assertEqual(iface, _iface)
 
     def _test_delete_interface(self, server, ifs):
         # NOTE(danms): delete not the first or last, but one in the middle
         iface = ifs[1]
-        self.client.delete_interface(server['id'], iface['port_id'])
+        resp, _ = self.client.delete_interface(server['id'], iface['port_id'])
+        self.assertEqual(202, resp.status)
         _ifs = self.client.list_interfaces(server['id'])[1]
         start = int(time.time())
 
