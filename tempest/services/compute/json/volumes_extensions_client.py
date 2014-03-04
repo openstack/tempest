@@ -17,14 +17,14 @@ import json
 import time
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class VolumesExtensionsClientJSON(RestClient):
+class VolumesExtensionsClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(VolumesExtensionsClientJSON, self).__init__(

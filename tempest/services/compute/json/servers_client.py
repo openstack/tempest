@@ -18,7 +18,7 @@ import json
 import time
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest.common import waiters
 from tempest import config
 from tempest import exceptions
@@ -26,7 +26,7 @@ from tempest import exceptions
 CONF = config.CONF
 
 
-class ServersClientJSON(RestClient):
+class ServersClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(ServersClientJSON, self).__init__(auth_provider)

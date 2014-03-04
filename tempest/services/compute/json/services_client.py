@@ -17,13 +17,13 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class ServicesClientJSON(RestClient):
+class ServicesClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(ServicesClientJSON, self).__init__(auth_provider)
