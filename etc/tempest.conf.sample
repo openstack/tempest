@@ -359,6 +359,10 @@
 # iSCSI volumes (boolean value)
 #block_migrate_cinder_iscsi=false
 
+# Enable VNC console. This configuration value should be same
+# as [nova.vnc]->vnc_enabled in nova.conf (boolean value)
+#vnc_console=false
+
 
 [dashboard]
 
