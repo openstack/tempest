@@ -16,11 +16,12 @@
 import copy
 import datetime
 
+from oslotest import mockpatch
+
 from tempest import auth
 from tempest.common import http
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config

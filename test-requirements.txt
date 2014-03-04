@@ -7,3 +7,4 @@ oslosphinx
 mox>=0.5.3
 mock>=1.0
 coverage>=3.6
+oslotest
