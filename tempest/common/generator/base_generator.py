@@ -59,7 +59,9 @@ class BasicGeneratorSet(object):
                 "enum": ["GET", "PUT", "HEAD",
                          "POST", "PATCH", "DELETE", 'COPY']
             },
+            "admin_client": {"type": "boolean"},
             "url": {"type": "string"},
+            "default_result_code": {"type": "integer"},
             "json-schema": jsonschema._utils.load_schema("draft4"),
             "resources": {
                 "type": "array",
