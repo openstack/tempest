@@ -16,14 +16,14 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class FloatingIPsClientJSON(RestClient):
+class FloatingIPsClientJSON(rest_client.RestClient):
     def __init__(self, auth_provider):
         super(FloatingIPsClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
