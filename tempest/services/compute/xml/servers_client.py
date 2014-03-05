@@ -641,3 +641,8 @@ class ServersClientXML(rest_client.RestClient):
     def inject_network_info(self, server_id, **kwargs):
         """Inject the Network Info into server"""
         return self.action(server_id, 'injectNetworkInfo', None, **kwargs)
+
+    def get_vnc_console(self, server_id, console_type):
+        """Get URL of VNC console."""
+        return self.action(server_id, "os-getVNCConsole",
+                           "console", type=console_type)

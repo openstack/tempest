@@ -17,6 +17,7 @@ import base64
 import time
 
 import testtools
+import urlparse
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -421,6 +422,29 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp, server = self.servers_client.start(self.server_id)
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
+
+    def _validate_url(self, url):
+        valid_scheme = ['http', 'https']
+        parsed_url = urlparse.urlparse(url)
+        self.assertNotEqual('None', parsed_url.port)
+        self.assertNotEqual('None', parsed_url.hostname)
+        self.assertIn(parsed_url.scheme, valid_scheme)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
+                          'VNC Console feature is disabled.')
+    @test.attr(type='gate')
+    def test_get_vnc_console(self):
+        # Get the VNC console of type 'novnc' and 'xvpvnc'
+        console_types = ['novnc', 'xvpvnc']
+        for console_type in console_types:
+            resp, body = self.servers_client.get_vnc_console(self.server_id,
+                                                             console_type)
+            self.assertEqual(
+                200, resp.status,
+                "Failed to get Console Type: %s" % (console_types))
+            self.assertEqual(console_type, body['type'])
+            self.assertNotEqual('', body['url'])
+            self._validate_url(body['url'])
 
 
 class ServerActionsTestXML(ServerActionsTestJSON):
