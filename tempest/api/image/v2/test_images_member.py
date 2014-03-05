@@ -11,13 +11,13 @@
 #    under the License.
 
 from tempest.api.image import base
-from tempest.test import attr
+from tempest import test
 
 
 class ImagesMemberTest(base.BaseV2MemberImageTest):
     _interface = 'json'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_image_share_accept(self):
         image_id = self._create_image()
         resp, member = self.os_img_client.add_member(image_id,
@@ -40,7 +40,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertEqual(member['image_id'], image_id)
         self.assertEqual(member['status'], 'accepted')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_image_share_reject(self):
         image_id = self._create_image()
         resp, member = self.os_img_client.add_member(image_id,
@@ -56,7 +56,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertEqual(200, resp.status)
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_image_member(self):
         image_id = self._create_image()
         self.os_img_client.add_member(image_id,
@@ -73,7 +73,7 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         self.assertEqual(image_id, member['image_id'])
         self.assertEqual('accepted', member['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_remove_image_member(self):
         image_id = self._create_image()
         self.os_img_client.add_member(image_id,

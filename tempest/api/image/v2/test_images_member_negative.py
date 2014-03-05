@@ -12,13 +12,13 @@
 
 from tempest.api.image import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
     _interface = 'json'
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_image_share_invalid_status(self):
         image_id = self._create_image()
         resp, member = self.os_img_client.add_member(image_id,
@@ -28,7 +28,7 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
                           self.alt_img_client.update_member_status,
                           image_id, self.alt_tenant_id, 'notavalidstatus')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_image_share_owner_cannot_accept(self):
         image_id = self._create_image()
         resp, member = self.os_img_client.add_member(image_id,

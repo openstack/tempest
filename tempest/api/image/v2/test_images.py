@@ -19,7 +19,7 @@ import random
 
 from tempest.api.image import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class BasicOperationsImagesTest(base.BaseV2ImageTest):
@@ -27,7 +27,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
     Here we test the basic operations of images
     """
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_register_upload_get_image_file(self):
 
         """
@@ -68,7 +68,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(file_content, body)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_delete_image(self):
         # Deletes an image by image_id
 
@@ -90,7 +90,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(resp.status, 200)
         self.assertNotIn(image_id, images)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_image(self):
         # Updates an image by image_id
 
@@ -176,7 +176,7 @@ class ListImagesTest(base.BaseV2ImageTest):
                 msg = "Failed to list images by %s" % key
                 self.assertEqual(params[key], image[key], msg)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
         resp, images_list = self.client.image_list()
@@ -186,25 +186,25 @@ class ListImagesTest(base.BaseV2ImageTest):
         for image in self.created_images:
             self.assertIn(image, image_list)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_param_container_format(self):
         # Test to get all images with container_format='bare'
         params = {"container_format": "bare"}
         self._list_by_param_value_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_param_disk_format(self):
         # Test to get all images with disk_format = raw
         params = {"disk_format": "raw"}
         self._list_by_param_value_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_param_visibility(self):
         # Test to get all images with visibility = public
         params = {"visibility": "public"}
         self._list_by_param_value_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_param_size(self):
         # Test to get all images by size
         image_id = self.created_images[1]
@@ -215,7 +215,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         params = {"size": image['size']}
         self._list_by_param_value_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_param_min_max_size(self):
         # Test to get all images with size between 2000 to 3000
         image_id = self.created_images[1]
@@ -234,13 +234,13 @@ class ListImagesTest(base.BaseV2ImageTest):
                             image_size <= params['size_max'],
                             "Failed to get images by size_min and size_max")
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_param_status(self):
         # Test to get all active images
         params = {"status": "active"}
         self._list_by_param_value_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_images_param_limit(self):
         # Test to get images by limit
         params = {"limit": 2}
@@ -250,7 +250,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         self.assertEqual(len(images_list), params['limit'],
                          "Failed to get images by limit")
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_image_schema(self):
         # Test to get image schema
         schema = "image"
@@ -258,7 +258,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         self.assertEqual(200, resp.status)
         self.assertEqual("image", body['name'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_images_schema(self):
         # Test to get images schema
         schema = "images"

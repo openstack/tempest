@@ -17,12 +17,12 @@ import uuid
 from tempest.api.image import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ImagesTagsNegativeTest(base.BaseV2ImageTest):
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_tags_for_non_existing_image(self):
         # Update tag with non existing image.
         tag = data_utils.rand_name('tag-')
@@ -30,7 +30,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
         self.assertRaises(exceptions.NotFound, self.client.add_image_tag,
                           non_exist_image, tag)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_non_existing_tag(self):
         # Delete non existing tag.
         resp, body = self.create_image(container_format='bare',

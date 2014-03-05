@@ -14,12 +14,12 @@
 
 
 from tempest.api.image import base
-from tempest.test import attr
+from tempest import test
 
 
 class ImageMembersTest(base.BaseV1ImageMembersTest):
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_add_image_member(self):
         image = self._create_image()
         resp = self.client.add_member(self.alt_tenant_id, image)
@@ -33,7 +33,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         resp, body = self.alt_img_cli.get_image(image)
         self.assertEqual(200, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_shared_images(self):
         image = self._create_image()
         resp = self.client.add_member(self.alt_tenant_id, image)
@@ -48,7 +48,7 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         self.assertIn(share_image, images)
         self.assertIn(image, images)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_remove_member(self):
         image_id = self._create_image()
         resp = self.client.add_member(self.alt_tenant_id, image_id)

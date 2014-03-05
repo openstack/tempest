@@ -18,7 +18,7 @@ import uuid
 
 from tempest.api.image import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ImagesNegativeTest(base.BaseV2ImageTest):
@@ -35,20 +35,20 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         ** delete the deleted image
      """
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_non_existent_image(self):
         # get the non-existent image
         non_existent_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.get_image,
                           non_existent_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_image_null_id(self):
         # get image with image_id = NULL
         image_id = ""
         self.assertRaises(exceptions.NotFound, self.client.get_image, image_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_delete_deleted_image(self):
         # get and delete the deleted image
         # create and delete image
@@ -67,27 +67,27 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_image,
                           image_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_non_existing_image(self):
         # delete non-existent image
         non_existent_image_id = str(uuid.uuid4())
         self.assertRaises(exceptions.NotFound, self.client.delete_image,
                           non_existent_image_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_image_null_id(self):
         # delete image with image_id=NULL
         image_id = ""
         self.assertRaises(exceptions.NotFound, self.client.delete_image,
                           image_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_register_with_invalid_container_format(self):
         # Negative tests for invalid data supplied to POST /images
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           'test', 'wrong', 'vhd')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_register_with_invalid_disk_format(self):
         self.assertRaises(exceptions.BadRequest, self.client.create_image,
                           'test', 'bare', 'wrong')
