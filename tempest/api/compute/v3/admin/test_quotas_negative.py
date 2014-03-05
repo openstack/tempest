@@ -20,7 +20,6 @@ from tempest import test
 
 
 class QuotasAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
-    _interface = 'json'
     force_tenant_isolation = True
 
     @classmethod

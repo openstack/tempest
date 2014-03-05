@@ -22,7 +22,6 @@ CONF = config.CONF
 class DeleteServersV3Test(base.BaseV3ComputeTest):
     # NOTE: Server creations of each test class should be under 10
     # for preventing "Quota exceeded for instances".
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
@@ -89,7 +88,6 @@ class DeleteServersV3Test(base.BaseV3ComputeTest):
 class DeleteServersAdminV3Test(base.BaseV3ComputeAdminTest):
     # NOTE: Server creations of each test class should be under 10
     # for preventing "Quota exceeded for instances".
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

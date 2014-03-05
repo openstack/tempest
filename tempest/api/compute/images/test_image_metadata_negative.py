@@ -20,7 +20,6 @@ from tempest.test import attr
 
 
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -25,7 +25,6 @@ CONF = config.CONF
 
 
 class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
-    _interface = 'json'
     server_id = None
 
     @classmethod

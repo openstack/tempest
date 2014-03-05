@@ -23,7 +23,6 @@ CONF = config.CONF
 
 
 class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

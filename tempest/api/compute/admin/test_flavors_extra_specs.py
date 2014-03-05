@@ -26,8 +26,6 @@ class FlavorsExtraSpecsTestJSON(base.BaseV2ComputeAdminTest):
     GET Flavor Extra specs can be performed even by without admin privileges.
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(FlavorsExtraSpecsTestJSON, cls).setUpClass()

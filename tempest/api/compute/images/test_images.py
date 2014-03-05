@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class ImagesTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

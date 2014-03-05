@@ -25,7 +25,6 @@ CONF = config.CONF
 
 
 class VolumesNegativeTest(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

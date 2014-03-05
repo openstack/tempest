@@ -30,7 +30,6 @@ def not_existing_id():
 
 
 class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

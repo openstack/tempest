@@ -23,8 +23,6 @@ import urllib
 
 class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(InstanceUsageAuditLogNegativeTestJSON, cls).setUpClass()

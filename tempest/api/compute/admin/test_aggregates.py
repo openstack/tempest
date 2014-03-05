@@ -26,7 +26,6 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     _host_key = 'OS-EXT-SRV-ATTR:host'
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

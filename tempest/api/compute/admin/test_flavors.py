@@ -27,8 +27,6 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
     Tests Flavors API Create and Delete that require admin privileges
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(FlavorsAdminTestJSON, cls).setUpClass()

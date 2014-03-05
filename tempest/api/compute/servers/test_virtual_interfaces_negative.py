@@ -21,7 +21,6 @@ from tempest import test
 
 
 class VirtualInterfacesNegativeTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -22,8 +22,6 @@ import urllib
 
 class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(InstanceUsageAuditLogTestJSON, cls).setUpClass()

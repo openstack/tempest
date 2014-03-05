@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

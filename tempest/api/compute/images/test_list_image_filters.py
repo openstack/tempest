@@ -24,7 +24,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -28,7 +28,6 @@ CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
     run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
@@ -110,7 +109,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
-    _interface = 'json'
     run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 

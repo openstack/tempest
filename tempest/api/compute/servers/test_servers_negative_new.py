@@ -24,7 +24,6 @@ load_tests = testscenarios.load_tests_apply_scenarios
 
 class GetConsoleOutputNegativeTestJSON(base.BaseV2ComputeTest,
                                        test.NegativeAutoTest):
-    _interface = 'json'
     _service = 'compute'
     _schema_file = 'compute/servers/get_console_output.json'
 

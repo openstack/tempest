@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class AttachVolumeTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
     run_ssh = CONF.compute.run_ssh
 
     def __init__(self, *args, **kwargs):

@@ -29,7 +29,6 @@ CONF = config.CONF
 
 
 class ServerActionsTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
     resize_available = CONF.compute_feature_enabled.resize
     run_ssh = CONF.compute.run_ssh
 

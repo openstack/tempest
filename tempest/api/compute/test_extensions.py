@@ -26,7 +26,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ExtensionsTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @test.attr(type='gate')
     def test_list_extensions(self):

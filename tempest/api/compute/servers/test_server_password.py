@@ -19,7 +19,6 @@ from tempest.test import attr
 
 
 class ServerPasswordTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

@@ -31,8 +31,6 @@ class VolumesTestJSON(base.BaseV2ComputeTest):
     VOLUME_BACKING_FILE_SIZE is atleast 4G in your localrc
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(VolumesTestJSON, cls).setUpClass()
