@@ -154,12 +154,18 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_usage_list(self):
         self.nova('usage-list')
 
+    @testtools.skipIf(not CONF.service_available.cinder,
+                      "Skipped as Cinder is not available")
     def test_admin_volume_list(self):
         self.nova('volume-list')
 
+    @testtools.skipIf(not CONF.service_available.cinder,
+                      "Skipped as Cinder is not available")
     def test_admin_volume_snapshot_list(self):
         self.nova('volume-snapshot-list')
 
+    @testtools.skipIf(not CONF.service_available.cinder,
+                      "Skipped as Cinder is not available")
     def test_admin_volume_type_list(self):
         self.nova('volume-type-list')
 
