@@ -249,3 +249,19 @@ class ListImagesTest(base.BaseV2ImageTest):
 
         self.assertEqual(len(images_list), params['limit'],
                          "Failed to get images by limit")
+
+    @attr(type='gate')
+    def test_get_image_schema(self):
+        # Test to get image schema
+        schema = "image"
+        resp, body = self.client.get_schema(schema)
+        self.assertEqual(200, resp.status)
+        self.assertEqual("image", body['name'])
+
+    @attr(type='gate')
+    def test_get_images_schema(self):
+        # Test to get images schema
+        schema = "images"
+        resp, body = self.client.get_schema(schema)
+        self.assertEqual(200, resp.status)
+        self.assertEqual("images", body['name'])

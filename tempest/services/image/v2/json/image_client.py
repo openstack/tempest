@@ -39,23 +39,9 @@ class ImageClientV2JSON(rest_client.RestClient):
                                       filters=self.filters,
                                       insecure=dscv)
 
-    def get_images_schema(self):
-        url = 'v2/schemas/images'
-        resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body
-
-    def get_image_schema(self):
-        url = 'v2/schemas/image'
-        resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body
-
     def _validate_schema(self, body, type='image'):
-        if type == 'image':
-            resp, schema = self.get_image_schema()
-        elif type == 'images':
-            resp, schema = self.get_images_schema()
+        if type in ['image', 'images']:
+            resp, schema = self.get_schema(type)
         else:
             raise ValueError("%s is not a valid schema type" % type)
 
@@ -184,3 +170,9 @@ class ImageClientV2JSON(rest_client.RestClient):
         resp, _ = self.delete(url)
         self.expected_success(204, resp)
         return resp
+
+    def get_schema(self, schema):
+        url = 'v2/schemas/%s' % schema
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body
