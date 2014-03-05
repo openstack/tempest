@@ -313,13 +313,13 @@ class BaseV3ComputeTest(BaseComputeTest):
                         "%s will be removed shortly" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        cls.set_network_resources()
-        super(BaseV3ComputeTest, cls).setUpClass()
         if not CONF.compute_feature_enabled.api_v3:
-            cls.tearDownClass()
             skip_msg = ("%s skipped as nova v3 api is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)
+
+        cls.set_network_resources()
+        super(BaseV3ComputeTest, cls).setUpClass()
 
         cls.servers_client = cls.os.servers_v3_client
         cls.images_client = cls.os.image_client
