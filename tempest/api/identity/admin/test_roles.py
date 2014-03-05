@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from six import moves
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest.test import attr
@@ -24,7 +26,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
     @classmethod
     def setUpClass(cls):
         super(RolesTestJSON, cls).setUpClass()
-        for _ in xrange(5):
+        for _ in moves.xrange(5):
             role_name = data_utils.rand_name(name='role-')
             resp, role = cls.client.create_role(role_name)
             cls.data.roles.append(role)

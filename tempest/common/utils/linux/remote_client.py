@@ -11,6 +11,7 @@
 #    under the License.
 
 import re
+import six
 import time
 
 from tempest.common import ssh
@@ -28,7 +29,7 @@ class RemoteClient():
         network = CONF.compute.network_for_ssh
         ip_version = CONF.compute.ip_version_for_ssh
         ssh_channel_timeout = CONF.compute.ssh_channel_timeout
-        if isinstance(server, basestring):
+        if isinstance(server, six.string_types):
             ip_address = server
         else:
             addresses = server['addresses'][network]

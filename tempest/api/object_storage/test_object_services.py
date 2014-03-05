@@ -14,6 +14,7 @@
 #    under the License.
 
 import hashlib
+from six import moves
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
@@ -242,9 +243,9 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(name='LObject')
         data = data_utils.arbitrary_string()
         segments = 10
-        data_segments = [data + str(i) for i in xrange(segments)]
+        data_segments = [data + str(i) for i in moves.xrange(segments)]
         # uploading segments
-        for i in xrange(segments):
+        for i in moves.xrange(segments):
             resp, _ = self.object_client.create_object_segments(
                 self.container_name, object_name, i, data_segments[i])
             self.assertEqual(resp['status'], '201')

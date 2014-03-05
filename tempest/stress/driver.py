@@ -17,6 +17,8 @@ import os
 import signal
 import time
 
+from six import moves
+
 from tempest import clients
 from tempest.common import ssh
 from tempest.common.utils import data_utils
@@ -128,7 +130,7 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
             manager = admin_manager
         else:
             manager = clients.Manager()
-        for p_number in xrange(test.get('threads', default_thread_num)):
+        for p_number in moves.xrange(test.get('threads', default_thread_num)):
             if test.get('use_isolated_tenants', False):
                 username = data_utils.rand_name("stress_user")
                 tenant_name = data_utils.rand_name("stress_tenant")

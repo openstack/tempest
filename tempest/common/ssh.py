@@ -16,6 +16,7 @@
 
 import cStringIO
 import select
+import six
 import socket
 import time
 import warnings
@@ -39,7 +40,7 @@ class Client(object):
         self.host = host
         self.username = username
         self.password = password
-        if isinstance(pkey, basestring):
+        if isinstance(pkey, six.string_types):
             pkey = paramiko.RSAKey.from_private_key(
                 cStringIO.StringIO(str(pkey)))
         self.pkey = pkey
