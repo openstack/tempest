@@ -26,6 +26,11 @@ from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
+VOLUME_NS_BASE = 'http://docs.openstack.org/volume/ext/'
+VOLUME_HOST_NS = VOLUME_NS_BASE + 'volume_host_attribute/api/v1'
+VOLUME_MIG_STATUS_NS = VOLUME_NS_BASE + 'volume_mig_status_attribute/api/v1'
+VOLUMES_TENANT_NS = VOLUME_NS_BASE + 'volume_tenant_attribute/api/v1'
+
 
 class VolumesClientXML(rest_client.RestClient):
     """
@@ -38,6 +43,23 @@ class VolumesClientXML(rest_client.RestClient):
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout
+
+    def _translate_attributes_to_json(self, volume):
+        volume_host_attr = '{' + VOLUME_HOST_NS + '}host'
+        volume_mig_stat_attr = '{' + VOLUME_MIG_STATUS_NS + '}migstat'
+        volume_mig_name_attr = '{' + VOLUME_MIG_STATUS_NS + '}name_id'
+        volume_tenant_id_attr = '{' + VOLUMES_TENANT_NS + '}tenant_id'
+        if volume_host_attr in volume:
+            volume['os-vol-host-attr:host'] = volume.pop(volume_host_attr)
+        if volume_mig_stat_attr in volume:
+            volume['os-vol-mig-status-attr:migstat'] = volume.pop(
+                volume_mig_stat_attr)
+        if volume_mig_name_attr in volume:
+            volume['os-vol-mig-status-attr:name_id'] = volume.pop(
+                volume_mig_name_attr)
+        if volume_tenant_id_attr in volume:
+            volume['os-vol-tenant-attr:tenant_id'] = volume.pop(
+                volume_tenant_id_attr)
 
     def _parse_volume(self, body):
         vol = dict((attr, body.get(attr)) for attr in body.keys())
@@ -52,6 +74,8 @@ class VolumesClientXML(rest_client.RestClient):
                                        child.getchildren())
             else:
                 vol[tag] = common.xml_to_json(child)
+        self._translate_attributes_to_json(vol)
+        self._check_if_bootable(vol)
         return vol
 
     def get_attachment_from_volume(self, volume):
@@ -90,8 +114,6 @@ class VolumesClientXML(rest_client.RestClient):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
-        for v in volumes:
-            v = self._check_if_bootable(v)
         return resp, volumes
 
     def list_volumes_with_detail(self, params=None):
@@ -106,8 +128,6 @@ class VolumesClientXML(rest_client.RestClient):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
-        for v in volumes:
-            v = self._check_if_bootable(v)
         return resp, volumes
 
     def get_volume(self, volume_id):
@@ -115,7 +135,6 @@ class VolumesClientXML(rest_client.RestClient):
         url = "volumes/%s" % str(volume_id)
         resp, body = self.get(url)
         body = self._parse_volume(etree.fromstring(body))
-        body = self._check_if_bootable(body)
         return resp, body
 
     def create_volume(self, size, **kwargs):
