@@ -43,9 +43,14 @@ class NetworkClientXML(client_base.NetworkClientBase):
         post_body = common.Element(root)
         post_body.add_attr('xmlns:xsi',
                            'http://www.w3.org/2001/XMLSchema-instance')
+        elements = set()
         for name, attr in body[root].items():
             elt = self._get_element(name, attr)
             post_body.append(elt)
+            if ":" in name:
+                elements.add(name.split(":")[0])
+        if elements:
+            self._add_namespaces(post_body, elements)
         return str(common.Document(post_body))
 
     def serialize_list(self, body, root_name=None, item_name=None):
@@ -81,6 +86,11 @@ class NetworkClientXML(client_base.NetworkClientBase):
             return list_element
         else:
             return common.Element(name, value)
+
+    def _add_namespaces(self, root, elements):
+        for element in elements:
+            root.add_attr('xmlns:%s' % element,
+                          common.NEUTRON_NAMESPACES[element])
 
     def create_member(self, address, protocol_port, pool_id):
         uri = '%s/lb/members' % (self.uri_prefix)

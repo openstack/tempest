@@ -18,6 +18,11 @@ import collections
 XMLNS_11 = "http://docs.openstack.org/compute/api/v1.1"
 XMLNS_V3 = "http://docs.openstack.org/compute/api/v1.1"
 
+NEUTRON_NAMESPACES = {
+    'router': "http://docs.openstack.org/ext/neutron/router/api/v1.0",
+    'provider': 'http://docs.openstack.org/ext/provider/api/v1.0',
+}
+
 
 # NOTE(danms): This is just a silly implementation to help make generating
 # XML faster for prototyping. Could be replaced with proper etree gorp
@@ -137,6 +142,9 @@ def xml_to_json(node, plurals=None):
         tag = child.tag
         if tag.startswith("{"):
             ns, tag = tag.split("}", 1)
+            for key, uri in NEUTRON_NAMESPACES.iteritems():
+                if uri == ns[1:]:
+                    tag = key + ":" + tag
         if plurals is not None and tag in plurals:
                 json[tag] = parse_array(child, plurals)
         else:
