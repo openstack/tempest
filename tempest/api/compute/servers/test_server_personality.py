@@ -60,6 +60,25 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         resp, server = self.create_test_server(personality=person)
         self.assertEqual('202', resp['status'])
 
+    @test.attr(type='gate')
+    def test_create_server_with_existent_personality_file(self):
+        # Any existing file that match specified file will be renamed to
+        # include the bak extension appended with a time stamp
+
+        # TODO(zhikunliu): will add validations when ssh instance validation
+        # re-factor is ready
+        file_contents = 'This is a test file.'
+        personality = [{'path': '/test.txt',
+                       'contents': base64.b64encode(file_contents)}]
+        resp, server = self.create_test_server(personality=personality,
+                                               wait_until="ACTIVE")
+        resp, image = self.create_image_from_server(server['id'],
+                                                    wait_until="ACTIVE")
+        resp, server = self.create_test_server(image_id=image['id'],
+                                               personality=personality,
+                                               wait_until="ACTIVE")
+        self.assertEqual('202', resp['status'])
+
 
 class ServerPersonalityTestXML(ServerPersonalityTestJSON):
     _interface = "xml"
