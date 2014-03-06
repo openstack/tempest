@@ -20,7 +20,6 @@ from tempest import test
 
 
 class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
-    _interface = 'json'
     server_id = None
     floating_ip = None
 

@@ -25,7 +25,6 @@ CONF = config.CONF
 
 
 class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

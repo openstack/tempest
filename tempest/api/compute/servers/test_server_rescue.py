@@ -19,7 +19,6 @@ from tempest import test
 
 
 class ServerRescueTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

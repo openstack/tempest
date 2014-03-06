@@ -19,7 +19,6 @@ from tempest import test
 
 
 class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
-    _interface = 'json'
     force_tenant_isolation = True
 
     @classmethod

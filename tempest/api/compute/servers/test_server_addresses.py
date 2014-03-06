@@ -21,7 +21,6 @@ CONF = config.CONF
 
 
 class ServerAddressesTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

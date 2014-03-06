@@ -20,7 +20,6 @@ from tempest import test
 
 
 class InstanceActionsNegativeV3Test(base.BaseV3ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

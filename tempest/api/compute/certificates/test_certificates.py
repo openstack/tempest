@@ -18,7 +18,6 @@ from tempest.test import attr
 
 
 class CertificatesTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @attr(type='gate')
     def test_create_and_get_root_certificate(self):

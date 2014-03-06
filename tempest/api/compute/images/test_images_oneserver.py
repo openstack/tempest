@@ -26,7 +26,6 @@ LOG = logging.getLogger(__name__)
 
 
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,

@@ -22,8 +22,6 @@ import time
 
 class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(TenantUsagesTestJSON, cls).setUpClass()

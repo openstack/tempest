@@ -22,8 +22,6 @@ from tempest.test import attr
 
 class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(TenantUsagesNegativeTestJSON, cls).setUpClass()

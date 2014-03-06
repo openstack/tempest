@@ -24,8 +24,6 @@ class ServicesAdminTestJSON(base.BaseV2ComputeAdminTest):
     Tests Services API. List and Enable/Disable require admin privileges.
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(ServicesAdminTestJSON, cls).setUpClass()

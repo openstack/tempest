@@ -24,8 +24,6 @@ CONF = config.CONF
 
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(VolumesGetTestJSON, cls).setUpClass()

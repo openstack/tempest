@@ -20,7 +20,6 @@ from tempest import test
 
 
 class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

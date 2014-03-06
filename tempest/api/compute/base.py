@@ -206,6 +206,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
 class BaseV2ComputeTest(BaseComputeTest):
 
+    _interface = "json"
+
     @classmethod
     def setUpClass(cls):
         # By default compute tests do not create network resources

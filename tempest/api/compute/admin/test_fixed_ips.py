@@ -21,7 +21,6 @@ CONF = config.CONF
 
 
 class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

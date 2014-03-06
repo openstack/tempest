@@ -18,7 +18,6 @@ from tempest import test
 
 
 class ServerMetadataTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

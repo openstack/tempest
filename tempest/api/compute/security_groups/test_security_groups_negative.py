@@ -25,7 +25,6 @@ CONF = config.CONF
 
 
 class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
-    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):

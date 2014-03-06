@@ -27,8 +27,6 @@ class HypervisorAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     Tests Hypervisors API that require admin privileges
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(HypervisorAdminNegativeTestJSON, cls).setUpClass()

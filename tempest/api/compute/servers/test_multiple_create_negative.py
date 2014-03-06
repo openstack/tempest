@@ -20,7 +20,6 @@ from tempest import test
 
 
 class MultipleCreateNegativeTestJSON(base.BaseV2ComputeTest):
-    _interface = 'json'
     _name = 'multiple-create-test'
 
     def _generate_name(self):

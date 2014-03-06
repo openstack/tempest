@@ -22,7 +22,6 @@ CONF = config.CONF
 
 
 class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
-    _interface = 'json'
     force_tenant_isolation = True
 
     @classmethod

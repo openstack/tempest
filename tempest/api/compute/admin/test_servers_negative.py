@@ -26,8 +26,6 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     Tests Servers API using admin privileges
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(ServersAdminNegativeTestJSON, cls).setUpClass()

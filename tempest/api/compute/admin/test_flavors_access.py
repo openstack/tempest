@@ -25,8 +25,6 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
     Add and remove Flavor Access require admin privileges.
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(FlavorsAccessTestJSON, cls).setUpClass()

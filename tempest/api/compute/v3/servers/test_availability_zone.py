@@ -23,8 +23,6 @@ class AZV3Test(base.BaseV3ComputeTest):
     Tests Availability Zone API List
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(AZV3Test, cls).setUpClass()
