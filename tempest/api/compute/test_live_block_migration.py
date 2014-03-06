@@ -18,7 +18,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -86,7 +86,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
 
     @testtools.skipIf(not CONF.compute_feature_enabled.live_migration,
                       'Live migration not available')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_live_block_migration(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:
@@ -106,7 +106,7 @@ class LiveBlockMigrationTestJSON(base.BaseV2ComputeAdminTest):
     @testtools.skipIf(not CONF.compute_feature_enabled.
                       block_migrate_cinder_iscsi,
                       'Block Live migration not configured for iSCSI')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_iscsi_volume(self):
         # Live block migrate an instance to another host
         if len(self._get_compute_hostnames()) < 2:

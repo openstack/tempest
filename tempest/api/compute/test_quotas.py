@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
 class QuotasTestJSON(base.BaseV2ComputeTest):
@@ -36,7 +36,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_quotas(self):
         # User can get the quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
@@ -46,7 +46,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.tenant_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_default_quotas(self):
         # User can get the default quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
@@ -56,7 +56,7 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.tenant_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_compare_tenant_quotas_with_default_quotas(self):
         # Tenants are created with the default quota values
         resp, defualt_quota_set = \

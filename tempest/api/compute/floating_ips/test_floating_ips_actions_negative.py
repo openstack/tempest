@@ -19,7 +19,7 @@ from tempest.api.compute.floating_ips import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -48,7 +48,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
             if cls.non_exist_id not in cls.floating_ip_ids:
                 break
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_allocate_floating_ip_from_nonexistent_pool(self):
         # Negative test:Allocation of a new floating IP from a nonexistent_pool
         # to a project should fail
@@ -56,7 +56,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           self.client.create_floating_ip,
                           "non_exist_pool")
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_nonexistent_floating_ip(self):
         # Negative test:Deletion of a nonexistent floating IP
         # from project should fail
@@ -65,7 +65,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_floating_ip,
                           self.non_exist_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_associate_nonexistent_floating_ip(self):
         # Negative test:Association of a non existent floating IP
         # to specific server should fail
@@ -74,7 +74,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           self.client.associate_floating_ip_to_server,
                           "0.0.0.0", self.server_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_dissociate_nonexistent_floating_ip(self):
         # Negative test:Dissociation of a non existent floating IP should fail
         # Dissociating non existent floating IP
@@ -82,7 +82,7 @@ class FloatingIPsNegativeTestJSON(base.BaseFloatingIPsTest):
                           self.client.disassociate_floating_ip_from_server,
                           "0.0.0.0", self.server_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_associate_ip_to_server_without_passing_floating_ip(self):
         # Negative test:Association of empty floating IP to specific server
         # should raise NotFound exception

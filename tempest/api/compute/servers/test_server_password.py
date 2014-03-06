@@ -15,7 +15,7 @@
 
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
 class ServerPasswordTestJSON(base.BaseV2ComputeTest):
@@ -27,12 +27,12 @@ class ServerPasswordTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
         resp, cls.server = cls.create_test_server(wait_until="ACTIVE")
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_server_password(self):
         resp, body = self.client.get_password(self.server['id'])
         self.assertEqual(200, resp.status)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_delete_server_password(self):
         resp, body = self.client.delete_password(self.server['id'])
         self.assertEqual(204, resp.status)

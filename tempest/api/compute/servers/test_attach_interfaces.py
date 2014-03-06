@@ -16,7 +16,7 @@
 from tempest.api.compute import base
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 import time
 
@@ -107,7 +107,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
 
         self.assertEqual(sorted(list1), sorted(list2))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_list_show_delete_interfaces(self):
         server, ifs = self._create_server_get_interfaces()
         interface_count = len(ifs)
@@ -128,7 +128,7 @@ class AttachInterfacesTestJSON(base.BaseV2ComputeTest):
         _ifs = self._test_delete_interface(server, ifs)
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_add_remove_fixed_ip(self):
         # Add and Remove the fixed IP to server.
         server, ifs = self._create_server_get_interfaces()

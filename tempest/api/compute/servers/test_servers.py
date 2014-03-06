@@ -15,7 +15,7 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
@@ -30,7 +30,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.clear_servers()
         super(ServersTestJSON, self).tearDown()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_server_with_admin_password(self):
         # If an admin password is provided on server creation, the server's
         # root password should be set to that password.
@@ -39,7 +39,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         # Verify the password is set correctly in the response
         self.assertEqual('testpassword', server['adminPass'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_with_existing_server_name(self):
         # Creating a server with a name that already exists is allowed
 
@@ -58,7 +58,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         name2 = server['name']
         self.assertEqual(name1, name2)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_specify_keypair(self):
         # Specify a keypair while creating a server
 
@@ -71,7 +71,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual(key_name, server['key_name'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_server_name(self):
         # The server name should be changed to the the provided value
         resp, server = self.create_test_server(wait_until='ACTIVE')
@@ -86,7 +86,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('newname', server['name'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_access_server_address(self):
         # The server's access addresses should reflect the provided values
         resp, server = self.create_test_server(wait_until='ACTIVE')
@@ -103,7 +103,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('1.1.1.1', server['accessIPv4'])
         self.assertEqual('::babe:202:202', server['accessIPv6'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_server_with_ipv6_addr_only(self):
         # Create a server without an IPv4 address(only IPv6 address).
         resp, server = self.create_test_server(accessIPv6='2001:2001::3')

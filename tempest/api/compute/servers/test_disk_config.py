@@ -17,7 +17,7 @@ import testtools
 
 from tempest.api.compute import base
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -45,7 +45,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
             resp, server = self.client.get_server(server['id'])
             self.assertEqual(disk_config, server['OS-DCF:diskConfig'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rebuild_server_with_manual_disk_config(self):
         # A server should be rebuilt using the manual disk config option
         self._update_server_with_disk_config(disk_config='AUTO')
@@ -61,7 +61,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rebuild_server_with_auto_disk_config(self):
         # A server should be rebuilt using the auto disk config option
         self._update_server_with_disk_config(disk_config='MANUAL')
@@ -87,7 +87,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_resize_server_from_manual_to_auto(self):
         # A server should be resized from manual to auto disk config
         self._update_server_with_disk_config(disk_config='MANUAL')
@@ -104,7 +104,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_resize_server_from_auto_to_manual(self):
         # A server should be resized from auto to manual disk config
         self._update_server_with_disk_config(disk_config='AUTO')
@@ -119,7 +119,7 @@ class ServerDiskConfigTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual('MANUAL', server['OS-DCF:diskConfig'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_server_from_auto_to_manual(self):
         # A server should be updated from auto to manual disk config
         self._update_server_with_disk_config(disk_config='AUTO')

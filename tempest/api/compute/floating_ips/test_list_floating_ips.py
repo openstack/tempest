@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
 class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
@@ -37,7 +37,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
             cls.client.delete_floating_ip(cls.floating_ip_id[i])
         super(FloatingIPDetailsTestJSON, cls).tearDownClass()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_floating_ips(self):
         # Positive test:Should return the list of floating IPs
         resp, body = self.client.list_floating_ips()
@@ -48,7 +48,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         for i in range(3):
             self.assertIn(self.floating_ip[i], floating_ips)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         # Creating a floating IP for which details are to be checked
@@ -70,7 +70,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
                          body['fixed_ip'])
         self.assertEqual(floating_ip_id, body['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_floating_ip_pools(self):
         # Positive test:Should return the list of floating IP Pools
         resp, floating_ip_pools = self.client.list_floating_ip_pools()
