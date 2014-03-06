@@ -154,8 +154,8 @@ Outputs:
         sid = self.stack_identifier
         rid = 'SmokeServer'
 
-        # wait for server resource create to complete.
-        self.client.wait_for_resource_status(sid, rid, 'CREATE_COMPLETE')
+        # wait for create to complete.
+        self.client.wait_for_stack_status(sid, 'CREATE_COMPLETE')
 
         resp, body = self.client.get_resource(sid, rid)
         self.assertEqual('CREATE_COMPLETE', body['resource_status'])
