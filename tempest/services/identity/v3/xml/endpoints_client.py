@@ -18,9 +18,7 @@ from lxml import etree
 from tempest.common import http
 from tempest.common import rest_client
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -41,11 +39,11 @@ class EndPointClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "endpoint":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def _parse_body(self, body):
-        json = xml_to_json(body)
+        json = common.xml_to_json(body)
         return json
 
     def request(self, method, url, headers=None, body=None, wait=None):
@@ -69,21 +67,22 @@ class EndPointClientXML(rest_client.RestClient):
         enabled = kwargs.get('enabled', None)
         if enabled is not None:
             enabled = str(enabled).lower()
-        create_endpoint = Element("endpoint",
-                                  xmlns=XMLNS,
-                                  service_id=service_id,
-                                  interface=interface,
-                                  url=url, region=region,
-                                  enabled=enabled)
-        resp, body = self.post('endpoints', str(Document(create_endpoint)))
+        create_endpoint = common.Element("endpoint",
+                                         xmlns=XMLNS,
+                                         service_id=service_id,
+                                         interface=interface,
+                                         url=url, region=region,
+                                         enabled=enabled)
+        resp, body = self.post('endpoints',
+                               str(common.Document(create_endpoint)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def update_endpoint(self, endpoint_id, service_id=None, interface=None,
                         url=None, region=None, enabled=None):
         """Updates an endpoint with given parameters."""
-        doc = Document()
-        endpoint = Element("endpoint")
+        doc = common.Document()
+        endpoint = common.Element("endpoint")
         doc.append(endpoint)
 
         if service_id:

@@ -17,9 +17,7 @@ from lxml import etree
 
 from tempest.common import rest_client
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -36,7 +34,7 @@ class ServiceClientXML(rest_client.RestClient):
         self.api_version = "v3"
 
     def _parse_body(self, body):
-        data = xml_to_json(body)
+        data = common.xml_to_json(body)
         return data
 
     def update_service(self, service_id, **kwargs):
@@ -45,14 +43,14 @@ class ServiceClientXML(rest_client.RestClient):
         name = kwargs.get('name', body['name'])
         description = kwargs.get('description', body['description'])
         type = kwargs.get('type', body['type'])
-        update_service = Element("service",
-                                 xmlns=XMLNS,
-                                 id=service_id,
-                                 name=name,
-                                 description=description,
-                                 type=type)
+        update_service = common.Element("service",
+                                        xmlns=XMLNS,
+                                        id=service_id,
+                                        name=name,
+                                        description=description,
+                                        type=type)
         resp, body = self.patch('services/%s' % service_id,
-                                str(Document(update_service)))
+                                str(common.Document(update_service)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -64,12 +62,12 @@ class ServiceClientXML(rest_client.RestClient):
         return resp, body
 
     def create_service(self, serv_type, name=None, description=None):
-        post_body = Element("service",
-                            xmlns=XMLNS,
-                            name=name,
-                            description=description,
-                            type=serv_type)
-        resp, body = self.post("services", str(Document(post_body)))
+        post_body = common.Element("service",
+                                   xmlns=XMLNS,
+                                   name=name,
+                                   description=description,
+                                   type=serv_type)
+        resp, body = self.post("services", str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 

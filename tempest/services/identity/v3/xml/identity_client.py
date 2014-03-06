@@ -20,10 +20,7 @@ from lxml import etree
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -44,7 +41,7 @@ class IdentityV3ClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "project":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def _parse_domains(self, node):
@@ -52,7 +49,7 @@ class IdentityV3ClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "domain":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def _parse_group_users(self, node):
@@ -60,7 +57,7 @@ class IdentityV3ClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "user":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def _parse_roles(self, node):
@@ -68,17 +65,17 @@ class IdentityV3ClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "role":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
-            array.append(xml_to_json(child))
+            array.append(common.xml_to_json(child))
         return array
 
     def _parse_body(self, body):
-        _json = xml_to_json(body)
+        _json = common.xml_to_json(body)
         return _json
 
     def create_user(self, user_name, **kwargs):
@@ -89,16 +86,16 @@ class IdentityV3ClientXML(rest_client.RestClient):
         project_id = kwargs.get('project_id', None)
         description = kwargs.get('description', None)
         domain_id = kwargs.get('domain_id', 'default')
-        post_body = Element("user",
-                            xmlns=XMLNS,
-                            name=user_name,
-                            password=password,
-                            description=description,
-                            email=email,
-                            enabled=str(en).lower(),
-                            project_id=project_id,
-                            domain_id=domain_id)
-        resp, body = self.post('users', str(Document(post_body)))
+        post_body = common.Element("user",
+                                   xmlns=XMLNS,
+                                   name=user_name,
+                                   password=password,
+                                   description=description,
+                                   email=email,
+                                   enabled=str(en).lower(),
+                                   project_id=project_id,
+                                   domain_id=domain_id)
+        resp, body = self.post('users', str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -110,16 +107,16 @@ class IdentityV3ClientXML(rest_client.RestClient):
         project_id = kwargs.get('project_id', body['project_id'])
         description = kwargs.get('description', body['description'])
         domain_id = kwargs.get('domain_id', body['domain_id'])
-        update_user = Element("user",
-                              xmlns=XMLNS,
-                              name=name,
-                              email=email,
-                              project_id=project_id,
-                              domain_id=domain_id,
-                              description=description,
-                              enabled=str(en).lower())
+        update_user = common.Element("user",
+                                     xmlns=XMLNS,
+                                     name=name,
+                                     email=email,
+                                     project_id=project_id,
+                                     domain_id=domain_id,
+                                     description=description,
+                                     enabled=str(en).lower())
         resp, body = self.patch('users/%s' % user_id,
-                                str(Document(update_user)))
+                                str(common.Document(update_user)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -151,14 +148,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
         description = kwargs.get('description', None)
         en = kwargs.get('enabled', 'true')
         domain_id = kwargs.get('domain_id', 'default')
-        post_body = Element("project",
-                            xmlns=XMLNS,
-                            description=description,
-                            domain_id=domain_id,
-                            enabled=str(en).lower(),
-                            name=name)
+        post_body = common.Element("project",
+                                   xmlns=XMLNS,
+                                   description=description,
+                                   domain_id=domain_id,
+                                   enabled=str(en).lower(),
+                                   name=name)
         resp, body = self.post('projects',
-                               str(Document(post_body)))
+                               str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -175,14 +172,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
         desc = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
         domain_id = kwargs.get('domain_id', body['domain_id'])
-        post_body = Element("project",
-                            xmlns=XMLNS,
-                            name=name,
-                            description=desc,
-                            enabled=str(en).lower(),
-                            domain_id=domain_id)
+        post_body = common.Element("project",
+                                   xmlns=XMLNS,
+                                   name=name,
+                                   description=desc,
+                                   enabled=str(en).lower(),
+                                   domain_id=domain_id)
         resp, body = self.patch('projects/%s' % project_id,
-                                str(Document(post_body)))
+                                str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -199,10 +196,10 @@ class IdentityV3ClientXML(rest_client.RestClient):
 
     def create_role(self, name):
         """Create a Role."""
-        post_body = Element("role",
-                            xmlns=XMLNS,
-                            name=name)
-        resp, body = self.post('roles', str(Document(post_body)))
+        post_body = common.Element("role",
+                                   xmlns=XMLNS,
+                                   name=name)
+        resp, body = self.post('roles', str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -214,11 +211,11 @@ class IdentityV3ClientXML(rest_client.RestClient):
 
     def update_role(self, name, role_id):
         """Updates a Role."""
-        post_body = Element("role",
-                            xmlns=XMLNS,
-                            name=name)
+        post_body = common.Element("role",
+                                   xmlns=XMLNS,
+                                   name=name)
         resp, body = self.patch('roles/%s' % str(role_id),
-                                str(Document(post_body)))
+                                str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -237,12 +234,12 @@ class IdentityV3ClientXML(rest_client.RestClient):
         """Creates a domain."""
         description = kwargs.get('description', None)
         en = kwargs.get('enabled', True)
-        post_body = Element("domain",
-                            xmlns=XMLNS,
-                            name=name,
-                            description=description,
-                            enabled=str(en).lower())
-        resp, body = self.post('domains', str(Document(post_body)))
+        post_body = common.Element("domain",
+                                   xmlns=XMLNS,
+                                   name=name,
+                                   description=description,
+                                   enabled=str(en).lower())
+        resp, body = self.post('domains', str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -263,13 +260,13 @@ class IdentityV3ClientXML(rest_client.RestClient):
         description = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
         name = kwargs.get('name', body['name'])
-        post_body = Element("domain",
-                            xmlns=XMLNS,
-                            name=name,
-                            description=description,
-                            enabled=str(en).lower())
+        post_body = common.Element("domain",
+                                   xmlns=XMLNS,
+                                   name=name,
+                                   description=description,
+                                   enabled=str(en).lower())
         resp, body = self.patch('domains/%s' % domain_id,
-                                str(Document(post_body)))
+                                str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -299,13 +296,13 @@ class IdentityV3ClientXML(rest_client.RestClient):
         description = kwargs.get('description', None)
         domain_id = kwargs.get('domain_id', 'default')
         project_id = kwargs.get('project_id', None)
-        post_body = Element("group",
-                            xmlns=XMLNS,
-                            name=name,
-                            description=description,
-                            domain_id=domain_id,
-                            project_id=project_id)
-        resp, body = self.post('groups', str(Document(post_body)))
+        post_body = common.Element("group",
+                                   xmlns=XMLNS,
+                                   name=name,
+                                   description=description,
+                                   domain_id=domain_id,
+                                   project_id=project_id)
+        resp, body = self.post('groups', str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -320,12 +317,12 @@ class IdentityV3ClientXML(rest_client.RestClient):
         resp, body = self.get_group(group_id)
         name = kwargs.get('name', body['name'])
         description = kwargs.get('description', body['description'])
-        post_body = Element("group",
-                            xmlns=XMLNS,
-                            name=name,
-                            description=description)
+        post_body = common.Element("group",
+                                   xmlns=XMLNS,
+                                   name=name,
+                                   description=description)
         resp, body = self.patch('groups/%s' % group_id,
-                                str(Document(post_body)))
+                                str(common.Document(post_body)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -456,35 +453,35 @@ class V3TokenClientXML(rest_client.RestClient):
         Validation is left to the server side.
         """
         if user_type == 'id':
-            _user = Element('user', id=user, password=password)
+            _user = common.Element('user', id=user, password=password)
         else:
-            _user = Element('user', name=user, password=password)
+            _user = common.Element('user', name=user, password=password)
         if domain is not None:
-            _domain = Element('domain', name=domain)
+            _domain = common.Element('domain', name=domain)
             _user.append(_domain)
 
-        password = Element('password')
+        password = common.Element('password')
         password.append(_user)
 
-        method = Element('method')
-        method.append(Text('password'))
-        methods = Element('methods')
+        method = common.Element('method')
+        method.append(common.Text('password'))
+        methods = common.Element('methods')
         methods.append(method)
-        identity = Element('identity')
+        identity = common.Element('identity')
         identity.append(methods)
         identity.append(password)
 
-        auth = Element('auth')
+        auth = common.Element('auth')
         auth.append(identity)
 
         if tenant is not None:
-            project = Element('project', name=tenant)
+            project = common.Element('project', name=tenant)
             project.append(_domain)
-            scope = Element('scope')
+            scope = common.Element('scope')
             scope.append(project)
             auth.append(scope)
 
-        resp, body = self.post(self.auth_url, body=str(Document(auth)))
+        resp, body = self.post(self.auth_url, body=str(common.Document(auth)))
         return resp, body
 
     def request(self, method, url, headers=None, body=None):

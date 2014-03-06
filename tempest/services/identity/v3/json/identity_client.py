@@ -15,14 +15,14 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class IdentityV3ClientJSON(RestClient):
+class IdentityV3ClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(IdentityV3ClientJSON, self).__init__(auth_provider)
@@ -439,7 +439,7 @@ class IdentityV3ClientJSON(RestClient):
         return resp, body
 
 
-class V3TokenClientJSON(RestClient):
+class V3TokenClientJSON(rest_client.RestClient):
 
     def __init__(self):
         super(V3TokenClientJSON, self).__init__(None)
