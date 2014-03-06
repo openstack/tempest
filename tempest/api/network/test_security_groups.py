@@ -14,6 +14,7 @@
 #    under the License.
 
 from tempest.api.network import base_security_groups as base
+from tempest.common.utils import data_utils
 from tempest import test
 
 
@@ -41,14 +42,8 @@ class SecGroupTest(base.BaseSecGroupTest):
         self.assertIsNotNone(found, msg)
 
     @test.attr(type='smoke')
-    def test_create_show_delete_security_group(self):
+    def test_create_list_update_show_delete_security_group(self):
         group_create_body, name = self._create_security_group()
-
-        # Show details of the created security group
-        resp, show_body = self.client.show_security_group(
-            group_create_body['security_group']['id'])
-        self.assertEqual('200', resp['status'])
-        self.assertEqual(show_body['security_group']['name'], name)
 
         # List security groups and verify if created group is there in response
         resp, list_body = self.client.list_security_groups()
@@ -57,6 +52,24 @@ class SecGroupTest(base.BaseSecGroupTest):
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])
         self.assertIn(group_create_body['security_group']['id'], secgroup_list)
+        # Update the security group
+        new_name = data_utils.rand_name('security-')
+        new_description = data_utils.rand_name('security-description')
+        resp, update_body = self.client.update_security_group(
+            group_create_body['security_group']['id'],
+            name=new_name,
+            description=new_description)
+        # Verify if security group is updated
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(update_body['security_group']['name'], new_name)
+        self.assertEqual(update_body['security_group']['description'],
+                         new_description)
+        # Show details of the updated security group
+        resp, show_body = self.client.show_security_group(
+            group_create_body['security_group']['id'])
+        self.assertEqual(show_body['security_group']['name'], new_name)
+        self.assertEqual(show_body['security_group']['description'],
+                         new_description)
 
     @test.attr(type='smoke')
     def test_create_show_delete_security_group_rule(self):
