@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest.openstack.common import jsonutils as json
 import tempest.services.telemetry.telemetry_client_base as client
 
@@ -21,7 +21,7 @@ import tempest.services.telemetry.telemetry_client_base as client
 class TelemetryClientJSON(client.TelemetryClientBase):
 
     def get_rest_client(self, auth_provider):
-        return RestClient(auth_provider)
+        return rest_client.RestClient(auth_provider)
 
     def deserialize(self, body):
         return json.loads(body.replace("\n", ""))

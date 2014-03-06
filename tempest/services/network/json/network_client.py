@@ -12,7 +12,7 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest.services.network import network_client_base
 
 
@@ -32,7 +32,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
     """
 
     def get_rest_client(self, auth_provider):
-        return RestClient(auth_provider)
+        return rest_client.RestClient(auth_provider)
 
     def deserialize_single(self, body):
         return json.loads(body)

@@ -16,14 +16,14 @@
 import urllib
 
 from tempest.common import http
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class ObjectClient(RestClient):
+class ObjectClient(rest_client.RestClient):
     def __init__(self, auth_provider):
         super(ObjectClient, self).__init__(auth_provider)
 
@@ -135,14 +135,14 @@ class ObjectClient(RestClient):
         return resp, body
 
 
-class ObjectClientCustomizedHeader(RestClient):
+class ObjectClientCustomizedHeader(rest_client.RestClient):
 
     # TODO(andreaf) This class is now redundant, to be removed in next patch
 
     def __init__(self, auth_provider):
         super(ObjectClientCustomizedHeader, self).__init__(
             auth_provider)
-        # Overwrites json-specific header encoding in RestClient
+        # Overwrites json-specific header encoding in rest_client.RestClient
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 

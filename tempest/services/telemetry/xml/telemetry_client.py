@@ -16,8 +16,7 @@
 from lxml import etree
 
 from tempest.common import rest_client
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 import tempest.services.telemetry.telemetry_client_base as client
 
 
@@ -32,11 +31,11 @@ class TelemetryClientXML(client.TelemetryClientBase):
     def _parse_array(self, body):
         array = []
         for child in body.getchildren():
-            array.append(xml_to_json(child))
+            array.append(common.xml_to_json(child))
         return array
 
     def serialize(self, body):
-        return str(Document(body))
+        return str(common.Document(body))
 
     def deserialize(self, body):
         return self._parse_array(etree.fromstring(body))
