@@ -27,10 +27,12 @@ class QuotasClientJSON(rest_client.RestClient):
         super(QuotasClientJSON, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
 
-    def get_quota_set(self, tenant_id):
+    def get_quota_set(self, tenant_id, user_id=None):
         """List the quota set for a tenant."""
 
         url = 'os-quota-sets/%s' % str(tenant_id)
+        if user_id:
+            url += '?user_id=%s' % str(user_id)
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['quota_set']

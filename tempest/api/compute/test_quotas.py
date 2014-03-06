@@ -27,6 +27,9 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
         resp, tenants = cls.admin_client.list_tenants()
         cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
                          cls.client.tenant_name][0]
+        resp, users = cls.admin_client.list_users_for_tenant(cls.tenant_id)
+        cls.user_id = [user['id'] for user in users if user['name'] ==
+                       cls.client.user][0]
         cls.default_quota_set = set(('injected_file_content_bytes',
                                      'metadata_items', 'injected_files',
                                      'ram', 'floating_ips',
@@ -40,6 +43,14 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
         # User can get the quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
         resp, quota_set = self.client.get_quota_set(self.tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(sorted(expected_quota_set),
+                         sorted(quota_set.keys()))
+        self.assertEqual(quota_set['id'], self.tenant_id)
+
+        # get the quota set using user id
+        resp, quota_set = self.client.get_quota_set(self.tenant_id,
+                                                    self.user_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(sorted(expected_quota_set),
                          sorted(quota_set.keys()))
