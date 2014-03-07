@@ -693,7 +693,7 @@
 
 # Timeout in seconds to wait for a stack to build. (integer
 # value)
-#build_timeout=300
+#build_timeout=600
 
 # Instance type for tests. Needs to be big enough for a full
 # OS plus the test workload (string value)
