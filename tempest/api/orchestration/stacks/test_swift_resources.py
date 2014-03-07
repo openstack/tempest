@@ -27,20 +27,20 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     _interface = 'json'
     template = """
 heat_template_version: 2013-05-23
-description: Template which creates a Swift container ressource
+description: Template which creates a Swift container resource
 
 resources:
   SwiftContainerWebsite:
-    DeletionPolicy: "Delete"
-    Type: OS::Swift::Container
-    Properties:
+    deletion_policy: "Delete"
+    type: OS::Swift::Container
+    properties:
       X-Container-Read: ".r:*"
       X-Container-Meta:
         web-index: "index.html"
         web-error: "error.html"
 
   SwiftContainer:
-    Type: OS::Swift::Container
+    type: OS::Swift::Container
 
 outputs:
   WebsiteURL:

@@ -73,7 +73,7 @@ resources:
       subnet_id: {get_resource: Subnet}
   Server:
     type: AWS::EC2::Instance
-    Metadata:
+    metadata:
       Name: SmokeServerNeutron
     properties:
       ImageId: {get_param: ImageId}
@@ -93,7 +93,7 @@ resources:
     type: AWS::CloudFormation::WaitConditionHandle
   WaitCondition:
     type: AWS::CloudFormation::WaitCondition
-    DependsOn: Server
+    depends_on: Server
     properties:
       Handle: {get_resource: WaitHandleNeutron}
       Timeout: '600'
