@@ -230,3 +230,114 @@ class TestRestClientParseRespJSON(TestRestClientParseRespXML):
         data = {"one_top_key": "not_list_or_dict_value"}
         body = self.rest_client._parse_resp(json.dumps(data))
         self.assertEqual(data, body)
+
+
+class TestRestClientErrorCheckerJSON(base.TestCase):
+    c_type = "application/json"
+
+    def set_data(self, r_code, enc=None, r_body=None):
+        if enc is None:
+            enc = self.c_type
+        resp_dict = {'status': r_code, 'content-type': enc}
+        resp = httplib2.Response(resp_dict)
+        data = {
+            "method": "fake_method",
+            "url": "fake_url",
+            "headers": "fake_headers",
+            "body": "fake_body",
+            "resp": resp,
+            "resp_body": '{"resp_body": "fake_resp_body"}',
+        }
+        if r_body is not None:
+            data.update({"resp_body": r_body})
+        return data
+
+    def setUp(self):
+        super(TestRestClientErrorCheckerJSON, self).setUp()
+        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakeConfig)
+        self.rest_client = rest_client.RestClient(
+            fake_auth_provider.FakeAuthProvider())
+
+    def test_response_less_than_400(self):
+        self.rest_client._error_checker(**self.set_data("399"))
+
+    def test_response_400(self):
+        self.assertRaises(exceptions.BadRequest,
+                          self.rest_client._error_checker,
+                          **self.set_data("400"))
+
+    def test_response_401(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.rest_client._error_checker,
+                          **self.set_data("401"))
+
+    def test_response_403(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.rest_client._error_checker,
+                          **self.set_data("403"))
+
+    def test_response_404(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.rest_client._error_checker,
+                          **self.set_data("404"))
+
+    def test_response_409(self):
+        self.assertRaises(exceptions.Conflict,
+                          self.rest_client._error_checker,
+                          **self.set_data("409"))
+
+    def test_response_413(self):
+        self.assertRaises(exceptions.OverLimit,
+                          self.rest_client._error_checker,
+                          **self.set_data("413"))
+
+    def test_response_422(self):
+        self.assertRaises(exceptions.UnprocessableEntity,
+                          self.rest_client._error_checker,
+                          **self.set_data("422"))
+
+    def test_response_500_with_text(self):
+        # _parse_resp is expected to return 'str'
+        self.assertRaises(exceptions.ServerFault,
+                          self.rest_client._error_checker,
+                          **self.set_data("500"))
+
+    def test_response_501_with_text(self):
+        self.assertRaises(exceptions.ServerFault,
+                          self.rest_client._error_checker,
+                          **self.set_data("501"))
+
+    def test_response_500_with_dict(self):
+        r_body = '{"resp_body": {"err": "fake_resp_body"}}'
+        self.assertRaises(exceptions.ServerFault,
+                          self.rest_client._error_checker,
+                          **self.set_data("500", r_body=r_body))
+
+    def test_response_501_with_dict(self):
+        r_body = '{"resp_body": {"err": "fake_resp_body"}}'
+        self.assertRaises(exceptions.ServerFault,
+                          self.rest_client._error_checker,
+                          **self.set_data("501", r_body=r_body))
+
+    def test_response_bigger_than_400(self):
+        # Any response code, that bigger than 400, and not in
+        # (401, 403, 404, 409, 413, 422, 500, 501)
+        self.assertRaises(exceptions.UnexpectedResponseCode,
+                          self.rest_client._error_checker,
+                          **self.set_data("402"))
+
+
+class TestRestClientErrorCheckerXML(TestRestClientErrorCheckerJSON):
+    c_type = "application/xml"
+
+
+class TestRestClientErrorCheckerTEXT(TestRestClientErrorCheckerJSON):
+    c_type = "text/plain"
+
+    def test_fake_content_type(self):
+        # This test is required only in one exemplar
+        # Any response code, that bigger than 400, and not in
+        # (401, 403, 404, 409, 413, 422, 500, 501)
+        self.assertRaises(exceptions.InvalidContentType,
+                          self.rest_client._error_checker,
+                          **self.set_data("405", enc="fake_enc"))
