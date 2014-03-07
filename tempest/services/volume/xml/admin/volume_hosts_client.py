@@ -19,7 +19,7 @@ from lxml import etree
 
 from tempest.common import rest_client
 from tempest import config
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -58,7 +58,7 @@ class VolumeHostsClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[0] == "host":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def list_hosts(self, params=None):

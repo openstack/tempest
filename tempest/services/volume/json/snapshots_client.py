@@ -14,7 +14,7 @@ import json
 import time
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -24,7 +24,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SnapshotsClientJSON(RestClient):
+class SnapshotsClientJSON(rest_client.RestClient):
     """Client class to send CRUD Volume API requests."""
 
     def __init__(self, auth_provider):

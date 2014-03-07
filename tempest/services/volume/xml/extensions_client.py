@@ -17,7 +17,7 @@ from lxml import etree
 
 from tempest.common import rest_client
 from tempest import config
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -32,7 +32,7 @@ class ExtensionsClientXML(rest_client.RestClient):
     def _parse_array(self, node):
         array = []
         for child in node:
-            array.append(xml_to_json(child))
+            array.append(common.xml_to_json(child))
         return array
 
     def list_extensions(self):
