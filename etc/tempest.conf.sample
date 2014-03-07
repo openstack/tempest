@@ -391,6 +391,20 @@
 #endpoint_type=publicURL
 
 
+[database]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Database service. (string value)
+#catalog_type=database
+
+# Valid primary flavor to use in database tests. (string
+# value)
+#db_flavor_ref=1
+
+
 [debug]
 
 #
@@ -772,6 +786,10 @@
 # Whether or not Ironic is expected to be available (boolean
 # value)
 #ironic=false
+
+# Whether or not Trove is expected to be available (boolean
+# value)
+#trove=false
 
 
 [stress]
