@@ -69,6 +69,13 @@ class BackupsClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['backup']
 
+    def list_backups_with_detail(self):
+        """Information for all the tenant's backups."""
+        url = "backups/detail"
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['backups']
+
     def wait_for_backup_status(self, backup_id, status):
         """Waits for a Backup to reach a given status."""
         resp, body = self.get_backup(backup_id)
