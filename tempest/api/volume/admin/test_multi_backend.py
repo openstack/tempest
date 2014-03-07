@@ -14,7 +14,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -86,7 +86,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
 
         super(VolumeMultiBackendTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_backend_name_reporting(self):
         # this test checks if os-vol-attr:host is populated correctly after
         # the multi backend feature has been enabled
@@ -100,7 +100,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
                self.volume1['id'])
         self.assertTrue(len(volume1_host.split("@")) > 1, msg)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_backend_name_distinction(self):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the

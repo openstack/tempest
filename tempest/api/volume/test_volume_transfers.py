@@ -18,7 +18,7 @@ from testtools import matchers
 from tempest.api.volume import base
 from tempest import clients
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -66,7 +66,7 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
         self.assertEqual(202, resp.status)
         self.adm_client.wait_for_resource_deletion(volume_id)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_get_list_accept_volume_transfer(self):
         # Create a volume first
         volume = self.create_volume()

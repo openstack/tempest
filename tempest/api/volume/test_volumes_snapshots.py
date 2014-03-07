@@ -14,7 +14,7 @@ from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 LOG = logging.getLogger(__name__)
 CONF = config.CONF
@@ -63,7 +63,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                       ('details' if with_detail else '', key)
                 self.assertEqual(params[key], snap[key], msg)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshot_create_with_volume_in_use(self):
         # Create a snapshot when volume status is in-use
         # Create a test instance
@@ -89,7 +89,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
         self.snapshots.remove(snapshot)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshot_create_get_list_update_delete(self):
         # Create a snapshot
         s_name = data_utils.rand_name('snap')
@@ -134,7 +134,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
         self.snapshots.remove(snapshot)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshots_list_with_params(self):
         """list snapshots with params."""
         # Create a snapshot
@@ -155,7 +155,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                   'display_name': snapshot['display_name']}
         self._list_by_param_values_and_assert(params)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshots_list_details_with_params(self):
         """list snapshot details with params."""
         # Create a snapshot
@@ -174,7 +174,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                   'display_name': snapshot['display_name']}
         self._list_by_param_values_and_assert(params, with_detail=True)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_from_snapshot(self):
         # Create a temporary snap using wrapper method from base, then
         # create a snap based volume, check resp code and deletes it

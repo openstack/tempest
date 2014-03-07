@@ -15,7 +15,7 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
@@ -32,7 +32,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
         cls.client.delete_volume_type(cls.volume_type['id'])
         super(VolumeTypesExtraSpecsTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_type_extra_specs_list(self):
         # List Volume types extra specs.
         extra_specs = {"spec1": "val1"}
@@ -47,7 +47,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
         self.assertIsInstance(body, dict)
         self.assertIn('spec1', body)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_type_extra_specs_update(self):
         # Update volume type extra specs
         extra_specs = {"spec2": "val1"}
@@ -67,7 +67,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
         self.assertEqual(extra_spec['spec2'], body['spec2'],
                          "Volume type extra spec incorrectly updated")
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_type_extra_spec_create_get_delete(self):
         # Create/Get/Delete volume type extra spec.
         extra_specs = {"spec3": "val1"}

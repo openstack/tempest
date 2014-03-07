@@ -15,13 +15,13 @@ import uuid
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class VolumesSnapshotNegativeTest(base.BaseVolumeV1Test):
     _interface = "json"
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_snapshot_with_nonexistent_volume_id(self):
         # Create a snapshot with nonexistent volume id
         s_name = data_utils.rand_name('snap')
@@ -29,7 +29,7 @@ class VolumesSnapshotNegativeTest(base.BaseVolumeV1Test):
                           self.snapshots_client.create_snapshot,
                           str(uuid.uuid4()), display_name=s_name)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_snapshot_without_passing_volume_id(self):
         # Create a snapshot without passing volume id
         s_name = data_utils.rand_name('snap')

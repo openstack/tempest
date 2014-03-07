@@ -25,7 +25,7 @@ from tempest.common import http
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -299,11 +299,11 @@ class RestClient(object):
                 # Parse list-like xmls (users, roles, etc)
                 array = []
                 for child in element.getchildren():
-                    array.append(xml_to_json(child))
+                    array.append(common.xml_to_json(child))
                 return array
 
             # Parse one-item-like xmls (user, role, etc)
-            return xml_to_json(element)
+            return common.xml_to_json(element)
 
     def response_checker(self, method, url, headers, body, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or

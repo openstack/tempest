@@ -14,11 +14,11 @@
 #    under the License.
 
 import copy
+import datetime
 import exceptions
 import re
 import urlparse
 
-from datetime import datetime
 from tempest import config
 from tempest.services.identity.json import identity_client as json_id
 from tempest.services.identity.v3.json import identity_client as json_v3id
@@ -291,9 +291,9 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 
     def is_expired(self, auth_data):
         _, access = auth_data
-        expiry = datetime.strptime(access['token']['expires'],
-                                   self.EXPIRY_DATE_FORMAT)
-        return expiry <= datetime.now()
+        expiry = datetime.datetime.strptime(access['token']['expires'],
+                                            self.EXPIRY_DATE_FORMAT)
+        return expiry <= datetime.datetime.now()
 
 
 class KeystoneV3AuthProvider(KeystoneAuthProvider):
@@ -391,6 +391,6 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
     def is_expired(self, auth_data):
         _, access = auth_data
-        expiry = datetime.strptime(access['expires_at'],
-                                   self.EXPIRY_DATE_FORMAT)
-        return expiry <= datetime.now()
+        expiry = datetime.datetime.strptime(access['expires_at'],
+                                            self.EXPIRY_DATE_FORMAT)
+        return expiry <= datetime.datetime.now()
