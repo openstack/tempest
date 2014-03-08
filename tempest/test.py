@@ -27,10 +27,11 @@ import testresources
 import testtools
 
 from tempest import clients
-from tempest.common import generate_json
+import tempest.common.generator.valid_generator as valid
 from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
+from tempest.openstack.common import importutils
 from tempest.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -400,7 +401,8 @@ class NegativeAutoTest(BaseTestCase):
         """
         description = NegativeAutoTest.load_schema(description_file)
         LOG.debug(description)
-        generate_json.validate_negative_test_schema(description)
+        generator = importutils.import_class(CONF.negative.test_generator)()
+        generator.validate_schema(description)
         schema = description.get("json-schema", None)
         resources = description.get("resources", [])
         scenario_list = []
@@ -416,7 +418,7 @@ class NegativeAutoTest(BaseTestCase):
                                              "expected_result": expected_result
                                              }))
         if schema is not None:
-            for invalid in generate_json.generate_invalid(schema):
+            for invalid in generator.generate(schema):
                 scenario_list.append((invalid[0],
                                       {"schema": invalid[1],
                                        "expected_result": invalid[2]}))
@@ -459,11 +461,12 @@ class NegativeAutoTest(BaseTestCase):
             # Note(mkoderer): The resources list already contains an invalid
             # entry (see get_resource).
             # We just send a valid json-schema with it
-            valid = None
+            valid_schema = None
             schema = description.get("json-schema", None)
             if schema:
-                valid = generate_json.generate_valid(schema)
-            new_url, body = self._http_arguments(valid, url, method)
+                valid_schema = \
+                    valid.ValidTestGenerator().generate_valid(schema)
+            new_url, body = self._http_arguments(valid_schema, url, method)
         elif hasattr(self, "schema"):
             new_url, body = self._http_arguments(self.schema, url, method)
 

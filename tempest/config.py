@@ -820,6 +820,15 @@ CLIGroup = [
                help="Number of seconds to wait on a CLI timeout"),
 ]
 
+negative_group = cfg.OptGroup(name='negative', title="Negative Test Options")
+
+NegativeGroup = [
+    cfg.StrOpt('test_generator',
+               default='tempest.common.' +
+               'generator.negative_generator.NegativeTestGenerator',
+               help="Test generator class for all negative tests"),
+]
+
 
 def register_opts():
     register_opt_group(cfg.CONF, compute_group, ComputeGroup)
@@ -855,6 +864,7 @@ def register_opts():
     register_opt_group(cfg.CONF, baremetal_group, BaremetalGroup)
     register_opt_group(cfg.CONF, input_scenario_group, InputScenarioGroup)
     register_opt_group(cfg.CONF, cli_group, CLIGroup)
+    register_opt_group(cfg.CONF, negative_group, NegativeGroup)
 
 
 # this should never be called outside of this class
@@ -895,6 +905,7 @@ class TempestConfigPrivate(object):
         self.baremetal = cfg.CONF.baremetal
         self.input_scenario = cfg.CONF['input-scenario']
         self.cli = cfg.CONF.cli
+        self.negative = cfg.CONF.negative
         if not self.compute_admin.username:
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password

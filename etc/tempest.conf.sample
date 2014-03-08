@@ -562,6 +562,16 @@
 #ssh_user_regex=[["^.*[Cc]irros.*$", "root"]]
 
 
+[negative]
+
+#
+# Options defined in tempest.config
+#
+
+# Test generator class for all negative tests (string value)
+#test_generator=tempest.common.generator.negative_generator.NegativeTestGenerator
+
+
 [network]
 
 #

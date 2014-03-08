@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common import generate_json as gen
+from tempest.common.generator import negative_generator
 import tempest.test
 
 
-class TestGenerateJson(tempest.test.BaseTestCase):
+class TestNegativeGenerator(tempest.test.BaseTestCase):
 
     fake_input_str = {"type": "string",
                       "minLength": 2,
@@ -35,19 +35,23 @@ class TestGenerateJson(tempest.test.BaseTestCase):
                                      }
                       }
 
+    def setUp(self):
+        super(TestNegativeGenerator, self).setUp()
+        self.negative = negative_generator.NegativeTestGenerator()
+
     def _validate_result(self, data):
         self.assertTrue(isinstance(data, list))
         for t in data:
             self.assertTrue(isinstance(t, tuple))
 
     def test_generate_invalid_string(self):
-        result = gen.generate_invalid(self.fake_input_str)
+        result = self.negative.generate(self.fake_input_str)
         self._validate_result(result)
 
     def test_generate_invalid_integer(self):
-        result = gen.generate_invalid(self.fake_input_int)
+        result = self.negative.generate(self.fake_input_int)
         self._validate_result(result)
 
     def test_generate_invalid_obj(self):
-        result = gen.generate_invalid(self.fake_input_obj)
+        result = self.negative.generate(self.fake_input_obj)
         self._validate_result(result)
