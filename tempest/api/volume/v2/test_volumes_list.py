@@ -116,8 +116,8 @@ class VolumesV2ListTestJSON(base.BaseVolumeV2Test):
                           ('details' if with_detail else '', key)
                     if key == 'metadata':
                         self.assertThat(volume[key].items(),
-                                        matchers.ContainsAll(params[key]
-                                        .items()), msg)
+                                        matchers.ContainsAll(
+                                            params[key].items()), msg)
                     else:
                         self.assertEqual(params[key], volume[key], msg)
 

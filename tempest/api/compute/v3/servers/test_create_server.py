@@ -195,8 +195,7 @@ class ServersWithSpecificFlavorV3Test(base.BaseV3ComputeAdminTest):
 
         admin_pass = self.image_ssh_password
 
-        resp, server_no_eph_disk = (self.
-                                    create_test_server(
+        resp, server_no_eph_disk = (self.create_test_server(
                                     wait_until='ACTIVE',
                                     adminPass=admin_pass,
                                     flavor=flavor_no_eph_disk_id))
