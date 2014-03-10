@@ -15,14 +15,14 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 
 CONF = config.CONF
 
 
-class AggregatesV3ClientJSON(RestClient):
+class AggregatesV3ClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(AggregatesV3ClientJSON, self).__init__(auth_provider)

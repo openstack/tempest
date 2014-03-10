@@ -15,13 +15,13 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class KeyPairsV3ClientJSON(RestClient):
+class KeyPairsV3ClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(KeyPairsV3ClientJSON, self).__init__(auth_provider)
