@@ -199,13 +199,11 @@ at_exit_set = set()
 
 def validate_tearDownClass():
     if at_exit_set:
-        raise RuntimeError("tearDownClass does not call the super's "
-                           "tearDownClass in these classes: "
-                           + str(at_exit_set) + "\n"
-                           "If you see the exception, with another "
-                           "exception please do not report this one! "
-                           "If you are changing tempest code, make sure you "
-                           "are calling the super class's tearDownClass!")
+        LOG.error(
+            "tearDownClass does not call the super's "
+            "tearDownClass in these classes: \n"
+            + str(at_exit_set))
+
 
 atexit.register(validate_tearDownClass)
 
