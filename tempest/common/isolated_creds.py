@@ -134,6 +134,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             self.identity_admin_client.users.delete(user)
 
     def _delete_tenant(self, tenant):
+        if CONF.service_available.neutron:
+            self._cleanup_default_secgroup(tenant)
         if self.tempest_client:
             self.identity_admin_client.delete_tenant(tenant)
         else:
@@ -375,6 +377,22 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         except exceptions.NotFound:
             LOG.warn('network with name: %s not found for delete' %
                      network_name)
+
+    def _cleanup_default_secgroup(self, tenant):
+        net_client = self.network_admin_client
+        if self.tempest_client:
+            resp, resp_body = net_client.list_security_groups(tenant_id=tenant,
+                                                              name="default")
+        else:
+            resp_body = net_client.list_security_groups(tenant_id=tenant,
+                                                        name="default")
+        secgroups_to_delete = resp_body['security_groups']
+        for secgroup in secgroups_to_delete:
+            try:
+                net_client.delete_security_group(secgroup['id'])
+            except exceptions.NotFound:
+                LOG.warn('Security group %s, id %s not found for clean-up' %
+                         (secgroup['name'], secgroup['id']))
 
     def _clear_isolated_net_resources(self):
         net_client = self.network_admin_client

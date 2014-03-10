@@ -272,6 +272,13 @@ class TestTenantIsolation(base.TestCase):
 
     @mock.patch('tempest.common.rest_client.RestClient')
     def test_network_cleanup(self, MockRestClient):
+        def side_effect(**args):
+            return ({'status': 200},
+                    {"security_groups": [{"tenant_id": args['tenant_id'],
+                                          "name": args['name'],
+                                          "description": args['name'],
+                                          "security_group_rules": [],
+                                          "id": "sg-%s" % args['tenant_id']}]})
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  password='fake_password')
         # Create primary tenant and network
@@ -341,7 +348,23 @@ class TestTenantIsolation(base.TestCase):
                                            return_value=return_values)
 
         port_list_mock.start()
+        secgroup_list_mock = mock.patch.object(iso_creds.network_admin_client,
+                                               'list_security_groups',
+                                               side_effect=side_effect)
+        secgroup_list_mock.start()
+
+        return_values = (fake_http.fake_httplib({}, status=204), {})
+        remove_secgroup_mock = self.patch(
+            'tempest.services.network.network_client_base.'
+            'NetworkClientBase.delete', return_value=return_values)
         iso_creds.clear_isolated_creds()
+        # Verify default security group delete
+        calls = remove_secgroup_mock.mock_calls
+        self.assertEqual(len(calls), 3)
+        args = map(lambda x: x[1][0], calls)
+        self.assertIn('v2.0/security-groups/sg-1234', args)
+        self.assertIn('v2.0/security-groups/sg-12345', args)
+        self.assertIn('v2.0/security-groups/sg-123456', args)
         # Verify remove router interface calls
         calls = remove_router_interface_mock.mock_calls
         self.assertEqual(len(calls), 3)
