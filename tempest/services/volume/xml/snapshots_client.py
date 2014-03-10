@@ -19,11 +19,7 @@ from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
+from tempest.services.compute.xml import common
 
 CONF = config.CONF
 
@@ -52,7 +48,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         body = etree.fromstring(body)
         snapshots = []
         for snap in body:
-            snapshots.append(xml_to_json(snap))
+            snapshots.append(common.xml_to_json(snap))
         return resp, snapshots
 
     def list_snapshots_with_detail(self, params=None):
@@ -66,7 +62,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         body = etree.fromstring(body)
         snapshots = []
         for snap in body:
-            snapshots.append(xml_to_json(snap))
+            snapshots.append(common.xml_to_json(snap))
         return resp, snapshots
 
     def get_snapshot(self, snapshot_id):
@@ -74,7 +70,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         url = "snapshots/%s" % str(snapshot_id)
         resp, body = self.get(url)
         body = etree.fromstring(body)
-        return resp, xml_to_json(body)
+        return resp, common.xml_to_json(body)
 
     def create_snapshot(self, volume_id, **kwargs):
         """Creates a new snapshot.
@@ -84,20 +80,22 @@ class SnapshotsClientXML(rest_client.RestClient):
         display_description: User friendly snapshot description.
         """
         # NOTE(afazekas): it should use the volume namespace
-        snapshot = Element("snapshot", xmlns=XMLNS_11, volume_id=volume_id)
+        snapshot = common.Element("snapshot", xmlns=common.XMLNS_11,
+                                  volume_id=volume_id)
         for key, value in kwargs.items():
             snapshot.add_attr(key, value)
-        resp, body = self.post('snapshots', str(Document(snapshot)))
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.post('snapshots',
+                               str(common.Document(snapshot)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def update_snapshot(self, snapshot_id, **kwargs):
         """Updates a snapshot."""
-        put_body = Element("snapshot", xmlns=XMLNS_11, **kwargs)
+        put_body = common.Element("snapshot", xmlns=common.XMLNS_11, **kwargs)
 
         resp, body = self.put('snapshots/%s' % snapshot_id,
-                              str(Document(put_body)))
-        body = xml_to_json(etree.fromstring(body))
+                              str(common.Document(put_body)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     # NOTE(afazekas): just for the wait function
@@ -150,32 +148,30 @@ class SnapshotsClientXML(rest_client.RestClient):
 
     def reset_snapshot_status(self, snapshot_id, status):
         """Reset the specified snapshot's status."""
-        post_body = Element("os-reset_status",
-                            status=status
-                            )
+        post_body = common.Element("os-reset_status", status=status)
         url = 'snapshots/%s/action' % str(snapshot_id)
-        resp, body = self.post(url, str(Document(post_body)))
+        resp, body = self.post(url, str(common.Document(post_body)))
         if body:
-            body = xml_to_json(etree.fromstring(body))
+            body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def update_snapshot_status(self, snapshot_id, status, progress):
         """Update the specified snapshot's status."""
-        post_body = Element("os-update_snapshot_status",
-                            status=status,
-                            progress=progress
-                            )
+        post_body = common.Element("os-update_snapshot_status",
+                                   status=status,
+                                   progress=progress
+                                   )
         url = 'snapshots/%s/action' % str(snapshot_id)
-        resp, body = self.post(url, str(Document(post_body)))
+        resp, body = self.post(url, str(common.Document(post_body)))
         if body:
-            body = xml_to_json(etree.fromstring(body))
+            body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def _metadata_body(self, meta):
-        post_body = Element('metadata')
+        post_body = common.Element('metadata')
         for k, v in meta.items():
-            data = Element('meta', key=k)
-            data.append(Text(v))
+            data = common.Element('meta', key=k)
+            data.append(common.Text(v))
             post_body.append(data)
         return post_body
 
@@ -190,7 +186,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         """Create metadata for the snapshot."""
         post_body = self._metadata_body(metadata)
         resp, body = self.post('snapshots/%s/metadata' % snapshot_id,
-                               str(Document(post_body)))
+                               str(common.Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
@@ -205,18 +201,18 @@ class SnapshotsClientXML(rest_client.RestClient):
         """Update metadata for the snapshot."""
         put_body = self._metadata_body(metadata)
         url = "snapshots/%s/metadata" % str(snapshot_id)
-        resp, body = self.put(url, str(Document(put_body)))
+        resp, body = self.put(url, str(common.Document(put_body)))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
     def update_snapshot_metadata_item(self, snapshot_id, id, meta_item):
         """Update metadata item for the snapshot."""
         for k, v in meta_item.items():
-            put_body = Element('meta', key=k)
-            put_body.append(Text(v))
+            put_body = common.Element('meta', key=k)
+            put_body.append(common.Text(v))
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
-        resp, body = self.put(url, str(Document(put_body)))
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.put(url, str(common.Document(put_body)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_snapshot_metadata_item(self, snapshot_id, id):
@@ -226,9 +222,9 @@ class SnapshotsClientXML(rest_client.RestClient):
 
     def force_delete_snapshot(self, snapshot_id):
         """Force Delete Snapshot."""
-        post_body = Element("os-force_delete")
+        post_body = common.Element("os-force_delete")
         url = 'snapshots/%s/action' % str(snapshot_id)
-        resp, body = self.post(url, str(Document(post_body)))
+        resp, body = self.post(url, str(common.Document(post_body)))
         if body:
-            body = xml_to_json(etree.fromstring(body))
+            body = common.xml_to_json(etree.fromstring(body))
         return resp, body

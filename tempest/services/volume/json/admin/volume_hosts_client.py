@@ -16,13 +16,13 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 
 CONF = config.CONF
 
 
-class VolumeHostsClientJSON(RestClient):
+class VolumeHostsClientJSON(rest_client.RestClient):
     """
     Client class to send CRUD Volume Hosts API requests to a Cinder endpoint
     """
