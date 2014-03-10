@@ -14,12 +14,12 @@
 
 from tempest.api.image import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class ImagesTagsTest(base.BaseV2ImageTest):
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_delete_tags_for_image(self):
         resp, body = self.create_image(container_format='bare',
                                        disk_format='raw',
