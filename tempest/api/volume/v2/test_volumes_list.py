@@ -187,7 +187,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeV2Test):
         self._list_by_param_value_and_assert(params)
 
     @test.attr(type='gate')
-    def test_volume_list_with_detail_param_metadata(self):
+    def test_volume_list_with_details_param_metadata(self):
         # Test to list volumes details when metadata param is given
         params = {'metadata': self.metadata}
         self._list_by_param_value_and_assert(params, with_detail=True)
@@ -201,13 +201,44 @@ class VolumesV2ListTestJSON(base.BaseVolumeV2Test):
         self._list_by_param_value_and_assert(params, expected_list=[volume])
 
     @test.attr(type='gate')
-    def test_volume_list_with_detail_param_display_name_and_status(self):
+    def test_volume_list_with_details_param_display_name_and_status(self):
         # Test to list volume when name and status param is given
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {'name': volume['name'],
                   'status': 'available'}
         self._list_by_param_value_and_assert(params, expected_list=[volume],
                                              with_detail=True)
+
+    @test.attr(type='gate')
+    def test_volume_list_details_with_multiple_params(self):
+        # List volumes detail using combined condition
+        def _list_details_with_multiple_params(limit=2,
+                                               status='available',
+                                               sort_dir='asc',
+                                               sort_key='created_at'):
+            params = {'limit': limit,
+                      'status': status,
+                      'sort_dir': sort_dir,
+                      'sort_key': sort_key
+                      }
+            resp, fetched_volume = self.client.list_volumes_with_detail(params)
+            self.assertEqual(200, resp.status)
+            self.assertEqual(limit, len(fetched_volume),
+                             "The count of volumes is %s, expected:%s " %
+                             (len(fetched_volume), limit))
+            self.assertEqual(status, fetched_volume[0]['status'])
+            self.assertEqual(status, fetched_volume[1]['status'])
+            val0 = fetched_volume[0][sort_key]
+            val1 = fetched_volume[1][sort_key]
+            if sort_dir == 'asc':
+                self.assertTrue(val0 < val1,
+                                "%s < %s" % (val0, val1))
+            elif sort_dir == 'desc':
+                self.assertTrue(val0 > val1,
+                                "%s > %s" % (val0, val1))
+
+        _list_details_with_multiple_params()
+        _list_details_with_multiple_params(sort_dir='desc')
 
 
 class VolumesV2ListTestXML(VolumesV2ListTestJSON):
