@@ -255,6 +255,9 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('pause',
                 default=True,
                 help="Does the test environment support pausing?"),
+    cfg.BoolOpt('suspend',
+                default=True,
+                help="Does the test environment support suspend/resume?"),
     cfg.BoolOpt('live_migration',
                 default=False,
                 help="Does the test environment support live migration "

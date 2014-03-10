@@ -30,6 +30,7 @@ CONF = config.CONF
 
 class ServersNegativeTestJSON(base.BaseV2ComputeTest):
     pause_available = CONF.compute_feature_enabled.pause
+    suspend_available = CONF.compute_feature_enabled.suspend
 
     def setUp(self):
         super(ServersNegativeTestJSON, self).setUp()
@@ -332,6 +333,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.unpause_server,
                           self.server_id)
 
+    @testtools.skipIf(not suspend_available, 'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_suspend_non_existent_server(self):
         # suspend a non existent server
@@ -339,6 +341,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.suspend_server,
                           nonexistent_server)
 
+    @testtools.skipIf(not suspend_available, 'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_suspend_server_invalid_state(self):
         # suspend a suspended server.
@@ -351,6 +354,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.suspend_server,
                           self.server_id)
 
+    @testtools.skipIf(not suspend_available, 'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resume_non_existent_server(self):
         # resume a non existent server
@@ -358,6 +362,7 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.resume_server,
                           nonexistent_server)
 
+    @testtools.skipIf(not suspend_available, 'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resume_server_invalid_state(self):
         # resume an active server.
