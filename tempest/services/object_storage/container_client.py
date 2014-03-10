@@ -16,18 +16,18 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
 from tempest import config
 from xml.etree import ElementTree as etree
 
 CONF = config.CONF
 
 
-class ContainerClient(RestClient):
+class ContainerClient(rest_client.RestClient):
     def __init__(self, auth_provider):
         super(ContainerClient, self).__init__(auth_provider)
 
-        # Overwrites json-specific header encoding in RestClient
+        # Overwrites json-specific header encoding in rest_client.RestClient
         self.headers = {}
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
