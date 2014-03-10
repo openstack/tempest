@@ -35,7 +35,7 @@ class ImagesNegativeV3Test(base.BaseV3ComputeTest):
         resp, body = self.servers_client.create_image(server_id, name, meta)
         image_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(self.client.delete_image, image_id)
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
+        self.client.wait_for_image_status(image_id, 'active')
         return resp, body
 
     @test.attr(type=['negative', 'gate'])
