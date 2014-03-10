@@ -13,11 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import uuid
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest.test import attr
-import uuid
 
 
 class UsersNegativeTestJSON(base.BaseIdentityV2AdminTest):

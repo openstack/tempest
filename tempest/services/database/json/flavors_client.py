@@ -13,9 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import urllib
+
 from tempest.common import rest_client
 from tempest import config
-import urllib
 
 CONF = config.CONF
 

@@ -14,10 +14,10 @@
 #    under the License.
 
 import datetime
+import time
 
 from tempest.api.compute import base
 from tempest import test
-import time
 
 
 class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):

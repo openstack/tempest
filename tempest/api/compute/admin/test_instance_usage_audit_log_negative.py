@@ -14,11 +14,11 @@
 #    under the License.
 
 import datetime
+import urllib
 
 from tempest.api.compute import base
 from tempest import exceptions
 from tempest import test
-import urllib
 
 
 class InstanceUsageAuditLogNegativeTestJSON(base.BaseV2ComputeAdminTest):
