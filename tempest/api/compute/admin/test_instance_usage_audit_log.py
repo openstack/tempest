@@ -16,7 +16,7 @@
 import datetime
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 import urllib
 
 
@@ -27,7 +27,7 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
         super(InstanceUsageAuditLogTestJSON, cls).setUpClass()
         cls.adm_client = cls.os_adm.instance_usages_audit_log_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_instance_usage_audit_logs(self):
         # list instance usage audit logs
         resp, body = self.adm_client.list_instance_usage_audit_logs()
@@ -40,7 +40,7 @@ class InstanceUsageAuditLogTestJSON(base.BaseV2ComputeAdminTest):
         for item in expected_items:
             self.assertIn(item, body)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_instance_usage_audit_log(self):
         # Get instance usage audit log before specified time
         now = datetime.datetime.now()

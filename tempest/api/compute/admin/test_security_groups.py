@@ -18,7 +18,7 @@ import testtools
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -42,7 +42,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
     @testtools.skipIf(CONF.service_available.neutron,
                       "Skipped because neutron do not support all_tenants"
                       "search filter.")
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_security_groups_list_all_tenants_filter(self):
         # Admin can list security groups of all tenants
         # List of all security groups created

@@ -14,7 +14,7 @@
 
 from tempest.api.compute import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -28,7 +28,7 @@ class AZAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         super(AZAdminNegativeTestJSON, cls).setUpClass()
         cls.non_adm_client = cls.availability_zone_client
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_availability_zone_list_detail_with_non_admin_user(self):
         # List of availability zones and available services with
         # non-administrator user

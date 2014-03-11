@@ -15,7 +15,7 @@
 
 from tempest.api.compute import base
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -39,18 +39,18 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
             if cls.ip:
                 break
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_fixed_ip_details(self):
         resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)
         self.assertEqual(fixed_ip['address'], self.ip)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_set_reserve(self):
         body = {"reserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)
         self.assertEqual(resp.status, 202)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_set_unreserve(self):
         body = {"unreserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)

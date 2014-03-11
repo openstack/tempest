@@ -17,7 +17,7 @@ import uuid
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -52,7 +52,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             flavor_id = data_utils.rand_int_id(start=1000)
         return flavor_id
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_ram(self):
         flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
@@ -70,7 +70,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.servers[0]['id'],
                           flavor_ref['id'])
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_vcpus(self):
         flavor_name = data_utils.rand_name("flavor-")
         flavor_id = self._get_unused_flavor_id()
@@ -88,38 +88,38 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.servers[0]['id'],
                           flavor_ref['id'])
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_reset_state_server_invalid_state(self):
         self.assertRaises(exceptions.BadRequest,
                           self.client.reset_state, self.s1_id,
                           state='invalid')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_reset_state_server_invalid_type(self):
         self.assertRaises(exceptions.BadRequest,
                           self.client.reset_state, self.s1_id,
                           state=1)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_reset_state_server_nonexistent_server(self):
         self.assertRaises(exceptions.NotFound,
                           self.client.reset_state, '999')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_server_diagnostics_by_non_admin(self):
         # Non-admin user can not view server diagnostics according to policy
         self.assertRaises(exceptions.Unauthorized,
                           self.non_adm_client.get_server_diagnostics,
                           self.s1_id)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_migrate_non_existent_server(self):
         # migrate a non existent server
         self.assertRaises(exceptions.NotFound,
                           self.client.migrate_server,
                           str(uuid.uuid4()))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_migrate_server_invalid_state(self):
         # create server.
         resp, server = self.create_test_server(wait_until='ACTIVE')

@@ -16,7 +16,7 @@
 from tempest.api.compute import base
 from tempest.common import tempest_fixtures as fixtures
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
@@ -39,7 +39,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                     filter(lambda y: y['service'] == 'compute', hosts_all))
         cls.host = hosts[0]
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_create_delete(self):
         # Create and delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -52,7 +52,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_create_delete_with_az(self):
         # Create and delete an aggregate.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -67,7 +67,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.client.wait_for_resource_deletion(aggregate['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_create_verify_entry_in_list(self):
         # Create an aggregate and ensure it is listed.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -80,7 +80,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                       map(lambda x: (x['id'], x['availability_zone']),
                           aggregates))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_create_update_metadata_get_details(self):
         # Create an aggregate and ensure its details are returned.
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -105,7 +105,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(meta, body["metadata"])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_create_update_with_az(self):
         # Update an aggregate and ensure properties are updated correctly
         aggregate_name = data_utils.rand_name(self.aggregate_name_prefix)
@@ -137,7 +137,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                          (x['id'], x['name'], x['availability_zone']),
                           aggregates))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_add_remove_host(self):
         # Add an host to the given aggregate and remove.
         self.useFixture(fixtures.LockFixture('availability_zone'))
@@ -159,7 +159,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
                          body['availability_zone'])
         self.assertNotIn(self.host, body['hosts'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_add_host_list(self):
         # Add an host to the given aggregate and list.
         self.useFixture(fixtures.LockFixture('availability_zone'))
@@ -177,7 +177,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIsNone(agg['availability_zone'])
         self.assertIn(self.host, agg['hosts'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_add_host_get_details(self):
         # Add an host to the given aggregate and get details.
         self.useFixture(fixtures.LockFixture('availability_zone'))
@@ -192,7 +192,7 @@ class AggregatesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertIsNone(body['availability_zone'])
         self.assertIn(self.host, body['hosts'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_aggregate_add_host_create_server_with_az(self):
         # Add an host to the given aggregate and create a server.
         self.useFixture(fixtures.LockFixture('availability_zone'))
