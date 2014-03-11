@@ -61,8 +61,11 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
     @test.attr(type='smoke')
     def test_security_group_create_get_delete(self):
         # Security Group should be created, fetched and deleted
-        s_name = data_utils.rand_name('securitygroup-')
+        # with char space between name along with
+        # leading and trailing spaces
+        s_name = ' %s ' % data_utils.rand_name('securitygroup ')
         resp, securitygroup = self.create_security_group(name=s_name)
+        self.assertEqual(200, resp.status)
         self.assertIn('name', securitygroup)
         securitygroup_name = securitygroup['name']
         self.assertEqual(securitygroup_name, s_name,
