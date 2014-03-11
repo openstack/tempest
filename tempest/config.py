@@ -283,7 +283,15 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
-                     'be same as [nova.vnc]->vnc_enabled in nova.conf')
+                     'be same as [nova.vnc]->vnc_enabled in nova.conf'),
+    cfg.BoolOpt('spice_console',
+                default=False,
+                help='Enable Spice console. This configuration value should '
+                     'be same as [nova.spice]->enabled in nova.conf'),
+    cfg.BoolOpt('rdp_console',
+                default=False,
+                help='Enable RDP console. This configuration value should '
+                     'be same as [nova.rdp]->enabled in nova.conf')
 ]
 
 

@@ -461,3 +461,13 @@ class ServersV3ClientJSON(rest_client.RestClient):
     def inject_network_info(self, server_id, **kwargs):
         """Inject the Network Info into server"""
         return self.action(server_id, 'inject_network_info', None, **kwargs)
+
+    def get_spice_console(self, server_id, console_type):
+        """Get URL of Spice console."""
+        return self.action(server_id, "get_spice_console"
+                           "console", type=console_type)
+
+    def get_rdp_console(self, server_id, console_type):
+        """Get URL of RDP console."""
+        return self.action(server_id, "get_rdp_console"
+                           "console", type=console_type)
