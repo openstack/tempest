@@ -25,20 +25,24 @@ import urllib2
 import yaml
 
 
-is_neutron = os.environ.get('DEVSTACK_GATE_NEUTRON', "0") == "1"
 is_grenade = (os.environ.get('DEVSTACK_GATE_GRENADE', "0") == "1" or
               os.environ.get('DEVSTACK_GATE_GRENADE_FORWARD', "0") == "1")
 dump_all_errors = True
 
+# As logs are made clean, add to this set
+must_be_clean = set(['c-sch', 'g-reg', 'ceilometer-alarm-notifier',
+                     'ceilometer-collector', 'horizon', 'n-crt', 'n-obj',
+                     'q-vpn'])
+
 
 def process_files(file_specs, url_specs, whitelists):
     regexp = re.compile(r"^.* (ERROR|CRITICAL|TRACE) .*\[.*\-.*\]")
-    had_errors = False
+    logs_with_errors = []
     for (name, filename) in file_specs:
         whitelist = whitelists.get(name, [])
         with open(filename) as content:
             if scan_content(name, content, regexp, whitelist):
-                had_errors = True
+                logs_with_errors.append(name)
     for (name, url) in url_specs:
         whitelist = whitelists.get(name, [])
         req = urllib2.Request(url)
@@ -47,8 +51,8 @@ def process_files(file_specs, url_specs, whitelists):
         buf = StringIO.StringIO(page.read())
         f = gzip.GzipFile(fileobj=buf)
         if scan_content(name, f.read().splitlines(), regexp, whitelist):
-            had_errors = True
-    return had_errors
+            logs_with_errors.append(name)
+    return logs_with_errors
 
 
 def scan_content(name, content, regexp, whitelist):
@@ -122,19 +126,22 @@ def main(opts):
                     assert 'module' in w, 'no module in %s' % name
                     assert 'message' in w, 'no message in %s' % name
             whitelists = loaded
-    if process_files(files_to_process, urls_to_process, whitelists):
+    logs_with_errors = process_files(files_to_process, urls_to_process,
+                                     whitelists)
+    if logs_with_errors:
         print("Logs have errors")
-        if is_neutron:
-            print("Currently not failing neutron builds with errors")
-            return 0
-        if is_grenade:
-            print("Currently not failing grenade runs with errors")
-            return 0
-        print("FAILED")
-        return 1
-    else:
-        print("ok")
+    if is_grenade:
+        print("Currently not failing grenade runs with errors")
         return 0
+    failed = False
+    for log in logs_with_errors:
+        if log in must_be_clean:
+            print("FAILED: %s" % log)
+            failed = True
+    if failed:
+        return 1
+    print("ok")
+    return 0
 
 usage = """
 Find non-white-listed log errors in log files from a devstack-gate run.
