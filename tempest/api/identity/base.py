@@ -153,10 +153,11 @@ class DataGenerator(object):
             self.test_user = data_utils.rand_name('test_user_')
             self.test_password = data_utils.rand_name('pass_')
             self.test_email = self.test_user + '@testmail.tm'
-            resp, self.v3_user = self.client.create_user(self.test_user,
-                                                         self.test_password,
-                                                         self.project['id'],
-                                                         self.test_email)
+            resp, self.v3_user = self.client.create_user(
+                self.test_user,
+                password=self.test_password,
+                project_id=self.project['id'],
+                email=self.test_email)
             self.v3_users.append(self.v3_user)
 
         def setup_test_project(self):

@@ -120,6 +120,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                          ', '.join(m_project for m_project
                                    in missing_projects))
 
+    @attr(type='gate')
+    def test_get_user(self):
+        # Get a user detail
+        self.data.setup_test_v3_user()
+        resp, user = self.client.get_user(self.data.v3_user['id'])
+        self.assertEqual(self.data.v3_user['id'], user['id'])
+
 
 class UsersV3TestXML(UsersV3TestJSON):
     _interface = 'xml'
