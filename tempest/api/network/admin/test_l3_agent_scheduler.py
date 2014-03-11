@@ -26,6 +26,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
 
         List routers that the given L3 agent is hosting.
         List L3 agents hosting the given router.
+        Add and Remove Router to L3 agent
 
     v2.0 of the Neutron API is assumed. It is also assumed that the following
     options are defined in the [network] section of etc/tempest.conf:
@@ -37,28 +38,49 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         if not test.is_extension_enabled('l3_agent_scheduler', 'network'):
             msg = "L3 Agent Scheduler Extension not enabled."
             raise cls.skipException(msg)
+        # Trying to get agent details for L3 Agent
+        resp, body = cls.admin_client.list_agents()
+        agents = body['agents']
+        for agent in agents:
+            if agent['agent_type'] == 'L3 agent':
+                cls.agent = agent
+                break
+        else:
+            msg = "L3 Agent not found"
+            raise cls.skipException(msg)
 
     @test.attr(type='smoke')
     def test_list_routers_on_l3_agent(self):
-        resp, body = self.admin_client.list_agents()
-        agents = body['agents']
-        for a in agents:
-            if a['agent_type'] == 'L3 agent':
-                agent = a
         resp, body = self.admin_client.list_routers_on_l3_agent(
-            agent['id'])
+            self.agent['id'])
         self.assertEqual('200', resp['status'])
 
     @test.attr(type='smoke')
-    def test_list_l3_agents_hosting_router(self):
-        name = data_utils.rand_name('router-')
+    def test_add_list_remove_router_on_l3_agent(self):
+        l3_agent_ids = list()
+        name = data_utils.rand_name('router1-')
         resp, router = self.client.create_router(name)
+        self.addCleanup(self.client.delete_router, router['router']['id'])
+        resp, body = self.admin_client.add_router_to_l3_agent(
+            self.agent['id'], router['router']['id'])
         self.assertEqual('201', resp['status'])
         resp, body = self.admin_client.list_l3_agents_hosting_router(
             router['router']['id'])
         self.assertEqual('200', resp['status'])
-        resp, _ = self.client.delete_router(router['router']['id'])
-        self.assertEqual(204, resp.status)
+        for agent in body['agents']:
+            l3_agent_ids.append(agent['id'])
+            self.assertIn('agent_type', agent)
+            self.assertEqual('L3 agent', agent['agent_type'])
+        self.assertIn(self.agent['id'], l3_agent_ids)
+        del l3_agent_ids[:]
+        resp, body = self.admin_client.remove_router_from_l3_agent(
+            self.agent['id'], router['router']['id'])
+        self.assertEqual('204', resp['status'])
+        resp, body = self.admin_client.list_l3_agents_hosting_router(
+            router['router']['id'])
+        for agent in body['agents']:
+            l3_agent_ids.append(agent['id'])
+        self.assertNotIn(self.agent['id'], l3_agent_ids)
 
 
 class L3AgentSchedulerTestXML(L3AgentSchedulerTestJSON):

@@ -248,13 +248,28 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def list_routers_on_l3_agent(self, agent_id):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        routers = common.parse_array(etree.fromstring(body))
+        body = {'routers': routers}
         return resp, body
 
     def list_l3_agents_hosting_router(self, router_id):
         uri = '%s/routers/%s/l3-agents' % (self.uri_prefix, router_id)
         resp, body = self.get(uri)
+        agents = common.parse_array(etree.fromstring(body))
+        body = {'agents': agents}
+        return resp, body
+
+    def add_router_to_l3_agent(self, agent_id, router_id):
+        uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
+        router = (common.Element("router_id", router_id))
+        resp, body = self.post(uri, str(common.Document(router)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def remove_router_from_l3_agent(self, agent_id, router_id):
+        uri = '%s/agents/%s/l3-routers/%s' % (
+            self.uri_prefix, agent_id, router_id)
+        resp, body = self.delete(uri)
         return resp, body
 
     def list_dhcp_agent_hosting_network(self, network_id):
