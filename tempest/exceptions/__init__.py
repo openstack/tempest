@@ -146,3 +146,11 @@ class ResponseWithEntity(base.RFCViolation):
 
 class InvalidHTTPResponseBody(base.RestClientException):
     message = "HTTP response body is invalid json or xml"
+
+
+class InvalidContentType(base.RestClientException):
+    message = "Invalid content type provided"
+
+
+class UnexpectedResponseCode(base.RestClientException):
+    message = "Unexpected response code received"

@@ -409,7 +409,7 @@ class RestClient(object):
         elif ctype.lower() in TXT_ENC:
             parse_resp = False
         else:
-            raise exceptions.RestClientException(str(resp.status))
+            raise exceptions.InvalidContentType(str(resp.status))
 
         if resp.status == 401 or resp.status == 403:
             raise exceptions.Unauthorized()
@@ -451,25 +451,26 @@ class RestClient(object):
                     # exception.
                     raise exceptions.InvalidHTTPResponseBody(message)
                 else:
-                    # I'm seeing both computeFault
-                    # and cloudServersFault come back.
-                    # Will file a bug to fix, but leave as is for now.
-                    if 'cloudServersFault' in resp_body:
-                        message = resp_body['cloudServersFault']['message']
-                    elif 'computeFault' in resp_body:
-                        message = resp_body['computeFault']['message']
-                    elif 'error' in resp_body:  # Keystone errors
-                        message = resp_body['error']['message']
-                        raise exceptions.IdentityError(message)
-                    elif 'message' in resp_body:
-                        message = resp_body['message']
+                    if isinstance(resp_body, dict):
+                        # I'm seeing both computeFault
+                        # and cloudServersFault come back.
+                        # Will file a bug to fix, but leave as is for now.
+                        if 'cloudServersFault' in resp_body:
+                            message = resp_body['cloudServersFault']['message']
+                        elif 'computeFault' in resp_body:
+                            message = resp_body['computeFault']['message']
+                        elif 'error' in resp_body:  # Keystone errors
+                            message = resp_body['error']['message']
+                            raise exceptions.IdentityError(message)
+                        elif 'message' in resp_body:
+                            message = resp_body['message']
+                    else:
+                        message = resp_body
 
             raise exceptions.ServerFault(message)
 
         if resp.status >= 400:
-            if parse_resp:
-                resp_body = self._parse_resp(resp_body)
-            raise exceptions.RestClientException(str(resp.status))
+            raise exceptions.UnexpectedResponseCode(str(resp.status))
 
     def is_absolute_limit(self, resp, resp_body):
         if (not isinstance(resp_body, collections.Mapping) or
