@@ -86,3 +86,15 @@ class ImagesMemberTest(base.BaseV2MemberImageTest):
         resp = self.os_img_client.remove_member(image_id, self.alt_tenant_id)
         self.assertEqual(204, resp.status)
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
+
+    @test.attr(type='gate')
+    def test_get_image_member_schema(self):
+        resp, body = self.os_img_client.get_schema("member")
+        self.assertEqual(200, resp.status)
+        self.assertEqual("member", body['name'])
+
+    @test.attr(type='gate')
+    def test_get_image_members_schema(self):
+        resp, body = self.os_img_client.get_schema("members")
+        self.assertEqual(200, resp.status)
+        self.assertEqual("members", body['name'])
