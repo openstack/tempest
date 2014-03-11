@@ -32,22 +32,6 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.images_client
         cls.servers_client = cls.servers_client
 
-        cls.image_ids = []
-
-    def tearDown(self):
-        """Terminate test instances created after a test is executed."""
-        for image_id in self.image_ids:
-            self.client.delete_image(image_id)
-            self.image_ids.remove(image_id)
-        super(ImagesTestJSON, self).tearDown()
-
-    def __create_image__(self, server_id, name, meta=None):
-        resp, body = self.client.create_image(server_id, name, meta)
-        image_id = data_utils.parse_image_id(resp['location'])
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
-        self.image_ids.append(image_id)
-        return resp, body
-
     @test.attr(type=['negative', 'gate'])
     def test_create_image_from_deleted_server(self):
         # An image should not be created if the server instance is removed
@@ -60,8 +44,8 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         name = data_utils.rand_name('image')
         meta = {'image_type': 'test'}
         self.assertRaises(exceptions.NotFound,
-                          self.__create_image__,
-                          server['id'], name, meta)
+                          self.create_image_from_server,
+                          server['id'], name=name, meta=meta)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_image_from_invalid_server(self):
@@ -71,8 +55,9 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         meta = {'image_type': 'test'}
         resp = {}
         resp['status'] = None
-        self.assertRaises(exceptions.NotFound, self.__create_image__,
-                          '!@#$%^&*()', name, meta)
+        self.assertRaises(exceptions.NotFound,
+                          self.create_image_from_server,
+                          '!@#$%^&*()', name=name, meta=meta)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_image_from_stopped_server(self):
