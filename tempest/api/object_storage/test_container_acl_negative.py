@@ -29,7 +29,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         test_os = clients.Manager(cls.data.test_user,
                                   cls.data.test_password,
                                   cls.data.test_tenant)
-        cls.test_auth_data = test_os.get_auth_provider().auth_data
+        cls.test_auth_data = test_os.auth_provider.auth_data
 
     @classmethod
     def tearDownClass(cls):

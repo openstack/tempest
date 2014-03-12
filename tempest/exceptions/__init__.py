@@ -20,6 +20,10 @@ class InvalidConfiguration(base.TempestException):
     message = "Invalid Configuration"
 
 
+class InvalidCredentials(base.TempestException):
+    message = "Invalid Credentials"
+
+
 class InvalidHttpSuccessCode(base.RestClientException):
     message = "The success code is different than the expected one"
 

@@ -75,13 +75,12 @@ class Manager(object):
             tenant_name=CONF.identity.tenant_name
         )
 
-    def get_auth_provider(self, credentials=None):
-        auth_params = dict(client_type=getattr(self, 'client_type', None),
-                           interface=getattr(self, 'interface', None))
+    def get_auth_provider(self, credentials):
+        if credentials is None:
+            raise exceptions.InvalidCredentials(
+                'Credentials must be specified')
         auth_provider_class = self.get_auth_provider_class(self.auth_version)
-        # If invalid / incomplete credentials are provided, use default ones
-        if credentials is None or \
-                not auth_provider_class.check_credentials(credentials):
-            credentials = self.credentials
-        auth_params['credentials'] = credentials
-        return auth_provider_class(**auth_params)
+        return auth_provider_class(
+            client_type=getattr(self, 'client_type', None),
+            interface=getattr(self, 'interface', None),
+            credentials=credentials)

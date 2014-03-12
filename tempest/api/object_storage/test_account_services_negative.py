@@ -31,7 +31,7 @@ class AccountNegativeTest(base.BaseObjectTest):
         test_os = clients.Manager(self.data.test_user,
                                   self.data.test_password,
                                   self.data.test_tenant)
-        test_auth_provider = test_os.get_auth_provider()
+        test_auth_provider = test_os.auth_provider
         # Get auth for the test user
         test_auth_provider.auth_data
 
