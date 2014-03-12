@@ -15,3 +15,5 @@ include/swift_objects/swift_large
 dist
 build
 .testrepository
+.coverage
+cover/
