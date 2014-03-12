@@ -20,8 +20,28 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
 
     @attr(type="gate")
     def test_alarm_list(self):
-        resp, _ = self.telemetry_client.list_alarms()
+        # Create an alarm to verify in the list of alarms
+        created_alarm_ids = list()
+        fetched_ids = list()
+        rules = {'meter_name': 'cpu_util',
+                 'comparison_operator': 'gt',
+                 'threshold': 80.0,
+                 'period': 70}
+        for i in range(3):
+            resp, body = self.create_alarm(threshold_rule=rules)
+            created_alarm_ids.append(body['alarm_id'])
+
+        # List alarms
+        resp, alarm_list = self.telemetry_client.list_alarms()
         self.assertEqual(int(resp['status']), 200)
+
+        # Verify created alarm in the list
+        fetched_ids = [a['alarm_id'] for a in alarm_list]
+        missing_alarms = [a for a in created_alarm_ids if a not in fetched_ids]
+        self.assertEqual(0, len(missing_alarms),
+                         "Failed to find the following created alarm(s)"
+                         " in a fetched list: %s" %
+                         ', '.join(str(a) for a in missing_alarms))
 
     @attr(type="gate")
     def test_create_alarm(self):
