@@ -382,6 +382,10 @@ class ServersClientJSON(rest_client.RestClient):
         """Un-shelves the provided server."""
         return self.action(server_id, 'unshelve', None, **kwargs)
 
+    def shelve_offload_server(self, server_id, **kwargs):
+        """Shelve-offload the provided server."""
+        return self.action(server_id, 'shelveOffload', None, **kwargs)
+
     def get_console_output(self, server_id, length):
         return self.action(server_id, 'os-getConsoleOutput', 'output',
                            length=length)

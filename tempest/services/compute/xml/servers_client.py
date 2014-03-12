@@ -227,6 +227,10 @@ class ServersClientXML(rest_client.RestClient):
         """Un-shelves the provided server."""
         return self.action(server_id, 'unshelve', None, **kwargs)
 
+    def shelve_offload_server(self, server_id, **kwargs):
+        """Shelve-offload the provided server."""
+        return self.action(server_id, 'shelveOffload', None, **kwargs)
+
     def reset_state(self, server_id, state='error'):
         """Resets the state of a server to active/error."""
         return self.action(server_id, 'os-resetState', None, state=state)

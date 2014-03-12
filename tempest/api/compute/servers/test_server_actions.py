@@ -382,6 +382,11 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             self.client.wait_for_server_status(self.server_id,
                                                'SHELVED')
 
+            resp, server = self.client.shelve_offload_server(self.server_id)
+            self.assertEqual(202, resp.status)
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED_OFFLOADED')
+
         resp, server = self.client.get_server(self.server_id)
         image_name = server['name'] + '-shelved'
         params = {'name': image_name}

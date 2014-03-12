@@ -372,6 +372,11 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
             self.client.wait_for_server_status(self.server_id,
                                                'SHELVED')
 
+            resp, server = self.client.shelve_offload_server(self.server_id)
+            self.assertEqual(202, resp.status)
+            self.client.wait_for_server_status(self.server_id,
+                                               'SHELVED_OFFLOADED')
+
         resp, server = self.client.get_server(self.server_id)
         image_name = server['name'] + '-shelved'
         resp, images = self.images_client.image_list(name=image_name)
