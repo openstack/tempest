@@ -170,3 +170,15 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
         # deletion operations to succeed
         self._stop_instances([instance_2nd, instance_from_snapshot])
         self._detach_volumes([volume_origin, volume])
+
+
+class TestVolumeBootPatternV2(TestVolumeBootPattern):
+    def _boot_instance_from_volume(self, vol_id, keypair):
+        bdms = [{'uuid': vol_id, 'source_type': 'volume',
+                 'destination_type': 'volume', 'boot_index': 0,
+                 'delete_on_termination': False}]
+        create_kwargs = {
+            'block_device_mapping_v2': bdms,
+            'key_name': keypair.name
+        }
+        return self.create_server(image='', create_kwargs=create_kwargs)
