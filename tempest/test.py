@@ -363,6 +363,9 @@ class NegativeAutoTest(BaseTestCase):
         super(NegativeAutoTest, cls).setUpClass()
         os = cls.get_client_manager()
         cls.client = os.negative_client
+        os_admin = clients.AdminManager(interface=cls._interface,
+                                        service=cls._service)
+        cls.admin_client = os_admin.negative_client
 
     @staticmethod
     def load_schema(file):
@@ -418,10 +421,13 @@ class NegativeAutoTest(BaseTestCase):
                                              "expected_result": expected_result
                                              }))
         if schema is not None:
-            for invalid in generator.generate(schema):
-                scenario_list.append((invalid[0],
-                                      {"schema": invalid[1],
-                                       "expected_result": invalid[2]}))
+            for name, schema, expected_result in generator.generate(schema):
+                if (expected_result is None and
+                    "default_result_code" in description):
+                    expected_result = description["default_result_code"]
+                scenario_list.append((name,
+                                      {"schema": schema,
+                                       "expected_result": expected_result}))
         LOG.debug(scenario_list)
         return scenario_list
 
@@ -470,8 +476,12 @@ class NegativeAutoTest(BaseTestCase):
         elif hasattr(self, "schema"):
             new_url, body = self._http_arguments(self.schema, url, method)
 
-        resp, resp_body = self.client.send_request(method, new_url,
-                                                   resources, body=body)
+        if "admin_client" in description and description["admin_client"]:
+            client = self.admin_client
+        else:
+            client = self.client
+        resp, resp_body = client.send_request(method, new_url,
+                                              resources, body=body)
         self._check_negative_response(resp.status, resp_body)
 
     def _http_arguments(self, json_dict, url, method):

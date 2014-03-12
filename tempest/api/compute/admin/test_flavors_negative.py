@@ -13,12 +13,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testscenarios
 import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest import test
+
+load_tests = testscenarios.load_tests_apply_scenarios
 
 
 class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -43,11 +46,6 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         cls.ephemeral = 10
         cls.swap = 1024
         cls.rxtx = 2
-
-    def flavor_clean_up(self, flavor_id):
-        resp, body = self.client.delete_flavor(flavor_id)
-        self.assertEqual(resp.status, 202)
-        self.client.wait_for_resource_deletion(flavor_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_get_flavor_details_for_deleted_flavor(self):
@@ -85,13 +83,6 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         self.assertTrue(flag)
 
     @test.attr(type=['negative', 'gate'])
-    def test_invalid_is_public_string(self):
-        # the 'is_public' parameter can be 'none/true/false' if it exists
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.list_flavors_with_detail,
-                          {'is_public': 'invalid'})
-
-    @test.attr(type=['negative', 'gate'])
     def test_create_flavor_as_user(self):
         # only admin user can create a flavor
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
@@ -110,231 +101,16 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.user_client.delete_flavor,
                           self.flavor_ref_alt)
 
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_using_invalid_ram(self):
-        # the 'ram' attribute must be positive integer
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
 
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          flavor_name, -1, self.vcpus,
-                          self.disk, new_flavor_id)
+class FlavorCreateNegativeTestJSON(base.BaseV2ComputeAdminTest,
+                                   test.NegativeAutoTest):
+    _interface = 'json'
+    _service = 'compute'
+    _schema_file = 'compute/admin/flavor_create.json'
+
+    scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
 
     @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_using_invalid_vcpus(self):
-        # the 'vcpu' attribute must be positive integer
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          flavor_name, self.ram, -1,
-                          self.disk, new_flavor_id)
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_name_length_less_than_1(self):
-        # ensure name length >= 1
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          '',
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_name_length_exceeds_255(self):
-        # ensure name do not exceed 255 characters
-        new_flavor_name = 'a' * 256
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_invalid_name(self):
-        # the regex of flavor_name is '^[\w\.\- ]*$'
-        invalid_flavor_name = data_utils.rand_name('invalid-!@#$%-')
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          invalid_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_invalid_flavor_id(self):
-        # the regex of flavor_id is '^[\w\.\- ]*$', and it cannot contain
-        # leading and/or trailing whitespace
-        new_flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        invalid_flavor_id = '!@#$%'
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          invalid_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_id_length_exceeds_255(self):
-        # the length of flavor_id should not exceed 255 characters
-        new_flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        invalid_flavor_id = 'a' * 256
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          invalid_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_invalid_root_gb(self):
-        # root_gb attribute should be non-negative ( >= 0) integer
-        new_flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          -1,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_invalid_ephemeral_gb(self):
-        # ephemeral_gb attribute should be non-negative ( >= 0) integer
-        new_flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=-1,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_invalid_swap(self):
-        # swap attribute should be non-negative ( >= 0) integer
-        new_flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=-1,
-                          rxtx=self.rxtx,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_invalid_rxtx_factor(self):
-        # rxtx_factor attribute should be a positive float
-        new_flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=-1.5,
-                          is_public='False')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_with_invalid_is_public(self):
-        # is_public attribute should be boolean
-        new_flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.create_flavor,
-                          new_flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx,
-                          is_public='Invalid')
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor_already_exists(self):
-        flavor_name = data_utils.rand_name(self.flavor_name_prefix)
-        new_flavor_id = str(uuid.uuid4())
-
-        resp, flavor = self.client.create_flavor(flavor_name,
-                                                 self.ram, self.vcpus,
-                                                 self.disk,
-                                                 new_flavor_id,
-                                                 ephemeral=self.ephemeral,
-                                                 swap=self.swap,
-                                                 rxtx=self.rxtx)
-        self.assertEqual(200, resp.status)
-        self.addCleanup(self.flavor_clean_up, flavor['id'])
-
-        self.assertRaises(exceptions.Conflict,
-                          self.client.create_flavor,
-                          flavor_name,
-                          self.ram, self.vcpus,
-                          self.disk,
-                          new_flavor_id,
-                          ephemeral=self.ephemeral,
-                          swap=self.swap,
-                          rxtx=self.rxtx)
-
-    @test.attr(type=['negative', 'gate'])
-    def test_delete_nonexistent_flavor(self):
-        nonexistent_flavor_id = str(uuid.uuid4())
-
-        self.assertRaises(exceptions.NotFound,
-                          self.client.delete_flavor,
-                          nonexistent_flavor_id)
-
-
-class FlavorsAdminNegativeTestXML(FlavorsAdminNegativeTestJSON):
-    _interface = 'xml'
+    def test_create_flavor(self):
+        # flavor details are not returned for non-existent flavors
+        self.execute(self._schema_file)
