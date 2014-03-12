@@ -22,7 +22,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @attr(type='gate')
-    def test_create_delete_token(self):
+    def test_create_get_delete_token(self):
         # get a token by username and password
         user_name = data_utils.rand_name(name='user-')
         user_password = data_utils.rand_name(name='pass-')
@@ -43,8 +43,16 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(rsp['status'], '200')
         self.assertEqual(body['token']['tenant']['name'],
                          tenant['name'])
-        # then delete the token
+        # Perform GET Token
         token_id = body['token']['id']
+        resp, token_details = self.client.get_token(token_id)
+        self.assertEqual(resp['status'], '200')
+        self.assertEqual(token_id, token_details['token']['id'])
+        self.assertEqual(user['id'], token_details['user']['id'])
+        self.assertEqual(user_name, token_details['user']['name'])
+        self.assertEqual(tenant['name'],
+                         token_details['token']['tenant']['name'])
+        # then delete the token
         resp, body = self.client.delete_token(token_id)
         self.assertEqual(resp['status'], '204')
 
