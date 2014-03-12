@@ -15,12 +15,11 @@
 
 
 from tempest.api.network import base
-from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import test
 
 
-class QuotasTest(base.BaseNetworkTest):
+class QuotasTest(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     """
@@ -32,13 +31,9 @@ class QuotasTest(base.BaseNetworkTest):
         update quotas for a specified tenant
         reset quotas to default values for a specified tenant
 
-    v2.0 of the API is assumed. It is also assumed that the following
-    option is defined in the [service_available] section of etc/tempest.conf:
-
-        neutron as True
-
-    Finally, it is assumed that the per-tenant quota extension API is
-    configured in /etc/neutron/neutron.conf as follows:
+    v2.0 of the API is assumed.
+    It is also assumed that the per-tenant quota extension API is configured
+    in /etc/neutron/neutron.conf as follows:
 
         quota_driver = neutron.db.quota_db.DbQuotaDriver
     """
@@ -49,9 +44,7 @@ class QuotasTest(base.BaseNetworkTest):
         if not test.is_extension_enabled('quotas', 'network'):
             msg = "quotas extension not enabled."
             raise cls.skipException(msg)
-        admin_manager = clients.AdminManager()
-        cls.admin_client = admin_manager.network_client
-        cls.identity_admin_client = admin_manager.identity_client
+        cls.identity_admin_client = cls.os_adm.identity_client
 
     @test.attr(type='gate')
     def test_quotas(self):
