@@ -17,7 +17,7 @@ import base64
 
 from tempest.api.compute import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
@@ -28,7 +28,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
         # number of files are injected into the server.
@@ -43,7 +43,7 @@ class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.OverLimit, self.create_test_server,
                           personality=personality)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.

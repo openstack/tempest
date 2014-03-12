@@ -14,12 +14,12 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
 class CertificatesTestJSON(base.BaseV2ComputeTest):
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_and_get_root_certificate(self):
         # create certificates
         resp, create_body = self.certificates_client.create_certificate()

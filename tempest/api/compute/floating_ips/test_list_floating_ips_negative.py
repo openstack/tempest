@@ -19,7 +19,7 @@ from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -31,7 +31,7 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
         super(FloatingIPDetailsNegativeTestJSON, cls).setUpClass()
         cls.client = cls.floating_ips_client
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_nonexistent_floating_ip_details(self):
         # Negative test:Should not be able to GET the details
         # of non-existent floating IP

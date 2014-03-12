@@ -16,7 +16,7 @@
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
@@ -26,14 +26,14 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
         super(ImagesMetadataTestJSON, cls).setUpClass()
         cls.client = cls.images_client
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_nonexistent_image_metadata(self):
         # Negative test: List on nonexistent image
         # metadata should not happen
         self.assertRaises(exceptions.NotFound, self.client.list_image_metadata,
                           data_utils.rand_uuid())
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_nonexistent_image_metadata(self):
         # Negative test:An update should not happen for a non-existent image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
@@ -41,21 +41,21 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
                           self.client.update_image_metadata,
                           data_utils.rand_uuid(), meta)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_nonexistent_image_metadata_item(self):
         # Negative test: Get on non-existent image should not happen
         self.assertRaises(exceptions.NotFound,
                           self.client.get_image_metadata_item,
                           data_utils.rand_uuid(), 'key2')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_set_nonexistent_image_metadata(self):
         # Negative test: Metadata should not be set to a non-existent image
         meta = {'key1': 'alt1', 'key2': 'alt2'}
         self.assertRaises(exceptions.NotFound, self.client.set_image_metadata,
                           data_utils.rand_uuid(), meta)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_set_nonexistent_image_metadata_item(self):
         # Negative test: Metadata item should not be set to a
         # nonexistent image
@@ -65,7 +65,7 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
                           data_utils.rand_uuid(), 'key1',
                           meta)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_nonexistent_image_metadata_item(self):
         # Negative test: Shouldn't be able to delete metadata
         # item from non-existent image

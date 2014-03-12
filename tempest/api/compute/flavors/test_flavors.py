@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
 class FlavorsTestJSON(base.BaseV2ComputeTest):
@@ -24,7 +24,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         super(FlavorsTestJSON, cls).setUpClass()
         cls.client = cls.flavors_client
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_flavors(self):
         # List of all flavors should contain the expected flavor
         resp, flavors = self.client.list_flavors()
@@ -33,34 +33,34 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
                              'name': flavor['name']}
         self.assertIn(flavor_min_detail, flavors)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_flavors_with_detail(self):
         # Detailed list of all flavors should contain the expected flavor
         resp, flavors = self.client.list_flavors_with_detail()
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         self.assertIn(flavor, flavors)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_flavor(self):
         # The expected flavor details should be returned
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         self.assertEqual(self.flavor_ref, flavor['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_limit_results(self):
         # Only the expected number of flavors should be returned
         params = {'limit': 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertEqual(1, len(flavors))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_limit_results(self):
         # Only the expected number of flavors (detailed) should be returned
         params = {'limit': 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertEqual(1, len(flavors))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_using_marker(self):
         # The list of flavors should start from the provided marker
         resp, flavors = self.client.list_flavors()
@@ -71,7 +71,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
                          'The list of flavors did not start after the marker.')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_using_marker(self):
         # The list of flavors should start from the provided marker
         resp, flavors = self.client.list_flavors_with_detail()
@@ -82,7 +82,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
                          'The list of flavors did not start after the marker.')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_filter_by_min_disk(self):
         # The detailed list of flavors should be filtered by disk space
         resp, flavors = self.client.list_flavors_with_detail()
@@ -93,7 +93,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_filter_by_min_ram(self):
         # The detailed list of flavors should be filtered by RAM
         resp, flavors = self.client.list_flavors_with_detail()
@@ -104,7 +104,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_filter_by_min_disk(self):
         # The list of flavors should be filtered by disk space
         resp, flavors = self.client.list_flavors_with_detail()
@@ -115,7 +115,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_filter_by_min_ram(self):
         # The list of flavors should be filtered by RAM
         resp, flavors = self.client.list_flavors_with_detail()

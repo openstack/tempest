@@ -17,7 +17,7 @@ import uuid
 
 from tempest.api.compute import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class FlavorsNegativeTestXML(base.BaseV2ComputeTest):
@@ -28,19 +28,19 @@ class FlavorsNegativeTestXML(base.BaseV2ComputeTest):
         super(FlavorsNegativeTestXML, cls).setUpClass()
         cls.client = cls.flavors_client
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_invalid_minRam_filter(self):
         self.assertRaises(exceptions.BadRequest,
                           self.client.list_flavors_with_detail,
                           {'minRam': 'invalid'})
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_invalid_minDisk_filter(self):
         self.assertRaises(exceptions.BadRequest,
                           self.client.list_flavors_with_detail,
                           {'minDisk': 'invalid'})
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_non_existent_flavor_id(self):
         # flavor details are not returned for non-existent flavors
         nonexistent_flavor_id = str(uuid.uuid4())

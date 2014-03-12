@@ -15,7 +15,7 @@
 
 from tempest.api.compute import base
 from tempest import config
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -30,20 +30,20 @@ class ListImagesTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(skip_msg)
         cls.client = cls.images_client
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_image(self):
         # Returns the correct details for a single image
         resp, image = self.client.get_image(self.image_ref)
         self.assertEqual(self.image_ref, image['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_images(self):
         # The list of all images should contain the image
         resp, images = self.client.list_images()
         found = any([i for i in images if i['id'] == self.image_ref])
         self.assertTrue(found)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_images_with_detail(self):
         # Detailed list of all images should contain the expected images
         resp, images = self.client.list_images_with_detail()
