@@ -242,11 +242,17 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_member(cls, protocol_port, pool):
         """Wrapper utility that returns a test member."""
-        resp, body = cls.client.create_member("10.0.9.46",
-                                              protocol_port,
-                                              pool['id'])
+        resp, body = cls.client.create_member(address="10.0.9.46",
+                                              protocol_port=protocol_port,
+                                              pool_id=pool['id'])
         member = body['member']
         cls.members.append(member)
+        return member
+
+    @classmethod
+    def update_member(cls, admin_state_up):
+        resp, body = cls.client.update_member(admin_state_up=admin_state_up)
+        member = body['member']
         return member
 
     @classmethod
