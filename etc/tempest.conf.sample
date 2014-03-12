@@ -722,6 +722,16 @@
 #max_template_size=524288
 
 
+[queuing]
+
+#
+# Options defined in tempest.config
+#
+
+# Catalog type of the Queuing service. (string value)
+#catalog_type=queuing
+
+
 [scenario]
 
 #
@@ -800,6 +810,10 @@
 # Whether or not Trove is expected to be available (boolean
 # value)
 #trove=false
+
+# Whether or not Marconi is expected to be available (boolean
+# value)
+#marconi=false
 
 
 [stress]

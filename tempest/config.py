@@ -381,6 +381,15 @@ NetworkFeaturesGroup = [
                      'entry all which indicates every extension is enabled'),
 ]
 
+queuing_group = cfg.OptGroup(name='queuing',
+                             title='Queuing Service')
+
+QueuingGroup = [
+    cfg.StrOpt('catalog_type',
+               default='queuing',
+               help='Catalog type of the Queuing service.'),
+]
+
 volume_group = cfg.OptGroup(name='volume',
                             title='Block Storage Options')
 
@@ -753,6 +762,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('trove',
                 default=False,
                 help="Whether or not Trove is expected to be available"),
+    cfg.BoolOpt('marconi',
+                default=False,
+                help="Whether or not Marconi is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -842,6 +854,7 @@ def register_opts():
     register_opt_group(cfg.CONF, network_group, NetworkGroup)
     register_opt_group(cfg.CONF, network_feature_group,
                        NetworkFeaturesGroup)
+    register_opt_group(cfg.CONF, queuing_group, QueuingGroup)
     register_opt_group(cfg.CONF, volume_group, VolumeGroup)
     register_opt_group(cfg.CONF, volume_feature_group,
                        VolumeFeaturesGroup)
@@ -893,6 +906,7 @@ class TempestConfigPrivate(object):
             'object-storage-feature-enabled']
         self.database = cfg.CONF.database
         self.orchestration = cfg.CONF.orchestration
+        self.queuing = cfg.CONF.queuing
         self.telemetry = cfg.CONF.telemetry
         self.dashboard = cfg.CONF.dashboard
         self.data_processing = cfg.CONF.data_processing
