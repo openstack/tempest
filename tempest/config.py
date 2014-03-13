@@ -366,6 +366,14 @@ NetworkGroup = [
                default="",
                help="Id of the public router that provides external "
                     "connectivity"),
+    cfg.IntOpt('build_timeout',
+               default=300,
+               help="Timeout in seconds to wait for network operation to "
+                    "complete."),
+    cfg.IntOpt('build_interval',
+               default=10,
+               help="Time in seconds between network operation status "
+                    "checks."),
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',

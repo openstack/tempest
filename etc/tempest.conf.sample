@@ -617,6 +617,14 @@
 # (string value)
 #public_router_id=
 
+# Timeout in seconds to wait for network operation to
+# complete. (integer value)
+#build_timeout=300
+
+# Time in seconds between network operation status checks.
+# (integer value)
+#build_interval=10
+
 
 [network-feature-enabled]
 
