@@ -16,6 +16,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute import flavors_access as schema_access
 from tempest.common import rest_client
 from tempest import config
 
@@ -125,6 +126,7 @@ class FlavorsClientJSON(rest_client.RestClient):
         """Gets flavor access information given the flavor id."""
         resp, body = self.get('flavors/%s/os-flavor-access' % flavor_id)
         body = json.loads(body)
+        self.validate_response(schema_access.list_flavor_access, resp, body)
         return resp, body['flavor_access']
 
     def add_flavor_access(self, flavor_id, tenant_id):
