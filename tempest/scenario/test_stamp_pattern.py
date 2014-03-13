@@ -72,8 +72,7 @@ class TestStampPattern(manager.OfficialClientTest):
         server.add_floating_ip(floating_ip)
 
     def _ssh_to_server(self, server_or_ip):
-        linux_client = self.get_remote_client(server_or_ip)
-        return linux_client.ssh_client
+        return self.get_remote_client(server_or_ip)
 
     def _create_volume_snapshot(self, volume):
         snapshot_name = data_utils.rand_name('scenario-snapshot-')

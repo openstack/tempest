@@ -101,14 +101,13 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
             ip = server.networks[network_name_for_ssh][0]
 
         try:
-            client = self.get_remote_client(
+            return self.get_remote_client(
                 ip,
                 private_key=keypair.private_key)
         except Exception:
             LOG.exception('ssh to server failed')
             self._log_console_output()
             raise
-        return client.ssh_client
 
     def _get_content(self, ssh_client):
         return ssh_client.exec_command('cat /tmp/text')

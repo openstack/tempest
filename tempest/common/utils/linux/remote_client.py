@@ -43,6 +43,9 @@ class RemoteClient():
                                      ssh_timeout, pkey=pkey,
                                      channel_timeout=ssh_channel_timeout)
 
+    def exec_command(self, cmd):
+        return self.ssh_client.exec_command(cmd)
+
     def validate_authentication(self):
         """Validate ssh connection and authentication
            This method raises an Exception when the validation fails.
@@ -51,33 +54,33 @@ class RemoteClient():
 
     def hostname_equals_servername(self, expected_hostname):
         # Get host name using command "hostname"
-        actual_hostname = self.ssh_client.exec_command("hostname").rstrip()
+        actual_hostname = self.exec_command("hostname").rstrip()
         return expected_hostname == actual_hostname
 
     def get_files(self, path):
         # Return a list of comma separated files
         command = "ls -m " + path
-        return self.ssh_client.exec_command(command).rstrip('\n').split(', ')
+        return self.exec_command(command).rstrip('\n').split(', ')
 
     def get_ram_size_in_mb(self):
-        output = self.ssh_client.exec_command('free -m | grep Mem')
+        output = self.exec_command('free -m | grep Mem')
         if output:
             return output.split()[1]
 
     def get_number_of_vcpus(self):
         command = 'cat /proc/cpuinfo | grep processor | wc -l'
-        output = self.ssh_client.exec_command(command)
+        output = self.exec_command(command)
         return int(output)
 
     def get_partitions(self):
         # Return the contents of /proc/partitions
         command = 'cat /proc/partitions'
-        output = self.ssh_client.exec_command(command)
+        output = self.exec_command(command)
         return output
 
     def get_boot_time(self):
         cmd = 'cut -f1 -d. /proc/uptime'
-        boot_secs = self.ssh_client.exec_command(cmd)
+        boot_secs = self.exec_command(cmd)
         boot_time = time.time() - int(boot_secs)
         return time.localtime(boot_time)
 
@@ -85,27 +88,27 @@ class RemoteClient():
         message = re.sub("([$\\`])", "\\\\\\\\\\1", message)
         # usually to /dev/ttyS0
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
-        return self.ssh_client.exec_command(cmd)
+        return self.exec_command(cmd)
 
     def ping_host(self, host):
         cmd = 'ping -c1 -w1 %s' % host
-        return self.ssh_client.exec_command(cmd)
+        return self.exec_command(cmd)
 
     def get_mac_address(self):
         cmd = "/sbin/ifconfig | awk '/HWaddr/ {print $5}'"
-        return self.ssh_client.exec_command(cmd)
+        return self.exec_command(cmd)
 
     def get_ip_list(self):
         cmd = "/bin/ip address"
-        return self.ssh_client.exec_command(cmd)
+        return self.exec_command(cmd)
 
     def assign_static_ip(self, nic, addr):
         cmd = "sudo /bin/ip addr add {ip}/{mask} dev {nic}".format(
             ip=addr, mask=CONF.network.tenant_network_mask_bits,
             nic=nic
         )
-        return self.ssh_client.exec_command(cmd)
+        return self.exec_command(cmd)
 
     def turn_nic_on(self, nic):
         cmd = "sudo /bin/ip link set {nic} up".format(nic=nic)
-        return self.ssh_client.exec_command(cmd)
+        return self.exec_command(cmd)

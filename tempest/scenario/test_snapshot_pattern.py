@@ -45,11 +45,10 @@ class TestSnapshotPattern(manager.OfficialClientTest):
 
     def _ssh_to_server(self, server_or_ip):
         try:
-            linux_client = self.get_remote_client(server_or_ip)
+            return self.get_remote_client(server_or_ip)
         except Exception:
             LOG.exception()
             self._log_console_output()
-        return linux_client.ssh_client
 
     def _write_timestamp(self, server_or_ip):
         ssh_client = self._ssh_to_server(server_or_ip)
