@@ -34,22 +34,16 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
         if CONF.compute.allow_tenant_isolation:
             cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds(),
                                          interface=cls._interface)
-            cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
             # Add admin tenant to cleanup resources
             cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
                                          interface=cls._interface)
-
         else:
             cls.os_alt = clients.AltManager()
-            alt_tenant_name = cls.os_alt.credentials['tenant_name']
-            identity_client = cls._get_identity_admin_client()
-            _, tenants = identity_client.list_tenants()
-            cls.alt_tenant_id = [tnt['id'] for tnt in tenants
-                                 if tnt['name'] == alt_tenant_name][0]
             cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
 
         cls.client = cls.volumes_client
         cls.alt_client = cls.os_alt.volumes_client
+        cls.alt_tenant_id = cls.alt_client.tenant_id
         cls.adm_client = cls.os_adm.volumes_client
 
     def _delete_volume(self, volume_id):

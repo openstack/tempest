@@ -143,6 +143,10 @@ class RestClient(object):
         return self.auth_provider.credentials.username
 
     @property
+    def user_id(self):
+        return self.auth_provider.credentials.user_id
+
+    @property
     def tenant_name(self):
         return self.auth_provider.credentials.tenant_name
 

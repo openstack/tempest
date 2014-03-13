@@ -37,10 +37,7 @@ class ServersAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
         cls.client = cls.servers_admin_client
         cls.non_adm_client = cls.servers_client
         cls.flavors_client = cls.flavors_admin_client
-        cls.identity_client = cls._get_identity_admin_client()
-        tenant = cls.identity_client.get_tenant_by_name(
-            cls.client.tenant_name)
-        cls.tenant_id = tenant['id']
+        cls.tenant_id = cls.client.tenant_id
 
         cls.s1_name = data_utils.rand_name('server')
         resp, server = cls.create_test_server(name=cls.s1_name,

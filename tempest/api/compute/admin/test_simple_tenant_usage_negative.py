@@ -52,11 +52,9 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         params = {'start': self.end,
                   'end': self.start}
         resp, tenants = self.identity_client.list_tenants()
-        tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
-                     self.client.tenant_name][0]
         self.assertRaises(exceptions.BadRequest,
                           self.adm_client.get_tenant_usage,
-                          tenant_id, params)
+                          self.client.tenant_id, params)
 
     @test.attr(type=['negative', 'gate'])
     def test_list_usage_all_tenants_with_non_admin_user(self):

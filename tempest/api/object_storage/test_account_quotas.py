@@ -47,15 +47,11 @@ class AccountQuotasTest(base.BaseObjectTest):
             msg = "No ResellerAdmin role found"
             raise exceptions.NotFound(msg)
 
-        # Retrieve the ResellerAdmin tenant id
-        _, users = cls.os_admin.identity_client.get_users()
-        reseller_user_id = next(usr['id'] for usr in users if usr['name']
-                                == cls.data.test_user)
+        # Retrieve the ResellerAdmin user id
+        reseller_user_id = cls.data.test_credentials.user_id
 
         # Retrieve the ResellerAdmin tenant id
-        _, tenants = cls.os_admin.identity_client.list_tenants()
-        reseller_tenant_id = next(tnt['id'] for tnt in tenants if tnt['name']
-                                  == cls.data.test_tenant)
+        reseller_tenant_id = cls.data.test_credentials.tenant_id
 
         # Assign the newly created user the appropriate ResellerAdmin role
         cls.os_admin.identity_client.assign_user_role(
