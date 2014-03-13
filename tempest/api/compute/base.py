@@ -15,8 +15,6 @@
 
 import time
 
-import jsonschema
-
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -177,32 +175,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.security_groups.append(body)
 
         return resp, body
-
-    @classmethod
-    def validate_response(cls, schema, resp, body):
-        response_code = schema['status_code']
-        if resp.status not in response_code:
-            msg = ("The status code(%s) is different than the expected "
-                   "one(%s)") % (resp.status, response_code)
-            raise exceptions.InvalidHttpSuccessCode(msg)
-        response_schema = schema.get('response_body')
-        if response_schema:
-            if cls._interface == 'xml':
-                # NOTE: xml client of Tempest is broken and cannot get some
-                # keys. The best way is to fix it, but now xml format has been
-                # marked as "deprecated" in Nova API and xml client will be
-                # removed from Tempest.
-                # So now this test does not check attributes if xml.
-                return
-            try:
-                jsonschema.validate(body, response_schema)
-            except jsonschema.ValidationError as ex:
-                msg = ("HTTP response body is invalid (%s)") % ex
-                raise exceptions.InvalidHTTPResponseBody(msg)
-        else:
-            if body:
-                msg = ("HTTP response body should not exist (%s)") % body
-                raise exceptions.InvalidHTTPResponseBody(msg)
 
     def wait_for(self, condition):
         """Repeatedly calls condition() until a timeout."""

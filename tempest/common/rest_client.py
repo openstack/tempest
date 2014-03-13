@@ -21,6 +21,8 @@ from lxml import etree
 import re
 import time
 
+import jsonschema
+
 from tempest.common import http
 from tempest import config
 from tempest import exceptions
@@ -501,6 +503,31 @@ class RestClient(object):
         message = ('"%s" does not implement is_resource_deleted'
                    % self.__class__.__name__)
         raise NotImplementedError(message)
+
+    @classmethod
+    def validate_response(cls, schema, resp, body):
+        # Only check the response if the status code is a success code
+        # TODO(cyeoh): Eventually we should be able to verify that a failure
+        # code if it exists is something that we expect. This is explicitly
+        # declared in the V3 API and so we should be able to export this in
+        # the response schema. For now we'll ignore it.
+        if str(resp.status).startswith('2'):
+            response_code = schema['status_code']
+            if resp.status not in response_code:
+                msg = ("The status code(%s) is different than the expected "
+                       "one(%s)") % (resp.status, response_code)
+                raise exceptions.InvalidHttpSuccessCode(msg)
+            response_schema = schema.get('response_body')
+            if response_schema:
+                try:
+                    jsonschema.validate(body, response_schema)
+                except jsonschema.ValidationError as ex:
+                    msg = ("HTTP response body is invalid (%s)") % ex
+                    raise exceptions.InvalidHTTPResponseBody(msg)
+            else:
+                if body:
+                    msg = ("HTTP response body should not exist (%s)") % body
+                    raise exceptions.InvalidHTTPResponseBody(msg)
 
 
 class NegativeRestClient(RestClient):

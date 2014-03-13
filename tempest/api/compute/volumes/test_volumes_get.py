@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.compute.api_schema.v2 import volumes as schema
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -44,7 +43,9 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
                                                  display_name=v_name,
                                                  metadata=metadata)
         self.addCleanup(self.delete_volume, volume['id'])
-        self.validate_response(schema.get_volume, resp, volume)
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', volume)
+        self.assertIn('displayName', volume)
         self.assertEqual(volume['displayName'], v_name,
                          "The created volume name is not equal "
                          "to the requested name")
@@ -54,7 +55,7 @@ class VolumesGetTestJSON(base.BaseV2ComputeTest):
         self.client.wait_for_volume_status(volume['id'], 'available')
         # GET Volume
         resp, fetched_volume = self.client.get_volume(volume['id'])
-        self.validate_response(schema.get_volume, resp, fetched_volume)
+        self.assertEqual(200, resp.status)
         # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],
