@@ -26,6 +26,8 @@ import fixtures
 import testresources
 import testtools
 
+from oslo.config import cfg
+
 from tempest import clients
 import tempest.common.generator.valid_generator as valid
 from tempest.common import isolated_creds
@@ -410,7 +412,17 @@ class NegativeAutoTest(BaseTestCase):
         """
         description = NegativeAutoTest.load_schema(description_file)
         LOG.debug(description)
-        generator = importutils.import_class(CONF.negative.test_generator)()
+
+        # NOTE(mkoderer): since this will be executed on import level the
+        # config doesn't have to be in place (e.g. for the pep8 job).
+        # In this case simply return.
+        try:
+            generator = importutils.import_class(
+                CONF.negative.test_generator)()
+        except cfg.ConfigFilesNotFoundError:
+            LOG.critical(
+                "Tempest config not found. Test scenarios aren't created")
+            return
         generator.validate_schema(description)
         schema = description.get("json-schema", None)
         resources = description.get("resources", [])
