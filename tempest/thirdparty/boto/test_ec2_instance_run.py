@@ -40,7 +40,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
                                     ": requires ami/aki/ari manifest")))
         cls.s3_client = cls.os.s3_client
         cls.ec2_client = cls.os.ec2api_client
-        cls.zone = cls.ec2_client.get_good_zone()
+        cls.zone = CONF.boto.aws_zone
         cls.materials_path = CONF.boto.s3_materials_path
         ami_manifest = CONF.boto.ami_manifest
         aki_manifest = CONF.boto.aki_manifest

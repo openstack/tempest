@@ -128,6 +128,9 @@
 # AWS Access Key (string value)
 #aws_access=<None>
 
+# AWS Zone for EC2 tests (string value)
+#aws_zone=nova
+
 # S3 Materials Path (string value)
 #s3_materials_path=/opt/stack/devstack/files/images/s3-materials/cirros-0.3.0
 

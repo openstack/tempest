@@ -38,7 +38,7 @@ class EC2VolumesTest(boto_test.BotoTestCase):
             raise cls.skipException(skip_msg)
 
         cls.client = cls.os.ec2api_client
-        cls.zone = cls.client.get_good_zone()
+        cls.zone = CONF.boto.aws_zone
 
     @test.attr(type='smoke')
     def test_create_get_delete(self):

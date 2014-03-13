@@ -179,19 +179,6 @@ class APIClientEC2(BotoClientBase):
                            'revoke_security_group',
                            'revoke_security_group_egress'))
 
-    def get_good_zone(self):
-        """
-        :rtype: BaseString
-        :return: Returns with the first available zone name
-        """
-        for zone in self.get_all_zones():
-            # NOTE(afazekas): zone.region_name was None
-            if (zone.state == "available" and
-                zone.region.name == self.connection_data["region"].name):
-                return zone.name
-        else:
-            raise IndexError("Don't have a good zone")
-
 
 class ObjectClientS3(BotoClientBase):
 
