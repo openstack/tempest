@@ -439,3 +439,4 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
         cls.aggregates_admin_client = cls.os_adm.aggregates_v3_client
         cls.hosts_admin_client = cls.os_adm.hosts_v3_client
         cls.quotas_admin_client = cls.os_adm.quotas_v3_client
+        cls.agents_admin_client = cls.os_adm.agents_v3_client
