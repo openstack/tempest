@@ -73,3 +73,7 @@ def ip_ns_route(ns):
 
 def iptables_ns(ns, table):
     return ip_ns_exec(ns, "iptables -v -S -t " + table)
+
+
+def ovs_db_dump():
+    return sudo_cmd_call("ovsdb-client dump")

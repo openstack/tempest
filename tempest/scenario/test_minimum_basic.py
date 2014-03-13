@@ -97,7 +97,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         except Exception:
             LOG.exception('ssh to server failed')
             self._log_console_output()
-            debug.log_ip_ns()
+            debug.log_net_debug()
             raise
 
     def check_partitions(self):

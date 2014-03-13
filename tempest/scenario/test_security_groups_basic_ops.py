@@ -343,7 +343,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                                                             should_succeed),
                             msg)
         except Exception:
-            debug.log_ip_ns()
+            debug.log_net_debug()
             raise
 
     def _test_in_tenant_block(self, tenant):
