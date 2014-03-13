@@ -45,6 +45,11 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
             cls.rescue_id, adminPass=rescue_password)
         cls.servers_client.wait_for_server_status(cls.rescue_id, 'RESCUE')
 
+    @classmethod
+    def tearDownClass(cls):
+        cls.delete_volume(cls.volume['id'])
+        super(ServerRescueNegativeTestJSON, cls).tearDownClass()
+
     def _detach(self, server_id, volume_id):
         self.servers_client.detach_volume(server_id, volume_id)
         self.volumes_extensions_client.wait_for_volume_status(volume_id,
