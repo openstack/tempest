@@ -27,8 +27,8 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         super(BaseDataProcessingTest, cls).setUpClass()
         os = cls.get_client_manager()
-        if not CONF.service_available.savanna:
-            raise cls.skipException("Savanna support is required")
+        if not CONF.service_available.sahara:
+            raise cls.skipException("Sahara support is required")
         cls.client = os.data_processing_client
 
         # set some constants

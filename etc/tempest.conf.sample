@@ -789,9 +789,9 @@
 # value)
 #horizon=true
 
-# Whether or not Savanna is expected to be available (boolean
+# Whether or not Sahara is expected to be available (boolean
 # value)
-#savanna=false
+#sahara=false
 
 # Whether or not Ironic is expected to be available (boolean
 # value)

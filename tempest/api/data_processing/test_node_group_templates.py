@@ -28,7 +28,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
 
         if template_name is None:
             # generate random name if it's not specified
-            template_name = data_utils.rand_name('savanna')
+            template_name = data_utils.rand_name('sahara')
 
         # create simple node group template
         resp, body, template_id = self.create_node_group_template(
