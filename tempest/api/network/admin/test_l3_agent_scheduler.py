@@ -76,11 +76,8 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         resp, body = self.admin_client.remove_router_from_l3_agent(
             self.agent['id'], router['router']['id'])
         self.assertEqual('204', resp['status'])
-        resp, body = self.admin_client.list_l3_agents_hosting_router(
-            router['router']['id'])
-        for agent in body['agents']:
-            l3_agent_ids.append(agent['id'])
-        self.assertNotIn(self.agent['id'], l3_agent_ids)
+        # NOTE(afazekas): The deletion not asserted, because neutron
+        # is not forbidden to reschedule the router to the same agent
 
 
 class L3AgentSchedulerTestXML(L3AgentSchedulerTestJSON):
