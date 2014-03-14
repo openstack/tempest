@@ -246,9 +246,6 @@ ComputeFeaturesGroup = [
                 default=False,
                 help="Does the test environment support changing the admin "
                      "password?"),
-    cfg.BoolOpt('create_image',
-                default=False,
-                help="Does the test environment support snapshots?"),
     cfg.BoolOpt('resize',
                 default=False,
                 help="Does the test environment support resizing?"),

@@ -344,9 +344,6 @@
 # password? (boolean value)
 #change_password=false
 
-# Does the test environment support snapshots? (boolean value)
-#create_image=false
-
 # Does the test environment support resizing? (boolean value)
 #resize=false
 

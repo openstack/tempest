@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -61,8 +60,6 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
-    @testtools.skipUnless(CONF.compute_feature_enabled.create_image,
-                          'Environment unable to create images.')
     @test.attr(type='smoke')
     def test_create_delete_image(self):
 

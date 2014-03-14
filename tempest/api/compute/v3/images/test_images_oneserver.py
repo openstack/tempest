@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -61,8 +60,6 @@ class ImagesOneServerV3Test(base.BaseV3ComputeTest):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)
         return flavor['disk']
 
-    @testtools.skipUnless(CONF.compute_feature_enabled.create_image,
-                          'Environment unable to create images.')
     @test.attr(type='smoke')
     def test_create_delete_image(self):
 
@@ -73,26 +70,26 @@ class ImagesOneServerV3Test(base.BaseV3ComputeTest):
                                                       name, meta)
         self.assertEqual(202, resp.status)
         image_id = data_utils.parse_image_id(resp['location'])
-        self.client.wait_for_image_status(image_id, 'ACTIVE')
+        self.client.wait_for_image_status(image_id, 'active')
 
         # Verify the image was created correctly
-        resp, image = self.client.get_image(image_id)
+        resp, image = self.client.get_image_meta(image_id)
         self.assertEqual(name, image['name'])
-        self.assertEqual('test', image['metadata']['image_type'])
+        self.assertEqual('test', image['properties']['image_type'])
 
-        resp, original_image = self.client.get_image(self.image_ref)
+        resp, original_image = self.client.get_image_meta(self.image_ref)
 
         # Verify minRAM is the same as the original image
-        self.assertEqual(image['minRam'], original_image['minRam'])
+        self.assertEqual(image['min_ram'], original_image['min_ram'])
 
         # Verify minDisk is the same as the original image or the flavor size
         flavor_disk_size = self._get_default_flavor_disk_size(self.flavor_ref)
-        self.assertIn(str(image['minDisk']),
-                      (str(original_image['minDisk']), str(flavor_disk_size)))
+        self.assertIn(str(image['min_disk']),
+                      (str(original_image['min_disk']), str(flavor_disk_size)))
 
         # Verify the image was deleted correctly
         resp, body = self.client.delete_image(image_id)
-        self.assertEqual('204', resp['status'])
+        self.assertEqual('200', resp['status'])
         self.client.wait_for_resource_deletion(image_id)
 
     @test.attr(type=['gate'])
