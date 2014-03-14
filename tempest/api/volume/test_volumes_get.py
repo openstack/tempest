@@ -124,8 +124,8 @@ class VolumesGetTest(base.BaseVolumeV1Test):
         resp, new_volume = \
             self.client.create_volume(size=1,
                                       display_description=new_v_desc,
-                                      availability_zone=volume[
-                                      'availability_zone'])
+                                      availability_zone=
+                                      volume['availability_zone'])
         self.assertEqual(200, resp.status)
         self.assertIn('id', new_volume)
         self.addCleanup(self._delete_volume, new_volume['id'])
@@ -133,8 +133,8 @@ class VolumesGetTest(base.BaseVolumeV1Test):
         resp, update_volume = \
             self.client.update_volume(new_volume['id'],
                                       display_name=volume['display_name'],
-                                      display_description=volume[
-                                      'display_description'])
+                                      display_description=
+                                      volume['display_description'])
         self.assertEqual(200, resp.status)
 
         # NOTE(jdg): Revert back to strict true/false checking

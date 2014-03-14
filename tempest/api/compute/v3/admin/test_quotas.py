@@ -56,7 +56,7 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     def test_get_quota_set_detail(self):
         # Admin can get the detail of resource quota set for a tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        expected_detail = {'reserved', 'limit', 'in_use'}
+        expected_detail = ['reserved', 'limit', 'in_use']
         resp, quota_set = self.adm_client.get_quota_set_detail(
             self.demo_tenant_id)
         self.assertEqual(200, resp.status)
