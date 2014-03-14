@@ -15,13 +15,14 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils as utils
-from tempest.test import attr
+from tempest import test
 
 
 class VolumesActionsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumesActionsTest, cls).setUpClass()
         cls.client = cls.volumes_client
@@ -75,7 +76,7 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         self.assertEqual(202, resp_delete.status)
         self.client.wait_for_resource_deletion(temp_volume['id'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
         resp, body = self._reset_volume_status(self.volume['id'], 'error')
@@ -84,7 +85,7 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
             self.volume['id'])
         self.assertEqual('error', volume_get['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_begin_detaching(self):
         # test volume begin detaching : available -> detaching -> available
         resp, body = self.client.volume_begin_detaching(self.volume['id'])
@@ -92,7 +93,7 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         resp_get, volume_get = self.client.get_volume(self.volume['id'])
         self.assertEqual('detaching', volume_get['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_roll_detaching(self):
         # test volume roll detaching : detaching -> in-use -> available
         resp, body = self.client.volume_begin_detaching(self.volume['id'])
@@ -110,7 +111,7 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         # test force delete when status of volume is attaching
         self._create_reset_and_force_delete_temp_volume('attaching')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_force_delete_when_volume_is_error(self):
         # test force delete when status of volume is error
         self._create_reset_and_force_delete_temp_volume('error')

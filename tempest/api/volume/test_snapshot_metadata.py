@@ -21,6 +21,7 @@ class SnapshotMetadataTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(SnapshotMetadataTest, cls).setUpClass()
         cls.client = cls.snapshots_client

@@ -15,13 +15,14 @@
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(SnapshotsActionsTest, cls).setUpClass()
         cls.client = cls.snapshots_client
@@ -80,7 +81,7 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
     def _get_progress_alias(self):
         return 'os-extended-snapshot-attributes:progress'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_reset_snapshot_status(self):
         # Reset snapshot status to creating
         status = 'creating'
@@ -92,7 +93,7 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
         self.assertEqual(200, resp_get.status)
         self.assertEqual(status, snapshot_get['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_snapshot_status(self):
         # Reset snapshot status to creating
         status = 'creating'
@@ -112,22 +113,22 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
         self.assertEqual(status, snapshot_get['status'])
         self.assertEqual(progress, snapshot_get[progress_alias])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshot_force_delete_when_snapshot_is_creating(self):
         # test force delete when status of snapshot is creating
         self._create_reset_and_force_delete_temp_snapshot('creating')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshot_force_delete_when_snapshot_is_deleting(self):
         # test force delete when status of snapshot is deleting
         self._create_reset_and_force_delete_temp_snapshot('deleting')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshot_force_delete_when_snapshot_is_error(self):
         # test force delete when status of snapshot is error
         self._create_reset_and_force_delete_temp_snapshot('error')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_snapshot_force_delete_when_snapshot_is_error_deleting(self):
         # test force delete when status of snapshot is error_deleting
         self._create_reset_and_force_delete_temp_snapshot('error_deleting')
