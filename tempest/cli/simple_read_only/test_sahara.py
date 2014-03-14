@@ -25,8 +25,8 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlySavannaClientTest(cli.ClientTestBase):
-    """Basic, read-only tests for Savanna CLI client.
+class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
+    """Basic, read-only tests for Sahara CLI client.
 
     Checks return values and output of read-only commands.
     These tests do not presume any content, nor do they create
@@ -35,36 +35,36 @@ class SimpleReadOnlySavannaClientTest(cli.ClientTestBase):
 
     @classmethod
     def setUpClass(cls):
-        if not CONF.service_available.savanna:
-            msg = "Skipping all Savanna cli tests because it is not available"
+        if not CONF.service_available.sahara:
+            msg = "Skipping all Sahara cli tests because it is not available"
             raise cls.skipException(msg)
-        super(SimpleReadOnlySavannaClientTest, cls).setUpClass()
+        super(SimpleReadOnlySaharaClientTest, cls).setUpClass()
 
     @test.attr(type='negative')
-    def test_savanna_fake_action(self):
+    def test_sahara_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
-                          self.savanna,
+                          self.sahara,
                           'this-does-not-exist')
 
-    def test_savanna_plugins_list(self):
-        plugins = self.parser.listing(self.savanna('plugin-list'))
+    def test_sahara_plugins_list(self):
+        plugins = self.parser.listing(self.sahara('plugin-list'))
         self.assertTableStruct(plugins, ['name', 'versions', 'title'])
 
-    def test_savanna_plugins_show(self):
-        plugin = self.parser.listing(self.savanna('plugin-show',
-                                                  params='--name vanilla'))
+    def test_sahara_plugins_show(self):
+        plugin = self.parser.listing(self.sahara('plugin-show',
+                                                 params='--name vanilla'))
         self.assertTableStruct(plugin, ['Property', 'Value'])
 
-    def test_savanna_node_group_template_list(self):
-        plugins = self.parser.listing(self.savanna('node-group-template-list'))
+    def test_sahara_node_group_template_list(self):
+        plugins = self.parser.listing(self.sahara('node-group-template-list'))
         self.assertTableStruct(plugins, ['name', 'id', 'plugin_name',
                                          'node_processes', 'description'])
 
-    def test_savanna_cluster_template_list(self):
-        plugins = self.parser.listing(self.savanna('cluster-template-list'))
+    def test_sahara_cluster_template_list(self):
+        plugins = self.parser.listing(self.sahara('cluster-template-list'))
         self.assertTableStruct(plugins, ['name', 'id', 'plugin_name',
                                          'node_groups', 'description'])
 
-    def test_savanna_cluster_list(self):
-        plugins = self.parser.listing(self.savanna('cluster-list'))
+    def test_sahara_cluster_list(self):
+        plugins = self.parser.listing(self.sahara('cluster-list'))
         self.assertTableStruct(plugins, ['name', 'id', 'status', 'node_count'])
