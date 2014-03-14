@@ -101,6 +101,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
                                               disk_format='iso',
                                               visibility='public')
         self.assertEqual(201, resp.status)
+        self.addCleanup(self.client.delete_image, body['id'])
         self.assertEqual('queued', body['status'])
         image_id = body['id']
 
