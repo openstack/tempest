@@ -76,6 +76,30 @@ class TestTenantIsolation(base.TestCase):
                           {'id': id, 'name': name})))
         return tenant_fix
 
+    def _mock_network_create(self, iso_creds, id, name):
+        net_fix = self.useFixture(mockpatch.PatchObject(
+            iso_creds.network_admin_client,
+            'create_network',
+            return_value=({'status': 200},
+                          {'network': {'id': id, 'name': name}})))
+        return net_fix
+
+    def _mock_subnet_create(self, iso_creds, id, name):
+        subnet_fix = self.useFixture(mockpatch.PatchObject(
+            iso_creds.network_admin_client,
+            'create_subnet',
+            return_value=({'status': 200},
+                          {'subnet': {'id': id, 'name': name}})))
+        return subnet_fix
+
+    def _mock_router_create(self, id, name):
+        router_fix = self.useFixture(mockpatch.PatchObject(
+            json_network_client.NetworkClientJSON,
+            'create_router',
+            return_value=({'status': 200},
+                          {'router': {'id': id, 'name': name}})))
+        return router_fix
+
     @patch('tempest.common.rest_client.RestClient')
     def test_primary_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
@@ -163,6 +187,148 @@ class TestTenantIsolation(base.TestCase):
         self.assertIn('123456', args)
         # Verify tenant delete calls
         calls = tenant_mock.mock_calls
+        self.assertEqual(len(calls), 3)
+        args = map(lambda x: x[1][0], calls)
+        self.assertIn('1234', args)
+        self.assertIn('12345', args)
+        self.assertIn('123456', args)
+
+    @patch('tempest.common.rest_client.RestClient')
+    def test_alt_creds(self, MockRestClient):
+        cfg.CONF.set_default('neutron', False, 'service_available')
+        iso_creds = isolated_creds.IsolatedCreds('test class',
+                                                 password='fake_password')
+        self._mock_user_create('1234', 'fake_alt_user')
+        self._mock_tenant_create('1234', 'fake_alt_tenant')
+        username, tenant_name, password = iso_creds.get_alt_creds()
+        self.assertEqual(username, 'fake_alt_user')
+        self.assertEqual(tenant_name, 'fake_alt_tenant')
+        # Verify helper methods
+        tenant = iso_creds.get_alt_tenant()
+        user = iso_creds.get_alt_user()
+        self.assertEqual(tenant['id'], '1234')
+        self.assertEqual(user['id'], '1234')
+
+    @patch('tempest.common.rest_client.RestClient')
+    def test_network_creation(self, MockRestClient):
+        iso_creds = isolated_creds.IsolatedCreds('test class',
+                                                 password='fake_password')
+        self._mock_user_create('1234', 'fake_prim_user')
+        self._mock_tenant_create('1234', 'fake_prim_tenant')
+        self._mock_network_create(iso_creds, '1234', 'fake_net')
+        self._mock_subnet_create(iso_creds, '1234', 'fake_subnet')
+        self._mock_router_create('1234', 'fake_router')
+        router_interface_mock = self.patch(
+            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'add_router_interface_with_subnet_id')
+        username, tenant_name, password = iso_creds.get_primary_creds()
+        router_interface_mock.called_once_with('1234', '1234')
+        network = iso_creds.get_primary_network()
+        subnet = iso_creds.get_primary_subnet()
+        router = iso_creds.get_primary_router()
+        self.assertEqual(network['id'], '1234')
+        self.assertEqual(network['name'], 'fake_net')
+        self.assertEqual(subnet['id'], '1234')
+        self.assertEqual(subnet['name'], 'fake_subnet')
+        self.assertEqual(router['id'], '1234')
+        self.assertEqual(router['name'], 'fake_router')
+
+    @patch('tempest.common.rest_client.RestClient')
+    def test_network_cleanup(self, MockRestClient):
+        iso_creds = isolated_creds.IsolatedCreds('test class',
+                                                 password='fake_password')
+        # Create primary tenant and network
+        user_fix = self._mock_user_create('1234', 'fake_prim_user')
+        tenant_fix = self._mock_tenant_create('1234', 'fake_prim_tenant')
+        net_fix = self._mock_network_create(iso_creds, '1234', 'fake_net')
+        subnet_fix = self._mock_subnet_create(iso_creds, '1234', 'fake_subnet')
+        router_fix = self._mock_router_create('1234', 'fake_router')
+        router_interface_mock = self.patch(
+            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'add_router_interface_with_subnet_id')
+        username, tenant_name, password = iso_creds.get_primary_creds()
+        router_interface_mock.called_once_with('1234', '1234')
+        router_interface_mock.reset_mock()
+        tenant_fix.cleanUp()
+        user_fix.cleanUp()
+        net_fix.cleanUp()
+        subnet_fix.cleanUp()
+        router_fix.cleanUp()
+        # Create alternate tenant and network
+        user_fix = self._mock_user_create('12345', 'fake_alt_user')
+        tenant_fix = self._mock_tenant_create('12345', 'fake_alt_tenant')
+        net_fix = self._mock_network_create(iso_creds, '12345', 'fake_alt_net')
+        subnet_fix = self._mock_subnet_create(iso_creds, '12345',
+                                              'fake_alt_subnet')
+        router_fix = self._mock_router_create('12345', 'fake_alt_router')
+        alt_username, alt_tenant_name, password = iso_creds.get_alt_creds()
+        router_interface_mock.called_once_with('12345', '12345')
+        router_interface_mock.reset_mock()
+        tenant_fix.cleanUp()
+        user_fix.cleanUp()
+        net_fix.cleanUp()
+        subnet_fix.cleanUp()
+        router_fix.cleanUp()
+        # Create admin tenant and networks
+        user_fix = self._mock_user_create('123456', 'fake_admin_user')
+        tenant_fix = self._mock_tenant_create('123456', 'fake_admin_tenant')
+        net_fix = self._mock_network_create(iso_creds, '123456',
+                                            'fake_admin_net')
+        subnet_fix = self._mock_subnet_create(iso_creds, '123456',
+                                              'fake_admin_subnet')
+        router_fix = self._mock_router_create('123456', 'fake_admin_router')
+        self.useFixture(mockpatch.PatchObject(
+            json_iden_client.IdentityClientJSON,
+            'list_roles',
+            return_value=({'status': 200},
+                          [{'id': '123456', 'name': 'admin'}])))
+        with patch.object(json_iden_client.IdentityClientJSON,
+                          'assign_user_role'):
+            admin_user, admin_tenant, password = iso_creds.get_admin_creds()
+        self.patch('tempest.services.identity.json.identity_client.'
+                   'IdentityClientJSON.delete_user')
+        self.patch('tempest.services.identity.json.identity_client.'
+                   'IdentityClientJSON.delete_tenant')
+        net = patch.object(iso_creds.network_admin_client,
+                           'delete_network')
+        net_mock = net.start()
+        subnet = patch.object(iso_creds.network_admin_client,
+                              'delete_subnet')
+        subnet_mock = subnet.start()
+        router = patch.object(iso_creds.network_admin_client,
+                              'delete_router')
+        router_mock = router.start()
+        remove_router_interface_mock = self.patch(
+            'tempest.services.network.json.network_client.NetworkClientJSON.'
+            'remove_router_interface_with_subnet_id')
+        port_list_mock = patch.object(iso_creds.network_admin_client,
+                                      'list_ports', return_value=(
+                                      {'status': 200}, {'ports': []}))
+        port_list_mock.start()
+        iso_creds.clear_isolated_creds()
+        # Verify remove router interface calls
+        calls = remove_router_interface_mock.mock_calls
+        self.assertEqual(len(calls), 3)
+        args = map(lambda x: x[1], calls)
+        self.assertIn(('1234', '1234'), args)
+        self.assertIn(('12345', '12345'), args)
+        self.assertIn(('123456', '123456'), args)
+        # Verify network delete calls
+        calls = net_mock.mock_calls
+        self.assertEqual(len(calls), 3)
+        args = map(lambda x: x[1][0], calls)
+        self.assertIn('1234', args)
+        self.assertIn('12345', args)
+        self.assertIn('123456', args)
+        # Verify subnet delete calls
+        calls = subnet_mock.mock_calls
+        self.assertEqual(len(calls), 3)
+        args = map(lambda x: x[1][0], calls)
+        self.assertIn('1234', args)
+        self.assertIn('12345', args)
+        self.assertIn('123456', args)
+        # Verify router delete calls
+        calls = router_mock.mock_calls
         self.assertEqual(len(calls), 3)
         args = map(lambda x: x[1][0], calls)
         self.assertIn('1234', args)
