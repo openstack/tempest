@@ -45,6 +45,16 @@ def cleanup():
         except Exception:
             pass
 
+    secgrp_client = admin_manager.security_groups_client
+    _, secgrp = secgrp_client.list_security_groups({"all_tenants": True})
+    secgrp_del = [grp for grp in secgrp if grp['name'] != 'default']
+    LOG.info("Cleanup::remove %s Security Group" % len(secgrp_del))
+    for g in secgrp_del:
+        try:
+            secgrp_client.delete_security_group(g['id'])
+        except Exception:
+            pass
+
     _, floating_ips = admin_manager.floating_ips_client.list_floating_ips()
     LOG.info("Cleanup::remove %s floating ips" % len(floating_ips))
     for f in floating_ips:
