@@ -20,6 +20,6 @@ keyring>=1.6.1,<2.0,>=2.1
 testrepository>=0.0.18
 oslo.config>=1.2.0
 six>=1.5.2
-iso8601>=0.1.8
+iso8601>=0.1.9
 fixtures>=0.3.14
 testscenarios>=0.4
