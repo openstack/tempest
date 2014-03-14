@@ -92,6 +92,29 @@ class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(quota_set['ram'], 5120)
 
+    @test.attr(type='gate')
+    def test_delete_quota(self):
+        # Admin can delete the resource quota set for a tenant
+        tenant_name = data_utils.rand_name('ram_quota_tenant_')
+        tenant_desc = tenant_name + '-desc'
+        identity_client = self.os_adm.identity_client
+        _, tenant = identity_client.create_tenant(name=tenant_name,
+                                                  description=tenant_desc)
+        tenant_id = tenant['id']
+        self.addCleanup(identity_client.delete_tenant, tenant_id)
+        resp, quota_set_default = self.adm_client.get_quota_set(tenant_id)
+        ram_default = quota_set_default['ram']
+
+        resp, body = self.adm_client.update_quota_set(tenant_id, ram='5120')
+        self.assertEqual(200, resp.status)
+
+        resp, body = self.adm_client.delete_quota_set(tenant_id)
+        self.assertEqual(202, resp.status)
+
+        resp, quota_set_new = self.adm_client.get_quota_set(tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(ram_default, quota_set_new['ram'])
+
 
 class QuotasAdminTestXML(QuotasAdminTestJSON):
     _interface = 'xml'
