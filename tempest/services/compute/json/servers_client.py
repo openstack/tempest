@@ -18,6 +18,7 @@ import json
 import time
 import urllib
 
+from tempest.api_schema.compute.v2 import servers as schema
 from tempest.common import rest_client
 from tempest.common import waiters
 from tempest import config
@@ -85,6 +86,7 @@ class ServersClientJSON(rest_client.RestClient):
         # with return reservation id set True
         if 'reservation_id' in body:
             return resp, body
+        self.validate_response(schema.create_server, resp, body)
         return resp, body['server']
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
