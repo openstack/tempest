@@ -24,14 +24,15 @@ CONF = config.CONF
 class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ImagesMetadataTestJSON, cls).setUpClass()
         if not CONF.service_available.glance:
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        cls.servers_client = cls.servers_client
         cls.client = cls.images_client
+        cls.image_id = None
 
         resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
@@ -45,7 +46,8 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        cls.client.delete_image(cls.image_id)
+        if cls.image_id:
+            cls.client.delete_image(cls.image_id)
         super(ImagesMetadataTestJSON, cls).tearDownClass()
 
     def setUp(self):

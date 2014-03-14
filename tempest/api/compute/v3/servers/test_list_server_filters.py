@@ -26,6 +26,7 @@ CONF = config.CONF
 class ListServerFiltersV3Test(base.BaseV3ComputeTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ListServerFiltersV3Test, cls).setUpClass()
         cls.client = cls.servers_client
