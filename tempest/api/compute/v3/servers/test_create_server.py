@@ -92,14 +92,6 @@ class ServersV3Test(base.BaseV3ComputeTest):
 
     @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
     @test.attr(type='gate')
-    def test_can_log_into_created_server(self):
-        # Check that the user can authenticate with the generated password
-        linux_client = remote_client.RemoteClient(self.server,
-                                                  self.ssh_user, self.password)
-        self.assertTrue(linux_client.can_authenticate())
-
-    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
-    @test.attr(type='gate')
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
         # the amount stated by the flavor
