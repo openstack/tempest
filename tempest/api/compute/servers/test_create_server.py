@@ -32,6 +32,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServersTestJSON, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
@@ -114,6 +115,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServersWithSpecificFlavorTestJSON, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'

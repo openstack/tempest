@@ -33,6 +33,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(AttachVolumeTestJSON, cls).setUpClass()
         cls.device = CONF.compute.volume_device_name
         if not CONF.service_available.cinder:

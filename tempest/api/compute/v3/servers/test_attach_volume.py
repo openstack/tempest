@@ -33,6 +33,7 @@ class AttachVolumeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(AttachVolumeV3Test, cls).setUpClass()
         cls.device = CONF.compute.volume_device_name
         if not CONF.service_available.cinder:
