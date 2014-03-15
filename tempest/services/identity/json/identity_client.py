@@ -134,9 +134,10 @@ class IdentityClientJSON(rest_client.RestClient):
         post_body = {
             'name': name,
             'password': password,
-            'tenantId': tenant_id,
             'email': email
         }
+        if tenant_id is not None:
+            post_body['tenantId'] = tenant_id
         if kwargs.get('enabled') is not None:
             post_body['enabled'] = kwargs.get('enabled')
         post_body = json.dumps({'user': post_body})
@@ -233,16 +234,36 @@ class TokenClientJSON(IdentityClientJSON):
 
         self.auth_url = auth_url
 
-    def auth(self, user, password, tenant):
+    def auth(self, user, password, tenant=None):
         creds = {
             'auth': {
                 'passwordCredentials': {
                     'username': user,
                     'password': password,
                 },
-                'tenantName': tenant,
             }
         }
+
+        if tenant:
+            creds['auth']['tenantName'] = tenant
+
+        body = json.dumps(creds)
+        resp, body = self.post(self.auth_url, body=body)
+
+        return resp, body['access']
+
+    def auth_token(self, token_id, tenant=None):
+        creds = {
+            'auth': {
+                'token': {
+                    'id': token_id,
+                },
+            }
+        }
+
+        if tenant:
+            creds['auth']['tenantName'] = tenant
+
         body = json.dumps(creds)
         resp, body = self.post(self.auth_url, body=body)
 
