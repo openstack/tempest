@@ -17,6 +17,7 @@ import json
 import time
 import urllib
 
+from tempest.api_schema.compute.v2 import volumes as schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -58,6 +59,7 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
         url = "os-volumes/%s" % str(volume_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.get_volume, resp, body)
         return resp, body['volume']
 
     def create_volume(self, size, **kwargs):
