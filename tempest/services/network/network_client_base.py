@@ -44,7 +44,6 @@ resource_plural_map = {
     'security_groups': 'security_groups',
     'security_group_rules': 'security_group_rules',
     'ikepolicy': 'ikepolicies',
-    'floating_ip': 'floatingips',
     'quotas': 'quotas'
 }
 

@@ -90,7 +90,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             cls.client.delete_vpnservice(vpnservice['id'])
         # Clean up floating IPs
         for floating_ip in cls.floating_ips:
-            cls.client.delete_floating_ip(floating_ip['id'])
+            cls.client.delete_floatingip(floating_ip['id'])
         # Clean up routers
         for router in cls.routers:
             resp, body = cls.client.list_router_interfaces(router['id'])
@@ -193,11 +193,10 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return router
 
     @classmethod
-    def create_floating_ip(cls, external_network_id, **kwargs):
+    def create_floatingip(cls, external_network_id):
         """Wrapper utility that returns a test floating IP."""
-        resp, body = cls.client.create_floating_ip(
-            external_network_id,
-            **kwargs)
+        resp, body = cls.client.create_floatingip(
+            floating_network_id=external_network_id)
         fip = body['floatingip']
         cls.floating_ips.append(fip)
         return fip

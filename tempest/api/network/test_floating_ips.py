@@ -65,8 +65,12 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_create_list_show_update_delete_floating_ip(self):
         # Creates a floating IP
-        created_floating_ip = self.create_floating_ip(
-            self.ext_net_id, port_id=self.ports[0]['id'])
+        resp, body = self.client.create_floatingip(
+            floating_network_id=self.ext_net_id, port_id=self.ports[0]['id'])
+        self.assertEqual('201', resp['status'])
+        created_floating_ip = body['floatingip']
+        self.addCleanup(self.client.delete_floatingip,
+                        created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['id'])
         self.assertIsNotNone(created_floating_ip['tenant_id'])
         self.assertIsNotNone(created_floating_ip['floating_ip_address'])
@@ -74,7 +78,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(created_floating_ip['floating_network_id'],
                          self.ext_net_id)
         # Verifies the details of a floating_ip
-        resp, floating_ip = self.client.show_floating_ip(
+        resp, floating_ip = self.client.show_floatingip(
             created_floating_ip['id'])
         self.assertEqual('200', resp['status'])
         shown_floating_ip = floating_ip['floatingip']
@@ -95,7 +99,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
             floatingip_id_list.append(f['id'])
         self.assertIn(created_floating_ip['id'], floatingip_id_list)
         # Associate floating IP to the other port
-        resp, floating_ip = self.client.update_floating_ip(
+        resp, floating_ip = self.client.update_floatingip(
             created_floating_ip['id'], port_id=self.ports[1]['id'])
         self.assertEqual('200', resp['status'])
         updated_floating_ip = floating_ip['floatingip']
@@ -105,7 +109,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.assertEqual(updated_floating_ip['router_id'], self.router['id'])
 
         # Disassociate floating IP from the port
-        resp, floating_ip = self.client.update_floating_ip(
+        resp, floating_ip = self.client.update_floatingip(
             created_floating_ip['id'], port_id=None)
         self.assertEqual('200', resp['status'])
         updated_floating_ip = floating_ip['floatingip']
@@ -116,17 +120,22 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_floating_ip_delete_port(self):
         # Create a floating IP
-        created_floating_ip = self.create_floating_ip(self.ext_net_id)
+        resp, body = self.client.create_floatingip(
+            floating_network_id=self.ext_net_id)
+        self.assertEqual('201', resp['status'])
+        created_floating_ip = body['floatingip']
+        self.addCleanup(self.client.delete_floatingip,
+                        created_floating_ip['id'])
         # Create a port
         resp, port = self.client.create_port(network_id=self.network['id'])
         created_port = port['port']
-        resp, floating_ip = self.client.update_floating_ip(
+        resp, floating_ip = self.client.update_floatingip(
             created_floating_ip['id'], port_id=created_port['id'])
         self.assertEqual('200', resp['status'])
         # Delete port
         self.client.delete_port(created_port['id'])
         # Verifies the details of the floating_ip
-        resp, floating_ip = self.client.show_floating_ip(
+        resp, floating_ip = self.client.show_floatingip(
             created_floating_ip['id'])
         self.assertEqual('200', resp['status'])
         shown_floating_ip = floating_ip['floatingip']
@@ -139,8 +148,12 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_floating_ip_update_different_router(self):
         # Associate a floating IP to a port on a router
-        created_floating_ip = self.create_floating_ip(
-            self.ext_net_id, port_id=self.ports[1]['id'])
+        resp, body = self.client.create_floatingip(
+            floating_network_id=self.ext_net_id, port_id=self.ports[1]['id'])
+        self.assertEqual('201', resp['status'])
+        created_floating_ip = body['floatingip']
+        self.addCleanup(self.client.delete_floatingip,
+                        created_floating_ip['id'])
         self.assertEqual(created_floating_ip['router_id'], self.router['id'])
         network2 = self.create_network()
         subnet2 = self.create_subnet(network2)
@@ -149,7 +162,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
         self.create_router_interface(router2['id'], subnet2['id'])
         port_other_router = self.create_port(network2)
         # Associate floating IP to the other port on another router
-        resp, floating_ip = self.client.update_floating_ip(
+        resp, floating_ip = self.client.update_floatingip(
             created_floating_ip['id'], port_id=port_other_router['id'])
         self.assertEqual('200', resp['status'])
         updated_floating_ip = floating_ip['floatingip']

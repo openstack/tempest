@@ -144,25 +144,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.loads(body)
         return resp, body
 
-    def create_floating_ip(self, ext_network_id, **kwargs):
-        post_body = {
-            'floatingip': kwargs}
-        post_body['floatingip']['floating_network_id'] = ext_network_id
-        body = json.dumps(post_body)
-        uri = '%s/floatingips' % (self.uri_prefix)
-        resp, body = self.post(uri, body=body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_floating_ip(self, floating_ip_id, **kwargs):
-        post_body = {
-            'floatingip': kwargs}
-        body = json.dumps(post_body)
-        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
     def associate_health_monitor_with_pool(self, health_monitor_id,
                                            pool_id):
         post_body = {
