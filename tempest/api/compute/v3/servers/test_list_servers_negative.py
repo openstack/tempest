@@ -19,13 +19,14 @@ from six import moves
 
 from tempest.api.compute import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ListServersNegativeV3Test(base.BaseV3ComputeTest):
     force_tenant_isolation = True
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ListServersNegativeV3Test, cls).setUpClass()
         cls.client = cls.servers_client
@@ -51,7 +52,7 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
                                                ignore_error=True)
         cls.deleted_fixtures.append(srv)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_with_a_deleted_server(self):
         # Verify deleted servers do not show by default in list servers
         # List servers and verify server not returned
@@ -63,7 +64,7 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], actual)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_non_existing_image(self):
         # Listing servers for a non existing image returns empty list
         non_existing_image = '1234abcd-zzz0-aaa9-ppp3-0987654abcde'
@@ -72,7 +73,7 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_non_existing_flavor(self):
         # Listing servers by non existing flavor returns empty list
         non_existing_flavor = 1234
@@ -81,7 +82,7 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_non_existing_server_name(self):
         # Listing servers for a non existent server name returns empty list
         non_existing_name = 'junk_server_1234'
@@ -90,7 +91,7 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_status_non_existing(self):
         # Return an empty list when invalid status is specified
         non_existing_status = 'BALONEY'
@@ -99,33 +100,33 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_by_limits(self):
         # List servers by specifying limits
         resp, body = self.client.list_servers({'limit': 1})
         self.assertEqual('200', resp['status'])
         self.assertEqual(1, len([x for x in body['servers'] if 'id' in x]))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_greater_than_actual_count(self):
         # List servers by specifying a greater value for limit
         resp, body = self.client.list_servers({'limit': 100})
         self.assertEqual('200', resp['status'])
         self.assertEqual(len(self.existing_fixtures), len(body['servers']))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_string(self):
         # Return an error if a string value is passed for limit
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
                           {'limit': 'testing'})
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_limits_pass_negative_value(self):
         # Return an error if a negative value for limit is passed
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
                           {'limit': -1})
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_servers_by_changes_since(self):
         # Servers are listed by specifying changes-since date
         changes_since = {'changes_since': self.start_time.isoformat()}
@@ -138,13 +139,13 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
                          "Number of servers %d is wrong in %s" %
                          (num_expected, body['servers']))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_invalid_date(self):
         # Return an error when invalid date format is passed
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
                           {'changes_since': '2011/01/01'})
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_future_date(self):
         # Return an empty list when a date in the future is passed
         changes_since = {'changes_since': '2051-01-01T12:34:00Z'}
@@ -152,7 +153,7 @@ class ListServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual(0, len(body['servers']))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_servers_detail_server_is_deleted(self):
         # Server details are not listed for a deleted server
         deleted_ids = [s['id'] for s in self.deleted_fixtures]

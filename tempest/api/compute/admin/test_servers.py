@@ -27,6 +27,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
     _host_key = 'OS-EXT-SRV-ATTR:host'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ServersAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.servers_client
