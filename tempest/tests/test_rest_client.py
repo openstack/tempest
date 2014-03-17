@@ -384,3 +384,63 @@ class TestRestClientUtils(BaseRestClientTestClass):
         self.assertRaises(NotImplementedError,
                           self.rest_client.wait_for_resource_deletion,
                           '1234')
+
+
+class TestNegativeRestClient(BaseRestClientTestClass):
+
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestNegativeRestClient, self).setUp()
+        self.negative_rest_client = rest_client.NegativeRestClient(
+            fake_auth_provider.FakeAuthProvider())
+        self.useFixture(mockpatch.PatchObject(self.negative_rest_client,
+                                              '_log_request'))
+
+    def test_post(self):
+        __, return_dict = self.negative_rest_client.send_request('POST',
+                                                                 self.url,
+                                                                 [], {})
+        self.assertEqual('POST', return_dict['method'])
+
+    def test_get(self):
+        __, return_dict = self.negative_rest_client.send_request('GET',
+                                                                 self.url,
+                                                                 [])
+        self.assertEqual('GET', return_dict['method'])
+
+    def test_delete(self):
+        __, return_dict = self.negative_rest_client.send_request('DELETE',
+                                                                 self.url,
+                                                                 [])
+        self.assertEqual('DELETE', return_dict['method'])
+
+    def test_patch(self):
+        __, return_dict = self.negative_rest_client.send_request('PATCH',
+                                                                 self.url,
+                                                                 [], {})
+        self.assertEqual('PATCH', return_dict['method'])
+
+    def test_put(self):
+        __, return_dict = self.negative_rest_client.send_request('PUT',
+                                                                 self.url,
+                                                                 [], {})
+        self.assertEqual('PUT', return_dict['method'])
+
+    def test_head(self):
+        self.useFixture(mockpatch.PatchObject(self.negative_rest_client,
+                                              'response_checker'))
+        __, return_dict = self.negative_rest_client.send_request('HEAD',
+                                                                 self.url,
+                                                                 [])
+        self.assertEqual('HEAD', return_dict['method'])
+
+    def test_copy(self):
+        __, return_dict = self.negative_rest_client.send_request('COPY',
+                                                                 self.url,
+                                                                 [])
+        self.assertEqual('COPY', return_dict['method'])
+
+    def test_other(self):
+        self.assertRaises(AssertionError,
+                          self.negative_rest_client.send_request,
+                          'OTHER', self.url, [])
