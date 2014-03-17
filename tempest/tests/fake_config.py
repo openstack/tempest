@@ -12,49 +12,33 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo.config import cfg
 
-class FakeConfig(object):
+from tempest import config
+from tempest.openstack.common.fixture import config as conf_fixture
 
-    class fake_compute(object):
-        build_interval = 10
-        build_timeout = 10
 
-    class fake_identity(object):
-        disable_ssl_certificate_validation = True
-        catalog_type = 'identity'
-        uri = 'http://fake_uri.com/auth'
-        uri_v3 = 'http://fake_uri_v3.com/auth'
+class ConfigFixture(conf_fixture.Config):
 
-    class fake_default_feature_enabled(object):
-        api_extensions = ['all']
+    def __init__(self):
+        config.register_opts()
+        super(ConfigFixture, self).__init__()
 
-    class fake_compute_feature_enabled(fake_default_feature_enabled):
-        api_v3_extensions = ['all']
+    def setUp(self):
+        super(ConfigFixture, self).setUp()
+        self.conf.set_default('build_interval', 10, group='compute')
+        self.conf.set_default('build_timeout', 10, group='compute')
+        self.conf.set_default('disable_ssl_certificate_validation', True,
+                              group='identity')
+        self.conf.set_default('uri', 'http://fake_uri.com/auth',
+                              group='identity')
+        self.conf.set_default('uri_v3', 'http://fake_uri_v3.com/auth',
+                              group='identity')
+        self.conf.set_default('neutron', True, group='service_available')
+        self.conf.set_default('heat', True, group='service_available')
 
-    class fake_object_storage_discoverable_apis(object):
-        discoverable_apis = ['all']
 
-    class fake_service_available(object):
-        nova = True
-        glance = True
-        cinder = True
-        heat = True
-        neutron = True
-        swift = True
-        horizon = True
-
-    class fake_negative(object):
-        test_generator = 'tempest.common.' \
-            'generator.negative_generator.NegativeTestGenerator'
-
-    compute_feature_enabled = fake_compute_feature_enabled()
-    volume_feature_enabled = fake_default_feature_enabled()
-    network_feature_enabled = fake_default_feature_enabled()
-    object_storage_feature_enabled = fake_object_storage_discoverable_apis()
-
-    service_available = fake_service_available()
-
-    compute = fake_compute()
-    identity = fake_identity()
-
-    negative = fake_negative()
+class FakePrivate(config.TempestConfigPrivate):
+    def __init__(self):
+        cfg.CONF([], default_config_files=[])
+        self._set_attrs()
