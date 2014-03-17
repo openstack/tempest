@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testscenarios
 import uuid
 
 from tempest.api.compute import base
@@ -21,7 +20,7 @@ from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest import test
 
-load_tests = testscenarios.load_tests_apply_scenarios
+load_tests = test.NegativeAutoTest.load_tests
 
 
 class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
@@ -107,8 +106,6 @@ class FlavorCreateNegativeTestJSON(base.BaseV2ComputeAdminTest,
     _interface = 'json'
     _service = 'compute'
     _schema_file = 'compute/admin/flavor_create.json'
-
-    scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
 
     @test.attr(type=['negative', 'gate'])
     def test_create_flavor(self):

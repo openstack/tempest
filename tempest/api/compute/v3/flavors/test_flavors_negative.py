@@ -13,21 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testscenarios
-
 from tempest.api.compute import base
 from tempest import test
 
 
-load_tests = testscenarios.load_tests_apply_scenarios
+load_tests = test.NegativeAutoTest.load_tests
 
 
 class FlavorsListNegativeV3Test(base.BaseV3ComputeTest,
                                 test.NegativeAutoTest):
     _service = 'computev3'
     _schema_file = 'compute/flavors/flavors_list_v3.json'
-
-    scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
 
     @test.attr(type=['negative', 'gate'])
     def test_list_flavors_with_detail(self):
@@ -38,8 +34,6 @@ class FlavorDetailsNegativeV3Test(base.BaseV3ComputeTest,
                                   test.NegativeAutoTest):
     _service = 'computev3'
     _schema_file = 'compute/flavors/flavor_details_v3.json'
-
-    scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
 
     @classmethod
     def setUpClass(cls):
