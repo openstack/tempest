@@ -62,7 +62,7 @@ class BasicGeneratorSet(object):
             "admin_client": {"type": "boolean"},
             "url": {"type": "string"},
             "default_result_code": {"type": "integer"},
-            "json-schema": jsonschema._utils.load_schema("draft4"),
+            "json-schema": {},
             "resources": {
                 "type": "array",
                 "items": {
@@ -105,6 +105,8 @@ class BasicGeneratorSet(object):
                         self.types_dict[type].append(method)
 
     def validate_schema(self, schema):
+        if "json-schema" in schema:
+            jsonschema.Draft4Validator.check_schema(schema['json-schema'])
         jsonschema.validate(schema, self.schema)
 
     def generate(self, schema):
