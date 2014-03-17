@@ -68,7 +68,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
         # Retrieve a ResellerAdmin auth data and use it to set a quota
         # on the client's account
         cls.reselleradmin_auth_data = \
-            cls.os_reselleradmin.get_auth_provider().auth_data
+            cls.os_reselleradmin.auth_provider.auth_data
 
     def setUp(self):
         super(AccountQuotasNegativeTest, self).setUp()
