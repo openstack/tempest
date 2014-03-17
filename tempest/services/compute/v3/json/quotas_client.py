@@ -96,3 +96,7 @@ class QuotasV3ClientJSON(rest_client.RestClient):
 
         body = json.loads(body)
         return resp, body['quota_set']
+
+    def delete_quota_set(self, tenant_id):
+        """Delete the tenant's quota set."""
+        return self.delete('os-quota-sets/%s' % str(tenant_id))
