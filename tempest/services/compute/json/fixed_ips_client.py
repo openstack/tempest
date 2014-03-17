@@ -15,6 +15,7 @@
 
 import json
 
+from tempest.api_schema.compute.v2 import fixed_ips as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -31,6 +32,7 @@ class FixedIPsClientJSON(rest_client.RestClient):
         url = "os-fixed-ips/%s" % (fixed_ip)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.fixed_ips, resp, body)
         return resp, body['fixed_ip']
 
     def reserve_fixed_ip(self, ip, body):
