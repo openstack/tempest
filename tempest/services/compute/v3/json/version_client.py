@@ -15,6 +15,7 @@
 
 import json
 
+from tempest.api_schema.compute import version as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -30,4 +31,5 @@ class VersionV3ClientJSON(rest_client.RestClient):
     def get_version(self):
         resp, body = self.get('')
         body = json.loads(body)
+        self.validate_response(schema.version, resp, body)
         return resp, body['version']
