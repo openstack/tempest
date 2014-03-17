@@ -16,6 +16,7 @@
 from tempest import cli
 from tempest import config
 from tempest.openstack.common import log as logging
+from tempest import test
 
 CONF = config.CONF
 
@@ -41,6 +42,7 @@ class SimpleReadOnlyCeilometerClientTest(cli.ClientTestBase):
     def test_ceilometer_meter_list(self):
         self.ceilometer('meter-list')
 
+    @test.attr(type='slow')
     def test_ceilometer_resource_list(self):
         self.ceilometer('resource-list')
 
