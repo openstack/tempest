@@ -93,8 +93,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
         """Executes sahara command for the given action."""
         flags += ' --endpoint-type %s' % CONF.data_processing.endpoint_type
         return self.cmd_with_auth(
-            # TODO (slukjanov): replace with sahara when new client released
-            'savanna', action, flags, params, admin, fail_ok)
+            'sahara', action, flags, params, admin, fail_ok)
 
     def cmd_with_auth(self, cmd, action, flags='', params='',
                       admin=True, fail_ok=False):
