@@ -158,3 +158,7 @@ class InvalidContentType(base.RestClientException):
 
 class UnexpectedResponseCode(base.RestClientException):
     message = "Unexpected response code received"
+
+
+class InvalidStructure(base.TempestException):
+    message = "Invalid structure of table with details"
