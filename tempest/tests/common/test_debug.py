@@ -53,15 +53,14 @@ class TestDebug(base.TestCase):
         self.useFixture(mockpatch.PatchObject(test.CONF.debug,
                                               'enable', True))
 
-        tables = ['filter', 'nat', 'mangle']
         self.ip_ns_list_mock.return_value = [1, 2]
 
         debug.log_ip_ns()
         self.ip_addr_raw_mock.assert_called_with()
         self.assertTrue(self.log_mock.info.called)
         self.ip_route_raw_mock.assert_called_with()
-        self.assertEqual(len(tables), self.iptables_raw_mock.call_count)
-        for table in tables:
+        self.assertEqual(len(debug.TABLES), self.iptables_raw_mock.call_count)
+        for table in debug.TABLES:
             self.assertIn(mock.call(table),
                           self.iptables_raw_mock.call_args_list)
 
@@ -76,10 +75,11 @@ class TestDebug(base.TestCase):
             self.assertIn(mock.call(ns),
                           self.ip_ns_route_mock.call_args_list)
 
-        self.assertEqual(len(tables) * len(self.ip_ns_list_mock.return_value),
+        self.assertEqual(len(debug.TABLES) *
+                         len(self.ip_ns_list_mock.return_value),
                          self.iptables_ns_mock.call_count)
         for ns in self.ip_ns_list_mock.return_value:
-            for table in tables:
+            for table in debug.TABLES:
                 self.assertIn(mock.call(ns, table),
                               self.iptables_ns_mock.call_args_list)
 
