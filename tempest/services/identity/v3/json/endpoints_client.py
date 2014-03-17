@@ -36,9 +36,17 @@ class EndPointClientJSON(rest_client.RestClient):
         return resp, body['endpoints']
 
     def create_endpoint(self, service_id, interface, url, **kwargs):
-        """Create endpoint."""
+        """Create endpoint.
+
+        Normally this function wouldn't allow setting values that are not
+        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
+
+        """
         region = kwargs.get('region', None)
-        enabled = kwargs.get('enabled', None)
+        if 'force_enabled' in kwargs:
+            enabled = kwargs.get('force_enabled', None)
+        else:
+            enabled = kwargs.get('enabled', None)
         post_body = {
             'service_id': service_id,
             'interface': interface,
@@ -52,8 +60,13 @@ class EndPointClientJSON(rest_client.RestClient):
         return resp, body['endpoint']
 
     def update_endpoint(self, endpoint_id, service_id=None, interface=None,
-                        url=None, region=None, enabled=None):
-        """Updates an endpoint with given parameters."""
+                        url=None, region=None, enabled=None, **kwargs):
+        """Updates an endpoint with given parameters.
+
+        Normally this function wouldn't allow setting values that are not
+        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
+
+        """
         post_body = {}
         if service_id is not None:
             post_body['service_id'] = service_id
@@ -63,7 +76,9 @@ class EndPointClientJSON(rest_client.RestClient):
             post_body['url'] = url
         if region is not None:
             post_body['region'] = region
-        if enabled is not None:
+        if 'force_enabled' in kwargs:
+            post_body['enabled'] = kwargs['force_enabled']
+        elif enabled is not None:
             post_body['enabled'] = enabled
         post_body = json.dumps({'endpoint': post_body})
         resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)

@@ -102,6 +102,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
             self.client.create_endpoint(self.service_id, interface1,
                                         url1, region=region1,
                                         enabled=True)
+        self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
         # Creating service so as update endpoint with new service ID
         s_name = data_utils.rand_name('service-')
         s_type = data_utils.rand_name('type--')
@@ -126,7 +127,6 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(url2, endpoint['url'])
         self.assertEqual(region2, endpoint['region'])
         self.assertEqual('false', str(endpoint['enabled']).lower())
-        self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
 
 
 class EndPointsTestXML(EndPointsTestJSON):
