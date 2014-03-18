@@ -108,6 +108,7 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
     def test_create_update_delete_pool_vip(self):
         # Creates a vip
         name = data_utils.rand_name('vip-')
+        address = self.subnet['allocation_pools'][0]['end']
         resp, body = self.client.create_pool(
             name=data_utils.rand_name("pool-"),
             lb_method='ROUND_ROBIN',
@@ -118,16 +119,36 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
                                             protocol="HTTP",
                                             protocol_port=80,
                                             subnet_id=self.subnet['id'],
-                                            pool_id=pool['id'])
+                                            pool_id=pool['id'],
+                                            address=address)
         self.assertEqual('201', resp['status'])
         vip = body['vip']
         vip_id = vip['id']
+        # Confirm VIP's address correctness with a show
+        resp, body = self.client.show_vip(vip_id)
+        self.assertEqual('200', resp['status'])
+        vip = body['vip']
+        self.assertEqual(address, vip['address'])
         # Verification of vip update
         new_name = "New_vip"
-        resp, body = self.client.update_vip(vip_id, name=new_name)
+        new_description = "New description"
+        persistence_type = "HTTP_COOKIE"
+        update_data = {"session_persistence": {
+            "type": persistence_type}}
+        resp, body = self.client.update_vip(vip_id,
+                                            name=new_name,
+                                            description=new_description,
+                                            connection_limit=10,
+                                            admin_state_up=False,
+                                            **update_data)
         self.assertEqual('200', resp['status'])
         updated_vip = body['vip']
-        self.assertEqual(updated_vip['name'], new_name)
+        self.assertEqual(new_name, updated_vip['name'])
+        self.assertEqual(new_description, updated_vip['description'])
+        self.assertEqual(10, updated_vip['connection_limit'])
+        self.assertFalse(updated_vip['admin_state_up'])
+        self.assertEqual(persistence_type,
+                         updated_vip['session_persistence']['type'])
         # Verification of vip delete
         resp, body = self.client.delete_vip(vip['id'])
         self.assertEqual('204', resp['status'])
@@ -272,6 +293,40 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         # Verification of health_monitor delete
         resp, body = self.client.delete_health_monitor(health_monitor['id'])
         self.assertEqual('204', resp['status'])
+
+    @test.attr(type='smoke')
+    def test_create_health_monitor_http_type(self):
+        hm_type = "HTTP"
+        resp, body = self.client.create_health_monitor(delay=4,
+                                                       max_retries=3,
+                                                       type=hm_type,
+                                                       timeout=1)
+        self.assertEqual('201', resp['status'])
+        health_monitor = body['health_monitor']
+        self.addCleanup(self.client.delete_health_monitor,
+                        health_monitor['id'])
+        self.assertEqual(hm_type, health_monitor['type'])
+
+    @test.attr(type='smoke')
+    def test_update_health_monitor_http_method(self):
+        resp, body = self.client.create_health_monitor(delay=4,
+                                                       max_retries=3,
+                                                       type="HTTP",
+                                                       timeout=1)
+        self.assertEqual('201', resp['status'])
+        health_monitor = body['health_monitor']
+        self.addCleanup(self.client.delete_health_monitor,
+                        health_monitor['id'])
+        resp, body = (self.client.update_health_monitor
+                     (health_monitor['id'],
+                      http_method="POST",
+                      url_path="/home/user",
+                      expected_codes="290"))
+        self.assertEqual('200', resp['status'])
+        updated_health_monitor = body['health_monitor']
+        self.assertEqual("POST", updated_health_monitor['http_method'])
+        self.assertEqual("/home/user", updated_health_monitor['url_path'])
+        self.assertEqual("290", updated_health_monitor['expected_codes'])
 
     @test.attr(type='smoke')
     def test_show_health_monitor(self):
