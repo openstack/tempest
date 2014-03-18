@@ -22,6 +22,7 @@ class SnapshotsActionsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(SnapshotsActionsTest, cls).setUpClass()
         cls.client = cls.snapshots_client
