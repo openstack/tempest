@@ -52,6 +52,8 @@ from tempest.services.compute.json.interfaces_client import \
     InterfacesClientJSON
 from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.limits_client import LimitsClientJSON
+from tempest.services.compute.json.migrations_client import \
+    MigrationsClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClientJSON
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
@@ -381,6 +383,7 @@ class Manager(manager.Manager):
             AccountClientCustomizedHeader(self.auth_provider)
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
+        self.migrations_client = MigrationsClientJSON(self.auth_provider)
 
 
 class AltManager(Manager):
