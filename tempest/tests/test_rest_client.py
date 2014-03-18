@@ -343,3 +343,44 @@ class TestRestClientErrorCheckerTEXT(TestRestClientErrorCheckerJSON):
         self.assertRaises(exceptions.InvalidContentType,
                           self.rest_client._error_checker,
                           **self.set_data("405", enc="fake_enc"))
+
+
+class TestRestClientUtils(BaseRestClientTestClass):
+
+    def _is_resource_deleted(self, resource_id):
+        if not isinstance(self.retry_pass, int):
+            return False
+        if self.retry_count >= self.retry_pass:
+            return True
+        self.retry_count = self.retry_count + 1
+        return False
+
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestRestClientUtils, self).setUp()
+        self.retry_count = 0
+        self.retry_pass = None
+        self.original_deleted_method = self.rest_client.is_resource_deleted
+        self.rest_client.is_resource_deleted = self._is_resource_deleted
+
+    def test_wait_for_resource_deletion(self):
+        self.retry_pass = 2
+        # Ensure timeout long enough for loop execution to hit retry count
+        self.rest_client.build_timeout = 500
+        sleep_mock = self.patch('time.sleep')
+        self.rest_client.wait_for_resource_deletion('1234')
+        self.assertEqual(len(sleep_mock.mock_calls), 2)
+
+    def test_wait_for_resource_deletion_not_deleted(self):
+        self.patch('time.sleep')
+        # Set timeout to be very quick to force exception faster
+        self.rest_client.build_timeout = 1
+        self.assertRaises(exceptions.TimeoutException,
+                          self.rest_client.wait_for_resource_deletion,
+                          '1234')
+
+    def test_wait_for_deletion_with_unimplemented_deleted_method(self):
+        self.rest_client.is_resource_deleted = self.original_deleted_method
+        self.assertRaises(NotImplementedError,
+                          self.rest_client.wait_for_resource_deletion,
+                          '1234')
