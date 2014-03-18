@@ -33,56 +33,64 @@ import urlparse
 LOG = logging.getLogger(__name__)
 
 
-class AdminClientManager(object):
+class ClientManager(object):
     """
     Manager that provides access to the official python clients for
     calling various OpenStack APIs.
     """
-    def __init__(self, conf, has_neutron):
+    def __init__(self, conf, admin):
         self.conf = conf
+        insecure = conf.get('identity', 'disable_ssl_certificate_validation')
+        auth_url = conf.get('identity', 'uri')
+        if admin:
+            username = conf.get('identity', 'admin_username')
+            password = conf.get('identity', 'admin_password')
+            tenant_name = conf.get('identity', 'admin_tenant_name')
+        else:
+            username = conf.get('identity', 'username')
+            password = conf.get('identity', 'password')
+            tenant_name = conf.get('identity', 'tenant_name')
         # identity client
-        creds = {'username': conf.get('identity', 'admin_username'),
-                 'password': conf.get('identity', 'admin_password'),
-                 'tenant_name': conf.get('identity', 'admin_tenant_name'),
-                 'auth_url': conf.get('identity', 'uri'),
-                 'insecure': conf.get('identity',
-                                      'disable_ssl_certificate_validation'
-                                      )
-             }
+        creds = {'username': username,
+                 'password': password,
+                 'tenant_name': tenant_name,
+                 'auth_url': auth_url,
+                 'insecure': insecure
+                 }
         LOG.debug(creds)
         self.identity_client = keystone_client.Client(**creds)
 
         # compute client
-        dscv = conf.get('identity', 'disable_ssl_certificate_validation')
-        username = conf.get('identity', 'admin_username')
-        password = conf.get('identity', 'admin_password')
-        tenantname = conf.get('identity', 'admin_tenant_name')
-        auth_url = conf.get('identity', 'uri')
-        kwargs = {'insecure': dscv,
+        kwargs = {'insecure': insecure,
                   'no_cache': True}
         self.compute_client = nova_client.Client('2', username, password,
-                                                 tenantname, auth_url,
+                                                 tenant_name, auth_url,
                                                  **kwargs)
 
-        # network client
-        if has_neutron:
-            self.network_client = neutron_client.Client(username=username,
-                                                        password=password,
-                                                        tenant_name=tenantname,
-                                                        auth_url=auth_url,
-                                                        insecure=dscv)
         # image client
         token = self.identity_client.auth_token
         endpoint = self.identity_client.\
         service_catalog.url_for(service_type='image',
                                 endpoint_type='publicURL'
                             )
-        dscv = self.conf.get('identity',
-                             'disable_ssl_certificate_validation')
         creds = {'endpoint': endpoint,
                  'token': token,
-                 'insecure': dscv}
+                 'insecure': insecure}
         self.image_client = glance_client.Client("1", **creds)
+        
+        self.username = username
+        self.password = password
+        self.tenant_name = tenant_name
+        self.insecure = insecure
+        self.auth_url = auth_url
+
+    def add_neutron_client(self):
+        self.network_client = \
+        neutron_client.Client(username=self.username,
+                              password=self.password,
+                              tenant_name=self.tenant_name,
+                              auth_url=self.auth_url,
+                              insecure=self.insecure)
 
     def create_users_and_tenants(self):
         LOG.debug("Creating users and tenants")
@@ -169,6 +177,7 @@ class AdminClientManager(object):
             self.conf.set('compute', 'flavor_ref_alt', flavor_alt_id)
 
     def upload_image(self, name, data):
+        LOG.debug("Uploading image: %s" % name)
         data.seek(0)
         return self.image_client.images.create(name=name,
                                                disk_format="qcow2",
@@ -194,6 +203,7 @@ class AdminClientManager(object):
             # Make sure image location is writable beforeuploading
             open(qcow2_img_path, "w")
             if path.startswith("http:") or path.startswith("https:"):
+                LOG.debug("Downloading image file: %s" % path)
                 request = urllib2.urlopen(path)
                 with tempfile.NamedTemporaryFile() as data:
                     while True:
@@ -217,22 +227,31 @@ class AdminClientManager(object):
                 shutil.copyfile(path, qcow2_img_path)
 
         self.conf.set('compute', 'image_ref', image_id)
-        self.conf.set('compute', 'image_ref_alt', image_alt_id)
+        self.conf.set('compute', 'image_ref_alt', image_alt_id or image_id)
 
     def do_networks(self, has_neutron, create):
+        label = None
         if has_neutron:
             for router in self.network_client.list_routers()['routers']:
-                if "external_gateway_info" in router:
+                if ('external_gateway_info' in router and
+                    router['external_gateway_info']['network_id'] is not None):
                     net_id = router['external_gateway_info']['network_id']
                     self.conf.set('network', 'public_network_id', net_id)
                     self.conf.set('network', 'public_router_id', router['id'])
+                    break
             for network in self.compute_client.networks.list():
                 if network.id != net_id:
                     label = network.label
                     break
         else:
-            label = self.compute_client.networks.list()[0].label
-        self.conf.set('compute', 'fixed_network_name', label)
+            networks = self.compute_client.networks.list()
+            if networks:
+                label = networks[0].label
+        if label:
+            self.conf.set('compute', 'fixed_network_name', label)
+        else:
+            raise Exception('fixed_network_name could not be discovered and' \
+                            'and must be specified')
 
 
 class TempestConf():
@@ -303,30 +322,6 @@ class TempestConf():
         if old.lower() != new.lower():
             self.set('service_available', name, str(new))
 
-    def get_services(self, is_admin):
-        LOG.debug("Getting services")
-        if is_admin:
-            (username, password, tenant_name) = ('admin_username',
-                                                 'admin_password',
-                                                 'admin_tenant_name')
-        else:
-            (username, password, tenant_name) = ('username',
-                                                 'password',
-                                                 'tenant_name')
-
-        creds = {'username': self.get('identity', username),
-                 'password': self.get('identity', password),
-                 'tenant_name': self.get('identity', tenant_name),
-                 'auth_url': self.get('identity', 'uri'),
-                 'insecure': self.get('identity',
-                                      'disable_ssl_certificate_validation'
-                                      )
-                 }
-        LOG.debug(creds)
-        client = keystone_client.Client(**creds)
-        services = client.service_catalog.get_endpoints()
-        return services
-
     def set_service_available(self, services):
         self.set_service('ironic', 'baremetal', services)
         self.set_service('nova', 'compute', services)
@@ -338,12 +333,11 @@ class TempestConf():
         self.set_service('ceilometer', 'telemetry', services)
         self.set_service('cinder', 'volume', services)
 
-    def do_resources(self, image, has_neutron, create):
+    def do_resources(self, manager, image, has_neutron, create):
         if create:
             LOG.debug("Creating resources")
         else:
             LOG.debug("Querying resources")
-        manager = AdminClientManager(self, has_neutron)
         if create:
             manager.create_users_and_tenants()
         manager.do_flavors(create)
@@ -385,6 +379,8 @@ class TempestConf():
 
 def configure_tempest(sample=None, out=None, no_query=False, create=False,
                       overrides=[], image=None, patch=None, non_admin=False):
+    if create and non_admin:
+        raise Exception("--create requires admin credentials")
     LOG.debug("Configuring from %s to %s" % (sample, out))
     conf = TempestConf(sample)
     if patch:
@@ -400,11 +396,22 @@ def configure_tempest(sample=None, out=None, no_query=False, create=False,
     if not conf.is_modified("identity", "uri_v3"):
         uri =  conf.get("identity", "uri")
         conf.set("identity", "uri_v3", uri.replace("v2.0", "v3"))
-    services = conf.get_services(not non_admin)
+    if non_admin:
+        conf.set("identity", "admin_username", "")
+        conf.set("identity", "admin_tenant_name", "")
+        conf.set("identity", "admin_password", "")
+        conf.set("compute", "allow_tenant_isolation", "False")
+        conf.set("compute", "allow_tenant_reuse", "False")
+
+    manager = ClientManager(conf, not non_admin)
+    services = manager.identity_client.service_catalog.get_endpoints()
+    has_neutron = "network" in services
+    if has_neutron:
+        manager.add_neutron_client()
     if image is None:
         image = "http://download.cirros-cloud.net/0.3.1/" \
                 "cirros-0.3.1-x86_64-disk.img"
-    conf.do_resources(image, "network" in services, create)
+    conf.do_resources(manager, image, has_neutron, create)
     if not no_query:
         conf.set_service_available(services)
     conf.set_paths(services, not no_query)
