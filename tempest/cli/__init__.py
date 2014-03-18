@@ -42,6 +42,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
 
     def nova(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes nova command for the given action."""
+        flags += ' --endpoint-type %s' % CONF.compute.endpoint_type
         return self.cmd_with_auth(
             'nova', action, flags, params, admin, fail_ok)
 
@@ -58,33 +59,39 @@ class ClientTestBase(tempest.test.BaseTestCase):
 
     def glance(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes glance command for the given action."""
+        flags += ' --os-endpoint-type %s' % CONF.image.endpoint_type
         return self.cmd_with_auth(
             'glance', action, flags, params, admin, fail_ok)
 
     def ceilometer(self, action, flags='', params='', admin=True,
                    fail_ok=False):
         """Executes ceilometer command for the given action."""
+        flags += ' --os-endpoint-type %s' % CONF.telemetry.endpoint_type
         return self.cmd_with_auth(
             'ceilometer', action, flags, params, admin, fail_ok)
 
     def heat(self, action, flags='', params='', admin=True,
              fail_ok=False):
         """Executes heat command for the given action."""
+        flags += ' --os-endpoint-type %s' % CONF.orchestration.endpoint_type
         return self.cmd_with_auth(
             'heat', action, flags, params, admin, fail_ok)
 
     def cinder(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes cinder command for the given action."""
+        flags += ' --endpoint-type %s' % CONF.volume.endpoint_type
         return self.cmd_with_auth(
             'cinder', action, flags, params, admin, fail_ok)
 
     def neutron(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes neutron command for the given action."""
+        flags += ' --endpoint-type %s' % CONF.network.endpoint_type
         return self.cmd_with_auth(
             'neutron', action, flags, params, admin, fail_ok)
 
     def sahara(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes sahara command for the given action."""
+        flags += ' --endpoint-type %s' % CONF.data_processing.endpoint_type
         return self.cmd_with_auth(
             # TODO (slukjanov): replace with sahara when new client released
             'savanna', action, flags, params, admin, fail_ok)
@@ -94,7 +101,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
         """Executes given command with auth attributes appended."""
         # TODO(jogo) make admin=False work
         creds = ('--os-username %s --os-tenant-name %s --os-password %s '
-                 '--os-auth-url %s ' %
+                 '--os-auth-url %s' %
                  (CONF.identity.admin_username,
                   CONF.identity.admin_tenant_name,
                   CONF.identity.admin_password,
