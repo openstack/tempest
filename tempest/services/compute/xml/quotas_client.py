@@ -44,10 +44,12 @@ class QuotasClientXML(rest_client.RestClient):
 
         return quota
 
-    def get_quota_set(self, tenant_id):
+    def get_quota_set(self, tenant_id, user_id=None):
         """List the quota set for a tenant."""
 
         url = 'os-quota-sets/%s' % str(tenant_id)
+        if user_id:
+            url += '?user_id=%s' % str(user_id)
         resp, body = self.get(url)
         body = xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
