@@ -33,15 +33,15 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         resp, user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email)
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(201, resp.status)
         self.addCleanup(self.client.delete_user, user['id'])
         # Perform Authentication
         resp, body = self.token.auth(user['id'], u_password)
-        self.assertEqual(resp['status'], '201')
+        self.assertEqual(201, resp.status)
         subject_token = resp['x-subject-token']
         # Perform GET Token
         resp, token_details = self.client.get_token(subject_token)
-        self.assertEqual(resp['status'], '200')
+        self.assertEqual(200, resp.status)
         self.assertEqual(resp['x-subject-token'], subject_token)
         self.assertEqual(token_details['user']['id'], user['id'])
         self.assertEqual(token_details['user']['name'], u_name)

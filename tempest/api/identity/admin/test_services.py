@@ -27,7 +27,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
     def _del_service(self, service_id):
         # Deleting the service created in this method
         resp, _ = self.client.delete_service(service_id)
-        self.assertEqual(resp['status'], '204')
+        self.assertEqual(204, resp.status)
         # Checking whether service is deleted successfully
         self.assertRaises(exceptions.NotFound, self.client.get_service,
                           service_id)
@@ -43,7 +43,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
             name, type, description=description)
         self.assertFalse(service_data['id'] is None)
         self.addCleanup(self._del_service, service_data['id'])
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(200, resp.status)
         # Verifying response body of create service
         self.assertIn('id', service_data)
         self.assertIn('name', service_data)
@@ -54,7 +54,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(description, service_data['description'])
         # Get service
         resp, fetched_service = self.client.get_service(service_data['id'])
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(200, resp.status)
         # verifying the existence of service created
         self.assertIn('id', fetched_service)
         self.assertEqual(fetched_service['id'], service_data['id'])
@@ -86,7 +86,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.addCleanup(delete_services)
         # List and Verify Services
         resp, body = self.client.list_services()
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(200, resp.status)
         found = [service for service in body if service['id'] in service_ids]
         self.assertEqual(len(found), len(services), 'Services not found')
 

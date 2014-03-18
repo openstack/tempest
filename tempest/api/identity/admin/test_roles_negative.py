@@ -74,8 +74,7 @@ class RolesNegativeTestJSON(base.BaseIdentityV2AdminTest):
         role_name = data_utils.rand_name(name='role-dup-')
         resp, body = self.client.create_role(role_name)
         role1_id = body.get('id')
-        self.assertIn('status', resp)
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(200, resp.status)
         self.addCleanup(self.client.delete_role, role1_id)
         self.assertRaises(exceptions.Conflict, self.client.create_role,
                           role_name)
