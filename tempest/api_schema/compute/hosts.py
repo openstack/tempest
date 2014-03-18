@@ -33,3 +33,34 @@ list_hosts = {
         'required': ['hosts']
     }
 }
+
+show_host_detail = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'host': {
+                'type': 'array',
+                'item': {
+                    'type': 'object',
+                    'properties': {
+                        'resource': {
+                            'type': 'object',
+                            'properties': {
+                                'cpu': {'type': 'integer'},
+                                'disk_gb': {'type': 'integer'},
+                                'host': {'type': 'string'},
+                                'memory_mb': {'type': 'integer'},
+                                'project': {'type': 'string'}
+                            },
+                            'required': ['cpu', 'disk_gb', 'host',
+                                         'memory_mb', 'project']
+                        }
+                    },
+                    'required': ['resource']
+                }
+            }
+        },
+        'required': ['host']
+    }
+}
