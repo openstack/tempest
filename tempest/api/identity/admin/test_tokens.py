@@ -56,6 +56,49 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         resp, body = self.client.delete_token(token_id)
         self.assertEqual(resp['status'], '204')
 
+    @attr(type='gate')
+    def test_rescope_token(self):
+        """An unscoped token can be requested, that token can be used to
+           request a scoped token.
+        """
+
+        # Create a user.
+        user_name = data_utils.rand_name(name='user-')
+        user_password = data_utils.rand_name(name='pass-')
+        tenant_id = None  # No default tenant so will get unscoped token.
+        email = ''
+        resp, user = self.client.create_user(user_name, user_password,
+                                             tenant_id, email)
+        self.assertEqual(200, resp.status)
+        self.data.users.append(user)
+
+        # Create a tenant.
+        tenant_name = data_utils.rand_name(name='tenant-')
+        resp, tenant = self.client.create_tenant(tenant_name)
+        self.assertEqual(200, resp.status)
+        self.data.tenants.append(tenant)
+
+        # Create a role
+        role_name = data_utils.rand_name(name='role-')
+        resp, role = self.client.create_role(role_name)
+        self.assertEqual(200, resp.status)
+        self.data.roles.append(role)
+
+        # Grant the user the role on the tenant.
+        resp, _ = self.client.assign_user_role(tenant['id'], user['id'],
+                                               role['id'])
+        self.assertEqual(200, resp.status)
+
+        # Get an unscoped token.
+        rsp, body = self.token_client.auth(user_name, user_password)
+        self.assertEqual(200, resp.status)
+
+        token_id = body['token']['id']
+
+        # Use the unscoped token to get a scoped token.
+        rsp, body = self.token_client.auth_token(token_id, tenant=tenant_name)
+        self.assertEqual(200, resp.status)
+
 
 class TokensTestXML(TokensTestJSON):
     _interface = 'xml'

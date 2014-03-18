@@ -75,8 +75,9 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                                   xmlns=XMLNS,
                                   name=name,
                                   password=password,
-                                  tenantId=tenant_id,
                                   email=email)
+        if tenant_id:
+            create_user.add_attr('tenantId', tenant_id)
         if 'enabled' in kwargs:
             create_user.add_attr('enabled', str(kwargs['enabled']).lower())
 
@@ -116,11 +117,24 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
 class TokenClientXML(identity_client.TokenClientJSON):
     TYPE = "xml"
 
-    def auth(self, user, password, tenant):
-        passwordCreds = xml.Element("passwordCredentials",
+    def auth(self, user, password, tenant=None):
+        passwordCreds = xml.Element('passwordCredentials',
                                     username=user,
                                     password=password)
-        auth = xml.Element("auth", tenantName=tenant)
+        auth_kwargs = {}
+        if tenant:
+            auth_kwargs['tenantName'] = tenant
+        auth = xml.Element('auth', **auth_kwargs)
         auth.append(passwordCreds)
+        resp, body = self.post(self.auth_url, body=str(xml.Document(auth)))
+        return resp, body['access']
+
+    def auth_token(self, token_id, tenant=None):
+        tokenCreds = xml.Element('token', id=token_id)
+        auth_kwargs = {}
+        if tenant:
+            auth_kwargs['tenantName'] = tenant
+        auth = xml.Element('auth', **auth_kwargs)
+        auth.append(tokenCreds)
         resp, body = self.post(self.auth_url, body=str(xml.Document(auth)))
         return resp, body['access']
