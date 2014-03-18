@@ -116,3 +116,35 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
         self.assertEqual(extra_specs, fetched_volume_type['extra_specs'],
                          'The fetched Volume_type is different '
                          'from the created Volume_type')
+
+    @test.attr(type='smoke')
+    def test_volume_type_encryption_create_get(self):
+        # Create/get encryption type.
+        provider = "LuksEncryptor"
+        control_location = "front-end"
+        name = data_utils.rand_name("volume-type-")
+        resp, body = self.client.create_volume_type(name)
+        self.assertEqual(200, resp.status)
+        self.addCleanup(self._delete_volume_type, body['id'])
+        resp, encryption_type = self.client.create_encryption_type(
+            body['id'], provider=provider,
+            control_location=control_location)
+        self.assertEqual(200, resp.status)
+        self.assertIn('volume_type_id', encryption_type)
+        self.assertEqual(provider, encryption_type['provider'],
+                         "The created encryption_type provider is not equal "
+                         "to the requested provider")
+        self.assertEqual(control_location, encryption_type['control_location'],
+                         "The created encryption_type control_location is not "
+                         "equal to the requested control_location")
+        resp, fetched_encryption_type = self.client.get_encryption_type(
+            encryption_type['volume_type_id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(provider,
+                         fetched_encryption_type['provider'],
+                         'The fetched encryption_type provider is different '
+                         'from the created encryption_type')
+        self.assertEqual(control_location,
+                         fetched_encryption_type['control_location'],
+                         'The fetched encryption_type control_location is '
+                         'different from the created encryption_type')

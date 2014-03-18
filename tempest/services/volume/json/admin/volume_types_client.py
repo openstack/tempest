@@ -122,3 +122,31 @@ class VolumeTypesClientJSON(rest_client.RestClient):
         resp, body = self.put(url, put_body)
         body = json.loads(body)
         return resp, body
+
+    def get_encryption_type(self, vol_type_id):
+        """
+        Get the volume encryption type for the specified volume type.
+        vol_type_id: Id of volume_type.
+        """
+        url = "/types/%s/encryption" % str(vol_type_id)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body
+
+    def create_encryption_type(self, vol_type_id, **kwargs):
+        """
+        Create a new encryption type for the specified volume type.
+
+        vol_type_id: Id of volume_type.
+        provider: Class providing encryption support.
+        cipher: Encryption algorithm/mode to use.
+        key_size: Size of the encryption key, in bits.
+        control_location: Notional service where encryption is performed.
+        """
+        url = "/types/%s/encryption" % str(vol_type_id)
+        post_body = {}
+        post_body.update(kwargs)
+        post_body = json.dumps({'encryption': post_body})
+        resp, body = self.post(url, post_body)
+        body = json.loads(body)
+        return resp, body['encryption']
