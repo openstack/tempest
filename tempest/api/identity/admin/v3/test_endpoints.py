@@ -15,13 +15,14 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(EndPointsTestJSON, cls).setUpClass()
         cls.identity_client = cls.client
@@ -53,7 +54,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
             cls.service_client.delete_service(s)
         super(EndPointsTestJSON, cls).tearDownClass()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_endpoints(self):
         # Get a list of endpoints
         resp, fetched_endpoints = self.client.list_endpoints()
@@ -65,7 +66,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_list_delete_endpoint(self):
         region = data_utils.rand_name('region')
         url = data_utils.rand_name('url')
@@ -91,7 +92,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertNotIn(endpoint['id'], fetched_endpoints_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_endpoint(self):
         # Creating an endpoint so as to check update endpoint
         # with new values
