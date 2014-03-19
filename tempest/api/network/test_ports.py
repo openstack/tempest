@@ -46,6 +46,8 @@ class PortsTestJSON(base.BaseNetworkTest):
         resp, body = self.client.create_port(network_id=self.network['id'])
         self.assertEqual('201', resp['status'])
         port = body['port']
+        # Schedule port deletion with verification upon test completion
+        self.addCleanup(self._delete_port, port['id'])
         self.assertTrue(port['admin_state_up'])
         # Verify port update
         new_name = "New_Port"
@@ -57,9 +59,6 @@ class PortsTestJSON(base.BaseNetworkTest):
         updated_port = body['port']
         self.assertEqual(updated_port['name'], new_name)
         self.assertFalse(updated_port['admin_state_up'])
-        # Verify port deletion
-        resp, body = self.client.delete_port(port['id'])
-        self.assertEqual('204', resp['status'])
 
     @test.attr(type='smoke')
     def test_show_port(self):
@@ -133,6 +132,29 @@ class PortsTestJSON(base.BaseNetworkTest):
         for port in ports:
             self.assertEqual(len(port), 1)
             self.assertIn('id', port)
+
+    @test.attr(type='smoke')
+    def test_update_port_with_second_ip(self):
+        # Create a network with two subnets
+        network = self.create_network()
+        subnet_1 = self.create_subnet(network)
+        subnet_2 = self.create_subnet(network)
+        fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
+        fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
+
+        # Create a port with a single IP address from first subnet
+        port = self.create_port(network,
+                                fixed_ips=fixed_ip_1)
+        self.assertEqual(1, len(port['fixed_ips']))
+
+        # Update the port with a second IP address from second subnet
+        fixed_ips = fixed_ip_1 + fixed_ip_2
+        port = self.update_port(port, fixed_ips=fixed_ips)
+        self.assertEqual(2, len(port['fixed_ips']))
+
+        # Update the port to return to a single IP address
+        port = self.update_port(port, fixed_ips=fixed_ip_1)
+        self.assertEqual(1, len(port['fixed_ips']))
 
 
 class PortsTestXML(PortsTestJSON):
