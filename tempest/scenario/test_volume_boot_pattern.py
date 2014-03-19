@@ -35,6 +35,12 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
      * Boot an additional instance from the new snapshot based volume
      * Check written content in the instance booted from snapshot
     """
+    @classmethod
+    def setUpClass(cls):
+        super(TestVolumeBootPattern, cls).setUpClass()
+
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
 
     def _create_volume_from_image(self):
         img_uuid = CONF.compute.image_ref

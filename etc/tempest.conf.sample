@@ -954,6 +954,9 @@
 # Runs Cinder volumes backup test (boolean value)
 #backup=true
 
+# Runs Cinder volume snapshot test (boolean value)
+#snapshot=true
+
 # A list of enabled volume extensions with a special entry all
 # which indicates every extension is enabled (list value)
 #api_extensions=all

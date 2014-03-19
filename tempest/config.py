@@ -453,6 +453,9 @@ VolumeFeaturesGroup = [
     cfg.BoolOpt('backup',
                 default=True,
                 help='Runs Cinder volumes backup test'),
+    cfg.BoolOpt('snapshot',
+                default=True,
+                help='Runs Cinder volume snapshot test'),
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled volume extensions with a special '

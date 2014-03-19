@@ -50,6 +50,13 @@ class TestStampPattern(manager.OfficialClientTest):
     14. Check the existence of a file which created at 6. in volume2
     """
 
+    @classmethod
+    def setUpClass(cls):
+        super(TestStampPattern, cls).setUpClass()
+
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
+
     def _wait_for_volume_snapshot_status(self, volume_snapshot, status):
         self.status_timeout(self.volume_client.volume_snapshots,
                             volume_snapshot.id, status)
