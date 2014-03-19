@@ -18,7 +18,7 @@ from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -100,6 +100,7 @@ resources:
 """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(NeutronResourcesTestJSON, cls).setUpClass()
         if not CONF.orchestration.image_ref:
@@ -155,7 +156,7 @@ resources:
                               'network:router_interface', ports)
         return router_ports[0]['device_id']
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_created_resources(self):
         """Verifies created neutron resources."""
         resources = [('Network', 'OS::Neutron::Net'),
@@ -169,7 +170,7 @@ resources:
             self.assertEqual(resource_type, resource['resource_type'])
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_created_network(self):
         """Verifies created network."""
         network_id = self.test_resources.get('Network')['physical_resource_id']
@@ -180,7 +181,7 @@ resources:
         self.assertEqual(network_id, network['id'])
         self.assertEqual('NewNetwork', network['name'])
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_created_subnet(self):
         """Verifies created subnet."""
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
@@ -197,7 +198,7 @@ resources:
         self.assertEqual(4, subnet['ip_version'])
         self.assertEqual('10.0.3.0/24', subnet['cidr'])
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_created_router(self):
         """Verifies created router."""
         router_id = self.test_resources.get('Router')['physical_resource_id']
@@ -211,7 +212,7 @@ resources:
                          router['external_gateway_info']['enable_snat'])
         self.assertEqual(False, router['admin_state_up'])
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_created_router_interface(self):
         """Verifies created router interface."""
         network_id = self.test_resources.get('Network')['physical_resource_id']
@@ -232,7 +233,7 @@ resources:
         router_interface_ip = subnet_fixed_ips[0]['ip_address']
         self.assertEqual('10.0.3.1', router_interface_ip)
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_created_server(self):
         """Verifies created sever."""
         server_id = self.test_resources.get('Server')['physical_resource_id']

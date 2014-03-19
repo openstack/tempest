@@ -12,7 +12,7 @@
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class TemplateYAMLTestJSON(base.BaseOrchestrationTest):
@@ -30,6 +30,7 @@ Resources:
     invalid_template_url = 'http://www.example.com/template.yaml'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(TemplateYAMLTestJSON, cls).setUpClass()
         cls.client = cls.orchestration_client
@@ -40,13 +41,13 @@ Resources:
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.parameters = {}
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_show_template(self):
         """Getting template used to create the stack."""
         resp, template = self.client.show_template(self.stack_identifier)
         self.assertEqual('200', resp['status'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_validate_template(self):
         """Validating template passing it content."""
         resp, parameters = self.client.validate_template(self.template,
