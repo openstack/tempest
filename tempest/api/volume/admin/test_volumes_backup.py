@@ -27,6 +27,7 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumesBackupsTest, cls).setUpClass()
 

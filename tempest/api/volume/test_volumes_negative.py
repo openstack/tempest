@@ -25,6 +25,7 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumesNegativeTest, cls).setUpClass()
         cls.client = cls.volumes_client

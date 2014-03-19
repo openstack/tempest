@@ -56,6 +56,7 @@ class VolumesListTest(base.BaseVolumeV1Test):
                              [str_vol(v) for v in fetched_list]))
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumesListTest, cls).setUpClass()
         cls.client = cls.volumes_client
@@ -65,24 +66,10 @@ class VolumesListTest(base.BaseVolumeV1Test):
         cls.volume_id_list = []
         cls.metadata = {'Type': 'work'}
         for i in range(3):
-            try:
-                volume = cls.create_volume(metadata=cls.metadata)
-
-                resp, volume = cls.client.get_volume(volume['id'])
-                cls.volume_list.append(volume)
-                cls.volume_id_list.append(volume['id'])
-            except Exception:
-                LOG.exception('Failed to create volume. %d volumes were '
-                              'created' % len(cls.volume_id_list))
-                if cls.volume_list:
-                    # We could not create all the volumes, though we were able
-                    # to create *some* of the volumes. This is typically
-                    # because the backing file size of the volume group is
-                    # too small.
-                    for volid in cls.volume_id_list:
-                        cls.client.delete_volume(volid)
-                        cls.client.wait_for_resource_deletion(volid)
-                raise
+            volume = cls.create_volume(metadata=cls.metadata)
+            resp, volume = cls.client.get_volume(volume['id'])
+            cls.volume_list.append(volume)
+            cls.volume_id_list.append(volume['id'])
 
     @classmethod
     def tearDownClass(cls):
