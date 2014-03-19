@@ -126,7 +126,7 @@ ComputeGroup = [
                      "OpenStack Identity API admin credentials are known."),
     cfg.StrOpt('image_ref',
                default="{$IMAGE_ID}",
-               help="Valid secondary image reference to be used in tests."),
+               help="Valid primary image reference to be used in tests."),
     cfg.StrOpt('image_ref_alt',
                default="{$IMAGE_ID_ALT}",
                help="Valid secondary image reference to be used in tests."),
@@ -441,6 +441,9 @@ VolumeGroup = [
     cfg.StrOpt('disk_format',
                default='raw',
                help='Disk format to use when copying a volume to image'),
+    cfg.IntOpt('volume_size',
+               default=1,
+               help='Default size in GB for volumes created by volumes tests'),
 ]
 
 volume_feature_group = cfg.OptGroup(name='volume-feature-enabled',

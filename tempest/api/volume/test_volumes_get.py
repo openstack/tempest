@@ -51,8 +51,7 @@ class VolumesGetTest(base.BaseVolumeV1Test):
         v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'Test'}
         # Create a volume
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
+        resp, volume = self.client.create_volume(display_name=v_name,
                                                  metadata=metadata,
                                                  **kwargs)
         self.assertEqual(200, resp.status)

@@ -118,10 +118,10 @@ class VolumesClientXML(rest_client.RestClient):
         body = self._check_if_bootable(body)
         return resp, body
 
-    def create_volume(self, size, **kwargs):
+    def create_volume(self, size=None, **kwargs):
         """Creates a new Volume.
 
-        :param size: Size of volume in GB. (Required)
+        :param size: Size of volume in GB.
         :param display_name: Optional Volume Name.
         :param metadata: An optional dictionary of values for metadata.
         :param volume_type: Optional Name of volume_type for the volume
@@ -130,6 +130,10 @@ class VolumesClientXML(rest_client.RestClient):
         :param imageRef: When specified the volume is created from this
                          image
         """
+        # for bug #1293885:
+        # If no size specified, read volume size from CONF
+        if size is None:
+            size = CONF.volume.volume_size
         # NOTE(afazekas): it should use a volume namespace
         volume = common.Element("volume", xmlns=common.XMLNS_11, size=size)
 

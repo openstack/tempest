@@ -67,10 +67,10 @@ class VolumesClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['volume']
 
-    def create_volume(self, size, **kwargs):
+    def create_volume(self, size=None, **kwargs):
         """
         Creates a new Volume.
-        size(Required): Size of volume in GB.
+        size: Size of volume in GB.
         Following optional keyword arguments are accepted:
         display_name: Optional Volume Name.
         metadata: A dictionary of values to be used as metadata.
@@ -78,6 +78,10 @@ class VolumesClientJSON(rest_client.RestClient):
         snapshot_id: When specified the volume is created from this snapshot
         imageRef: When specified the volume is created from this image
         """
+        # for bug #1293885:
+        # If no size specified, read volume size from CONF
+        if size is None:
+            size = CONF.volume.volume_size
         post_body = {'size': size}
         post_body.update(kwargs)
         post_body = json.dumps({'volume': post_body})
