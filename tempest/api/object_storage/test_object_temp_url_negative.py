@@ -27,7 +27,11 @@ from tempest import test
 
 class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
+    metadata = {}
+    containers = []
+
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ObjectTempUrlNegativeTest, cls).setUpClass()
 
