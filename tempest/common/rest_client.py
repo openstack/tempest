@@ -511,7 +511,7 @@ class RestClient(object):
         # code if it exists is something that we expect. This is explicitly
         # declared in the V3 API and so we should be able to export this in
         # the response schema. For now we'll ignore it.
-        if str(resp.status).startswith('2'):
+        if resp.status in HTTP_SUCCESS:
             response_code = schema['status_code']
             if resp.status not in response_code:
                 msg = ("The status code(%s) is different than the expected "
