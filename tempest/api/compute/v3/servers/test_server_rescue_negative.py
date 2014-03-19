@@ -22,6 +22,7 @@ from tempest import test
 class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ServerRescueNegativeV3Test, cls).setUpClass()
         cls.device = 'vdf'

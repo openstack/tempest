@@ -22,6 +22,7 @@ from tempest import test
 class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         cls.set_network_resources(network=True, subnet=True, router=True)
         super(ServerRescueNegativeTestJSON, cls).setUpClass()

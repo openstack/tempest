@@ -27,6 +27,7 @@ class ServersAdminV3Test(base.BaseV3ComputeAdminTest):
     _host_key = 'os-extended-server-attributes:host'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ServersAdminV3Test, cls).setUpClass()
         cls.client = cls.servers_admin_client
