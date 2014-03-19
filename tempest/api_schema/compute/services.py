@@ -42,3 +42,22 @@ list_services = {
         'required': ['services']
     }
 }
+
+enable_service = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'service': {
+                'type': 'object',
+                'properties': {
+                    'status': {'type': 'string'},
+                    'binary': {'type': 'string'},
+                    'host': {'type': 'string'}
+                },
+                'required': ['status', 'binary', 'host']
+            }
+        },
+        'required': ['service']
+    }
+}
