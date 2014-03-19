@@ -71,8 +71,8 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         resp, server = self.servers_client.create_server(server_name,
                                                          self.image_ref,
                                                          self.flavor_ref)
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         self.addCleanup(self.servers_client.delete_server, server['id'])
+        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         mountpoint = '/dev/%s' % CONF.compute.volume_device_name
         resp, body = self.volumes_client.attach_volume(
             self.volume_origin['id'], server['id'], mountpoint)
