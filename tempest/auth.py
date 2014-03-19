@@ -213,7 +213,7 @@ class KeystoneAuthProvider(AuthProvider):
         # build authenticated request
         # returns new request, it does not touch the original values
         _headers = copy.deepcopy(headers) if headers is not None else {}
-        _headers['X-Auth-Token'] = token
+        _headers['X-Auth-Token'] = str(token)
         if url is None or url == "":
             _url = base_url
         else:
@@ -223,7 +223,7 @@ class KeystoneAuthProvider(AuthProvider):
             parts[2] = re.sub("/{2,}", "/", parts[2])
             _url = urlparse.urlunparse(parts)
         # no change to method or body
-        return _url, _headers, body
+        return str(_url), _headers, body
 
     def _auth_client(self):
         raise NotImplementedError
