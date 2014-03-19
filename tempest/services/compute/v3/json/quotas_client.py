@@ -15,6 +15,7 @@
 
 import json
 
+from tempest.api_schema.compute.v3 import quotas as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -35,6 +36,7 @@ class QuotasV3ClientJSON(rest_client.RestClient):
             url += '?user_id=%s' % str(user_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.quota_set, resp, body)
         return resp, body['quota_set']
 
     def get_quota_set_detail(self, tenant_id):
@@ -51,6 +53,7 @@ class QuotasV3ClientJSON(rest_client.RestClient):
         url = 'os-quota-sets/%s/defaults' % str(tenant_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.quota_set, resp, body)
         return resp, body['quota_set']
 
     def update_quota_set(self, tenant_id, force=None,
@@ -97,6 +100,7 @@ class QuotasV3ClientJSON(rest_client.RestClient):
         resp, body = self.put('os-quota-sets/%s' % str(tenant_id), post_body)
 
         body = json.loads(body)
+        self.validate_response(schema.quota_set, resp, body)
         return resp, body['quota_set']
 
     def delete_quota_set(self, tenant_id):
