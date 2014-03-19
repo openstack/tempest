@@ -46,9 +46,11 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         cls.vcpus = 1
         cls.disk = 10
 
+    @test.skip_because(bug='1286297')
     @test.attr(type='gate')
     def test_flavor_access_list_with_private_flavor(self):
-        # Test to list flavor access successfully by querying private flavor
+        # Test to make sure that list flavor access on a newly created
+        # private flavor will return an empty access list
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
         resp, new_flavor = self.client.create_flavor(flavor_name,
@@ -60,10 +62,7 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(resp.status, 200)
         resp, flavor_access = self.client.list_flavor_access(new_flavor_id)
         self.assertEqual(resp.status, 200)
-        self.assertEqual(len(flavor_access), 1, str(flavor_access))
-        first_flavor = flavor_access[0]
-        self.assertEqual(str(new_flavor_id), str(first_flavor['flavor_id']))
-        self.assertEqual(self.adm_tenant_id, first_flavor['tenant_id'])
+        self.assertEqual(len(flavor_access), 0, str(flavor_access))
 
     @test.attr(type='gate')
     def test_flavor_access_add_remove(self):
