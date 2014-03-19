@@ -30,9 +30,30 @@ is_grenade = (os.environ.get('DEVSTACK_GATE_GRENADE', "0") == "1" or
 dump_all_errors = True
 
 # As logs are made clean, add to this set
-must_be_clean = set(['c-sch', 'g-reg', 'ceilometer-alarm-notifier',
-                     'ceilometer-collector', 'horizon', 'n-crt', 'n-obj',
-                     'q-vpn'])
+allowed_dirty = set([
+    'c-api',
+    'ceilometer-acentral',
+    'ceilometer-acompute',
+    'ceilometer-alarm-evaluator',
+    'ceilometer-anotification',
+    'ceilometer-api',
+    'c-vol',
+    'g-api',
+    'h-api',
+    'h-eng',
+    'ir-cond',
+    'n-api',
+    'n-cpu',
+    'n-net',
+    'n-sch',
+    'q-agt',
+    'q-dhcp',
+    'q-lbaas',
+    'q-meta',
+    'q-metering',
+    'q-svc',
+    'q-vpn',
+    's-proxy'])
 
 
 def process_files(file_specs, url_specs, whitelists):
@@ -69,12 +90,12 @@ def scan_content(name, content, regexp, whitelist):
                     break
             if not whitelisted or dump_all_errors:
                 if print_log_name:
-                    print("Log File: %s" % name)
+                    print("Log File Has Errors: %s" % name)
                     print_log_name = False
                 if not whitelisted:
                     had_errors = True
                     print("*** Not Whitelisted ***"),
-                print(line)
+                print(line.rstrip())
     return had_errors
 
 
@@ -135,8 +156,8 @@ def main(opts):
         return 0
     failed = False
     for log in logs_with_errors:
-        if log in must_be_clean:
-            print("FAILED: %s" % log)
+        if log not in allowed_dirty:
+            print("Log: %s not allowed to have ERRORS or TRACES" % log)
             failed = True
     if failed:
         return 1
