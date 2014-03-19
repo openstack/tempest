@@ -65,7 +65,10 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
         self.addCleanup(self.quotas_client.update_quota_set,
                         self.demo_tenant_id, **default_quota_set)
         self.assertEqual(200, resp.status)
-        self.assertEqual(new_quota_set, quota_set)
+        # test that the specific values we set are actually in
+        # the final result. There is nothing here that ensures there
+        # would be no other values in there.
+        self.assertDictContainsSubset(new_quota_set, quota_set)
 
     @test.attr(type='gate')
     def test_show_quota_usage(self):
