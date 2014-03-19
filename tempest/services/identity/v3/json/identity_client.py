@@ -503,10 +503,9 @@ class V3TokenClientJSON(rest_client.RestClient):
             # Because XML response is not easily
             # converted to the corresponding JSON one
             headers = self.get_headers(accept_type="json")
-        self._log_request(method, url, headers, body)
         resp, resp_body = self.http_obj.request(url, method,
                                                 headers=headers, body=body)
-        self._log_response(resp, resp_body)
+        self._log_request(method, url, resp)
 
         if resp.status in [401, 403]:
             resp_body = json.loads(resp_body)
