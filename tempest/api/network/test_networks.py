@@ -19,7 +19,7 @@ from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -64,6 +64,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(NetworksTestJSON, cls).setUpClass()
         cls.network = cls.create_network()
@@ -71,7 +72,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         cls.subnet = cls.create_subnet(cls.network)
         cls.cidr = cls.subnet['cidr']
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_network_subnet(self):
         # Create a network
         name = data_utils.rand_name('network-')
@@ -102,7 +103,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         resp, body = self.client.delete_network(net_id)
         self.assertEqual('204', resp['status'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_network(self):
         # Verify the details of a network
         resp, body = self.client.show_network(self.network['id'])
@@ -111,7 +112,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         for key in ['id', 'name']:
             self.assertEqual(network[key], self.network[key])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_network_fields(self):
         # Verify specific fields of a network
         field_list = [('fields', 'id'), ('fields', 'name'), ]
@@ -123,7 +124,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         for label, field_name in field_list:
             self.assertEqual(network[field_name], self.network[field_name])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_networks(self):
         # Verify the network exists in the list of all networks
         resp, body = self.client.list_networks()
@@ -132,7 +133,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
                     if network['id'] == self.network['id']]
         self.assertNotEmpty(networks, "Created network not found in the list")
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
         resp, body = self.client.list_networks(fields='id')
@@ -143,7 +144,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
             self.assertEqual(len(network), 1)
             self.assertIn('id', network)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_subnet(self):
         # Verify the details of a subnet
         resp, body = self.client.show_subnet(self.subnet['id'])
@@ -154,7 +155,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
             self.assertIn(key, subnet)
             self.assertEqual(subnet[key], self.subnet[key])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_show_subnet_fields(self):
         # Verify specific fields of a subnet
         field_list = [('fields', 'id'), ('fields', 'cidr'), ]
@@ -166,7 +167,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         for label, field_name in field_list:
             self.assertEqual(subnet[field_name], self.subnet[field_name])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_subnets(self):
         # Verify the subnet exists in the list of all subnets
         resp, body = self.client.list_subnets()
@@ -175,7 +176,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
                    if subnet['id'] == self.subnet['id']]
         self.assertNotEmpty(subnets, "Created subnet not found in the list")
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_subnets_fields(self):
         # Verify specific fields of subnets
         resp, body = self.client.list_subnets(fields='id')
@@ -194,7 +195,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         except exceptions.NotFound:
             pass
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_delete_network_with_subnet(self):
         # Creates a network
         name = data_utils.rand_name('network-')
@@ -221,7 +222,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         # it from the list.
         self.subnets.pop()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_port_with_no_ip(self):
         # For this test create a new network - do not use any previously
         # created networks.
@@ -275,6 +276,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(BulkNetworkOpsTestJSON, cls).setUpClass()
         cls.network1 = cls.create_network()
@@ -310,7 +312,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         for n in created_ports:
             self.assertNotIn(n['id'], ports_list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_bulk_create_delete_network(self):
         # Creates 2 networks in one request
         network_names = [data_utils.rand_name('network-'),
@@ -326,7 +328,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], networks_list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_bulk_create_delete_subnet(self):
         # Creates 2 subnets in one request
         cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
@@ -358,7 +360,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
             self.assertIsNotNone(n['id'])
             self.assertIn(n['id'], subnets_list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_bulk_create_delete_port(self):
         # Creates 2 ports in one request
         networks = [self.network1['id'], self.network2['id']]

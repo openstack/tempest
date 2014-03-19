@@ -44,6 +44,7 @@ class FloatingIPTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(FloatingIPTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('router', 'network'):

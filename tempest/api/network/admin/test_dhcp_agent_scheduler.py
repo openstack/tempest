@@ -20,6 +20,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(DHCPAgentSchedulersTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('dhcp_agent_scheduler', 'network'):
