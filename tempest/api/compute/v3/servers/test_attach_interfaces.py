@@ -127,7 +127,7 @@ class AttachInterfacesV3Test(base.BaseV3ComputeTest):
         _ifs = self._test_delete_interface(server, ifs)
         self.assertEqual(len(ifs) - 1, len(_ifs))
 
-    @attr(type='gate')
+    @attr(type='smoke')
     def test_add_remove_fixed_ip(self):
         # Add and Remove the fixed IP to server.
         server, ifs = self._create_server_get_interfaces()
