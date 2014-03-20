@@ -48,23 +48,48 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
 
     def test_sahara_plugins_list(self):
         plugins = self.parser.listing(self.sahara('plugin-list'))
-        self.assertTableStruct(plugins, ['name', 'versions', 'title'])
+        self.assertTableStruct(plugins, [
+            'name',
+            'versions',
+            'title'
+        ])
 
     def test_sahara_plugins_show(self):
-        plugin = self.parser.listing(self.sahara('plugin-show',
-                                                 params='--name vanilla'))
-        self.assertTableStruct(plugin, ['Property', 'Value'])
+        result = self.sahara('plugin-show', params='--name vanilla')
+        plugin = self.parser.listing(result)
+        self.assertTableStruct(plugin, [
+            'Property',
+            'Value'
+        ])
 
     def test_sahara_node_group_template_list(self):
-        plugins = self.parser.listing(self.sahara('node-group-template-list'))
-        self.assertTableStruct(plugins, ['name', 'id', 'plugin_name',
-                                         'node_processes', 'description'])
+        result = self.sahara('node-group-template-list')
+        node_group_templates = self.parser.listing(result)
+        self.assertTableStruct(node_group_templates, [
+            'name',
+            'id',
+            'plugin_name',
+            'node_processes',
+            'description'
+        ])
 
     def test_sahara_cluster_template_list(self):
-        plugins = self.parser.listing(self.sahara('cluster-template-list'))
-        self.assertTableStruct(plugins, ['name', 'id', 'plugin_name',
-                                         'node_groups', 'description'])
+        result = self.sahara('cluster-template-list')
+        cluster_templates = self.parser.listing(result)
+        self.assertTableStruct(cluster_templates, [
+            'name',
+            'id',
+            'plugin_name',
+            'node_groups',
+            'description'
+        ])
 
     def test_sahara_cluster_list(self):
-        plugins = self.parser.listing(self.sahara('cluster-list'))
-        self.assertTableStruct(plugins, ['name', 'id', 'status', 'node_count'])
+        result = self.sahara('cluster-list')
+        clusters = self.parser.listing(result)
+        self.assertTableStruct(clusters, [
+            'name',
+            'id',
+            'status',
+            'node_count'
+        ])
