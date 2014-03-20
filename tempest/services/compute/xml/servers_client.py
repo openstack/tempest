@@ -122,6 +122,10 @@ def _translate_server_xml_to_json(xml_dom):
                 '/compute/ext/extended_status/api/v1.1}vm_state')
     task_state = ('{http://docs.openstack.org'
                   '/compute/ext/extended_status/api/v1.1}task_state')
+    if 'tenantId' in json:
+        json['tenant_id'] = json.pop('tenantId')
+    if 'userId' in json:
+        json['user_id'] = json.pop('userId')
     if diskConfig in json:
         json['OS-DCF:diskConfig'] = json.pop(diskConfig)
     if terminated_at in json:
@@ -245,13 +249,19 @@ class ServersClientXML(rest_client.RestClient):
             array.append(xml_to_json(child))
         return array
 
+    def _parse_server_array(self, node):
+        array = []
+        for child in node.getchildren():
+            array.append(self._parse_server(child))
+        return array
+
     def list_servers(self, params=None):
         url = 'servers'
         if params:
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
-        servers = self._parse_array(etree.fromstring(body))
+        servers = self._parse_server_array(etree.fromstring(body))
         return resp, {"servers": servers}
 
     def list_servers_with_detail(self, params=None):
@@ -260,7 +270,7 @@ class ServersClientXML(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
-        servers = self._parse_array(etree.fromstring(body))
+        servers = self._parse_server_array(etree.fromstring(body))
         return resp, {"servers": servers}
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
