@@ -17,6 +17,7 @@ from mock import patch
 import neutronclient.v2_0.client as neutronclient
 from oslo.config import cfg
 
+from tempest.common import http
 from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
@@ -27,6 +28,8 @@ from tempest.services.network.json import network_client as json_network_client
 from tempest.services.network.xml import network_client as xml_network_client
 from tempest.tests import base
 from tempest.tests import fake_config
+from tempest.tests import fake_http
+from tempest.tests import fake_identity
 
 
 class TestTenantIsolation(base.TestCase):
@@ -35,6 +38,9 @@ class TestTenantIsolation(base.TestCase):
         super(TestTenantIsolation, self).setUp()
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+        self.fake_http = fake_http.fake_httplib2(return_type=200)
+        self.stubs.Set(http.ClosingHttp, 'request',
+                       fake_identity._fake_v2_response)
 
     def test_tempest_client(self):
         iso_creds = isolated_creds.IsolatedCreds('test class')

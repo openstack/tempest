@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from oslo.config import cfg
 
 from tempest import auth
@@ -41,6 +43,10 @@ class CredentialsTests(base.TestCase):
         self.stubs.Set(http.ClosingHttp, 'request', self.fake_http.request)
         self.useFixture(fake_config.ConfigFixture())
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+
+    def test_create(self):
+        creds = self._get_credentials()
+        self.assertEqual(self.attributes, creds._initial)
 
     def test_create_invalid_attr(self):
         self.assertRaises(exceptions.InvalidCredentials,
@@ -79,19 +85,44 @@ class KeystoneV2CredentialsTests(CredentialsTests):
         self.stubs.Set(http.ClosingHttp, 'request', self.identity_response)
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
 
-    def _verify_credentials(self, credentials_class, creds_dict):
-        creds = auth.get_credentials(**creds_dict)
-        # Check the right version of credentials has been returned
-        self.assertIsInstance(creds, credentials_class)
-        # Check the id attributes are filled in
-        attributes = [x for x in creds.ATTRIBUTES if (
-            '_id' in x and x != 'domain_id')]
-        for attr in attributes:
-            self.assertIsNone(getattr(creds, attr))
+    def _verify_credentials(self, credentials_class, filled=True,
+                            creds_dict=None):
+
+        def _check(credentials):
+            # Check the right version of credentials has been returned
+            self.assertIsInstance(credentials, credentials_class)
+            # Check the id attributes are filled in
+            attributes = [x for x in credentials.ATTRIBUTES if (
+                '_id' in x and x != 'domain_id')]
+            for attr in attributes:
+                if filled:
+                    self.assertIsNotNone(getattr(credentials, attr))
+                else:
+                    self.assertIsNone(getattr(credentials, attr))
+
+        if creds_dict is None:
+            for ctype in auth.Credentials.TYPES:
+                creds = auth.get_default_credentials(credential_type=ctype,
+                                                     fill_in=filled)
+                _check(creds)
+        else:
+            creds = auth.get_credentials(fill_in=filled, **creds_dict)
+            _check(creds)
+
+    def test_get_default_credentials(self):
+        self.useFixture(fixtures.LockFixture('auth_version'))
+        self._verify_credentials(credentials_class=self.credentials_class)
 
     def test_get_credentials(self):
         self.useFixture(fixtures.LockFixture('auth_version'))
-        self._verify_credentials(self.credentials_class, self.attributes)
+        self._verify_credentials(credentials_class=self.credentials_class,
+                                 creds_dict=self.attributes)
+
+    def test_get_credentials_not_filled(self):
+        self.useFixture(fixtures.LockFixture('auth_version'))
+        self._verify_credentials(credentials_class=self.credentials_class,
+                                 filled=False,
+                                 creds_dict=self.attributes)
 
     def test_is_valid(self):
         creds = self._get_credentials()
@@ -112,6 +143,30 @@ class KeystoneV2CredentialsTests(CredentialsTests):
                 # Default configuration values related to credentials
                 # are defined as fake_* in fake_config.py
                 self.assertEqual(getattr(creds, attr), 'fake_' + attr)
+
+    def test_reset_all_attributes(self):
+        creds = self._get_credentials()
+        initial_creds = copy.deepcopy(creds)
+        set_attr = creds.__dict__.keys()
+        missing_attr = set(creds.ATTRIBUTES).difference(set_attr)
+        # Set all unset attributes, then reset
+        for attr in missing_attr:
+            setattr(creds, attr, 'fake' + attr)
+        creds.reset()
+        # Check reset credentials are same as initial ones
+        self.assertEqual(creds, initial_creds)
+
+    def test_reset_single_attribute(self):
+        creds = self._get_credentials()
+        initial_creds = copy.deepcopy(creds)
+        set_attr = creds.__dict__.keys()
+        missing_attr = set(creds.ATTRIBUTES).difference(set_attr)
+        # Set one unset attributes, then reset
+        for attr in missing_attr:
+            setattr(creds, attr, 'fake' + attr)
+            creds.reset()
+            # Check reset credentials are same as initial ones
+            self.assertEqual(creds, initial_creds)
 
 
 class KeystoneV3CredentialsTests(KeystoneV2CredentialsTests):

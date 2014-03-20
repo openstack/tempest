@@ -109,6 +109,10 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
         self.assertIsNone(self.auth_provider.alt_part)
         self.assertIsNone(self.auth_provider.alt_auth_data)
 
+    def test_fill_credentials(self):
+        self.assertRaises(NotImplementedError,
+                          self.auth_provider.fill_credentials)
+
 
 class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
     _endpoints = fake_identity.IDENTITY_V2_RESPONSE['access']['serviceCatalog']
@@ -132,6 +136,13 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
 
     def _get_token_from_fake_identity(self):
         return fake_identity.TOKEN
+
+    def _get_from_fake_identity(self, attr):
+        access = fake_identity.IDENTITY_V2_RESPONSE['access']
+        if attr == 'user_id':
+            return access['user']['id']
+        elif attr == 'tenant_id':
+            return access['token']['tenant']['id']
 
     def _test_request_helper(self, filters, expected):
         url, headers, body = self.auth_provider.auth_request('GET',
@@ -219,6 +230,13 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
             cred = copy.copy(self.credentials)
             del cred[attr]
             self.assertFalse(self.auth_provider.check_credentials(cred))
+
+    def test_fill_credentials(self):
+        self.auth_provider.fill_credentials()
+        creds = self.auth_provider.credentials
+        for attr in ['user_id', 'tenant_id']:
+            self.assertEqual(self._get_from_fake_identity(attr),
+                             getattr(creds, attr))
 
     def _test_base_url_helper(self, expected_url, filters,
                               auth_data=None):
@@ -340,9 +358,20 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
         access['expires_at'] = date_as_string
         return token, access
 
+    def _get_from_fake_identity(self, attr):
+        token = fake_identity.IDENTITY_V3_RESPONSE['token']
+        if attr == 'user_id':
+            return token['user']['id']
+        elif attr == 'project_id':
+            return token['project']['id']
+        elif attr == 'user_domain_id':
+            return token['user']['domain']['id']
+        elif attr == 'project_domain_id':
+            return token['project']['domain']['id']
+
     def test_check_credentials_missing_attribute(self):
         # reset credentials to fresh ones
-        self.credentials = fake_credentials.FakeKeystoneV3Credentials()
+        self.credentials.reset()
         for attr in ['username', 'password', 'user_domain_name',
                      'project_domain_name']:
             cred = copy.copy(self.credentials)
@@ -352,13 +381,21 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
 
     def test_check_domain_credentials_missing_attribute(self):
         # reset credentials to fresh ones
-        self.credentials = fake_credentials.FakeKeystoneV3Credentials()
+        self.credentials.reset()
         domain_creds = fake_credentials.FakeKeystoneV3DomainCredentials()
         for attr in ['username', 'password', 'user_domain_name']:
             cred = copy.copy(domain_creds)
             del cred[attr]
             self.assertFalse(self.auth_provider.check_credentials(cred),
                              "Credentials should be invalid without %s" % attr)
+
+    def test_fill_credentials(self):
+        self.auth_provider.fill_credentials()
+        creds = self.auth_provider.credentials
+        for attr in ['user_id', 'project_id', 'user_domain_id',
+                     'project_domain_id']:
+            self.assertEqual(self._get_from_fake_identity(attr),
+                             getattr(creds, attr))
 
     # Overwrites v2 test
     def test_base_url_to_get_admin_endpoint(self):
