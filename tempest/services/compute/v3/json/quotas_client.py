@@ -45,6 +45,7 @@ class QuotasV3ClientJSON(rest_client.RestClient):
         url = 'os-quota-sets/%s/detail' % str(tenant_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.quota_set_detail, resp, body)
         return resp, body['quota_set']
 
     def get_default_quota_set(self, tenant_id):
