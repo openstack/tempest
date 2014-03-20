@@ -12,16 +12,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from oslo.config import cfg
 
 from tempest import config
 from tempest.openstack.common.fixture import config as conf_fixture
+from tempest.openstack.common import importutils
 
 
 class ConfigFixture(conf_fixture.Config):
 
     def __init__(self):
         config.register_opts()
+        # Register locking options
+        importutils.import_module('tempest.openstack.common.lockutils')
         super(ConfigFixture, self).__init__()
 
     def setUp(self):
@@ -36,6 +41,10 @@ class ConfigFixture(conf_fixture.Config):
                               group='identity')
         self.conf.set_default('neutron', True, group='service_available')
         self.conf.set_default('heat', True, group='service_available')
+        if not os.path.exists(str(os.environ.get('OS_TEST_LOCK_PATH'))):
+            os.mkdir(str(os.environ.get('OS_TEST_LOCK_PATH')))
+        self.conf.set_default('lock_path',
+                              str(os.environ.get('OS_TEST_LOCK_PATH')))
 
 
 class FakePrivate(config.TempestConfigPrivate):
