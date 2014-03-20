@@ -26,7 +26,7 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
             msg = "dhcp_agent_scheduler extension not enabled."
             raise cls.skipException(msg)
         # Create a network and make sure it will be hosted by a
-        # dhcp agent.
+        # dhcp agent: this is done by creating a regular port
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.cidr = cls.subnet['cidr']
@@ -60,6 +60,9 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_remove_network_from_dhcp_agent(self):
+        # The agent is now bound to the network, we can free the port
+        self.client.delete_port(self.port['id'])
+        self.ports.remove(self.port)
         resp, body = self.admin_client.list_dhcp_agent_hosting_network(
             self.network['id'])
         agents = body['agents']
