@@ -21,6 +21,7 @@ import unicodedata
 import testscenarios
 import testtools
 
+from tempest import auth
 from tempest import clients
 from tempest.common.utils import misc
 from tempest import config
@@ -39,9 +40,8 @@ class ImageUtils(object):
         self.non_ssh_image_pattern = \
             CONF.input_scenario.non_ssh_image_regex
         # Setup clients
-        ocm = clients.OfficialClientManager(CONF.identity.username,
-                                            CONF.identity.password,
-                                            CONF.identity.tenant_name)
+        ocm = clients.OfficialClientManager(
+            auth.get_default_credentials('user'))
         self.client = ocm.compute_client
 
     def ssh_user(self, image_id):
@@ -99,9 +99,8 @@ class InputScenarioUtils(object):
                                             digit=string.digits)
 
     def __init__(self):
-        ocm = clients.OfficialClientManager(CONF.identity.username,
-                                            CONF.identity.password,
-                                            CONF.identity.tenant_name)
+        ocm = clients.OfficialClientManager(
+            auth.get_default_credentials('user', fill_in=False))
         self.client = ocm.compute_client
         self.image_pattern = CONF.input_scenario.image_regex
         self.flavor_pattern = CONF.input_scenario.flavor_regex

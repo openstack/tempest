@@ -24,6 +24,7 @@ from neutronclient.common import exceptions as exc
 from novaclient import exceptions as nova_exceptions
 
 from tempest.api.network import common as net_common
+from tempest import auth
 from tempest import clients
 from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
@@ -65,10 +66,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             cls.__name__, tempest_client=False,
             network_resources=cls.network_resources)
 
-        username, password, tenant_name = cls.credentials()
-
         cls.manager = clients.OfficialClientManager(
-            username, password, tenant_name)
+            credentials=cls.credentials())
         cls.compute_client = cls.manager.compute_client
         cls.image_client = cls.manager.image_client
         cls.baremetal_client = cls.manager.baremetal_client
@@ -82,27 +81,27 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.os_resources = []
 
     @classmethod
-    def _get_credentials(cls, get_creds, prefix):
+    def _get_credentials(cls, get_creds, ctype):
         if CONF.compute.allow_tenant_isolation:
-            username, tenant_name, password = get_creds()
+            creds = get_creds()
         else:
-            username = getattr(CONF.identity, prefix + 'username')
-            password = getattr(CONF.identity, prefix + 'password')
-            tenant_name = getattr(CONF.identity, prefix + 'tenant_name')
-        return username, password, tenant_name
+            creds = auth.get_default_credentials(ctype)
+        return creds
 
     @classmethod
     def credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_primary_creds, '')
+        return cls._get_credentials(cls.isolated_creds.get_primary_creds,
+                                    'user')
 
     @classmethod
     def alt_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_alt_creds, 'alt_')
+        return cls._get_credentials(cls.isolated_creds.get_alt_creds,
+                                    'alt_user')
 
     @classmethod
     def admin_credentials(cls):
         return cls._get_credentials(cls.isolated_creds.get_admin_creds,
-                                    'admin_')
+                                    'identity_admin')
 
     @staticmethod
     def cleanup_resource(resource, test_name):
@@ -541,13 +540,7 @@ class NetworkScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
         super(NetworkScenarioTest, cls).setUpClass()
-        if CONF.compute.allow_tenant_isolation:
-            cls.tenant_id = cls.isolated_creds.get_primary_tenant().id
-        else:
-            cls.tenant_id = cls.manager._get_identity_client(
-                CONF.identity.username,
-                CONF.identity.password,
-                CONF.identity.tenant_name).tenant_id
+        cls.tenant_id = cls.manager.identity_client.tenant_id
 
     def _create_network(self, tenant_id, namestart='network-smoke-'):
         name = data_utils.rand_name(namestart)
@@ -1053,10 +1046,10 @@ class OrchestrationScenarioTest(OfficialClientTest):
 
     @classmethod
     def credentials(cls):
-        username = CONF.identity.admin_username
-        password = CONF.identity.admin_password
-        tenant_name = CONF.identity.tenant_name
-        return username, password, tenant_name
+        admin_creds = auth.get_default_credentials('identity_admin')
+        creds = auth.get_default_credentials('user')
+        admin_creds.tenant_name = creds.tenant_name
+        return admin_creds
 
     def _load_template(self, base_file, file_name):
         filepath = os.path.join(os.path.dirname(os.path.realpath(base_file)),

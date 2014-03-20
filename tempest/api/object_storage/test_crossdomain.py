@@ -29,10 +29,7 @@ class CrossdomainTest(base.BaseObjectTest):
         # endpoint and test the healthcheck feature.
         cls.data.setup_test_user()
 
-        cls.os_test_user = clients.Manager(
-            cls.data.test_user,
-            cls.data.test_password,
-            cls.data.test_tenant)
+        cls.os_test_user = clients.Manager(cls.data.test_credentials)
 
         cls.xml_start = '<?xml version="1.0"?>\n' \
                         '<!DOCTYPE cross-domain-policy SYSTEM ' \

@@ -32,21 +32,13 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
 
         # Add another tenant to test volume-transfer
         if CONF.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_alt_creds()
-            username, tenant_name, password = creds
-            cls.os_alt = clients.Manager(username=username,
-                                         password=password,
-                                         tenant_name=tenant_name,
+            cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds(),
                                          interface=cls._interface)
             cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
-
             # Add admin tenant to cleanup resources
-            adm_creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = adm_creds
-            cls.os_adm = clients.Manager(username=admin_username,
-                                         password=admin_password,
-                                         tenant_name=admin_tenant_name,
+            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
                                          interface=cls._interface)
+
         else:
             cls.os_alt = clients.AltManager()
             alt_tenant_name = cls.os_alt.credentials['tenant_name']

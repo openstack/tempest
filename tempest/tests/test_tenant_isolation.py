@@ -17,6 +17,7 @@ from mock import patch
 import neutronclient.v2_0.client as neutronclient
 from oslo.config import cfg
 
+from tempest import clients
 from tempest.common import http
 from tempest.common import isolated_creds
 from tempest import config
@@ -52,6 +53,12 @@ class TestTenantIsolation(base.TestCase):
     def test_official_client(self):
         self.useFixture(mockpatch.PatchObject(keystoneclient.Client,
                                               'authenticate'))
+        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
+                                              '_get_image_client'))
+        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
+                                              '_get_object_storage_client'))
+        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
+                                              '_get_orchestration_client'))
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  tempest_client=False)
         self.assertTrue(isinstance(iso_creds.identity_admin_client,
@@ -142,7 +149,7 @@ class TestTenantIsolation(base.TestCase):
         self.addCleanup(user_mock.stop)
         with patch.object(json_iden_client.IdentityClientJSON,
                           'assign_user_role') as user_mock:
-            admin_creds = iso_creds.get_admin_creds(old_style=False)
+            admin_creds = iso_creds.get_admin_creds()
         user_mock.assert_called_once_with('1234', '1234', '1234')
         self.assertEqual(admin_creds.username, 'fake_admin_user')
         self.assertEqual(admin_creds.tenant_name, 'fake_admin_tenant')
@@ -176,7 +183,7 @@ class TestTenantIsolation(base.TestCase):
                           [{'id': '123456', 'name': 'admin'}])))
         with patch.object(json_iden_client.IdentityClientJSON,
                           'assign_user_role'):
-            iso_creds.get_admin_creds(old_style=False)
+            iso_creds.get_admin_creds()
         user_mock = self.patch(
             'tempest.services.identity.json.identity_client.'
             'IdentityClientJSON.delete_user')
@@ -290,7 +297,7 @@ class TestTenantIsolation(base.TestCase):
                           [{'id': '123456', 'name': 'admin'}])))
         with patch.object(json_iden_client.IdentityClientJSON,
                           'assign_user_role'):
-            iso_creds.get_admin_creds(old_style=False)
+            iso_creds.get_admin_creds()
         self.patch('tempest.services.identity.json.identity_client.'
                    'IdentityClientJSON.delete_user')
         self.patch('tempest.services.identity.json.identity_client.'
@@ -353,7 +360,7 @@ class TestTenantIsolation(base.TestCase):
         router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClientJSON.'
             'add_router_interface_with_subnet_id')
-        username, tenant_name, password = iso_creds.get_alt_creds()
+        iso_creds.get_alt_creds()
         router_interface_mock.called_once_with('1234', '1234')
         network = iso_creds.get_alt_network()
         subnet = iso_creds.get_alt_subnet()
@@ -384,7 +391,7 @@ class TestTenantIsolation(base.TestCase):
                           [{'id': '123456', 'name': 'admin'}])))
         with patch.object(json_iden_client.IdentityClientJSON,
                           'assign_user_role'):
-            username, tenant_name, password = iso_creds.get_admin_creds()
+            iso_creds.get_admin_creds()
         router_interface_mock.called_once_with('1234', '1234')
         network = iso_creds.get_admin_network()
         subnet = iso_creds.get_admin_subnet()
@@ -419,7 +426,7 @@ class TestTenantIsolation(base.TestCase):
                               'delete_router')
         router_mock = router.start()
 
-        username, tenant_name, password = iso_creds.get_primary_creds()
+        iso_creds.get_primary_creds()
         self.assertEqual(net_mock.mock_calls, [])
         self.assertEqual(subnet_mock.mock_calls, [])
         self.assertEqual(router_mock.mock_calls, [])

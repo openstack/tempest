@@ -43,10 +43,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
         if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
-            username, tenant_name, password = creds
-            cls.alt_manager = clients.Manager(username=username,
-                                              password=password,
-                                              tenant_name=tenant_name)
+            cls.alt_manager = clients.Manager(credentials=creds)
         else:
             # Use the alt_XXX credentials in the config file
             cls.alt_manager = clients.AltManager()

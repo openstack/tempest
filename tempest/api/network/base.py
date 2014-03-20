@@ -352,11 +352,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
             raise cls.skipException(msg)
         if (CONF.compute.allow_tenant_isolation or
             cls.force_tenant_isolation is True):
-            creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = creds
-            cls.os_adm = clients.Manager(username=admin_username,
-                                         password=admin_password,
-                                         tenant_name=admin_tenant_name,
+            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
                                          interface=cls._interface)
         else:
             cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)

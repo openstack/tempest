@@ -19,6 +19,7 @@ import time
 
 from six import moves
 
+from tempest import auth
 from tempest import clients
 from tempest.common import ssh
 from tempest.common.utils import data_utils
@@ -147,9 +148,10 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                                             password,
                                             tenant['id'],
                                             "email")
-                manager = clients.Manager(username=username,
-                                          password="pass",
-                                          tenant_name=tenant_name)
+                creds = auth.get_credentials(username=username,
+                                             password=password,
+                                             tenant_name=tenant_name)
+                manager = clients.Manager(credentials=creds)
 
             test_obj = importutils.import_class(test['action'])
             test_run = test_obj(manager, max_runs, stop_on_error)

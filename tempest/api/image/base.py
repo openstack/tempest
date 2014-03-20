@@ -42,11 +42,7 @@ class BaseImageTest(tempest.test.BaseTestCase):
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
         if CONF.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_primary_creds()
-            username, tenant_name, password = creds
-            cls.os = clients.Manager(username=username,
-                                     password=password,
-                                     tenant_name=tenant_name)
+            cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
         else:
             cls.os = clients.Manager()
 
@@ -96,11 +92,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
     def setUpClass(cls):
         super(BaseV1ImageMembersTest, cls).setUpClass()
         if CONF.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_alt_creds()
-            username, tenant_name, password = creds
-            cls.os_alt = clients.Manager(username=username,
-                                         password=password,
-                                         tenant_name=tenant_name)
+            cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
             cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
         else:
             cls.os_alt = clients.AltManager()
@@ -139,12 +131,8 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         super(BaseV2MemberImageTest, cls).setUpClass()
         if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
-            username, tenant_name, password = creds
-            cls.os_alt = clients.Manager(username=username,
-                                         password=password,
-                                         tenant_name=tenant_name,
-                                         interface=cls._interface)
-            cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
+            cls.os_alt = clients.Manager(creds)
+            cls.alt_tenant_id = cls.isolated_creds.get_alt_creds().tenant_id
         else:
             cls.os_alt = clients.AltManager()
             alt_tenant_name = cls.os_alt.credentials['tenant_name']

@@ -14,9 +14,6 @@
 
 import netaddr
 
-import keystoneclient.v2_0.client as keystoneclient
-import neutronclient.v2_0.client as neutronclient
-
 from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -44,24 +41,6 @@ class IsolatedCreds(object):
         self.identity_admin_client, self.network_admin_client = (
             self._get_admin_clients())
 
-    def _get_official_admin_clients(self):
-        username = CONF.identity.admin_username
-        password = CONF.identity.admin_password
-        tenant_name = CONF.identity.admin_tenant_name
-        auth_url = CONF.identity.uri
-        dscv = CONF.identity.disable_ssl_certificate_validation
-        identity_client = keystoneclient.Client(username=username,
-                                                password=password,
-                                                tenant_name=tenant_name,
-                                                auth_url=auth_url,
-                                                insecure=dscv)
-        network_client = neutronclient.Client(username=username,
-                                              password=password,
-                                              tenant_name=tenant_name,
-                                              auth_url=auth_url,
-                                              insecure=dscv)
-        return identity_client, network_client
-
     def _get_admin_clients(self):
         """
         Returns a tuple with instances of the following admin clients (in this
@@ -71,11 +50,11 @@ class IsolatedCreds(object):
         """
         if self.tempest_client:
             os = clients.AdminManager(interface=self.interface)
-            admin_clients = (os.identity_client,
-                             os.network_client,)
         else:
-            admin_clients = self._get_official_admin_clients()
-        return admin_clients
+            os = clients.OfficialClientManager(
+                auth.get_default_credentials('identity_admin')
+            )
+        return os.identity_client, os.network_client
 
     def _create_tenant(self, name, description):
         if self.tempest_client:
@@ -388,13 +367,13 @@ class IsolatedCreds(object):
         else:
             return credentials
 
-    def get_primary_creds(self, old_style=True):
+    def get_primary_creds(self, old_style=False):
         return self.get_credentials('primary', old_style)
 
-    def get_admin_creds(self, old_style=True):
+    def get_admin_creds(self, old_style=False):
         return self.get_credentials('admin', old_style)
 
-    def get_alt_creds(self, old_style=True):
+    def get_alt_creds(self, old_style=False):
         return self.get_credentials('alt', old_style)
 
     def _clear_isolated_router(self, router_id, router_name):

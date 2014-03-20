@@ -307,26 +307,18 @@ class BaseTestCase(BaseDeps):
             cls.__name__, network_resources=cls.network_resources)
 
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
-        if (CONF.compute.allow_tenant_isolation or
-            force_tenant_isolation):
+        if CONF.compute.allow_tenant_isolation or force_tenant_isolation:
             creds = cls.isolated_creds.get_primary_creds()
-            username, tenant_name, password = creds
             if getattr(cls, '_interface', None):
-                os = clients.Manager(username=username,
-                                     password=password,
-                                     tenant_name=tenant_name,
+                os = clients.Manager(credentials=creds,
                                      interface=cls._interface,
                                      service=cls._service)
             elif interface:
-                os = clients.Manager(username=username,
-                                     password=password,
-                                     tenant_name=tenant_name,
+                os = clients.Manager(credentials=creds,
                                      interface=interface,
                                      service=cls._service)
             else:
-                os = clients.Manager(username=username,
-                                     password=password,
-                                     tenant_name=tenant_name,
+                os = clients.Manager(credentials=creds,
                                      service=cls._service)
         else:
             if getattr(cls, '_interface', None):
