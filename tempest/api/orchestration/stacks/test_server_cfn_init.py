@@ -94,7 +94,8 @@ class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
         try:
             self.client.wait_for_resource_status(
                 sid, 'WaitCondition', 'CREATE_COMPLETE')
-        except exceptions.TimeoutException as e:
+        except (exceptions.StackResourceBuildErrorException,
+                exceptions.TimeoutException) as e:
             # attempt to log the server console to help with debugging
             # the cause of the server not signalling the waitcondition
             # to heat.

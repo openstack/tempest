@@ -154,7 +154,8 @@ class OrchestrationClient(rest_client.RestClient):
                 if resource_status == status:
                     return
                 if fail_regexp.search(resource_status):
-                    raise exceptions.StackBuildErrorException(
+                    raise exceptions.StackResourceBuildErrorException(
+                        resource_name=resource_name,
                         stack_identifier=stack_identifier,
                         resource_status=resource_status,
                         resource_status_reason=body['resource_status_reason'])
