@@ -510,6 +510,10 @@ class NegativeAutoTest(BaseTestCase):
             new_url, body = self._http_arguments(valid_schema, url, method)
         elif hasattr(self, "schema"):
             new_url, body = self._http_arguments(self.schema, url, method)
+        else:
+            raise Exception("testscenarios are not active. Please make sure "
+                            "that your test runner supports the load_tests "
+                            "mechanism")
 
         if "admin_client" in description and description["admin_client"]:
             client = self.admin_client
