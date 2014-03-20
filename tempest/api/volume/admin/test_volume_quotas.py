@@ -29,8 +29,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
     def setUpClass(cls):
         super(VolumeQuotasAdminTestJSON, cls).setUpClass()
         cls.admin_volume_client = cls.os_adm.volumes_client
-        cls.demo_tenant_id = cls.isolated_creds.get_primary_user().get(
-            'tenantId')
+        cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
 
     @test.attr(type='gate')
     def test_list_quotas(self):

@@ -102,11 +102,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self.manager = clients.OfficialClientManager(credentials)
             # Credentials from manager are filled with both names and IDs
             self.creds = self.manager.credentials
-            self.keypair = None
-            self.tenant_id = credentials.tenant_id
-            self.tenant_name = credentials.tenant_name
-            self.tenant_user = credentials.username
-            self.tenant_pass = credentials.password
             self.network = None
             self.subnet = None
             self.router = None
@@ -119,12 +114,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             self.router = router
 
         def _get_tenant_credentials(self):
-            return self.tenant_user, self.tenant_pass, self.tenant_name
+            # FIXME(andreaf) Unused method
+            return self.creds
 
     @classmethod
     def check_preconditions(cls):
         super(TestSecurityGroupsBasicOps, cls).check_preconditions()
-        if (cls.alt_tenant_id is None) or (cls.tenant_id is cls.alt_tenant_id):
+        if (cls.alt_creds is None) or \
+                (cls.tenant_id is cls.alt_creds.tenant_id):
             msg = 'No alt_tenant defined'
             cls.enabled = False
             raise cls.skipException(msg)
@@ -140,7 +137,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         super(TestSecurityGroupsBasicOps, cls).setUpClass()
         cls.alt_creds = cls.alt_credentials()
         cls.alt_manager = clients.OfficialClientManager(cls.alt_creds)
-        cls.alt_tenant_id = cls.alt_manager.identity_client.tenant_id
+        # Credentials from the manager are filled with both IDs and Names
+        cls.alt_creds = cls.alt_manager.credentials
         cls.check_preconditions()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
@@ -150,7 +148,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         cls.primary_tenant = cls.TenantProperties(creds)
         cls.alt_tenant = cls.TenantProperties(cls.alt_creds)
         for tenant in [cls.primary_tenant, cls.alt_tenant]:
-            cls.tenants[tenant.tenant_id] = tenant
+            cls.tenants[tenant.creds.tenant_id] = tenant
         cls.floating_ip_access = not CONF.network.public_router_id
 
     def cleanup_wrapper(self, resource):
@@ -171,14 +169,14 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _create_tenant_security_groups(self, tenant):
         access_sg = self._create_empty_security_group(
             namestart='secgroup_access-',
-            tenant_id=tenant.tenant_id
+            tenant_id=tenant.creds.tenant_id
         )
         self.addCleanup(self.cleanup_wrapper, access_sg)
 
         # don't use default secgroup since it allows in-tenant traffic
         def_sg = self._create_empty_security_group(
             namestart='secgroup_general-',
-            tenant_id=tenant.tenant_id
+            tenant_id=tenant.creds.tenant_id
         )
         self.addCleanup(self.cleanup_wrapper, def_sg)
         tenant.security_groups.update(access=access_sg, default=def_sg)
@@ -235,7 +233,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             ],
             'key_name': tenant.keypair.name,
             'security_groups': security_groups,
-            'tenant_id': tenant.tenant_id
+            'tenant_id': tenant.creds.tenant_id
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
         self.addCleanup(self.cleanup_wrapper, server)
@@ -244,7 +242,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _create_tenant_servers(self, tenant, num=1):
         for i in range(num):
             name = 'server-{tenant}-gen-{num}-'.format(
-                   tenant=tenant.tenant_name,
+                   tenant=tenant.creds.tenant_name,
                    num=i
             )
             name = data_utils.rand_name(name)
@@ -258,8 +256,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         workaround ip namespace
         """
         secgroups = [sg.name for sg in tenant.security_groups.values()]
-        name = 'server-{tenant}-access_point-'.format(tenant=tenant.tenant_name
-                                                      )
+        name = 'server-{tenant}-access_point-'.format(
+            tenant=tenant.creds.tenant_name)
         name = data_utils.rand_name(name)
         server = self._create_server(name, tenant,
                                      security_groups=secgroups)
@@ -273,7 +271,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self.floating_ips.setdefault(server, floating_ip)
 
     def _create_tenant_network(self, tenant):
-        network, subnet, router = self._create_networks(tenant.tenant_id)
+        network, subnet, router = self._create_networks(tenant.creds.tenant_id)
         for r in [network, router, subnet]:
             self.addCleanup(self.cleanup_wrapper, r)
         tenant.set_network(network, subnet, router)
@@ -296,7 +294,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             tenant_id = tenant_or_id
         else:
             tenant = tenant_or_id
-            tenant_id = tenant.tenant_id
+            tenant_id = tenant.creds.tenant_id
         self._set_compute_context(tenant)
         self._create_tenant_keypairs(tenant_id)
         self._create_tenant_network(tenant)

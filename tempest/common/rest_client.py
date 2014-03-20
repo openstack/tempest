@@ -140,15 +140,19 @@ class RestClient(object):
 
     @property
     def user(self):
-        return self.auth_provider.credentials.get('username', None)
+        return self.auth_provider.credentials.username
 
     @property
     def tenant_name(self):
-        return self.auth_provider.credentials.get('tenant_name', None)
+        return self.auth_provider.credentials.tenant_name
+
+    @property
+    def tenant_id(self):
+        return self.auth_provider.credentials.tenant_id
 
     @property
     def password(self):
-        return self.auth_provider.credentials.get('password', None)
+        return self.auth_provider.credentials.password
 
     @property
     def base_url(self):
