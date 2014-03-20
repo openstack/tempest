@@ -220,7 +220,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
     # NOTE(afazekas): doctored test case,
     # with normal validation it would fail
-    @test.skip_because(bug="1182679")
     @test.attr(type='smoke')
     def test_integration_1(self):
         # EC2 1. integration test (not strict)
