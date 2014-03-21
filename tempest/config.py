@@ -818,13 +818,29 @@ baremetal_group = cfg.OptGroup(name='baremetal',
 BaremetalGroup = [
     cfg.StrOpt('catalog_type',
                default='baremetal',
-               help="Catalog type of the baremetal provisioning service."),
+               help="Catalog type of the baremetal provisioning service"),
+    cfg.BoolOpt('driver_enabled',
+                default=False,
+                help="Whether the Ironic nova-compute driver is enabled"),
     cfg.StrOpt('endpoint_type',
                default='publicURL',
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the baremetal provisioning "
-                    "service."),
+                    "service"),
+    cfg.IntOpt('active_timeout',
+               default=300,
+               help="Timeout for Ironic node to completely provision"),
+    cfg.IntOpt('association_timeout',
+               default=10,
+               help="Timeout for association of Nova instance and Ironic "
+                    "node"),
+    cfg.IntOpt('power_timeout',
+               default=20,
+               help="Timeout for Ironic power transitions."),
+    cfg.IntOpt('unprovision_timeout',
+               default=20,
+               help="Timeout for unprovisioning an Ironic node.")
 ]
 
 cli_group = cfg.OptGroup(name='cli', title="cli Configuration Options")

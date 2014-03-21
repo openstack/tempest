@@ -19,6 +19,7 @@ import os
 import six
 import subprocess
 
+from ironicclient import exc as ironic_exceptions
 import netaddr
 from neutronclient.common import exceptions as exc
 from novaclient import exceptions as nova_exceptions
@@ -71,6 +72,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             username, password, tenant_name)
         cls.compute_client = cls.manager.compute_client
         cls.image_client = cls.manager.image_client
+        cls.baremetal_client = cls.manager.baremetal_client
         cls.identity_client = cls.manager.identity_client
         cls.network_client = cls.manager.network_client
         cls.volume_client = cls.manager.volume_client
@@ -283,7 +285,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return rules
 
     def create_server(self, client=None, name=None, image=None, flavor=None,
-                      create_kwargs={}):
+                      wait=True, create_kwargs={}):
         if client is None:
             client = self.compute_client
         if name is None:
@@ -318,7 +320,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         server = client.servers.create(name, image, flavor, **create_kwargs)
         self.assertEqual(server.name, name)
         self.set_resource(name, server)
-        self.status_timeout(client.servers, server.id, 'ACTIVE')
+        if wait:
+            self.status_timeout(client.servers, server.id, 'ACTIVE')
         # The instance retrieved on creation is missing network
         # details, necessitating retrieval after it becomes active to
         # ensure correct details.
@@ -437,6 +440,80 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                                             path=ami_img_path,
                                             properties=properties)
         LOG.debug("image:%s" % self.image)
+
+
+class BaremetalScenarioTest(OfficialClientTest):
+    @classmethod
+    def setUpClass(cls):
+        super(BaremetalScenarioTest, cls).setUpClass()
+
+        if (not CONF.service_available.ironic or
+           not CONF.baremetal.driver_enabled):
+            msg = 'Ironic not available or Ironic compute driver not enabled'
+            raise cls.skipException(msg)
+
+        # use an admin client manager for baremetal client
+        username, password, tenant = cls.admin_credentials()
+        manager = clients.OfficialClientManager(username, password, tenant)
+        cls.baremetal_client = manager.baremetal_client
+
+        # allow any issues obtaining the node list to raise early
+        cls.baremetal_client.node.list()
+
+    def _node_state_timeout(self, node_id, state_attr,
+                            target_states, timeout=10, interval=1):
+        if not isinstance(target_states, list):
+            target_states = [target_states]
+
+        def check_state():
+            node = self.get_node(node_id=node_id)
+            if getattr(node, state_attr) in target_states:
+                return True
+            return False
+
+        if not tempest.test.call_until_true(
+            check_state, timeout, interval):
+            msg = ("Timed out waiting for node %s to reach %s state(s) %s" %
+                   (node_id, state_attr, target_states))
+            raise exceptions.TimeoutException(msg)
+
+    def wait_provisioning_state(self, node_id, state, timeout):
+        self._node_state_timeout(
+            node_id=node_id, state_attr='provision_state',
+            target_states=state, timeout=timeout)
+
+    def wait_power_state(self, node_id, state):
+        self._node_state_timeout(
+            node_id=node_id, state_attr='power_state',
+            target_states=state, timeout=CONF.baremetal.power_timeout)
+
+    def wait_node(self, instance_id):
+        """Waits for a node to be associated with instance_id."""
+        def _get_node():
+            node = None
+            try:
+                node = self.get_node(instance_id=instance_id)
+            except ironic_exceptions.HTTPNotFound:
+                pass
+            return node is not None
+
+        if not tempest.test.call_until_true(
+            _get_node, CONF.baremetal.association_timeout, 1):
+            msg = ('Timed out waiting to get Ironic node by instance id %s'
+                   % instance_id)
+            raise exceptions.TimeoutException(msg)
+
+    def get_node(self, node_id=None, instance_id=None):
+        if node_id:
+            return self.baremetal_client.node.get(node_id)
+        elif instance_id:
+            return self.baremetal_client.node.get_by_instance_uuid(instance_id)
+
+    def get_ports(self, node_id):
+        ports = []
+        for port in self.baremetal_client.node.list_ports(node_id):
+            ports.append(self.baremetal_client.port.get(port.uuid))
+        return ports
 
 
 class NetworkScenarioTest(OfficialClientTest):

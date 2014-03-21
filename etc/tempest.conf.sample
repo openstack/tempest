@@ -101,13 +101,31 @@
 # Options defined in tempest.config
 #
 
-# Catalog type of the baremetal provisioning service. (string
+# Catalog type of the baremetal provisioning service (string
 # value)
 #catalog_type=baremetal
 
+# Whether the Ironic nova-compute driver is enabled (boolean
+# value)
+#driver_enabled=false
+
 # The endpoint type to use for the baremetal provisioning
-# service. (string value)
+# service (string value)
 #endpoint_type=publicURL
+
+# Timeout for Ironic node to completely provision (integer
+# value)
+#active_timeout=300
+
+# Timeout for association of Nova instance and Ironic node
+# (integer value)
+#association_timeout=10
+
+# Timeout for Ironic power transitions. (integer value)
+#power_timeout=20
+
+# Timeout for unprovisioning an Ironic node. (integer value)
+#unprovision_timeout=20
 
 
 [boto]

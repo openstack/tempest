@@ -17,6 +17,7 @@
 import cinderclient.client
 import glanceclient
 import heatclient.client
+import ironicclient.client
 import keystoneclient.exceptions
 import keystoneclient.v2_0.client
 import neutronclient.v2_0.client
@@ -456,6 +457,7 @@ class OfficialClientManager(manager.Manager):
     NOVACLIENT_VERSION = '2'
     CINDERCLIENT_VERSION = '1'
     HEATCLIENT_VERSION = '1'
+    IRONICCLIENT_VERSION = '1'
 
     def __init__(self, username, password, tenant_name):
         # FIXME(andreaf) Auth provider for client_type 'official' is
@@ -465,6 +467,7 @@ class OfficialClientManager(manager.Manager):
         # super cares for credentials validation
         super(OfficialClientManager, self).__init__(
             username=username, password=password, tenant_name=tenant_name)
+        self.baremetal_client = self._get_baremetal_client()
         self.compute_client = self._get_compute_client(username,
                                                        password,
                                                        tenant_name)
@@ -484,6 +487,22 @@ class OfficialClientManager(manager.Manager):
             username,
             password,
             tenant_name)
+
+    def _get_roles(self):
+        keystone_admin = self._get_identity_client(
+            CONF.identity.admin_username,
+            CONF.identity.admin_password,
+            CONF.identity.admin_tenant_name)
+
+        username = self.credentials['username']
+        tenant_name = self.credentials['tenant_name']
+        user_id = keystone_admin.users.find(name=username).id
+        tenant_id = keystone_admin.tenants.find(name=tenant_name).id
+
+        roles = keystone_admin.roles.roles_for_user(
+            user=user_id, tenant=tenant_id)
+
+        return [r.name for r in roles]
 
     def _get_compute_client(self, username, password, tenant_name):
         # Novaclient will not execute operations for anyone but the
@@ -605,6 +624,34 @@ class OfficialClientManager(manager.Manager):
                                                  tenant_name=tenant_name,
                                                  auth_url=auth_url,
                                                  insecure=dscv)
+
+    def _get_baremetal_client(self):
+        # ironic client is currently intended to by used by admin users
+        roles = self._get_roles()
+        if CONF.identity.admin_role not in roles:
+            return None
+
+        auth_url = CONF.identity.uri
+        api_version = self.IRONICCLIENT_VERSION
+        insecure = CONF.identity.disable_ssl_certificate_validation
+        service_type = CONF.baremetal.catalog_type
+        endpoint_type = CONF.baremetal.endpoint_type
+        creds = {
+            'os_username': self.credentials['username'],
+            'os_password': self.credentials['password'],
+            'os_tenant_name': self.credentials['tenant_name']
+        }
+
+        try:
+            return ironicclient.client.get_client(
+                api_version=api_version,
+                os_auth_url=auth_url,
+                insecure=insecure,
+                os_service_type=service_type,
+                os_endpoint_type=endpoint_type,
+                **creds)
+        except keystoneclient.exceptions.EndpointNotFound:
+            return None
 
     def _get_network_client(self):
         # The intended configuration is for the network client to have
