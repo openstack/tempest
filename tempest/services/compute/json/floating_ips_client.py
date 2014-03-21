@@ -16,6 +16,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute.v2 import floating_ips as schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -36,6 +37,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_floating_ips, resp, body)
         return resp, body['floating_ips']
 
     def get_floating_ip_details(self, floating_ip_id):
