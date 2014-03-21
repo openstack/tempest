@@ -113,6 +113,7 @@ Outputs:
 """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ServerCfnInitTestJSON, cls).setUpClass()
         if not CONF.orchestration.image_ref:

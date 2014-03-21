@@ -18,6 +18,7 @@ from tempest.api.orchestration import base
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import test
 
 
 CONF = config.CONF
@@ -53,6 +54,7 @@ outputs:
 """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(SwiftResourcesTestJSON, cls).setUpClass()
         cls.client = cls.orchestration_client
