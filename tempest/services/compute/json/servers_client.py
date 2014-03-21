@@ -78,7 +78,12 @@ class ServersClientJSON(rest_client.RestClient):
             value = kwargs.get(key)
             if value is not None:
                 post_body[post_param] = value
-        post_body = json.dumps({'server': post_body})
+        post_body = {'server': post_body}
+
+        if 'sched_hints' in kwargs:
+            hints = {'os:scheduler_hints': kwargs.get('sched_hints')}
+            post_body = dict(post_body.items() + hints.items())
+        post_body = json.dumps(post_body)
         resp, body = self.post('servers', post_body)
 
         body = json.loads(body)

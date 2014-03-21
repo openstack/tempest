@@ -360,6 +360,15 @@ class ServersClientXML(rest_client.RestClient):
                 temp.append(Text(k['contents']))
                 personality.append(temp)
 
+        if 'sched_hints' in kwargs:
+            sched_hints = kwargs.get('sched_hints')
+            hints = Element("os:scheduler_hints")
+            hints.add_attr('xmlns:os', XMLNS_11)
+            for attr in sched_hints:
+                p1 = Element(attr)
+                p1.append(sched_hints[attr])
+                hints.append(p1)
+            server.append(hints)
         resp, body = self.post('servers', str(Document(server)))
         server = self._parse_server(etree.fromstring(body))
         return resp, server

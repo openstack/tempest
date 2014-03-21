@@ -185,6 +185,16 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         resp, server_body = self.client.inject_network_info(server['id'])
         self.assertEqual(202, resp.status)
 
+    @test.attr(type='gate')
+    def test_create_server_with_scheduling_hint(self):
+        # Create a server with scheduler hints.
+        hints = {
+            'same_host': self.s1_id
+        }
+        resp, server = self.create_test_server(sched_hints=hints,
+                                               wait_until='ACTIVE')
+        self.assertEqual('202', resp['status'])
+
 
 class ServersAdminTestXML(ServersAdminTestJSON):
     _host_key = (
