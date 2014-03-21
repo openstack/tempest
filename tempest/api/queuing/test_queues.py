@@ -35,3 +35,26 @@ class TestQueues(base.BaseQueuingTest):
 
         self.assertEqual('201', resp['status'])
         self.assertEqual('', body)
+
+
+class TestManageQueue(base.BaseQueuingTest):
+    _interface = 'json'
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestManageQueue, cls).setUpClass()
+        cls.queue_name = data_utils.rand_name('Queues-Test')
+        # Create Queue
+        cls.client.create_queue(cls.queue_name)
+
+    @test.attr(type='smoke')
+    def test_delete_queue(self):
+        # Delete Queue
+        resp, body = self.delete_queue(self.queue_name)
+        self.assertEqual('204', resp['status'])
+        self.assertEqual('', body)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.delete_queue(cls.queue_name)
+        super(TestManageQueue, cls).tearDownClass()

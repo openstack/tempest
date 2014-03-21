@@ -47,3 +47,9 @@ class BaseQueuingTest(test.BaseTestCase):
         """Wrapper utility that returns a test queue."""
         resp, body = cls.client.create_queue(queue_name)
         return resp, body
+
+    @classmethod
+    def delete_queue(cls, queue_name):
+        """Wrapper utility that returns a test queue."""
+        resp, body = cls.client.delete_queue(queue_name)
+        return resp, body
