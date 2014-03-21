@@ -151,10 +151,10 @@ create_image_enabled = true
 # For resize to work with libvirt/kvm, one of the following must be true:
 # Single node: allow_resize_to_same_host=True must be set in nova.conf
 # Cluster: the 'nova' user must have scp access between cluster nodes
-resize_available = true
+resize_available = false
 
 # Does the compute API support changing the admin password?
-change_password_available=true
+change_password_available=false
 
 # Run live migration tests (requires 2 hosts)
 live_migration_available = false

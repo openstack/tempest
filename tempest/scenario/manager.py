@@ -196,8 +196,11 @@ class OfficialClientTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(OfficialClientTest, cls).setUpClass()
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
-            __name__, tempest_client=False)
+        if cls.config.compute.allow_tenant_isolation:
+            cls.isolated_creds = isolated_creds.IsolatedCreds(
+                __name__, tempest_client=False)
+        else:
+            cls.isolated_creds = None
 
         username, tenant_name, password = cls.credentials()
 
@@ -260,7 +263,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
             # Block until resource deletion has completed or timed-out
             tempest.test.call_until_true(is_deletion_complete, 10, 1)
-        cls.isolated_creds.clear_isolated_creds()
+        if cls.isolated_creds:
+            cls.isolated_creds.clear_isolated_creds()
         super(OfficialClientTest, cls).tearDownClass()
 
     @classmethod
