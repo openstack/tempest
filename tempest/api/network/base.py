@@ -277,6 +277,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         """Wrapper utility that returns a router interface."""
         resp, interface = cls.client.add_router_interface_with_subnet_id(
             router_id, subnet_id)
+        return interface
 
     @classmethod
     def create_vpnservice(cls, subnet_id, router_id):
