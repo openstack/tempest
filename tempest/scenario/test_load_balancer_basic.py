@@ -215,6 +215,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         self.assertEqual(5, resp.count("server1\n"))
         self.assertEqual(5, resp.count("server2\n"))
 
+    @test.skip_because(bug='1295165')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
