@@ -16,6 +16,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute.v2 import images as schema
 from tempest.common import rest_client
 from tempest.common import waiters
 from tempest import config
@@ -74,6 +75,7 @@ class ImagesClientJSON(rest_client.RestClient):
         resp, body = self.get("images/%s" % str(image_id))
         self.expected_success(200, resp)
         body = json.loads(body)
+        self.validate_response(schema.get_image, resp, body)
         return resp, body['image']
 
     def delete_image(self, image_id):
