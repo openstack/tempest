@@ -15,6 +15,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute import hosts as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -36,6 +37,7 @@ class HostsClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_hosts, resp, body)
         return resp, body['hosts']
 
     def show_host_detail(self, hostname):
