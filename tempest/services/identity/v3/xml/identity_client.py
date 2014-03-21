@@ -52,6 +52,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
                 array.append(common.xml_to_json(child))
         return array
 
+    def _parse_groups(self, node):
+        array = []
+        for child in node.getchildren():
+            tag_list = child.tag.split('}', 1)
+            if tag_list[1] == "group":
+                array.append(common.xml_to_json(child))
+        return array
+
     def _parse_group_users(self, node):
         array = []
         for child in node.getchildren():
@@ -340,6 +348,12 @@ class IdentityV3ClientXML(rest_client.RestClient):
         """List users in group."""
         resp, body = self.get('groups/%s/users' % group_id)
         body = self._parse_group_users(etree.fromstring(body))
+        return resp, body
+
+    def list_user_groups(self, user_id):
+        """Lists the groups which a user belongs to."""
+        resp, body = self.get('users/%s/groups' % user_id)
+        body = self._parse_groups(etree.fromstring(body))
         return resp, body
 
     def delete_group_user(self, group_id, user_id):

@@ -297,6 +297,12 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['users']
 
+    def list_user_groups(self, user_id):
+        """Lists groups which a user belongs to."""
+        resp, body = self.get('users/%s/groups' % user_id)
+        body = json.loads(body)
+        return resp, body['groups']
+
     def delete_group_user(self, group_id, user_id):
         """Delete user in group."""
         resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id))

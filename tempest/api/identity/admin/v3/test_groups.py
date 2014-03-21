@@ -68,7 +68,7 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         # list users in group
         resp, group_users = self.client.list_group_users(group['id'])
         self.assertEqual(resp['status'], '200')
-        self.assertEqual(users.sort(), group_users.sort())
+        self.assertEqual(sorted(users), sorted(group_users))
         # delete user in group
         for user in users:
             resp, body = self.client.delete_group_user(group['id'],
@@ -76,6 +76,27 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
             self.assertEqual(resp['status'], '204')
         resp, group_users = self.client.list_group_users(group['id'])
         self.assertEqual(len(group_users), 0)
+
+    @test.attr(type='smoke')
+    def test_list_user_groups(self):
+        # create a user
+        resp, user = self.client.create_user(
+            data_utils.rand_name('User-'),
+            password=data_utils.rand_name('Pass-'))
+        self.addCleanup(self.client.delete_user, user['id'])
+        # create two groups, and add user into them
+        groups = []
+        for i in range(2):
+            name = data_utils.rand_name('Group-')
+            resp, group = self.client.create_group(name)
+            groups.append(group)
+            self.addCleanup(self.client.delete_group, group['id'])
+            self.client.add_group_user(group['id'], user['id'])
+        # list groups which user belongs to
+        resp, user_groups = self.client.list_user_groups(user['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(sorted(groups), sorted(user_groups))
+        self.assertEqual(2, len(user_groups))
 
 
 class GroupsV3TestXML(GroupsV3TestJSON):
