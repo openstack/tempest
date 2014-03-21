@@ -138,21 +138,63 @@ def display_results(results):
                           "enabled extensions" % (service, extension))
 
 
-def check_service_availability(service):
-    if service == 'nova_v3':
-        service = 'nova'
-    return getattr(CONF.service_available, service)
+def check_service_availability(os):
+    services = []
+    avail_services = []
+    codename_match = {
+        'volume': 'cinder',
+        'network': 'neutron',
+        'image': 'glance',
+        'object_storage': 'swift',
+        'compute': 'nova',
+        'orchestration': 'heat',
+        'metering': 'ceilometer',
+        'telemetry': 'ceilometer',
+        'data_processing': 'savanna',
+        'baremetal': 'ironic',
+        'identity': 'keystone'
+
+    }
+    # Get catalog list for endpoints to use for validation
+    __, endpoints = os.endpoints_client.list_endpoints()
+    for endpoint in endpoints:
+        __, service = os.service_client.get_service(endpoint['service_id'])
+        services.append(service['type'])
+    # Pull all catalog types from config file and compare against endpoint list
+    for cfgname in dir(CONF._config):
+        cfg = getattr(CONF, cfgname)
+        catalog_type = getattr(cfg, 'catalog_type', None)
+        if not catalog_type:
+            continue
+        else:
+            if cfgname == 'identity':
+                # Keystone is a required service for tempest
+                continue
+            if catalog_type not in services:
+                if getattr(CONF.service_available, codename_match[cfgname]):
+                    print('Endpoint type %s not found either disable service '
+                          '%s or fix the catalog_type in the config file' % (
+                          catalog_type, codename_match[cfgname]))
+            else:
+                if not getattr(CONF.service_available,
+                               codename_match[cfgname]):
+                    print('Endpoint type %s is available, service %s should be'
+                          ' set as available in the config file.' % (
+                          catalog_type, codename_match[cfgname]))
+                else:
+                    avail_services.append(codename_match[cfgname])
+    return avail_services
 
 
 def main(argv):
     print('Running config verification...')
     os = clients.ComputeAdminManager(interface='json')
+    services = check_service_availability(os)
     results = {}
     for service in ['nova', 'nova_v3', 'cinder', 'neutron', 'swift']:
-        # TODO(mtreinish) make this a keystone endpoint check for available
-        # services
-        if not check_service_availability(service):
-            print("%s is not available" % service)
+        if service == 'nova_v3' and 'nova' not in services:
+            continue
+        elif service not in services:
             continue
         results = verify_extensions(os, service, results)
     verify_glance_api_versions(os)
