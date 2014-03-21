@@ -18,6 +18,7 @@ import netaddr
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
 from tempest.test import attr
 
 CONF = config.CONF
@@ -43,6 +44,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
         port update
         network update
         subnet update
+        delete a network also deletes its subnets
+        create a port with no IP address associated with it
 
         All subnet tests are run once with ipv4 and once with ipv6.
 
@@ -182,6 +185,67 @@ class NetworksTestJSON(base.BaseNetworkTest):
         for subnet in subnets:
             self.assertEqual(len(subnet), 1)
             self.assertIn('id', subnet)
+
+    def _try_delete_network(self, net_id):
+        # delete network, if it exists
+        try:
+            self.client.delete_network(net_id)
+        # if network is not found, this means it was deleted in the test
+        except exceptions.NotFound:
+            pass
+
+    @attr(type='smoke')
+    def test_delete_network_with_subnet(self):
+        # Creates a network
+        name = data_utils.rand_name('network-')
+        resp, body = self.client.create_network(name=name)
+        self.assertEqual('201', resp['status'])
+        network = body['network']
+        net_id = network['id']
+        self.addCleanup(self._try_delete_network, net_id)
+
+        # Find a cidr that is not in use yet and create a subnet with it
+        subnet = self.create_subnet(network)
+        subnet_id = subnet['id']
+
+        # Delete network while the subnet still exists
+        resp, body = self.client.delete_network(net_id)
+        self.assertEqual('204', resp['status'])
+
+        # Verify that the subnet got automatically deleted.
+        self.assertRaises(exceptions.NotFound, self.client.show_subnet,
+                          subnet_id)
+
+        # Since create_subnet adds the subnet to the delete list, and it is
+        # is actually deleted here - this will create and issue, hence remove
+        # it from the list.
+        self.subnets.pop()
+
+    @attr(type='smoke')
+    def test_create_port_with_no_ip(self):
+        # For this test create a new network - do not use any previously
+        # created networks.
+        name = data_utils.rand_name('network-nosubnet-')
+        resp, body = self.client.create_network(name=name)
+        self.assertEqual('201', resp['status'])
+        network = body['network']
+        net_id = network['id']
+        self.networks.append(network)
+
+        # Now create a port for this network - without creating any
+        # subnets for this network - this ensures no IP for the port
+        resp, body = self.client.create_port(network_id=net_id)
+        self.assertEqual('201', resp['status'])
+        port = body['port']
+        port_id = port['id']
+        self.addCleanup(self.client.delete_port, port_id)
+
+        # Verify that the port does not have any IP address
+        resp, body = self.client.show_port(port_id)
+        self.assertEqual('200', resp['status'])
+        port_resp = body['port']
+        self.assertEqual(port_id, port_resp['id'])
+        self.assertEqual(port_resp['fixed_ips'], [])
 
 
 class NetworksTestXML(NetworksTestJSON):
