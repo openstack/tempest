@@ -15,13 +15,14 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(RolesV3TestJSON, cls).setUpClass()
         cls.fetched_role_ids = list()
@@ -68,7 +69,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(len(body), 1)
         self.assertIn(role_id, fetched_role_ids)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_role_create_update_get(self):
         r_name = data_utils.rand_name('Role-')
         resp, role = self.client.create_role(r_name)
@@ -90,7 +91,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_name, new_role['name'])
         self.assertEqual(updated_role['id'], new_role['id'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_user_on_project(self):
         resp, _ = self.client.assign_user_role_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
@@ -109,7 +110,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             self.project['id'], self.user_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_user_on_domain(self):
         resp, _ = self.client.assign_user_role_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
@@ -128,7 +129,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             self.domain['id'], self.user_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_group_on_project(self):
         resp, _ = self.client.assign_group_role_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
@@ -147,7 +148,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
             self.project['id'], self.group_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_group_on_domain(self):
         resp, _ = self.client.assign_group_role_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])

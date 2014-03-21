@@ -15,13 +15,14 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(CredentialsTestJSON, cls).setUpClass()
         cls.projects = list()
@@ -56,7 +57,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
         resp, body = self.creds_client.delete_credential(cred_id)
         self.assertEqual(resp['status'], '204')
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_credentials_create_get_update_delete(self):
         keys = [data_utils.rand_name('Access-'),
                 data_utils.rand_name('Secret-')]
@@ -91,7 +92,7 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             self.assertEqual(update_body['blob'][value2],
                              get_body['blob'][value2])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_credentials_list_delete(self):
         created_cred_ids = list()
         fetched_cred_ids = list()

@@ -17,13 +17,14 @@ from six import moves
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class RolesTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(RolesTestJSON, cls).setUpClass()
         for _ in moves.xrange(5):
@@ -46,7 +47,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
                 found = True
         self.assertTrue(found, "assigned role was not in list")
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_roles(self):
         # Return a list of all roles
         resp, body = self.client.list_roles()
@@ -54,7 +55,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertTrue(any(found))
         self.assertEqual(len(found), len(self.data.roles))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_role_create_delete(self):
         # Role should be created, verified, and deleted
         role_name = data_utils.rand_name(name='role-test-')
@@ -75,7 +76,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         found = [role for role in body if role['name'] == role_name]
         self.assertFalse(any(found))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_assign_user_role(self):
         # Assign a role to a user on a tenant
         (user, tenant, role) = self._get_role_params()
@@ -83,7 +84,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         resp, roles = self.client.list_user_roles(tenant['id'], user['id'])
         self.assert_role_in_role_list(role, roles)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_remove_user_role(self):
         # Remove a role assigned to a user on a tenant
         (user, tenant, role) = self._get_role_params()
@@ -93,7 +94,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
                                                   user_role['id'])
         self.assertEqual(resp['status'], '204')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_user_roles(self):
         # List roles assigned to a user on tenant
         (user, tenant, role) = self._get_role_params()
