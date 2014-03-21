@@ -61,9 +61,11 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
             self.demo_tenant_id,
             **new_quota_set)
 
-        default_quota_set.pop('id')
+        cleanup_quota_set = dict(
+            (k, v) for k, v in default_quota_set.iteritems()
+            if k in QUOTA_KEYS)
         self.addCleanup(self.quotas_client.update_quota_set,
-                        self.demo_tenant_id, **default_quota_set)
+                        self.demo_tenant_id, **cleanup_quota_set)
         self.assertEqual(200, resp.status)
         # test that the specific values we set are actually in
         # the final result. There is nothing here that ensures there
