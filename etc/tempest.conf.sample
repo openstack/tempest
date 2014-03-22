@@ -347,6 +347,9 @@
 # Does the test environment support resizing? (boolean value)
 #resize=false
 
+# Does the test environment support pausing? (boolean value)
+#pause=true
+
 # Does the test environment support live migration available?
 # (boolean value)
 #live_migration=false
