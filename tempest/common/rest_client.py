@@ -197,26 +197,26 @@ class RestClient(object):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 
-    def post(self, url, body, headers=None):
-        return self.request('POST', url, headers, body)
+    def post(self, url, body, headers=None, extra_headers=False):
+        return self.request('POST', url, extra_headers, headers, body)
 
-    def get(self, url, headers=None):
-        return self.request('GET', url, headers)
+    def get(self, url, headers=None, extra_headers=False):
+        return self.request('GET', url, extra_headers, headers)
 
-    def delete(self, url, headers=None, body=None):
-        return self.request('DELETE', url, headers, body)
+    def delete(self, url, headers=None, body=None, extra_headers=False):
+        return self.request('DELETE', url, extra_headers, headers, body)
 
-    def patch(self, url, body, headers=None):
-        return self.request('PATCH', url, headers, body)
+    def patch(self, url, body, headers=None, extra_headers=False):
+        return self.request('PATCH', url, extra_headers, headers, body)
 
-    def put(self, url, body, headers=None):
-        return self.request('PUT', url, headers, body)
+    def put(self, url, body, headers=None, extra_headers=False):
+        return self.request('PUT', url, extra_headers, headers, body)
 
-    def head(self, url, headers=None):
-        return self.request('HEAD', url, headers)
+    def head(self, url, headers=None, extra_headers=False):
+        return self.request('HEAD', url, extra_headers, headers)
 
-    def copy(self, url, headers=None):
-        return self.request('COPY', url, headers)
+    def copy(self, url, headers=None, extra_headers=False):
+        return self.request('COPY', url, extra_headers, headers)
 
     def get_versions(self):
         resp, body = self.get('')
@@ -389,13 +389,22 @@ class RestClient(object):
 
         return resp, resp_body
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
+        # if extra_headers is True
+        # default headers would be added to headers
         retry = 0
 
         if headers is None:
             # NOTE(vponomaryov): if some client do not need headers,
             # it should explicitly pass empty dict
             headers = self.get_headers()
+        elif extra_headers:
+            try:
+                headers = headers.copy()
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = self.get_headers()
 
         resp, resp_body = self._request(method, url,
                                         headers=headers, body=body)

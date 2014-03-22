@@ -269,13 +269,20 @@ class TokenClientJSON(IdentityClientJSON):
 
         return resp, body['access']
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
         """A simple HTTP request interface."""
         if headers is None:
             # Always accept 'json', for TokenClientXML too.
             # Because XML response is not easily
             # converted to the corresponding JSON one
             headers = self.get_headers(accept_type="json")
+        elif extra_headers:
+            try:
+                headers.update(self.get_headers(accept_type="json"))
+            except (ValueError, TypeError):
+                headers = self.get_headers(accept_type="json")
+
         resp, resp_body = self.http_obj.request(url, method,
                                                 headers=headers, body=body)
         self._log_request(method, url, resp)

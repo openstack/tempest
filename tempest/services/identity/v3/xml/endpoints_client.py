@@ -46,12 +46,19 @@ class EndPointClientXML(rest_client.RestClient):
         json = common.xml_to_json(body)
         return json
 
-    def request(self, method, url, headers=None, body=None, wait=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None, wait=None):
         """Overriding the existing HTTP request in super class RestClient."""
+        if extra_headers:
+            try:
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = self.get_headers()
         dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
         return super(EndPointClientXML, self).request(method, url,
+                                                      extra_headers,
                                                       headers=headers,
                                                       body=body)
 
