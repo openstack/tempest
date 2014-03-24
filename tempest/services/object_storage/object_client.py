@@ -160,11 +160,10 @@ class ObjectClientCustomizedHeader(rest_client.RestClient):
             filters=self.filters
         )
         # Use original method
-        self._log_request(method, req_url, headers, body)
         resp, resp_body = self.http_obj.request(req_url, method,
                                                 headers=req_headers,
                                                 body=req_body)
-        self._log_response(resp, resp_body)
+        self._log_request(method, req_url, resp)
         if resp.status == 401 or resp.status == 403:
             raise exceptions.Unauthorized()
 

@@ -15,7 +15,6 @@
 #    under the License.
 
 import collections
-import hashlib
 import json
 from lxml import etree
 import re
@@ -224,44 +223,20 @@ class RestClient(object):
         versions = map(lambda x: x['id'], body)
         return resp, versions
 
-    def _log_request(self, method, req_url, headers, body):
-        self.LOG.info('Request: ' + method + ' ' + req_url)
-        if headers:
-            print_headers = headers
-            if 'X-Auth-Token' in headers and headers['X-Auth-Token']:
-                token = headers['X-Auth-Token']
-                if len(token) > 64 and TOKEN_CHARS_RE.match(token):
-                    print_headers = headers.copy()
-                    print_headers['X-Auth-Token'] = "<Token omitted>"
-            self.LOG.debug('Request Headers: ' + str(print_headers))
-        if body:
-            str_body = str(body)
-            length = len(str_body)
-            self.LOG.debug('Request Body: ' + str_body[:2048])
-            if length >= 2048:
-                self.LOG.debug("Large body (%d) md5 summary: %s", length,
-                               hashlib.md5(str_body).hexdigest())
+    def _get_request_id(self, resp):
+        for i in ('x-openstack-request-id', 'x-compute-request-id'):
+            if i in resp:
+                return resp[i]
+        return ""
 
-    def _log_response(self, resp, resp_body):
-        status = resp['status']
-        self.LOG.info("Response Status: " + status)
-        headers = resp.copy()
-        del headers['status']
-        if headers.get('x-compute-request-id'):
-            self.LOG.info("Nova/Cinder request id: %s" %
-                          headers.pop('x-compute-request-id'))
-        elif headers.get('x-openstack-request-id'):
-            self.LOG.info("OpenStack request id %s" %
-                          headers.pop('x-openstack-request-id'))
-        if len(headers):
-            self.LOG.debug('Response Headers: ' + str(headers))
-        if resp_body:
-            str_body = str(resp_body)
-            length = len(str_body)
-            self.LOG.debug('Response Body: ' + str_body[:2048])
-            if length >= 2048:
-                self.LOG.debug("Large body (%d) md5 summary: %s", length,
-                               hashlib.md5(str_body).hexdigest())
+    def _log_request(self, method, req_url, resp):
+        extra = dict(request_id=self._get_request_id(resp))
+        self.LOG.info(
+            'Request: %s %s %s' % (
+                resp['status'],
+                method,
+                req_url),
+            extra=extra)
 
     def _parse_resp(self, body):
         if self._get_type() is "json":
@@ -340,11 +315,11 @@ class RestClient(object):
         # Authenticate the request with the auth provider
         req_url, req_headers, req_body = self.auth_provider.auth_request(
             method, url, headers, body, self.filters)
-        self._log_request(method, req_url, req_headers, req_body)
+
         # Do the actual request
         resp, resp_body = self.http_obj.request(
             req_url, method, headers=req_headers, body=req_body)
-        self._log_response(resp, resp_body)
+        self._log_request(method, req_url, resp)
         # Verify HTTP response codes
         self.response_checker(method, url, req_headers, req_body, resp,
                               resp_body)

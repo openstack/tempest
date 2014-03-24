@@ -43,7 +43,7 @@ class BaseRestClientTestClass(base.TestCase):
         self.useFixture(mockpatch.PatchObject(self.rest_client, '_get_region',
                                               side_effect=self._get_region()))
         self.useFixture(mockpatch.PatchObject(self.rest_client,
-                                              '_log_response'))
+                                              '_log_request'))
 
 
 class TestRestClientHTTPMethods(BaseRestClientTestClass):
