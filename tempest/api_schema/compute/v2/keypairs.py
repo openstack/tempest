@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api_schema.compute import keypairs
+
 get_keypair = {
     'status_code': [200],
     'response_body': {
@@ -44,4 +46,13 @@ get_keypair = {
         },
         'required': ['keypair']
     }
+}
+
+create_keypair = {
+    'status_code': [200],
+    'response_body': keypairs.create_keypair
+}
+
+delete_keypair = {
+    'status_code': [202],
 }

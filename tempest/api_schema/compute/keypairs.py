@@ -39,3 +39,27 @@ list_keypairs = {
         'required': ['keypairs']
     }
 }
+
+create_keypair = {
+    'type': 'object',
+    'properties': {
+        'keypair': {
+            'type': 'object',
+            'properties': {
+                'fingerprint': {'type': 'string'},
+                'name': {'type': 'string'},
+                'public_key': {'type': 'string'},
+                # NOTE: Now the type of 'user_id' is integer, but here
+                # allows 'string' also because we will be able to change
+                # it to 'uuid' in the future.
+                'user_id': {'type': ['integer', 'string']},
+                'private_key': {'type': 'string'}
+            },
+            # When create keypair API is being called with 'Public key'
+            # (Importing keypair) then, response body does not contain
+            # 'private_key' So it is not defined as 'required'
+            'required': ['fingerprint', 'name', 'public_key', 'user_id']
+        }
+    },
+    'required': ['keypair']
+}

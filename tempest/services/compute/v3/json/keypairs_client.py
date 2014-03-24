@@ -53,7 +53,10 @@ class KeyPairsV3ClientJSON(rest_client.RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post("keypairs", body=post_body)
         body = json.loads(body)
+        self.validate_response(schema.create_keypair, resp, body)
         return resp, body['keypair']
 
     def delete_keypair(self, key_name):
-        return self.delete("keypairs/%s" % str(key_name))
+        resp, body = self.delete("keypairs/%s" % str(key_name))
+        self.validate_response(schema.delete_keypair, resp, body)
+        return resp, body
