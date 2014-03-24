@@ -58,6 +58,7 @@ class ImagesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_images, resp, body)
         return resp, body['images']
 
     def list_images_with_detail(self, params=None):

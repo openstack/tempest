@@ -79,3 +79,38 @@ get_image = {
         'required': ['image']
     }
 }
+
+list_images = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'images': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'string'},
+                        'links': {
+                            'type': 'array',
+                            'items': {
+                                'type': 'object',
+                                'properties': {
+                                    'href': {
+                                        'type': 'string',
+                                        'format': 'uri'
+                                    },
+                                    'rel': {'type': 'string'}
+                                },
+                                'required': ['href', 'rel']
+                            }
+                        },
+                        'name': {'type': 'string'}
+                    },
+                    'required': ['id', 'links', 'name']
+                }
+            }
+        },
+        'required': ['images']
+    }
+}
