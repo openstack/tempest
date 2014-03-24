@@ -64,6 +64,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
         """Deletes the provided floating IP from the project."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.delete(url)
+        self.validate_response(schema.add_remove_floating_ip, resp, body)
         return resp, body
 
     def associate_floating_ip_to_server(self, floating_ip, server_id):
@@ -77,6 +78,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
 
         post_body = json.dumps(post_body)
         resp, body = self.post(url, post_body)
+        self.validate_response(schema.add_remove_floating_ip, resp, body)
         return resp, body
 
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
@@ -90,6 +92,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
 
         post_body = json.dumps(post_body)
         resp, body = self.post(url, post_body)
+        self.validate_response(schema.add_remove_floating_ip, resp, body)
         return resp, body
 
     def is_resource_deleted(self, id):
@@ -107,4 +110,5 @@ class FloatingIPsClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.floating_ip_pools, resp, body)
         return resp, body['floating_ip_pools']

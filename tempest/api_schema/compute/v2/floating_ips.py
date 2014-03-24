@@ -74,3 +74,27 @@ floating_ip = {
         'required': ['floating_ip']
     }
 }
+
+floating_ip_pools = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'floating_ip_pools': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'name': {'type': 'string'}
+                    },
+                    'required': ['name']
+                }
+            }
+        },
+        'required': ['floating_ip_pools']
+    }
+}
+
+add_remove_floating_ip = {
+    'status_code': [202]
+}
