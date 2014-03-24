@@ -14,10 +14,15 @@
 
 import uuid
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest.test import attr
+
+CONF = config.CONF
 
 
 class ServersAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
@@ -119,6 +124,8 @@ class ServersAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
                           self.client.migrate_server,
                           str(uuid.uuid4()))
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
     @attr(type=['negative', 'gate'])
     def test_migrate_server_invalid_state(self):
         # create server.
