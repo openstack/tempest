@@ -24,14 +24,10 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumesSnapshotTest, cls).setUpClass()
-        try:
-            cls.volume_origin = cls.create_volume()
-        except Exception:
-            LOG.exception("setup failed")
-            cls.tearDownClass()
-            raise
+        cls.volume_origin = cls.create_volume()
 
     @classmethod
     def tearDownClass(cls):

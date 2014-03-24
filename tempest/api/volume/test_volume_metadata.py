@@ -23,15 +23,12 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumeMetadataTest, cls).setUpClass()
         # Create a volume
         cls.volume = cls.create_volume()
         cls.volume_id = cls.volume['id']
-
-    @classmethod
-    def tearDownClass(cls):
-        super(VolumeMetadataTest, cls).tearDownClass()
 
     def tearDown(self):
         # Update the metadata to {}

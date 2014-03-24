@@ -25,10 +25,10 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumeMultiBackendTest, cls).setUpClass()
         if not CONF.volume_feature_enabled.multi_backend:
-            cls.tearDownClass()
             raise cls.skipException("Cinder multi-backend feature disabled")
 
         cls.backend1_name = CONF.volume.backend1_name
@@ -37,39 +37,35 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
         cls.volume_client = cls.os_adm.volumes_client
         cls.volume_type_id_list = []
         cls.volume_id_list = []
-        try:
-            # Volume/Type creation (uses backend1_name)
-            type1_name = data_utils.rand_name('Type-')
-            vol1_name = data_utils.rand_name('Volume-')
-            extra_specs1 = {"volume_backend_name": cls.backend1_name}
-            resp, cls.type1 = cls.client.create_volume_type(
-                type1_name, extra_specs=extra_specs1)
-            cls.volume_type_id_list.append(cls.type1['id'])
 
-            resp, cls.volume1 = cls.volume_client.create_volume(
-                size=1, display_name=vol1_name, volume_type=type1_name)
-            cls.volume_id_list.append(cls.volume1['id'])
-            cls.volume_client.wait_for_volume_status(cls.volume1['id'],
+        # Volume/Type creation (uses backend1_name)
+        type1_name = data_utils.rand_name('Type-')
+        vol1_name = data_utils.rand_name('Volume-')
+        extra_specs1 = {"volume_backend_name": cls.backend1_name}
+        resp, cls.type1 = cls.client.create_volume_type(
+            type1_name, extra_specs=extra_specs1)
+        cls.volume_type_id_list.append(cls.type1['id'])
+
+        resp, cls.volume1 = cls.volume_client.create_volume(
+            size=1, display_name=vol1_name, volume_type=type1_name)
+        cls.volume_id_list.append(cls.volume1['id'])
+        cls.volume_client.wait_for_volume_status(cls.volume1['id'],
+                                                 'available')
+
+        if cls.backend1_name != cls.backend2_name:
+            # Volume/Type creation (uses backend2_name)
+            type2_name = data_utils.rand_name('Type-')
+            vol2_name = data_utils.rand_name('Volume-')
+            extra_specs2 = {"volume_backend_name": cls.backend2_name}
+            resp, cls.type2 = cls.client.create_volume_type(
+                type2_name, extra_specs=extra_specs2)
+            cls.volume_type_id_list.append(cls.type2['id'])
+
+            resp, cls.volume2 = cls.volume_client.create_volume(
+                size=1, display_name=vol2_name, volume_type=type2_name)
+            cls.volume_id_list.append(cls.volume2['id'])
+            cls.volume_client.wait_for_volume_status(cls.volume2['id'],
                                                      'available')
-
-            if cls.backend1_name != cls.backend2_name:
-                # Volume/Type creation (uses backend2_name)
-                type2_name = data_utils.rand_name('Type-')
-                vol2_name = data_utils.rand_name('Volume-')
-                extra_specs2 = {"volume_backend_name": cls.backend2_name}
-                resp, cls.type2 = cls.client.create_volume_type(
-                    type2_name, extra_specs=extra_specs2)
-                cls.volume_type_id_list.append(cls.type2['id'])
-
-                resp, cls.volume2 = cls.volume_client.create_volume(
-                    size=1, display_name=vol2_name, volume_type=type2_name)
-                cls.volume_id_list.append(cls.volume2['id'])
-                cls.volume_client.wait_for_volume_status(cls.volume2['id'],
-                                                         'available')
-        except Exception as e:
-            LOG.exception("setup failed: %s" % e)
-            cls.tearDownClass()
-            raise
 
     @classmethod
     def tearDownClass(cls):
