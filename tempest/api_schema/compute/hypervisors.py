@@ -97,3 +97,53 @@ common_list_hypervisors_detail = {
         'required': ['hypervisors']
     }
 }
+
+common_show_hypervisor = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'hypervisor': {
+                'type': 'object',
+                'properties': {
+                    'cpu_info': {'type': 'string'},
+                    'current_workload': {'type': 'integer'},
+                    'disk_available_least': {'type': 'integer'},
+                    'host_ip': {
+                        'type': 'string',
+                        'format': 'ip-address'
+                    },
+                    'free_disk_gb': {'type': 'integer'},
+                    'free_ram_mb': {'type': 'integer'},
+                    'hypervisor_hostname': {'type': 'string'},
+                    'hypervisor_type': {'type': 'string'},
+                    'hypervisor_version': {'type': 'integer'},
+                    'id': {'type': ['integer', 'string']},
+                    'local_gb': {'type': 'integer'},
+                    'local_gb_used': {'type': 'integer'},
+                    'memory_mb': {'type': 'integer'},
+                    'memory_mb_used': {'type': 'integer'},
+                    'running_vms': {'type': 'integer'},
+                    'service': {
+                        'type': 'object',
+                        'properties': {
+                            'host': {'type': 'string'},
+                            'id': {'type': ['integer', 'string']}
+                        },
+                        'required': ['host', 'id']
+                    },
+                    'vcpus': {'type': 'integer'},
+                    'vcpus_used': {'type': 'integer'}
+                },
+                'required': ['cpu_info', 'current_workload',
+                             'disk_available_least', 'host_ip',
+                             'free_disk_gb', 'free_ram_mb',
+                             'hypervisor_hostname', 'hypervisor_type',
+                             'hypervisor_version', 'id', 'local_gb',
+                             'local_gb_used', 'memory_mb', 'memory_mb_used',
+                             'running_vms', 'service', 'vcpus', 'vcpus_used']
+            }
+        },
+        'required': ['hypervisor']
+    }
+}
