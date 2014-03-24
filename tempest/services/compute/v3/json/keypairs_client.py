@@ -15,6 +15,7 @@
 
 import json
 
+from tempest.api_schema.compute.v3 import keypairs as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -40,6 +41,7 @@ class KeyPairsV3ClientJSON(rest_client.RestClient):
     def get_keypair(self, key_name):
         resp, body = self.get("keypairs/%s" % str(key_name))
         body = json.loads(body)
+        self.validate_response(schema.get_keypair, resp, body)
         return resp, body['keypair']
 
     def create_keypair(self, name, pub_key=None):
