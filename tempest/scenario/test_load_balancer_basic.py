@@ -71,6 +71,21 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def _create_security_groups(self):
         self.security_groups[self.tenant_id] =\
             self._create_security_group_neutron(tenant_id=self.tenant_id)
+        self._create_security_group_rules_for_port(self.port1)
+        self._create_security_group_rules_for_port(self.port2)
+
+    def _create_security_group_rules_for_port(self, port):
+        rule = {
+            'direction': 'ingress',
+            'protocol': 'tcp',
+            'port_range_min': port,
+            'port_range_max': port,
+        }
+        self._create_security_group_rule(
+            client=self.network_client,
+            secgroup=self.security_groups[self.tenant_id],
+            tenant_id=self.tenant_id,
+            **rule)
 
     def _create_server(self):
         tenant_id = self.tenant_id
@@ -215,7 +230,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         self.assertEqual(5, resp.count("server1\n"))
         self.assertEqual(5, resp.count("server2\n"))
 
-    @test.skip_because(bug='1295165')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
