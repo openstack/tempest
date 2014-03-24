@@ -114,25 +114,19 @@ class ClientTestBase(tempest.test.BaseTestCase):
         cmd = ' '.join([os.path.join(CONF.cli.cli_dir, cmd),
                         flags, action, params])
         LOG.info("running: '%s'" % cmd)
-        cmd_str = cmd
         cmd = shlex.split(cmd)
         result = ''
         result_err = ''
-        try:
-            stdout = subprocess.PIPE
-            stderr = subprocess.STDOUT if merge_stderr else subprocess.PIPE
-            proc = subprocess.Popen(
-                cmd, stdout=stdout, stderr=stderr)
-            result, result_err = proc.communicate()
-            if not fail_ok and proc.returncode != 0:
-                raise CommandFailed(proc.returncode,
-                                    cmd,
-                                    result,
-                                    stderr=result_err)
-        finally:
-            LOG.debug('output of %s:\n%s' % (cmd_str, result))
-            if not merge_stderr and result_err:
-                LOG.debug('error output of %s:\n%s' % (cmd_str, result_err))
+        stdout = subprocess.PIPE
+        stderr = subprocess.STDOUT if merge_stderr else subprocess.PIPE
+        proc = subprocess.Popen(
+            cmd, stdout=stdout, stderr=stderr)
+        result, result_err = proc.communicate()
+        if not fail_ok and proc.returncode != 0:
+            raise CommandFailed(proc.returncode,
+                                cmd,
+                                result,
+                                stderr=result_err)
         return result
 
     def assertTableStruct(self, items, field_names):
