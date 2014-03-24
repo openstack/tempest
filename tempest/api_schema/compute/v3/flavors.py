@@ -39,3 +39,30 @@ set_flavor_extra_specs['status_code'] = [201]
 unset_flavor_extra_specs = {
     'status_code': [204]
 }
+
+get_flavor_details = copy.deepcopy(flavors.common_flavor_details)
+
+# NOTE- In v3 API, 'swap' comes as '0' not empty string '""'
+# (In V2 API, it comes as empty string) So leaving 'swap'as integer type only.
+
+# Defining extra attributes for V3 flavor schema
+get_flavor_details['response_body']['properties']['flavor'][
+    'properties'].update({'disabled': {'type': 'boolean'},
+                          'ephemeral': {'type': 'integer'},
+                          'flavor-access:is_public': {'type': 'boolean'},
+                          'os-flavor-rxtx:rxtx_factor': {'type': 'number'}})
+
+# 'flavor-access' and 'os-flavor-rxtx' are API extensions.
+# So they are not 'required'.
+get_flavor_details['response_body']['properties']['flavor'][
+    'required'].extend(['disabled', 'ephemeral'])
+
+
+create_flavor_details = copy.deepcopy(get_flavor_details)
+
+# Overriding the status code for create flavor V3 API.
+create_flavor_details['status_code'] = [201]
+
+delete_flavor = {
+    'status_code': [204]
+}
