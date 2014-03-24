@@ -13,6 +13,7 @@
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -73,14 +74,14 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         for stack_identifier in cls.stacks:
             try:
                 cls.orchestration_client.delete_stack(stack_identifier)
-            except Exception:
+            except exceptions.NotFound:
                 pass
 
         for stack_identifier in cls.stacks:
             try:
                 cls.orchestration_client.wait_for_stack_status(
                     stack_identifier, 'DELETE_COMPLETE')
-            except Exception:
+            except exceptions.NotFound:
                 pass
 
     @classmethod
