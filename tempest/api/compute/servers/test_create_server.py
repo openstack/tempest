@@ -28,7 +28,6 @@ CONF = config.CONF
 
 
 class ServersTestJSON(base.BaseV2ComputeTest):
-    run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
     @classmethod
@@ -89,7 +88,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         found = any([i for i in servers if i['id'] == self.server['id']])
         self.assertTrue(found)
 
-    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
+    @testtools.skipUnless(CONF.compute.run_ssh,
+                          'Instance validation tests are disabled.')
     @test.attr(type='gate')
     def test_verify_created_server_vcpus(self):
         # Verify that the number of vcpus reported by the instance matches
@@ -99,7 +99,8 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                                   self.password)
         self.assertEqual(flavor['vcpus'], linux_client.get_number_of_vcpus())
 
-    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
+    @testtools.skipUnless(CONF.compute.run_ssh,
+                          'Instance validation tests are disabled.')
     @test.attr(type='gate')
     def test_host_name_is_same_as_server_name(self):
         # Verify the instance host name is the same as the server name
@@ -109,7 +110,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
-    run_ssh = CONF.compute.run_ssh
     disk_config = 'AUTO'
 
     @classmethod
@@ -135,7 +135,8 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
 
-    @testtools.skipIf(not run_ssh, 'Instance validation tests are disabled.')
+    @testtools.skipUnless(CONF.compute.run_ssh,
+                          'Instance validation tests are disabled.')
     @test.attr(type='gate')
     def test_verify_created_server_ephemeral_disk(self):
         # Verify that the ephemeral disk is created when creating server

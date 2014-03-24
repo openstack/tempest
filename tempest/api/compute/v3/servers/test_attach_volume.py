@@ -24,7 +24,6 @@ CONF = config.CONF
 
 
 class AttachVolumeV3Test(base.BaseV3ComputeTest):
-    run_ssh = CONF.compute.run_ssh
 
     def __init__(self, *args, **kwargs):
         super(AttachVolumeV3Test, self).__init__(*args, **kwargs)
@@ -76,7 +75,7 @@ class AttachVolumeV3Test(base.BaseV3ComputeTest):
         self.attached = True
         self.addCleanup(self._detach, server['id'], volume['id'])
 
-    @testtools.skipIf(not run_ssh, 'SSH required for this test')
+    @testtools.skipUnless(CONF.compute.run_ssh, 'SSH required for this test')
     @test.attr(type='gate')
     def test_attach_detach_volume(self):
         # Stop and Start a server with an attached volume, ensuring that
