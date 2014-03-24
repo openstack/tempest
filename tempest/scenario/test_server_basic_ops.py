@@ -99,42 +99,6 @@ class TestServerBasicOps(manager.OfficialClientTest):
                                       create_kwargs=create_kwargs)
         self.set_resource('instance', instance)
 
-    def pause_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Pausing instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.pause()
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'PAUSED')
-
-    def unpause_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Unpausing instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.unpause()
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
-
-    def suspend_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Suspending instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.suspend()
-        self.status_timeout(self.compute_client.servers,
-                            instance_id, 'SUSPENDED')
-
-    def resume_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Resuming instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.resume()
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
-
     def terminate_instance(self):
         instance = self.get_resource('instance')
         instance.delete()
@@ -163,9 +127,5 @@ class TestServerBasicOps(manager.OfficialClientTest):
         self.add_keypair()
         self.create_security_group()
         self.boot_instance()
-        self.pause_server()
-        self.unpause_server()
-        self.suspend_server()
-        self.resume_server()
         self.verify_ssh()
         self.terminate_instance()

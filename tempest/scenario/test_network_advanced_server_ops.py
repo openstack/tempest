@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
@@ -158,6 +160,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.server.rebuild(image_ref_alt)
         self._wait_server_status_and_check_network_connectivity()
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     @services('compute', 'network')
     def test_server_connectivity_pause_unpause(self):
         self.server.pause()
@@ -167,6 +171,8 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.server.unpause()
         self._wait_server_status_and_check_network_connectivity()
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
     @services('compute', 'network')
     def test_server_connectivity_suspend_resume(self):
         self.server.suspend()
@@ -176,11 +182,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.server.resume()
         self._wait_server_status_and_check_network_connectivity()
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize is not available.')
     @services('compute', 'network')
     def test_server_connectivity_resize(self):
-        if not CONF.compute_feature_enabled.resize:
-            msg = "Skipping test - resize not available on this host"
-            raise self.skipException(msg)
         resize_flavor = CONF.compute.flavor_ref_alt
         if resize_flavor == CONF.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
