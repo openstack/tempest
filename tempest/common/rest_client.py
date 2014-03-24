@@ -281,14 +281,22 @@ class RestClient(object):
                 return resp[i]
         return ""
 
-    def _log_request(self, method, req_url, resp):
+    def _log_request(self, method, req_url, resp, secs=""):
+        # if we have the request id, put it in the right part of the log
         extra = dict(request_id=self._get_request_id(resp))
+        # NOTE(sdague): while we still have 6 callers to this function
+        # we're going to just provide work around on who is actually
+        # providing timings by gracefully adding no content if they don't.
+        # Once we're down to 1 caller, clean this up.
+        if secs:
+            secs = " %.3fs" % secs
         self.LOG.info(
-            'Request (%s): %s %s %s' % (
+            'Request (%s): %s %s %s%s' % (
                 self._find_caller(),
                 resp['status'],
                 method,
-                req_url),
+                req_url,
+                secs),
             extra=extra)
 
     def _parse_resp(self, body):
@@ -369,10 +377,12 @@ class RestClient(object):
         req_url, req_headers, req_body = self.auth_provider.auth_request(
             method, url, headers, body, self.filters)
 
-        # Do the actual request
+        # Do the actual request, and time it
+        start = time.time()
         resp, resp_body = self.http_obj.request(
             req_url, method, headers=req_headers, body=req_body)
-        self._log_request(method, req_url, resp)
+        end = time.time()
+        self._log_request(method, req_url, resp, secs=(end - start))
         # Verify HTTP response codes
         self.response_checker(method, url, req_headers, req_body, resp,
                               resp_body)
