@@ -73,7 +73,10 @@ class TelemetryClientBase(object):
         return resp, body
 
     def put(self, uri, body):
-        return self.rest_client.put(uri, body)
+        body = self.serialize(body)
+        resp, body = self.rest_client.put(uri, body)
+        body = self.deserialize(body)
+        return resp, body
 
     def get(self, uri):
         resp, body = self.rest_client.get(uri)
@@ -133,3 +136,15 @@ class TelemetryClientBase(object):
     def create_alarm(self, **kwargs):
         uri = "%s/alarms" % self.uri_prefix
         return self.post(uri, kwargs)
+
+    def update_alarm(self, alarm_id, **kwargs):
+        uri = "%s/alarms/%s" % (self.uri_prefix, alarm_id)
+        return self.put(uri, kwargs)
+
+    def alarm_get_state(self, alarm_id):
+        uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
+        return self.get(uri)
+
+    def alarm_set_state(self, alarm_id, state):
+        uri = "%s/alarms/%s/state" % (self.uri_prefix, alarm_id)
+        return self.put(uri, state)
