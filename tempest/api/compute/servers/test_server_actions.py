@@ -29,7 +29,6 @@ CONF = config.CONF
 
 
 class ServerActionsTestJSON(base.BaseV2ComputeTest):
-    resize_available = CONF.compute_feature_enabled.resize
     run_ssh = CONF.compute.run_ssh
 
     def setUp(self):
@@ -184,7 +183,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             if current_flavor == self.flavor_ref else self.flavor_ref
         return current_flavor, new_flavor_ref
 
-    @testtools.skipIf(not resize_available, 'Resize not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @test.attr(type='smoke')
     def test_resize_server_confirm(self):
         # The server's RAM and disk space should be modified to that of
@@ -203,7 +203,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(new_flavor_ref, server['flavor']['id'])
 
-    @testtools.skipIf(not resize_available, 'Resize not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @test.attr(type='gate')
     def test_resize_server_revert(self):
         # The server's RAM and disk space should return to its original
