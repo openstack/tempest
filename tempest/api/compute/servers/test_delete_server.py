@@ -23,7 +23,6 @@ CONF = config.CONF
 
 
 class DeleteServersTestJSON(base.BaseV2ComputeTest):
-    pause_available = CONF.compute_feature_enabled.pause
 
     # NOTE: Server creations of each test class should be under 10
     # for preventing "Quota exceeded for instances"
@@ -59,7 +58,8 @@ class DeleteServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual('204', resp['status'])
         self.client.wait_for_server_termination(server['id'])
 
-    @testtools.skipIf(not pause_available, 'Pause is not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     @test.attr(type='gate')
     def test_delete_server_while_in_pause_state(self):
         # Delete a server while it's VM state is Pause
