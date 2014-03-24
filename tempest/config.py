@@ -794,6 +794,26 @@ DebugGroup = [
     cfg.BoolOpt('enable',
                 default=True,
                 help="Enable diagnostic commands"),
+    cfg.StrOpt('trace_requests',
+               default='',
+               help="""A regex to determine which requests should be traced.
+
+This is a regex to match the caller for rest client requests to be able to
+selectively trace calls out of specific classes and methods. It largely
+exists for test development, and is not expected to be used in a real deploy
+of tempest. This will be matched against the discovered ClassName:method
+in the test environment.
+
+Expected values for this field are:
+
+ * ClassName:test_method_name - traces one test_method
+ * ClassName:setUp(Class) - traces specific setup functions
+ * ClassName:tearDown(Class) - traces specific teardown functions
+ * ClassName:_run_cleanups - traces the cleanup functions
+
+If nothing is specified, this feature is not enabled. To trace everything
+specify .* as the regex.
+""")
 ]
 
 input_scenario_group = cfg.OptGroup(name="input-scenario",
