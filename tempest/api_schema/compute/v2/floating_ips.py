@@ -44,3 +44,33 @@ list_floating_ips = {
         'required': ['floating_ips']
     }
 }
+
+floating_ip = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'floating_ip': {
+                'type': 'object',
+                'properties': {
+                    # NOTE: Now the type of 'id' is integer, but here allows
+                    # 'string' also because we will be able to change it to
+                    # 'uuid' in the future.
+                    'id': {'type': ['integer', 'string']},
+                    'pool': {'type': ['string', 'null']},
+                    'instance_id': {'type': ['integer', 'string', 'null']},
+                    'ip': {
+                        'type': 'string',
+                        'format': 'ip-address'
+                    },
+                    'fixed_ip': {
+                        'type': ['string', 'null'],
+                        'format': 'ip-address'
+                    }
+                },
+                'required': ['id', 'pool', 'instance_id', 'ip', 'fixed_ip']
+            }
+        },
+        'required': ['floating_ip']
+    }
+}

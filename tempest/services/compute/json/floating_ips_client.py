@@ -47,6 +47,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
         body = json.loads(body)
         if resp.status == 404:
             raise exceptions.NotFound(body)
+        self.validate_response(schema.floating_ip, resp, body)
         return resp, body['floating_ip']
 
     def create_floating_ip(self, pool_name=None):
@@ -56,6 +57,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.validate_response(schema.floating_ip, resp, body)
         return resp, body['floating_ip']
 
     def delete_floating_ip(self, floating_ip_id):
