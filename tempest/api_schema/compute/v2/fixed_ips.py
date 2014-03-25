@@ -34,3 +34,8 @@ fixed_ips = {
         'required': ['fixed_ip']
     }
 }
+
+fixed_ip_action = {
+    'status_code': [202],
+    'response_body': {'type': 'string'}
+}
