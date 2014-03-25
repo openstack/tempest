@@ -36,6 +36,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
         cls.os = os
         cls.orchestration_client = os.orchestration_client
+        cls.client = os.orchestration_client
         cls.servers_client = os.servers_client
         cls.keypairs_client = os.keypairs_client
         cls.network_client = os.network_client
@@ -73,13 +74,13 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def clear_stacks(cls):
         for stack_identifier in cls.stacks:
             try:
-                cls.orchestration_client.delete_stack(stack_identifier)
+                cls.client.delete_stack(stack_identifier)
             except exceptions.NotFound:
                 pass
 
         for stack_identifier in cls.stacks:
             try:
-                cls.orchestration_client.wait_for_stack_status(
+                cls.client.wait_for_stack_status(
                     stack_identifier, 'DELETE_COMPLETE')
             except exceptions.NotFound:
                 pass
