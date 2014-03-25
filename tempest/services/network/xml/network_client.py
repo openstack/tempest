@@ -166,33 +166,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
-    def create_floating_ip(self, ext_network_id, **kwargs):
-        uri = '%s/floatingips' % (self.uri_prefix)
-        floatingip = common.Element('floatingip')
-        floatingip.append(common.Element("floating_network_id",
-                                         ext_network_id))
-        for element, content in kwargs.iteritems():
-            floatingip.append(common.Element(element, content))
-        resp, body = self.post(uri, str(common.Document(floatingip)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def update_floating_ip(self, floating_ip_id, **kwargs):
-        uri = '%s/floatingips/%s' % (self.uri_prefix, floating_ip_id)
-        floatingip = common.Element('floatingip')
-        floatingip.add_attr('xmlns:xsi',
-                            'http://www.w3.org/2001/XMLSchema-instance')
-        for element, content in kwargs.iteritems():
-            if content is None:
-                xml_elem = common.Element(element)
-                xml_elem.add_attr("xsi:nil", "true")
-                floatingip.append(xml_elem)
-            else:
-                floatingip.append(common.Element(element, content))
-        resp, body = self.put(uri, str(common.Document(floatingip)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
