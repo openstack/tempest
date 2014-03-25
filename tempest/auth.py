@@ -164,6 +164,8 @@ class AuthProvider(object):
 
 class KeystoneAuthProvider(AuthProvider):
 
+    token_expiry_threshold = datetime.timedelta(seconds=60)
+
     def __init__(self, credentials, client_type='tempest', interface=None):
         super(KeystoneAuthProvider, self).__init__(credentials, client_type,
                                                    interface)
@@ -293,7 +295,8 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         _, access = auth_data
         expiry = datetime.datetime.strptime(access['token']['expires'],
                                             self.EXPIRY_DATE_FORMAT)
-        return expiry <= datetime.datetime.now()
+        return expiry - self.token_expiry_threshold <= \
+            datetime.datetime.utcnow()
 
 
 class KeystoneV3AuthProvider(KeystoneAuthProvider):
@@ -393,4 +396,5 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         _, access = auth_data
         expiry = datetime.datetime.strptime(access['expires_at'],
                                             self.EXPIRY_DATE_FORMAT)
-        return expiry <= datetime.datetime.now()
+        return expiry - self.token_expiry_threshold <= \
+            datetime.datetime.utcnow()

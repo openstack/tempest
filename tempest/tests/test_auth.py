@@ -14,6 +14,7 @@
 #    under the License.
 
 import copy
+import datetime
 
 from tempest import auth
 from tempest.common import http
@@ -130,6 +131,11 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         self.assertEqual(expected['url'], url)
         self.assertEqual(expected['token'], headers['X-Auth-Token'])
         self.assertEqual(expected['body'], body)
+
+    def _auth_data_with_expiry(self, date_as_string):
+        token, access = self.auth_provider.auth_data
+        access['token']['expires'] = date_as_string
+        return token, access
 
     def test_request(self):
         filters = {
@@ -292,6 +298,25 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
         expected = 'http://fake_url/'
         self._test_base_url_helper(expected, self.filters)
 
+    def test_token_not_expired(self):
+        expiry_data = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        auth_data = self._auth_data_with_expiry(
+            expiry_data.strftime(self.auth_provider.EXPIRY_DATE_FORMAT))
+        self.assertFalse(self.auth_provider.is_expired(auth_data))
+
+    def test_token_expired(self):
+        expiry_data = datetime.datetime.utcnow() - datetime.timedelta(hours=1)
+        auth_data = self._auth_data_with_expiry(
+            expiry_data.strftime(self.auth_provider.EXPIRY_DATE_FORMAT))
+        self.assertTrue(self.auth_provider.is_expired(auth_data))
+
+    def test_token_not_expired_to_be_renewed(self):
+        expiry_data = datetime.datetime.utcnow() + \
+            self.auth_provider.token_expiry_threshold / 2
+        auth_data = self._auth_data_with_expiry(
+            expiry_data.strftime(self.auth_provider.EXPIRY_DATE_FORMAT))
+        self.assertTrue(self.auth_provider.is_expired(auth_data))
+
 
 class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
     _endpoints = fake_identity.IDENTITY_V3_RESPONSE['token']['catalog']
@@ -315,6 +340,11 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
         if replacement:
             return ep['url'].replace('v3', replacement)
         return ep['url']
+
+    def _auth_data_with_expiry(self, date_as_string):
+        token, access = self.auth_provider.auth_data
+        access['expires_at'] = date_as_string
+        return token, access
 
     def test_check_credentials_missing_tenant_name(self):
         cred = copy.copy(self.credentials)
