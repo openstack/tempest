@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import time
-
 import testtools
 
 from tempest.api.compute import base
@@ -212,18 +210,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.client.revert_resize(self.server_id)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        # Need to poll for the id change until lp#924371 is fixed
         resp, server = self.client.get_server(self.server_id)
-        start = int(time.time())
-
-        while server['flavor']['id'] != previous_flavor_ref:
-            time.sleep(self.build_interval)
-            resp, server = self.client.get_server(self.server_id)
-
-            if int(time.time()) - start >= self.build_timeout:
-                message = 'Server %s failed to revert resize within the \
-                required time (%s s).' % (self.server_id, self.build_timeout)
-                raise exceptions.TimeoutException(message)
+        self.assertEqual(previous_flavor_ref, server['flavor']['id'])
 
     @test.attr(type='gate')
     def test_create_backup(self):
