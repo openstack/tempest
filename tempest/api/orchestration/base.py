@@ -120,3 +120,20 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         """Return a stack output value for a given key."""
         return next((o['output_value'] for o in stack['outputs']
                     if o['output_key'] == output_key), None)
+
+    def assert_fields_in_dict(self, obj, *fields):
+        for field in fields:
+            self.assertIn(field, obj)
+
+    def list_resources(self, stack_identifier):
+        """Get a dict mapping of resource names to types."""
+        resp, resources = self.client.list_resources(stack_identifier)
+        self.assertEqual('200', resp['status'])
+        self.assertIsInstance(resources, list)
+        for res in resources:
+            self.assert_fields_in_dict(res, 'logical_resource_id',
+                                       'resource_type', 'resource_status',
+                                       'updated_time')
+
+        return dict((r['resource_name'], r['resource_type'])
+                    for r in resources)

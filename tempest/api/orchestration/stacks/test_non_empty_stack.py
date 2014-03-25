@@ -40,16 +40,18 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         cls.resource_type = 'AWS::AutoScaling::LaunchConfiguration'
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
 
-    def assert_fields_in_dict(self, obj, *fields):
-        for field in fields:
-            self.assertIn(field, obj)
+    def _list_stacks(self, expected_num=None, **filter_kwargs):
+        resp, stacks = self.client.list_stacks(params=filter_kwargs)
+        self.assertEqual('200', resp['status'])
+        self.assertIsInstance(stacks, list)
+        if expected_num is not None:
+            self.assertEqual(expected_num, len(stacks))
+        return stacks
 
     @attr(type='gate')
     def test_stack_list(self):
         """Created stack should be in the list of existing stacks."""
-        resp, stacks = self.client.list_stacks()
-        self.assertEqual('200', resp['status'])
-        self.assertIsInstance(stacks, list)
+        stacks = self._list_stacks()
         stacks_names = map(lambda stack: stack['stack_name'], stacks)
         self.assertIn(self.stack_name, stacks_names)
 
@@ -89,20 +91,8 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     def test_list_resources(self):
         """Getting list of created resources for the stack should be possible.
         """
-        resp, resources = self.client.list_resources(self.stack_identifier)
-        self.assertEqual('200', resp['status'])
-        self.assertIsInstance(resources, list)
-        for res in resources:
-            self.assert_fields_in_dict(res, 'logical_resource_id',
-                                       'resource_type', 'resource_status',
-                                       'updated_time')
-
-        resources_names = map(lambda resource: resource['logical_resource_id'],
-                              resources)
-        self.assertIn(self.resource_name, resources_names)
-        resources_types = map(lambda resource: resource['resource_type'],
-                              resources)
-        self.assertIn(self.resource_type, resources_types)
+        resources = self.list_resources(self.stack_identifier)
+        self.assertEqual({self.resource_name: self.resource_type}, resources)
 
     @attr(type='gate')
     def test_show_resource(self):
