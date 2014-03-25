@@ -15,6 +15,7 @@
 
 import json
 
+from tempest.api_schema.compute import aggregates as schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -32,6 +33,7 @@ class AggregatesV3ClientJSON(rest_client.RestClient):
         """Get aggregate list."""
         resp, body = self.get("os-aggregates")
         body = json.loads(body)
+        self.validate_response(schema.list_aggregates, resp, body)
         return resp, body['aggregates']
 
     def get_aggregate(self, aggregate_id):
