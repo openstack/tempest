@@ -13,21 +13,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testscenarios
 
 from tempest.api.compute import base
 from tempest import test
 
 
-load_tests = testscenarios.load_tests_apply_scenarios
+load_tests = test.NegativeAutoTest.load_tests
 
 
 class GetConsoleOutputNegativeTestJSON(base.BaseV2ComputeTest,
                                        test.NegativeAutoTest):
     _service = 'compute'
     _schema_file = 'compute/servers/get_console_output.json'
-
-    scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
 
     @classmethod
     def setUpClass(cls):

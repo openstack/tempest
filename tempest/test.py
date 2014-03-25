@@ -24,9 +24,8 @@ import uuid
 
 import fixtures
 import testresources
+import testscenarios
 import testtools
-
-from oslo.config import cfg
 
 from tempest import clients
 import tempest.common.generator.valid_generator as valid
@@ -407,6 +406,24 @@ class NegativeAutoTest(BaseTestCase):
         return json.load(open(fn))
 
     @staticmethod
+    def load_tests(*args):
+        """
+        Wrapper for testscenarios to set the mandatory scenarios variable
+        only in case a real test loader is in place. Will be automatically
+        called in case the variable "load_tests" is set.
+        """
+        if getattr(args[0], 'suiteClass', None) is not None:
+            loader, standard_tests, pattern = args
+        else:
+            standard_tests, module, loader = args
+        for test in testtools.iterate_tests(standard_tests):
+            schema_file = getattr(test, '_schema_file', None)
+            if schema_file is not None:
+                setattr(test, 'scenarios',
+                        NegativeAutoTest.generate_scenario(schema_file))
+        return testscenarios.load_tests_apply_scenarios(*args)
+
+    @staticmethod
     def generate_scenario(description_file):
         """
         Generates the test scenario list for a given description.
@@ -429,17 +446,8 @@ class NegativeAutoTest(BaseTestCase):
         """
         description = NegativeAutoTest.load_schema(description_file)
         LOG.debug(description)
-
-        # NOTE(mkoderer): since this will be executed on import level the
-        # config doesn't have to be in place (e.g. for the pep8 job).
-        # In this case simply return.
-        try:
-            generator = importutils.import_class(
-                CONF.negative.test_generator)()
-        except cfg.ConfigFilesNotFoundError:
-            LOG.critical(
-                "Tempest config not found. Test scenarios aren't created")
-            return
+        generator = importutils.import_class(
+            CONF.negative.test_generator)()
         generator.validate_schema(description)
         schema = description.get("json-schema", None)
         resources = description.get("resources", [])
