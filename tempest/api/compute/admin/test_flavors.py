@@ -170,10 +170,12 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
+    @test.skip_because(bug='1286297')
     @test.attr(type='gate')
     def test_list_non_public_flavor(self):
-        # Create a flavor with os-flavor-access:is_public false should
-        # be present in list_details.
+        # Create a flavor with os-flavor-access:is_public false.
+        # The flavor should not be present in list_details as the
+        # tenant is not automatically added access list.
         # This operation requires the user to have 'admin' role
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
@@ -192,7 +194,7 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
         for flavor in flavors:
             if flavor['name'] == flavor_name:
                 flag = True
-        self.assertTrue(flag)
+        self.assertFalse(flag)
 
         # Verify flavor is not retrieved with other user
         flag = False
