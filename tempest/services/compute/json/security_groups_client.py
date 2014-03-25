@@ -16,6 +16,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute.v2 import security_groups as schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -38,6 +39,7 @@ class SecurityGroupsClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_security_groups, resp, body)
         return resp, body['security_groups']
 
     def get_security_group(self, security_group_id):
@@ -119,6 +121,7 @@ class SecurityGroupsClientJSON(rest_client.RestClient):
         """List all rules for a security group."""
         resp, body = self.get('os-security-groups')
         body = json.loads(body)
+        self.validate_response(schema.list_security_groups, resp, body)
         for sg in body['security_groups']:
             if sg['id'] == security_group_id:
                 return resp, sg['rules']
