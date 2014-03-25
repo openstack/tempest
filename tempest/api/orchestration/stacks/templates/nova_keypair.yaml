@@ -1,0 +1,43 @@
+heat_template_version: 2013-05-23
+
+description: >
+  Template which creates two key pairs.
+
+parameters:
+  KeyPairName1:
+    type: string
+    default: testkey
+
+  KeyPairName2:
+    type: string
+    default: testkey2
+
+resources:
+  KeyPairSavePrivate:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_param: KeyPairName1 }
+      save_private_key: true
+
+  KeyPairDontSavePrivate:
+    type: OS::Nova::KeyPair
+    properties:
+      name: { get_param: KeyPairName2 }
+      save_private_key: false
+
+outputs:
+  KeyPair_PublicKey:
+    description: Public Key of generated keypair
+    value: { get_attr: [KeyPairSavePrivate, public_key] }
+
+  KeyPair_PrivateKey:
+    description: Private Key of generated keypair
+    value: { get_attr: [KeyPairSavePrivate, private_key] }
+
+  KeyPairDontSavePrivate_PublicKey:
+    description: Public Key of generated keypair
+    value: { get_attr: [KeyPairDontSavePrivate, public_key] }
+
+  KeyPairDontSavePrivate_PrivateKey:
+    description: Private Key of generated keypair
+    value: { get_attr: [KeyPairDontSavePrivate, private_key] }

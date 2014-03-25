@@ -26,78 +26,6 @@ LOG = logging.getLogger(__name__)
 
 
 class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
-    _interface = 'json'
-
-    template = """
-heat_template_version: '2013-05-23'
-description: |
-  Template which creates single EC2 instance
-parameters:
-  KeyName:
-    type: string
-  InstanceType:
-    type: string
-  ImageId:
-    type: string
-  ExternalRouterId:
-    type: string
-  ExternalNetworkId:
-    type: string
-resources:
-  Network:
-    type: OS::Neutron::Net
-    properties:
-      name: NewNetwork
-  Subnet:
-    type: OS::Neutron::Subnet
-    properties:
-      network_id: {Ref: Network}
-      name: NewSubnet
-      ip_version: 4
-      cidr: 10.0.3.0/24
-      dns_nameservers: ["8.8.8.8"]
-      allocation_pools:
-      - {end: 10.0.3.150, start: 10.0.3.20}
-  Router:
-    type: OS::Neutron::Router
-    properties:
-      name: NewRouter
-      admin_state_up: false
-      external_gateway_info:
-        network: {get_param: ExternalNetworkId}
-        enable_snat: false
-  RouterInterface:
-    type: OS::Neutron::RouterInterface
-    properties:
-      router_id: {get_param: ExternalRouterId}
-      subnet_id: {get_resource: Subnet}
-  Server:
-    type: AWS::EC2::Instance
-    metadata:
-      Name: SmokeServerNeutron
-    properties:
-      ImageId: {get_param: ImageId}
-      InstanceType: {get_param: InstanceType}
-      KeyName: {get_param: KeyName}
-      SubnetId: {get_resource: Subnet}
-      UserData:
-        str_replace:
-          template: |
-            #!/bin/bash -v
-
-            /opt/aws/bin/cfn-signal -e 0 -r "SmokeServerNeutron created" \
-            'wait_handle'
-          params:
-            wait_handle: {get_resource: WaitHandleNeutron}
-  WaitHandleNeutron:
-    type: AWS::CloudFormation::WaitConditionHandle
-  WaitCondition:
-    type: AWS::CloudFormation::WaitCondition
-    depends_on: Server
-    properties:
-      Handle: {get_resource: WaitHandleNeutron}
-      Timeout: '600'
-"""
 
     @classmethod
     @test.safe_setup
@@ -111,6 +39,7 @@ resources:
             raise cls.skipException("Neutron support is required")
         cls.network_client = os.network_client
         cls.stack_name = data_utils.rand_name('heat')
+        template = cls.load_template('neutron_basic')
         cls.keypair_name = (CONF.orchestration.keypair_name or
                             cls._create_keypair()['name'])
         cls.external_router_id = cls._get_external_router_id()
@@ -119,7 +48,7 @@ resources:
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
-            cls.template,
+            template,
             parameters={
                 'KeyName': cls.keypair_name,
                 'InstanceType': CONF.orchestration.instance_type,

@@ -21,53 +21,18 @@ LOG = logging.getLogger(__name__)
 
 
 class StacksTestJSON(base.BaseOrchestrationTest):
-    _interface = 'json'
-
-    template = """
-HeatTemplateFormatVersion: '2012-12-12'
-Description: |
-  Template which creates some simple resources
-Parameters:
-  trigger:
-    Type: String
-    Default: not_yet
-Resources:
-  fluffy:
-    Type: AWS::AutoScaling::LaunchConfiguration
-    Metadata:
-      kittens:
-      - Tom
-      - Stinky
-    Properties:
-      ImageId: not_used
-      InstanceType: not_used
-      UserData:
-        Fn::Replace:
-        - variable_a: {Ref: trigger}
-          variable_b: bee
-        - |
-          A == variable_a
-          B == variable_b
-Outputs:
-  fluffy:
-    Description: "fluffies irc nick"
-    Value:
-      Fn::Replace:
-      - nick: {Ref: fluffy}
-      - |
-        #nick
-"""
 
     @classmethod
     def setUpClass(cls):
         super(StacksTestJSON, cls).setUpClass()
         cls.client = cls.orchestration_client
         cls.stack_name = data_utils.rand_name('heat')
+        template = cls.load_template('non_empty_stack')
 
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
-            cls.template,
+            template,
             parameters={
                 'trigger': 'start'
             })

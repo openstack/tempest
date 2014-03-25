@@ -25,40 +25,13 @@ CONF = config.CONF
 
 
 class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
-    _interface = 'json'
-    template = """
-heat_template_version: 2013-05-23
-description: Template which creates a Swift container resource
-
-resources:
-  SwiftContainerWebsite:
-    deletion_policy: "Delete"
-    type: OS::Swift::Container
-    properties:
-      X-Container-Read: ".r:*"
-      X-Container-Meta:
-        web-index: "index.html"
-        web-error: "error.html"
-
-  SwiftContainer:
-    type: OS::Swift::Container
-
-outputs:
-  WebsiteURL:
-    description: "URL for website hosted on S3"
-    value: { get_attr: [SwiftContainer, WebsiteURL] }
-  DomainName:
-    description: "Domain of Swift host"
-    value: { get_attr: [SwiftContainer, DomainName] }
-
-"""
-
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
         super(SwiftResourcesTestJSON, cls).setUpClass()
         cls.client = cls.orchestration_client
         cls.stack_name = data_utils.rand_name('heat')
+        template = cls.load_template('swift_basic')
         os = clients.Manager()
         if not CONF.service_available.swift:
             raise cls.skipException("Swift support is required")
@@ -67,7 +40,7 @@ outputs:
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
-            cls.template)
+            template)
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
         cls.test_resources = {}

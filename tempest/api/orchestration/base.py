@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os.path
+
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -28,18 +30,17 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseOrchestrationTest, cls).setUpClass()
-        os = clients.OrchestrationManager()
+        cls.os = clients.OrchestrationManager()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
         cls.build_timeout = CONF.orchestration.build_timeout
         cls.build_interval = CONF.orchestration.build_interval
 
-        cls.os = os
-        cls.orchestration_client = os.orchestration_client
-        cls.client = os.orchestration_client
-        cls.servers_client = os.servers_client
-        cls.keypairs_client = os.keypairs_client
-        cls.network_client = os.network_client
+        cls.orchestration_client = cls.os.orchestration_client
+        cls.client = cls.orchestration_client
+        cls.servers_client = cls.os.servers_client
+        cls.keypairs_client = cls.os.keypairs_client
+        cls.network_client = cls.os.network_client
         cls.stacks = []
         cls.keypairs = []
 
@@ -55,8 +56,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         """
         Returns an instance of the Identity Admin API client
         """
-        os = clients.AdminManager(interface=cls._interface)
-        admin_client = os.identity_client
+        manager = clients.AdminManager(interface=cls._interface)
+        admin_client = manager.identity_client
         return admin_client
 
     @classmethod
@@ -99,6 +100,16 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                 cls.keypairs_client.delete_keypair(kp_name)
             except Exception:
                 pass
+
+    @classmethod
+    def load_template(cls, name, ext='yaml'):
+        loc = ["tempest", "api", "orchestration",
+               "stacks", "templates", "%s.%s" % (name, ext)]
+        fullpath = os.path.join(*loc)
+
+        with open(fullpath, "r") as f:
+            content = f.read()
+            return content
 
     @classmethod
     def tearDownClass(cls):

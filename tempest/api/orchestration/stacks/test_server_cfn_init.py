@@ -26,91 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
-    _interface = 'json'
     existing_keypair = CONF.orchestration.keypair_name is not None
-
-    template = """
-HeatTemplateFormatVersion: '2012-12-12'
-Description: |
-  Template which uses a wait condition to confirm that a minimal
-  cfn-init and cfn-signal has worked
-Parameters:
-  key_name:
-    Type: String
-  flavor:
-    Type: String
-  image:
-    Type: String
-  network:
-    Type: String
-Resources:
-  CfnUser:
-    Type: AWS::IAM::User
-  SmokeSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      GroupDescription: Enable only ping and SSH access
-      SecurityGroupIngress:
-      - {CidrIp: 0.0.0.0/0, FromPort: '-1', IpProtocol: icmp, ToPort: '-1'}
-      - {CidrIp: 0.0.0.0/0, FromPort: '22', IpProtocol: tcp, ToPort: '22'}
-  SmokeKeys:
-    Type: AWS::IAM::AccessKey
-    Properties:
-      UserName: {Ref: CfnUser}
-  SmokeServer:
-    Type: OS::Nova::Server
-    Metadata:
-      AWS::CloudFormation::Init:
-        config:
-          files:
-            /tmp/smoke-status:
-              content: smoke test complete
-            /etc/cfn/cfn-credentials:
-              content:
-                Fn::Replace:
-                - SmokeKeys: {Ref: SmokeKeys}
-                  SecretAccessKey:
-                    'Fn::GetAtt': [SmokeKeys, SecretAccessKey]
-                - |
-                  AWSAccessKeyId=SmokeKeys
-                  AWSSecretKey=SecretAccessKey
-              mode: '000400'
-              owner: root
-              group: root
-    Properties:
-      image: {Ref: image}
-      flavor: {Ref: flavor}
-      key_name: {Ref: key_name}
-      security_groups:
-      - {Ref: SmokeSecurityGroup}
-      networks:
-      - uuid: {Ref: network}
-      user_data:
-        Fn::Replace:
-        - WaitHandle: {Ref: WaitHandle}
-        - |
-          #!/bin/bash -v
-          /opt/aws/bin/cfn-init
-          /opt/aws/bin/cfn-signal -e 0 --data "`cat /tmp/smoke-status`" \
-              "WaitHandle"
-  WaitHandle:
-    Type: AWS::CloudFormation::WaitConditionHandle
-  WaitCondition:
-    Type: AWS::CloudFormation::WaitCondition
-    DependsOn: SmokeServer
-    Properties:
-      Handle: {Ref: WaitHandle}
-      Timeout: '600'
-Outputs:
-  WaitConditionStatus:
-    Description: Contents of /tmp/smoke-status on SmokeServer
-    Value:
-      Fn::GetAtt: [WaitCondition, Data]
-  SmokeServerIp:
-    Description: IP address of server
-    Value:
-      Fn::GetAtt: [SmokeServer, first_address]
-"""
 
     @classmethod
     @test.safe_setup
@@ -119,7 +35,7 @@ Outputs:
         if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
         cls.client = cls.orchestration_client
-
+        template = cls.load_template('cfn_init_signal')
         stack_name = data_utils.rand_name('heat')
         if CONF.orchestration.keypair_name:
             keypair_name = CONF.orchestration.keypair_name
@@ -130,7 +46,7 @@ Outputs:
         # create the stack
         cls.stack_identifier = cls.create_stack(
             stack_name,
-            cls.template,
+            template,
             parameters={
                 'key_name': keypair_name,
                 'flavor': CONF.orchestration.instance_type,

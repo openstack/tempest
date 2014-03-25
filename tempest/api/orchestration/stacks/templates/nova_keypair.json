@@ -1,0 +1,48 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "Template which create two key pairs.",
+  "Parameters" : {
+    "KeyPairName1": {
+      "Type": "String",
+      "Default": "testkey1"
+      },
+    "KeyPairName2": {
+      "Type": "String",
+      "Default": "testkey2"
+      }
+   },
+   "Resources" : {
+     "KeyPairSavePrivate": {
+       "Type": "OS::Nova::KeyPair",
+       "Properties": {
+         "name" : { "Ref" : "KeyPairName1" },
+         "save_private_key": true
+       }
+     },
+     "KeyPairDontSavePrivate": {
+       "Type": "OS::Nova::KeyPair",
+       "Properties": {
+         "name" : { "Ref" : "KeyPairName2" },
+         "save_private_key": false
+      }
+     }
+  },
+ "Outputs": {
+   "KeyPair_PublicKey": {
+     "Description": "Public Key of generated keypair.",
+     "Value": { "Fn::GetAtt" : ["KeyPairSavePrivate", "public_key"] }
+    },
+   "KeyPair_PrivateKey": {
+     "Description": "Private Key of generated keypair.",
+     "Value": { "Fn::GetAtt" : ["KeyPairSavePrivate", "private_key"] }
+   },
+   "KeyPairDontSavePrivate_PublicKey": {
+     "Description": "Public Key of generated keypair.",
+     "Value": { "Fn::GetAtt" : ["KeyPairDontSavePrivate", "public_key"] }
+   },
+  "KeyPairDontSavePrivate_PrivateKey": {
+     "Description": "Private Key of generated keypair.",
+     "Value": { "Fn::GetAtt" : ["KeyPairDontSavePrivate", "private_key"] }
+   }
+  }
+}
