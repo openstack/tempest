@@ -16,6 +16,7 @@
 import json
 
 from tempest.api_schema.compute import hypervisors as common_schema
+from tempest.api_schema.compute.v3 import hypervisors as v3schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -38,6 +39,7 @@ class HypervisorV3ClientJSON(rest_client.RestClient):
         """Show detailed hypervisors information."""
         resp, body = self.get('os-hypervisors/detail')
         body = json.loads(body)
+        self.validate_response(v3schema.list_hypervisors_detail, resp, body)
         return resp, body['hypervisors']
 
     def get_hypervisor_show_details(self, hyper_id):
