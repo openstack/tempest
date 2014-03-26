@@ -42,6 +42,7 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_volumes, resp, body)
         return resp, body['volumes']
 
     def list_volumes_with_detail(self, params=None):
@@ -52,6 +53,7 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_volumes, resp, body)
         return resp, body['volumes']
 
     def get_volume(self, volume_id):
