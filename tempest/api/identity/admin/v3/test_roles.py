@@ -48,7 +48,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         resp[4], cls.role = cls.client.create_role(
             data_utils.rand_name('Role-'))
         for r in resp:
-            assert r['status'] == '201', "Expected: %s" % r['status']
+            assert r['status'] == '201', (
+                "Expected 201, but got: %s" % r['status'])
 
     @classmethod
     def tearDownClass(cls):
@@ -62,7 +63,8 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         cls.client.update_domain(cls.domain['id'], enabled=False)
         resp[4], _ = cls.client.delete_domain(cls.domain['id'])
         for r in resp:
-            assert r['status'] == '204', "Expected: %s" % r['status']
+            assert r['status'] == '204', (
+                "Expected 204, but got: %s" % r['status'])
         super(RolesV3TestJSON, cls).tearDownClass()
 
     def _list_assertions(self, resp, body, fetched_role_ids, role_id):

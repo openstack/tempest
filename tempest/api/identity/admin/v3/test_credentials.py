@@ -36,21 +36,25 @@ class CredentialsTestJSON(base.BaseIdentityV3AdminTest):
             resp, cls.project = cls.client.create_project(
                 data_utils.rand_name('project-'),
                 description=data_utils.rand_name('project-desc-'))
-            assert resp['status'] == '201', "Expected %s" % resp['status']
+            assert resp['status'] == '201', (
+                "Expected 201, but got: %s" % resp['status'])
             cls.projects.append(cls.project['id'])
 
         resp, cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, project_id=cls.projects[0])
-        assert resp['status'] == '201', "Expected: %s" % resp['status']
+        assert resp['status'] == '201', (
+            "Expected 201, but got: %s" % resp['status'])
 
     @classmethod
     def tearDownClass(cls):
         resp, _ = cls.client.delete_user(cls.user_body['id'])
-        assert resp['status'] == '204', "Expected: %s" % resp['status']
+        assert resp['status'] == '204', (
+            "Expected 204, but got: %s" % resp['status'])
         for p in cls.projects:
             resp, _ = cls.client.delete_project(p)
-            assert resp['status'] == '204', "Expected: %s" % resp['status']
+            assert resp['status'] == '204', (
+                "Expected 204, but got: %s" % resp['status'])
         super(CredentialsTestJSON, cls).tearDownClass()
 
     def _delete_credential(self, cred_id):
