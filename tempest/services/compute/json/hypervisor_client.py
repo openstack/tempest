@@ -15,6 +15,7 @@
 
 import json
 
+from tempest.api_schema.compute import hypervisors as common_schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -55,6 +56,7 @@ class HypervisorClientJSON(rest_client.RestClient):
         """Get hypervisor statistics over all compute nodes."""
         resp, body = self.get('os-hypervisors/statistics')
         body = json.loads(body)
+        self.validate_response(common_schema.hypervisor_statistics, resp, body)
         return resp, body['hypervisor_statistics']
 
     def get_hypervisor_uptime(self, hyper_id):
