@@ -21,16 +21,14 @@ from tempest import test
 load_tests = test.NegativeAutoTest.load_tests
 
 
-class FlavorsListNegativeTestJSON(base.BaseV2ComputeTest,
-                                  test.NegativeAutoTest):
+@test.SimpleNegativeAutoTest
+class FlavorsListWithDetailsNegativeTestJSON(base.BaseV2ComputeTest,
+                                             test.NegativeAutoTest):
     _service = 'compute'
     _schema_file = 'compute/flavors/flavors_list.json'
 
-    @test.attr(type=['negative', 'gate'])
-    def test_list_flavors_with_detail(self):
-        self.execute(self._schema_file)
 
-
+@test.SimpleNegativeAutoTest
 class FlavorDetailsNegativeTestJSON(base.BaseV2ComputeTest,
                                     test.NegativeAutoTest):
     _service = 'compute'
@@ -40,8 +38,3 @@ class FlavorDetailsNegativeTestJSON(base.BaseV2ComputeTest,
     def setUpClass(cls):
         super(FlavorDetailsNegativeTestJSON, cls).setUpClass()
         cls.set_resource("flavor", cls.flavor_ref)
-
-    @test.attr(type=['negative', 'gate'])
-    def test_get_flavor_details(self):
-        # flavor details are not returned for non-existent flavors
-        self.execute(self._schema_file)
