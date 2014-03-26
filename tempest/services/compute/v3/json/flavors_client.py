@@ -18,6 +18,8 @@ import urllib
 
 from tempest.api_schema.compute import flavors as common_schema
 from tempest.api_schema.compute import flavors_access as schema_access
+from tempest.api_schema.compute import flavors_extra_specs \
+    as schema_extra_specs
 from tempest.api_schema.compute.v3 import flavors as v3schema
 from tempest.common import rest_client
 from tempest import config
@@ -99,12 +101,15 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
         resp, body = self.post('flavors/%s/flavor-extra-specs' % flavor_id,
                                post_body)
         body = json.loads(body)
+        self.validate_response(v3schema.set_flavor_extra_specs, resp, body)
         return resp, body['extra_specs']
 
     def get_flavor_extra_spec(self, flavor_id):
         """Gets extra Specs details of the mentioned flavor."""
         resp, body = self.get('flavors/%s/flavor-extra-specs' % flavor_id)
         body = json.loads(body)
+        self.validate_response(schema_extra_specs.flavor_extra_specs,
+                               resp, body)
         return resp, body['extra_specs']
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
@@ -112,6 +117,8 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
         resp, body = self.get('flavors/%s/flavor-extra-specs/%s' %
                               (str(flavor_id), key))
         body = json.loads(body)
+        self.validate_response(schema_extra_specs.flavor_extra_specs_key,
+                               resp, body)
         return resp, body
 
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
@@ -119,12 +126,16 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
         resp, body = self.put('flavors/%s/flavor-extra-specs/%s' %
                               (flavor_id, key), json.dumps(kwargs))
         body = json.loads(body)
+        self.validate_response(schema_extra_specs.flavor_extra_specs_key,
+                               resp, body)
         return resp, body
 
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets extra Specs from the mentioned flavor."""
-        return self.delete('flavors/%s/flavor-extra-specs/%s' %
-                           (str(flavor_id), key))
+        resp, body = self.delete('flavors/%s/flavor-extra-specs/%s' %
+                                 (str(flavor_id), key))
+        self.validate_response(v3schema.unset_flavor_extra_specs, resp, body)
+        return resp, body
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
