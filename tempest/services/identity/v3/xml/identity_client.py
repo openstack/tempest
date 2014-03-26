@@ -217,6 +217,12 @@ class IdentityV3ClientXML(rest_client.RestClient):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def list_roles(self):
+        """Get the list of Roles."""
+        resp, body = self.get("roles")
+        body = self._parse_roles(etree.fromstring(body))
+        return resp, body
+
     def update_role(self, name, role_id):
         """Updates a Role."""
         post_body = common.Element("role",
