@@ -524,6 +524,7 @@ class OfficialClientManager(manager.Manager):
         auth_url = CONF.identity.uri
         region = CONF.identity.region
         endpoint_type = CONF.volume.endpoint_type
+        dscv = CONF.identity.disable_ssl_certificate_validation
         return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
                                           username,
                                           password,
@@ -531,6 +532,7 @@ class OfficialClientManager(manager.Manager):
                                           auth_url,
                                           region_name=region,
                                           endpoint_type=endpoint_type,
+                                          insecure=dscv,
                                           http_log_debug=True)
 
     def _get_object_storage_client(self, username, password, tenant_name):
