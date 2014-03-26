@@ -37,15 +37,9 @@ class NetworksTestJSON(base.BaseNetworkTest):
         create a subnet for a tenant
         list tenant's subnets
         show a tenant subnet details
-        port create
-        port delete
-        port list
-        port show
-        port update
         network update
         subnet update
         delete a network also deletes its subnets
-        create a port with no IP address associated with it
 
         All subnet tests are run once with ipv4 and once with ipv6.
 
@@ -221,32 +215,6 @@ class NetworksTestJSON(base.BaseNetworkTest):
         # is actually deleted here - this will create and issue, hence remove
         # it from the list.
         self.subnets.pop()
-
-    @test.attr(type='smoke')
-    def test_create_port_with_no_ip(self):
-        # For this test create a new network - do not use any previously
-        # created networks.
-        name = data_utils.rand_name('network-nosubnet-')
-        resp, body = self.client.create_network(name=name)
-        self.assertEqual('201', resp['status'])
-        network = body['network']
-        net_id = network['id']
-        self.networks.append(network)
-
-        # Now create a port for this network - without creating any
-        # subnets for this network - this ensures no IP for the port
-        resp, body = self.client.create_port(network_id=net_id)
-        self.assertEqual('201', resp['status'])
-        port = body['port']
-        port_id = port['id']
-        self.addCleanup(self.client.delete_port, port_id)
-
-        # Verify that the port does not have any IP address
-        resp, body = self.client.show_port(port_id)
-        self.assertEqual('200', resp['status'])
-        port_resp = body['port']
-        self.assertEqual(port_id, port_resp['id'])
-        self.assertEqual(port_resp['fixed_ips'], [])
 
 
 class NetworksTestXML(NetworksTestJSON):
