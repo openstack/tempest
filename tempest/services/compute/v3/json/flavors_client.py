@@ -16,6 +16,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute import flavors as common_schema
 from tempest.api_schema.compute import flavors_access as schema_access
 from tempest.common import rest_client
 from tempest import config
@@ -36,6 +37,7 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(common_schema.list_flavors, resp, body)
         return resp, body['flavors']
 
     def list_flavors_with_detail(self, params=None):
