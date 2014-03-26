@@ -15,22 +15,11 @@
 import copy
 from tempest.api_schema.compute import hypervisors
 
-list_hypervisors_detail = copy.deepcopy(
-    hypervisors.common_list_hypervisors_detail)
-# Defining extra attributes for V3 show hypervisor schema
-list_hypervisors_detail['response_body']['properties']['hypervisors'][
-    'items']['properties']['os-pci:pci_stats'] = {'type': 'array'}
-
-show_hypervisor = copy.deepcopy(hypervisors.common_show_hypervisor)
-# Defining extra attributes for V3 show hypervisor schema
-show_hypervisor['response_body']['properties']['hypervisor']['properties'][
-    'os-pci:pci_stats'] = {'type': 'array'}
-
-hypervisors_servers = copy.deepcopy(hypervisors.common_hypervisors_info)
+hypervisors_servers = copy.deepcopy(hypervisors.common_hypervisors_detail)
 
 # Defining extra attributes for V3 show hypervisor schema
-hypervisors_servers['response_body']['properties']['hypervisor']['properties'][
-    'servers'] = {
+hypervisors_servers['response_body']['properties']['hypervisors']['items'][
+    'properties']['servers'] = {
         'type': 'array',
         'items': {
             'type': 'object',
@@ -44,7 +33,5 @@ hypervisors_servers['response_body']['properties']['hypervisor']['properties'][
             }
         }
     }
-# V3 API response body always contains the 'servers' attribute even there
-# is no server (VM) are present on Hypervisor host.
-hypervisors_servers['response_body']['properties']['hypervisor'][
-    'required'] = ['id', 'hypervisor_hostname', 'servers']
+# In V2 API, if there is no servers (VM) on the Hypervisor host then 'servers'
+# attribute will not be present in response body So it is not 'required'.
