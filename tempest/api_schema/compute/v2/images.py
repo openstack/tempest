@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api_schema.compute import parameter_types
+
 get_image = {
     'status_code': [200],
     'response_body': {
@@ -23,20 +25,7 @@ get_image = {
                     'id': {'type': 'string'},
                     'status': {'type': 'string'},
                     'updated': {'type': 'string'},
-                    'links': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'object',
-                            'properties': {
-                                'href': {
-                                    'type': 'string',
-                                    'format': 'uri'
-                                },
-                                'rel': {'type': 'string'}
-                            },
-                            'required': ['href', 'rel']
-                        }
-                    },
+                    'links': parameter_types.links,
                     'name': {'type': 'string'},
                     'created': {'type': 'string'},
                     'OS-EXT-IMG-SIZE:size': {'type': 'integer'},
@@ -51,20 +40,7 @@ get_image = {
                             # allows 'string' also because we will be able to
                             # change it to 'uuid' in the future.
                             'id': {'type': ['integer', 'string']},
-                            'links': {
-                                'type': 'array',
-                                'items': {
-                                    'type': 'object',
-                                    'properties': {
-                                        'href': {
-                                            'type': 'string',
-                                            'format': 'uri'
-                                        },
-                                        'rel': {'type': 'string'}
-                                    },
-                                    'required': ['href', 'rel']
-                                }
-                            }
+                            'links': parameter_types.links
                         },
                         'required': ['id', 'links']
                     }

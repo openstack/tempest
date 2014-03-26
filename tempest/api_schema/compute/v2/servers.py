@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api_schema.compute import parameter_types
+
 create_server = {
     'status_code': [202],
     'response_body': {
@@ -25,20 +27,7 @@ create_server = {
                     # as a server id.
                     'id': {'type': ['integer', 'string']},
                     'security_groups': {'type': 'array'},
-                    'links': {
-                        'type': 'array',
-                        'items': {
-                            'type': 'object',
-                            'properties': {
-                                'href': {
-                                    'type': 'string',
-                                    'format': 'uri'
-                                },
-                                'rel': {'type': 'string'}
-                            },
-                            'required': ['href', 'rel']
-                        }
-                    },
+                    'links': parameter_types.links,
                     'adminPass': {'type': 'string'},
                     'OS-DCF:diskConfig': {'type': 'string'}
                 },
