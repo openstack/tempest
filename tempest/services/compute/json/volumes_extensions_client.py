@@ -61,7 +61,7 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
         url = "os-volumes/%s" % str(volume_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.validate_response(schema.get_volume, resp, body)
+        self.validate_response(schema.create_get_volume, resp, body)
         return resp, body['volume']
 
     def create_volume(self, size, **kwargs):
@@ -81,11 +81,14 @@ class VolumesExtensionsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'volume': post_body})
         resp, body = self.post('os-volumes', post_body)
         body = json.loads(body)
+        self.validate_response(schema.create_get_volume, resp, body)
         return resp, body['volume']
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
-        return self.delete("os-volumes/%s" % str(volume_id))
+        resp, body = self.delete("os-volumes/%s" % str(volume_id))
+        self.validate_response(schema.delete_volume, resp, body)
+        return resp, body
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
