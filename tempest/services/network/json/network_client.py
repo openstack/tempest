@@ -180,18 +180,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.loads(body)
         return resp, body
 
-    def update_vpnservice(self, uuid, description):
-        put_body = {
-            "vpnservice": {
-                "description": description
-            }
-        }
-        body = json.dumps(put_body)
-        uri = '%s/vpn/vpnservices/%s' % (self.uri_prefix, uuid)
-        resp, body = self.put(uri, body)
-        body = json.loads(body)
-        return resp, body
-
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
@@ -278,14 +266,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.dumps(post_body)
         uri = '%s/vpn/ikepolicies' % (self.uri_prefix)
         resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
-    def update_ikepolicy(self, uuid, **kwargs):
-        put_body = {'ikepolicy': kwargs}
-        body = json.dumps(put_body)
-        uri = '%s/vpn/ikepolicies/%s' % (self.uri_prefix, uuid)
-        resp, body = self.put(uri, body)
         body = json.loads(body)
         return resp, body
 
