@@ -46,6 +46,7 @@ class HypervisorV3ClientJSON(rest_client.RestClient):
         """Display the details of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s' % hyper_id)
         body = json.loads(body)
+        self.validate_response(v3schema.show_hypervisor, resp, body)
         return resp, body['hypervisor']
 
     def get_hypervisor_servers(self, hyper_name):

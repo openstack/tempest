@@ -20,3 +20,8 @@ list_hypervisors_detail = copy.deepcopy(
 # Defining extra attributes for V3 show hypervisor schema
 list_hypervisors_detail['response_body']['properties']['hypervisors'][
     'items']['properties']['os-pci:pci_stats'] = {'type': 'array'}
+
+show_hypervisor = copy.deepcopy(hypervisors.common_show_hypervisor)
+# Defining extra attributes for V3 show hypervisor schema
+show_hypervisor['response_body']['properties']['hypervisor']['properties'][
+    'os-pci:pci_stats'] = {'type': 'array'}
