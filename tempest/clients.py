@@ -465,6 +465,7 @@ class OfficialClientManager(manager.Manager):
     CINDERCLIENT_VERSION = '1'
     HEATCLIENT_VERSION = '1'
     IRONICCLIENT_VERSION = '1'
+    SAHARACLIENT_VERSION = '1.1'
 
     def __init__(self, username, password, tenant_name):
         # FIXME(andreaf) Auth provider for client_type 'official' is
@@ -491,6 +492,10 @@ class OfficialClientManager(manager.Manager):
             password,
             tenant_name)
         self.orchestration_client = self._get_orchestration_client(
+            username,
+            password,
+            tenant_name)
+        self.data_processing_client = self._get_data_processing_client(
             username,
             password,
             tenant_name)
@@ -685,3 +690,25 @@ class OfficialClientManager(manager.Manager):
                                                 endpoint_type=endpoint_type,
                                                 auth_url=auth_url,
                                                 insecure=dscv)
+
+    def _get_data_processing_client(self, username, password, tenant_name):
+        if not CONF.service_available.sahara:
+            # Sahara isn't available
+            return None
+
+        import saharaclient.client
+
+        self._validate_credentials(username, password, tenant_name)
+
+        endpoint_type = CONF.data_processing.endpoint_type
+        catalog_type = CONF.data_processing.catalog_type
+        auth_url = CONF.identity.uri
+
+        client = saharaclient.client.Client(self.SAHARACLIENT_VERSION,
+                                            username, password,
+                                            project_name=tenant_name,
+                                            endpoint_type=endpoint_type,
+                                            service_type=catalog_type,
+                                            auth_url=auth_url)
+
+        return client
