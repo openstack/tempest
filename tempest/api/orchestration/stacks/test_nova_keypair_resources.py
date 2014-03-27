@@ -22,63 +22,19 @@ LOG = logging.getLogger(__name__)
 
 
 class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
-    _interface = 'json'
-    template = """
-heat_template_version: 2013-05-23
-
-description: >
-  Template which creates two key pairs.
-
-parameters:
-  KeyPairName1:
-    type: string
-    default: testkey
-
-  KeyPairName2:
-    type: string
-    default: testkey2
-
-resources:
-  KeyPairSavePrivate:
-    type: OS::Nova::KeyPair
-    properties:
-      name: { get_param: KeyPairName1 }
-      save_private_key: true
-
-  KeyPairDontSavePrivate:
-    type: OS::Nova::KeyPair
-    properties:
-      name: { get_param: KeyPairName2 }
-      save_private_key: false
-
-outputs:
-  KeyPair_PublicKey:
-    description: Public Key of generated keypair
-    value: { get_attr: [KeyPairSavePrivate, public_key] }
-
-  KeyPair_PrivateKey:
-    description: Private Key of generated keypair
-    value: { get_attr: [KeyPairSavePrivate, private_key] }
-
-  KeyPairDontSavePrivate_PublicKey:
-    description: Public Key of generated keypair
-    value: { get_attr: [KeyPairDontSavePrivate, public_key] }
-
-  KeyPairDontSavePrivate_PrivateKey:
-    description: Private Key of generated keypair
-    value: { get_attr: [KeyPairDontSavePrivate, private_key] }
-"""
+    _tpl_type = 'yaml'
 
     @classmethod
     def setUpClass(cls):
         super(NovaKeyPairResourcesYAMLTest, cls).setUpClass()
         cls.client = cls.orchestration_client
         cls.stack_name = data_utils.rand_name('heat')
+        template = cls.load_template('nova_keypair', ext=cls._tpl_type)
 
         # create the stack, avoid any duplicated key.
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
-            cls.template,
+            template,
             parameters={
                 'KeyPairName1': cls.stack_name + '_1',
                 'KeyPairName2': cls.stack_name + '_2'
@@ -129,53 +85,4 @@ outputs:
 
 
 class NovaKeyPairResourcesAWSTest(NovaKeyPairResourcesYAMLTest):
-    template = """
-{
-  "AWSTemplateFormatVersion" : "2010-09-09",
-  "Description" : "Template which create two key pairs.",
-  "Parameters" : {
-    "KeyPairName1": {
-      "Type": "String",
-      "Default": "testkey1"
-      },
-    "KeyPairName2": {
-      "Type": "String",
-      "Default": "testkey2"
-      }
-   },
-   "Resources" : {
-     "KeyPairSavePrivate": {
-       "Type": "OS::Nova::KeyPair",
-       "Properties": {
-         "name" : { "Ref" : "KeyPairName1" },
-         "save_private_key": true
-       }
-     },
-     "KeyPairDontSavePrivate": {
-       "Type": "OS::Nova::KeyPair",
-       "Properties": {
-         "name" : { "Ref" : "KeyPairName2" },
-         "save_private_key": false
-      }
-     }
-  },
- "Outputs": {
-   "KeyPair_PublicKey": {
-     "Description": "Public Key of generated keypair.",
-     "Value": { "Fn::GetAtt" : ["KeyPairSavePrivate", "public_key"] }
-    },
-   "KeyPair_PrivateKey": {
-     "Description": "Private Key of generated keypair.",
-     "Value": { "Fn::GetAtt" : ["KeyPairSavePrivate", "private_key"] }
-   },
-   "KeyPairDontSavePrivate_PublicKey": {
-     "Description": "Public Key of generated keypair.",
-     "Value": { "Fn::GetAtt" : ["KeyPairDontSavePrivate", "public_key"] }
-   },
-  "KeyPairDontSavePrivate_PrivateKey": {
-     "Description": "Private Key of generated keypair.",
-     "Value": { "Fn::GetAtt" : ["KeyPairDontSavePrivate", "private_key"] }
-   }
-  }
-}
-"""
+    _tpl_type = 'json'

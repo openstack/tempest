@@ -1,0 +1,32 @@
+HeatTemplateFormatVersion: '2012-12-12'
+Description: |
+  Template which creates some simple resources
+Parameters:
+  trigger:
+    Type: String
+    Default: not_yet
+Resources:
+  fluffy:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Metadata:
+      kittens:
+      - Tom
+      - Stinky
+    Properties:
+      ImageId: not_used
+      InstanceType: not_used
+      UserData:
+        Fn::Replace:
+        - variable_a: {Ref: trigger}
+          variable_b: bee
+        - |
+          A == variable_a
+          B == variable_b
+Outputs:
+  fluffy:
+    Description: "fluffies irc nick"
+    Value:
+      Fn::Replace:
+      - nick: {Ref: fluffy}
+      - |
+        #nick

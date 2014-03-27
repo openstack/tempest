@@ -16,8 +16,6 @@ from tempest import test
 
 
 class TemplateYAMLTestJSON(base.BaseOrchestrationTest):
-    _interface = 'json'
-
     template = """
 HeatTemplateFormatVersion: '2012-12-12'
 Description: |

@@ -20,8 +20,6 @@ LOG = logging.getLogger(__name__)
 
 
 class StacksTestJSON(base.BaseOrchestrationTest):
-    _interface = 'json'
-
     empty_template = "HeatTemplateFormatVersion: '2012-12-12'\n"
 
     @classmethod
