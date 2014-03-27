@@ -37,6 +37,7 @@ allowed_dirty = set([
     'ceilometer-alarm-evaluator',
     'ceilometer-anotification',
     'ceilometer-api',
+    'ceilometer-collector',
     'c-vol',
     'g-api',
     'h-api',
@@ -90,7 +91,7 @@ def scan_content(name, content, regexp, whitelist):
                     break
             if not whitelisted or dump_all_errors:
                 if print_log_name:
-                    print("Log File Has Errors: %s" % name)
+                    print("\nLog File Has Errors: %s" % name)
                     print_log_name = False
                 if not whitelisted:
                     had_errors = True
