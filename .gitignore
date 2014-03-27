@@ -16,4 +16,5 @@ dist
 build
 .testrepository
 .coverage*
+!.coveragerc
 cover/

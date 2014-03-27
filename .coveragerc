@@ -1,0 +1,4 @@
+[run]
+branch = True
+source = tempest
+omit = tempest/tests/*,tempest/openstack/*
