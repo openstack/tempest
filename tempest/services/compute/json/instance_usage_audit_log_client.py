@@ -34,6 +34,8 @@ class InstanceUsagesAuditLogClientJSON(rest_client.RestClient):
         url = 'os-instance_usage_audit_log'
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_instance_usage_audit_log,
+                               resp, body)
         return resp, body["instance_usage_audit_logs"]
 
     def get_instance_usage_audit_log(self, time_before):
