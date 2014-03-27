@@ -31,6 +31,11 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                                str(xml.Document(create_role)))
         return resp, self._parse_resp(body)
 
+    def get_role(self, role_id):
+        """Get a role by its id."""
+        resp, body = self.get('OS-KSADM/roles/%s' % role_id)
+        return resp, self._parse_resp(body)
+
     def create_tenant(self, name, **kwargs):
         """
         Create a tenant

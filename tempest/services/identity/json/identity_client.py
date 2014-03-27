@@ -49,6 +49,12 @@ class IdentityClientJSON(rest_client.RestClient):
         resp, body = self.post('OS-KSADM/roles', post_body)
         return resp, self._parse_resp(body)
 
+    def get_role(self, role_id):
+        """Get a role by its id."""
+        resp, body = self.get('OS-KSADM/roles/%s' % role_id)
+        body = json.loads(body)
+        return resp, body['role']
+
     def create_tenant(self, name, **kwargs):
         """
         Create a tenant

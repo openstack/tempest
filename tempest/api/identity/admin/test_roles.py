@@ -77,6 +77,18 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertFalse(any(found))
 
     @test.attr(type='gate')
+    def test_get_role_by_id(self):
+        # Get a role by its id
+        self.data.setup_test_role()
+        role_id = self.data.role['id']
+        role_name = self.data.role['name']
+        resp, body = self.client.get_role(role_id)
+        self.assertIn('status', resp)
+        self.assertTrue('200', resp['status'])
+        self.assertEqual(role_id, body['id'])
+        self.assertEqual(role_name, body['name'])
+
+    @test.attr(type='gate')
     def test_assign_user_role(self):
         # Assign a role to a user on a tenant
         (user, tenant, role) = self._get_role_params()

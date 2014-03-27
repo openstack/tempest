@@ -66,6 +66,20 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(fetched_service['description'],
                          service_data['description'])
 
+    @attr(type='gate')
+    def test_create_service_without_description(self):
+        # Create a service only with name and type
+        name = data_utils.rand_name('service-')
+        type = data_utils.rand_name('type--')
+        resp, service = self.client.create_service(name, type)
+        self.assertIn('id', service)
+        self.assertTrue('200', resp['status'])
+        self.addCleanup(self._del_service, service['id'])
+        self.assertIn('name', service)
+        self.assertEqual(name, service['name'])
+        self.assertIn('type', service)
+        self.assertEqual(type, service['type'])
+
     @attr(type='smoke')
     def test_list_services(self):
         # Create, List, Verify and Delete Services
