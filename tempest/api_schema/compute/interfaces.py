@@ -12,6 +12,36 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api_schema.compute import parameter_types
+
 delete_interface = {
     'status_code': [202]
+}
+
+interface_common_info = {
+    'type': 'object',
+    'properties': {
+        'port_state': {'type': 'string'},
+        'fixed_ips': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'subnet_id': {
+                        'type': 'string',
+                        'format': 'uuid'
+                    },
+                    'ip_address': {
+                        'type': 'string',
+                        'format': 'ipv4'
+                    }
+                },
+                'required': ['subnet_id', 'ip_address']
+            }
+        },
+        'port_id': {'type': 'string', 'format': 'uuid'},
+        'net_id': {'type': 'string', 'format': 'uuid'},
+        'mac_addr': parameter_types.mac_address
+    },
+    'required': ['port_state', 'fixed_ips', 'port_id', 'net_id', 'mac_addr']
 }
