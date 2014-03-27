@@ -16,6 +16,7 @@ import json
 import urllib
 
 from tempest.api_schema.compute import hosts as schema
+from tempest.api_schema.compute.v2 import hosts as v2_schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -66,6 +67,7 @@ class HostsClientJSON(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s/startup" % str(hostname))
         body = json.loads(body)
+        self.validate_response(v2_schema.startup_host, resp, body)
         return resp, body['host']
 
     def shutdown_host(self, hostname):
