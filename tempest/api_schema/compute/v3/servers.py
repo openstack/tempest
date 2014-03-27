@@ -42,3 +42,7 @@ create_server = {
         'required': ['server']
     }
 }
+
+attach_detach_volume = {
+    'status_code': [202]
+}

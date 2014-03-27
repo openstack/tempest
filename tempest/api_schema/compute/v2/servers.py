@@ -66,3 +66,27 @@ list_virtual_interfaces = {
         'required': ['virtual_interfaces']
     }
 }
+
+attach_volume = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'volumeAttachment': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string'},
+                    'device': {'type': 'string'},
+                    'volumeId': {'type': 'string'},
+                    'serverId': {'type': ['integer', 'string']}
+                },
+                'required': ['id', 'device', 'volumeId', 'serverId']
+            }
+        },
+        'required': ['volumeAttachment']
+    }
+}
+
+detach_volume = {
+    'status_code': [202]
+}
