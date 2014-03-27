@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 from tempest.api_schema.compute.v2 import hosts
 
 startup_host = {
@@ -23,4 +24,18 @@ startup_host = {
         },
         'required': ['host']
     }
+}
+
+# The 'power_action' attribute of 'shutdown_host' API is 'shutdown'
+shutdown_host = copy.deepcopy(startup_host)
+
+shutdown_host['response_body']['properties']['power_action'] = {
+    'enum': ['shutdown']
+}
+
+# The 'power_action' attribute of 'reboot_host' API is 'reboot'
+reboot_host = copy.deepcopy(startup_host)
+
+reboot_host['response_body']['properties']['power_action'] = {
+    'enum': ['reboot']
 }
