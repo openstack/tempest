@@ -26,9 +26,10 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseDataProcessingTest, cls).setUpClass()
-        os = cls.get_client_manager()
         if not CONF.service_available.sahara:
             raise cls.skipException("Sahara support is required")
+
+        os = cls.get_client_manager()
         cls.client = os.data_processing_client
 
         # set some constants
@@ -57,7 +58,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     @classmethod
     def tearDownClass(cls):
         # cleanup node group templates
-        for ngt_id in cls._node_group_templates:
+        for ngt_id in getattr(cls, '_node_group_templates', []):
             try:
                 cls.client.delete_node_group_template(ngt_id)
             except Exception:
