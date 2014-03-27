@@ -18,8 +18,8 @@ import urllib
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -32,7 +32,7 @@ class TenantUsagesClientXML(rest_client.RestClient):
         self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):
-        json = xml_to_json(node)
+        json = xml_utils.xml_to_json(node)
         return json
 
     def list_tenant_usages(self, params=None):

@@ -16,10 +16,8 @@ import urllib
 
 from lxml import etree
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -40,7 +38,7 @@ class HostsClientXML(rest_client.RestClient):
 
         resp, body = self.get(url)
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
         return resp, body
 
     def show_host_detail(self, hostname):
@@ -48,20 +46,20 @@ class HostsClientXML(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s" % str(hostname))
         node = etree.fromstring(body)
-        body = [xml_to_json(node)]
+        body = [xml_utils.xml_to_json(node)]
         return resp, body
 
     def update_host(self, hostname, **kwargs):
         """Update a host."""
 
-        request_body = Element("updates")
+        request_body = xml_utils.Element("updates")
         if kwargs:
             for k, v in kwargs.iteritems():
-                request_body.append(Element(k, v))
+                request_body.append(xml_utils.Element(k, v))
         resp, body = self.put("os-hosts/%s" % str(hostname),
-                              str(Document(request_body)))
+                              str(xml_utils.Document(request_body)))
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
         return resp, body
 
     def startup_host(self, hostname):
@@ -69,7 +67,7 @@ class HostsClientXML(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s/startup" % str(hostname))
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
         return resp, body
 
     def shutdown_host(self, hostname):
@@ -77,7 +75,7 @@ class HostsClientXML(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s/shutdown" % str(hostname))
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
         return resp, body
 
     def reboot_host(self, hostname):
@@ -85,5 +83,5 @@ class HostsClientXML(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s/reboot" % str(hostname))
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
         return resp, body

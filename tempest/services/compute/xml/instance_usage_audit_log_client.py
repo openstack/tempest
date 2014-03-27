@@ -16,8 +16,8 @@
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import xml_to_json
 
 CONF = config.CONF
 
@@ -33,11 +33,13 @@ class InstanceUsagesAuditLogClientXML(rest_client.RestClient):
     def list_instance_usage_audit_logs(self):
         url = 'os-instance_usage_audit_log'
         resp, body = self.get(url)
-        instance_usage_audit_logs = xml_to_json(etree.fromstring(body))
+        instance_usage_audit_logs = xml_utils.xml_to_json(
+            etree.fromstring(body))
         return resp, instance_usage_audit_logs
 
     def get_instance_usage_audit_log(self, time_before):
         url = 'os-instance_usage_audit_log/%s' % time_before
         resp, body = self.get(url)
-        instance_usage_audit_log = xml_to_json(etree.fromstring(body))
+        instance_usage_audit_log = xml_utils.xml_to_json(
+            etree.fromstring(body))
         return resp, instance_usage_audit_log

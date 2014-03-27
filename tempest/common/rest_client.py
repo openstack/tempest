@@ -24,10 +24,10 @@ import time
 import jsonschema
 
 from tempest.common import http
+from tempest.common import xml_utils as common
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.services.compute.xml import common
 
 CONF = config.CONF
 

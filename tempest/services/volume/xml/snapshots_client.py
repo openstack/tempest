@@ -16,10 +16,10 @@ import urllib
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils as common
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.services.compute.xml import common
 
 CONF = config.CONF
 

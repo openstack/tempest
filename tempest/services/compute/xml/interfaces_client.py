@@ -18,13 +18,9 @@ import time
 from lxml import etree
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
 CONF = config.CONF
 
@@ -37,9 +33,9 @@ class InterfacesClientXML(rest_client.RestClient):
         self.service = CONF.compute.catalog_type
 
     def _process_xml_interface(self, node):
-        iface = xml_to_json(node)
+        iface = xml_utils.xml_to_json(node)
         # NOTE(danms): if multiple addresses per interface is ever required,
-        # xml_to_json will need to be fixed or replaced in this case
+        # xml_utils.xml_to_json will need to be fixed or replaced in this case
         iface['fixed_ips'] = [dict(iface['fixed_ips']['fixed_ip'].items())]
         return iface
 
@@ -52,21 +48,21 @@ class InterfacesClientXML(rest_client.RestClient):
 
     def create_interface(self, server, port_id=None, network_id=None,
                          fixed_ip=None):
-        doc = Document()
-        iface = Element('interfaceAttachment')
+        doc = xml_utils.Document()
+        iface = xml_utils.Element('interfaceAttachment')
         if port_id:
-            _port_id = Element('port_id')
-            _port_id.append(Text(port_id))
+            _port_id = xml_utils.Element('port_id')
+            _port_id.append(xml_utils.Text(port_id))
             iface.append(_port_id)
         if network_id:
-            _network_id = Element('net_id')
-            _network_id.append(Text(network_id))
+            _network_id = xml_utils.Element('net_id')
+            _network_id.append(xml_utils.Text(network_id))
             iface.append(_network_id)
         if fixed_ip:
-            _fixed_ips = Element('fixed_ips')
-            _fixed_ip = Element('fixed_ip')
-            _ip_address = Element('ip_address')
-            _ip_address.append(Text(fixed_ip))
+            _fixed_ips = xml_utils.Element('fixed_ips')
+            _fixed_ip = xml_utils.Element('fixed_ip')
+            _ip_address = xml_utils.Element('ip_address')
+            _ip_address.append(xml_utils.Text(fixed_ip))
             _fixed_ip.append(_ip_address)
             _fixed_ips.append(_fixed_ip)
             iface.append(_fixed_ips)
@@ -108,18 +104,18 @@ class InterfacesClientXML(rest_client.RestClient):
 
     def add_fixed_ip(self, server_id, network_id):
         """Add a fixed IP to input server instance."""
-        post_body = Element("addFixedIp",
-                            xmlns=XMLNS_11,
-                            networkId=network_id)
+        post_body = xml_utils.Element("addFixedIp",
+                                      xmlns=xml_utils.XMLNS_11,
+                                      networkId=network_id)
         resp, body = self.post('servers/%s/action' % str(server_id),
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         return resp, body
 
     def remove_fixed_ip(self, server_id, ip_address):
         """Remove input fixed IP from input server instance."""
-        post_body = Element("removeFixedIp",
-                            xmlns=XMLNS_11,
-                            address=ip_address)
+        post_body = xml_utils.Element("removeFixedIp",
+                                      xmlns=xml_utils.XMLNS_11,
+                                      address=ip_address)
         resp, body = self.post('servers/%s/action' % str(server_id),
-                               str(Document(post_body)))
+                               str(xml_utils.Document(post_body)))
         return resp, body

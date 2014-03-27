@@ -15,10 +15,8 @@
 
 
 from tempest.common import rest_client
+from tempest.common import xml_utils
 from tempest import config
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
 
 CONF = config.CONF
 
@@ -43,7 +41,7 @@ class FixedIPsClientXML(rest_client.RestClient):
         # accept any action key value here to permit tests to cover cases with
         # invalid actions raising badrequest.
         key, value = body.popitem()
-        xml_body = Element(key)
-        xml_body.append(Text(value))
-        resp, body = self.post(url, str(Document(xml_body)))
+        xml_body = xml_utils.Element(key)
+        xml_body.append(xml_utils.Text(value))
+        resp, body = self.post(url, str(xml_utils.Document(xml_body)))
         return resp, body

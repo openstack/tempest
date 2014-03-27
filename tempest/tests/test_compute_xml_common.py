@@ -13,7 +13,7 @@
 #    under the License.
 from lxml import etree
 
-from tempest.services.compute.xml import common
+from tempest.common import xml_utils as common
 from tempest.tests import base
 
 

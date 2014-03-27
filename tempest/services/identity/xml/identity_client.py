@@ -12,8 +12,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from tempest.common import xml_utils as xml
 from tempest import config
-from tempest.services.compute.xml import common as xml
 from tempest.services.identity.json import identity_client
 
 CONF = config.CONF

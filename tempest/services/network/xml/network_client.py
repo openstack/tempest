@@ -14,7 +14,7 @@ from lxml import etree
 import xml.etree.ElementTree as ET
 
 from tempest.common import rest_client
-from tempest.services.compute.xml import common
+from tempest.common import xml_utils as common
 from tempest.services.network import network_client_base as client_base
 
 
