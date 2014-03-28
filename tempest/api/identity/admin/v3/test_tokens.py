@@ -52,8 +52,12 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
 
     @attr(type='gate')
     def test_rescope_token(self):
-        """An unscoped token can be requested, that token can be used to
-           request a scoped token.
+        """Rescope a token.
+
+        An unscoped token can be requested, that token can be used to request a
+        scoped token. The scoped token can be revoked, and the original token
+        used to get a token in a different project.
+
         """
 
         # Create a user.
@@ -63,11 +67,16 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(201, resp.status)
         self.addCleanup(self.client.delete_user, user['id'])
 
-        # Create a project.
-        project_name = data_utils.rand_name(name='project-')
-        resp, project = self.client.create_project(project_name)
+        # Create a couple projects
+        project1_name = data_utils.rand_name(name='project-')
+        resp, project1 = self.client.create_project(project1_name)
         self.assertEqual(201, resp.status)
-        self.addCleanup(self.client.delete_project, project['id'])
+        self.addCleanup(self.client.delete_project, project1['id'])
+
+        project2_name = data_utils.rand_name(name='project-')
+        resp, project2 = self.client.create_project(project2_name)
+        self.assertEqual(201, resp.status)
+        self.addCleanup(self.client.delete_project, project2['id'])
 
         # Create a role
         role_name = data_utils.rand_name(name='role-')
@@ -75,8 +84,12 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(201, resp.status)
         self.addCleanup(self.client.delete_role, role['id'])
 
-        # Grant the user the role on the project.
-        resp, _ = self.client.assign_user_role(project['id'], user['id'],
+        # Grant the user the role on both projects.
+        resp, _ = self.client.assign_user_role(project1['id'], user['id'],
+                                               role['id'])
+        self.assertEqual(204, resp.status)
+
+        resp, _ = self.client.assign_user_role(project2['id'], user['id'],
                                                role['id'])
         self.assertEqual(204, resp.status)
 
@@ -104,8 +117,10 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertNotIn('roles', token_auth['token'])
 
         # Use the unscoped token to get a scoped token.
-        resp, token_auth = self.token.auth(token=token_id, tenant=project_name,
+        resp, token_auth = self.token.auth(token=token_id,
+                                           tenant=project1_name,
                                            domain='Default')
+        token1_id = resp['x-subject-token']
         self.assertEqual(201, resp.status)
 
         self.assertEqual(orig_expires_at, token_auth['token']['expires_at'],
@@ -117,9 +132,9 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(orig_user, token_auth['token']['user'],
                          'User should match original token')
         self.assertIsInstance(token_auth['token']['catalog'], list)
-        self.assertEqual(project['id'],
+        self.assertEqual(project1['id'],
                          token_auth['token']['project']['id'])
-        self.assertEqual(project['name'],
+        self.assertEqual(project1['name'],
                          token_auth['token']['project']['name'])
         self.assertEqual('default',
                          token_auth['token']['project']['domain']['id'])
@@ -128,6 +143,21 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(1, len(token_auth['token']['roles']))
         self.assertEqual(role['id'], token_auth['token']['roles'][0]['id'])
         self.assertEqual(role['name'], token_auth['token']['roles'][0]['name'])
+
+        # Revoke the unscoped token.
+        resp, _ = self.client.delete_token(token1_id)
+        self.assertEqual(204, resp.status)
+
+        # Now get another scoped token using the unscoped token.
+        resp, token_auth = self.token.auth(token=token_id,
+                                           tenant=project2_name,
+                                           domain='Default')
+        self.assertEqual(201, resp.status)
+
+        self.assertEqual(project2['id'],
+                         token_auth['token']['project']['id'])
+        self.assertEqual(project2['name'],
+                         token_auth['token']['project']['name'])
 
 
 class TokensV3TestXML(TokensV3TestJSON):
