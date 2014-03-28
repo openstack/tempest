@@ -48,6 +48,7 @@ class ImagesClientJSON(rest_client.RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
+        self.validate_response(schema.create_image, resp, body)
         return resp, body
 
     def list_images(self, params=None):
@@ -81,7 +82,9 @@ class ImagesClientJSON(rest_client.RestClient):
 
     def delete_image(self, image_id):
         """Deletes the provided image."""
-        return self.delete("images/%s" % str(image_id))
+        resp, body = self.delete("images/%s" % str(image_id))
+        self.validate_response(schema.delete, resp, body)
+        return resp, body
 
     def wait_for_image_status(self, image_id, status):
         """Waits for an image to reach a given status."""
@@ -125,6 +128,7 @@ class ImagesClientJSON(rest_client.RestClient):
         """Deletes a single image metadata key/value pair."""
         resp, body = self.delete("images/%s/metadata/%s" %
                                  (str(image_id), key))
+        self.validate_response(schema.delete, resp, body)
         return resp, body
 
     def is_resource_deleted(self, id):

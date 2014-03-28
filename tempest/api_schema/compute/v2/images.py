@@ -90,3 +90,11 @@ list_images = {
         'required': ['images']
     }
 }
+
+create_image = {
+    'status_code': [202]
+}
+
+delete = {
+    'status_code': [204]
+}
