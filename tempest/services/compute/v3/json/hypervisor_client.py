@@ -33,6 +33,8 @@ class HypervisorV3ClientJSON(rest_client.RestClient):
         """List hypervisors information."""
         resp, body = self.get('os-hypervisors')
         body = json.loads(body)
+        self.validate_response(common_schema.common_hypervisors_detail,
+                               resp, body)
         return resp, body['hypervisors']
 
     def get_hypervisor_list_details(self):
@@ -73,4 +75,6 @@ class HypervisorV3ClientJSON(rest_client.RestClient):
         """Search specified hypervisor."""
         resp, body = self.get('os-hypervisors/search?query=%s' % hyper_name)
         body = json.loads(body)
+        self.validate_response(common_schema.common_hypervisors_detail,
+                               resp, body)
         return resp, body['hypervisors']
