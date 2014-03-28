@@ -69,6 +69,7 @@ class HypervisorV3ClientJSON(rest_client.RestClient):
         """Display the uptime of the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/uptime' % hyper_id)
         body = json.loads(body)
+        self.validate_response(common_schema.hypervisor_uptime, resp, body)
         return resp, body['hypervisor']
 
     def search_hypervisor(self, hyper_name):
