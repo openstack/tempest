@@ -300,3 +300,11 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         resp, body = self.get(uri)
         body = json.loads(body)
         return resp, body
+
+    def add_dhcp_agent_to_network(self, agent_id, network_id):
+        post_body = {'network_id': network_id}
+        body = json.dumps(post_body)
+        uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
+        resp, body = self.post(uri, body)
+        body = json.loads(body)
+        return resp, body

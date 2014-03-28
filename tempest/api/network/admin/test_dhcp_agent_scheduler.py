@@ -59,22 +59,43 @@ class DHCPAgentSchedulersTestJSON(base.BaseAdminNetworkTest):
         return network_id in network_ids
 
     @test.attr(type='smoke')
-    def test_remove_network_from_dhcp_agent(self):
+    def test_add_remove_network_from_dhcp_agent(self):
         # The agent is now bound to the network, we can free the port
         self.client.delete_port(self.port['id'])
         self.ports.remove(self.port)
-        resp, body = self.admin_client.list_dhcp_agent_hosting_network(
-            self.network['id'])
+        agent = dict()
+        agent['agent_type'] = None
+        resp, body = self.admin_client.list_agents()
         agents = body['agents']
-        self.assertIsNotNone(agents)
-        # Get an agent.
-        agent = agents[0]
-        network_id = self.network['id']
+        for a in agents:
+            if a['agent_type'] == 'DHCP agent':
+                agent = a
+                break
+        self.assertEqual(agent['agent_type'], 'DHCP agent', 'Could not find '
+                         'DHCP agent in agent list though dhcp_agent_scheduler'
+                         ' is enabled.')
+        network = self.create_network()
+        network_id = network['id']
+        if self._check_network_in_dhcp_agent(network_id, agent):
+            self._remove_network_from_dhcp_agent(network_id, agent)
+            self._add_dhcp_agent_to_network(network_id, agent)
+        else:
+            self._add_dhcp_agent_to_network(network_id, agent)
+            self._remove_network_from_dhcp_agent(network_id, agent)
+
+    def _remove_network_from_dhcp_agent(self, network_id, agent):
         resp, body = self.admin_client.remove_network_from_dhcp_agent(
             agent_id=agent['id'],
             network_id=network_id)
         self.assertEqual(resp['status'], '204')
         self.assertFalse(self._check_network_in_dhcp_agent(
+            network_id, agent))
+
+    def _add_dhcp_agent_to_network(self, network_id, agent):
+        resp, body = self.admin_client.add_dhcp_agent_to_network(
+            agent['id'], network_id)
+        self.assertEqual(resp['status'], '201')
+        self.assertTrue(self._check_network_in_dhcp_agent(
             network_id, agent))
 
 
