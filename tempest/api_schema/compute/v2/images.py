@@ -109,3 +109,14 @@ image_metadata = {
         'required': ['metadata']
     }
 }
+
+image_meta_item = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'meta': {'type': 'object'}
+        },
+        'required': ['meta']
+    }
+}
