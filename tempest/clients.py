@@ -78,6 +78,8 @@ from tempest.services.compute.v3.json.interfaces_client import \
     InterfacesV3ClientJSON
 from tempest.services.compute.v3.json.keypairs_client import \
     KeyPairsV3ClientJSON
+from tempest.services.compute.v3.json.migration_client import \
+    MigrationsV3ClientJSON
 from tempest.services.compute.v3.json.quotas_client import \
     QuotasV3ClientJSON
 from tempest.services.compute.v3.json.servers_client import \
@@ -325,6 +327,8 @@ class Manager(manager.Manager):
             self.tenant_usages_client = TenantUsagesClientJSON(
                 self.auth_provider)
             self.version_v3_client = VersionV3ClientJSON(self.auth_provider)
+            self.migrations_v3_client = MigrationsV3ClientJSON(
+                self.auth_provider)
             self.policy_client = PolicyClientJSON(self.auth_provider)
             self.hosts_client = HostsClientJSON(self.auth_provider)
             self.hypervisor_v3_client = HypervisorV3ClientJSON(
