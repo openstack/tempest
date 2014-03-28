@@ -260,10 +260,6 @@ class ServersClientJSON(rest_client.RestClient):
         """Reverts a server back to its original flavor."""
         return self.action(server_id, 'revertResize', None, **kwargs)
 
-    def create_image(self, server_id, name):
-        """Creates an image of the given server."""
-        return self.action(server_id, 'createImage', None, name=name)
-
     def list_server_metadata(self, server_id):
         resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = json.loads(body)
