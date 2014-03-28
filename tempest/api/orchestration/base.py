@@ -53,9 +53,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def _get_identity_admin_client(cls):
-        """
-        Returns an instance of the Identity Admin API client
-        """
+        """Returns an instance of the Identity Admin API client."""
         manager = clients.AdminManager(interface=cls._interface)
         admin_client = manager.identity_client
         return admin_client
@@ -119,6 +117,6 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @staticmethod
     def stack_output(stack, output_key):
-        """Return a stack output value for a give key."""
+        """Return a stack output value for a given key."""
         return next((o['output_value'] for o in stack['outputs']
                     if o['output_key'] == output_key), None)

@@ -49,7 +49,7 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
             cls.test_resources[resource['logical_resource_id']] = resource
 
     def test_created_resources(self):
-        """Created stack should be on the list of existing stacks."""
+        """Created stack should be in the list of existing stacks."""
         resources = [('SwiftContainer', 'OS::Swift::Container'),
                      ('SwiftContainerWebsite', 'OS::Swift::Container')]
         for resource_name, resource_type in resources:
