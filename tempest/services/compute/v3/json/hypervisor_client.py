@@ -53,6 +53,7 @@ class HypervisorV3ClientJSON(rest_client.RestClient):
         """List instances belonging to the specified hypervisor."""
         resp, body = self.get('os-hypervisors/%s/servers' % hyper_name)
         body = json.loads(body)
+        self.validate_response(v3schema.hypervisors_servers, resp, body)
         return resp, body['hypervisor']
 
     def get_hypervisor_stats(self):

@@ -147,3 +147,42 @@ common_show_hypervisor = {
         'required': ['hypervisor']
     }
 }
+
+common_hypervisors_detail = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'hypervisors': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': ['integer', 'string']},
+                        'hypervisor_hostname': {'type': 'string'}
+                    },
+                    'required': ['id', 'hypervisor_hostname']
+                }
+            }
+        },
+        'required': ['hypervisors']
+    }
+}
+
+common_hypervisors_info = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'hypervisor': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': ['integer', 'string']},
+                    'hypervisor_hostname': {'type': 'string'},
+                },
+                'required': ['id', 'hypervisor_hostname']
+            }
+        },
+        'required': ['hypervisor']
+    }
+}
