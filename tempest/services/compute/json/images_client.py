@@ -94,6 +94,7 @@ class ImagesClientJSON(rest_client.RestClient):
         """Lists all metadata items for an image."""
         resp, body = self.get("images/%s/metadata" % str(image_id))
         body = json.loads(body)
+        self.validate_response(schema.image_metadata, resp, body)
         return resp, body['metadata']
 
     def set_image_metadata(self, image_id, meta):
@@ -101,6 +102,7 @@ class ImagesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'metadata': meta})
         resp, body = self.put('images/%s/metadata' % str(image_id), post_body)
         body = json.loads(body)
+        self.validate_response(schema.image_metadata, resp, body)
         return resp, body['metadata']
 
     def update_image_metadata(self, image_id, meta):
@@ -108,6 +110,7 @@ class ImagesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'metadata': meta})
         resp, body = self.post('images/%s/metadata' % str(image_id), post_body)
         body = json.loads(body)
+        self.validate_response(schema.image_metadata, resp, body)
         return resp, body['metadata']
 
     def get_image_metadata_item(self, image_id, key):

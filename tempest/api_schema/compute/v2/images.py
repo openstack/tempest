@@ -98,3 +98,14 @@ create_image = {
 delete = {
     'status_code': [204]
 }
+
+image_metadata = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'metadata': {'type': 'object'}
+        },
+        'required': ['metadata']
+    }
+}
