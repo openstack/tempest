@@ -459,16 +459,20 @@ class V3TokenClientJSON(rest_client.RestClient):
 
         self.auth_url = auth_url
 
-    def auth(self, user, password, tenant=None, user_type='id', domain=None):
+    def auth(self, user=None, password=None, tenant=None, user_type='id',
+             domain=None, token=None):
         """
         :param user: user id or name, as specified in user_type
         :param domain: the user and tenant domain
+        :param token: a token to re-scope.
 
         Accepts different combinations of credentials. Restrictions:
         - tenant and domain are only name (no id)
         - user domain and tenant domain are assumed identical
         - domain scope is not supported here
         Sample sample valid combinations:
+        - token
+        - token, tenant, domain
         - user_id, password
         - username, password, domain
         - username, password, tenant, domain
@@ -477,23 +481,32 @@ class V3TokenClientJSON(rest_client.RestClient):
         creds = {
             'auth': {
                 'identity': {
-                    'methods': ['password'],
-                    'password': {
-                        'user': {
-                            'password': password,
-                        }
-                    }
+                    'methods': [],
                 }
             }
         }
-        if user_type == 'id':
-            creds['auth']['identity']['password']['user']['id'] = user
-        else:
-            creds['auth']['identity']['password']['user']['name'] = user
-        if domain is not None:
-            _domain = dict(name=domain)
-            creds['auth']['identity']['password']['user']['domain'] = _domain
+        id_obj = creds['auth']['identity']
+        if token:
+            id_obj['methods'].append('token')
+            id_obj['token'] = {
+                'id': token
+            }
+        if user and password:
+            id_obj['methods'].append('password')
+            id_obj['password'] = {
+                'user': {
+                    'password': password,
+                }
+            }
+            if user_type == 'id':
+                id_obj['password']['user']['id'] = user
+            else:
+                id_obj['password']['user']['name'] = user
+            if domain is not None:
+                _domain = dict(name=domain)
+                id_obj['password']['user']['domain'] = _domain
         if tenant is not None:
+            _domain = dict(name=domain)
             project = dict(name=tenant, domain=_domain)
             scope = dict(project=project)
             creds['auth']['scope'] = scope

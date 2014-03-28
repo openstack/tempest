@@ -453,43 +453,61 @@ class V3TokenClientXML(rest_client.RestClient):
 
         self.auth_url = auth_url
 
-    def auth(self, user, password, tenant=None, user_type='id', domain=None):
+    def auth(self, user=None, password=None, tenant=None, user_type='id',
+             domain=None, token=None):
         """
         :param user: user id or name, as specified in user_type
+        :param domain: the user and tenant domain
+        :param token: a token to re-scope.
 
         Accepts different combinations of credentials. Restrictions:
         - tenant and domain are only name (no id)
         - user domain and tenant domain are assumed identical
+        - domain scope is not supported here
         Sample sample valid combinations:
+        - token
+        - token, tenant, domain
         - user_id, password
         - username, password, domain
         - username, password, tenant, domain
         Validation is left to the server side.
         """
-        if user_type == 'id':
-            _user = common.Element('user', id=user, password=password)
-        else:
-            _user = common.Element('user', name=user, password=password)
-        if domain is not None:
-            _domain = common.Element('domain', name=domain)
-            _user.append(_domain)
 
-        password = common.Element('password')
-        password.append(_user)
-
-        method = common.Element('method')
-        method.append(common.Text('password'))
         methods = common.Element('methods')
-        methods.append(method)
         identity = common.Element('identity')
+
+        if token:
+            method = common.Element('method')
+            method.append(common.Text('token'))
+            methods.append(method)
+
+            token = common.Element('token', id=token)
+            identity.append(token)
+
+        if user and password:
+            if user_type == 'id':
+                _user = common.Element('user', id=user, password=password)
+            else:
+                _user = common.Element('user', name=user, password=password)
+            if domain is not None:
+                _domain = common.Element('domain', name=domain)
+                _user.append(_domain)
+
+            password = common.Element('password')
+            password.append(_user)
+            method = common.Element('method')
+            method.append(common.Text('password'))
+            methods.append(method)
+            identity.append(password)
+
         identity.append(methods)
-        identity.append(password)
 
         auth = common.Element('auth')
         auth.append(identity)
 
         if tenant is not None:
             project = common.Element('project', name=tenant)
+            _domain = common.Element('domain', name=domain)
             project.append(_domain)
             scope = common.Element('scope')
             scope.append(project)
