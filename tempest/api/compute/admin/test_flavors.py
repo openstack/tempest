@@ -170,7 +170,6 @@ class FlavorsAdminTestJSON(base.BaseV2ComputeAdminTest):
                 flag = True
         self.assertTrue(flag)
 
-    @test.skip_because(bug='1286297')
     @test.attr(type='gate')
     def test_list_non_public_flavor(self):
         # Create a flavor with os-flavor-access:is_public false.

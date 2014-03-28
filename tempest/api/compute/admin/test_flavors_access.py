@@ -46,7 +46,6 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
         cls.vcpus = 1
         cls.disk = 10
 
-    @test.skip_because(bug='1286297')
     @test.attr(type='gate')
     def test_flavor_access_list_with_private_flavor(self):
         # Test to make sure that list flavor access on a newly created
