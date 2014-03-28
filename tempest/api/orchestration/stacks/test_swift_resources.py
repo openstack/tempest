@@ -29,7 +29,6 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     @test.safe_setup
     def setUpClass(cls):
         super(SwiftResourcesTestJSON, cls).setUpClass()
-        cls.client = cls.orchestration_client
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.load_template('swift_basic')
         os = clients.Manager()

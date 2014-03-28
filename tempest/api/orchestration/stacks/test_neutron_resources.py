@@ -33,7 +33,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         super(NeutronResourcesTestJSON, cls).setUpClass()
         if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
-        cls.client = cls.orchestration_client
         os = clients.Manager()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")

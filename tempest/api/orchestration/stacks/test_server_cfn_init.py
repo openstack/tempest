@@ -34,7 +34,6 @@ class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
         super(ServerCfnInitTestJSON, cls).setUpClass()
         if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
-        cls.client = cls.orchestration_client
         template = cls.load_template('cfn_init_signal')
         stack_name = data_utils.rand_name('heat')
         if CONF.orchestration.keypair_name:
