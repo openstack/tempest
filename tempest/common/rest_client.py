@@ -593,10 +593,12 @@ class RestClient(object):
                 msg = ("The status code(%s) is different than the expected "
                        "one(%s)") % (resp.status, response_code)
                 raise exceptions.InvalidHttpSuccessCode(msg)
-            response_schema = schema.get('response_body')
-            if response_schema:
+
+            # Check the body of a response
+            body_schema = schema.get('response_body')
+            if body_schema:
                 try:
-                    jsonschema.validate(body, response_schema)
+                    jsonschema.validate(body, body_schema)
                 except jsonschema.ValidationError as ex:
                     msg = ("HTTP response body is invalid (%s)") % ex
                     raise exceptions.InvalidHTTPResponseBody(msg)
@@ -604,6 +606,15 @@ class RestClient(object):
                 if body:
                     msg = ("HTTP response body should not exist (%s)") % body
                     raise exceptions.InvalidHTTPResponseBody(msg)
+
+            # Check the header of a response
+            header_schema = schema.get('response_header')
+            if header_schema:
+                try:
+                    jsonschema.validate(resp, header_schema)
+                except jsonschema.ValidationError as ex:
+                    msg = ("HTTP response header is invalid (%s)") % ex
+                    raise exceptions.InvalidHTTPResponseHeader(msg)
 
 
 class NegativeRestClient(RestClient):
