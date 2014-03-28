@@ -117,6 +117,7 @@ class ImagesClientJSON(rest_client.RestClient):
         """Returns the value for a specific image metadata key."""
         resp, body = self.get("images/%s/metadata/%s" % (str(image_id), key))
         body = json.loads(body)
+        self.validate_response(schema.image_meta_item, resp, body)
         return resp, body['meta']
 
     def set_image_metadata_item(self, image_id, key, meta):
@@ -125,6 +126,7 @@ class ImagesClientJSON(rest_client.RestClient):
         resp, body = self.put('images/%s/metadata/%s' % (str(image_id), key),
                               post_body)
         body = json.loads(body)
+        self.validate_response(schema.image_meta_item, resp, body)
         return resp, body['meta']
 
     def delete_image_metadata_item(self, image_id, key):
