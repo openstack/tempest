@@ -28,6 +28,7 @@ service_resource_prefix_map = {
     'vips': 'lb',
     'health_monitors': 'lb',
     'members': 'lb',
+    'ipsecpolicies': 'vpn',
     'vpnservices': 'vpn',
     'ikepolicies': 'vpn',
     'ipsecpolicies': 'vpn',
@@ -47,6 +48,7 @@ hyphen_exceptions = ["health_monitors", "firewall_rules", "firewall_policies"]
 resource_plural_map = {
     'security_groups': 'security_groups',
     'security_group_rules': 'security_group_rules',
+    'ipsecpolicy': 'ipsecpolicies',
     'ikepolicy': 'ikepolicies',
     'ipsecpolicy': 'ipsecpolicies',
     'quotas': 'quotas',
