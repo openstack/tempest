@@ -29,6 +29,9 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         super(VolumesSnapshotTest, cls).setUpClass()
         cls.volume_origin = cls.create_volume()
 
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
+
     @classmethod
     def tearDownClass(cls):
         super(VolumesSnapshotTest, cls).tearDownClass()

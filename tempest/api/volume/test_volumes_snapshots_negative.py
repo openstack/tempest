@@ -14,12 +14,22 @@ import uuid
 
 from tempest.api.volume import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 
 class VolumesSnapshotNegativeTest(base.BaseVolumeV1Test):
     _interface = "json"
+
+    @classmethod
+    def setUpClass(cls):
+        super(VolumesSnapshotNegativeTest, cls).setUpClass()
+
+        if not CONF.volume_feature_enabled.snapshot:
+            raise cls.skipException("Cinder volume snapshots are disabled")
 
     @test.attr(type=['negative', 'gate'])
     def test_create_snapshot_with_nonexistent_volume_id(self):

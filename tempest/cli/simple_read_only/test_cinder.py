@@ -16,6 +16,7 @@
 import logging
 import re
 import subprocess
+import testtools
 
 import tempest.cli
 from tempest import config
@@ -86,6 +87,8 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
     def test_cinder_rate_limits(self):
         self.cinder('rate-limits')
 
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Volume snapshot not available.')
     def test_cinder_snapshot_list(self):
         self.cinder('snapshot-list')
 
