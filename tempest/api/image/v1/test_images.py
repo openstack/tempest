@@ -109,6 +109,7 @@ class ListImagesTest(base.BaseV1ImageTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ListImagesTest, cls).setUpClass()
         # We add a few images here to test the listing functionality of
@@ -244,6 +245,7 @@ class ListImagesTest(base.BaseV1ImageTest):
 
 class ListSnapshotImagesTest(base.BaseV1ImageTest):
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ListSnapshotImagesTest, cls).setUpClass()
         if not CONF.compute_feature_enabled.api_v3:
@@ -268,7 +270,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
 
     @classmethod
     def tearDownClass(cls):
-        for server in cls.servers:
+        for server in getattr(cls, "servers", []):
             cls.servers_client.delete_server(server['id'])
         super(ListSnapshotImagesTest, cls).tearDownClass()
 

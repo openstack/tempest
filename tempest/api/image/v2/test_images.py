@@ -135,6 +135,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ListImagesTest, cls).setUpClass()
         # We add a few images here to test the listing functionality of
