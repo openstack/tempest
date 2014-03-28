@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 hypervisor_statistics = {
     'status_code': [200],
     'response_body': {
@@ -186,3 +188,10 @@ common_hypervisors_info = {
         'required': ['hypervisor']
     }
 }
+
+
+hypervisor_uptime = copy.deepcopy(common_hypervisors_info)
+hypervisor_uptime['response_body']['properties']['hypervisor'][
+    'properties']['uptime'] = {'type': 'string'}
+hypervisor_uptime['response_body']['properties']['hypervisor'][
+    'required'] = ['id', 'hypervisor_hostname', 'uptime']
