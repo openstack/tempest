@@ -25,8 +25,6 @@ Resources:
     Type: AWS::IAM::User
 """
 
-    invalid_template_url = 'http://www.example.com/template.yaml'
-
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
@@ -65,5 +63,3 @@ class TemplateAWSTestJSON(TemplateYAMLTestJSON):
   }
 }
 """
-
-    invalid_template_url = 'http://www.example.com/template.template'
