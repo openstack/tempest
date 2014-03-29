@@ -45,6 +45,7 @@ class HostsClientJSON(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s" % str(hostname))
         body = json.loads(body)
+        self.validate_response(schema.show_host_detail, resp, body)
         return resp, body['host']
 
     def update_host(self, hostname, **kwargs):
