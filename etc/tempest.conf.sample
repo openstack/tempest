@@ -261,7 +261,7 @@
 # IP version used for SSH connections. (integer value)
 #ip_version_for_ssh=4
 
-# Dose the SSH uses Floating IP? (boolean value)
+# Does SSH use Floating IPs? (boolean value)
 #use_floatingip_for_ssh=true
 
 # Catalog type of the Compute service. (string value)

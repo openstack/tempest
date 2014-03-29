@@ -189,7 +189,7 @@ ComputeGroup = [
                help="IP version used for SSH connections."),
     cfg.BoolOpt('use_floatingip_for_ssh',
                 default=True,
-                help="Dose the SSH uses Floating IP?"),
+                help="Does SSH use Floating IPs?"),
     cfg.StrOpt('catalog_type',
                default='compute',
                help="Catalog type of the Compute service."),
