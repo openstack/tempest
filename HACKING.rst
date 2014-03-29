@@ -120,13 +120,14 @@ These descriptions consists of two important sections for the test
  - A json schema: defines properties for a request.
 
 After that a test class must be added to automatically generate test scenarios
-out of the given interface description:
+out of the given interface description::
+
+    load_tests = test.NegativeAutoTest.load_tests
 
     class SampeTestNegativeTestJSON(<your base class>, test.NegativeAutoTest):
         _interface = 'json'
         _service = 'compute'
-        _schema_file = 'compute/servers/get_console_output.json'
-        scenarios = test.NegativeAutoTest.generate_scenario(_schema_file)
+        _schema_file = <your Schema file>
 
 Negative tests must be marked with a negative attribute::
 
