@@ -47,7 +47,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @attr(type='gate')
     def test_stack_list(self):
-        """Created stack should be on the list of existing stacks."""
+        """Created stack should be in the list of existing stacks."""
         resp, stacks = self.client.list_stacks()
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(stacks, list)
@@ -76,7 +76,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @attr(type='gate')
     def test_suspend_resume_stack(self):
-        """suspend and resume a stack."""
+        """Suspend and resume a stack."""
         resp, suspend_stack = self.client.suspend_stack(self.stack_identifier)
         self.assertEqual('200', resp['status'])
         self.client.wait_for_stack_status(self.stack_identifier,
@@ -121,7 +121,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @attr(type='gate')
     def test_resource_metadata(self):
-        """Getting metadata for created resource should be possible."""
+        """Getting metadata for created resources should be possible."""
         resp, metadata = self.client.show_resource_metadata(
             self.stack_identifier,
             self.resource_name)
@@ -147,7 +147,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @attr(type='gate')
     def test_show_event(self):
-        """Getting details about existing event should be possible."""
+        """Getting details about an event should be possible."""
         resp, events = self.client.list_resource_events(self.stack_identifier,
                                                         self.resource_name)
         self.assertNotEqual([], events)
