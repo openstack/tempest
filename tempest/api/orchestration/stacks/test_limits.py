@@ -37,3 +37,17 @@ Outputs:
         ex = self.assertRaises(exceptions.BadRequest, self.create_stack,
                                stack_name, template)
         self.assertIn('Template exceeds maximum allowed size', str(ex))
+
+    @attr(type='gate')
+    def test_exceed_max_resources_per_stack(self):
+        stack_name = data_utils.rand_name('heat')
+        # Create a big template, one resource more than the limit
+        template = 'heat_template_version: \'2013-05-23\'\nresources:\n'
+        rsrc_snippet = '  random%s:\n    type: \'OS::Heat::RandomString\'\n'
+        num_resources = CONF.orchestration.max_resources_per_stack + 1
+        for i in range(num_resources):
+            template += rsrc_snippet % i
+
+        ex = self.assertRaises(exceptions.BadRequest, self.create_stack,
+                               stack_name, template)
+        self.assertIn('Maximum resources per stack exceeded', str(ex))

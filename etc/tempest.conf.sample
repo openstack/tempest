@@ -736,6 +736,10 @@
 # (integer value)
 #max_template_size=524288
 
+# Value must match heat configuration of the same name.
+# (integer value)
+#max_resources_per_stack=1000
+
 
 [queuing]
 

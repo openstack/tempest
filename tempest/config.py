@@ -572,6 +572,9 @@ OrchestrationGroup = [
     cfg.IntOpt('max_template_size',
                default=524288,
                help="Value must match heat configuration of the same name."),
+    cfg.IntOpt('max_resources_per_stack',
+               default=1000,
+               help="Value must match heat configuration of the same name."),
 ]
 
 
