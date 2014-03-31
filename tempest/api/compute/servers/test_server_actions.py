@@ -30,7 +30,6 @@ CONF = config.CONF
 
 class ServerActionsTestJSON(base.BaseV2ComputeTest):
     resize_available = CONF.compute_feature_enabled.resize
-    pause_available = CONF.compute_feature_enabled.pause
     run_ssh = CONF.compute.run_ssh
 
     def setUp(self):
@@ -341,7 +340,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
         self.wait_for(self._get_output)
 
-    @testtools.skipIf(not pause_available, 'Pause is not available.')
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     @test.attr(type='gate')
     def test_pause_unpause_server(self):
         resp, server = self.client.pause_server(self.server_id)
