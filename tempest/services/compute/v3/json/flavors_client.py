@@ -128,7 +128,8 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
         """Gets flavor access information given the flavor id."""
         resp, body = self.get('flavors/%s/flavor-access' % flavor_id)
         body = json.loads(body)
-        self.validate_response(schema_access.list_flavor_access, resp, body)
+        self.validate_response(schema_access.add_remove_list_flavor_access,
+                               resp, body)
         return resp, body['flavor_access']
 
     def add_flavor_access(self, flavor_id, tenant_id):
@@ -141,6 +142,8 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post('flavors/%s/action' % flavor_id, post_body)
         body = json.loads(body)
+        self.validate_response(schema_access.add_remove_list_flavor_access,
+                               resp, body)
         return resp, body['flavor_access']
 
     def remove_flavor_access(self, flavor_id, tenant_id):
@@ -153,4 +156,6 @@ class FlavorsV3ClientJSON(rest_client.RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post('flavors/%s/action' % flavor_id, post_body)
         body = json.loads(body)
+        self.validate_response(schema_access.add_remove_list_flavor_access,
+                               resp, body)
         return resp, body['flavor_access']
