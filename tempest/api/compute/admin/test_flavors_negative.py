@@ -101,13 +101,9 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.flavor_ref_alt)
 
 
+@test.SimpleNegativeAutoTest
 class FlavorCreateNegativeTestJSON(base.BaseV2ComputeAdminTest,
                                    test.NegativeAutoTest):
     _interface = 'json'
     _service = 'compute'
     _schema_file = 'compute/admin/flavor_create.json'
-
-    @test.attr(type=['negative', 'gate'])
-    def test_create_flavor(self):
-        # flavor details are not returned for non-existent flavors
-        self.execute(self._schema_file)

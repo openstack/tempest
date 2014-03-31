@@ -21,6 +21,7 @@ from tempest import test
 load_tests = test.NegativeAutoTest.load_tests
 
 
+@test.SimpleNegativeAutoTest
 class GetConsoleOutputNegativeTestJSON(base.BaseV2ComputeTest,
                                        test.NegativeAutoTest):
     _service = 'compute'
@@ -31,7 +32,3 @@ class GetConsoleOutputNegativeTestJSON(base.BaseV2ComputeTest,
         super(GetConsoleOutputNegativeTestJSON, cls).setUpClass()
         _resp, server = cls.create_test_server()
         cls.set_resource("server", server['id'])
-
-    @test.attr(type=['negative', 'gate'])
-    def test_get_console_output(self):
-        self.execute(self._schema_file)

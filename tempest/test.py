@@ -17,6 +17,7 @@ import atexit
 import functools
 import json
 import os
+import re
 import sys
 import time
 import urllib
@@ -579,6 +580,24 @@ class NegativeAutoTest(BaseTestCase):
         if name in self._resources:
             return self._resources[name]
         return None
+
+
+def SimpleNegativeAutoTest(klass):
+    """
+    This decorator registers a test function on basis of the class name.
+    """
+    @attr(type=['negative', 'gate'])
+    def generic_test(self):
+        self.execute(self._schema_file)
+
+    cn = klass.__name__
+    cn = cn.replace('JSON', '')
+    cn = cn.replace('Test', '')
+    # NOTE(mkoderer): replaces uppercase chars inside the class name with '_'
+    lower_cn = re.sub('(?<!^)(?=[A-Z])', '_', cn).lower()
+    func_name = 'test_%s' % lower_cn
+    setattr(klass, func_name, generic_test)
+    return klass
 
 
 def call_until_true(func, duration, sleep_for):
