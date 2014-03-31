@@ -20,12 +20,15 @@ from tempest import test
 class CertificatesTestJSON(base.BaseV2ComputeTest):
 
     @test.attr(type='gate')
-    def test_create_and_get_root_certificate(self):
+    def test_create_root_certificate(self):
         # create certificates
-        resp, create_body = self.certificates_client.create_certificate()
+        resp, body = self.certificates_client.create_certificate()
         self.assertEqual(200, resp.status)
-        self.assertIn('data', create_body)
-        self.assertIn('private_key', create_body)
+        self.assertIn('data', body)
+        self.assertIn('private_key', body)
+
+    @test.attr(type='gate')
+    def test_get_root_certificate(self):
         # get the root certificate
         resp, body = self.certificates_client.get_certificate('root')
         self.assertEqual(200, resp.status)
