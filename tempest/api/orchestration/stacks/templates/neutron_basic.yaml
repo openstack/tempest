@@ -41,15 +41,16 @@ resources:
       router_id: {get_param: ExternalRouterId}
       subnet_id: {get_resource: Subnet}
   Server:
-    type: AWS::EC2::Instance
+    type: OS::Nova::Server
     metadata:
       Name: SmokeServerNeutron
     properties:
-      ImageId: {get_param: ImageId}
-      InstanceType: {get_param: InstanceType}
-      KeyName: {get_param: KeyName}
-      SubnetId: {get_resource: Subnet}
-      UserData:
+      image: {get_param: ImageId}
+      flavor: {get_param: InstanceType}
+      key_name: {get_param: KeyName}
+      networks:
+      - network: {get_resource: Network}
+      user_data:
         str_replace:
           template: |
             #!/bin/bash -v
