@@ -337,6 +337,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
     @test.attr(type='gate')
     def test_suspend_resume_server(self):
         resp, server = self.client.suspend_server(self.server_id)

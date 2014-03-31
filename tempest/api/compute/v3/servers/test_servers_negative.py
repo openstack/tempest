@@ -16,6 +16,8 @@
 import base64
 import sys
 
+import testtools
+
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -311,6 +313,8 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
                           self.client.unpause_server,
                           self.server_id)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_suspend_non_existent_server(self):
         # suspend a non existent server
@@ -318,6 +322,8 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.suspend_server,
                           nonexistent_server)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_suspend_server_invalid_state(self):
         # suspend a suspended server.
@@ -337,6 +343,8 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.resume_server,
                           nonexistent_server)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resume_server_invalid_state(self):
         # resume an active server.
