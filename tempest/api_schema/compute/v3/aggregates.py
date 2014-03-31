@@ -12,6 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
+from tempest.api_schema.compute import aggregates
+
 delete_aggregate = {
     'status_code': [204]
 }
+
+create_aggregate = copy.deepcopy(aggregates.common_create_aggregate)
+# V3 API's response status_code is 201
+create_aggregate['status_code'] = [201]

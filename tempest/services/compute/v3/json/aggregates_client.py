@@ -50,6 +50,7 @@ class AggregatesV3ClientJSON(rest_client.RestClient):
         resp, body = self.post('os-aggregates', post_body)
 
         body = json.loads(body)
+        self.validate_response(v3_schema.create_aggregate, resp, body)
         return resp, body['aggregate']
 
     def update_aggregate(self, aggregate_id, name, availability_zone=None):
