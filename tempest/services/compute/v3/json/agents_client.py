@@ -43,7 +43,9 @@ class AgentsV3ClientJSON(rest_client.RestClient):
         """Create an agent build."""
         post_body = json.dumps({'agent': kwargs})
         resp, body = self.post('os-agents', post_body)
-        return resp, self._parse_resp(body)
+        body = json.loads(body)
+        self.validate_response(schema.create_agent, resp, body)
+        return resp, body['agent']
 
     def delete_agent(self, agent_id):
         """Delete an existing agent build."""

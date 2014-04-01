@@ -38,3 +38,24 @@ list_agents = {
         'required': ['agents']
     }
 }
+
+common_create_agent = {
+    'type': 'object',
+    'properties': {
+        'agent': {
+            'type': 'object',
+            'properties': {
+                'agent_id': {'type': ['integer', 'string']},
+                'hypervisor': {'type': 'string'},
+                'os': {'type': 'string'},
+                'architecture': {'type': 'string'},
+                'version': {'type': 'string'},
+                'url': {'type': 'string', 'format': 'uri'},
+                'md5hash': {'type': 'string'}
+            },
+            'required': ['agent_id', 'hypervisor', 'os', 'architecture',
+                         'version', 'url', 'md5hash']
+        }
+    },
+    'required': ['agent']
+}

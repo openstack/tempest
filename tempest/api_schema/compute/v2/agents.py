@@ -12,6 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.api_schema.compute import agents
+
+create_agent = {
+    'status_code': [200],
+    'response_body': agents.common_create_agent
+}
+
 delete_agent = {
     'status_code': [200]
 }
