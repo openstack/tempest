@@ -19,6 +19,7 @@ import json
 import time
 import urllib
 
+from tempest.api_schema.compute import servers as common_schema
 from tempest.api_schema.compute.v3 import servers as schema
 from tempest.common import rest_client
 from tempest.common import waiters
@@ -221,6 +222,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.get("servers/%s/os-server-password" %
                               str(server_id))
         body = json.loads(body)
+        self.validate_response(common_schema.get_password, resp, body)
         return resp, body
 
     def delete_password(self, server_id):
