@@ -32,7 +32,6 @@ Resources:
     @classmethod
     def setUpClass(cls):
         super(TemplateYAMLNegativeTestJSON, cls).setUpClass()
-        cls.client = cls.orchestration_client
         cls.parameters = {}
 
     @test.attr(type=['gate', 'negative'])

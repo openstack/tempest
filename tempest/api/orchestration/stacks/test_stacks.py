@@ -25,7 +25,6 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     @classmethod
     def setUpClass(cls):
         super(StacksTestJSON, cls).setUpClass()
-        cls.client = cls.orchestration_client
 
     @attr(type='smoke')
     def test_stack_list_responds(self):
