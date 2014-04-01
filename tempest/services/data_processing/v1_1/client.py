@@ -32,7 +32,6 @@ class DataProcessingClient(rest_client.RestClient):
 
         It returns pair: resp and parsed resource(s) body.
         """
-
         resp, body = req_fun(uri, headers={
             'Content-Type': 'application/json'
         }, *args, **kwargs)
@@ -48,7 +47,7 @@ class DataProcessingClient(rest_client.RestClient):
     def get_node_group_template(self, tmpl_id):
         """Returns the details of a single node group template."""
 
-        uri = "node-group-templates/%s" % tmpl_id
+        uri = 'node-group-templates/%s' % tmpl_id
         return self._request_and_parse(self.get, uri, 'node_group_template')
 
     def create_node_group_template(self, name, plugin_name, hadoop_version,
@@ -59,7 +58,7 @@ class DataProcessingClient(rest_client.RestClient):
         It supports passing additional params using kwargs and returns created
         object.
         """
-        uri = "node-group-templates"
+        uri = 'node-group-templates'
         body = kwargs.copy()
         body.update({
             'name': name,
@@ -75,7 +74,7 @@ class DataProcessingClient(rest_client.RestClient):
     def delete_node_group_template(self, tmpl_id):
         """Deletes the specified node group template by id."""
 
-        uri = "node-group-templates/%s" % tmpl_id
+        uri = 'node-group-templates/%s' % tmpl_id
         return self.delete(uri)
 
     def list_plugins(self):
@@ -87,7 +86,45 @@ class DataProcessingClient(rest_client.RestClient):
     def get_plugin(self, plugin_name, plugin_version=None):
         """Returns the details of a single plugin."""
 
-        uri = "plugins/%s" % plugin_name
+        uri = 'plugins/%s' % plugin_name
         if plugin_version:
             uri += '/%s' % plugin_version
         return self._request_and_parse(self.get, uri, 'plugin')
+
+    def list_cluster_templates(self):
+        """List all cluster templates for a user."""
+
+        uri = 'cluster-templates'
+        return self._request_and_parse(self.get, uri, 'cluster_templates')
+
+    def get_cluster_template(self, tmpl_id):
+        """Returns the details of a single cluster template."""
+
+        uri = 'cluster-templates/%s' % tmpl_id
+        return self._request_and_parse(self.get, uri, 'cluster_template')
+
+    def create_cluster_template(self, name, plugin_name, hadoop_version,
+                                node_groups, cluster_configs=None,
+                                **kwargs):
+        """Creates cluster template with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object.
+        """
+        uri = 'cluster-templates'
+        body = kwargs.copy()
+        body.update({
+            'name': name,
+            'plugin_name': plugin_name,
+            'hadoop_version': hadoop_version,
+            'node_groups': node_groups,
+            'cluster_configs': cluster_configs or dict(),
+        })
+        return self._request_and_parse(self.post, uri, 'cluster_template',
+                                       body=json.dumps(body))
+
+    def delete_cluster_template(self, tmpl_id):
+        """Deletes the specified cluster template by id."""
+
+        uri = 'cluster-templates/%s' % tmpl_id
+        return self.delete(uri)
