@@ -111,11 +111,15 @@ class SecurityGroupsClientJSON(rest_client.RestClient):
         url = 'os-security-group-rules'
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.validate_response(schema.create_security_group_rule, resp, body)
         return resp, body['security_group_rule']
 
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule."""
-        return self.delete('os-security-group-rules/%s' % str(group_rule_id))
+        resp, body = self.delete('os-security-group-rules/%s' %
+                                 str(group_rule_id))
+        self.validate_response(schema.delete_security_group_rule, resp, body)
+        return resp, body
 
     def list_security_group_rules(self, security_group_id):
         """List all rules for a security group."""
