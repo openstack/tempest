@@ -281,23 +281,49 @@ class RestClient(object):
                 return resp[i]
         return ""
 
-    def _log_request(self, method, req_url, resp, secs=""):
+    def _log_request(self, method, req_url, resp,
+                     secs="", req_headers=None,
+                     req_body=None, resp_body=None):
         # if we have the request id, put it in the right part of the log
         extra = dict(request_id=self._get_request_id(resp))
         # NOTE(sdague): while we still have 6 callers to this function
         # we're going to just provide work around on who is actually
         # providing timings by gracefully adding no content if they don't.
         # Once we're down to 1 caller, clean this up.
+        caller_name = self._find_caller()
         if secs:
             secs = " %.3fs" % secs
         self.LOG.info(
             'Request (%s): %s %s %s%s' % (
-                self._find_caller(),
+                caller_name,
                 resp['status'],
                 method,
                 req_url,
                 secs),
             extra=extra)
+
+        # We intentionally duplicate the info content because in a parallel
+        # world this is important to match
+        trace_regex = CONF.debug.trace_requests
+        if trace_regex and re.search(trace_regex, caller_name):
+            log_fmt = """Request (%s): %s %s %s%s
+    Request - Headers: %s
+        Body: %s
+    Response - Headers: %s
+        Body: %s"""
+
+            self.LOG.debug(
+                log_fmt % (
+                    caller_name,
+                    resp['status'],
+                    method,
+                    req_url,
+                    secs,
+                    str(req_headers),
+                    str(req_body)[:2048],
+                    str(resp),
+                    str(resp_body)[:2048]),
+                extra=extra)
 
     def _parse_resp(self, body):
         if self._get_type() is "json":
@@ -382,7 +408,10 @@ class RestClient(object):
         resp, resp_body = self.http_obj.request(
             req_url, method, headers=req_headers, body=req_body)
         end = time.time()
-        self._log_request(method, req_url, resp, secs=(end - start))
+        self._log_request(method, req_url, resp, secs=(end - start),
+                          req_headers=req_headers, req_body=req_body,
+                          resp_body=resp_body)
+
         # Verify HTTP response codes
         self.response_checker(method, url, req_headers, req_body, resp,
                               resp_body)
