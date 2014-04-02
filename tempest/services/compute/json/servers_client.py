@@ -198,12 +198,21 @@ class ServersClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body
 
-    def action(self, server_id, action_name, response_key, **kwargs):
+    def action(self, server_id, action_name, response_key,
+               schema=None, **kwargs):
         post_body = json.dumps({action_name: kwargs})
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
         if response_key is not None:
-            body = json.loads(body)[response_key]
+            body = json.loads(body)
+            # Check for Schema as 'None' because if we donot have any server
+            # action schema implemented yet then they can pass 'None' to skip
+            # the validation.Once all server action has their schema
+            # implemented then, this check can be removed if every actions are
+            # supposed to validate their response.
+            if schema is not None:
+                self.validate_response(schema, resp, body)
+            body = body[response_key]
         return resp, body
 
     def create_backup(self, server_id, backup_type, rotation, name):
@@ -453,4 +462,5 @@ class ServersClientJSON(rest_client.RestClient):
     def get_vnc_console(self, server_id, console_type):
         """Get URL of VNC console."""
         return self.action(server_id, "os-getVNCConsole",
-                           "console", type=console_type)
+                           "console", common_schema.get_vnc_console,
+                           type=console_type)

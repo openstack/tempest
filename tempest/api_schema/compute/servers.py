@@ -22,3 +22,24 @@ get_password = {
         'required': ['password']
     }
 }
+
+get_vnc_console = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'console': {
+                'type': 'object',
+                'properties': {
+                    'type': {'type': 'string'},
+                    'url': {
+                        'type': 'string',
+                        'format': 'uri'
+                    }
+                },
+                'required': ['type', 'url']
+            }
+        },
+        'required': ['console']
+    }
+}
