@@ -209,7 +209,17 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
         if response_key is not None:
-            body = json.loads(body)[response_key]
+            body = json.loads(body)
+            # Check for Schema as 'None' because if we do not have any server
+            # action schema implemented yet then they can pass 'None' to skip
+            # the validation.Once all server action has their schema
+            # implemented then, this check can be removed if every actions are
+            # supposed to validate their response.
+            # TODO(GMann): Remove the below 'if' check once all server actions
+            # schema are implemented.
+            if schema is not None:
+                self.validate_response(schema, resp, body)
+            body = body[response_key]
         else:
             self.validate_response(schema, resp, body)
         return resp, body
@@ -256,7 +266,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         if 'disk_config' in kwargs:
             kwargs['os-disk-config:disk_config'] = kwargs['disk_config']
             del kwargs['disk_config']
-        return self.action(server_id, 'rebuild', 'server', **kwargs)
+        return self.action(server_id, 'rebuild', 'server', None, **kwargs)
 
     def resize(self, server_id, flavor_ref, **kwargs):
         """Changes the flavor of a server."""
@@ -421,11 +431,12 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def get_console_output(self, server_id, length):
         return self.action(server_id, 'get_console_output', 'output',
-                           length=length)
+                           common_schema.get_console_output, length=length)
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', 'admin_password', **kwargs)
+        return self.action(server_id, 'rescue', 'admin_password',
+                           None, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
@@ -483,9 +494,9 @@ class ServersV3ClientJSON(rest_client.RestClient):
     def get_spice_console(self, server_id, console_type):
         """Get URL of Spice console."""
         return self.action(server_id, "get_spice_console"
-                           "console", type=console_type)
+                           "console", None, type=console_type)
 
     def get_rdp_console(self, server_id, console_type):
         """Get URL of RDP console."""
         return self.action(server_id, "get_rdp_console"
-                           "console", type=console_type)
+                           "console", None, type=console_type)
