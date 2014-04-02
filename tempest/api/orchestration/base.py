@@ -70,7 +70,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         return stack_identifier
 
     @classmethod
-    def clear_stacks(cls):
+    def _clear_stacks(cls):
         for stack_identifier in cls.stacks:
             try:
                 cls.client.delete_stack(stack_identifier)
@@ -92,7 +92,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         return body
 
     @classmethod
-    def clear_keypairs(cls):
+    def _clear_keypairs(cls):
         for kp_name in cls.keypairs:
             try:
                 cls.keypairs_client.delete_keypair(kp_name)
@@ -111,8 +111,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.clear_stacks()
-        cls.clear_keypairs()
+        cls._clear_stacks()
+        cls._clear_keypairs()
         super(BaseOrchestrationTest, cls).tearDownClass()
 
     @staticmethod
