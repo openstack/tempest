@@ -60,8 +60,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         # Role should be created, verified, and deleted
         role_name = data_utils.rand_name(name='role-test-')
         resp, body = self.client.create_role(role_name)
-        self.assertIn('status', resp)
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(200, resp.status)
         self.assertEqual(role_name, body['name'])
 
         resp, body = self.client.list_roles()
@@ -69,8 +68,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertTrue(any(found))
 
         resp, body = self.client.delete_role(found[0]['id'])
-        self.assertIn('status', resp)
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(204, resp.status)
 
         resp, body = self.client.list_roles()
         found = [role for role in body if role['name'] == role_name]
@@ -104,7 +102,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
                                                        user['id'], role['id'])
         resp, body = self.client.remove_user_role(tenant['id'], user['id'],
                                                   user_role['id'])
-        self.assertEqual(resp['status'], '204')
+        self.assertEqual(204, resp.status)
 
     @test.attr(type='gate')
     def test_list_user_roles(self):

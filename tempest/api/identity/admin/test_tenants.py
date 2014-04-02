@@ -35,13 +35,13 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
             tenants.append(tenant)
         tenant_ids = map(lambda x: x['id'], tenants)
         resp, body = self.client.list_tenants()
-        self.assertTrue(resp['status'].startswith('2'))
+        self.assertEqual(200, resp.status)
         found = [tenant for tenant in body if tenant['id'] in tenant_ids]
         self.assertEqual(len(found), len(tenants), 'Tenants not created')
 
         for tenant in tenants:
             resp, body = self.client.delete_tenant(tenant['id'])
-            self.assertTrue(resp['status'].startswith('2'))
+            self.assertEqual(204, resp.status)
             self.data.tenants.remove(tenant)
 
         resp, body = self.client.list_tenants()
@@ -57,10 +57,9 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
                                                description=tenant_desc)
         tenant = body
         self.data.tenants.append(tenant)
-        st1 = resp['status']
         tenant_id = body['id']
         desc1 = body['description']
-        self.assertTrue(st1.startswith('2'))
+        self.assertEqual(200, resp.status)
         self.assertEqual(desc1, tenant_desc, 'Description should have '
                          'been sent in response for create')
         resp, body = self.client.get_tenant(tenant_id)
@@ -78,9 +77,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         tenant = body
         self.data.tenants.append(tenant)
         tenant_id = body['id']
-        st1 = resp['status']
         en1 = body['enabled']
-        self.assertTrue(st1.startswith('2'))
+        self.assertEqual(200, resp.status)
         self.assertTrue(en1, 'Enable should be True in response')
         resp, body = self.client.get_tenant(tenant_id)
         en2 = body['enabled']
@@ -96,9 +94,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         tenant = body
         self.data.tenants.append(tenant)
         tenant_id = body['id']
-        st1 = resp['status']
         en1 = body['enabled']
-        self.assertTrue(st1.startswith('2'))
+        self.assertEqual(200, resp.status)
         self.assertEqual('false', str(en1).lower(),
                          'Enable should be False in response')
         resp, body = self.client.get_tenant(tenant_id)
@@ -122,9 +119,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
         t_name2 = data_utils.rand_name(name='tenant2-')
         resp, body = self.client.update_tenant(t_id, name=t_name2)
-        st2 = resp['status']
         resp2_name = body['name']
-        self.assertTrue(st2.startswith('2'))
+        self.assertEqual(200, resp.status)
         self.assertNotEqual(resp1_name, resp2_name)
 
         resp, body = self.client.get_tenant(t_id)
@@ -152,9 +148,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
         t_desc2 = data_utils.rand_name(name='desc2-')
         resp, body = self.client.update_tenant(t_id, description=t_desc2)
-        st2 = resp['status']
         resp2_desc = body['description']
-        self.assertTrue(st2.startswith('2'))
+        self.assertEqual(200, resp.status)
         self.assertNotEqual(resp1_desc, resp2_desc)
 
         resp, body = self.client.get_tenant(t_id)
@@ -182,9 +177,8 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
 
         t_en2 = True
         resp, body = self.client.update_tenant(t_id, enabled=t_en2)
-        st2 = resp['status']
         resp2_en = body['enabled']
-        self.assertTrue(st2.startswith('2'))
+        self.assertEqual(200, resp.status)
         self.assertNotEqual(resp1_en, resp2_en)
 
         resp, body = self.client.get_tenant(t_id)
