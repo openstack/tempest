@@ -30,6 +30,8 @@ from tempest import manager
 from tempest.openstack.common import log as logging
 from tempest.services.baremetal.v1.client_json import BaremetalClientJSON
 from tempest.services import botoclients
+from tempest.services.compute.json.agents_client import \
+    AgentsClientJSON
 from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
 from tempest.services.compute.json.availability_zone_client import \
@@ -370,6 +372,7 @@ class Manager(manager.Manager):
 
         # common clients
         self.account_client = AccountClient(self.auth_provider)
+        self.agents_client = AgentsClientJSON(self.auth_provider)
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(self.auth_provider)
             self.image_client_v2 = ImageClientV2JSON(self.auth_provider)

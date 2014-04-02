@@ -227,6 +227,7 @@ class BaseV2ComputeTest(BaseComputeTest):
         cls.interfaces_client = cls.os.interfaces_client
         cls.fixed_ips_client = cls.os.fixed_ips_client
         cls.availability_zone_client = cls.os.availability_zone_client
+        cls.agents_client = cls.os.agents_client
         cls.aggregates_client = cls.os.aggregates_client
         cls.services_client = cls.os.services_client
         cls.instance_usages_audit_log_client = \
