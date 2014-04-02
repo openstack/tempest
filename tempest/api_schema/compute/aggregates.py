@@ -82,3 +82,5 @@ del common_create_aggregate['response_body']['properties']['aggregate'][
 common_create_aggregate['response_body']['properties']['aggregate'][
     'required'] = ['availability_zone', 'created_at', 'deleted', 'deleted_at',
                    'id', 'name', 'updated_at']
+
+aggregate_add_remove_host = get_aggregate
