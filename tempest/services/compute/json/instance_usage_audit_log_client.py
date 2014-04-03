@@ -15,6 +15,8 @@
 
 import json
 
+from tempest.api_schema.compute.v2 import instance_usage_audit_logs \
+    as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -38,4 +40,5 @@ class InstanceUsagesAuditLogClientJSON(rest_client.RestClient):
         url = 'os-instance_usage_audit_log/%s' % time_before
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.get_instance_usage_audit_log, resp, body)
         return resp, body["instance_usage_audit_log"]
