@@ -204,7 +204,7 @@ class ServersClientJSON(rest_client.RestClient):
         return resp, body
 
     def action(self, server_id, action_name, response_key,
-               schema=None, **kwargs):
+               schema=common_schema.server_actions_common_schema, **kwargs):
         post_body = json.dumps({action_name: kwargs})
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
@@ -218,6 +218,8 @@ class ServersClientJSON(rest_client.RestClient):
             if schema is not None:
                 self.validate_response(schema, resp, body)
             body = body[response_key]
+        else:
+            self.validate_response(schema, resp, body)
         return resp, body
 
     def create_backup(self, server_id, backup_type, rotation, name):
@@ -245,8 +247,11 @@ class ServersClientJSON(rest_client.RestClient):
         Note that this does not actually change the instance server
         password.
         """
-        return self.delete("servers/%s/os-server-password" %
-                           str(server_id))
+        resp, body = self.delete("servers/%s/os-server-password" %
+                                 str(server_id))
+        self.validate_response(common_schema.server_actions_delete_password,
+                               resp, body)
+        return resp, body
 
     def reboot(self, server_id, reboot_type):
         """Reboots a server."""
@@ -258,7 +263,7 @@ class ServersClientJSON(rest_client.RestClient):
         if 'disk_config' in kwargs:
             kwargs['OS-DCF:diskConfig'] = kwargs['disk_config']
             del kwargs['disk_config']
-        return self.action(server_id, 'rebuild', 'server', **kwargs)
+        return self.action(server_id, 'rebuild', 'server', None, **kwargs)
 
     def resize(self, server_id, flavor_ref, **kwargs):
         """Changes the flavor of a server."""
@@ -270,7 +275,9 @@ class ServersClientJSON(rest_client.RestClient):
 
     def confirm_resize(self, server_id, **kwargs):
         """Confirms the flavor change for a server."""
-        return self.action(server_id, 'confirmResize', None, **kwargs)
+        return self.action(server_id, 'confirmResize',
+                           None, schema.server_actions_confirm_resize,
+                           **kwargs)
 
     def revert_resize(self, server_id, **kwargs):
         """Reverts a server back to its original flavor."""
@@ -370,6 +377,8 @@ class ServersClientJSON(rest_client.RestClient):
         req_body = json.dumps({'os-migrateLive': migrate_params})
 
         resp, body = self.post("servers/%s/action" % str(server_id), req_body)
+        self.validate_response(common_schema.server_actions_common_schema,
+                               resp, body)
         return resp, body
 
     def migrate_server(self, server_id, **kwargs):
@@ -418,7 +427,7 @@ class ServersClientJSON(rest_client.RestClient):
 
     def get_console_output(self, server_id, length):
         return self.action(server_id, 'os-getConsoleOutput', 'output',
-                           length=length)
+                           None, length=length)
 
     def list_virtual_interfaces(self, server_id):
         """
@@ -432,7 +441,7 @@ class ServersClientJSON(rest_client.RestClient):
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, **kwargs)
+        return self.action(server_id, 'rescue', 'adminPass', None, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""

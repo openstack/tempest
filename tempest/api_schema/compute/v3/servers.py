@@ -81,3 +81,6 @@ list_addresses_by_network = {
     'status_code': [200],
     'response_body': addresses_v3
 }
+
+server_actions_change_password = copy.deepcopy(
+    servers.server_actions_delete_password)
