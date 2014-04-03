@@ -44,6 +44,7 @@ class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
         cls.servers_client.rescue_server(
             cls.rescue_id, admin_password=cls.rescue_password)
         cls.servers_client.wait_for_server_status(cls.rescue_id, 'RESCUE')
+        cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
 
     @classmethod
     def tearDownClass(cls):
