@@ -54,3 +54,5 @@ get_aggregate = {
         'required': ['aggregate']
     }
 }
+
+aggregate_set_metadata = get_aggregate
