@@ -34,7 +34,9 @@ create_server = {
                 # NOTE: OS-DCF:diskConfig is API extension, and some
                 # environments return a response without the attribute.
                 # So it is not 'required'.
-                'required': ['id', 'security_groups', 'links', 'adminPass']
+                # NOTE: adminPass is not required because it can be deactivated
+                # with nova API flag enable_instance_password=False
+                'required': ['id', 'security_groups', 'links']
             }
         },
         'required': ['server']
