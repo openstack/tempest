@@ -101,12 +101,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             cls.client.delete_floatingip(floating_ip['id'])
         # Clean up routers
         for router in cls.routers:
-            resp, body = cls.client.list_router_interfaces(router['id'])
-            interfaces = body['ports']
-            for i in interfaces:
-                cls.client.remove_router_interface_with_subnet_id(
-                    router['id'], i['fixed_ips'][0]['subnet_id'])
-            cls.client.delete_router(router['id'])
+            cls.delete_router(router)
+
         # Clean up health monitors
         for health_monitor in cls.health_monitors:
             cls.client.delete_health_monitor(health_monitor['id'])
@@ -323,6 +319,15 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         fw_policy = body['firewall_policy']
         cls.fw_policies.append(fw_policy)
         return fw_policy
+
+    @classmethod
+    def delete_router(cls, router):
+        resp, body = cls.client.list_router_interfaces(router['id'])
+        interfaces = body['ports']
+        for i in interfaces:
+            cls.client.remove_router_interface_with_subnet_id(
+                router['id'], i['fixed_ips'][0]['subnet_id'])
+        cls.client.delete_router(router['id'])
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):
