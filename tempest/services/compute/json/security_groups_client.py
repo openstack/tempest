@@ -88,7 +88,10 @@ class SecurityGroupsClientJSON(rest_client.RestClient):
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
-        return self.delete('os-security-groups/%s' % str(security_group_id))
+        resp, body = self.delete(
+            'os-security-groups/%s' % str(security_group_id))
+        self.validate_response(schema.delete_security_group, resp, body)
+        return resp, body
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
                                    to_port, **kwargs):

@@ -80,6 +80,10 @@ get_security_group = create_security_group = update_security_group = {
     }
 }
 
+delete_security_group = {
+    'status_code': [202]
+}
+
 create_security_group_rule = {
     'status_code': [200],
     'response_body': {
