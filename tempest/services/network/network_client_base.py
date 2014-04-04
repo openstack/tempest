@@ -31,12 +31,15 @@ service_resource_prefix_map = {
     'vpnservices': 'vpn',
     'ikepolicies': 'vpn',
     'metering_labels': 'metering',
-    'metering_label_rules': 'metering'
+    'metering_label_rules': 'metering',
+    'firewall_rules': 'fw',
+    'firewall_policies': 'fw',
+    'firewalls': 'fw'
 }
 
 # The following list represents resource names that do not require
 # changing underscore to a hyphen
-hyphen_exceptions = ["health_monitors"]
+hyphen_exceptions = ["health_monitors", "firewall_rules", "firewall_policies"]
 
 # map from resource name to a plural name
 # needed only for those which can't be constructed as name + 's'
@@ -44,7 +47,8 @@ resource_plural_map = {
     'security_groups': 'security_groups',
     'security_group_rules': 'security_group_rules',
     'ikepolicy': 'ikepolicies',
-    'quotas': 'quotas'
+    'quotas': 'quotas',
+    'firewall_policy': 'firewall_policies'
 }
 
 
