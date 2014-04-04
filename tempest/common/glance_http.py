@@ -19,6 +19,7 @@ import copy
 import hashlib
 import httplib
 import json
+import OpenSSL
 import posixpath
 import re
 from six import moves
@@ -26,14 +27,6 @@ import socket
 import StringIO
 import struct
 import urlparse
-
-
-# Python 2.5 compat fix
-if not hasattr(urlparse, 'parse_qsl'):
-    import cgi
-    urlparse.parse_qsl = cgi.parse_qsl
-
-import OpenSSL
 
 from tempest import exceptions as exc
 from tempest.openstack.common import log as logging
@@ -50,7 +43,7 @@ class HTTPClient(object):
         self.auth_provider = auth_provider
         self.filters = filters
         self.endpoint = auth_provider.base_url(filters)
-        endpoint_parts = self.parse_endpoint(self.endpoint)
+        endpoint_parts = urlparse.urlparse(self.endpoint)
         self.endpoint_scheme = endpoint_parts.scheme
         self.endpoint_hostname = endpoint_parts.hostname
         self.endpoint_port = endpoint_parts.port
@@ -59,10 +52,6 @@ class HTTPClient(object):
         self.connection_class = self.get_connection_class(self.endpoint_scheme)
         self.connection_kwargs = self.get_connection_kwargs(
             self.endpoint_scheme, **kwargs)
-
-    @staticmethod
-    def parse_endpoint(endpoint):
-        return urlparse.urlparse(endpoint)
 
     @staticmethod
     def get_connection_class(scheme):
@@ -107,7 +96,7 @@ class HTTPClient(object):
         conn = self.get_connection()
 
         try:
-            url_parts = self.parse_endpoint(url)
+            url_parts = urlparse.urlparse(url)
             conn_url = posixpath.normpath(url_parts.path)
             LOG.debug('Actual Path: {path}'.format(path=conn_url))
             if kwargs['headers'].get('Transfer-Encoding') == 'chunked':
@@ -134,7 +123,6 @@ class HTTPClient(object):
             raise exc.TimeoutException(message)
 
         body_iter = ResponseBodyIterator(resp)
-
         # Read body into string if it isn't obviously image data
         if resp.getheader('content-type', None) != 'application/octet-stream':
             body_str = ''.join([body_chunk for body_chunk in body_iter])
@@ -178,7 +166,7 @@ class HTTPClient(object):
 
         resp, body_iter = self._http_request(url, method, **kwargs)
 
-        if 'application/json' in resp.getheader('content-type', None):
+        if 'application/json' in resp.getheader('content-type', ''):
             body = ''.join([chunk for chunk in body_iter])
             try:
                 body = json.loads(body)
