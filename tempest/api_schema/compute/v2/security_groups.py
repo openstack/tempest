@@ -36,3 +36,41 @@ list_security_groups = {
         'required': ['security_groups']
     }
 }
+
+create_security_group_rule = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'security_group_rule': {
+                'type': 'object',
+                'properties': {
+                    'from_port': {'type': 'integer'},
+                    'to_port': {'type': 'integer'},
+                    'group': {'type': 'object'},
+                    'ip_protocol': {'type': 'string'},
+                    # 'parent_group_id' can be UUID so defining it
+                    # as 'string' also.
+                    'parent_group_id': {'type': ['integer', 'string']},
+                    'id': {'type': ['integer', 'string']},
+                    'ip_range': {
+                        'type': 'object',
+                        'properties': {
+                            'cidr': {'type': 'string'}
+                        }
+                        # When optional argument is provided in request body
+                        # like 'group_id' then, attribute 'cidr' does not
+                        # comes in response body. So it is not 'required'.
+                    }
+                },
+                'required': ['from_port', 'to_port', 'group', 'ip_protocol',
+                             'parent_group_id', 'id', 'ip_range']
+            }
+        },
+        'required': ['security_group_rule']
+    }
+}
+
+delete_security_group_rule = {
+    'status_code': [202]
+}
