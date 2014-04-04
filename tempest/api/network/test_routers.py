@@ -36,6 +36,18 @@ class RoutersTest(base.BaseRouterTest):
         admin_manager = clients.AdminManager()
         cls.identity_admin_client = admin_manager.identity_client
 
+    def _cleanup_router(self, router):
+        self.delete_router(router)
+        self.routers.remove(router)
+
+    def _create_router(self, name, admin_state_up=False,
+                       external_network_id=None, enable_snat=None):
+        # associate a cleanup with created routers to avoid quota limits
+        router = self.create_router(name, admin_state_up,
+                                    external_network_id, enable_snat)
+        self.addCleanup(self._cleanup_router, router)
+        return router
+
     @test.attr(type='smoke')
     def test_create_show_list_update_delete_router(self):
         # Create a router
@@ -102,7 +114,7 @@ class RoutersTest(base.BaseRouterTest):
     def test_add_remove_router_interface_with_subnet_id(self):
         network = self.create_network()
         subnet = self.create_subnet(network)
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self._create_router(data_utils.rand_name('router-'))
         # Add router interface with subnet id
         resp, interface = self.client.add_router_interface_with_subnet_id(
             router['id'], subnet['id'])
@@ -121,7 +133,7 @@ class RoutersTest(base.BaseRouterTest):
     def test_add_remove_router_interface_with_port_id(self):
         network = self.create_network()
         self.create_subnet(network)
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self._create_router(data_utils.rand_name('router-'))
         resp, port_body = self.client.create_port(
             network_id=network['id'])
         # add router interface to port created above
@@ -164,7 +176,7 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.attr(type='smoke')
     def test_update_router_set_gateway(self):
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self._create_router(data_utils.rand_name('router-'))
         self.client.update_router(
             router['id'],
             external_gateway_info={
@@ -180,7 +192,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     @test.attr(type='smoke')
     def test_update_router_set_gateway_with_snat_explicit(self):
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self._create_router(data_utils.rand_name('router-'))
         self.admin_client.update_router_with_snat_gw_info(
             router['id'],
             external_gateway_info={
@@ -195,7 +207,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     @test.attr(type='smoke')
     def test_update_router_set_gateway_without_snat(self):
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self._create_router(data_utils.rand_name('router-'))
         self.admin_client.update_router_with_snat_gw_info(
             router['id'],
             external_gateway_info={
@@ -209,7 +221,7 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.attr(type='smoke')
     def test_update_router_unset_gateway(self):
-        router = self.create_router(
+        router = self._create_router(
             data_utils.rand_name('router-'),
             external_network_id=CONF.network.public_network_id)
         self.client.update_router(router['id'], external_gateway_info={})
@@ -223,7 +235,7 @@ class RoutersTest(base.BaseRouterTest):
     @test.requires_ext(extension='ext-gw-mode', service='network')
     @test.attr(type='smoke')
     def test_update_router_reset_gateway_without_snat(self):
-        router = self.create_router(
+        router = self._create_router(
             data_utils.rand_name('router-'),
             external_network_id=CONF.network.public_network_id)
         self.admin_client.update_router_with_snat_gw_info(
@@ -244,7 +256,8 @@ class RoutersTest(base.BaseRouterTest):
         self.name = self.network['name']
         self.subnet = self.create_subnet(self.network)
         # Add router interface with subnet id
-        self.router = self.create_router(data_utils.rand_name('router-'), True)
+        self.router = self._create_router(
+            data_utils.rand_name('router-'), True)
         self.create_router_interface(self.router['id'], self.subnet['id'])
         self.addCleanup(
             self._delete_extra_routes,
@@ -259,7 +272,7 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.attr(type='smoke')
     def test_update_router_admin_state(self):
-        self.router = self.create_router(data_utils.rand_name('router-'))
+        self.router = self._create_router(data_utils.rand_name('router-'))
         self.assertFalse(self.router['admin_state_up'])
         # Update router admin state
         resp, update_body = self.client.update_router(self.router['id'],
@@ -275,7 +288,7 @@ class RoutersTest(base.BaseRouterTest):
         network = self.create_network()
         subnet01 = self.create_subnet(network)
         subnet02 = self.create_subnet(network)
-        router = self.create_router(data_utils.rand_name('router-'))
+        router = self._create_router(data_utils.rand_name('router-'))
         interface01 = self._add_router_interface_with_subnet_id(router['id'],
                                                                 subnet01['id'])
         self._verify_router_interface(router['id'], subnet01['id'],
