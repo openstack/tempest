@@ -13,6 +13,7 @@
 #    under the License.
 
 
+import mock
 import testtools
 
 from oslo.config import cfg
@@ -232,3 +233,19 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
                           self._test_requires_ext_helper,
                           extension='enabled_ext',
                           service='bad_service')
+
+
+class TestSimpleNegativeDecorator(BaseDecoratorsTest):
+    @test.SimpleNegativeAutoTest
+    class FakeNegativeJSONTest(test.NegativeAutoTest):
+        _schema_file = 'fake/schemas/file.json'
+
+    def test_testfunc_exist(self):
+        self.assertIn("test_fake_negative", dir(self.FakeNegativeJSONTest))
+
+    @mock.patch('tempest.test.NegativeAutoTest.execute')
+    def test_testfunc_calls_execute(self, mock):
+        obj = self.FakeNegativeJSONTest("test_fake_negative")
+        self.assertIn("test_fake_negative", dir(obj))
+        obj.test_fake_negative()
+        mock.assert_called_once_with(self.FakeNegativeJSONTest._schema_file)
