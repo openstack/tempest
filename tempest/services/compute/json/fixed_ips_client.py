@@ -39,4 +39,5 @@ class FixedIPsClientJSON(rest_client.RestClient):
         """This reserves and unreserves fixed ips."""
         url = "os-fixed-ips/%s/action" % (ip)
         resp, body = self.post(url, json.dumps(body))
+        self.validate_response(schema.fixed_ip_action, resp, body)
         return resp, body
