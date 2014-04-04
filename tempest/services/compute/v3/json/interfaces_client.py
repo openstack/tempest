@@ -16,6 +16,7 @@
 import json
 import time
 
+from tempest.api_schema.compute import interfaces as common_schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -59,6 +60,7 @@ class InterfacesV3ClientJSON(rest_client.RestClient):
         resp, body =\
             self.delete('servers/%s/os-attach-interfaces/%s' % (server,
                                                                 port_id))
+        self.validate_response(common_schema.delete_interface, resp, body)
         return resp, body
 
     def wait_for_interface_status(self, server, port_id, status):
