@@ -40,3 +40,42 @@ quota_set = {
         'required': ['quota_set']
     }
 }
+
+quota_common_info = {
+    'type': 'object',
+    'properties': {
+        'reserved': {'type': 'integer'},
+        'limit': {'type': 'integer'},
+        'in_use': {'type': 'integer'}
+    },
+    'required': ['reserved', 'limit', 'in_use']
+}
+
+quota_set_detail = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'quota_set': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string'},
+                    'instances': quota_common_info,
+                    'cores': quota_common_info,
+                    'ram': quota_common_info,
+                    'floating_ips': quota_common_info,
+                    'fixed_ips': quota_common_info,
+                    'metadata_items': quota_common_info,
+                    'key_pairs': quota_common_info,
+                    'security_groups': quota_common_info,
+                    'security_group_rules': quota_common_info
+                },
+                'required': ['id', 'instances', 'cores', 'ram',
+                             'floating_ips', 'fixed_ips',
+                             'metadata_items', 'key_pairs',
+                             'security_groups', 'security_group_rules']
+            }
+        },
+        'required': ['quota_set']
+    }
+}
