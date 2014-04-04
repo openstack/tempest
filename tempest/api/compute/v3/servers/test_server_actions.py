@@ -329,6 +329,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         self.wait_for(self._get_output)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     @test.attr(type='gate')
     def test_pause_unpause_server(self):
         resp, server = self.client.pause_server(self.server_id)

@@ -115,6 +115,8 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.reboot,
                           nonexistent_server, 'SOFT')
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_pause_paused_server(self):
         # Pause a paused server.
