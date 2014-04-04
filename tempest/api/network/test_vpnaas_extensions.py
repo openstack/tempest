@@ -21,7 +21,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class VPNaaSJSON(base.BaseNetworkTest):
+class VPNaaSTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
     """
@@ -41,7 +41,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
         if not test.is_extension_enabled('vpnaas', 'network'):
             msg = "vpnaas extension not enabled."
             raise cls.skipException(msg)
-        super(VPNaaSJSON, cls).setUpClass()
+        super(VPNaaSTestJSON, cls).setUpClass()
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
         cls.router = cls.create_router(
@@ -175,3 +175,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
                          ikepolicy['phase1_negotiation_mode'])
         self.assertEqual(self.ikepolicy['ike_version'],
                          ikepolicy['ike_version'])
+
+
+class VPNaaSTestXML(VPNaaSTestJSON):
+    _interface = 'xml'
