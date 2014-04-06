@@ -49,6 +49,7 @@ class ServicesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'binary': binary, 'host': host_name})
         resp, body = self.put('os-services/enable', post_body)
         body = json.loads(body)
+        self.validate_response(schema.enable_service, resp, body)
         return resp, body['service']
 
     def disable_service(self, host_name, binary):
