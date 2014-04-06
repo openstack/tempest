@@ -31,3 +31,32 @@ class FakeKeystoneV2Credentials(auth.KeystoneV2Credentials):
             tenant_name='fake_tenant_name'
         )
         super(FakeKeystoneV2Credentials, self).__init__(**creds)
+
+
+class FakeKeystoneV3Credentials(auth.KeystoneV3Credentials):
+    """
+    Fake credentials suitable for the Keystone Identity V3 API
+    """
+
+    def __init__(self):
+        creds = dict(
+            username='fake_username',
+            password='fake_password',
+            user_domain_name='fake_domain_name',
+            project_name='fake_tenant_name'
+        )
+        super(FakeKeystoneV3Credentials, self).__init__(**creds)
+
+
+class FakeKeystoneV3DomainCredentials(auth.KeystoneV3Credentials):
+    """
+    Fake credentials suitable for the Keystone Identity V3 API, with no scope
+    """
+
+    def __init__(self):
+        creds = dict(
+            username='fake_username',
+            password='fake_password',
+            user_domain_name='fake_domain_name'
+        )
+        super(FakeKeystoneV3DomainCredentials, self).__init__(**creds)

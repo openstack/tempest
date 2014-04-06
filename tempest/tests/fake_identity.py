@@ -113,7 +113,7 @@ IDENTITY_V3_RESPONSE = {
         "expires_at": "2020-01-01T00:00:10.000123Z",
         "project": {
             "domain": {
-                "id": "fake_id",
+                "id": "fake_domain_id",
                 "name": "fake"
             },
             "id": "project_id",
@@ -121,7 +121,7 @@ IDENTITY_V3_RESPONSE = {
         },
         "user": {
             "domain": {
-                "id": "domain_id",
+                "id": "fake_domain_id",
                 "name": "domain_name"
             },
             "id": "fake_user_id",

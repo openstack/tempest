@@ -72,6 +72,10 @@ IdentityGroup = [
                default=None,
                help="API key to use when authenticating.",
                secret=True),
+    cfg.StrOpt('domain_name',
+               default=None,
+               help="Domain name for authentication (Keystone V3)."
+                    "The same domain applies to user and project"),
     cfg.StrOpt('alt_username',
                default=None,
                help="Username of alternate user to use for Nova API "
@@ -84,6 +88,10 @@ IdentityGroup = [
                default=None,
                help="API key to use when authenticating as alternate user.",
                secret=True),
+    cfg.StrOpt('alt_domain_name',
+               default=None,
+               help="Alternate domain name for authentication (Keystone V3)."
+                    "The same domain applies to user and project"),
     cfg.StrOpt('admin_username',
                default=None,
                help="Administrative Username to use for "
@@ -96,6 +104,10 @@ IdentityGroup = [
                default=None,
                help="API key to use when authenticating as admin.",
                secret=True),
+    cfg.StrOpt('admin_domain_name',
+               default=None,
+               help="Admin domain name for authentication (Keystone V3)."
+                    "The same domain applies to user and project"),
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -302,6 +314,10 @@ ComputeAdminGroup = [
                default=None,
                help="API key to use when authenticating as admin.",
                secret=True),
+    cfg.StrOpt('domain_name',
+               default=None,
+               help="Domain name for authentication as admin (Keystone V3)."
+                    "The same domain applies to user and project"),
 ]
 
 image_group = cfg.OptGroup(name='image',
@@ -996,6 +1012,13 @@ class TempestConfigPrivate(object):
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
             self.compute_admin.tenant_name = self.identity.admin_tenant_name
+        cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
+                             group='identity')
+        cfg.CONF.set_default('alt_domain_name',
+                             self.identity.admin_domain_name,
+                             group='identity')
+        cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
+                             group='compute-admin')
 
     def __init__(self, parse_conf=True):
         """Initialize a configuration from a conf directory and conf file."""

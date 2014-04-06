@@ -300,19 +300,6 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    def _convert_credentials(self, credentials):
-        # For V3 do not convert as V3 Credentials are not defined yet
-        return credentials
-
-    @classmethod
-    def check_credentials(cls, credentials, scoped=True):
-        # tenant_name is optional if not scoped
-        valid = 'username' in credentials and 'password' in credentials \
-            and 'domain_name' in credentials
-        if scoped:
-            valid = valid and 'tenant_name' in credentials
-        return valid
-
     def _auth_client(self):
         if self.client_type == 'tempest':
             if self.interface == 'json':
@@ -325,10 +312,10 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
     def _auth_params(self):
         if self.client_type == 'tempest':
             return dict(
-                user=self.credentials['username'],
-                password=self.credentials['password'],
-                tenant=self.credentials['tenant_name'],
-                domain=self.credentials['domain_name'],
+                user=self.credentials.username,
+                password=self.credentials.password,
+                tenant=self.credentials.tenant_name,
+                domain=self.credentials.user_domain_name,
                 auth_data=True)
         else:
             raise NotImplementedError
@@ -400,6 +387,14 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             datetime.datetime.utcnow()
 
 
+def get_default_credentials(credential_type):
+    """
+    Returns configured credentials of the specified type
+    based on the configured auth_version
+    """
+    return get_credentials(credential_type=credential_type)
+
+
 def get_credentials(credential_type=None, **kwargs):
     """
     Builds a credentials object based on the configured auth_version
@@ -420,6 +415,8 @@ def get_credentials(credential_type=None, **kwargs):
     """
     if CONF.identity.auth_version == 'v2':
         credential_class = KeystoneV2Credentials
+    elif CONF.identity.auth_version == 'v3':
+        credential_class = KeystoneV3Credentials
     else:
         raise exceptions.InvalidConfiguration('Unsupported auth version')
     if credential_type is not None:
@@ -531,7 +528,7 @@ class KeystoneV2Credentials(Credentials):
                 params[attr] = getattr(_section, attr)
             else:
                 params[attr] = getattr(_section, prefix + "_" + attr)
-        return KeystoneV2Credentials(**params)
+        return cls(**params)
 
     def is_valid(self):
         """
@@ -539,3 +536,82 @@ class KeystoneV2Credentials(Credentials):
         Tenant is optional.
         """
         return None not in (self.username, self.password)
+
+
+class KeystoneV3Credentials(KeystoneV2Credentials):
+    """
+    Credentials suitable for the Keystone Identity V3 API
+    """
+
+    CONF_ATTRIBUTES = ['domain_name', 'password', 'tenant_name', 'username']
+    ATTRIBUTES = ['project_domain_id', 'project_domain_name', 'project_id',
+                  'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
+                  'user_domain_name', 'user_id']
+    ATTRIBUTES.extend(CONF_ATTRIBUTES)
+
+    def __init__(self, **kwargs):
+        """
+        If domain is not specified, load the one configured for the
+        identity manager.
+        """
+        domain_fields = set(x for x in self.ATTRIBUTES if 'domain' in x)
+        if not domain_fields.intersection(kwargs.keys()):
+            kwargs['user_domain_name'] = CONF.identity.admin_domain_name
+        super(KeystoneV3Credentials, self).__init__(**kwargs)
+
+    def __setattr__(self, key, value):
+        parent = super(KeystoneV3Credentials, self)
+        # for tenant_* set both project and tenant
+        if key == 'tenant_id':
+            parent.__setattr__('project_id', value)
+        elif key == 'tenant_name':
+            parent.__setattr__('project_name', value)
+        # for project_* set both project and tenant
+        if key == 'project_id':
+            parent.__setattr__('tenant_id', value)
+        elif key == 'project_name':
+            parent.__setattr__('tenant_name', value)
+        # for *_domain_* set both user and project if not set yet
+        if key == 'user_domain_id':
+            if self.project_domain_id is None:
+                parent.__setattr__('project_domain_id', value)
+        if key == 'project_domain_id':
+            if self.user_domain_id is None:
+                parent.__setattr__('user_domain_id', value)
+        if key == 'user_domain_name':
+            if self.project_domain_name is None:
+                parent.__setattr__('project_domain_name', value)
+        if key == 'project_domain_name':
+            if self.user_domain_name is None:
+                parent.__setattr__('user_domain_name', value)
+        # support domain_name coming from config
+        if key == 'domain_name':
+            parent.__setattr__('user_domain_name', value)
+            parent.__setattr__('project_domain_name', value)
+        # finally trigger default behaviour for all attributes
+        parent.__setattr__(key, value)
+
+    def is_valid(self):
+        """
+        Valid combinations of v3 credentials (excluding token, scope)
+        - User id, password (optional domain)
+        - User name, password and its domain id/name
+        For the scope, valid combinations are:
+        - None
+        - Project id (optional domain)
+        - Project name and its domain id/name
+        """
+        valid_user_domain = any(
+            [self.user_domain_id is not None,
+             self.user_domain_name is not None])
+        valid_project_domain = any(
+            [self.project_domain_id is not None,
+             self.project_domain_name is not None])
+        valid_user = any(
+            [self.user_id is not None,
+             self.username is not None and valid_user_domain])
+        valid_project = any(
+            [self.project_name is None and self.project_id is None,
+             self.project_id is not None,
+             self.project_name is not None and valid_project_domain])
+        return all([self.password is not None, valid_user, valid_project])
