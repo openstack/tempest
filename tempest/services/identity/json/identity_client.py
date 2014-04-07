@@ -219,7 +219,7 @@ class IdentityClientJSON(rest_client.RestClient):
 
     def list_services(self):
         """List Service - Returns Services."""
-        resp, body = self.get('/OS-KSADM/services/')
+        resp, body = self.get('/OS-KSADM/services')
         return resp, self._parse_resp(body)
 
     def delete_service(self, service_id):
