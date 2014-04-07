@@ -461,6 +461,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.get("servers/%s/os-server-actions" %
                               str(server_id))
         body = json.loads(body)
+        self.validate_response(schema.list_server_actions, resp, body)
         return resp, body['server_actions']
 
     def get_server_action(self, server_id, request_id):

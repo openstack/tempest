@@ -99,3 +99,21 @@ list_addresses = {
 update_server_metadata = copy.deepcopy(servers.update_server_metadata)
 # V3 API's response status_code is 201
 update_server_metadata['status_code'] = [201]
+
+server_actions_object = copy.deepcopy(servers.common_instance_actions)
+server_actions_object['properties'].update({'server_uuid': {'type': 'string'}})
+server_actions_object['required'].extend(['server_uuid'])
+
+list_server_actions = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server_actions': {
+                'type': 'array',
+                'items': server_actions_object
+            }
+        },
+        'required': ['server_actions']
+    }
+}
