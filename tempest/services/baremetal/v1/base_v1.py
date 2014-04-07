@@ -47,6 +47,11 @@ class BaremetalClientV1(base.BaremetalClient):
         return self._list_request('/ports/detail')
 
     @base.handle_errors
+    def list_drivers(self):
+        """List all existing drivers."""
+        return self._list_request('drivers')
+
+    @base.handle_errors
     def show_node(self, uuid):
         """
         Gets a specific node.
