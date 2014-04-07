@@ -106,17 +106,20 @@ class BaseBaremetalTest(test.BaseTestCase):
 
     @classmethod
     @creates('port')
-    def create_port(cls, node_id, address=None):
+    def create_port(cls, node_id, address, extra=None, uuid=None):
         """
         Wrapper utility for creating test ports.
 
-        :param address: MAC address of the port. If not supplied, a random
-            value will be generated.
+        :param address: MAC address of the port.
+        :param extra: Meta data of the port. If not supplied, an empty
+            dictionary will be created.
+        :param uuid: UUID of the port.
         :return: Created port.
 
         """
-        address = address or data_utils.rand_mac_address()
-        resp, body = cls.client.create_port(address=address, node_id=node_id)
+        extra = extra or {}
+        resp, body = cls.client.create_port(address=address, node_id=node_id,
+                                            extra=extra, uuid=uuid)
 
         return {'port': body, 'response': resp}
 
@@ -170,3 +173,12 @@ class BaseBaremetalTest(test.BaseTestCase):
             cls.created_objects['port'].remove(port_id)
 
         return resp
+
+    def validate_self_link(self, resource, uuid, link):
+        """Check whether the given self link formatted correctly."""
+        expected_link = "{base}/{pref}/{res}/{uuid}".format(
+                        base=self.client.base_url,
+                        pref=self.client.uri_prefix,
+                        res=resource,
+                        uuid=uuid)
+        self.assertEqual(expected_link, link)
