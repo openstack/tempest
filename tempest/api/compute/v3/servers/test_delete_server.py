@@ -99,6 +99,25 @@ class DeleteServersV3Test(base.BaseV3ComputeTest):
         self.assertEqual('204', resp['status'])
         self.client.wait_for_server_termination(server['id'])
 
+    @test.attr(type='gate')
+    def test_delete_server_while_in_attached_volume(self):
+        # Delete a server while a volume is attached to it
+        device = '/dev/%s' % CONF.compute.volume_device_name
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+
+        resp, volume = self.volumes_client.create_volume(1)
+        self.addCleanup(self.volumes_client.delete_volume, volume['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        resp, body = self.client.attach_volume(server['id'],
+                                               volume['id'],
+                                               device=device)
+        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+
+        resp, _ = self.client.delete_server(server['id'])
+        self.assertEqual('204', resp['status'])
+        self.client.wait_for_server_termination(server['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+
 
 class DeleteServersAdminV3Test(base.BaseV3ComputeAdminTest):
     # NOTE: Server creations of each test class should be under 10
