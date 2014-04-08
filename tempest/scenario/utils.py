@@ -12,17 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
+import json
+import re
+import string
+import unicodedata
+
 import testscenarios
 import testtools
 
 from tempest import clients
 from tempest.common.utils import misc
 from tempest import config
-
-import json
-import re
-import string
-import unicodedata
 
 CONF = config.CONF
 
