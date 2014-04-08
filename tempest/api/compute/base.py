@@ -233,6 +233,7 @@ class BaseV2ComputeTest(BaseComputeTest):
             cls.os.instance_usages_audit_log_client
         cls.hypervisor_client = cls.os.hypervisor_client
         cls.certificates_client = cls.os.certificates_client
+        cls.migrations_client = cls.os.migrations_client
 
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
