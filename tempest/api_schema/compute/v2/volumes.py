@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-get_volume = {
+create_get_volume = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
@@ -107,4 +107,8 @@ list_volumes = {
         },
         'required': ['volumes']
     }
+}
+
+delete_volume = {
+    'status_code': [202]
 }
