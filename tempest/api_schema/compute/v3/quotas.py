@@ -79,3 +79,7 @@ quota_set_detail = {
         'required': ['quota_set']
     }
 }
+
+delete_quota = {
+    'status_code': [204]
+}
