@@ -40,6 +40,7 @@ class AggregatesV3ClientJSON(rest_client.RestClient):
         """Get details of the given aggregate."""
         resp, body = self.get("os-aggregates/%s" % str(aggregate_id))
         body = json.loads(body)
+        self.validate_response(schema.get_aggregate, resp, body)
         return resp, body['aggregate']
 
     def create_aggregate(self, **kwargs):

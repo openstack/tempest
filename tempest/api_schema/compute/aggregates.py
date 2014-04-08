@@ -12,6 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+aggregate = {
+    'type': 'object',
+    'properties:': {
+        'availability_zone': {'type': ['string', 'null']},
+        'created_at': {'type': 'string'},
+        'deleted': {'type': 'boolean'},
+        'deleted_at': {'type': ['string', 'null']},
+        'hosts': {'type': 'array'},
+        'id': {'type': 'integer'},
+        'metadata': {'type': 'object'},
+        'name': {'type': 'string'},
+        'updated_at': {'type': ['string', 'null']}
+    },
+    'required': ['availability_zone', 'created_at', 'deleted',
+                 'deleted_at', 'hosts', 'id', 'metadata',
+                 'name', 'updated_at']
+}
+
 list_aggregates = {
     'status_code': [200],
     'response_body': {
@@ -19,25 +37,20 @@ list_aggregates = {
         'properties': {
             'aggregates': {
                 'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'availability_zone': {'type': ['string', 'null']},
-                        'created_at': {'type': 'string'},
-                        'deleted': {'type': 'boolean'},
-                        'deleted_at': {'type': ['string', 'null']},
-                        'hosts': {'type': 'array'},
-                        'id': {'type': 'integer'},
-                        'metadata': {'type': 'object'},
-                        'name': {'type': 'string'},
-                        'updated_at': {'type': ['string', 'null']}
-                    },
-                    'required': ['availability_zone', 'created_at', 'deleted',
-                                 'deleted_at', 'hosts', 'id', 'metadata',
-                                 'name', 'updated_at']
-                }
+                'items': aggregate
             }
         },
         'required': ['aggregates']
+    }
+}
+
+get_aggregate = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'aggregate': aggregate
+        },
+        'required': ['aggregate']
     }
 }
