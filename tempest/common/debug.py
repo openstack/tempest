@@ -20,7 +20,7 @@ from tempest.openstack.common import log as logging
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
-tables = ['filter', 'nat', 'mangle']
+TABLES = ['filter', 'nat', 'mangle']
 
 
 def log_ip_ns():
@@ -28,14 +28,14 @@ def log_ip_ns():
         return
     LOG.info("Host Addr:\n" + commands.ip_addr_raw())
     LOG.info("Host Route:\n" + commands.ip_route_raw())
-    for table in ['filter', 'nat', 'mangle']:
+    for table in TABLES:
         LOG.info('Host %s table:\n%s', table, commands.iptables_raw(table))
     ns_list = commands.ip_ns_list()
     LOG.info("Host ns list" + str(ns_list))
     for ns in ns_list:
         LOG.info("ns(%s) Addr:\n%s", ns, commands.ip_ns_addr(ns))
         LOG.info("ns(%s) Route:\n%s", ns, commands.ip_ns_route(ns))
-        for table in ['filter', 'nat', 'mangle']:
+        for table in TABLES:
             LOG.info('ns(%s) table(%s):\n%s', ns, table,
                      commands.iptables_ns(ns, table))
 
