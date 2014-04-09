@@ -105,4 +105,5 @@ class AggregatesClientJSON(rest_client.RestClient):
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                post_body)
         body = json.loads(body)
+        self.validate_response(schema.aggregate_set_metadata, resp, body)
         return resp, body['aggregate']
