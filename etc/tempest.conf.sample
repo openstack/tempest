@@ -211,7 +211,7 @@
 # admin credentials are known. (boolean value)
 #allow_tenant_isolation=false
 
-# Valid secondary image reference to be used in tests. (string
+# Valid primary image reference to be used in tests. (string
 # value)
 #image_ref={$IMAGE_ID}
 
@@ -977,6 +977,10 @@
 # Disk format to use when copying a volume to image (string
 # value)
 #disk_format=raw
+
+# Default size in GB for volumes created by volumes tests
+# (integer value)
+#volume_size=1
 
 
 [volume-feature-enabled]
