@@ -410,19 +410,19 @@ class ServersV3ClientJSON(rest_client.RestClient):
                               str(server_id))
         return resp, json.loads(body)
 
-    def list_instance_actions(self, server_id):
+    def list_server_actions(self, server_id):
         """List the provided server action."""
-        resp, body = self.get("servers/%s/os-instance-actions" %
+        resp, body = self.get("servers/%s/os-server-actions" %
                               str(server_id))
         body = json.loads(body)
-        return resp, body['instance_actions']
+        return resp, body['server_actions']
 
-    def get_instance_action(self, server_id, request_id):
+    def get_server_action(self, server_id, request_id):
         """Returns the action details of the provided server."""
-        resp, body = self.get("servers/%s/os-instance-actions/%s" %
+        resp, body = self.get("servers/%s/os-server-actions/%s" %
                               (str(server_id), str(request_id)))
         body = json.loads(body)
-        return resp, body['instance_action']
+        return resp, body['server_action']
 
     def force_delete_server(self, server_id, **kwargs):
         """Force delete a server."""
