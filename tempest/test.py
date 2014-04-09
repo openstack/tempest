@@ -94,6 +94,7 @@ def services(*args, **kwargs):
     service_list = {
         'compute': CONF.service_available.nova,
         'image': CONF.service_available.glance,
+        'baremetal': CONF.service_available.ironic,
         'volume': CONF.service_available.cinder,
         'orchestration': CONF.service_available.heat,
         # NOTE(mtreinish) nova-network will provide networking functionality
