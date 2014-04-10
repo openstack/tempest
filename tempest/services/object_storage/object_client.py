@@ -29,12 +29,16 @@ class ObjectClient(rest_client.RestClient):
 
         self.service = CONF.object_storage.catalog_type
 
-    def create_object(self, container, object_name, data, params=None):
+    def create_object(self, container, object_name, data,
+                      params=None, metadata=None):
         """Create storage object."""
 
         headers = self.get_headers()
         if not data:
             headers['content-length'] = '0'
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
         url = "%s/%s" % (str(container), str(object_name))
         if params:
             url += '?%s' % urllib.urlencode(params)
