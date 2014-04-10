@@ -18,6 +18,7 @@ from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
+import os
 
 CONF = config.CONF
 
@@ -140,6 +141,10 @@ class DataGenerator(object):
                 name=self.test_tenant,
                 description=self.test_description)
             self.tenants.append(self.tenant)
+            if os.environ.get('CONTRAIL_TEST_ENVIRONMENT') == '1':
+                # Need to sleep for 5 secs for Contrail API Server to 
+                # sync
+                time.sleep(5)
 
         def setup_test_role(self):
             """Set up a test role."""

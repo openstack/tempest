@@ -13,6 +13,7 @@
 #    under the License.
 
 import netaddr
+import os
 
 import keystoneclient.v2_0.client as keystoneclient
 import neutronclient.v2_0.client as neutronclient
@@ -83,6 +84,10 @@ class IsolatedCreds(object):
             tenant = self.identity_admin_client.tenants.create(
                 name,
                 description=description)
+        if os.environ.get('CONTRAIL_TEST_ENVIRONMENT') == '1':
+            # Need to sleep for 5 secs for Contrail API Server to
+            # sync
+            time.sleep(5)
         return tenant
 
     def _get_tenant_by_name(self, name):

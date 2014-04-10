@@ -1,0 +1,96 @@
+
+# Determinate is the given option present in the INI file
+# ini_has_option config-file section option
+function ini_has_option() {
+    local file=$1
+    local section=$2
+    local option=$3
+    local line
+    line=$(sed -ne "/^\[$section\]/,/^\[.*\]/ { /^$option[ \t]*=/ p; }" "$file")
+    [ -n "$line" ]
+}
+
+
+# Set an option in an INI file
+# iniset config-file section option value
+function iniset() {
+    local file=$1
+    local section=$2
+    local option=$3
+    local value=$4
+
+    [[ -z $section || -z $option ]] && return
+
+    if ! grep -q "^\[$section\]" "$file" 2>/dev/null; then
+        # Add section at the end
+        echo -e "\n[$section]" >>"$file"
+    fi
+    if ! ini_has_option "$file" "$section" "$option"; then
+        # Add it
+        sed -i -e "/^\[$section\]/ a\\
+$option = $value
+" "$file"
+    else
+        local sep=$(echo -ne "\x01")
+        # Replace it
+        sed -i -e '/^\['${section}'\]/,/^\[.*\]/ s'${sep}'^\('${option}'[ \t]*=[ \t]*\).*$'${sep}'\1'"${value}"${sep} "$file"
+    fi
+}
+
+function get_image_id() {
+    local image_name=$1
+    local image_path=$2
+    images=`(source /etc/contrail/openstackrc; nova image-list)`
+    #if grep -q $image_name $images; then
+    if [[ "$images" == *${image_name}* ]];then
+        image_id=`nova image-list | grep cirros  | awk {'print $2'}`
+    else
+        image_filename=$(basename $image_path)
+        rm -f $image_filename
+        `wget $image_path`
+        (source /etc/contrail/openstackrc; glance image-create --name $image_name --disk-format qcow2 --container-format bare --is-public True --file $image_filename)
+        image_id=`nova image-list | grep cirros  | awk {'print $2'}`
+    fi
+    echo $image_id
+}
+
+function create_project() {
+    local project_name=$1
+    id=$(keystone tenant-list | grep ' '$project_name' ' | awk '{print $2;}')
+    if [ -z "$id" ]; then
+        keystone tenant-create --name $project_name --enabled True
+    fi
+}
+
+function create_user() {
+    local username=$1
+    local password=$2
+    local project_name=$3
+    local role=$4
+    id=$(keystone user-list | grep $username | awk '{print $2;}')
+    if [ -z $id ]; then
+        keystone user-create --name $username --tenant $project_name --pass $password --email $username@example.com
+        keystone user-role-add --user $username --role $role --tenant $project_name
+    fi
+}    
+
+function create_network() {
+    local vn_name=$1
+    local subnet=$2
+    if neutron net-show $vn_name >/dev/null 2>&1 ; then
+        echo "$vn_name already present, not creating"
+    else 
+        neutron net-create $vn_name
+        vn_id=`neutron net-show $vn_name | grep " id " | awk {'print $4'}`
+        neutron subnet-create $vn_id $subnet
+    fi
+}
+
+function create_public_network() {
+    local vn_name=$1
+    local subnet=$2
+    create_network $vn_name $subnet 
+    neutron net-update $vn_name --router:external True
+}
+
+
