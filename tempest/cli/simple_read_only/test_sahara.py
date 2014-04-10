@@ -93,3 +93,48 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'status',
             'node_count'
         ])
+
+    def test_sahara_data_source_list(self):
+        result = self.sahara('data-source-list')
+        data_sources = self.parser.listing(result)
+        self.assertTableStruct(data_sources, [
+            'name',
+            'id',
+            'type',
+            'description'
+        ])
+
+    def test_sahara_job_binary_data_list(self):
+        result = self.sahara('job-binary-data-list')
+        job_binary_data_list = self.parser.listing(result)
+        self.assertTableStruct(job_binary_data_list, [
+            'id',
+            'name'
+        ])
+
+    def test_sahara_job_binary_list(self):
+        result = self.sahara('job-binary-list')
+        job_binaries = self.parser.listing(result)
+        self.assertTableStruct(job_binaries, [
+            'id',
+            'name',
+            'description'
+        ])
+
+    def test_sahara_job_template_list(self):
+        result = self.sahara('job-template-list')
+        job_templates = self.parser.listing(result)
+        self.assertTableStruct(job_templates, [
+            'id',
+            'name',
+            'description'
+        ])
+
+    def test_sahara_job_list(self):
+        result = self.sahara('job-list')
+        jobs = self.parser.listing(result)
+        self.assertTableStruct(jobs, [
+            'id',
+            'cluster_id',
+            'status'
+        ])
