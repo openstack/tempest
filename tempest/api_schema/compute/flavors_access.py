@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-list_flavor_access = {
+add_remove_list_flavor_access = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
