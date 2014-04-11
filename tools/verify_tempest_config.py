@@ -46,8 +46,8 @@ def _get_api_versions(os, service):
         'keystone': os.identity_client,
     }
     client_dict[service].skip_path()
-    endpoint_parts = urlparse.urlparse(client_dict[service])
-    endpoint = endpoint_parts.scheme + '//' + endpoint_parts.netloc
+    endpoint_parts = urlparse.urlparse(client_dict[service].base_url)
+    endpoint = endpoint_parts.scheme + '://' + endpoint_parts.netloc
     __, body = RAW_HTTP.request(endpoint, 'GET')
     client_dict[service].reset_path()
     body = json.loads(body)
