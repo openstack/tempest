@@ -37,6 +37,7 @@ class VPNaaSJSON(base.BaseNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         if not test.is_extension_enabled('vpnaas', 'network'):
             msg = "vpnaas extension not enabled."

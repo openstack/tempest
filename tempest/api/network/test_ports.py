@@ -27,6 +27,7 @@ class PortsTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(PortsTestJSON, cls).setUpClass()
         cls.network = cls.create_network()
@@ -143,6 +144,7 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(PortsAdminExtendedAttrsTestJSON, cls).setUpClass()
         cls.identity_client = cls._get_identity_admin_client()

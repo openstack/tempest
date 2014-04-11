@@ -29,6 +29,7 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(LoadBalancerAdminTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('lbaas', 'network'):
