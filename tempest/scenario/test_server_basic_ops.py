@@ -14,10 +14,10 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
-from tempest.common.utils import test_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+from tempest.scenario import utils as test_utils
 from tempest import test
 
 import testscenarios
