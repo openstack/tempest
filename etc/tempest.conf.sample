@@ -327,6 +327,11 @@
 # (integer value)
 #shelved_offload_time=0
 
+# Unallocated floating IP range, which will be used to test
+# the floating IP bulk feature for CRUD operation. (string
+# value)
+#floating_ip_range=10.0.0.0/29
+
 # Allows test cases to create/destroy tenants and users. This
 # option enables isolated test cases and better parallel
 # execution, but also requires that OpenStack Identity API
