@@ -162,11 +162,17 @@ class AccountClientCustomizedHeader(rest_client.RestClient):
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
         """A simple HTTP request interface."""
         self.http_obj = http.ClosingHttp()
         if headers is None:
             headers = {}
+        elif extra_headers:
+            try:
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = {}
 
         # Authorize the request
         req_url, req_headers, req_body = self.auth_provider.auth_request(
