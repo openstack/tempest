@@ -86,7 +86,8 @@ iniset $TEMPEST_CONFIG compute image_alt_ssh_user ${DEFAULT_INSTANCE_USER:-cirro
 iniset $TEMPEST_CONFIG compute image_alt_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-cubswin:)}
 iniset $TEMPEST_CONFIG network public_network_id "$public_network_id"
 
-
+# Disable IPv6 tests
+iniset $TEMPEST_CONFIG network-feature-enabled ipv6 false
 
 iniset $TEMPEST_CONFIG service_available "neutron" "True"
 iniset $TEMPEST_CONFIG service_available "cinder" "False"
