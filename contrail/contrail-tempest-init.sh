@@ -1,9 +1,9 @@
 
 #export WORKSPACE=$PWD
 cd $WORKSPACE
-apt-get install -y git
-apt-get install -y libffi-dev
-apt-get install -y gcc
+sudo apt-get install -y git
+sudo apt-get install -y libffi-dev
+sudo apt-get install -y gcc
 if [ ! -d "tempest" ]; then
    git clone git://github.com/vedujoshi/tempest
 else
