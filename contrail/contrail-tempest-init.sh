@@ -4,13 +4,6 @@ cd $WORKSPACE
 sudo apt-get install -y git
 sudo apt-get install -y libffi-dev
 sudo apt-get install -y gcc
-if [ ! -d "tempest" ]; then
-   git clone git://github.com/vedujoshi/tempest
-else
-   (cd tempest ; git pull)
-fi
-  
-#(cd tempest;git checkout remotes/origin/stable/havana)
 
 #TEMPEST_DIR="~/tempest1/tempest"
 KEYSTONE_SERVICE_PROTOCOL="http"
