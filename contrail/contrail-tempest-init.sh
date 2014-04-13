@@ -1,3 +1,6 @@
+
+#export WORKSPACE=$PWD
+cd $WORKSPACE
 apt-get install -y git
 apt-get install -y libffi-dev
 apt-get install -y gcc
@@ -9,34 +12,30 @@ fi
   
 #(cd tempest;git checkout remotes/origin/stable/havana)
 
-DEST="$PWD/tempest"
-DATA_DIR=${DEST}/data
+#TEMPEST_DIR="~/tempest1/tempest"
 KEYSTONE_SERVICE_PROTOCOL="http"
-KEYSTONE_SERVICE_HOST="10.204.217.70"
-PUBLIC_NETWORK_NAME="public_net"
-PUBLIC_NETWORK_SUBNET="10.204.216.64/29"
-HTTP_IMAGE_PATH="http://10.204.216.51/images/cirros/cirros-0.3.1-x86_64-uec.tar.gz"
+#KEYSTONE_SERVICE_HOST="10.204.217.70"
+#PUBLIC_NETWORK_NAME="public_net"
+#PUBLIC_NETWORK_SUBNET="10.204.216.64/29"
+#HTTP_IMAGE_PATH="http://10.204.216.51/images/cirros/cirros-0.3.1-x86_64-uec.tar.gz"
 SERVICE_HOST=$KEYSTONE_SERVICE_HOST
 
-TEMPEST_DIR=$DEST
 TEMPEST_CONFIG_DIR=${TEMPEST_CONFIG_DIR:-$TEMPEST_DIR/etc}
 TEMPEST_CONFIG=$TEMPEST_CONFIG_DIR/tempest.conf
-TEMPEST_STATE_PATH=${TEMPEST_STATE_PATH:=$DATA_DIR/tempest}
 
 source $TEMPEST_DIR/contrail/functions
-#source /etc/contrail/openstackrc
-source ~/openstackrc
+#source ~/openstackrc
 
 cp $TEMPEST_DIR/etc/tempest.conf.sample $TEMPEST_CONFIG
 password=${ADMIN_PASSWORD:-contrail123}
 ALT_USERNAME=${ALT_USERNAME:-alt_demo}
 ALT_TENANT_NAME=${ALT_TENANT_NAME:-alt_demo}
 USERNAME="demo"
-PASSWORD="contrail123"
+PASSWORD=$OS_PASSWORD
 TENANT_NAME="demo"
 
 ADMIN_USERNAME="admin"
-ADMIN_PASSWORD="contrail123"
+ADMIN_PASSWORD=$OS_PASSWORD
 ADMIN_TENANT_NAME="admin"
 
 # ADD GLANCE IMAGE 
