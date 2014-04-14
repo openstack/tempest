@@ -163,6 +163,12 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['role']
 
+    def list_roles(self):
+        """Get the list of Roles."""
+        resp, body = self.get("roles")
+        body = json.loads(body)
+        return resp, body['roles']
+
     def update_role(self, name, role_id):
         """Create a Role."""
         post_body = {

@@ -73,7 +73,7 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertIn(role_id, fetched_role_ids)
 
     @test.attr(type='smoke')
-    def test_role_create_update_get(self):
+    def test_role_create_update_get_list(self):
         r_name = data_utils.rand_name('Role-')
         resp, role = self.client.create_role(r_name)
         self.addCleanup(self.client.delete_role, role['id'])
@@ -93,6 +93,10 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(resp['status'], '200')
         self.assertEqual(new_name, new_role['name'])
         self.assertEqual(updated_role['id'], new_role['id'])
+
+        resp, roles = self.client.list_roles()
+        self.assertEqual(resp['status'], '200')
+        self.assertIn(role['id'], [r['id'] for r in roles])
 
     @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_user_on_project(self):
