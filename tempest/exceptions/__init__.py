@@ -78,6 +78,12 @@ class StackBuildErrorException(base.TempestException):
                "due to '%(stack_status_reason)s'")
 
 
+class StackResourceBuildErrorException(base.TempestException):
+    message = ("Resource %(resource_name) in stack %(stack_identifier)s is "
+               "in %(resource_status)s status due to "
+               "'%(resource_status_reason)s'")
+
+
 class BadRequest(base.RestClientException):
     message = "Bad request"
 
