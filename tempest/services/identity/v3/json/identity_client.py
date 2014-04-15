@@ -450,6 +450,16 @@ class IdentityV3ClientJSON(rest_client.RestClient):
                                % (trust_id, role_id))
         return resp, body
 
+    def get_ca_certificate(self):
+        """GET ca certificate chain."""
+        resp, body = self.get("OS-SIMPLE-CERT/ca")
+        return resp, body
+
+    def get_certificates(self):
+        """GET signing certificates used to sign tokens."""
+        resp, body = self.get("OS-SIMPLE-CERT/certificates")
+        return resp, body
+
 
 class V3TokenClientJSON(rest_client.RestClient):
 
