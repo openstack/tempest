@@ -61,9 +61,11 @@ class AggregatesClientXML(rest_client.RestClient):
 
     def create_aggregate(self, name, availability_zone=None):
         """Creates a new aggregate."""
-        post_body = xml_utils.Element("aggregate",
-                                      name=name,
-                                      availability_zone=availability_zone)
+        if availability_zone is not None:
+            post_body = xml_utils.Element("aggregate", name=name,
+                                          availability_zone=availability_zone)
+        else:
+            post_body = xml_utils.Element("aggregate", name=name)
         resp, body = self.post('os-aggregates',
                                str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
@@ -71,9 +73,11 @@ class AggregatesClientXML(rest_client.RestClient):
 
     def update_aggregate(self, aggregate_id, name, availability_zone=None):
         """Update a aggregate."""
-        put_body = xml_utils.Element("aggregate",
-                                     name=name,
-                                     availability_zone=availability_zone)
+        if availability_zone is not None:
+            put_body = xml_utils.Element("aggregate", name=name,
+                                         availability_zone=availability_zone)
+        else:
+            put_body = xml_utils.Element("aggregate", name=name)
         resp, body = self.put('os-aggregates/%s' % str(aggregate_id),
                               str(xml_utils.Document(put_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
