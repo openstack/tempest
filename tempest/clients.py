@@ -13,16 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# Default client libs
-import cinderclient.client
-import glanceclient
-import heatclient.client
-import ironicclient.client
 import keystoneclient.exceptions
 import keystoneclient.v2_0.client
-import neutronclient.v2_0.client
-import novaclient.client
-import swiftclient
 
 from tempest.common.rest_client import NegativeRestClient
 from tempest import config
@@ -520,6 +512,9 @@ class OfficialClientManager(manager.Manager):
         # Novaclient will not execute operations for anyone but the
         # identified user, so a new client needs to be created for
         # each user that operations need to be performed for.
+        if not CONF.service_available.nova:
+            return None
+        import novaclient.client
         self._validate_credentials(username, password, tenant_name)
 
         auth_url = CONF.identity.uri
@@ -541,6 +536,9 @@ class OfficialClientManager(manager.Manager):
                                         http_log_debug=True)
 
     def _get_image_client(self):
+        if not CONF.service_available.glance:
+            return None
+        import glanceclient
         token = self.identity_client.auth_token
         region = CONF.identity.region
         endpoint_type = CONF.image.endpoint_type
@@ -552,6 +550,9 @@ class OfficialClientManager(manager.Manager):
                                    insecure=dscv)
 
     def _get_volume_client(self, username, password, tenant_name):
+        if not CONF.service_available.cinder:
+            return None
+        import cinderclient.client
         auth_url = CONF.identity.uri
         region = CONF.identity.region
         endpoint_type = CONF.volume.endpoint_type
@@ -567,6 +568,9 @@ class OfficialClientManager(manager.Manager):
                                           http_log_debug=True)
 
     def _get_object_storage_client(self, username, password, tenant_name):
+        if not CONF.service_available.swift:
+            return None
+        import swiftclient
         auth_url = CONF.identity.uri
         # add current tenant to swift operator role group.
         keystone_admin = self._get_identity_client(
@@ -596,6 +600,9 @@ class OfficialClientManager(manager.Manager):
 
     def _get_orchestration_client(self, username=None, password=None,
                                   tenant_name=None):
+        if not CONF.service_available.heat:
+            return None
+        import heatclient.client
         if not username:
             username = CONF.identity.admin_username
         if not password:
@@ -641,6 +648,9 @@ class OfficialClientManager(manager.Manager):
 
     def _get_baremetal_client(self):
         # ironic client is currently intended to by used by admin users
+        if not CONF.service_available.ironic:
+            return None
+        import ironicclient.client
         roles = self._get_roles()
         if CONF.identity.admin_role not in roles:
             return None
@@ -674,6 +684,9 @@ class OfficialClientManager(manager.Manager):
         # preferable to authenticating as a specific user because
         # working with certain resources (public routers and networks)
         # often requires admin privileges anyway.
+        if not CONF.service_available.neutron:
+            return None
+        import neutronclient.v2_0.client
         username = CONF.identity.admin_username
         password = CONF.identity.admin_password
         tenant_name = CONF.identity.admin_tenant_name
