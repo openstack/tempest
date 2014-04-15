@@ -79,7 +79,7 @@ class InputScenarioUtils(object):
 
     class TestInputScenario(manager.OfficialClientTest):
 
-        scenario_utils = test_utils.InputScenarioUtils()
+        scenario_utils = utils.InputScenarioUtils()
         scenario_flavor = scenario_utils.scenario_flavors
         scenario_image = scenario_utils.scenario_images
         scenarios = testscenarios.multiply_scenarios(scenario_image,
