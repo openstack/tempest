@@ -559,7 +559,7 @@ OrchestrationGroup = [
                default=1,
                help="Time in seconds between build status checks."),
     cfg.IntOpt('build_timeout',
-               default=600,
+               default=1200,
                help="Timeout in seconds to wait for a stack to build."),
     cfg.StrOpt('instance_type',
                default='m1.micro',
