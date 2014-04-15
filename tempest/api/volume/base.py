@@ -107,6 +107,7 @@ class BaseVolumeV1Test(BaseVolumeTest):
         cls.snapshots_client = cls.os.snapshots_client
         cls.volumes_client = cls.os.volumes_client
         cls.backups_client = cls.os.backups_client
+        cls.volume_services_client = cls.os.volume_services_client
         cls.volumes_extension_client = cls.os.volumes_extension_client
 
     @classmethod
