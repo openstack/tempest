@@ -15,6 +15,7 @@
 
 import json
 
+from tempest.api_schema.queuing.v1 import queues as queues_schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -33,6 +34,7 @@ class QueuingClientJSON(rest_client.RestClient):
         uri = '{0}/queues'.format(self.uri_prefix)
         resp, body = self.get(uri)
         body = json.loads(body)
+        self.validate_response(queues_schema.list_queues, resp, body)
         return resp, body
 
     def create_queue(self, queue_name):
@@ -43,16 +45,32 @@ class QueuingClientJSON(rest_client.RestClient):
     def get_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
         resp, body = self.get(uri)
-        body = json.loads(body)
         return resp, body
 
     def head_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
         resp, body = self.head(uri)
-        body = json.loads(body)
         return resp, body
 
     def delete_queue(self, queue_name):
         uri = '{0}/queues/{1}'.format(self.uri_prefix, queue_name)
         resp = self.delete(uri)
         return resp
+
+    def get_queue_stats(self, queue_name):
+        uri = '{0}/queues/{1}/stats'.format(self.uri_prefix, queue_name)
+        resp, body = self.get(uri)
+        body = json.loads(body)
+        self.validate_response(queues_schema.queue_stats, resp, body)
+        return resp, body
+
+    def get_queue_metadata(self, queue_name):
+        uri = '{0}/queues/{1}/metadata'.format(self.uri_prefix, queue_name)
+        resp, body = self.get(uri)
+        body = json.loads(body)
+        return resp, body
+
+    def set_queue_metadata(self, queue_name, rbody):
+        uri = '{0}/queues/{1}/metadata'.format(self.uri_prefix, queue_name)
+        resp, body = self.put(uri, body=json.dumps(rbody))
+        return resp, body

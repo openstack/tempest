@@ -825,6 +825,10 @@
 # Catalog type of the Queuing service. (string value)
 #catalog_type=queuing
 
+# The maximum number of queue records per page when listing
+# queues (integer value)
+#max_queues_per_page=20
+
 
 [scenario]
 
