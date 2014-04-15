@@ -12,6 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testscenarios
+import testtools
+
 from tempest import clients
 from tempest.common.utils import misc
 from tempest import config
@@ -134,3 +137,22 @@ class InputScenarioUtils(object):
                 for f in flavors if re.search(self.flavor_pattern, str(f.name))
             ]
         return self._scenario_flavors
+
+
+def load_tests_input_scenario_utils(*args):
+    """
+    Wrapper for testscenarios to set the scenarios to avoid running a getattr
+    on the CONF object at import.
+    """
+    if getattr(args[0], 'suiteClass', None) is not None:
+        loader, standard_tests, pattern = args
+    else:
+        standard_tests, module, loader = args
+    scenario_utils = InputScenarioUtils()
+    scenario_flavor = scenario_utils.scenario_flavors
+    scenario_image = scenario_utils.scenario_images
+    for test in testtools.iterate_tests(standard_tests):
+        setattr(test, 'scenarios', testscenarios.multiply_scenarios(
+            scenario_image,
+            scenario_flavor))
+    return testscenarios.load_tests_apply_scenarios(*args)
