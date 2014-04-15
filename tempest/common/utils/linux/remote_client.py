@@ -112,3 +112,8 @@ class RemoteClient():
     def turn_nic_on(self, nic):
         cmd = "sudo /bin/ip link set {nic} up".format(nic=nic)
         return self.exec_command(cmd)
+
+    def get_pids(self, pr_name):
+        # Get pid(s) of a process/program
+        cmd = "ps -ef | grep %s | grep -v 'grep' | awk {'print $1'}" % pr_name
+        return self.exec_command(cmd).split('\n')
