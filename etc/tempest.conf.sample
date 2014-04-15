@@ -571,6 +571,9 @@
 # applies to user and project (string value)
 #admin_domain_name = <None>
 
+# ID of the default domain (string value)
+#default_domain_id = default
+
 
 [identity-feature-enabled]
 
