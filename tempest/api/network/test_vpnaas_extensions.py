@@ -82,8 +82,8 @@ class VPNaaSTestJSON(base.BaseNetworkTest):
     def test_create_update_delete_vpn_service(self):
         # Creates a VPN service
         name = data_utils.rand_name('vpn-service-')
-        resp, body = self.client.create_vpnservice(self.subnet['id'],
-                                                   self.router['id'],
+        resp, body = self.client.create_vpnservice(subnet_id=self.subnet['id'],
+                                                   router_id=self.router['id'],
                                                    name=name,
                                                    admin_state_up=True)
         self.assertEqual('201', resp['status'])
@@ -134,7 +134,7 @@ class VPNaaSTestJSON(base.BaseNetworkTest):
         # Creates a IKE policy
         name = data_utils.rand_name('ike-policy-')
         resp, body = (self.client.create_ikepolicy(
-                      name,
+                      name=name,
                       ike_version="v1",
                       encryption_algorithm="aes-128",
                       auth_algorithm="sha1"))

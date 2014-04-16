@@ -257,38 +257,6 @@ class NetworkClientXML(client_base.NetworkClientBase):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
-    def create_vpnservice(self, subnet_id, router_id, **kwargs):
-        uri = '%s/vpn/vpnservices' % (self.uri_prefix)
-        vpnservice = common.Element("vpnservice")
-        p1 = common.Element("subnet_id", subnet_id)
-        p2 = common.Element("router_id", router_id)
-        vpnservice.append(p1)
-        vpnservice.append(p2)
-        common.deep_dict_to_xml(vpnservice, kwargs)
-        resp, body = self.post(uri, str(common.Document(vpnservice)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def create_ikepolicy(self, name, **kwargs):
-        uri = '%s/vpn/ikepolicies' % (self.uri_prefix)
-        ikepolicy = common.Element("ikepolicy")
-        p1 = common.Element("name", name)
-        ikepolicy.append(p1)
-        common.deep_dict_to_xml(ikepolicy, kwargs)
-        resp, body = self.post(uri, str(common.Document(ikepolicy)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
-    def create_ipsecpolicy(self, name, **kwargs):
-        uri = '%s/vpn/ipsecpolicies' % (self.uri_prefix)
-        ipsecpolicy = common.Element("ipsecpolicy")
-        p1 = common.Element("name", name)
-        ipsecpolicy.append(p1)
-        common.deep_dict_to_xml(ipsecpolicy, kwargs)
-        resp, body = self.post(uri, str(common.Document(ipsecpolicy)))
-        body = _root_tag_fetcher_and_xml_to_json_parse(body)
-        return resp, body
-
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)

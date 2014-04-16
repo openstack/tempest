@@ -165,21 +165,6 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         resp, body = self.delete(uri)
         return resp, body
 
-    def create_vpnservice(self, subnet_id, router_id, **kwargs):
-        post_body = {
-            "vpnservice": {
-                "subnet_id": subnet_id,
-                "router_id": router_id
-            }
-        }
-        for key, val in kwargs.items():
-            post_body['vpnservice'][key] = val
-        body = json.dumps(post_body)
-        uri = '%s/vpn/vpnservices' % (self.uri_prefix)
-        resp, body = self.post(uri, body)
-        body = json.loads(body)
-        return resp, body
-
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
