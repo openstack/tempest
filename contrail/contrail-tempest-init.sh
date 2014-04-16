@@ -2,6 +2,7 @@
 
 #export WORKSPACE=$PWD
 cd $WORKSPACE
+with_venv=tools/with_venv.sh
 sudo apt-get install -y git
 sudo apt-get install -y libffi-dev
 sudo apt-get install -y gcc
@@ -34,8 +35,8 @@ ADMIN_TENANT_NAME="admin"
 
 # ADD GLANCE IMAGE 
 # set image_uuid and image_uuid_alt
-image_uuid=`get_image_id "cirros" $image_path`
-image_uuid_alt=`get_image_id "cirros" $image_path`
+image_uuid=`get_image_id $KEYSTONE_SERVICE_HOST "cirros" $HTTP_IMAGE_PATH`
+image_uuid_alt=`get_image_id $KEYSTONE_SERVICE_HOST "cirros" $HTTP_IMAGE_PATH`
 echo "Image id $image_uuid"
 
 # Create tenant, user and public network
@@ -67,7 +68,7 @@ iniset $TEMPEST_CONFIG identity admin_tenant_name $ADMIN_TENANT_NAME
 iniset $TEMPEST_CONFIG image http_image $HTTP_IMAGE_PATH
 
 #COMPUTE 
-public_network_id=$(source ~/openstackrc; neutron net-list | grep $PUBLIC_NETWORK_NAME | \
+public_network_id=$(${with_venv} neutron net-list | grep $PUBLIC_NETWORK_NAME | \
             awk '{print $2}')
 
 iniset $TEMPEST_CONFIG compute ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
