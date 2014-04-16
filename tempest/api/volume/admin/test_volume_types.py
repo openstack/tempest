@@ -118,14 +118,16 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
                          'from the created Volume_type')
 
     @test.attr(type='smoke')
-    def test_volume_type_encryption_create_get(self):
-        # Create/get encryption type.
+    def test_volume_type_encryption_create_get_delete(self):
+        # Create/get/delete encryption type.
         provider = "LuksEncryptor"
         control_location = "front-end"
         name = data_utils.rand_name("volume-type-")
         resp, body = self.client.create_volume_type(name)
         self.assertEqual(200, resp.status)
         self.addCleanup(self._delete_volume_type, body['id'])
+
+        # Create encryption type
         resp, encryption_type = self.client.create_encryption_type(
             body['id'], provider=provider,
             control_location=control_location)
@@ -137,6 +139,8 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
         self.assertEqual(control_location, encryption_type['control_location'],
                          "The created encryption_type control_location is not "
                          "equal to the requested control_location")
+
+        # Get encryption type
         resp, fetched_encryption_type = self.client.get_encryption_type(
             encryption_type['volume_type_id'])
         self.assertEqual(200, resp.status)
@@ -148,3 +152,15 @@ class VolumeTypesTest(base.BaseVolumeV1AdminTest):
                          fetched_encryption_type['control_location'],
                          'The fetched encryption_type control_location is '
                          'different from the created encryption_type')
+
+        # Delete encryption type
+        resp, _ = self.client.delete_encryption_type(
+            encryption_type['volume_type_id'])
+        self.assertEqual(202, resp.status)
+        resource = {"id": encryption_type['volume_type_id'],
+                    "type": "encryption-type"}
+        self.client.wait_for_resource_deletion(resource)
+        resp, deleted_encryption_type = self.client.get_encryption_type(
+            encryption_type['volume_type_id'])
+        self.assertEqual(200, resp.status)
+        self.assertEmpty(deleted_encryption_type)
