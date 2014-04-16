@@ -36,7 +36,6 @@ resources:
       admin_state_up: false
       external_gateway_info:
         network: {get_param: ExternalNetworkId}
-        enable_snat: false
   RouterInterface:
     type: OS::Neutron::RouterInterface
     properties:

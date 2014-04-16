@@ -432,24 +432,6 @@ class ComputeAdminManager(Manager):
                       service=service)
 
 
-class OrchestrationManager(Manager):
-    """
-    Manager object that uses the admin credentials for its
-    so that heat templates can create users
-    """
-    def __init__(self, interface='json', service=None):
-        base = super(OrchestrationManager, self)
-        # heat currently needs an admin user so that stacks can create users
-        # however the tests need the demo tenant so that the neutron
-        # private network is the default. DO NOT change this auth combination
-        # until heat can run with the demo user.
-        base.__init__(CONF.identity.admin_username,
-                      CONF.identity.admin_password,
-                      CONF.identity.tenant_name,
-                      interface=interface,
-                      service=service)
-
-
 class OfficialClientManager(manager.Manager):
     """
     Manager that provides access to the official python clients for
