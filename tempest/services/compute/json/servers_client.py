@@ -401,7 +401,9 @@ class ServersClientJSON(rest_client.RestClient):
         """
         resp, body = self.get('/'.join(['servers', server_id,
                               'os-virtual-interfaces']))
-        return resp, json.loads(body)
+        body = json.loads(body)
+        self.validate_response(schema.list_virtual_interfaces, resp, body)
+        return resp, body
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""

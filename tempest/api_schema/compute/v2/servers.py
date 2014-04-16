@@ -42,3 +42,27 @@ create_server = {
         'required': ['server']
     }
 }
+
+list_virtual_interfaces = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'virtual_interfaces': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'string'},
+                        'mac_address': parameter_types.mac_address,
+                        'OS-EXT-VIF-NET:net_id': {'type': 'string'}
+                    },
+                    # 'OS-EXT-VIF-NET:net_id' is API extension So it is
+                    # not defined as 'required'
+                    'required': ['id', 'mac_address']
+                }
+            }
+        },
+        'required': ['virtual_interfaces']
+    }
+}

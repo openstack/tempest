@@ -26,3 +26,8 @@ links = {
         'required': ['href', 'rel']
     }
 }
+
+mac_address = {
+    'type': 'string',
+    'pattern': '(?:[a-f0-9]{2}:){5}[a-f0-9]{2}'
+}
