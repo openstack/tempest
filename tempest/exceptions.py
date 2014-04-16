@@ -13,158 +13,197 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.exceptions import base
+import testtools
 
 
-class InvalidConfiguration(base.TempestException):
+class TempestException(Exception):
+    """
+    Base Tempest Exception
+
+    To correctly use this class, inherit from it and define
+    a 'message' property. That message will get printf'd
+    with the keyword arguments provided to the constructor.
+    """
+    message = "An unknown exception occurred"
+
+    def __init__(self, *args, **kwargs):
+        super(TempestException, self).__init__()
+        try:
+            self._error_string = self.message % kwargs
+        except Exception:
+            # at least get the core message out if something happened
+            self._error_string = self.message
+        if len(args) > 0:
+            # If there is a non-kwarg parameter, assume it's the error
+            # message or reason description and tack it on to the end
+            # of the exception message
+            # Convert all arguments into their string representations...
+            args = ["%s" % arg for arg in args]
+            self._error_string = (self._error_string +
+                                  "\nDetails: %s" % '\n'.join(args))
+
+    def __str__(self):
+        return self._error_string
+
+
+class RestClientException(TempestException,
+                          testtools.TestCase.failureException):
+    pass
+
+
+class RFCViolation(RestClientException):
+    message = "RFC Violation"
+
+
+class InvalidConfiguration(TempestException):
     message = "Invalid Configuration"
 
 
-class InvalidCredentials(base.TempestException):
+class InvalidCredentials(TempestException):
     message = "Invalid Credentials"
 
 
-class InvalidHttpSuccessCode(base.RestClientException):
+class InvalidHttpSuccessCode(RestClientException):
     message = "The success code is different than the expected one"
 
 
-class NotFound(base.RestClientException):
+class NotFound(RestClientException):
     message = "Object not found"
 
 
-class Unauthorized(base.RestClientException):
+class Unauthorized(RestClientException):
     message = 'Unauthorized'
 
 
-class InvalidServiceTag(base.RestClientException):
+class InvalidServiceTag(RestClientException):
     message = "Invalid service tag"
 
 
-class TimeoutException(base.TempestException):
+class TimeoutException(TempestException):
     message = "Request timed out"
 
 
-class BuildErrorException(base.TempestException):
+class BuildErrorException(TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
-class ImageKilledException(base.TempestException):
+class ImageKilledException(TempestException):
     message = "Image %(image_id)s 'killed' while waiting for '%(status)s'"
 
 
-class AddImageException(base.TempestException):
+class AddImageException(TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
 
-class EC2RegisterImageException(base.TempestException):
+class EC2RegisterImageException(TempestException):
     message = ("Image %(image_id)s failed to become 'available' "
                "in the allotted time")
 
 
-class VolumeBuildErrorException(base.TempestException):
+class VolumeBuildErrorException(TempestException):
     message = "Volume %(volume_id)s failed to build and is in ERROR status"
 
 
-class SnapshotBuildErrorException(base.TempestException):
+class SnapshotBuildErrorException(TempestException):
     message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
 
 
-class VolumeBackupException(base.TempestException):
+class VolumeBackupException(TempestException):
     message = "Volume backup %(backup_id)s failed and is in ERROR status"
 
 
-class StackBuildErrorException(base.TempestException):
+class StackBuildErrorException(TempestException):
     message = ("Stack %(stack_identifier)s is in %(stack_status)s status "
                "due to '%(stack_status_reason)s'")
 
 
-class StackResourceBuildErrorException(base.TempestException):
+class StackResourceBuildErrorException(TempestException):
     message = ("Resource %(resource_name) in stack %(stack_identifier)s is "
                "in %(resource_status)s status due to "
                "'%(resource_status_reason)s'")
 
 
-class BadRequest(base.RestClientException):
+class BadRequest(RestClientException):
     message = "Bad request"
 
 
-class UnprocessableEntity(base.RestClientException):
+class UnprocessableEntity(RestClientException):
     message = "Unprocessable entity"
 
 
-class AuthenticationFailure(base.RestClientException):
+class AuthenticationFailure(RestClientException):
     message = ("Authentication with user %(user)s and password "
                "%(password)s failed auth using tenant %(tenant)s.")
 
 
-class EndpointNotFound(base.TempestException):
+class EndpointNotFound(TempestException):
     message = "Endpoint not found"
 
 
-class RateLimitExceeded(base.TempestException):
+class RateLimitExceeded(TempestException):
     message = "Rate limit exceeded"
 
 
-class OverLimit(base.TempestException):
+class OverLimit(TempestException):
     message = "Quota exceeded"
 
 
-class ServerFault(base.TempestException):
+class ServerFault(TempestException):
     message = "Got server fault"
 
 
-class ImageFault(base.TempestException):
+class ImageFault(TempestException):
     message = "Got image fault"
 
 
-class IdentityError(base.TempestException):
+class IdentityError(TempestException):
     message = "Got identity error"
 
 
-class Conflict(base.RestClientException):
+class Conflict(RestClientException):
     message = "An object with that identifier already exists"
 
 
-class SSHTimeout(base.TempestException):
+class SSHTimeout(TempestException):
     message = ("Connection to the %(host)s via SSH timed out.\n"
                "User: %(user)s, Password: %(password)s")
 
 
-class SSHExecCommandFailed(base.TempestException):
+class SSHExecCommandFailed(TempestException):
     """Raised when remotely executed command returns nonzero status."""
     message = ("Command '%(command)s', exit status: %(exit_status)d, "
                "Error:\n%(strerror)s")
 
 
-class ServerUnreachable(base.TempestException):
+class ServerUnreachable(TempestException):
     message = "The server is not reachable via the configured network"
 
 
-class TearDownException(base.TempestException):
+class TearDownException(TempestException):
     message = "%(num)d cleanUp operation failed"
 
 
-class ResponseWithNonEmptyBody(base.RFCViolation):
+class ResponseWithNonEmptyBody(RFCViolation):
     message = ("RFC Violation! Response with %(status)d HTTP Status Code "
                "MUST NOT have a body")
 
 
-class ResponseWithEntity(base.RFCViolation):
+class ResponseWithEntity(RFCViolation):
     message = ("RFC Violation! Response with 205 HTTP Status Code "
                "MUST NOT have an entity")
 
 
-class InvalidHTTPResponseBody(base.RestClientException):
+class InvalidHTTPResponseBody(RestClientException):
     message = "HTTP response body is invalid json or xml"
 
 
-class InvalidContentType(base.RestClientException):
+class InvalidContentType(RestClientException):
     message = "Invalid content type provided"
 
 
-class UnexpectedResponseCode(base.RestClientException):
+class UnexpectedResponseCode(RestClientException):
     message = "Unexpected response code received"
 
 
-class InvalidStructure(base.TempestException):
+class InvalidStructure(TempestException):
     message = "Invalid structure of table with details"
