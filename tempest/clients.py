@@ -52,6 +52,8 @@ from tempest.services.compute.json.migrations_client import \
     MigrationsClientJSON
 from tempest.services.compute.json.quotas_client import QuotaClassesClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClientJSON
+from tempest.services.compute.json.security_group_default_rules_client import \
+    SecurityGroupDefaultRulesClientJSON
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
@@ -406,6 +408,8 @@ class Manager(manager.Manager):
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
         self.migrations_client = MigrationsClientJSON(self.auth_provider)
+        self.security_group_default_rules_client = (
+            SecurityGroupDefaultRulesClientJSON(self.auth_provider))
 
 
 class AltManager(Manager):

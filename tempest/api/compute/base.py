@@ -83,6 +83,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             cls.hypervisor_client = cls.os.hypervisor_client
             cls.certificates_client = cls.os.certificates_client
             cls.migrations_client = cls.os.migrations_client
+            cls.security_group_default_rules_client = (
+                cls.os.security_group_default_rules_client)
 
         elif cls._api_version == 3:
             if not CONF.compute_feature_enabled.api_v3:
