@@ -442,6 +442,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
         body = json.loads(body)
+        self.validate_response(common_schema.get_vnc_console, resp, body)
         return resp, body['console']
 
     def reset_network(self, server_id, **kwargs):
