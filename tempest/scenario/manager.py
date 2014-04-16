@@ -19,7 +19,6 @@ import os
 import six
 import subprocess
 
-from ironicclient import exc as ironic_exceptions
 import netaddr
 from neutronclient.common import exceptions as exc
 from novaclient import exceptions as nova_exceptions
@@ -490,6 +489,8 @@ class BaremetalScenarioTest(OfficialClientTest):
 
     def wait_node(self, instance_id):
         """Waits for a node to be associated with instance_id."""
+        from ironicclient import exc as ironic_exceptions
+
         def _get_node():
             node = None
             try:
