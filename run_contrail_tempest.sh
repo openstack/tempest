@@ -17,6 +17,7 @@ function usage {
   echo "  -l, --logging            Enable logging"
   echo "  -L, --logging-config     Logging config file location.  Default is etc/logging.conf"
   echo "  -r, --result-xml         Path of Junitxml report to be generated"
+  echo "  -p, --populate-config         Populate config file and init contrail environment"
   echo "  -- [TESTROPTIONS]        After the first '--' you can pass arbitrary arguments to testr "
 }
 
@@ -35,8 +36,9 @@ update=0
 logging=0
 logging_config=etc/logging.conf
 result_xml="result.xml"
+populate_config=0
 
-if ! options=$(getopt -o VNnfusthdC:lLr: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,help,debug,config:,logging,logging-config,result-xml: -- "$@")
+if ! options=$(getopt -o VNnfusthdC:lLpr: -l virtual-env,no-virtual-env,no-site-packages,force,update,smoke,serial,help,debug,config:,logging,logging-config,populate-config,result-xml: -- "$@")
 then
     # parse error
     usage
@@ -59,6 +61,7 @@ while [ $# -gt 0 ]; do
     -t|--serial) serial=1;;
     -l|--logging) logging=1;;
     -L|--logging-config) logging_config=$2; shift;;
+    -p|--populate-config) populate_config=1;;
     -r|--result-xml) result_xml=$2; shift;;
     --) [ "yes" == "$first_uu" ] || testrargs="$testrargs $1"; first_uu=no  ;;
     *) testrargs+="$testrargs $1";;
@@ -86,6 +89,10 @@ cd `dirname "$0"`
 
 if [ $no_site_packages -eq 1 ]; then
   installvenvopts="--no-site-packages"
+fi
+
+if [ $populate_config -eq 1 ]; then
+  ./contrail/contrail-tempest-init.sh
 fi
 
 function testr_init {

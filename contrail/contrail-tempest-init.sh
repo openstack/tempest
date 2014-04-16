@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 
 #export WORKSPACE=$PWD
 cd $WORKSPACE
