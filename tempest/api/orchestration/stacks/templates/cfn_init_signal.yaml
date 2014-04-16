@@ -11,6 +11,8 @@ Parameters:
     Type: String
   network:
     Type: String
+  timeout:
+    Type: Number
 Resources:
   CfnUser:
     Type: AWS::IAM::User
@@ -68,7 +70,7 @@ Resources:
     DependsOn: SmokeServer
     Properties:
       Handle: {Ref: WaitHandle}
-      Timeout: '600'
+      Timeout: {Ref: timeout}
 Outputs:
   WaitConditionStatus:
     Description: Contents of /tmp/smoke-status on SmokeServer
