@@ -94,21 +94,38 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
     # TODO(afazekas): merge these test cases
     @test.attr(type='gate')
     def test_get_updated_quotas(self):
-        # Verify that GET shows the updated quota set
+        # Verify that GET shows the updated quota set of tenant
         tenant_name = data_utils.rand_name('cpu_quota_tenant_')
         tenant_desc = tenant_name + '-desc'
         identity_client = self.os_adm.identity_client
         _, tenant = identity_client.create_tenant(name=tenant_name,
                                                   description=tenant_desc)
         tenant_id = tenant['id']
-        self.addCleanup(identity_client.delete_tenant,
-                        tenant_id)
+        self.addCleanup(identity_client.delete_tenant, tenant_id)
 
-        self.adm_client.update_quota_set(tenant_id,
-                                         ram='5120')
+        self.adm_client.update_quota_set(tenant_id, ram='5120')
         resp, quota_set = self.adm_client.get_quota_set(tenant_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(quota_set['ram'], 5120)
+        self.assertEqual(5120, quota_set['ram'])
+
+        # Verify that GET shows the updated quota set of user
+        user_name = data_utils.rand_name('cpu_quota_user_')
+        password = data_utils.rand_name('password-')
+        email = user_name + '@testmail.tm'
+        _, user = identity_client.create_user(name=user_name,
+                                              password=password,
+                                              tenant_id=tenant_id,
+                                              email=email)
+        user_id = user['id']
+        self.addCleanup(identity_client.delete_user, user_id)
+
+        self.adm_client.update_quota_set(tenant_id,
+                                         user_id=user_id,
+                                         ram='2048')
+        resp, quota_set = self.adm_client.get_quota_set(tenant_id,
+                                                        user_id=user_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(2048, quota_set['ram'])
 
     @test.attr(type='gate')
     def test_delete_quota(self):
