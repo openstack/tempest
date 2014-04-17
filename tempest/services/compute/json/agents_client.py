@@ -15,6 +15,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute.v2 import agents as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -46,7 +47,9 @@ class AgentsClientJSON(rest_client.RestClient):
 
     def delete_agent(self, agent_id):
         """Delete an existing agent build."""
-        return self.delete('os-agents/%s' % str(agent_id))
+        resp, body = self.delete("os-agents/%s" % str(agent_id))
+        self.validate_response(schema.delete_agent, resp, body)
+        return resp, body
 
     def update_agent(self, agent_id, **kwargs):
         """Update an agent build."""
