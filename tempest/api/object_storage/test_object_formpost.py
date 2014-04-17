@@ -39,6 +39,18 @@ class ObjectFormPostTest(base.BaseObjectTest):
         cls.metadata = {'Temp-URL-Key': cls.key}
         cls.account_client.create_account_metadata(metadata=cls.metadata)
 
+    def setUp(self):
+        super(ObjectFormPostTest, self).setUp()
+
+        # make sure the metadata has been set
+        account_client_metadata, _ = \
+            self.account_client.list_account_metadata()
+        self.assertIn('x-account-meta-temp-url-key',
+                      account_client_metadata)
+        self.assertEqual(
+            account_client_metadata['x-account-meta-temp-url-key'],
+            self.key)
+
     @classmethod
     def tearDownClass(cls):
         cls.account_client.delete_account_metadata(metadata=cls.metadata)
@@ -100,13 +112,9 @@ class ObjectFormPostTest(base.BaseObjectTest):
         headers = {'Content-Type': content_type,
                    'Content-Length': str(len(body))}
 
-        url = "%s/%s/%s" % (self.container_client.base_url,
-                            self.container_name,
-                            self.object_name)
+        url = "%s/%s" % (self.container_name, self.object_name)
 
-        # Use a raw request, otherwise authentication headers are used
-        resp, body = self.object_client.http_obj.request(url, "POST",
-                                                         body, headers=headers)
+        resp, body = self.object_client.post(url, body, headers=headers)
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, "Object", "POST")
 
