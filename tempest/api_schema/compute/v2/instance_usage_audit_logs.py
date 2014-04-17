@@ -46,3 +46,14 @@ get_instance_usage_audit_log = {
         'required': ['instance_usage_audit_log']
     }
 }
+
+list_instance_usage_audit_log = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'instance_usage_audit_logs': common_instance_usage_audit_log
+        },
+        'required': ['instance_usage_audit_logs']
+    }
+}
