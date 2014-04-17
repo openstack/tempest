@@ -86,9 +86,6 @@ class SecGroupTest(base.BaseSecGroupTest):
                 direction='ingress'
             )
             self.assertEqual('201', resp['status'])
-            self.addCleanup(self._delete_security_group_rule,
-                            rule_create_body['security_group_rule']['id']
-                            )
 
             # Show details of the created security rule
             resp, show_rule_body = self.client.show_security_group_rule(
@@ -130,9 +127,6 @@ class SecGroupTest(base.BaseSecGroupTest):
 
         self.assertEqual('201', resp['status'])
         sec_group_rule = rule_create_body['security_group_rule']
-        self.addCleanup(self._delete_security_group_rule,
-                        sec_group_rule['id']
-                        )
 
         self.assertEqual(sec_group_rule['direction'], direction)
         self.assertEqual(sec_group_rule['protocol'], protocol)
