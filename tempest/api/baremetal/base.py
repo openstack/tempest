@@ -51,7 +51,7 @@ class BaseBaremetalTest(test.BaseTestCase):
 
         mgr = clients.AdminManager()
         cls.client = mgr.baremetal_client
-
+        cls.power_timeout = CONF.baremetal.power_timeout
         cls.created_objects = {'chassis': set(),
                                'port': set(),
                                'node': set()}

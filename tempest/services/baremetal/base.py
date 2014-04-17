@@ -199,3 +199,14 @@ class BaremetalClient(rest_client.RestClient):
 
         """
         return self._list_request(version, permanent=True)
+
+    def _put_request(self, resource, put_object):
+        """
+        Update specified object with JSON-patch.
+
+        """
+        uri = self._get_uri(resource)
+        put_body = json.dumps(put_object)
+
+        resp, body = self.put(uri, body=put_body)
+        return resp, body
