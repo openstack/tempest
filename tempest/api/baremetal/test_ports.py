@@ -22,25 +22,30 @@ class TestPorts(base.BaseBaremetalTest):
     def setUp(self):
         super(TestPorts, self).setUp()
 
-        chassis = self.create_chassis()['chassis']
-        self.node = self.create_node(chassis['uuid'])['node']
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+        _, self.port = self.create_port(self.node['uuid'],
+                                        data_utils.rand_mac_address())
+
+    def _assertExpected(self, expected, actual):
+        # Check if not expected keys/values exists in actual response body
+        for key, value in expected.iteritems():
+            if key not in ('created_at', 'updated_at'):
+                self.assertIn(key, actual)
+                self.assertEqual(value, actual[key])
 
     @test.attr(type='smoke')
     def test_create_port(self):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        result = self.create_port(node_id=node_id, address=address)
-
-        port = result['port']
+        resp, port = self.create_port(node_id=node_id, address=address)
+        self.assertEqual(201, resp.status)
 
         resp, body = self.client.show_port(port['uuid'])
 
         self.assertEqual(200, resp.status)
-        self.assertEqual(port['uuid'], body['uuid'])
-        self.assertEqual(address, body['address'])
-        self.assertEqual({}, body['extra'])
-        self.assertEqual(node_id, body['node_uuid'])
+        self._assertExpected(port, body)
 
     @test.attr(type='smoke')
     def test_create_port_specifying_uuid(self):
@@ -48,15 +53,13 @@ class TestPorts(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         uuid = data_utils.rand_uuid()
 
-        self.create_port(node_id=node_id, address=address, uuid=uuid)
+        resp, port = self.create_port(node_id=node_id,
+                                      address=address, uuid=uuid)
+        self.assertEqual(201, resp.status)
 
         resp, body = self.client.show_port(uuid)
-
         self.assertEqual(200, resp.status)
-        self.assertEqual(uuid, body['uuid'])
-        self.assertEqual(address, body['address'])
-        self.assertEqual({}, body['extra'])
-        self.assertEqual(node_id, body['node_uuid'])
+        self._assertExpected(port, body)
 
     @test.attr(type='smoke')
     def test_create_port_with_extra(self):
@@ -64,76 +67,46 @@ class TestPorts(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         extra = {'key': 'value'}
 
-        result = self.create_port(node_id=node_id, address=address,
-                                  extra=extra)
-        port = result['port']
+        resp, port = self.create_port(node_id=node_id, address=address,
+                                      extra=extra)
+        self.assertEqual(201, resp.status)
 
         resp, body = self.client.show_port(port['uuid'])
-
         self.assertEqual(200, resp.status)
-        self.assertEqual(port['uuid'], body['uuid'])
-        self.assertEqual(address, body['address'])
-        self.assertEqual(extra, body['extra'])
-        self.assertEqual(node_id, body['node_uuid'])
+        self._assertExpected(port, body)
 
     @test.attr(type='smoke')
     def test_delete_port(self):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
-        port_id = self.create_port(node_id=node_id, address=address)['port'][
-            'uuid']
+        resp, port = self.create_port(node_id=node_id, address=address)
+        self.assertEqual(201, resp.status)
 
-        resp = self.delete_port(port_id)
+        resp = self.delete_port(port['uuid'])
 
         self.assertEqual(204, resp.status)
-        self.assertRaises(exc.NotFound, self.client.show_port, port_id)
+        self.assertRaises(exc.NotFound, self.client.show_port, port['uuid'])
 
     @test.attr(type='smoke')
     def test_show_port(self):
-        node_id = self.node['uuid']
-        address = data_utils.rand_mac_address()
-        extra = {'key': 'value'}
-
-        port_id = self.create_port(node_id=node_id, address=address,
-                                   extra=extra)['port']['uuid']
-
-        resp, port = self.client.show_port(port_id)
-
+        resp, port = self.client.show_port(self.port['uuid'])
         self.assertEqual(200, resp.status)
-        self.assertEqual(port_id, port['uuid'])
-        self.assertEqual(address, port['address'])
-        self.assertEqual(extra, port['extra'])
+        self._assertExpected(self.port, port)
 
     @test.attr(type='smoke')
     def test_show_port_with_links(self):
-        node_id = self.node['uuid']
-        address = data_utils.rand_mac_address()
-
-        port_id = self.create_port(node_id=node_id, address=address)['port'][
-            'uuid']
-
-        resp, body = self.client.show_port(port_id)
-
+        resp, port = self.client.show_port(self.port['uuid'])
         self.assertEqual(200, resp.status)
-        self.assertIn('links', body.keys())
-        self.assertEqual(2, len(body['links']))
-        self.assertIn(port_id, body['links'][0]['href'])
+        self.assertIn('links', port.keys())
+        self.assertEqual(2, len(port['links']))
+        self.assertIn(port['uuid'], port['links'][0]['href'])
 
     @test.attr(type='smoke')
     def test_list_ports(self):
-        node_id = self.node['uuid']
-
-        uuids = [self.create_port(node_id=node_id,
-                                  address=data_utils.rand_mac_address())
-                 ['port']['uuid'] for i in xrange(5)]
-
         resp, body = self.client.list_ports()
         self.assertEqual(200, resp.status)
-        loaded_uuids = [p['uuid'] for p in body['ports']]
-
-        for uuid in uuids:
-            self.assertIn(uuid, loaded_uuids)
-
+        self.assertIn(self.port['uuid'],
+                      [i['uuid'] for i in body['ports']])
         # Verify self links.
         for port in body['ports']:
             self.validate_self_link('ports', port['uuid'],
@@ -141,15 +114,8 @@ class TestPorts(base.BaseBaremetalTest):
 
     @test.attr(type='smoke')
     def test_list_with_limit(self):
-        node_id = self.node['uuid']
-
-        for i in xrange(5):
-            self.create_port(node_id=node_id,
-                             address=data_utils.rand_mac_address())
-
         resp, body = self.client.list_ports(limit=3)
         self.assertEqual(200, resp.status)
-        self.assertEqual(3, len(body['ports']))
 
         next_marker = body['ports'][-1]['uuid']
         self.assertIn(next_marker, body['next'])
@@ -160,7 +126,7 @@ class TestPorts(base.BaseBaremetalTest):
         uuids = [
             self.create_port(node_id=node_id,
                              address=data_utils.rand_mac_address())
-            ['port']['uuid'] for i in range(0, 5)]
+            [1]['uuid'] for i in range(0, 5)]
 
         resp, body = self.client.list_ports_detail()
         self.assertEqual(200, resp.status)
@@ -185,8 +151,9 @@ class TestPorts(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         extra = {'key1': 'value1', 'key2': 'value2', 'key3': 'value3'}
 
-        port_id = self.create_port(node_id=node_id, address=address,
-                                   extra=extra)['port']['uuid']
+        resp, port = self.create_port(node_id=node_id, address=address,
+                                      extra=extra)
+        self.assertEqual(201, resp.status)
 
         new_address = data_utils.rand_mac_address()
         new_extra = {'key1': 'new-value1', 'key2': 'new-value2',
@@ -205,9 +172,10 @@ class TestPorts(base.BaseBaremetalTest):
                   'op': 'replace',
                   'value': new_extra['key3']}]
 
-        self.client.update_port(port_id, patch)
+        resp, _ = self.client.update_port(port['uuid'], patch)
+        self.assertEqual(200, resp.status)
 
-        resp, body = self.client.show_port(port_id)
+        resp, body = self.client.show_port(port['uuid'])
         self.assertEqual(200, resp.status)
         self.assertEqual(new_address, body['address'])
         self.assertEqual(new_extra, body['extra'])
@@ -218,23 +186,25 @@ class TestPorts(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         extra = {'key1': 'value1', 'key2': 'value2', 'key3': 'value3'}
 
-        port_id = self.create_port(node_id=node_id, address=address,
-                                   extra=extra)['port']['uuid']
+        resp, port = self.create_port(node_id=node_id, address=address,
+                                      extra=extra)
+        self.assertEqual(201, resp.status)
 
         # Removing one item from the collection
-        resp, _ = self.client.update_port(port_id, [{'path': '/extra/key2',
-                                                     'op': 'remove'}])
+        resp, _ = self.client.update_port(port['uuid'],
+                                          [{'path': '/extra/key2',
+                                           'op': 'remove'}])
         self.assertEqual(200, resp.status)
         extra.pop('key2')
-        resp, body = self.client.show_port(port_id)
+        resp, body = self.client.show_port(port['uuid'])
         self.assertEqual(200, resp.status)
         self.assertEqual(extra, body['extra'])
 
         # Removing the collection
-        resp, _ = self.client.update_port(port_id, [{'path': '/extra',
-                                                     'op': 'remove'}])
+        resp, _ = self.client.update_port(port['uuid'], [{'path': '/extra',
+                                                         'op': 'remove'}])
         self.assertEqual(200, resp.status)
-        resp, body = self.client.show_port(port_id)
+        resp, body = self.client.show_port(port['uuid'])
         self.assertEqual(200, resp.status)
         self.assertEqual({}, body['extra'])
 
@@ -247,8 +217,8 @@ class TestPorts(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        port_id = self.create_port(node_id=node_id, address=address)['port'][
-            'uuid']
+        resp, port = self.create_port(node_id=node_id, address=address)
+        self.assertEqual(201, resp.status)
 
         extra = {'key1': 'value1', 'key2': 'value2'}
 
@@ -259,9 +229,10 @@ class TestPorts(base.BaseBaremetalTest):
                   'op': 'add',
                   'value': extra['key2']}]
 
-        self.client.update_port(port_id, patch)
+        resp, _ = self.client.update_port(port['uuid'], patch)
+        self.assertEqual(200, resp.status)
 
-        resp, body = self.client.show_port(port_id)
+        resp, body = self.client.show_port(port['uuid'])
         self.assertEqual(200, resp.status)
         self.assertEqual(extra, body['extra'])
 
@@ -271,8 +242,9 @@ class TestPorts(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         extra = {'key1': 'value1', 'key2': 'value2'}
 
-        port_id = self.create_port(node_id=node_id, address=address,
-                                   extra=extra)['port']['uuid']
+        resp, port = self.create_port(node_id=node_id, address=address,
+                                      extra=extra)
+        self.assertEqual(201, resp.status)
 
         new_address = data_utils.rand_mac_address()
         new_extra = {'key1': 'new-value1', 'key3': 'new-value3'}
@@ -289,9 +261,10 @@ class TestPorts(base.BaseBaremetalTest):
                   'op': 'add',
                   'value': new_extra['key3']}]
 
-        self.client.update_port(port_id, patch)
+        resp, _ = self.client.update_port(port['uuid'], patch)
+        self.assertEqual(200, resp.status)
 
-        resp, body = self.client.show_port(port_id)
+        resp, body = self.client.show_port(port['uuid'])
         self.assertEqual(200, resp.status)
         self.assertEqual(new_address, body['address'])
         self.assertEqual(new_extra, body['extra'])
