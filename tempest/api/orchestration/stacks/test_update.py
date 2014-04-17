@@ -14,7 +14,7 @@ import logging
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 LOG = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ resources:
         self.assertEqual('202', resp[0]['status'])
         self.client.wait_for_stack_status(stack_identifier, 'UPDATE_COMPLETE')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_stack_update_nochange(self):
         stack_name = data_utils.rand_name('heat')
         stack_identifier = self.create_stack(stack_name, self.template)
@@ -61,7 +61,8 @@ resources:
         self.assertEqual(expected_resources,
                          self.list_resources(stack_identifier))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
+    @test.skip_because(bug='1308682')
     def test_stack_update_add_remove(self):
         stack_name = data_utils.rand_name('heat')
         stack_identifier = self.create_stack(stack_name, self.template)
