@@ -43,3 +43,7 @@ get_vnc_console = {
         'required': ['console']
     }
 }
+
+delete_server = {
+    'status_code': [204],
+}
