@@ -182,15 +182,31 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_list_ports_binding_ext_attr(self):
-        resp, body = self.admin_client.list_ports(
-            **{'tenant_id': self.tenant['id']})
+        # Create a new port
+        post_body = {"network_id": self.network['id']}
+        resp, body = self.admin_client.create_port(**post_body)
+        self.assertEqual('201', resp['status'])
+        port = body['port']
+        self.addCleanup(self.admin_client.delete_port, port['id'])
+
+        # Update the port's binding attributes so that is now 'bound'
+        # to a host
+        update_body = {"binding:host_id": self.host_id}
+        resp, _ = self.admin_client.update_port(port['id'], **update_body)
+        self.assertEqual('200', resp['status'])
+
+        # List all ports, ensure new port is part of list and its binding
+        # attributes are set and accurate
+        resp, body = self.admin_client.list_ports()
         self.assertEqual('200', resp['status'])
         ports_list = body['ports']
-        for port in ports_list:
-            vif_type = port['binding:vif_type']
-            self.assertIsNotNone(vif_type)
-            vif_details = port['binding:vif_details']['port_filter']
-            self.assertIsNotNone(vif_details)
+        pids_list = [p['id'] for p in ports_list]
+        self.assertIn(port['id'], pids_list)
+        listed_port = [p for p in ports_list if p['id'] == port['id']]
+        self.assertEqual(1, len(listed_port),
+                         'Multiple ports listed with id %s in ports listing: '
+                         '%s' % (port['id'], ports_list))
+        self.assertEqual(self.host_id, listed_port[0]['binding:host_id'])
 
     @test.attr(type='smoke')
     def test_show_port_binding_ext_attr(self):
