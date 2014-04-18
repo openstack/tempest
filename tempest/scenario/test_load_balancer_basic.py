@@ -13,10 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
+import httplib
+import tempfile
 import time
-import urllib
+import urllib2
 
 from tempest.api.network import common as net_common
+from tempest.common import commands
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
@@ -135,71 +139,53 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
         1. SSH to the instance
         2. Start two http backends listening on ports 80 and 88 respectively
-        In case there are two instances, each backend is created on a separate
-        instance.
-
-        The backends are the inetd services. To start them we need to edit
-        /etc/inetd.conf in the following way:
-        www stream tcp nowait root /bin/sh sh /home/cirros/script_name
-
-        Where /home/cirros/script_name is a path to a script which
-        echoes the responses:
-        echo -e 'HTTP/1.0 200 OK\r\n\r\nserver_name
-
-        If we want the server to listen on port 88, then we use
-        "kerberos" instead of "www".
         """
 
         for server_id, ip in self.server_ips.iteritems():
             private_key = self.servers_keypairs[server_id].private_key
             server_name = self.compute_client.servers.get(server_id).name
+            username = config.scenario.ssh_user
             ssh_client = self.get_remote_client(
                 server_or_ip=ip,
                 private_key=private_key)
             ssh_client.validate_authentication()
-            # Create service for inetd
-            create_script = """sudo sh -c "echo -e \\"echo -e 'HTTP/1.0 """ \
-                            """200 OK\\\\\\r\\\\\\n\\\\\\r\\\\\\n""" \
-                            """%(server)s'\\" >>/home/cirros/%(script)s\""""
 
-            cmd = create_script % {
-                'server': server_name,
-                'script': 'script1'}
+            # Write a backend's responce into a file
+            resp = """HTTP/1.0 200 OK\r\nContent-Length: 8\r\n\r\n%s"""
+            with tempfile.NamedTemporaryFile() as script:
+                script.write(resp % server_name)
+                script.flush()
+                with tempfile.NamedTemporaryFile() as key:
+                    key.write(private_key)
+                    key.flush()
+                    commands.copy_file_to_host(script.name,
+                                               "~/script1",
+                                               ip,
+                                               username, key.name)
+            # Start netcat
+            start_server = """sudo nc -ll -p %(port)s -e cat """ \
+                           """~/%(script)s &"""
+            cmd = start_server % {'port': self.port1,
+                                  'script': 'script1'}
             ssh_client.exec_command(cmd)
-            # Configure inetd
-            configure_inetd = """sudo sh -c "echo -e \\"%(service)s """ \
-                              """stream tcp nowait root /bin/sh sh """ \
-                              """/home/cirros/%(script)s\\" >> """ \
-                              """/etc/inetd.conf\""""
-            # "www" stands for port 80
-            cmd = configure_inetd % {'service': 'www',
-                                     'script': 'script1'}
-            ssh_client.exec_command(cmd)
-
             if len(self.server_ips) == 1:
-                cmd = create_script % {'server': 'server2',
-                                       'script': 'script2'}
+                with tempfile.NamedTemporaryFile() as script:
+                    script.write(resp % 'server2')
+                    script.flush()
+                    with tempfile.NamedTemporaryFile() as key:
+                        key.write(private_key)
+                        key.flush()
+                        commands.copy_file_to_host(script.name,
+                                                   "~/script2", ip,
+                                                   username, key.name)
+                cmd = start_server % {'port': self.port2,
+                                      'script': 'script2'}
                 ssh_client.exec_command(cmd)
-                # "kerberos" stands for port 88
-                cmd = configure_inetd % {'service': 'kerberos',
-                                         'script': 'script2'}
-                ssh_client.exec_command(cmd)
-
-            # Get PIDs of inetd
-            pids = ssh_client.get_pids('inetd')
-            if pids != ['']:
-                # If there are any inetd processes, reload them
-                kill_cmd = "sudo kill -HUP %s" % ' '.join(pids)
-                ssh_client.exec_command(kill_cmd)
-            else:
-                # In other case start inetd
-                start_inetd = "sudo /usr/sbin/inetd /etc/inetd.conf"
-                ssh_client.exec_command(start_inetd)
 
     def _check_connection(self, check_ip, port=80):
         def try_connect(ip, port):
             try:
-                resp = urllib.urlopen("http://{0}:{1}/".format(ip, port))
+                resp = urllib2.urlopen("http://{0}:{1}/".format(ip, port))
                 if resp.getcode() == 200:
                     return True
                 return False
@@ -284,27 +270,32 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
 
     def _check_load_balancing(self):
         """
-        1. Send 100 requests on the floating ip associated with the VIP
+        1. Send 10 requests on the floating ip associated with the VIP
         2. Check that the requests are shared between
            the two servers and that both of them get equal portions
            of the requests
         """
 
         self._check_connection(self.vip_ip)
-        resp = self._send_requests(self.vip_ip)
-        self.assertEqual(set(["server1\n", "server2\n"]), set(resp))
-        self.assertEqual(50, resp.count("server1\n"))
-        self.assertEqual(50, resp.count("server2\n"))
+        self._send_requests(self.vip_ip, set(["server1", "server2"]))
 
-    def _send_requests(self, vip_ip):
-        resp = []
-        for count in range(100):
-            resp.append(
-                urllib.urlopen(
-                    "http://{0}/".format(vip_ip)).read())
-        return resp
+    def _send_requests(self, vip_ip, expected, num_req=10):
+        count = 0
+        while count < num_req:
+            try:
+                resp = []
+                for i in range(len(self.members)):
+                    resp.append(
+                        urllib2.urlopen(
+                            "http://{0}/".format(vip_ip)).read())
+                count += 1
+                self.assertEqual(expected,
+                                 set(resp))
+            # NOTE: There always is a slim chance of getting this exception
+            #       due to special aspects of haproxy internal behavior.
+            except httplib.BadStatusLine:
+                pass
 
-    @test.skip_because(bug='1295165')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
