@@ -12,6 +12,8 @@ parameters:
     type: string
   ExternalNetworkId:
     type: string
+  timeout:
+    type: number
 resources:
   Network:
     type: OS::Neutron::Net
@@ -65,4 +67,4 @@ resources:
     depends_on: Server
     properties:
       Handle: {get_resource: WaitHandleNeutron}
-      Timeout: '600'
+      Timeout: {get_param: timeout}

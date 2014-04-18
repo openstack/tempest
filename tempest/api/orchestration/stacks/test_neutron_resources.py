@@ -53,7 +53,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                 'InstanceType': CONF.orchestration.instance_type,
                 'ImageId': CONF.orchestration.image_ref,
                 'ExternalRouterId': cls.external_router_id,
-                'ExternalNetworkId': cls.external_network_id
+                'ExternalNetworkId': cls.external_network_id,
+                'timeout': CONF.orchestration.build_timeout
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]
         try:

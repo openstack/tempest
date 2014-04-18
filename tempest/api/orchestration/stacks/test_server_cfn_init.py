@@ -50,7 +50,8 @@ class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
                 'key_name': keypair_name,
                 'flavor': CONF.orchestration.instance_type,
                 'image': CONF.orchestration.image_ref,
-                'network': cls._get_default_network()['id']
+                'network': cls._get_default_network()['id'],
+                'timeout': CONF.orchestration.build_timeout
             })
 
     @test.attr(type='slow')
