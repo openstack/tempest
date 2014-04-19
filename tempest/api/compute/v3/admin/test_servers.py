@@ -14,7 +14,6 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
@@ -43,16 +42,6 @@ class ServersAdminV3Test(base.BaseV3ComputeAdminTest):
         resp, server = cls.create_test_server(name=cls.s2_name,
                                               wait_until='ACTIVE')
         cls.s2_id = server['id']
-
-    def _get_unused_flavor_id(self):
-        flavor_id = data_utils.rand_int_id(start=1000)
-        while True:
-            try:
-                resp, body = self.flavors_client.get_flavor_details(flavor_id)
-            except exceptions.NotFound:
-                break
-            flavor_id = data_utils.rand_int_id(start=1000)
-        return flavor_id
 
     @test.attr(type='gate')
     def test_list_servers_by_admin(self):
