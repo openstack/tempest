@@ -91,7 +91,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         resources = [('Network', 'OS::Neutron::Net'),
                      ('Subnet', 'OS::Neutron::Subnet'),
                      ('RouterInterface', 'OS::Neutron::RouterInterface'),
-                     ('Server', 'AWS::EC2::Instance')]
+                     ('Server', 'OS::Nova::Server')]
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name, None)
             self.assertIsInstance(resource, dict)
