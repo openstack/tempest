@@ -442,6 +442,10 @@
 # value)
 #db_flavor_ref=1
 
+# Current database version to use in database tests. (string
+# value)
+#db_current_version=v1.0
+
 
 [debug]
 

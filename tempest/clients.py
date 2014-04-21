@@ -116,6 +116,8 @@ from tempest.services.compute.xml.volumes_extensions_client import \
 from tempest.services.data_processing.v1_1.client import DataProcessingClient
 from tempest.services.database.json.flavors_client import \
     DatabaseFlavorsClientJSON
+from tempest.services.database.json.versions_client import \
+    DatabaseVersionsClientJSON
 from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
@@ -353,6 +355,8 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.hosts_v3_client = HostsV3ClientJSON(self.auth_provider)
             self.database_flavors_client = DatabaseFlavorsClientJSON(
+                self.auth_provider)
+            self.database_versions_client = DatabaseVersionsClientJSON(
                 self.auth_provider)
             self.queuing_client = QueuingClientJSON(self.auth_provider)
             if CONF.service_available.ceilometer:
