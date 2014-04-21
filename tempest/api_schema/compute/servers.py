@@ -117,3 +117,25 @@ list_server_metadata = copy.deepcopy(set_server_metadata)
 delete_server_metadata_item = {
     'status_code': [204]
 }
+
+list_servers = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'servers': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'string'},
+                        'links': parameter_types.links,
+                        'name': {'type': 'string'}
+                    },
+                    'required': ['id', 'links', 'name']
+                }
+            }
+        },
+        'required': ['servers']
+    }
+}

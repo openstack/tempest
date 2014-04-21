@@ -150,6 +150,7 @@ class ServersClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(common_schema.list_servers, resp, body)
         return resp, body
 
     def list_servers_with_detail(self, params=None):
