@@ -16,6 +16,7 @@
 import json
 
 from tempest.api_schema.compute import aggregates as schema
+from tempest.api_schema.compute.v3 import aggregates as v3_schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -65,7 +66,9 @@ class AggregatesV3ClientJSON(rest_client.RestClient):
 
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
-        return self.delete("os-aggregates/%s" % str(aggregate_id))
+        resp, body = self.delete("os-aggregates/%s" % str(aggregate_id))
+        self.validate_response(v3_schema.delete_aggregate, resp, body)
+        return resp, body
 
     def is_resource_deleted(self, id):
         try:
