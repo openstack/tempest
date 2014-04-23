@@ -54,6 +54,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.images = []
         cls.multi_user = cls.get_multi_user()
         cls.security_groups = []
+        cls.server_groups = []
 
         if cls._api_version == 2:
             cls.servers_client = cls.os.servers_client
@@ -191,11 +192,24 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
+    def clear_server_groups(cls):
+        for server_group_id in cls.server_groups:
+            try:
+                cls.client.delete_server_group(server_group_id)
+            except exceptions.NotFound:
+                # The server-group may have already been deleted which is OK.
+                pass
+            except Exception:
+                LOG.exception('Exception raised deleting server-group %s',
+                              server_group_id)
+
+    @classmethod
     def tearDownClass(cls):
         cls.clear_images()
         cls.clear_servers()
         cls.clear_security_groups()
         cls.clear_isolated_creds()
+        cls.clear_server_groups()
         super(BaseComputeTest, cls).tearDownClass()
 
     @classmethod
@@ -247,6 +261,16 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                                                              description)
         cls.security_groups.append(body)
 
+        return resp, body
+
+    @classmethod
+    def create_test_server_group(cls, name="", policy=[]):
+        if not name:
+            name = data_utils.rand_name(cls.__name__ + "-Server-Group")
+        if not policy:
+            policy = ['affinity']
+        resp, body = cls.servers_client.create_server_group(name, policy)
+        cls.server_groups.append(body)
         return resp, body
 
     def wait_for(self, condition):
