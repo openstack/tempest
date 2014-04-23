@@ -312,7 +312,7 @@ def parse_args():
     return args
 
 
-def main(argv):
+def main():
     print('Running config verification...')
     opts = parse_args()
     update = opts.update
@@ -343,4 +343,4 @@ def main(argv):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
