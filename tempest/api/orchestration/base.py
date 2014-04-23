@@ -101,9 +101,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def load_template(cls, name, ext='yaml'):
-        loc = ["tempest", "api", "orchestration",
-               "stacks", "templates", "%s.%s" % (name, ext)]
-        fullpath = os.path.join(*loc)
+        loc = ["stacks", "templates", "%s.%s" % (name, ext)]
+        fullpath = os.path.join(os.path.dirname(__file__), *loc)
 
         with open(fullpath, "r") as f:
             content = f.read()
