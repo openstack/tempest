@@ -77,11 +77,16 @@ class ObjectClient(rest_client.RestClient):
         resp, body = self.head(url)
         return resp, body
 
-    def get_object(self, container, object_name):
+    def get_object(self, container, object_name, metadata=None):
         """Retrieve object's data."""
 
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
         url = "{0}/{1}".format(container, object_name)
-        resp, body = self.get(url)
+        resp, body = self.get(url, headers=headers)
         return resp, body
 
     def copy_object_in_same_container(self, container, src_object_name,
