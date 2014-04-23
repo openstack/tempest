@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 get_password = {
     'status_code': [200],
     'response_body': {
@@ -58,3 +60,5 @@ set_server_metadata = {
         'required': ['metadata']
     }
 }
+
+list_server_metadata = copy.deepcopy(set_server_metadata)
