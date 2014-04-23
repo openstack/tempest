@@ -43,6 +43,8 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
             tenant_name)['id']
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
+        cls.pool = cls.create_pool(data_utils.rand_name('pool-'),
+                                   "ROUND_ROBIN", "HTTP", cls.subnet)
 
     @test.attr(type='smoke')
     def test_create_vip_as_admin_for_another_tenant(self):
@@ -101,6 +103,17 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         self.addCleanup(self.admin_client.delete_pool, pool['id'])
         self.assertIsNotNone(pool['id'])
         self.assertEqual(self.tenant_id, pool['tenant_id'])
+
+    @test.attr(type='smoke')
+    def test_create_member_from_admin_user_other_tenant(self):
+        resp, body = self.admin_client.create_member(
+            address="10.0.9.47", protocol_port=80, pool_id=self.pool['id'],
+            tenant_id=self.tenant_id)
+        self.assertEqual('201', resp['status'])
+        member = body['member']
+        self.addCleanup(self.admin_client.delete_member, member['id'])
+        self.assertIsNotNone(member['id'])
+        self.assertEqual(self.tenant_id, member['tenant_id'])
 
 
 class LoadBalancerAdminTestXML(LoadBalancerAdminTestJSON):
