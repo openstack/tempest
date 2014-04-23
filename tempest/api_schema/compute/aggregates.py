@@ -12,9 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 aggregate = {
     'type': 'object',
-    'properties:': {
+    'properties': {
         'availability_zone': {'type': ['string', 'null']},
         'created_at': {'type': 'string'},
         'deleted': {'type': 'boolean'},
@@ -56,3 +58,9 @@ get_aggregate = {
 }
 
 aggregate_set_metadata = get_aggregate
+# The 'updated_at' attribute of 'update_aggregate' can't be null.
+update_aggregate = copy.deepcopy(get_aggregate)
+update_aggregate['response_body']['properties']['aggregate']['properties'][
+    'updated_at'] = {
+        'type': 'string'
+    }

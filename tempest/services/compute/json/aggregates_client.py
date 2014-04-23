@@ -61,6 +61,7 @@ class AggregatesClientJSON(rest_client.RestClient):
         resp, body = self.put('os-aggregates/%s' % str(aggregate_id), put_body)
 
         body = json.loads(body)
+        self.validate_response(schema.update_aggregate, resp, body)
         return resp, body['aggregate']
 
     def delete_aggregate(self, aggregate_id):
