@@ -33,3 +33,9 @@ class TestDrivers(base.BaseBaremetalTest):
         self.assertEqual('200', resp['status'])
         self.assertIn(self.driver_name,
                       [d['name'] for d in drivers['drivers']])
+
+    @test.attr(type="smoke")
+    def test_show_driver(self):
+        resp, driver = self.client.show_driver(self.driver_name)
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(self.driver_name, driver['name'])
