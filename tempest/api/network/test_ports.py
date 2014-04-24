@@ -26,6 +26,16 @@ CONF = config.CONF
 class PortsTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
+    """
+    Test the following operations for ports:
+
+        port create
+        port delete
+        port list
+        port show
+        port update
+    """
+
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
@@ -80,6 +90,7 @@ class PortsTestJSON(base.BaseNetworkTest):
         self.assertEqual(self.port['network_id'], port['network_id'])
         self.assertEqual(self.port['security_groups'],
                          port['security_groups'])
+        self.assertEqual(port['fixed_ips'], [])
 
     @test.attr(type='smoke')
     def test_show_port_fields(self):
