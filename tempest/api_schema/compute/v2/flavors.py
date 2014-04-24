@@ -31,3 +31,7 @@ list_flavors_details['response_body']['properties']['flavors']['items'][
                           'OS-FLV-EXT-DATA:ephemeral': {'type': 'integer'}})
 # 'OS-FLV-DISABLED', 'os-flavor-access', 'rxtx_factor' and 'OS-FLV-EXT-DATA'
 # are API extensions. So they are not 'required'.
+
+unset_flavor_extra_specs = {
+    'status_code': [200]
+}

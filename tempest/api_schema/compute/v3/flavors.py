@@ -15,6 +15,7 @@
 import copy
 
 from tempest.api_schema.compute import flavors
+from tempest.api_schema.compute import flavors_extra_specs
 
 list_flavors_details = copy.deepcopy(flavors.common_flavor_list_details)
 
@@ -31,3 +32,10 @@ list_flavors_details['response_body']['properties']['flavors']['items'][
 # So they are not 'required'.
 list_flavors_details['response_body']['properties']['flavors']['items'][
     'required'].extend(['disabled', 'ephemeral'])
+
+set_flavor_extra_specs = copy.deepcopy(flavors_extra_specs.flavor_extra_specs)
+set_flavor_extra_specs['status_code'] = [201]
+
+unset_flavor_extra_specs = {
+    'status_code': [204]
+}
