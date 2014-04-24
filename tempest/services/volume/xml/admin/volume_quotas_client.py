@@ -68,3 +68,7 @@ class VolumeQuotasClientXML(volume_quotas_client.VolumeQuotasClientJSON):
                               str(xml.Document(element)))
         body = xml.xml_to_json(etree.fromstring(body))
         return resp, self._format_quota(body)
+
+    def delete_quota_set(self, tenant_id):
+        """Delete the tenant's quota set."""
+        return self.delete('os-quota-sets/%s' % tenant_id)
