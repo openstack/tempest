@@ -75,12 +75,16 @@ def safe_setup(f):
             try:
                 f(cls)
             except Exception as se:
+                etype, value, trace = sys.exc_info()
                 LOG.exception("setUpClass failed: %s" % se)
                 try:
                     cls.tearDownClass()
                 except Exception as te:
                     LOG.exception("tearDownClass failed: %s" % te)
-                raise se
+                try:
+                    raise etype(value), None, trace
+                finally:
+                    del trace  # for avoiding circular refs
 
     return decorator
 
