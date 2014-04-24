@@ -118,7 +118,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             self.floating_ips[floating_ip] = server
             self.server_ips[server.id] = floating_ip.floating_ip_address
         else:
-            self.server_ips[server.id] = server.networks[net.name][0]
+            self.server_ips[server.id] = server.networks[net['name']][0]
         self.assertTrue(self.servers_keypairs)
         return server
 
