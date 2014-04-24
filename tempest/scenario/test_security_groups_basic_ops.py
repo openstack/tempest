@@ -422,11 +422,15 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         access_point_ssh = self._connect_to_access_point(tenant)
         mac_addr = access_point_ssh.get_mac_address()
         mac_addr = mac_addr.strip().lower()
-        port_list = self.network_client.list_ports()['ports']
+        # Get the fixed_ips and mac_address fields of all ports. Select
+        # only those two columns to reduce the size of the response.
+        port_list = self.network_client.list_ports(
+            fields=['fixed_ips', 'mac_address'])['ports']
         port_detail_list = [
             (port['fixed_ips'][0]['subnet_id'],
              port['fixed_ips'][0]['ip_address'],
-             port['mac_address'].lower()) for port in port_list
+             port['mac_address'].lower())
+            for port in port_list if port['fixed_ips']
         ]
         server_ip = self._get_server_ip(tenant.access_point)
         subnet_id = tenant.subnet.id
