@@ -14,6 +14,7 @@
 # limitations under the License.
 
 from tempest import config
+from tempest import exceptions
 import tempest.test
 
 
@@ -27,45 +28,34 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         super(BaseDataProcessingTest, cls).setUpClass()
         if not CONF.service_available.sahara:
-            raise cls.skipException("Sahara support is required")
+            raise cls.skipException('Sahara support is required')
 
         os = cls.get_client_manager()
         cls.client = os.data_processing_client
 
-        # set some constants
         cls.flavor_ref = CONF.compute.flavor_ref
-        cls.simple_node_group_template = {
-            'plugin_name': 'vanilla',
-            'hadoop_version': '1.2.1',
-            'node_processes': [
-                "datanode",
-                "tasktracker"
-            ],
-            'flavor_id': cls.flavor_ref,
-            'node_configs': {
-                'HDFS': {
-                    'Data Node Heap Size': 1024
-                },
-                'MapReduce': {
-                    'Task Tracker Heap Size': 1024
-                }
-            }
-        }
 
         # add lists for watched resources
         cls._node_group_templates = []
+        cls._cluster_templates = []
 
     @classmethod
     def tearDownClass(cls):
-        # cleanup node group templates
-        for ngt_id in getattr(cls, '_node_group_templates', []):
-            try:
-                cls.client.delete_node_group_template(ngt_id)
-            except Exception:
-                # ignore errors while auto removing created resource
-                pass
+        cls.cleanup_resources(getattr(cls, '_cluster_templates', []),
+                              cls.client.delete_cluster_template)
+        cls.cleanup_resources(getattr(cls, '_node_group_templates', []),
+                              cls.client.delete_node_group_template)
         cls.clear_isolated_creds()
         super(BaseDataProcessingTest, cls).tearDownClass()
+
+    @staticmethod
+    def cleanup_resources(resource_id_list, method):
+        for resource_id in resource_id_list:
+            try:
+                method(resource_id)
+            except exceptions.NotFound:
+                # ignore errors while auto removing created resource
+                pass
 
     @classmethod
     def create_node_group_template(cls, name, plugin_name, hadoop_version,
@@ -77,16 +67,32 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         object. All resources created in this method will be automatically
         removed in tearDownClass method.
         """
-
         resp, body = cls.client.create_node_group_template(name, plugin_name,
                                                            hadoop_version,
                                                            node_processes,
                                                            flavor_id,
                                                            node_configs,
                                                            **kwargs)
-
         # store id of created node group template
-        template_id = body['id']
-        cls._node_group_templates.append(template_id)
+        cls._node_group_templates.append(body['id'])
 
-        return resp, body, template_id
+        return resp, body
+
+    @classmethod
+    def create_cluster_template(cls, name, plugin_name, hadoop_version,
+                                node_groups, cluster_configs=None, **kwargs):
+        """Creates watched cluster template with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object. All resources created in this method will be automatically
+        removed in tearDownClass method.
+        """
+        resp, body = cls.client.create_cluster_template(name, plugin_name,
+                                                        hadoop_version,
+                                                        node_groups,
+                                                        cluster_configs,
+                                                        **kwargs)
+        # store id of created cluster template
+        cls._cluster_templates.append(body['id'])
+
+        return resp, body
