@@ -159,6 +159,19 @@ ComputeGroup = [
     cfg.BoolOpt('run_ssh',
                 default=False,
                 help="Should the tests ssh to instances?"),
+    cfg.StrOpt('ssh_auth_method',
+               default='keypair',
+               help="Auth method used for authenticate to the instance. "
+                    "Valid choices are: keypair, configured, adminpass. "
+                    "keypair: start the servers with an ssh keypair. "
+                    "configured: use the configured user and password. "
+                    "adminpass: use the injected adminPass. "
+                    "disabled: avoid using ssh when it is an option."),
+    cfg.StrOpt('ssh_connect_method',
+               default='fixed',
+               help="How to connect to the instance? "
+                    "fixed: using the first ip belongs the fixed network "
+                    "floating: creating and using a floating ip"),
     cfg.StrOpt('ssh_user',
                default='root',
                help="User name used to authenticate to an instance."),

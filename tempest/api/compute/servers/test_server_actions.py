@@ -44,6 +44,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServerActionsTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.server_id = cls.rebuild_server(None)

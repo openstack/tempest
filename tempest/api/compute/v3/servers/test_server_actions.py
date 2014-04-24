@@ -41,6 +41,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServerActionsV3Test, cls).setUpClass()
         cls.client = cls.servers_client
         cls.server_id = cls.rebuild_server(None)

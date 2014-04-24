@@ -203,6 +203,13 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             LOG.warn("Unable to delete volume '%s' since it was not found. "
                      "Maybe it was already deleted?" % volume_id)
 
+    @classmethod
+    def prepare_instance_network(cls):
+        if (CONF.compute.ssh_auth_method != 'disabled' and
+                CONF.compute.ssh_connect_method == 'floating'):
+            cls.set_network_resources(network=True, subnet=True, router=True,
+                                      dhcp=True)
+
 
 class BaseV2ComputeTest(BaseComputeTest):
 

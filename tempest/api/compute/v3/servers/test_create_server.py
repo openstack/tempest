@@ -32,6 +32,7 @@ class ServersV3Test(base.BaseV3ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServersV3Test, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
@@ -115,6 +116,7 @@ class ServersWithSpecificFlavorV3Test(base.BaseV3ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServersWithSpecificFlavorV3Test, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'

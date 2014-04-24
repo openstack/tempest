@@ -250,6 +250,19 @@
 # Should the tests ssh to instances? (boolean value)
 #run_ssh=false
 
+# Auth method used for authenticate to the instance. Valid
+# choices are: keypair, configured, adminpass. keypair: start
+# the servers with an ssh keypair. configured: use the
+# configured user and password. adminpass: use the injected
+# adminPass. disabled: avoid using ssh when it is an option.
+# (string value)
+#ssh_auth_method=keypair
+
+# How to connect to the instance? fixed: using the first ip
+# belongs the fixed network floating: creating and using a
+# floating ip (string value)
+#ssh_connect_method=fixed
+
 # User name used to authenticate to an instance. (string
 # value)
 #ssh_user=root
