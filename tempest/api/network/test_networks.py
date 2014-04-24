@@ -109,13 +109,13 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_show_network_fields(self):
         # Verify specific fields of a network
-        field_list = [('fields', 'id'), ('fields', 'name'), ]
+        fields = ['id', 'name']
         resp, body = self.client.show_network(self.network['id'],
-                                              field_list=field_list)
+                                              fields=fields)
         self.assertEqual('200', resp['status'])
         network = body['network']
-        self.assertEqual(len(network), len(field_list))
-        for label, field_name in field_list:
+        self.assertEqual(sorted(network.keys()), sorted(fields))
+        for field_name in fields:
             self.assertEqual(network[field_name], self.network[field_name])
 
     @test.attr(type='smoke')
@@ -130,13 +130,13 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_list_networks_fields(self):
         # Verify specific fields of the networks
-        resp, body = self.client.list_networks(fields='id')
+        fields = ['id', 'name']
+        resp, body = self.client.list_networks(fields=fields)
         self.assertEqual('200', resp['status'])
         networks = body['networks']
         self.assertNotEmpty(networks, "Network list returned is empty")
         for network in networks:
-            self.assertEqual(len(network), 1)
-            self.assertIn('id', network)
+            self.assertEqual(sorted(network.keys()), sorted(fields))
 
     @test.attr(type='smoke')
     def test_show_subnet(self):
@@ -152,13 +152,13 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_show_subnet_fields(self):
         # Verify specific fields of a subnet
-        field_list = [('fields', 'id'), ('fields', 'cidr'), ]
+        fields = ['id', 'network_id']
         resp, body = self.client.show_subnet(self.subnet['id'],
-                                             field_list=field_list)
+                                             fields=fields)
         self.assertEqual('200', resp['status'])
         subnet = body['subnet']
-        self.assertEqual(len(subnet), len(field_list))
-        for label, field_name in field_list:
+        self.assertEqual(sorted(subnet.keys()), sorted(fields))
+        for field_name in fields:
             self.assertEqual(subnet[field_name], self.subnet[field_name])
 
     @test.attr(type='smoke')
@@ -173,13 +173,13 @@ class NetworksTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_list_subnets_fields(self):
         # Verify specific fields of subnets
-        resp, body = self.client.list_subnets(fields='id')
+        fields = ['id', 'network_id']
+        resp, body = self.client.list_subnets(fields=fields)
         self.assertEqual('200', resp['status'])
         subnets = body['subnets']
         self.assertNotEmpty(subnets, "Subnet list returned is empty")
         for subnet in subnets:
-            self.assertEqual(len(subnet), 1)
-            self.assertIn('id', subnet)
+            self.assertEqual(sorted(subnet.keys()), sorted(fields))
 
     def _try_delete_network(self, net_id):
         # delete network, if it exists
