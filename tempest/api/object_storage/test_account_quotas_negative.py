@@ -122,6 +122,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
                           {"Quota-Bytes": "100"})
 
     @test.attr(type=["negative", "smoke"])
+    @test.skip_because(bug="1310597")
     @test.requires_ext(extension='account_quotas', service='object')
     def test_upload_large_object(self):
         object_name = data_utils.rand_name(name="TestObject")
