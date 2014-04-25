@@ -27,7 +27,6 @@ class InstanceActionsV3Test(base.BaseV3ComputeTest):
         cls.resp = resp
         cls.server_id = server['id']
 
-    @test.skip_because(bug="1206032")
     @test.attr(type='gate')
     def test_list_server_actions(self):
         # List actions of the provided server
