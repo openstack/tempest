@@ -284,6 +284,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
     def list_server_metadata(self, server_id):
         resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = json.loads(body)
+        self.validate_response(common_schema.list_server_metadata, resp, body)
         return resp, body['metadata']
 
     def set_server_metadata(self, server_id, meta, no_metadata_field=False):
