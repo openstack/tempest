@@ -179,6 +179,19 @@ class TestPorts(base.BaseBaremetalTest):
             self.validate_self_link('ports', port['uuid'],
                                     port['links'][0]['href'])
 
+    def test_list_ports_details_with_address(self):
+        node_id = self.node['uuid']
+        address = data_utils.rand_mac_address()
+        self.create_port(node_id=node_id, address=address)
+        for i in range(0, 5):
+            self.create_port(node_id=node_id,
+                             address=data_utils.rand_mac_address())
+
+        resp, body = self.client.list_ports_detail(address=address)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(1, len(body['ports']))
+        self.assertEqual(address, body['ports'][0]['address'])
+
     @test.attr(type='smoke')
     def test_update_port_replace(self):
         node_id = self.node['uuid']
