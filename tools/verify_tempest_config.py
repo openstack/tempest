@@ -169,10 +169,11 @@ def check_service_availability(os):
         'orchestration': 'heat',
         'metering': 'ceilometer',
         'telemetry': 'ceilometer',
-        'data_processing': 'savanna',
+        'data_processing': 'sahara',
         'baremetal': 'ironic',
-        'identity': 'keystone'
-
+        'identity': 'keystone',
+        'queuing': 'marconi',
+        'database': 'trove'
     }
     # Get catalog list for endpoints to use for validation
     __, endpoints = os.endpoints_client.list_endpoints()
