@@ -308,6 +308,8 @@ class ServersV3ClientJSON(rest_client.RestClient):
     def get_server_metadata_item(self, server_id, key):
         resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key))
         body = json.loads(body)
+        self.validate_response(schema.set_get_server_metadata_item,
+                               resp, body)
         return resp, body['metadata']
 
     def set_server_metadata_item(self, server_id, key, meta):
@@ -315,11 +317,15 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
                               post_body)
         body = json.loads(body)
+        self.validate_response(schema.set_get_server_metadata_item,
+                               resp, body)
         return resp, body['metadata']
 
     def delete_server_metadata_item(self, server_id, key):
         resp, body = self.delete("servers/%s/metadata/%s" %
                                  (str(server_id), key))
+        self.validate_response(common_schema.delete_server_metadata_item,
+                               resp, body)
         return resp, body
 
     def stop(self, server_id, **kwargs):
