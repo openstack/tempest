@@ -80,11 +80,16 @@ def _has_error_in_logs(logfiles, nodes, ssh_user, ssh_key=None,
     return ret
 
 
-def sigchld_handler(signal, frame):
+def sigchld_handler(signalnum, frame):
     """
     Signal handler (only active if stop_on_error is True).
     """
-    terminate_all_processes()
+    for process in processes:
+        if (not process['process'].is_alive() and
+                process['process'].exitcode != 0):
+            signal.signal(signalnum, signal.SIG_DFL)
+            terminate_all_processes()
+            break
 
 
 def terminate_all_processes(check_interval=20):
@@ -202,6 +207,8 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
             had_errors = True
             break
 
+    if stop_on_error:
+        signal.signal(signal.SIGCHLD, signal.SIG_DFL)
     terminate_all_processes()
 
     sum_fails = 0
