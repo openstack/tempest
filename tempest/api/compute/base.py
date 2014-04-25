@@ -34,6 +34,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources()
         super(BaseComputeTest, cls).setUpClass()
 
         os = cls.get_client_manager()
@@ -218,7 +219,6 @@ class BaseV2ComputeTest(BaseComputeTest):
     @classmethod
     def setUpClass(cls):
         # By default compute tests do not create network resources
-        cls.set_network_resources()
         super(BaseV2ComputeTest, cls).setUpClass()
         cls.servers_client = cls.os.servers_client
         cls.flavors_client = cls.os.flavors_client
@@ -324,7 +324,6 @@ class BaseV3ComputeTest(BaseComputeTest):
                         cls.__name__)
             raise cls.skipException(skip_msg)
 
-        cls.set_network_resources()
         super(BaseV3ComputeTest, cls).setUpClass()
 
         cls.servers_client = cls.os.servers_v3_client
