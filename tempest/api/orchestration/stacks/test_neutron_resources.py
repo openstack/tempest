@@ -137,8 +137,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual('NewRouter', router['name'])
         self.assertEqual(self.external_network_id,
                          router['external_gateway_info']['network_id'])
-        self.assertEqual(False,
-                         router['external_gateway_info']['enable_snat'])
         self.assertEqual(False, router['admin_state_up'])
 
     @test.attr(type='slow')

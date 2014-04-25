@@ -30,7 +30,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseOrchestrationTest, cls).setUpClass()
-        cls.os = clients.OrchestrationManager()
+        cls.os = clients.Manager()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
         cls.build_timeout = CONF.orchestration.build_timeout
