@@ -38,6 +38,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         # add lists for watched resources
         cls._node_group_templates = []
         cls._cluster_templates = []
+        cls._data_sources = []
 
     @classmethod
     def tearDownClass(cls):
@@ -45,6 +46,8 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
                               cls.client.delete_cluster_template)
         cls.cleanup_resources(getattr(cls, '_node_group_templates', []),
                               cls.client.delete_node_group_template)
+        cls.cleanup_resources(getattr(cls, '_data_sources', []),
+                              cls.client.delete_data_source)
         cls.clear_isolated_creds()
         super(BaseDataProcessingTest, cls).tearDownClass()
 
@@ -94,5 +97,19 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
                                                         **kwargs)
         # store id of created cluster template
         cls._cluster_templates.append(body['id'])
+
+        return resp, body
+
+    @classmethod
+    def create_data_source(cls, name, type, url, **kwargs):
+        """Creates watched data source with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object. All resources created in this method will be automatically
+        removed in tearDownClass method.
+        """
+        resp, body = cls.client.create_data_source(name, type, url, **kwargs)
+        # store id of created data source
+        cls._data_sources.append(body['id'])
 
         return resp, body
