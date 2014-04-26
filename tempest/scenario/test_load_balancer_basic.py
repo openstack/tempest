@@ -68,6 +68,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def setUp(self):
         super(TestLoadBalancerBasic, self).setUp()
         self.server_ips = {}
+        self.server_fixed_ips = {}
         self._create_security_group()
 
     def cleanup_wrapper(self, resource):
@@ -119,6 +120,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             self.server_ips[server.id] = floating_ip.floating_ip_address
         else:
             self.server_ips[server.id] = server.networks[net['name']][0]
+        self.server_fixed_ips[server.id] = server.networks[net['name']][0]
         self.assertTrue(self.servers_keypairs)
         return server
 
@@ -231,8 +233,8 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         but with different ports to listen on.
         """
 
-        for server_id, ip in self.server_ips.iteritems():
-            if len(self.server_ips) == 1:
+        for server_id, ip in self.server_fixed_ips.iteritems():
+            if len(self.server_fixed_ips) == 1:
                 member1 = self._create_member(address=ip,
                                               protocol_port=self.port1,
                                               pool_id=self.pool.id)
