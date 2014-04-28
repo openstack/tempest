@@ -61,6 +61,7 @@ class HostsClientJSON(rest_client.RestClient):
 
         resp, body = self.put("os-hosts/%s" % str(hostname), request_body)
         body = json.loads(body)
+        self.validate_response(v2_schema.update_host, resp, body)
         return resp, body
 
     def startup_host(self, hostname):

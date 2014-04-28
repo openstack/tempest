@@ -16,7 +16,6 @@ import copy
 
 from tempest.api_schema.compute import hosts
 
-
 startup_host = {
     'status_code': [200],
     'response_body': {
@@ -40,4 +39,15 @@ reboot_host = copy.deepcopy(startup_host)
 
 reboot_host['response_body']['properties']['power_action'] = {
     'enum': ['reboot']
+}
+
+update_host = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'host': hosts.update_host_common
+        },
+        'required': ['host']
+    }
 }

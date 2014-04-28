@@ -35,3 +35,8 @@ reboot_host = copy.deepcopy(startup_host)
 reboot_host['response_body']['properties']['power_action'] = {
     'enum': ['reboot']
 }
+
+update_host = {
+    'status_code': [200],
+    'response_body': hosts.update_host_common
+}
