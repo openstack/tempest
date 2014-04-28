@@ -45,6 +45,16 @@ class ConfigFixture(conf_fixture.Config):
             os.mkdir(str(os.environ.get('OS_TEST_LOCK_PATH')))
         self.conf.set_default('lock_path',
                               str(os.environ.get('OS_TEST_LOCK_PATH')))
+        self.conf.set_default('auth_version', 'v2', group='identity')
+        for config_option in ['username', 'password', 'tenant_name']:
+            # Identity group items
+            for prefix in ['', 'alt_', 'admin_']:
+                self.conf.set_default(prefix + config_option,
+                                      'fake_' + config_option,
+                                      group='identity')
+            # Compute Admin group items
+            self.conf.set_default(config_option, 'fake_' + config_option,
+                                  group='compute-admin')
 
 
 class FakePrivate(config.TempestConfigPrivate):

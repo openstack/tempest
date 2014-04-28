@@ -13,14 +13,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.tests import fake_credentials
+from tempest import auth
 
 
-def get_credentials(credential_type=None, fill_in=True, **kwargs):
-    return fake_credentials.FakeCredentials()
+class FakeCredentials(auth.Credentials):
+
+    def is_valid(self):
+        return True
 
 
-class FakeAuthProvider(object):
+class FakeKeystoneV2Credentials(auth.KeystoneV2Credentials):
 
-    def auth_request(self, method, url, headers=None, body=None, filters=None):
-        return url, headers, body
+    def __init__(self):
+        creds = dict(
+            username='fake_username',
+            password='fake_password',
+            tenant_name='fake_tenant_name'
+        )
+        super(FakeKeystoneV2Credentials, self).__init__(**creds)

@@ -22,18 +22,16 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
+from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
+from tempest.tests import fake_credentials
 from tempest.tests import fake_http
 from tempest.tests import fake_identity
 
 
 class BaseAuthTestsSetUp(base.TestCase):
     _auth_provider_class = None
-    credentials = {
-        'username': 'fake_user',
-        'password': 'fake_pwd',
-        'tenant_name': 'fake_tenant'
-    }
+    credentials = fake_credentials.FakeCredentials()
 
     def _auth(self, credentials, **params):
         """
@@ -47,6 +45,8 @@ class BaseAuthTestsSetUp(base.TestCase):
         self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
         self.fake_http = fake_http.fake_httplib2(return_type=200)
         self.stubs.Set(http.ClosingHttp, 'request', self.fake_http.request)
+        self.stubs.Set(auth, 'get_credentials',
+                       fake_auth_provider.get_credentials)
         self.auth_provider = self._auth(self.credentials)
 
 
@@ -58,11 +58,18 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
     """
     _auth_provider_class = auth.AuthProvider
 
-    def test_check_credentials_is_dict(self):
-        self.assertTrue(self.auth_provider.check_credentials({}))
+    def test_check_credentials_class(self):
+        self.assertRaises(NotImplementedError,
+                          self.auth_provider.check_credentials,
+                          auth.Credentials())
 
     def test_check_credentials_bad_type(self):
         self.assertFalse(self.auth_provider.check_credentials([]))
+
+    def test_instantiate_with_dict(self):
+        # Dict credentials are only supported for backward compatibility
+        auth_provider = self._auth(credentials={})
+        self.assertIsInstance(auth_provider.credentials, auth.Credentials)
 
     def test_instantiate_with_bad_credentials_type(self):
         """
@@ -104,6 +111,7 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
 class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
     _endpoints = fake_identity.IDENTITY_V2_RESPONSE['access']['serviceCatalog']
     _auth_provider_class = auth.KeystoneV2AuthProvider
+    credentials = fake_credentials.FakeKeystoneV2Credentials()
 
     def setUp(self):
         super(TestKeystoneV2AuthProvider, self).setUp()
@@ -209,17 +217,6 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
             cred = copy.copy(self.credentials)
             del cred[attr]
             self.assertFalse(self.auth_provider.check_credentials(cred))
-
-    def test_check_credentials_not_scoped_missing_tenant_name(self):
-        cred = copy.copy(self.credentials)
-        del cred['tenant_name']
-        self.assertTrue(self.auth_provider.check_credentials(cred,
-                                                             scoped=False))
-
-    def test_check_credentials_missing_tenant_name(self):
-        cred = copy.copy(self.credentials)
-        del cred['tenant_name']
-        self.assertFalse(self.auth_provider.check_credentials(cred))
 
     def _test_base_url_helper(self, expected_url, filters,
                               auth_data=None):

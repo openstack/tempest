@@ -43,11 +43,11 @@ class AuthProvider(object):
         :param client_type: 'tempest' or 'official'
         :param interface: 'json' or 'xml'. Applicable for tempest client only
         """
+        credentials = self._convert_credentials(credentials)
         if self.check_credentials(credentials):
             self.credentials = credentials
         else:
             raise TypeError("Invalid credentials")
-        self.credentials = credentials
         self.client_type = client_type
         self.interface = interface
         if self.client_type == 'tempest' and self.interface is None:
@@ -55,6 +55,13 @@ class AuthProvider(object):
         self.cache = None
         self.alt_auth_data = None
         self.alt_part = None
+
+    def _convert_credentials(self, credentials):
+        # Support dict credentials for backwards compatibility
+        if isinstance(credentials, dict):
+            return get_credentials(**credentials)
+        else:
+            return credentials
 
     def __str__(self):
         return "Creds :{creds}, client type: {client_type}, interface: " \
@@ -76,9 +83,9 @@ class AuthProvider(object):
     @classmethod
     def check_credentials(cls, credentials):
         """
-        Verify credentials are valid. Subclasses can do a better check.
+        Verify credentials are valid.
         """
-        return isinstance(credentials, dict)
+        return isinstance(credentials, Credentials) and credentials.is_valid()
 
     @property
     def auth_data(self):
@@ -218,16 +225,6 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
-    @classmethod
-    def check_credentials(cls, credentials, scoped=True):
-        # tenant_name is optional if not scoped
-        valid = super(KeystoneV2AuthProvider, cls).check_credentials(
-            credentials) and 'username' in credentials and \
-            'password' in credentials
-        if scoped:
-            valid = valid and 'tenant_name' in credentials
-        return valid
-
     def _auth_client(self):
         if self.client_type == 'tempest':
             if self.interface == 'json':
@@ -240,9 +237,9 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     def _auth_params(self):
         if self.client_type == 'tempest':
             return dict(
-                user=self.credentials['username'],
-                password=self.credentials['password'],
-                tenant=self.credentials.get('tenant_name', None),
+                user=self.credentials.username,
+                password=self.credentials.password,
+                tenant=self.credentials.tenant_name,
                 auth_data=True)
         else:
             raise NotImplementedError
@@ -303,12 +300,15 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
+    def _convert_credentials(self, credentials):
+        # For V3 do not convert as V3 Credentials are not defined yet
+        return credentials
+
     @classmethod
     def check_credentials(cls, credentials, scoped=True):
         # tenant_name is optional if not scoped
-        valid = super(KeystoneV3AuthProvider, cls).check_credentials(
-            credentials) and 'username' in credentials and \
-            'password' in credentials and 'domain_name' in credentials
+        valid = 'username' in credentials and 'password' in credentials \
+            and 'domain_name' in credentials
         if scoped:
             valid = valid and 'tenant_name' in credentials
         return valid
@@ -327,7 +327,7 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             return dict(
                 user=self.credentials['username'],
                 password=self.credentials['password'],
-                tenant=self.credentials.get('tenant_name', None),
+                tenant=self.credentials['tenant_name'],
                 domain=self.credentials['domain_name'],
                 auth_data=True)
         else:
@@ -398,3 +398,144 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
                                             self.EXPIRY_DATE_FORMAT)
         return expiry - self.token_expiry_threshold <= \
             datetime.datetime.utcnow()
+
+
+def get_credentials(credential_type=None, **kwargs):
+    """
+    Builds a credentials object based on the configured auth_version
+
+    :param credential_type (string): requests credentials from tempest
+           configuration file. Valid values are defined in
+           Credentials.TYPE.
+    :param kwargs (dict): take into account only if credential_type is
+           not specified or None. Dict of credential key/value pairs
+
+    Examples:
+
+        Returns credentials from the provided parameters:
+        >>> get_credentials(username='foo', password='bar')
+
+        Returns credentials from tempest configuration:
+        >>> get_credentials(credential_type='user')
+    """
+    if CONF.identity.auth_version == 'v2':
+        credential_class = KeystoneV2Credentials
+    else:
+        raise exceptions.InvalidConfiguration('Unsupported auth version')
+    if credential_type is not None:
+        creds = credential_class.get_default(credential_type)
+    else:
+        creds = credential_class(**kwargs)
+    return creds
+
+
+class Credentials(object):
+    """
+    Set of credentials for accessing OpenStack services
+
+    ATTRIBUTES: list of valid class attributes representing credentials.
+
+    TYPES: types of credentials available in the configuration file.
+           For each key there's a tuple (section, prefix) to match the
+           configuration options.
+    """
+
+    ATTRIBUTES = []
+    TYPES = {
+        'identity_admin': ('identity', 'admin'),
+        'compute_admin': ('compute_admin', None),
+        'user': ('identity', None),
+        'alt_user': ('identity', 'alt')
+    }
+
+    def __init__(self, **kwargs):
+        """
+        Enforce the available attributes at init time (only).
+        Additional attributes can still be set afterwards if tests need
+        to do so.
+        """
+        self._apply_credentials(kwargs)
+
+    def _apply_credentials(self, attr):
+        for key in attr.keys():
+            if key in self.ATTRIBUTES:
+                setattr(self, key, attr[key])
+            else:
+                raise exceptions.InvalidCredentials
+
+    def __str__(self):
+        """
+        Represent only attributes included in self.ATTRIBUTES
+        """
+        _repr = dict((k, getattr(self, k)) for k in self.ATTRIBUTES)
+        return str(_repr)
+
+    def __eq__(self, other):
+        """
+        Credentials are equal if attributes in self.ATTRIBUTES are equal
+        """
+        return str(self) == str(other)
+
+    def __getattr__(self, key):
+        # If an attribute is set, __getattr__ is not invoked
+        # If an attribute is not set, and it is a known one, return None
+        if key in self.ATTRIBUTES:
+            return None
+        else:
+            raise AttributeError
+
+    def __delitem__(self, key):
+        # For backwards compatibility, support dict behaviour
+        if key in self.ATTRIBUTES:
+            delattr(self, key)
+        else:
+            raise AttributeError
+
+    def get(self, item, default):
+        # In this patch act as dict for backward compatibility
+        try:
+            return getattr(self, item)
+        except AttributeError:
+            return default
+
+    @classmethod
+    def get_default(cls, credentials_type):
+        if credentials_type not in cls.TYPES:
+            raise exceptions.InvalidCredentials()
+        creds = cls._get_default(credentials_type)
+        if not creds.is_valid():
+            raise exceptions.InvalidConfiguration()
+        return creds
+
+    @classmethod
+    def _get_default(cls, credentials_type):
+        raise NotImplementedError
+
+    def is_valid(self):
+        raise NotImplementedError
+
+
+class KeystoneV2Credentials(Credentials):
+
+    CONF_ATTRIBUTES = ['username', 'password', 'tenant_name']
+    ATTRIBUTES = ['user_id', 'tenant_id']
+    ATTRIBUTES.extend(CONF_ATTRIBUTES)
+
+    @classmethod
+    def _get_default(cls, credentials_type='user'):
+        params = {}
+        section, prefix = cls.TYPES[credentials_type]
+        for attr in cls.CONF_ATTRIBUTES:
+            _section = getattr(CONF, section)
+            if prefix is None:
+                params[attr] = getattr(_section, attr)
+            else:
+                params[attr] = getattr(_section, prefix + "_" + attr)
+        return KeystoneV2Credentials(**params)
+
+    def is_valid(self):
+        """
+        Minimum set of valid credentials, are username and password.
+        Tenant is optional.
+        """
+        return None not in (self.username, self.password)
