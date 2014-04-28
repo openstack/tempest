@@ -118,7 +118,7 @@ class StackBuildErrorException(TempestException):
 
 
 class StackResourceBuildErrorException(TempestException):
-    message = ("Resource %(resource_name) in stack %(stack_identifier)s is "
+    message = ("Resource %(resource_name)s in stack %(stack_identifier)s is "
                "in %(resource_status)s status due to "
                "'%(resource_status_reason)s'")
 
