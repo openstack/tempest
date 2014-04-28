@@ -136,3 +136,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
         return dict((r['resource_name'], r['resource_type'])
                     for r in resources)
+
+    def get_stack_output(self, stack_identifier, output_key):
+        resp, body = self.client.get_stack(stack_identifier)
+        self.assertEqual('200', resp['status'])
+        return self.stack_output(body, output_key)

@@ -110,14 +110,6 @@ class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
         # wait for create to complete.
         self.client.wait_for_stack_status(sid, 'CREATE_COMPLETE')
 
-        # fetch the stack
-        resp, body = self.client.get_stack(sid)
-        self.assertEqual('CREATE_COMPLETE', body['stack_status'])
-
-        # fetch the stack
-        resp, body = self.client.get_stack(sid)
-        self.assertEqual('CREATE_COMPLETE', body['stack_status'])
-
         # This is an assert of great significance, as it means the following
         # has happened:
         # - cfn-init read the provided metadata and wrote out a file
@@ -125,5 +117,5 @@ class ServerCfnInitTestJSON(base.BaseOrchestrationTest):
         # - a cfn-signal was built which was signed with provided credentials
         # - the wait condition was fulfilled and the stack has changed state
         wait_status = json.loads(
-            self.stack_output(body, 'WaitConditionStatus'))
+            self.get_stack_output(sid, 'WaitConditionStatus'))
         self.assertEqual('smoke test complete', wait_status['00000'])
