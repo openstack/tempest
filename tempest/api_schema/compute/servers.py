@@ -14,6 +14,8 @@
 
 import copy
 
+from tempest.api_schema.compute import parameter_types
+
 get_password = {
     'status_code': [200],
     'response_body': {
@@ -43,6 +45,50 @@ get_vnc_console = {
             }
         },
         'required': ['console']
+    }
+}
+
+base_update_server = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': ['integer', 'string']},
+                    'name': {'type': 'string'},
+                    'status': {'type': 'string'},
+                    'image': {
+                        'type': 'object',
+                        'properties': {
+                            'id': {'type': ['integer', 'string']},
+                            'links': parameter_types.links
+                        },
+                        'required': ['id', 'links']
+                    },
+                    'flavor': {
+                        'type': 'object',
+                        'properties': {
+                            'id': {'type': ['integer', 'string']},
+                            'links': parameter_types.links
+                        },
+                        'required': ['id', 'links']
+                    },
+                    'user_id': {'type': 'string'},
+                    'tenant_id': {'type': 'string'},
+                    'created': {'type': 'string'},
+                    'updated': {'type': 'string'},
+                    'progress': {'type': 'integer'},
+                    'metadata': {'type': 'object'},
+                    'links': parameter_types.links,
+                    'addresses': parameter_types.addresses,
+                },
+                'required': ['id', 'name', 'status', 'image', 'flavor',
+                             'user_id', 'tenant_id', 'created', 'updated',
+                             'progress', 'metadata', 'links', 'addresses']
+            }
+        }
     }
 }
 

@@ -13,6 +13,7 @@
 #    under the License.
 
 import copy
+
 from tempest.api_schema.compute import parameter_types
 from tempest.api_schema.compute import servers
 
@@ -31,8 +32,8 @@ create_server = {
                     'os-security-groups:security_groups': {'type': 'array'},
                     'links': parameter_types.links,
                     'admin_password': {'type': 'string'},
-                    'os-access-ips:access_ip_v4': {'type': 'string'},
-                    'os-access-ips:access_ip_v6': {'type': 'string'}
+                    'os-access-ips:access_ip_v4': parameter_types.access_ip_v4,
+                    'os-access-ips:access_ip_v6': parameter_types.access_ip_v6
                 },
                 # NOTE: os-access-ips:access_ip_v4/v6 are API extension,
                 # and some environments return a response without these
@@ -44,6 +45,31 @@ create_server = {
         'required': ['server']
     }
 }
+
+addresses_v3 = copy.deepcopy(parameter_types.addresses)
+addresses_v3['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][
+    'properties'].update({
+        'type': {'type': 'string'},
+        'mac_addr': {'type': 'string'}
+    })
+addresses_v3['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][
+    'required'].extend(
+        ['type', 'mac_addr']
+    )
+
+update_server = copy.deepcopy(servers.base_update_server)
+update_server['response_body']['properties']['server']['properties'].update({
+    'addresses': addresses_v3,
+    'host_id': {'type': 'string'},
+    'os-access-ips:access_ip_v4': parameter_types.access_ip_v4,
+    'os-access-ips:access_ip_v6': parameter_types.access_ip_v6
+})
+update_server['response_body']['properties']['server']['required'].append(
+    # NOTE: os-access-ips:access_ip_v4/v6 are API extension,
+    # and some environments return a response without these
+    # attributes. So they are not 'required'.
+    'host_id'
+)
 
 attach_detach_volume = {
     'status_code': [202]

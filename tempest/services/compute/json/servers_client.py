@@ -126,6 +126,7 @@ class ServersClientJSON(rest_client.RestClient):
         post_body = json.dumps({'server': post_body})
         resp, body = self.put("servers/%s" % str(server_id), post_body)
         body = json.loads(body)
+        self.validate_response(schema.update_server, resp, body)
         return resp, body['server']
 
     def get_server(self, server_id):
