@@ -85,24 +85,6 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
             self.volume['id'])
         self.assertEqual('error', volume_get['status'])
 
-    @test.attr(type='gate')
-    def test_volume_begin_detaching(self):
-        # test volume begin detaching : available -> detaching -> available
-        resp, body = self.client.volume_begin_detaching(self.volume['id'])
-        self.assertEqual(202, resp.status)
-        resp_get, volume_get = self.client.get_volume(self.volume['id'])
-        self.assertEqual('detaching', volume_get['status'])
-
-    @test.attr(type='gate')
-    def test_volume_roll_detaching(self):
-        # test volume roll detaching : detaching -> in-use -> available
-        resp, body = self.client.volume_begin_detaching(self.volume['id'])
-        self.assertEqual(202, resp.status)
-        resp, body = self.client.volume_roll_detaching(self.volume['id'])
-        self.assertEqual(202, resp.status)
-        resp_get, volume_get = self.client.get_volume(self.volume['id'])
-        self.assertEqual('in-use', volume_get['status'])
-
     def test_volume_force_delete_when_volume_is_creating(self):
         # test force delete when status of volume is creating
         self._create_reset_and_force_delete_temp_volume('creating')
