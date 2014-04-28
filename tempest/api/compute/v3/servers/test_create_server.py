@@ -54,13 +54,6 @@ class ServersV3Test(base.BaseV3ComputeTest):
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
 
     @test.attr(type='smoke')
-    def test_create_server_response(self):
-        # Check that the required fields are returned with values
-        self.assertEqual(202, self.resp.status)
-        self.assertTrue(self.server_initial['id'] is not None)
-        self.assertTrue(self.server_initial['admin_password'] is not None)
-
-    @test.attr(type='smoke')
     def test_verify_server_details(self):
         # Verify the specified server attributes are set correctly
         self.assertEqual(self.accessIPv4,
