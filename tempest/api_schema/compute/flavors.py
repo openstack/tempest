@@ -36,6 +36,21 @@ list_flavors = {
     }
 }
 
+common_flavor_info = {
+    'type': 'object',
+    'properties': {
+        'name': {'type': 'string'},
+        'links': parameter_types.links,
+        'ram': {'type': 'integer'},
+        'vcpus': {'type': 'integer'},
+        'swap': {'type': 'integer'},
+        'disk': {'type': 'integer'},
+        'id': {'type': 'string'}
+    },
+    'required': ['name', 'links', 'ram', 'vcpus',
+                 'swap', 'disk', 'id']
+}
+
 common_flavor_list_details = {
     'status_code': [200],
     'response_body': {
@@ -43,22 +58,20 @@ common_flavor_list_details = {
         'properties': {
             'flavors': {
                 'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'name': {'type': 'string'},
-                        'links': parameter_types.links,
-                        'ram': {'type': 'integer'},
-                        'vcpus': {'type': 'integer'},
-                        'swap': {'type': 'integer'},
-                        'disk': {'type': 'integer'},
-                        'id': {'type': 'string'}
-                    },
-                    'required': ['name', 'links', 'ram', 'vcpus',
-                                 'swap', 'disk', 'id']
-                }
+                'items': common_flavor_info
             }
         },
         'required': ['flavors']
+    }
+}
+
+common_flavor_details = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'flavor': common_flavor_info
+        },
+        'required': ['flavor']
     }
 }
