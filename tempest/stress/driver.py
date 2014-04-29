@@ -198,9 +198,9 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
 
             time.sleep(min(remaining, log_check_interval))
             if stop_on_error:
-                for process in processes:
-                    if process['statistic']['fails'] > 0:
-                        break
+                if any([True for proc in processes
+                        if proc['statistic']['fails'] > 0]):
+                    break
 
             if not logfiles:
                 continue
