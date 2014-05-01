@@ -75,6 +75,12 @@ def verify_glance_api_versions(os, update):
                             not CONF.image_feature_enabled.api_v2, update)
 
 
+def _get_unversioned_endpoint(base_url):
+    endpoint_parts = urlparse.urlparse(base_url)
+    endpoint = endpoint_parts.scheme + '://' + endpoint_parts.netloc
+    return endpoint
+
+
 def _get_api_versions(os, service):
     client_dict = {
         'nova': os.servers_client,
@@ -82,8 +88,7 @@ def _get_api_versions(os, service):
         'cinder': os.volumes_client,
     }
     client_dict[service].skip_path()
-    endpoint_parts = urlparse.urlparse(client_dict[service].base_url)
-    endpoint = endpoint_parts.scheme + '://' + endpoint_parts.netloc
+    endpoint = _get_unversioned_endpoint(client_dict[service].base_url)
     __, body = RAW_HTTP.request(endpoint, 'GET')
     client_dict[service].reset_path()
     body = json.loads(body)
