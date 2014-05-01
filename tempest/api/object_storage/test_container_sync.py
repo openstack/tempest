@@ -31,8 +31,10 @@ CONF = config.CONF
 
 
 class ContainerSyncTest(base.BaseObjectTest):
+    clients = {}
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ContainerSyncTest, cls).setUpClass()
         cls.containers = []
@@ -50,7 +52,6 @@ class ContainerSyncTest(base.BaseObjectTest):
             int(container_sync_timeout / cls.container_sync_interval)
 
         # define container and object clients
-        cls.clients = {}
         cls.clients[data_utils.rand_name(name='TestContainerSync')] = \
             (cls.container_client, cls.object_client)
         cls.clients[data_utils.rand_name(name='TestContainerSync')] = \

@@ -27,6 +27,7 @@ CONF = config.CONF
 class AccountQuotasTest(base.BaseObjectTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(AccountQuotasTest, cls).setUpClass()
         cls.container_name = data_utils.rand_name(name="TestContainer")
@@ -101,7 +102,8 @@ class AccountQuotasTest(base.BaseObjectTest):
 
     @classmethod
     def tearDownClass(cls):
-        cls.delete_containers([cls.container_name])
+        if hasattr(cls, "container_name"):
+            cls.delete_containers([cls.container_name])
         cls.data.teardown_all()
         super(AccountQuotasTest, cls).tearDownClass()
 

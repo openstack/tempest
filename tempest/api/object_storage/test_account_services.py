@@ -29,10 +29,13 @@ CONF = config.CONF
 
 
 class AccountTest(base.BaseObjectTest):
+
+    containers = []
+
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(AccountTest, cls).setUpClass()
-        cls.containers = []
         for i in moves.xrange(ord('a'), ord('f') + 1):
             name = data_utils.rand_name(name='%s-' % chr(i))
             cls.container_client.create_container(name)

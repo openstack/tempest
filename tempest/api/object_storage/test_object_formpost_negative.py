@@ -26,7 +26,11 @@ from tempest import test
 
 class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
+    metadata = {}
+    containers = []
+
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ObjectFormPostNegativeTest, cls).setUpClass()
         cls.container_name = data_utils.rand_name(name='TestContainer')
