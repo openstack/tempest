@@ -55,10 +55,19 @@ set_server_metadata = {
     'response_body': {
         'type': 'object',
         'properties': {
-            'metadata': {'type': 'object'}
+            'metadata': {
+                'type': 'object',
+                'patternProperties': {
+                    '^.+$': {'type': 'string'}
+                }
+            }
         },
         'required': ['metadata']
     }
 }
 
 list_server_metadata = copy.deepcopy(set_server_metadata)
+
+delete_server_metadata_item = {
+    'status_code': [204]
+}

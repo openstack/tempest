@@ -90,3 +90,19 @@ attach_volume = {
 detach_volume = {
     'status_code': [202]
 }
+
+set_get_server_metadata_item = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'meta': {
+                'type': 'object',
+                'patternProperties': {
+                    '^.+$': {'type': 'string'}
+                }
+            }
+        },
+        'required': ['meta']
+    }
+}

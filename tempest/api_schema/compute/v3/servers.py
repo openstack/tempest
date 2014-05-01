@@ -12,7 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 from tempest.api_schema.compute import parameter_types
+from tempest.api_schema.compute import servers
 
 create_server = {
     'status_code': [202],
@@ -46,3 +48,5 @@ create_server = {
 attach_detach_volume = {
     'status_code': [202]
 }
+
+set_get_server_metadata_item = copy.deepcopy(servers.set_server_metadata)
