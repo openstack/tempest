@@ -30,6 +30,7 @@ LOG = logging.getLogger(__name__)
 class BaseComputeTest(tempest.test.BaseTestCase):
     """Base test case class for all Compute API tests."""
 
+    _api_version = 3
     force_tenant_isolation = False
 
     @classmethod
@@ -53,6 +54,57 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.images = []
         cls.multi_user = cls.get_multi_user()
         cls.security_groups = []
+
+        if cls._api_version == 2:
+            cls.servers_client = cls.os.servers_client
+            cls.flavors_client = cls.os.flavors_client
+            cls.images_client = cls.os.images_client
+            cls.extensions_client = cls.os.extensions_client
+            cls.floating_ips_client = cls.os.floating_ips_client
+            cls.keypairs_client = cls.os.keypairs_client
+            cls.security_groups_client = cls.os.security_groups_client
+            cls.quotas_client = cls.os.quotas_client
+            cls.limits_client = cls.os.limits_client
+            cls.volumes_extensions_client = cls.os.volumes_extensions_client
+            cls.volumes_client = cls.os.volumes_client
+            cls.interfaces_client = cls.os.interfaces_client
+            cls.fixed_ips_client = cls.os.fixed_ips_client
+            cls.availability_zone_client = cls.os.availability_zone_client
+            cls.agents_client = cls.os.agents_client
+            cls.aggregates_client = cls.os.aggregates_client
+            cls.services_client = cls.os.services_client
+            cls.instance_usages_audit_log_client = \
+                cls.os.instance_usages_audit_log_client
+            cls.hypervisor_client = cls.os.hypervisor_client
+            cls.certificates_client = cls.os.certificates_client
+            cls.migrations_client = cls.os.migrations_client
+
+        elif cls._api_version == 3:
+            if not CONF.compute_feature_enabled.api_v3:
+                skip_msg = ("%s skipped as nova v3 api is not available" %
+                            cls.__name__)
+                raise cls.skipException(skip_msg)
+            cls.servers_client = cls.os.servers_v3_client
+            cls.images_client = cls.os.image_client
+            cls.flavors_client = cls.os.flavors_v3_client
+            cls.services_client = cls.os.services_v3_client
+            cls.extensions_client = cls.os.extensions_v3_client
+            cls.availability_zone_client = cls.os.availability_zone_v3_client
+            cls.interfaces_client = cls.os.interfaces_v3_client
+            cls.hypervisor_client = cls.os.hypervisor_v3_client
+            cls.keypairs_client = cls.os.keypairs_v3_client
+            cls.volumes_client = cls.os.volumes_client
+            cls.certificates_client = cls.os.certificates_v3_client
+            cls.keypairs_client = cls.os.keypairs_v3_client
+            cls.aggregates_client = cls.os.aggregates_v3_client
+            cls.hosts_client = cls.os.hosts_v3_client
+            cls.quotas_client = cls.os.quotas_v3_client
+            cls.version_client = cls.os.version_v3_client
+            cls.migrations_client = cls.os.migrations_v3_client
+        else:
+            msg = ("Unexpected API version is specified (%s)" %
+                   cls._api_version)
+            raise exceptions.InvalidConfiguration(message=msg)
 
     @classmethod
     def get_multi_user(cls):
@@ -211,38 +263,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             cls.set_network_resources(network=True, subnet=True, router=True,
                                       dhcp=True)
 
-
-class BaseV2ComputeTest(BaseComputeTest):
-
-    _interface = "json"
-
-    @classmethod
-    def setUpClass(cls):
-        # By default compute tests do not create network resources
-        super(BaseV2ComputeTest, cls).setUpClass()
-        cls.servers_client = cls.os.servers_client
-        cls.flavors_client = cls.os.flavors_client
-        cls.images_client = cls.os.images_client
-        cls.extensions_client = cls.os.extensions_client
-        cls.floating_ips_client = cls.os.floating_ips_client
-        cls.keypairs_client = cls.os.keypairs_client
-        cls.security_groups_client = cls.os.security_groups_client
-        cls.quotas_client = cls.os.quotas_client
-        cls.limits_client = cls.os.limits_client
-        cls.volumes_extensions_client = cls.os.volumes_extensions_client
-        cls.volumes_client = cls.os.volumes_client
-        cls.interfaces_client = cls.os.interfaces_client
-        cls.fixed_ips_client = cls.os.fixed_ips_client
-        cls.availability_zone_client = cls.os.availability_zone_client
-        cls.agents_client = cls.os.agents_client
-        cls.aggregates_client = cls.os.aggregates_client
-        cls.services_client = cls.os.services_client
-        cls.instance_usages_audit_log_client = \
-            cls.os.instance_usages_audit_log_client
-        cls.hypervisor_client = cls.os.hypervisor_client
-        cls.certificates_client = cls.os.certificates_client
-        cls.migrations_client = cls.os.migrations_client
-
     @classmethod
     def create_image_from_server(cls, server_id, **kwargs):
         """Wrapper utility that returns an image created from the server."""
@@ -250,21 +270,25 @@ class BaseV2ComputeTest(BaseComputeTest):
         if 'name' in kwargs:
             name = kwargs.pop('name')
 
-        resp, image = cls.images_client.create_image(
-            server_id, name)
+        if cls._api_version == 2:
+            resp, image = cls.images_client.create_image(server_id, name)
+        elif cls._api_version == 3:
+            resp, image = cls.servers_client.create_image(server_id, name)
         image_id = data_utils.parse_image_id(resp['location'])
         cls.images.append(image_id)
 
         if 'wait_until' in kwargs:
             cls.images_client.wait_for_image_status(image_id,
                                                     kwargs['wait_until'])
-            resp, image = cls.images_client.get_image(image_id)
+            if cls._api_version == 2:
+                resp, image = cls.images_client.get_image(image_id)
+            elif cls._api_version == 3:
+                resp, image = cls.images_client.get_image_meta(image_id)
 
             if kwargs['wait_until'] == 'ACTIVE':
                 if kwargs.get('wait_for_server', True):
                     cls.servers_client.wait_for_server_status(server_id,
                                                               'ACTIVE')
-
         return resp, image
 
     @classmethod
@@ -278,13 +302,24 @@ class BaseV2ComputeTest(BaseComputeTest):
                 LOG.exception('Failed to delete server %s' % server_id)
                 pass
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
-        cls.password = server['adminPass']
+        if cls._api_version == 2:
+            cls.password = server['adminPass']
+        elif cls._api_version == 3:
+            cls.password = server['admin_password']
         return server['id']
 
     @classmethod
     def delete_volume(cls, volume_id):
         """Deletes the given volume and waits for it to be gone."""
-        cls._delete_volume(cls.volumes_extensions_client, volume_id)
+        if cls._api_version == 2:
+            cls._delete_volume(cls.volumes_extensions_client, volume_id)
+        elif cls._api_version == 3:
+            cls._delete_volume(cls.volumes_client, volume_id)
+
+
+class BaseV2ComputeTest(BaseComputeTest):
+    _api_version = 2
+    _interface = "json"
 
 
 class BaseV2ComputeAdminTest(BaseV2ComputeTest):
@@ -313,73 +348,8 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
 
 
 class BaseV3ComputeTest(BaseComputeTest):
-
+    _api_version = 3
     _interface = "json"
-
-    @classmethod
-    def setUpClass(cls):
-        # By default compute tests do not create network resources
-        if not CONF.compute_feature_enabled.api_v3:
-            skip_msg = ("%s skipped as nova v3 api is not available" %
-                        cls.__name__)
-            raise cls.skipException(skip_msg)
-
-        super(BaseV3ComputeTest, cls).setUpClass()
-
-        cls.servers_client = cls.os.servers_v3_client
-        cls.images_client = cls.os.image_client
-        cls.flavors_client = cls.os.flavors_v3_client
-        cls.services_client = cls.os.services_v3_client
-        cls.extensions_client = cls.os.extensions_v3_client
-        cls.availability_zone_client = cls.os.availability_zone_v3_client
-        cls.interfaces_client = cls.os.interfaces_v3_client
-        cls.hypervisor_client = cls.os.hypervisor_v3_client
-        cls.keypairs_client = cls.os.keypairs_v3_client
-        cls.volumes_client = cls.os.volumes_client
-        cls.certificates_client = cls.os.certificates_v3_client
-        cls.keypairs_client = cls.os.keypairs_v3_client
-        cls.aggregates_client = cls.os.aggregates_v3_client
-        cls.hosts_client = cls.os.hosts_v3_client
-        cls.quotas_client = cls.os.quotas_v3_client
-        cls.version_client = cls.os.version_v3_client
-        cls.migrations_client = cls.os.migrations_v3_client
-
-    @classmethod
-    def create_image_from_server(cls, server_id, **kwargs):
-        """Wrapper utility that returns an image created from the server."""
-        name = data_utils.rand_name(cls.__name__ + "-image")
-        if 'name' in kwargs:
-            name = kwargs.pop('name')
-
-        resp, image = cls.servers_client.create_image(
-            server_id, name)
-        image_id = data_utils.parse_image_id(resp['location'])
-        cls.images.append(image_id)
-
-        if 'wait_until' in kwargs:
-            cls.images_client.wait_for_image_status(image_id,
-                                                    kwargs['wait_until'])
-            resp, image = cls.images_client.get_image_meta(image_id)
-
-        return resp, image
-
-    @classmethod
-    def rebuild_server(cls, server_id, **kwargs):
-        # Destroy an existing server and creates a new one
-        try:
-            cls.servers_client.delete_server(server_id)
-            cls.servers_client.wait_for_server_termination(server_id)
-        except Exception:
-            LOG.exception('Failed to delete server %s' % server_id)
-            pass
-        resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
-        cls.password = server['admin_password']
-        return server['id']
-
-    @classmethod
-    def delete_volume(cls, volume_id):
-        """Deletes the given volume and waits for it to be gone."""
-        cls._delete_volume(cls.volumes_client, volume_id)
 
 
 class BaseV3ComputeAdminTest(BaseV3ComputeTest):
