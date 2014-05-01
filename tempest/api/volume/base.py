@@ -109,6 +109,7 @@ class BaseVolumeV1Test(BaseVolumeTest):
         cls.backups_client = cls.os.backups_client
         cls.volume_services_client = cls.os.volume_services_client
         cls.volumes_extension_client = cls.os.volumes_extension_client
+        cls.availability_zone_client = cls.os.volume_availability_zone_client
 
     @classmethod
     def create_volume(cls, size=1, **kwargs):
