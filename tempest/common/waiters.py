@@ -13,6 +13,7 @@
 
 import time
 
+from tempest.common.utils import misc as misc_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -86,6 +87,9 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                         'timeout': timeout})
             message += ' Current status: %s.' % server_status
             message += ' Current task state: %s.' % task_state
+            caller = misc_utils.find_test_caller()
+            if caller:
+                message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)
         old_status = server_status
         old_task_state = task_state
@@ -119,4 +123,7 @@ def wait_for_image_status(client, image_id, status):
                         'status': status,
                         'timeout': client.build_timeout})
             message += ' Current status: %s.' % image['status']
+            caller = misc_utils.find_test_caller()
+            if caller:
+                message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)
