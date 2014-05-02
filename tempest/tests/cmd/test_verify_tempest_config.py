@@ -199,3 +199,199 @@ class TestDiscovery(base.TestCase):
             verify_tempest_config.verify_glance_api_versions(fake_os, True)
         print_mock.assert_called_once_with('api_v1', 'image_feature_enabled',
                                            False, True)
+
+    def test_verify_extensions_neutron(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'alias': 'fake1'},
+                                          {'alias': 'fake2'},
+                                          {'alias': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.network_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['fake1', 'fake2', 'fake3'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'neutron', {})
+        self.assertIn('neutron', results)
+        self.assertIn('fake1', results['neutron'])
+        self.assertTrue(results['neutron']['fake1'])
+        self.assertIn('fake2', results['neutron'])
+        self.assertTrue(results['neutron']['fake2'])
+        self.assertIn('fake3', results['neutron'])
+        self.assertFalse(results['neutron']['fake3'])
+        self.assertIn('not_fake', results['neutron'])
+        self.assertFalse(results['neutron']['not_fake'])
+
+    def test_verify_extensions_neutron_all(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'alias': 'fake1'},
+                                          {'alias': 'fake2'},
+                                          {'alias': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.network_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['all'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'neutron', {})
+        self.assertIn('neutron', results)
+        self.assertIn('extensions', results['neutron'])
+        self.assertEqual(['fake1', 'fake2', 'not_fake'],
+                         results['neutron']['extensions'])
+
+    def test_verify_extensions_cinder(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'name': 'fake1'},
+                                          {'name': 'fake2'},
+                                          {'name': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.volumes_extension_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['fake1', 'fake2', 'fake3'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'cinder', {})
+        self.assertIn('cinder', results)
+        self.assertIn('fake1', results['cinder'])
+        self.assertTrue(results['cinder']['fake1'])
+        self.assertIn('fake2', results['cinder'])
+        self.assertTrue(results['cinder']['fake2'])
+        self.assertIn('fake3', results['cinder'])
+        self.assertFalse(results['cinder']['fake3'])
+        self.assertIn('not_fake', results['cinder'])
+        self.assertFalse(results['cinder']['not_fake'])
+
+    def test_verify_extensions_cinder_all(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'name': 'fake1'},
+                                          {'name': 'fake2'},
+                                          {'name': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.volumes_extension_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['all'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'cinder', {})
+        self.assertIn('cinder', results)
+        self.assertIn('extensions', results['cinder'])
+        self.assertEqual(['fake1', 'fake2', 'not_fake'],
+                         results['cinder']['extensions'])
+
+    def test_verify_extensions_nova(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'name': 'fake1'},
+                                          {'name': 'fake2'},
+                                          {'name': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.extensions_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['fake1', 'fake2', 'fake3'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'nova', {})
+        self.assertIn('nova', results)
+        self.assertIn('fake1', results['nova'])
+        self.assertTrue(results['nova']['fake1'])
+        self.assertIn('fake2', results['nova'])
+        self.assertTrue(results['nova']['fake2'])
+        self.assertIn('fake3', results['nova'])
+        self.assertFalse(results['nova']['fake3'])
+        self.assertIn('not_fake', results['nova'])
+        self.assertFalse(results['nova']['not_fake'])
+
+    def test_verify_extensions_nova_all(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'name': 'fake1'},
+                                          {'name': 'fake2'},
+                                          {'name': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.extensions_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['all'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'nova', {})
+        self.assertIn('nova', results)
+        self.assertIn('extensions', results['nova'])
+        self.assertEqual(['fake1', 'fake2', 'not_fake'],
+                         results['nova']['extensions'])
+
+    def test_verify_extensions_nova_v3(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'name': 'fake1'},
+                                          {'name': 'fake2'},
+                                          {'name': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.extensions_v3_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['fake1', 'fake2', 'fake3'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'nova_v3', {})
+        self.assertIn('nova_v3', results)
+        self.assertIn('fake1', results['nova_v3'])
+        self.assertTrue(results['nova_v3']['fake1'])
+        self.assertIn('fake2', results['nova_v3'])
+        self.assertTrue(results['nova_v3']['fake2'])
+        self.assertIn('fake3', results['nova_v3'])
+        self.assertFalse(results['nova_v3']['fake3'])
+        self.assertIn('not_fake', results['nova_v3'])
+        self.assertFalse(results['nova_v3']['not_fake'])
+
+    def test_verify_extensions_nova_v3_all(self):
+        def fake_list_extensions():
+            return (None, {'extensions': [{'name': 'fake1'},
+                                          {'name': 'fake2'},
+                                          {'name': 'not_fake'}]})
+        fake_os = mock.MagicMock()
+        fake_os.extensions_v3_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['all'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'nova_v3', {})
+        self.assertIn('nova_v3', results)
+        self.assertIn('extensions', results['nova_v3'])
+        self.assertEqual(['fake1', 'fake2', 'not_fake'],
+                         results['nova_v3']['extensions'])
+
+    def test_verify_extensions_swift(self):
+        def fake_list_extensions():
+            return (None, {'fake1': 'metadata',
+                           'fake2': 'metadata',
+                           'not_fake': 'metadata',
+                           'swift': 'metadata'})
+        fake_os = mock.MagicMock()
+        fake_os.account_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['fake1', 'fake2', 'fake3'])))
+        results = verify_tempest_config.verify_extensions(fake_os, 'swift', {})
+        self.assertIn('swift', results)
+        self.assertIn('fake1', results['swift'])
+        self.assertTrue(results['swift']['fake1'])
+        self.assertIn('fake2', results['swift'])
+        self.assertTrue(results['swift']['fake2'])
+        self.assertIn('fake3', results['swift'])
+        self.assertFalse(results['swift']['fake3'])
+        self.assertIn('not_fake', results['swift'])
+        self.assertFalse(results['swift']['not_fake'])
+
+    def test_verify_extensions_swift_all(self):
+        def fake_list_extensions():
+            return (None, {'fake1': 'metadata',
+                           'fake2': 'metadata',
+                           'not_fake': 'metadata',
+                           'swift': 'metadata'})
+        fake_os = mock.MagicMock()
+        fake_os.account_client.list_extensions = fake_list_extensions
+        self.useFixture(mockpatch.PatchObject(
+            verify_tempest_config, 'get_enabled_extensions',
+            return_value=(['all'])))
+        results = verify_tempest_config.verify_extensions(fake_os,
+                                                          'swift', {})
+        self.assertIn('swift', results)
+        self.assertIn('extensions', results['swift'])
+        self.assertEqual(['not_fake', 'fake1', 'fake2'],
+                         results['swift']['extensions'])
