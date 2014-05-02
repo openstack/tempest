@@ -161,6 +161,8 @@ from tempest.services.volume.json.admin.volume_hosts_client import \
     VolumeHostsClientJSON
 from tempest.services.volume.json.admin.volume_quotas_client import \
     VolumeQuotasClientJSON
+from tempest.services.volume.json.admin.volume_services_client import \
+    VolumesServicesClientJSON
 from tempest.services.volume.json.admin.volume_types_client import \
     VolumeTypesClientJSON
 from tempest.services.volume.json.backups_client import BackupsClientJSON
@@ -174,6 +176,8 @@ from tempest.services.volume.xml.admin.volume_hosts_client import \
     VolumeHostsClientXML
 from tempest.services.volume.xml.admin.volume_quotas_client import \
     VolumeQuotasClientXML
+from tempest.services.volume.xml.admin.volume_services_client import \
+    VolumesServicesClientXML
 from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
 from tempest.services.volume.xml.backups_client import BackupsClientXML
@@ -240,6 +244,8 @@ class Manager(manager.Manager):
             self.availability_zone_client = AvailabilityZoneClientXML(
                 self.auth_provider)
             self.service_client = ServiceClientXML(self.auth_provider)
+            self.volume_services_client = VolumesServicesClientXML(
+                self.auth_provider)
             self.aggregates_client = AggregatesClientXML(self.auth_provider)
             self.services_client = ServicesClientXML(self.auth_provider)
             self.tenant_usages_client = TenantUsagesClientXML(
@@ -315,6 +321,8 @@ class Manager(manager.Manager):
             self.services_v3_client = ServicesV3ClientJSON(
                 self.auth_provider)
             self.service_client = ServiceClientJSON(self.auth_provider)
+            self.volume_services_client = VolumesServicesClientJSON(
+                self.auth_provider)
             self.agents_v3_client = AgentsV3ClientJSON(self.auth_provider)
             self.aggregates_v3_client = AggregatesV3ClientJSON(
                 self.auth_provider)
