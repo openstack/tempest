@@ -41,6 +41,11 @@ class ImagesOneServerV3Test(base.BaseV3ComputeTest):
             # Usually it means the server had a serious accident
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
+    def tearDown(self):
+        """Terminate test instances created after a test is executed."""
+        self.server_check_teardown()
+        super(ImagesOneServerV3Test, self).tearDown()
+
     @classmethod
     def setUpClass(cls):
         super(ImagesOneServerV3Test, cls).setUpClass()

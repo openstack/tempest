@@ -39,6 +39,12 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
             # Rebuild server if something happened to it during a test
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
+    def tearDown(self):
+        _, server = self.client.get_server(self.server_id)
+        self.assertEqual(self.image_ref, server['image']['id'])
+        self.server_check_teardown()
+        super(ServerActionsV3Test, self).tearDown()
+
     @classmethod
     def setUpClass(cls):
         cls.prepare_instance_network()
@@ -117,7 +123,6 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
                                                    name=new_name,
                                                    metadata=meta,
                                                    admin_password=password)
-        self.addCleanup(self.client.rebuild, self.server_id, self.image_ref)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -138,6 +143,9 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
                                                       password)
             linux_client.validate_authentication()
 
+        if self.image_ref_alt != self.image_ref:
+            self.client.rebuild(self.server_id, self.image_ref)
+
     @test.attr(type='gate')
     def test_rebuild_server_in_stop_state(self):
         # The server in stop state  should be rebuilt using the provided
@@ -149,11 +157,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         resp, server = self.client.stop(self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
-        self.addCleanup(self.client.start, self.server_id)
         resp, rebuilt_server = self.client.rebuild(self.server_id, new_image)
-        self.addCleanup(self.client.wait_for_server_status, self.server_id,
-                        'SHUTOFF')
-        self.addCleanup(self.client.rebuild, self.server_id, old_image)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -166,6 +170,12 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         resp, server = self.client.get_server(rebuilt_server['id'])
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
+
+        # Restore to the original image (The tearDown will test it again)
+        if self.image_ref_alt != self.image_ref:
+            self.client.rebuild(self.server_id, old_image)
+            self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
+        self.client.start(self.server_id)
 
     def _detect_server_image_flavor(self, server_id):
         # Detects the current server image flavor ref.

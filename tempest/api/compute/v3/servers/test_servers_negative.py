@@ -37,6 +37,10 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
         except Exception:
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
+    def tearDown(self):
+            self.server_check_teardown()
+            super(ServersNegativeV3Test, self).tearDown()
+
     @classmethod
     def setUpClass(cls):
         super(ServersNegativeV3Test, cls).setUpClass()
@@ -121,12 +125,11 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
     def test_pause_paused_server(self):
         # Pause a paused server.
         self.client.pause_server(self.server_id)
-        self.addCleanup(self.client.unpause_server,
-                        self.server_id)
         self.client.wait_for_server_status(self.server_id, 'PAUSED')
         self.assertRaises(exceptions.Conflict,
                           self.client.pause_server,
                           self.server_id)
+        self.client.unpause_server(self.server_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_rebuild_reboot_deleted_server(self):
@@ -330,13 +333,12 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
     def test_suspend_server_invalid_state(self):
         # suspend a suspended server.
         resp, _ = self.client.suspend_server(self.server_id)
-        self.addCleanup(self.client.resume_server,
-                        self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SUSPENDED')
         self.assertRaises(exceptions.Conflict,
                           self.client.suspend_server,
                           self.server_id)
+        self.client.resume_server(self.server_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_resume_non_existent_server(self):
@@ -404,7 +406,6 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
         # shelve a shelved server.
         resp, server = self.client.shelve_server(self.server_id)
         self.assertEqual(202, resp.status)
-        self.addCleanup(self.client.unshelve_server, self.server_id)
 
         offload_time = CONF.compute.shelved_offload_time
         if offload_time >= 0:
@@ -424,6 +425,8 @@ class ServersNegativeV3Test(base.BaseV3ComputeTest):
         self.assertRaises(exceptions.Conflict,
                           self.client.shelve_server,
                           self.server_id)
+
+        self.client.unshelve_server(self.server_id)
 
     @test.attr(type=['negative', 'gate'])
     def test_unshelve_non_existent_server(self):

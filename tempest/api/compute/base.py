@@ -92,6 +92,26 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
+    def server_check_teardown(cls):
+        """Checks is the shared server clean enough for subsequent test.
+           Method will delete the server when it's dirty.
+           The setUp method is responsible for creating a new server.
+           Exceptions raised in tearDown class are fails the test case,
+           This method supposed to use only by tierDown methods, when
+           the shared server_id is stored in the server_id of the class.
+        """
+        if getattr(cls, 'server_id', None) is not None:
+            try:
+                cls.servers_client.wait_for_server_status(cls.server_id,
+                                                          'ACTIVE')
+            except Exception as exc:
+                LOG.exception(exc)
+                cls.servers_client.delete_server(cls.server_id)
+                cls.servers_client.wait_for_server_termination(cls.server_id)
+                cls.server_id = None
+                raise
+
+    @classmethod
     def clear_images(cls):
         for image_id in cls.images:
             try:
