@@ -15,6 +15,8 @@
 import os
 import re
 
+import pep8
+
 
 PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
                   'trove', 'ironic', 'savanna', 'heat', 'ceilometer',
@@ -56,6 +58,10 @@ def scenario_tests_need_service_tags(physical_line, filename,
 
 
 def no_setupclass_for_unit_tests(physical_line, filename):
+
+    if pep8.noqa(physical_line):
+        return
+
     if 'tempest/tests' in filename:
         if SETUPCLASS_DEFINITION.match(physical_line):
             return (physical_line.find('def'),
