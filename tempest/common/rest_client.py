@@ -371,7 +371,7 @@ class RestClient(object):
             # Parse one-item-like xmls (user, role, etc)
             return common.xml_to_json(element)
 
-    def response_checker(self, method, url, headers, body, resp, resp_body):
+    def response_checker(self, method, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
                 method.upper() == 'HEAD') and resp_body:
             raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
@@ -415,8 +415,7 @@ class RestClient(object):
                           resp_body=resp_body)
 
         # Verify HTTP response codes
-        self.response_checker(method, url, req_headers, req_body, resp,
-                              resp_body)
+        self.response_checker(method, resp, resp_body)
 
         return resp, resp_body
 
