@@ -197,6 +197,10 @@ class InvalidHTTPResponseBody(RestClientException):
     message = "HTTP response body is invalid json or xml"
 
 
+class InvalidHTTPResponseHeader(RestClientException):
+    message = "HTTP response header is invalid"
+
+
 class InvalidContentType(RestClientException):
     message = "Invalid content type provided"
 

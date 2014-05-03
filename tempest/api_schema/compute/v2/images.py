@@ -82,7 +82,17 @@ list_images = {
 }
 
 create_image = {
-    'status_code': [202]
+    'status_code': [202],
+    'response_header': {
+        'type': 'object',
+        'properties': {
+            'location': {
+                'type': 'string',
+                'format': 'uri'
+            }
+        },
+        'required': ['location']
+    }
 }
 
 delete = {
