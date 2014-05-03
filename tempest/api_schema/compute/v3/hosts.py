@@ -13,14 +13,16 @@
 #    under the License.
 
 import copy
-from tempest.api_schema.compute.v2 import hosts
+
+from tempest.api_schema.compute import hosts
+
 
 startup_host = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
         'properties': {
-            'host': hosts.body
+            'host': hosts.common_start_up_body
         },
         'required': ['host']
     }

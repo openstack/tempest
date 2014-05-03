@@ -12,6 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+common_start_up_body = {
+    'type': 'object',
+    'properties': {
+        'host': {'type': 'string'},
+        'power_action': {'enum': ['startup']}
+    },
+    'required': ['host', 'power_action']
+}
+
 list_hosts = {
     'status_code': [200],
     'response_body': {

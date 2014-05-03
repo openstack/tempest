@@ -14,18 +14,12 @@
 
 import copy
 
-body = {
-    'type': 'object',
-    'properties': {
-        'host': {'type': 'string'},
-        'power_action': {'enum': ['startup']}
-    },
-    'required': ['host', 'power_action']
-}
+from tempest.api_schema.compute import hosts
+
 
 startup_host = {
     'status_code': [200],
-    'response_body': body
+    'response_body': hosts.common_start_up_body
 }
 
 # The 'power_action' attribute of 'shutdown_host' API is 'shutdown'
