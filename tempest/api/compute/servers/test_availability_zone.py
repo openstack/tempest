@@ -17,15 +17,15 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class AZTestJSON(base.BaseV2ComputeTest):
-
+class AZV3Test(base.BaseComputeTest):
     """
     Tests Availability Zone API List
     """
+    _api_version = 3
 
     @classmethod
     def setUpClass(cls):
-        super(AZTestJSON, cls).setUpClass()
+        super(AZV3Test, cls).setUpClass()
         cls.client = cls.availability_zone_client
 
     @test.attr(type='gate')
@@ -36,5 +36,9 @@ class AZTestJSON(base.BaseV2ComputeTest):
         self.assertTrue(len(availability_zone) > 0)
 
 
-class AZTestXML(AZTestJSON):
+class AZV2TestJSON(AZV3Test):
+    _api_version = 2
+
+
+class AZV2TestXML(AZV2TestJSON):
     _interface = 'xml'
