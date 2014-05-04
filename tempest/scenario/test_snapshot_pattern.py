@@ -35,8 +35,10 @@ class TestSnapshotPattern(manager.OfficialClientTest):
     """
 
     def _boot_image(self, image_id):
+        security_groups = [self.security_group.name]
         create_kwargs = {
-            'key_name': self.keypair.name
+            'key_name': self.keypair.name,
+            'security_groups': security_groups
         }
         return self.create_server(image=image_id, create_kwargs=create_kwargs)
 
@@ -72,7 +74,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
     def test_snapshot_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self._create_loginable_secgroup_rule_nova()
+        self.security_group = self._create_security_group_nova()
 
         # boot a instance and create a timestamp file in it
         server = self._boot_image(CONF.compute.image_ref)

@@ -283,6 +283,23 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             rules.append(sg_rule)
         return rules
 
+    def _create_security_group_nova(self, client=None,
+                                    namestart='secgroup-smoke-'):
+        if client is None:
+            client = self.compute_client
+        # Create security group
+        sg_name = data_utils.rand_name(namestart)
+        sg_desc = sg_name + " description"
+        secgroup = client.security_groups.create(sg_name, sg_desc)
+        self.assertEqual(secgroup.name, sg_name)
+        self.assertEqual(secgroup.description, sg_desc)
+        self.set_resource(sg_name, secgroup)
+
+        # Add rules to the security group
+        self._create_loginable_secgroup_rule_nova(client, secgroup.id)
+
+        return secgroup
+
     def create_server(self, client=None, name=None, image=None, flavor=None,
                       wait=True, create_kwargs={}):
         if client is None:
@@ -797,24 +814,6 @@ class NetworkScenarioTest(OfficialClientTest):
         return tempest.test.call_until_true(ping_remote,
                                             CONF.compute.ping_timeout,
                                             1)
-
-    def _create_security_group_nova(self, client=None,
-                                    namestart='secgroup-smoke-',
-                                    tenant_id=None):
-        if client is None:
-            client = self.compute_client
-        # Create security group
-        sg_name = data_utils.rand_name(namestart)
-        sg_desc = sg_name + " description"
-        secgroup = client.security_groups.create(sg_name, sg_desc)
-        self.assertEqual(secgroup.name, sg_name)
-        self.assertEqual(secgroup.description, sg_desc)
-        self.set_resource(sg_name, secgroup)
-
-        # Add rules to the security group
-        self._create_loginable_secgroup_rule_nova(client, secgroup.id)
-
-        return secgroup
 
     def _create_security_group_neutron(self, tenant_id, client=None,
                                        namestart='secgroup-smoke-'):

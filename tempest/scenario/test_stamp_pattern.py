@@ -62,8 +62,10 @@ class TestStampPattern(manager.OfficialClientTest):
                             volume_snapshot.id, status)
 
     def _boot_image(self, image_id):
+        security_groups = [self.security_group.name]
         create_kwargs = {
-            'key_name': self.keypair.name
+            'key_name': self.keypair.name,
+            'security_groups': security_groups
         }
         return self.create_server(image=image_id, create_kwargs=create_kwargs)
 
@@ -152,7 +154,7 @@ class TestStampPattern(manager.OfficialClientTest):
     def test_stamp_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self._create_loginable_secgroup_rule_nova()
+        self.security_group = self._create_security_group_nova()
 
         # boot an instance and create a timestamp file in it
         volume = self._create_volume()
