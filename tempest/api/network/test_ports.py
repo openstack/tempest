@@ -288,11 +288,10 @@ class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
 
     @classmethod
     def setUpClass(cls):
-        super(PortsAdminExtendedAttrsIpV6TestJSON, cls).setUpClass()
         if not CONF.network_feature_enabled.ipv6:
-            cls.tearDownClass()
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
+        super(PortsAdminExtendedAttrsIpV6TestJSON, cls).setUpClass()
 
 
 class PortsAdminExtendedAttrsIpV6TestXML(
