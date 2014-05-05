@@ -17,6 +17,7 @@ import netaddr
 import keystoneclient.v2_0.client as keystoneclient
 import neutronclient.v2_0.client as neutronclient
 
+from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -33,6 +34,7 @@ class IsolatedCreds(object):
                  password='pass', network_resources=None):
         self.network_resources = network_resources
         self.isolated_creds = {}
+        self.isolated_creds_old_style = {}
         self.isolated_net_resources = {}
         self.ports = []
         self.name = name
@@ -185,22 +187,19 @@ class IsolatedCreds(object):
                 self._assign_user_role(tenant['id'], user['id'], role['id'])
             else:
                 self._assign_user_role(tenant.id, user.id, role.id)
-        return user, tenant
+        return self._get_credentials(user, tenant), user, tenant
 
-    def _get_cred_names(self, user, tenant):
+    def _get_credentials(self, user, tenant):
         if self.tempest_client:
-            username = user.get('name')
-            tenant_name = tenant.get('name')
+            user_get = user.get
+            tenant_get = tenant.get
         else:
-            username = user.name
-            tenant_name = tenant.name
-        return username, tenant_name
-
-    def _get_tenant_id(self, tenant):
-        if self.tempest_client:
-            return tenant.get('id')
-        else:
-            return tenant.id
+            user_get = user.__dict__.get
+            tenant_get = tenant.__dict__.get
+        return auth.get_credentials(
+            username=user_get('name'), user_id=user_get('id'),
+            tenant_name=tenant_get('name'), tenant_id=tenant_get('id'),
+            password=self.password)
 
     def _create_network_resources(self, tenant_id):
         network = None
@@ -315,22 +314,28 @@ class IsolatedCreds(object):
             self.network_admin_client.add_interface_router(router_id, body)
 
     def get_primary_tenant(self):
-        return self.isolated_creds.get('primary')[1]
+        # Deprecated. Maintained until all tests are ported
+        return self.isolated_creds_old_style.get('primary')[1]
 
     def get_primary_user(self):
-        return self.isolated_creds.get('primary')[0]
+        # Deprecated. Maintained until all tests are ported
+        return self.isolated_creds_old_style.get('primary')[0]
 
     def get_alt_tenant(self):
-        return self.isolated_creds.get('alt')[1]
+        # Deprecated. Maintained until all tests are ported
+        return self.isolated_creds_old_style.get('alt')[1]
 
     def get_alt_user(self):
-        return self.isolated_creds.get('alt')[0]
+        # Deprecated. Maintained until all tests are ported
+        return self.isolated_creds_old_style.get('alt')[0]
 
     def get_admin_tenant(self):
-        return self.isolated_creds.get('admin')[1]
+        # Deprecated. Maintained until all tests are ported
+        return self.isolated_creds_old_style.get('admin')[1]
 
     def get_admin_user(self):
-        return self.isolated_creds.get('admin')[0]
+        # Deprecated. Maintained until all tests are ported
+        return self.isolated_creds_old_style.get('admin')[0]
 
     def get_primary_network(self):
         return self.isolated_net_resources.get('primary')[0]
@@ -359,62 +364,38 @@ class IsolatedCreds(object):
     def get_alt_router(self):
         return self.isolated_net_resources.get('alt')[2]
 
-    def get_primary_creds(self):
-        if self.isolated_creds.get('primary'):
-            user, tenant = self.isolated_creds['primary']
-            username, tenant_name = self._get_cred_names(user, tenant)
+    def get_credentials(self, credential_type, old_style):
+        if self.isolated_creds.get(credential_type):
+            credentials = self.isolated_creds[credential_type]
         else:
-            user, tenant = self._create_creds()
-            username, tenant_name = self._get_cred_names(user, tenant)
-            self.isolated_creds['primary'] = (user, tenant)
-            LOG.info("Acquired isolated creds:\n user: %s, tenant: %s"
-                     % (username, tenant_name))
+            is_admin = (credential_type == 'admin')
+            credentials, user, tenant = self._create_creds(admin=is_admin)
+            self.isolated_creds[credential_type] = credentials
+            # Maintained until tests are ported
+            self.isolated_creds_old_style[credential_type] = (user, tenant)
+            LOG.info("Acquired isolated creds:\n credentials: %s"
+                     % credentials)
             if CONF.service_available.neutron:
                 network, subnet, router = self._create_network_resources(
-                    self._get_tenant_id(tenant))
-                self.isolated_net_resources['primary'] = (
+                    credentials.tenant_id)
+                self.isolated_net_resources[credential_type] = (
                     network, subnet, router,)
                 LOG.info("Created isolated network resources for : \n"
-                         + " user: %s, tenant: %s" % (username, tenant_name))
-        return username, tenant_name, self.password
+                         + " credentials: %s" % credentials)
+        if old_style:
+            return (credentials.username, credentials.tenant_name,
+                    credentials.password)
+        else:
+            return credentials
 
-    def get_admin_creds(self):
-        if self.isolated_creds.get('admin'):
-            user, tenant = self.isolated_creds['admin']
-            username, tenant_name = self._get_cred_names(user, tenant)
-        else:
-            user, tenant = self._create_creds(admin=True)
-            username, tenant_name = self._get_cred_names(user, tenant)
-            self.isolated_creds['admin'] = (user, tenant)
-            LOG.info("Acquired admin isolated creds:\n user: %s, tenant: %s"
-                     % (username, tenant_name))
-            if CONF.service_available.neutron:
-                network, subnet, router = self._create_network_resources(
-                    self._get_tenant_id(tenant))
-                self.isolated_net_resources['admin'] = (
-                    network, subnet, router,)
-                LOG.info("Created isolated network resources for : \n"
-                         + " user: %s, tenant: %s" % (username, tenant_name))
-        return username, tenant_name, self.password
+    def get_primary_creds(self, old_style=True):
+        return self.get_credentials('primary', old_style)
 
-    def get_alt_creds(self):
-        if self.isolated_creds.get('alt'):
-            user, tenant = self.isolated_creds['alt']
-            username, tenant_name = self._get_cred_names(user, tenant)
-        else:
-            user, tenant = self._create_creds()
-            username, tenant_name = self._get_cred_names(user, tenant)
-            self.isolated_creds['alt'] = (user, tenant)
-            LOG.info("Acquired alt isolated creds:\n user: %s, tenant: %s"
-                     % (username, tenant_name))
-            if CONF.service_available.neutron:
-                network, subnet, router = self._create_network_resources(
-                    self._get_tenant_id(tenant))
-                self.isolated_net_resources['alt'] = (
-                    network, subnet, router,)
-                LOG.info("Created isolated network resources for : \n"
-                         + " user: %s, tenant: %s" % (username, tenant_name))
-        return username, tenant_name, self.password
+    def get_admin_creds(self, old_style=True):
+        return self.get_credentials('admin', old_style)
+
+    def get_alt_creds(self, old_style=True):
+        return self.get_credentials('alt', old_style)
 
     def _clear_isolated_router(self, router_id, router_name):
         net_client = self.network_admin_client
@@ -505,29 +486,16 @@ class IsolatedCreds(object):
         if not self.isolated_creds:
             return
         self._clear_isolated_net_resources()
-        for cred in self.isolated_creds:
-            user, tenant = self.isolated_creds.get(cred)
+        for creds in self.isolated_creds.itervalues():
             try:
-                if self.tempest_client:
-                    self._delete_user(user['id'])
-                else:
-                    self._delete_user(user.id)
+                self._delete_user(creds.user_id)
             except exceptions.NotFound:
-                if self.tempest_client:
-                    name = user['name']
-                else:
-                    name = user.name
-                LOG.warn("user with name: %s not found for delete" % name)
+                LOG.warn("user with name: %s not found for delete" %
+                         creds.username)
                 pass
             try:
-                if self.tempest_client:
-                    self._delete_tenant(tenant['id'])
-                else:
-                    self._delete_tenant(tenant.id)
+                self._delete_tenant(creds.tenant_id)
             except exceptions.NotFound:
-                if self.tempest_client:
-                    name = tenant['name']
-                else:
-                    name = tenant.name
-                LOG.warn("tenant with name: %s not found for delete" % name)
+                LOG.warn("tenant with name: %s not found for delete" %
+                         creds.tenant_name)
                 pass
