@@ -57,11 +57,6 @@ class RemoteClient():
         actual_hostname = self.exec_command("hostname").rstrip()
         return expected_hostname == actual_hostname
 
-    def get_files(self, path):
-        # Return a list of comma separated files
-        command = "ls -m " + path
-        return self.exec_command(command).rstrip('\n').split(', ')
-
     def get_ram_size_in_mb(self):
         output = self.exec_command('free -m | grep Mem')
         if output:
