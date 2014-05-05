@@ -174,12 +174,20 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return subnet
 
     @classmethod
-    def create_port(cls, network):
+    def create_port(cls, network, **kwargs):
         """Wrapper utility that returns a test port."""
-        resp, body = cls.client.create_port(network_id=network['id'])
+        resp, body = cls.client.create_port(network_id=network['id'],
+                                            **kwargs)
         port = body['port']
         cls.ports.append(port)
         return port
+
+    @classmethod
+    def update_port(cls, port, **kwargs):
+        """Wrapper utility that updates a test port."""
+        resp, body = cls.client.update_port(port['id'],
+                                            **kwargs)
+        return body['port']
 
     @classmethod
     def create_router(cls, router_name=None, admin_state_up=False,
