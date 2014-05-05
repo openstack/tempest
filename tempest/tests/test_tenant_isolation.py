@@ -59,6 +59,8 @@ class TestTenantIsolation(base.TestCase):
                                               '_get_object_storage_client'))
         self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
                                               '_get_orchestration_client'))
+        self.useFixture(mockpatch.PatchObject(clients.OfficialClientManager,
+                                              '_get_ceilometer_client'))
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  tempest_client=False)
         self.assertTrue(isinstance(iso_creds.identity_admin_client,

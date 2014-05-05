@@ -456,6 +456,7 @@ class OfficialClientManager(manager.Manager):
     HEATCLIENT_VERSION = '1'
     IRONICCLIENT_VERSION = '1'
     SAHARACLIENT_VERSION = '1.1'
+    CEILOMETERCLIENT_VERSION = '2'
 
     def __init__(self, credentials):
         # FIXME(andreaf) Auth provider for client_type 'official' is
@@ -475,6 +476,8 @@ class OfficialClientManager(manager.Manager):
         self.orchestration_client = self._get_orchestration_client(
             credentials)
         self.data_processing_client = self._get_data_processing_client(
+            credentials)
+        self.ceilometer_client = self._get_ceilometer_client(
             credentials)
 
     def _get_roles(self):
@@ -696,3 +699,34 @@ class OfficialClientManager(manager.Manager):
             auth_url=auth_url)
 
         return client
+
+    def _get_ceilometer_client(self, credentials):
+        if not CONF.service_available.ceilometer:
+            return None
+
+        import ceilometerclient.client
+
+        keystone = self._get_identity_client(credentials)
+        region = CONF.identity.region
+
+        endpoint_type = CONF.telemetry.endpoint_type
+        service_type = CONF.telemetry.catalog_type
+        auth_url = CONF.identity.uri
+
+        try:
+            keystone.service_catalog.url_for(
+                attr='region',
+                filter_value=region,
+                service_type=service_type,
+                endpoint_type=endpoint_type)
+        except keystoneclient.exceptions.EndpointNotFound:
+            return None
+        else:
+            return ceilometerclient.client.get_client(
+                self.CEILOMETERCLIENT_VERSION,
+                os_username=credentials.username,
+                os_password=credentials.password,
+                os_tenant_name=credentials.tenant_name,
+                os_auth_url=auth_url,
+                os_service_type=service_type,
+                os_endpoint_type=endpoint_type)

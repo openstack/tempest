@@ -82,6 +82,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.object_storage_client = cls.manager.object_storage_client
         cls.orchestration_client = cls.manager.orchestration_client
         cls.data_processing_client = cls.manager.data_processing_client
+        cls.ceilometer_client = cls.manager.ceilometer_client
         cls.resource_keys = {}
         cls.os_resources = []
 
