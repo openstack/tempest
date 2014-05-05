@@ -62,7 +62,7 @@ Resources:
           #!/bin/bash -v
           /opt/aws/bin/cfn-init
           /opt/aws/bin/cfn-signal -e 0 --data "`cat /tmp/smoke-status`" \
-              "WaitHandle"
+              --id smoke_status "WaitHandle"
   WaitHandle:
     Type: AWS::CloudFormation::WaitConditionHandle
   WaitCondition:
