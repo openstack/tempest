@@ -350,6 +350,10 @@
 # API key to use when authenticating as admin. (string value)
 #password=<None>
 
+# Domain name for authentication as admin (Keystone V3).The
+# same domain applies to user and project (string value)
+#domain_name=<None>
+
 
 [compute-feature-enabled]
 
@@ -516,6 +520,10 @@
 # API key to use when authenticating. (string value)
 #password=<None>
 
+# Domain name for authentication (Keystone V3).The same domain
+# applies to user and project (string value)
+#domain_name=<None>
+
 # Username of alternate user to use for Nova API requests.
 # (string value)
 #alt_username=<None>
@@ -528,6 +536,10 @@
 # (string value)
 #alt_password=<None>
 
+# Alternate domain name for authentication (Keystone V3).The
+# same domain applies to user and project (string value)
+#alt_domain_name=<None>
+
 # Administrative Username to use for Keystone API requests.
 # (string value)
 #admin_username=<None>
@@ -538,6 +550,10 @@
 
 # API key to use when authenticating as admin. (string value)
 #admin_password=<None>
+
+# Admin domain name for authentication (Keystone V3).The same
+# domain applies to user and project (string value)
+#admin_domain_name=<None>
 
 
 [identity-feature-enabled]

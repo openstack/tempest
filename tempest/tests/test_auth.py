@@ -47,6 +47,8 @@ class BaseAuthTestsSetUp(base.TestCase):
         self.stubs.Set(http.ClosingHttp, 'request', self.fake_http.request)
         self.stubs.Set(auth, 'get_credentials',
                        fake_auth_provider.get_credentials)
+        self.stubs.Set(auth, 'get_default_credentials',
+                       fake_auth_provider.get_default_credentials)
         self.auth_provider = self._auth(self.credentials)
 
 
@@ -318,12 +320,7 @@ class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):
 class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
     _endpoints = fake_identity.IDENTITY_V3_RESPONSE['token']['catalog']
     _auth_provider_class = auth.KeystoneV3AuthProvider
-    credentials = {
-        'username': 'fake_user',
-        'password': 'fake_pwd',
-        'tenant_name': 'fake_tenant',
-        'domain_name': 'fake_domain_name',
-    }
+    credentials = fake_credentials.FakeKeystoneV3Credentials()
 
     def setUp(self):
         super(TestKeystoneV3AuthProvider, self).setUp()
@@ -343,10 +340,25 @@ class TestKeystoneV3AuthProvider(TestKeystoneV2AuthProvider):
         access['expires_at'] = date_as_string
         return token, access
 
-    def test_check_credentials_missing_tenant_name(self):
-        cred = copy.copy(self.credentials)
-        del cred['domain_name']
-        self.assertFalse(self.auth_provider.check_credentials(cred))
+    def test_check_credentials_missing_attribute(self):
+        # reset credentials to fresh ones
+        self.credentials = fake_credentials.FakeKeystoneV3Credentials()
+        for attr in ['username', 'password', 'user_domain_name',
+                     'project_domain_name']:
+            cred = copy.copy(self.credentials)
+            del cred[attr]
+            self.assertFalse(self.auth_provider.check_credentials(cred),
+                             "Credentials should be invalid without %s" % attr)
+
+    def test_check_domain_credentials_missing_attribute(self):
+        # reset credentials to fresh ones
+        self.credentials = fake_credentials.FakeKeystoneV3Credentials()
+        domain_creds = fake_credentials.FakeKeystoneV3DomainCredentials()
+        for attr in ['username', 'password', 'user_domain_name']:
+            cred = copy.copy(domain_creds)
+            del cred[attr]
+            self.assertFalse(self.auth_provider.check_credentials(cred),
+                             "Credentials should be invalid without %s" % attr)
 
     # Overwrites v2 test
     def test_base_url_to_get_admin_endpoint(self):

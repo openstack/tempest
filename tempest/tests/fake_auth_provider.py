@@ -16,6 +16,10 @@
 from tempest.tests import fake_credentials
 
 
+def get_default_credentials(credential_type, fill_in=True):
+    return fake_credentials.FakeCredentials()
+
+
 def get_credentials(credential_type=None, fill_in=True, **kwargs):
     return fake_credentials.FakeCredentials()
 
