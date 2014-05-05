@@ -80,6 +80,17 @@ class AuthProvider(object):
     def _get_auth(self):
         raise NotImplementedError
 
+    def _fill_credentials(self, auth_data_body):
+        raise NotImplementedError
+
+    def fill_credentials(self):
+        """
+        Fill credentials object with data from auth
+        """
+        auth_data = self.get_auth()
+        self._fill_credentials(auth_data[1])
+        return self.credentials
+
     @classmethod
     def check_credentials(cls, credentials):
         """
@@ -89,13 +100,27 @@ class AuthProvider(object):
 
     @property
     def auth_data(self):
-        if self.cache is None or self.is_expired(self.cache):
-            self.cache = self._get_auth()
-        return self.cache
+        return self.get_auth()
 
     @auth_data.deleter
     def auth_data(self):
         self.clear_auth()
+
+    def get_auth(self):
+        """
+        Returns auth from cache if available, else auth first
+        """
+        if self.cache is None or self.is_expired(self.cache):
+            self.set_auth()
+        return self.cache
+
+    def set_auth(self):
+        """
+        Forces setting auth, ignores cache if it exists.
+        Refills credentials
+        """
+        self.cache = self._get_auth()
+        self._fill_credentials(self.cache[1])
 
     def clear_auth(self):
         """
@@ -103,6 +128,7 @@ class AuthProvider(object):
         will fetch a new token and base_url.
         """
         self.cache = None
+        self.credentials.reset()
 
     def is_expired(self, auth_data):
         raise NotImplementedError
@@ -244,6 +270,18 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
         else:
             raise NotImplementedError
 
+    def _fill_credentials(self, auth_data_body):
+        tenant = auth_data_body['token']['tenant']
+        user = auth_data_body['user']
+        if self.credentials.tenant_name is None:
+            self.credentials.tenant_name = tenant['name']
+        if self.credentials.tenant_id is None:
+            self.credentials.tenant_id = tenant['id']
+        if self.credentials.username is None:
+            self.credentials.username = user['name']
+        if self.credentials.user_id is None:
+            self.credentials.user_id = user['id']
+
     def base_url(self, filters, auth_data=None):
         """
         Filters can be:
@@ -320,6 +358,39 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
         else:
             raise NotImplementedError
 
+    def _fill_credentials(self, auth_data_body):
+        # project or domain, depending on the scope
+        project = auth_data_body.get('project', None)
+        domain = auth_data_body.get('domain', None)
+        # user is always there
+        user = auth_data_body['user']
+        # Set project fields
+        if project is not None:
+            if self.credentials.project_name is None:
+                self.credentials.project_name = project['name']
+            if self.credentials.project_id is None:
+                self.credentials.project_id = project['id']
+            if self.credentials.project_domain_id is None:
+                self.credentials.project_domain_id = project['domain']['id']
+            if self.credentials.project_domain_name is None:
+                self.credentials.project_domain_name = \
+                    project['domain']['name']
+        # Set domain fields
+        if domain is not None:
+            if self.credentials.domain_id is None:
+                self.credentials.domain_id = domain['id']
+            if self.credentials.domain_name is None:
+                self.credentials.domain_name = domain['name']
+        # Set user fields
+        if self.credentials.username is None:
+            self.credentials.username = user['name']
+        if self.credentials.user_id is None:
+            self.credentials.user_id = user['id']
+        if self.credentials.user_domain_id is None:
+            self.credentials.user_domain_id = user['domain']['id']
+        if self.credentials.user_domain_name is None:
+            self.credentials.user_domain_name = user['domain']['name']
+
     def base_url(self, filters, auth_data=None):
         """
         Filters can be:
@@ -387,15 +458,15 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
             datetime.datetime.utcnow()
 
 
-def get_default_credentials(credential_type):
+def get_default_credentials(credential_type, fill_in=True):
     """
     Returns configured credentials of the specified type
     based on the configured auth_version
     """
-    return get_credentials(credential_type=credential_type)
+    return get_credentials(fill_in=fill_in, credential_type=credential_type)
 
 
-def get_credentials(credential_type=None, **kwargs):
+def get_credentials(credential_type=None, fill_in=True, **kwargs):
     """
     Builds a credentials object based on the configured auth_version
 
@@ -415,14 +486,20 @@ def get_credentials(credential_type=None, **kwargs):
     """
     if CONF.identity.auth_version == 'v2':
         credential_class = KeystoneV2Credentials
+        auth_provider_class = KeystoneV2AuthProvider
     elif CONF.identity.auth_version == 'v3':
         credential_class = KeystoneV3Credentials
+        auth_provider_class = KeystoneV3AuthProvider
     else:
         raise exceptions.InvalidConfiguration('Unsupported auth version')
     if credential_type is not None:
         creds = credential_class.get_default(credential_type)
     else:
         creds = credential_class(**kwargs)
+    # Fill in the credentials fields that were not specified
+    if fill_in:
+        auth_provider = auth_provider_class(creds)
+        creds = auth_provider.fill_credentials()
     return creds
 
 
@@ -451,6 +528,7 @@ class Credentials(object):
         Additional attributes can still be set afterwards if tests need
         to do so.
         """
+        self._initial = kwargs
         self._apply_credentials(kwargs)
 
     def _apply_credentials(self, attr):
@@ -510,6 +588,14 @@ class Credentials(object):
 
     def is_valid(self):
         raise NotImplementedError
+
+    def reset(self):
+        # First delete all known attributes
+        for key in self.ATTRIBUTES:
+            if getattr(self, key) is not None:
+                delattr(self, key)
+        # Then re-apply initial setup
+        self._apply_credentials(self._initial)
 
 
 class KeystoneV2Credentials(Credentials):
