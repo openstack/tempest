@@ -54,23 +54,34 @@ class TestGlanceHTTPClient(base.TestCase):
                         return_value=resp))
         return resp
 
-    def test_json_request_without_content_type_header(self):
+    def test_json_request_without_content_type_header_in_response(self):
         self._set_response_fixture({}, 200, 'fake_response_body')
-        resp, body = self.client.json_request('GET', '/images')
-        self.assertEqual(200, resp.status)
-        self.assertIsNone(body)
+        self.assertRaises(exceptions.InvalidContentType,
+                          self.client.json_request, 'GET', '/images')
 
-    def test_json_request_with_xml_content_type_header(self):
+    def test_json_request_with_xml_content_type_header_in_request(self):
+        self.assertRaises(exceptions.InvalidContentType,
+                          self.client.json_request, 'GET', '/images',
+                          headers={'Content-Type': 'application/xml'})
+
+    def test_json_request_with_xml_content_type_header_in_response(self):
         self._set_response_fixture({'content-type': 'application/xml'},
                                    200, 'fake_response_body')
-        resp, body = self.client.json_request('GET', '/images')
-        self.assertEqual(200, resp.status)
-        self.assertIsNone(body)
+        self.assertRaises(exceptions.InvalidContentType,
+                          self.client.json_request, 'GET', '/images')
 
-    def test_json_request_with_content_type_header(self):
+    def test_json_request_with_json_content_type_header_only_in_resp(self):
         self._set_response_fixture({'content-type': 'application/json'},
                                    200, 'fake_response_body')
         resp, body = self.client.json_request('GET', '/images')
+        self.assertEqual(200, resp.status)
+        self.assertEqual('fake_response_body', body)
+
+    def test_json_request_with_json_content_type_header_in_req_and_resp(self):
+        self._set_response_fixture({'content-type': 'application/json'},
+                                   200, 'fake_response_body')
+        resp, body = self.client.json_request('GET', '/images', headers={
+            'Content-Type': 'application/json'})
         self.assertEqual(200, resp.status)
         self.assertEqual('fake_response_body', body)
 
