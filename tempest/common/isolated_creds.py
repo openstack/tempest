@@ -404,7 +404,6 @@ class IsolatedCreds(object):
         except exceptions.NotFound:
             LOG.warn('router with name: %s not found for delete' %
                      router_name)
-            pass
 
     def _clear_isolated_subnet(self, subnet_id, subnet_name):
         net_client = self.network_admin_client
@@ -413,7 +412,6 @@ class IsolatedCreds(object):
         except exceptions.NotFound:
             LOG.warn('subnet with name: %s not found for delete' %
                      subnet_name)
-            pass
 
     def _clear_isolated_network(self, network_id, network_name):
         net_client = self.network_admin_client
@@ -422,7 +420,6 @@ class IsolatedCreds(object):
         except exceptions.NotFound:
             LOG.warn('network with name: %s not found for delete' %
                      network_name)
-            pass
 
     def _cleanup_ports(self, network_id):
         # TODO(mlavalle) This method will be removed once patch
@@ -468,7 +465,6 @@ class IsolatedCreds(object):
                 except exceptions.NotFound:
                     LOG.warn('router with name: %s not found for delete' %
                              router['name'])
-                    pass
                 self._clear_isolated_router(router['id'], router['name'])
             if (not self.network_resources or
                 self.network_resources.get('network')):
@@ -492,10 +488,8 @@ class IsolatedCreds(object):
             except exceptions.NotFound:
                 LOG.warn("user with name: %s not found for delete" %
                          creds.username)
-                pass
             try:
                 self._delete_tenant(creds.tenant_id)
             except exceptions.NotFound:
                 LOG.warn("tenant with name: %s not found for delete" %
                          creds.tenant_name)
-                pass
