@@ -12,7 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from tempest.api_schema.compute import parameter_types
+from tempest.api_schema.compute import servers
 
 create_server = {
     'status_code': [202],
@@ -42,6 +45,20 @@ create_server = {
         'required': ['server']
     }
 }
+
+update_server = copy.deepcopy(servers.base_update_server)
+update_server['response_body']['properties']['server']['properties'].update({
+    'hostId': {'type': 'string'},
+    'OS-DCF:diskConfig': {'type': 'string'},
+    'accessIPv4': parameter_types.access_ip_v4,
+    'accessIPv6': parameter_types.access_ip_v6
+})
+update_server['response_body']['properties']['server']['required'].append(
+    # NOTE: OS-DCF:diskConfig and accessIPv4/v6 are API
+    # extensions, and some environments return a response
+    # without these attributes. So they are not 'required'.
+    'hostId'
+)
 
 list_virtual_interfaces = {
     'status_code': [200],

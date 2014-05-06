@@ -31,3 +31,37 @@ mac_address = {
     'type': 'string',
     'pattern': '(?:[a-f0-9]{2}:){5}[a-f0-9]{2}'
 }
+
+access_ip_v4 = {
+    'type': 'string',
+    'anyOf': [{'format': 'ipv4'}, {'enum': ['']}]
+}
+
+access_ip_v6 = {
+    'type': 'string',
+    'anyOf': [{'format': 'ipv6'}, {'enum': ['']}]
+}
+
+addresses = {
+    'type': 'object',
+    'patternProperties': {
+        # NOTE: Here is for 'private' or something.
+        '^[a-zA-Z0-9-_.]+$': {
+            'type': 'array',
+            'items': {
+                'type': 'object',
+                'properties': {
+                    'version': {'type': 'integer'},
+                    'addr': {
+                        'type': 'string',
+                        'anyOf': [
+                            {'format': 'ipv4'},
+                            {'format': 'ipv6'}
+                        ]
+                    }
+                },
+                'required': ['version', 'addr']
+            }
+        }
+    }
+}
