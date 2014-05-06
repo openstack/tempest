@@ -364,11 +364,10 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
 
     @classmethod
     def setUpClass(cls):
-        super(NetworksIpV6TestJSON, cls).setUpClass()
         if not CONF.network_feature_enabled.ipv6:
-            cls.tearDownClass()
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
+        super(NetworksIpV6TestJSON, cls).setUpClass()
 
 
 class NetworksIpV6TestXML(NetworksIpV6TestJSON):
