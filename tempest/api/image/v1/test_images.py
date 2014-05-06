@@ -290,6 +290,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         return image_id
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_server_id(self):
         # The images should contain images filtered by server id
         resp, images = self.client.image_list_detail(
@@ -299,6 +300,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         self.assertEqual(self.snapshot_set, result_set)
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_type(self):
         # The list of servers should be filtered by image type
         params = {'image_type': 'snapshot'}
@@ -309,6 +311,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         self.assertIn(self.snapshot, result_set)
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_limit(self):
         # Verify only the expected number of results are returned
         resp, images = self.client.image_list_detail(limit=1)
@@ -317,6 +320,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         self.assertEqual(1, len(images))
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_by_change_since(self):
         # Verify an update image is returned
         # Becoming ACTIVE will modify the updated time
