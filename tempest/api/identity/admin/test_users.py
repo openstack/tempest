@@ -206,6 +206,25 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
                          "Failed to find user %s in fetched list" %
                          ', '.join(m_user for m_user in missing_users))
 
+    @test.attr(type='smoke')
+    def test_update_user_password(self):
+        # Test case to check if updating of user password is successful.
+        self.data.setup_test_user()
+        # Updating the user with new password
+        new_pass = data_utils.rand_name('pass-')
+        resp, update_user = self.client.update_user_password(
+            self.data.user['id'], new_pass)
+        # Assert response body of update user.
+        self.assertEqual(200, resp.status)
+        self.assertEqual(update_user['id'], self.data.user['id'])
+
+        # Validate the updated password
+        # Get a token
+        resp, body = self.token_client.auth(self.data.test_user, new_pass,
+                                            self.data.test_tenant)
+        self.assertEqual('200', resp['status'])
+        self.assertTrue('id' in body['token'])
+
 
 class UsersTestXML(UsersTestJSON):
     _interface = 'xml'

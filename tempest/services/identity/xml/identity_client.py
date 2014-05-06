@@ -118,6 +118,15 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                                str(xml.Document(create_service)))
         return resp, self._parse_resp(body)
 
+    def update_user_password(self, user_id, new_pass):
+        """Update User Password."""
+        put_body = xml.Element("user",
+                               id=user_id,
+                               password=new_pass)
+        resp, body = self.put('users/%s/OS-KSADM/password' % user_id,
+                              str(xml.Document(put_body)))
+        return resp, self._parse_resp(body)
+
 
 class TokenClientXML(identity_client.TokenClientJSON):
     TYPE = "xml"

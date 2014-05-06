@@ -227,6 +227,16 @@ class IdentityClientJSON(rest_client.RestClient):
         url = '/OS-KSADM/services/%s' % service_id
         return self.delete(url)
 
+    def update_user_password(self, user_id, new_pass):
+        """Update User Password."""
+        put_body = {
+            'password': new_pass,
+            'id': user_id
+        }
+        put_body = json.dumps({'user': put_body})
+        resp, body = self.put('users/%s/OS-KSADM/password' % user_id, put_body)
+        return resp, self._parse_resp(body)
+
 
 class TokenClientJSON(IdentityClientJSON):
 
