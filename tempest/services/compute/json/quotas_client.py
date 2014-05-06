@@ -110,6 +110,7 @@ class QuotasClientJSON(rest_client.RestClient):
                                   post_body)
 
         body = json.loads(body)
+        self.validate_response(schema.quota_set_update, resp, body)
         return resp, body['quota_set']
 
     def delete_quota_set(self, tenant_id):
