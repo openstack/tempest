@@ -160,11 +160,10 @@ def verify_extensions(os, service, results):
     extensions_client = get_extension_client(os, service)
     __, resp = extensions_client.list_extensions()
     if isinstance(resp, dict):
-        # Neutron's extension 'name' field has is not a single word (it has
-        # spaces in the string) Since that can't be used for list option the
-        # api_extension option in the network-feature-enabled group uses alias
-        # instead of name.
-        if service == 'neutron':
+        # For both Nova and Neutron we use the alias name rather than the
+        # 'name' field because the alias is considered to be the canonical
+        # name.
+        if service in ['nova', 'nova_v3', 'neutron']:
             extensions = map(lambda x: x['alias'], resp['extensions'])
         elif service == 'swift':
             # Remove Swift general information from extensions list

@@ -372,11 +372,13 @@
 #disk_config=true
 
 # A list of enabled compute extensions with a special entry
-# all which indicates every extension is enabled (list value)
+# all which indicates every extension is enabled. Each
+# extension should be specified with alias name (list value)
 #api_extensions=all
 
 # A list of enabled v3 extensions with a special entry all
-# which indicates every extension is enabled (list value)
+# which indicates every extension is enabled. Each extension
+# should be specified with alias name (list value)
 #api_v3_extensions=all
 
 # Does the test environment support changing the admin

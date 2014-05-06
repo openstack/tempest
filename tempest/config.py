@@ -263,11 +263,13 @@ ComputeFeaturesGroup = [
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled compute extensions with a special '
-                     'entry all which indicates every extension is enabled'),
+                     'entry all which indicates every extension is enabled. '
+                     'Each extension should be specified with alias name'),
     cfg.ListOpt('api_v3_extensions',
                 default=['all'],
                 help='A list of enabled v3 extensions with a special entry all'
-                     ' which indicates every extension is enabled'),
+                     ' which indicates every extension is enabled. '
+                     'Each extension should be specified with alias name'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
