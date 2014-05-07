@@ -114,8 +114,10 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             resource.delete()
         except Exception as e:
             # If the resource is already missing, mission accomplished.
-            # add status code as workaround for bug 1247568
-            if (e.__class__.__name__ == 'NotFound' or
+            # - Status code tolerated as a workaround for bug 1247568
+            # - HTTPNotFound tolerated as this is currently raised when
+            # attempting to delete an already-deleted heat stack.
+            if (e.__class__.__name__ in ('NotFound', 'HTTPNotFound') or
                     (hasattr(e, 'status_code') and e.status_code == 404)):
                 return
             raise
