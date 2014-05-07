@@ -199,6 +199,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.get("servers/%s/ips/%s" %
                               (str(server_id), network_id))
         body = json.loads(body)
+        self.validate_response(schema.list_addresses_by_network, resp, body)
         return resp, body
 
     def action(self, server_id, action_name, response_key, **kwargs):
