@@ -17,11 +17,15 @@ from tempest.api.compute import base
 from tempest import test
 
 
-class FlavorsTestJSON(base.BaseV2ComputeTest):
+class FlavorsV3Test(base.BaseComputeTest):
+
+    _api_version = 3
+    _min_disk = 'min_disk'
+    _min_ram = 'min_ram'
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsTestJSON, cls).setUpClass()
+        super(FlavorsV3Test, cls).setUpClass()
         cls.client = cls.flavors_client
 
     @test.attr(type='smoke')
@@ -89,7 +93,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         flavors = sorted(flavors, key=lambda k: k['disk'])
         flavor_id = flavors[0]['id']
 
-        params = {'minDisk': flavors[0]['disk'] + 1}
+        params = {self._min_disk: flavors[0]['disk'] + 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
@@ -100,7 +104,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         flavors = sorted(flavors, key=lambda k: k['ram'])
         flavor_id = flavors[0]['id']
 
-        params = {'minRam': flavors[0]['ram'] + 1}
+        params = {self._min_ram: flavors[0]['ram'] + 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
@@ -111,7 +115,7 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         flavors = sorted(flavors, key=lambda k: k['disk'])
         flavor_id = flavors[0]['id']
 
-        params = {'minDisk': flavors[0]['disk'] + 1}
+        params = {self._min_disk: flavors[0]['disk'] + 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
@@ -122,10 +126,17 @@ class FlavorsTestJSON(base.BaseV2ComputeTest):
         flavors = sorted(flavors, key=lambda k: k['ram'])
         flavor_id = flavors[0]['id']
 
-        params = {'minRam': flavors[0]['ram'] + 1}
+        params = {self._min_ram: flavors[0]['ram'] + 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
 
-class FlavorsTestXML(FlavorsTestJSON):
+class FlavorsV2TestJSON(FlavorsV3Test):
+
+    _api_version = 2
+    _min_disk = 'minDisk'
+    _min_ram = 'minRam'
+
+
+class FlavorsV2TestXML(FlavorsV2TestJSON):
     _interface = 'xml'
