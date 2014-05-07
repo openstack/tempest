@@ -294,7 +294,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_vpnservice(cls, subnet_id, router_id):
         """Wrapper utility that returns a test vpn service."""
         resp, body = cls.client.create_vpnservice(
-            subnet_id, router_id, admin_state_up=True,
+            subnet_id=subnet_id, router_id=router_id, admin_state_up=True,
             name=data_utils.rand_name("vpnservice-"))
         vpnservice = body['vpnservice']
         cls.vpnservices.append(vpnservice)
@@ -303,7 +303,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_ikepolicy(cls, name):
         """Wrapper utility that returns a test ike policy."""
-        resp, body = cls.client.create_ikepolicy(name)
+        resp, body = cls.client.create_ikepolicy(name=name)
         ikepolicy = body['ikepolicy']
         cls.ikepolicies.append(ikepolicy)
         return ikepolicy
