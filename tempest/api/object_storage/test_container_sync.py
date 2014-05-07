@@ -67,6 +67,7 @@ class ContainerSyncTest(base.BaseObjectTest):
         super(ContainerSyncTest, cls).tearDownClass()
 
     @test.attr(type='slow')
+    @test.skip_because(bug='1317133')
     def test_container_synchronization(self):
         # container to container synchronization
         # to allow/accept sync requests to/from other accounts
