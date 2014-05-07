@@ -40,3 +40,29 @@ class StackEnvironmentTest(base.BaseOrchestrationTest):
 
         random_value = self.get_stack_output(stack_identifier, 'random_value')
         self.assertEqual(20, len(random_value))
+
+    @test.attr(type='gate')
+    def test_environment_provider_resource(self):
+        """Test passing resource_registry defining a provider resource."""
+        stack_name = data_utils.rand_name('heat')
+        template = '''
+heat_template_version: 2013-05-23
+resources:
+  random:
+    type: My:Random::String
+outputs:
+    random_value:
+        value: {get_attr: [random, random_value]}
+'''
+        environment = {'resource_registry':
+                       {'My:Random::String': 'my_random.yaml'}}
+        files = {'my_random.yaml': self.load_template('random_string')}
+
+        stack_identifier = self.create_stack(stack_name, template,
+                                             environment=environment,
+                                             files=files)
+        self.client.wait_for_stack_status(stack_identifier, 'CREATE_COMPLETE')
+
+        # random_string.yaml specifies a length of 10
+        random_value = self.get_stack_output(stack_identifier, 'random_value')
+        self.assertEqual(10, len(random_value))
