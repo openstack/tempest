@@ -128,3 +128,37 @@ class DataProcessingClient(rest_client.RestClient):
 
         uri = 'cluster-templates/%s' % tmpl_id
         return self.delete(uri)
+
+    def list_data_sources(self):
+        """List all data sources for a user."""
+
+        uri = 'data-sources'
+        return self._request_and_parse(self.get, uri, 'data_sources')
+
+    def get_data_source(self, source_id):
+        """Returns the details of a single data source."""
+
+        uri = 'data-sources/%s' % source_id
+        return self._request_and_parse(self.get, uri, 'data_source')
+
+    def create_data_source(self, name, data_source_type, url, **kwargs):
+        """Creates data source with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object.
+        """
+        uri = 'data-sources'
+        body = kwargs.copy()
+        body.update({
+            'name': name,
+            'type': data_source_type,
+            'url': url
+        })
+        return self._request_and_parse(self.post, uri, 'data_source',
+                                       body=json.dumps(body))
+
+    def delete_data_source(self, source_id):
+        """Deletes the specified data source by id."""
+
+        uri = 'data-sources/%s' % source_id
+        return self.delete(uri)
