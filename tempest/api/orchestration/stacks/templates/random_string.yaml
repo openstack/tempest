@@ -1,0 +1,18 @@
+heat_template_version: 2013-05-23
+
+parameters:
+  random_length:
+    type: number
+    default: 10
+
+resources:
+  random:
+    type: OS::Heat::RandomString
+    properties:
+        length: {get_param: random_length}
+
+outputs:
+  random_length:
+    value: {get_param: random_length}
+  random_value:
+    value: {get_attr: [random, value]}
