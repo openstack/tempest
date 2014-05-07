@@ -93,11 +93,12 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
     def ssh_to_server(self):
         try:
             self.linux_client = self.get_remote_client(self.floating_ip.ip)
-            self.linux_client.validate_authentication()
-        except Exception:
+        except Exception as e:
             LOG.exception('ssh to server failed')
             self._log_console_output()
-            debug.log_net_debug()
+            # network debug is called as part of ssh init
+            if not isinstance(e, test.exceptions.SSHTimeout):
+                debug.log_net_debug()
             raise
 
     def check_partitions(self):

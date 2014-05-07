@@ -406,7 +406,16 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             username = CONF.scenario.ssh_user
         if private_key is None:
             private_key = self.keypair.private_key
-        return remote_client.RemoteClient(ip, username, pkey=private_key)
+        linux_client = remote_client.RemoteClient(ip, username,
+                                                  pkey=private_key)
+        try:
+            linux_client.validate_authentication()
+        except exceptions.SSHTimeout:
+            LOG.exception('ssh connection to %s failed' % ip)
+            debug.log_net_debug()
+            raise
+
+        return linux_client
 
     def _log_console_output(self, servers=None):
         if not servers:
@@ -868,9 +877,7 @@ class NetworkScenarioTest(OfficialClientTest):
                         msg=msg)
         if should_connect:
             # no need to check ssh for negative connectivity
-            linux_client = self.get_remote_client(ip_address, username,
-                                                  private_key)
-            linux_client.validate_authentication()
+            self.get_remote_client(ip_address, username, private_key)
 
     def _check_public_network_connectivity(self, ip_address, username,
                                            private_key, should_connect=True,
@@ -884,13 +891,15 @@ class NetworkScenarioTest(OfficialClientTest):
                                         username,
                                         private_key,
                                         should_connect=should_connect)
-        except Exception:
+        except Exception as e:
             ex_msg = 'Public network connectivity check failed'
             if msg:
                 ex_msg += ": " + msg
             LOG.exception(ex_msg)
             self._log_console_output(servers)
-            debug.log_net_debug()
+            # network debug is called as part of ssh init
+            if not isinstance(e, exceptions.SSHTimeout):
+                debug.log_net_debug()
             raise
 
     def _check_tenant_network_connectivity(self, server,
@@ -911,10 +920,12 @@ class NetworkScenarioTest(OfficialClientTest):
                                                 username,
                                                 private_key,
                                                 should_connect=should_connect)
-        except Exception:
+        except Exception as e:
             LOG.exception('Tenant network connectivity check failed')
             self._log_console_output(servers_for_debug)
-            debug.log_net_debug()
+            # network debug is called as part of ssh init
+            if not isinstance(e, exceptions.SSHTimeout):
+                debug.log_net_debug()
             raise
 
     def _check_remote_connectivity(self, source, dest, should_succeed=True):

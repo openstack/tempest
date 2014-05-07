@@ -93,11 +93,10 @@ class TestServerBasicOps(manager.OfficialClientTest):
             instance.add_floating_ip(floating_ip)
             # Check ssh
             try:
-                linux_client = self.get_remote_client(
+                self.get_remote_client(
                     server_or_ip=floating_ip.ip,
                     username=self.image_utils.ssh_user(self.image_ref),
                     private_key=self.keypair.private_key)
-                linux_client.validate_authentication()
             except Exception:
                 LOG.exception('ssh to server failed')
                 self._log_console_output()

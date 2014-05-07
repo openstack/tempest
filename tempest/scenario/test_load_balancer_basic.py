@@ -148,7 +148,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             ssh_client = self.get_remote_client(
                 server_or_ip=ip,
                 private_key=private_key)
-            ssh_client.validate_authentication()
 
             # Write a backend's responce into a file
             resp = """HTTP/1.0 200 OK\r\nContent-Length: 8\r\n\r\n%s"""
