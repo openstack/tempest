@@ -15,7 +15,6 @@
 #    under the License.
 
 import collections
-import inspect
 import json
 from lxml import etree
 import re
@@ -24,6 +23,7 @@ import time
 import jsonschema
 
 from tempest.common import http
+from tempest.common.utils import misc as misc_utils
 from tempest.common import xml_utils as common
 from tempest import config
 from tempest import exceptions
@@ -224,57 +224,6 @@ class RestClient(object):
         versions = map(lambda x: x['id'], body)
         return resp, versions
 
-    def _find_caller(self):
-        """Find the caller class and test name.
-
-        Because we know that the interesting things that call us are
-        test_* methods, and various kinds of setUp / tearDown, we
-        can look through the call stack to find appropriate methods,
-        and the class we were in when those were called.
-        """
-        caller_name = None
-        names = []
-        frame = inspect.currentframe()
-        is_cleanup = False
-        # Start climbing the ladder until we hit a good method
-        while True:
-            try:
-                frame = frame.f_back
-                name = frame.f_code.co_name
-                names.append(name)
-                if re.search("^(test_|setUp|tearDown)", name):
-                    cname = ""
-                    if 'self' in frame.f_locals:
-                        cname = frame.f_locals['self'].__class__.__name__
-                    if 'cls' in frame.f_locals:
-                        cname = frame.f_locals['cls'].__name__
-                    caller_name = cname + ":" + name
-                    break
-                elif re.search("^_run_cleanup", name):
-                    is_cleanup = True
-                else:
-                    cname = ""
-                    if 'self' in frame.f_locals:
-                        cname = frame.f_locals['self'].__class__.__name__
-                    if 'cls' in frame.f_locals:
-                        cname = frame.f_locals['cls'].__name__
-
-                    # the fact that we are running cleanups is indicated pretty
-                    # deep in the stack, so if we see that we want to just
-                    # start looking for a real class name, and declare victory
-                    # once we do.
-                    if is_cleanup and cname:
-                        if not re.search("^RunTest", cname):
-                            caller_name = cname + ":_run_cleanups"
-                            break
-            except Exception:
-                break
-        # prevents frame leaks
-        del frame
-        if caller_name is None:
-            self.LOG.debug("Sane call name not found in %s" % names)
-        return caller_name
-
     def _get_request_id(self, resp):
         for i in ('x-openstack-request-id', 'x-compute-request-id'):
             if i in resp:
@@ -290,7 +239,7 @@ class RestClient(object):
         # we're going to just provide work around on who is actually
         # providing timings by gracefully adding no content if they don't.
         # Once we're down to 1 caller, clean this up.
-        caller_name = self._find_caller()
+        caller_name = misc_utils.find_test_caller()
         if secs:
             secs = " %.3fs" % secs
         self.LOG.info(
