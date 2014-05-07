@@ -193,6 +193,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         """Lists all addresses for a server."""
         resp, body = self.get("servers/%s/ips" % str(server_id))
         body = json.loads(body)
+        self.validate_response(schema.list_addresses, resp, body)
         return resp, body['addresses']
 
     def list_addresses_by_network(self, server_id, network_id):

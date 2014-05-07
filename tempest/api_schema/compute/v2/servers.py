@@ -131,3 +131,14 @@ list_addresses_by_network = {
 
 server_actions_confirm_resize = copy.deepcopy(
     servers.server_actions_delete_password)
+
+list_addresses = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'addresses': parameter_types.addresses
+        },
+        'required': ['addresses']
+    }
+}
