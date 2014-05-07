@@ -34,14 +34,14 @@ test suite. All test flag with the `@stresstest` decorator will be executed.
 In order to use this discovery you have to be in the tempest root directory
 and execute the following:
 
-	tempest/stress/run_stress.py -a -d 30
+	run-tempest-stress -a -d 30
 
 Running the sample test
 -----------------------
 
-To test installation, do the following (from the tempest/stress directory):
+To test installation, do the following:
 
-	./run_stress.py -t etc/server-create-destroy-test.json -d 30
+	run-tempest-stress -t tempest/stress/etc/server-create-destroy-test.json -d 30
 
 This sample test tries to create a few VMs and kill a few VMs.
 
