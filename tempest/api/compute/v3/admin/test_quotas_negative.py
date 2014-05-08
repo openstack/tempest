@@ -30,8 +30,7 @@ class QuotasAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
-        cls.demo_tenant_id = cls.isolated_creds.get_primary_user().get(
-            'tenantId')
+        cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
 
     # TODO(afazekas): Add dedicated tenant to the skiped quota tests
     # it can be moved into the setUpClass as well
