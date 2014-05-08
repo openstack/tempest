@@ -64,3 +64,21 @@ update_aggregate['response_body']['properties']['aggregate']['properties'][
     'updated_at'] = {
         'type': 'string'
     }
+
+common_create_aggregate = {
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'aggregate': aggregate
+        },
+        'required': ['aggregate']
+    }
+}
+# create-aggregate api doesn't have 'hosts' and 'metadata' attributes.
+del common_create_aggregate['response_body']['properties']['aggregate'][
+    'properties']['hosts']
+del common_create_aggregate['response_body']['properties']['aggregate'][
+    'properties']['metadata']
+common_create_aggregate['response_body']['properties']['aggregate'][
+    'required'] = ['availability_zone', 'created_at', 'deleted', 'deleted_at',
+                   'id', 'name', 'updated_at']
