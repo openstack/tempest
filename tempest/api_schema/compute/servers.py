@@ -48,7 +48,7 @@ get_vnc_console = {
     }
 }
 
-base_update_server = {
+base_update_get_server = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
