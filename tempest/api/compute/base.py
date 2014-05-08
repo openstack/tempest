@@ -175,7 +175,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 pass
             except Exception:
                 LOG.exception('Exception raised deleting image %s' % image_id)
-                pass
 
     @classmethod
     def clear_security_groups(cls):
@@ -190,7 +189,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 LOG.info('Exception raised deleting security group %s',
                          sg['id'])
                 LOG.exception(exc)
-                pass
 
     @classmethod
     def tearDownClass(cls):
@@ -322,7 +320,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                 cls.servers_client.wait_for_server_termination(server_id)
             except Exception:
                 LOG.exception('Failed to delete server %s' % server_id)
-                pass
         resp, server = cls.create_test_server(wait_until='ACTIVE', **kwargs)
         if cls._api_version == 2:
             cls.password = server['adminPass']

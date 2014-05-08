@@ -101,7 +101,6 @@ class InstallVenv(object):
             print('done.')
         else:
             print("venv already exists...")
-            pass
 
     def pip_install(self, *args):
         self.run_command(['tools/with_venv.sh',
