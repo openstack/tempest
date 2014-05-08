@@ -341,12 +341,18 @@ class BaseV2ComputeTest(BaseComputeTest):
     _interface = "json"
 
 
-class BaseV2ComputeAdminTest(BaseV2ComputeTest):
-    """Base test case class for Compute Admin V2 API tests."""
+class BaseV3ComputeTest(BaseComputeTest):
+    _api_version = 3
+    _interface = "json"
+
+
+class BaseComputeAdminTest(BaseComputeTest):
+    """Base test case class for Compute Admin API tests."""
+    _interface = "json"
 
     @classmethod
     def setUpClass(cls):
-        super(BaseV2ComputeAdminTest, cls).setUpClass()
+        super(BaseComputeAdminTest, cls).setUpClass()
         if (CONF.compute.allow_tenant_isolation or
             cls.force_tenant_isolation is True):
             creds = cls.isolated_creds.get_admin_creds()
@@ -361,40 +367,25 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
                        "in configuration.")
                 raise cls.skipException(msg)
 
+        if cls._api_version == 3:
+            cls.servers_admin_client = cls.os_adm.servers_v3_client
+            cls.services_admin_client = cls.os_adm.services_v3_client
+            cls.availability_zone_admin_client = \
+                cls.os_adm.availability_zone_v3_client
+            cls.hypervisor_admin_client = cls.os_adm.hypervisor_v3_client
+            cls.flavors_admin_client = cls.os_adm.flavors_v3_client
+            cls.aggregates_admin_client = cls.os_adm.aggregates_v3_client
+            cls.hosts_admin_client = cls.os_adm.hosts_v3_client
+            cls.quotas_admin_client = cls.os_adm.quotas_v3_client
+            cls.agents_admin_client = cls.os_adm.agents_v3_client
+            cls.migrations_admin_client = cls.os_adm.migrations_v3_client
 
-class BaseV3ComputeTest(BaseComputeTest):
+
+class BaseV2ComputeAdminTest(BaseComputeAdminTest):
+    """Base test case class for Compute Admin V2 API tests."""
+    _api_version = 2
+
+
+class BaseV3ComputeAdminTest(BaseComputeAdminTest):
+    """Base test case class for Compute Admin V3 API tests."""
     _api_version = 3
-    _interface = "json"
-
-
-class BaseV3ComputeAdminTest(BaseV3ComputeTest):
-    """Base test case class for all Compute Admin API V3 tests."""
-
-    @classmethod
-    def setUpClass(cls):
-        super(BaseV3ComputeAdminTest, cls).setUpClass()
-        if CONF.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_admin_creds()
-            os_adm = clients.Manager(credentials=creds,
-                                     interface=cls._interface)
-        else:
-            try:
-                cls.os_adm = clients.ComputeAdminManager(
-                    interface=cls._interface)
-            except exceptions.InvalidCredentials:
-                msg = ("Missing Compute Admin API credentials "
-                       "in configuration.")
-                raise cls.skipException(msg)
-
-        cls.os_adm = os_adm
-        cls.servers_admin_client = cls.os_adm.servers_v3_client
-        cls.services_admin_client = cls.os_adm.services_v3_client
-        cls.availability_zone_admin_client = \
-            cls.os_adm.availability_zone_v3_client
-        cls.hypervisor_admin_client = cls.os_adm.hypervisor_v3_client
-        cls.flavors_admin_client = cls.os_adm.flavors_v3_client
-        cls.aggregates_admin_client = cls.os_adm.aggregates_v3_client
-        cls.hosts_admin_client = cls.os_adm.hosts_v3_client
-        cls.quotas_admin_client = cls.os_adm.quotas_v3_client
-        cls.agents_admin_client = cls.os_adm.agents_v3_client
-        cls.migrations_admin_client = cls.os_adm.migrations_v3_client
