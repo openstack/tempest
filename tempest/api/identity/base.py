@@ -14,6 +14,7 @@
 #    under the License.
 
 
+from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -119,6 +120,14 @@ class DataGenerator(object):
             self.v3_users = []
             self.projects = []
             self.v3_roles = []
+
+        @property
+        def test_credentials(self):
+            return auth.get_credentials(username=self.test_user,
+                                        user_id=self.user['id'],
+                                        password=self.test_password,
+                                        tenant_name=self.test_tenant,
+                                        tenant_id=self.tenant['id'])
 
         def setup_test_user(self):
             """Set up a test user."""

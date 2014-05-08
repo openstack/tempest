@@ -35,10 +35,7 @@ class AccountQuotasNegativeTest(base.BaseObjectTest):
 
         cls.data.setup_test_user()
 
-        cls.os_reselleradmin = clients.Manager(
-            cls.data.test_user,
-            cls.data.test_password,
-            cls.data.test_tenant)
+        cls.os_reselleradmin = clients.Manager(cls.data.test_credentials)
 
         # Retrieve the ResellerAdmin role id
         reseller_role_id = None

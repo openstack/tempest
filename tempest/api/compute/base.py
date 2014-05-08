@@ -38,6 +38,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.set_network_resources()
         super(BaseComputeTest, cls).setUpClass()
 
+        # TODO(andreaf) WE should care also for the alt_manager here
+        # but only once client lazy load in the manager is done
         os = cls.get_client_manager()
 
         cls.os = os
@@ -348,23 +350,19 @@ class BaseV2ComputeAdminTest(BaseV2ComputeTest):
     @classmethod
     def setUpClass(cls):
         super(BaseV2ComputeAdminTest, cls).setUpClass()
-        admin_username = CONF.compute_admin.username
-        admin_password = CONF.compute_admin.password
-        admin_tenant = CONF.compute_admin.tenant_name
-        if not (admin_username and admin_password and admin_tenant):
-            msg = ("Missing Compute Admin API credentials "
-                   "in configuration.")
-            raise cls.skipException(msg)
         if (CONF.compute.allow_tenant_isolation or
             cls.force_tenant_isolation is True):
             creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = creds
-            cls.os_adm = clients.Manager(username=admin_username,
-                                         password=admin_password,
-                                         tenant_name=admin_tenant_name,
+            cls.os_adm = clients.Manager(credentials=creds,
                                          interface=cls._interface)
         else:
-            cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)
+            try:
+                cls.os_adm = clients.ComputeAdminManager(
+                    interface=cls._interface)
+            except exceptions.InvalidCredentials:
+                msg = ("Missing Compute Admin API credentials "
+                       "in configuration.")
+                raise cls.skipException(msg)
 
 
 class BaseV3ComputeTest(BaseComputeTest):
@@ -378,22 +376,18 @@ class BaseV3ComputeAdminTest(BaseV3ComputeTest):
     @classmethod
     def setUpClass(cls):
         super(BaseV3ComputeAdminTest, cls).setUpClass()
-        admin_username = CONF.compute_admin.username
-        admin_password = CONF.compute_admin.password
-        admin_tenant = CONF.compute_admin.tenant_name
-        if not (admin_username and admin_password and admin_tenant):
-            msg = ("Missing Compute Admin API credentials "
-                   "in configuration.")
-            raise cls.skipException(msg)
         if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = creds
-            os_adm = clients.Manager(username=admin_username,
-                                     password=admin_password,
-                                     tenant_name=admin_tenant_name,
+            os_adm = clients.Manager(credentials=creds,
                                      interface=cls._interface)
         else:
-            os_adm = clients.ComputeAdminManager(interface=cls._interface)
+            try:
+                cls.os_adm = clients.ComputeAdminManager(
+                    interface=cls._interface)
+            except exceptions.InvalidCredentials:
+                msg = ("Missing Compute Admin API credentials "
+                       "in configuration.")
+                raise cls.skipException(msg)
 
         cls.os_adm = os_adm
         cls.servers_admin_client = cls.os_adm.servers_v3_client

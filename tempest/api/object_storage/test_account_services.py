@@ -67,9 +67,7 @@ class AccountTest(base.BaseObjectTest):
         self.data.setup_test_user()
 
         os_test_user = clients.Manager(
-            self.data.test_user,
-            self.data.test_password,
-            self.data.test_tenant)
+            self.data.test_credentials)
 
         # Retrieve the id of an operator role of object storage
         test_role_id = None

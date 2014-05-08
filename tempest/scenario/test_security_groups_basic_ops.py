@@ -98,17 +98,15 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             access point
         """
 
-        def __init__(self, tenant_id, tenant_user, tenant_pass, tenant_name):
-            self.manager = clients.OfficialClientManager(
-                tenant_user,
-                tenant_pass,
-                tenant_name
-            )
+        def __init__(self, credentials):
+            self.manager = clients.OfficialClientManager(credentials)
+            # Credentials from manager are filled with both names and IDs
+            self.creds = self.manager.credentials
             self.keypair = None
-            self.tenant_id = tenant_id
-            self.tenant_name = tenant_name
-            self.tenant_user = tenant_user
-            self.tenant_pass = tenant_pass
+            self.tenant_id = credentials.tenant_id
+            self.tenant_name = credentials.tenant_name
+            self.tenant_user = credentials.username
+            self.tenant_pass = credentials.password
             self.network = None
             self.subnet = None
             self.router = None
@@ -140,19 +138,17 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     @classmethod
     def setUpClass(cls):
         super(TestSecurityGroupsBasicOps, cls).setUpClass()
-        alt_creds = cls.alt_credentials()
-        cls.alt_tenant_id = cls.manager._get_identity_client(
-            *alt_creds
-        ).tenant_id
+        cls.alt_creds = cls.alt_credentials()
+        cls.alt_manager = clients.OfficialClientManager(cls.alt_creds)
+        cls.alt_tenant_id = cls.alt_manager.identity_client.tenant_id
         cls.check_preconditions()
         # TODO(mnewby) Consider looking up entities as needed instead
         # of storing them as collections on the class.
         cls.floating_ips = {}
         cls.tenants = {}
-        cls.primary_tenant = cls.TenantProperties(cls.tenant_id,
-                                                  *cls.credentials())
-        cls.alt_tenant = cls.TenantProperties(cls.alt_tenant_id,
-                                              *alt_creds)
+        creds = cls.credentials()
+        cls.primary_tenant = cls.TenantProperties(creds)
+        cls.alt_tenant = cls.TenantProperties(cls.alt_creds)
         for tenant in [cls.primary_tenant, cls.alt_tenant]:
             cls.tenants[tenant.tenant_id] = tenant
         cls.floating_ip_access = not CONF.network.public_router_id
