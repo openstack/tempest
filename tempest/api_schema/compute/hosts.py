@@ -73,3 +73,13 @@ show_host_detail = {
         'required': ['host']
     }
 }
+
+update_host_common = {
+    'type': 'object',
+    'properties': {
+        'host': {'type': 'string'},
+        'maintenance_mode': {'enum': ['on_maintenance', 'off_maintenance']},
+        'status': {'enum': ['enabled', 'disabled']}
+    },
+    'required': ['host', 'maintenance_mode', 'status']
+}
