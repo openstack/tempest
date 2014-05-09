@@ -452,8 +452,8 @@ class BaremetalScenarioTest(OfficialClientTest):
             raise cls.skipException(msg)
 
         # use an admin client manager for baremetal client
-        username, password, tenant = cls.admin_credentials()
-        manager = clients.OfficialClientManager(username, password, tenant)
+        admin_creds = cls.admin_credentials()
+        manager = clients.OfficialClientManager(credentials=admin_creds)
         cls.baremetal_client = manager.baremetal_client
 
         # allow any issues obtaining the node list to raise early
