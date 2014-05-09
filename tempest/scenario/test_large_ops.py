@@ -63,11 +63,20 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
             self.set_resource(server.name, server)
         self._wait_for_server_status('ACTIVE')
 
-    @test.services('compute', 'image')
-    def test_large_ops_scenario(self):
+    def _large_ops_scenario(self):
         if CONF.scenario.large_ops_number < 1:
             return
         self.glance_image_create()
         self.nova_boot()
-        self.nova_boot()
-        self.nova_boot()
+
+    @test.services('compute', 'image')
+    def test_large_ops_scenario_1(self):
+        self._large_ops_scenario()
+
+    @test.services('compute', 'image')
+    def test_large_ops_scenario_2(self):
+        self._large_ops_scenario()
+
+    @test.services('compute', 'image')
+    def test_large_ops_scenario_3(self):
+        self._large_ops_scenario()
