@@ -540,3 +540,50 @@ class TestNegativeRestClient(BaseRestClientTestClass):
         self.assertRaises(AssertionError,
                           self.negative_rest_client.send_request,
                           'OTHER', self.url, [])
+
+
+class TestExpectedSuccess(BaseRestClientTestClass):
+
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestExpectedSuccess, self).setUp()
+
+    def test_expected_succes_int_match(self):
+        expected_code = 202
+        read_code = 202
+        resp = self.rest_client.expected_success(expected_code, read_code)
+        # Assert None resp on success
+        self.assertFalse(resp)
+
+    def test_expected_succes_int_no_match(self):
+        expected_code = 204
+        read_code = 202
+        self.assertRaises(exceptions.InvalidHttpSuccessCode,
+                          self.rest_client.expected_success,
+                          expected_code, read_code)
+
+    def test_expected_succes_list_match(self):
+        expected_code = [202, 204]
+        read_code = 202
+        resp = self.rest_client.expected_success(expected_code, read_code)
+        # Assert None resp on success
+        self.assertFalse(resp)
+
+    def test_expected_succes_list_no_match(self):
+        expected_code = [202, 204]
+        read_code = 200
+        self.assertRaises(exceptions.InvalidHttpSuccessCode,
+                          self.rest_client.expected_success,
+                          expected_code, read_code)
+
+    def test_non_success_expected_int(self):
+        expected_code = 404
+        read_code = 202
+        self.assertRaises(AssertionError, self.rest_client.expected_success,
+                          expected_code, read_code)
+
+    def test_non_success_expected_list(self):
+        expected_code = [404, 202]
+        read_code = 202
+        self.assertRaises(AssertionError, self.rest_client.expected_success,
+                          expected_code, read_code)
