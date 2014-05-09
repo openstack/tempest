@@ -19,6 +19,7 @@
 """Trace a subunit stream in reasonable detail and high accuracy."""
 
 import functools
+import re
 import sys
 
 import mimeparse
@@ -207,6 +208,45 @@ def print_fails(stream):
     stream.write('\n')
 
 
+def count_tests(key, value):
+    count = 0
+    for k, v in RESULTS.items():
+        for item in v:
+            if key in item:
+                if re.search(value, item[key]):
+                    count += 1
+    return count
+
+
+def worker_stats(worker):
+    tests = RESULTS[worker]
+    num_tests = len(tests)
+    delta = tests[-1]['timestamps'][1] - tests[0]['timestamps'][0]
+    return num_tests, delta
+
+
+def print_summary(stream):
+    stream.write("\n======\nTotals\n======\n")
+    stream.write("Run: %s\n" % count_tests('status', '.*'))
+    stream.write(" - Passed: %s\n" % count_tests('status', 'success'))
+    stream.write(" - Skipped: %s\n" % count_tests('status', 'skip'))
+    stream.write(" - Failed: %s\n" % count_tests('status', 'fail'))
+
+    # we could have no results, especially as we filter out the process-codes
+    if RESULTS:
+        stream.write("\n==============\nWorker Balance\n==============\n")
+
+        for w in range(max(RESULTS.keys()) + 1):
+            if w not in RESULTS:
+                stream.write(
+                    " - WARNING: missing Worker %s! "
+                    "Race in testr accounting.\n" % w)
+            else:
+                num, time = worker_stats(w)
+                stream.write(" - Worker %s (%s tests) => %ss\n" %
+                             (w, num, time))
+
+
 def main():
     stream = subunit.ByteStreamToStreamResult(
         sys.stdin, non_subunit_name='stdout')
@@ -220,6 +260,7 @@ def main():
         stream.run(result)
     finally:
         result.stopTestRun()
+    print_summary(sys.stdout)
     return (0 if summary.wasSuccessful() else 1)
 
 
