@@ -15,7 +15,7 @@ python-cinderclient>=1.0.6
 python-heatclient>=0.2.3
 python-ironicclient
 python-saharaclient>=0.6.0
-python-swiftclient>=1.6
+python-swiftclient>=2.0.2
 testresources>=0.2.4
 keyring>=2.1
 testrepository>=0.0.18
