@@ -14,6 +14,7 @@
 #    under the License.
 
 import testtools
+import urlparse
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -420,6 +421,12 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+    def _validate_url(self, url):
+        valid_scheme = ['http', 'https']
+        parsed_url = urlparse.urlparse(url)
+        self.assertNotEqual('None', parsed_url.hostname)
+        self.assertIn(parsed_url.scheme, valid_scheme)
+
     @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
                           'VNC Console feature is disabled')
     @test.attr(type='gate')
@@ -429,6 +436,35 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         for console_type in console_types:
             resp, body = self.servers_client.get_vnc_console(self.server_id,
                                                              console_type)
-            self.assertEqual(200, resp.status)
+            self.assertEqual(
+                200, resp.status,
+                "Failed to get Console Type: %s" % (console_type))
             self.assertEqual(console_type, body['type'])
             self.assertNotEqual('', body['url'])
+            self._validate_url(body['url'])
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.spice_console,
+                          'Spice Console feature is disabled.')
+    @test.attr(type='gate')
+    def test_get_spice_console(self):
+        # Get the Spice console of type "spice-html5"
+        console_type = 'spice-html5'
+        resp, body = self.servers_client.get_spice_console(self.server_id,
+                                                           console_type)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(console_type, body['type'])
+        self.assertNotEqual('', body['url'])
+        self._validate_url(body['url'])
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.rdp_console,
+                          'RDP Console feature is disabled.')
+    @test.attr(type='gate')
+    def test_get_rdp_console(self):
+        # Get the RDP console of type "rdp-html5"
+        console_type = 'rdp-html5'
+        resp, body = self.servers_client.get_rdp_console(self.server_id,
+                                                         console_type)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(console_type, body['type'])
+        self.assertNotEqual('', body['url'])
+        self._validate_url(body['url'])

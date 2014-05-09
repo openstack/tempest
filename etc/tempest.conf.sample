@@ -405,6 +405,14 @@
 # as [nova.vnc]->vnc_enabled in nova.conf (boolean value)
 #vnc_console=false
 
+# Enable Spice console. This configuration value should be
+# same as [nova.spice]->enabled in nova.conf (boolean value)
+#spice_console=false
+
+# Enable RDP console. This configuration value should be same
+# as [nova.rdp]->enabled in nova.conf (boolean value)
+#rdp_console=false
+
 
 [dashboard]
 
