@@ -23,3 +23,7 @@ delete_aggregate = {
 create_aggregate = copy.deepcopy(aggregates.common_create_aggregate)
 # V3 API's response status_code is 201
 create_aggregate['status_code'] = [201]
+
+aggregate_add_remove_host = copy.deepcopy(aggregates.aggregate_add_remove_host)
+# V3 API's response status_code is 202
+aggregate_add_remove_host['status_code'] = [202]

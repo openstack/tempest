@@ -88,6 +88,7 @@ class AggregatesClientJSON(rest_client.RestClient):
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                post_body)
         body = json.loads(body)
+        self.validate_response(schema.aggregate_add_remove_host, resp, body)
         return resp, body['aggregate']
 
     def remove_host(self, aggregate_id, host):
@@ -99,6 +100,7 @@ class AggregatesClientJSON(rest_client.RestClient):
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
                                post_body)
         body = json.loads(body)
+        self.validate_response(schema.aggregate_add_remove_host, resp, body)
         return resp, body['aggregate']
 
     def set_metadata(self, aggregate_id, meta):
