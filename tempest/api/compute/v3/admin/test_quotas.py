@@ -32,7 +32,7 @@ class QuotasAdminV3Test(base.BaseV3ComputeAdminTest):
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
-        cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
+        cls.demo_tenant_id = cls.client.tenant_id
 
         cls.default_quota_set = set(('metadata_items',
                                      'ram', 'floating_ips',

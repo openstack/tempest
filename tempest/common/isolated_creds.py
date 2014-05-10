@@ -31,7 +31,6 @@ class IsolatedCreds(object):
                  password='pass', network_resources=None):
         self.network_resources = network_resources
         self.isolated_creds = {}
-        self.isolated_creds_old_style = {}
         self.isolated_net_resources = {}
         self.ports = []
         self.name = name
@@ -166,7 +165,7 @@ class IsolatedCreds(object):
                 self._assign_user_role(tenant['id'], user['id'], role['id'])
             else:
                 self._assign_user_role(tenant.id, user.id, role.id)
-        return self._get_credentials(user, tenant), user, tenant
+        return self._get_credentials(user, tenant)
 
     def _get_credentials(self, user, tenant):
         if self.tempest_client:
@@ -292,30 +291,6 @@ class IsolatedCreds(object):
             body = {'subnet_id': subnet_id}
             self.network_admin_client.add_interface_router(router_id, body)
 
-    def get_primary_tenant(self):
-        # Deprecated. Maintained until all tests are ported
-        return self.isolated_creds_old_style.get('primary')[1]
-
-    def get_primary_user(self):
-        # Deprecated. Maintained until all tests are ported
-        return self.isolated_creds_old_style.get('primary')[0]
-
-    def get_alt_tenant(self):
-        # Deprecated. Maintained until all tests are ported
-        return self.isolated_creds_old_style.get('alt')[1]
-
-    def get_alt_user(self):
-        # Deprecated. Maintained until all tests are ported
-        return self.isolated_creds_old_style.get('alt')[0]
-
-    def get_admin_tenant(self):
-        # Deprecated. Maintained until all tests are ported
-        return self.isolated_creds_old_style.get('admin')[1]
-
-    def get_admin_user(self):
-        # Deprecated. Maintained until all tests are ported
-        return self.isolated_creds_old_style.get('admin')[0]
-
     def get_primary_network(self):
         return self.isolated_net_resources.get('primary')[0]
 
@@ -343,15 +318,14 @@ class IsolatedCreds(object):
     def get_alt_router(self):
         return self.isolated_net_resources.get('alt')[2]
 
-    def get_credentials(self, credential_type, old_style):
+    def get_credentials(self, credential_type):
         if self.isolated_creds.get(credential_type):
             credentials = self.isolated_creds[credential_type]
         else:
             is_admin = (credential_type == 'admin')
-            credentials, user, tenant = self._create_creds(admin=is_admin)
+            credentials = self._create_creds(admin=is_admin)
             self.isolated_creds[credential_type] = credentials
             # Maintained until tests are ported
-            self.isolated_creds_old_style[credential_type] = (user, tenant)
             LOG.info("Acquired isolated creds:\n credentials: %s"
                      % credentials)
             if CONF.service_available.neutron:
@@ -361,20 +335,16 @@ class IsolatedCreds(object):
                     network, subnet, router,)
                 LOG.info("Created isolated network resources for : \n"
                          + " credentials: %s" % credentials)
-        if old_style:
-            return (credentials.username, credentials.tenant_name,
-                    credentials.password)
-        else:
-            return credentials
+        return credentials
 
-    def get_primary_creds(self, old_style=False):
-        return self.get_credentials('primary', old_style)
+    def get_primary_creds(self):
+        return self.get_credentials('primary')
 
-    def get_admin_creds(self, old_style=False):
-        return self.get_credentials('admin', old_style)
+    def get_admin_creds(self):
+        return self.get_credentials('admin')
 
-    def get_alt_creds(self, old_style=False):
-        return self.get_credentials('alt', old_style)
+    def get_alt_creds(self):
+        return self.get_credentials('alt')
 
     def _clear_isolated_router(self, router_id, router_name):
         net_client = self.network_admin_client

@@ -33,13 +33,7 @@ class FlavorsAccessNegativeV3Test(base.BaseV3ComputeAdminTest):
         super(FlavorsAccessNegativeV3Test, cls).setUpClass()
 
         cls.client = cls.flavors_admin_client
-        admin_client = cls._get_identity_admin_client()
-        cls.tenant = admin_client.get_tenant_by_name(cls.flavors_client.
-                                                     tenant_name)
-        cls.tenant_id = cls.tenant['id']
-        cls.adm_tenant = admin_client.get_tenant_by_name(
-            cls.flavors_admin_client.tenant_name)
-        cls.adm_tenant_id = cls.adm_tenant['id']
+        cls.tenant_id = cls.client.tenant_id
         cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
         cls.vcpus = 1

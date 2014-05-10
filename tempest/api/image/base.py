@@ -93,14 +93,11 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
         super(BaseV1ImageMembersTest, cls).setUpClass()
         if CONF.compute.allow_tenant_isolation:
             cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
-            cls.alt_tenant_id = cls.isolated_creds.get_alt_tenant()['id']
         else:
             cls.os_alt = clients.AltManager()
-            identity_client = cls._get_identity_admin_client()
-            cls.alt_tenant_id = identity_client.get_tenant_by_name(
-                cls.os_alt.credentials['tenant_name'])['id']
 
         cls.alt_img_cli = cls.os_alt.image_client
+        cls.alt_tenant_id = cls.alt_img_cli.tenant_id
 
     def _create_image(self):
         image_file = StringIO.StringIO('*' * 1024)
