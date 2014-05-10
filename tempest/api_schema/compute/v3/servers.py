@@ -76,3 +76,8 @@ attach_detach_volume = {
 }
 
 set_get_server_metadata_item = copy.deepcopy(servers.set_server_metadata)
+
+list_addresses_by_network = {
+    'status_code': [200],
+    'response_body': addresses_v3
+}

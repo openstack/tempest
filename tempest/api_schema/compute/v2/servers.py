@@ -123,3 +123,8 @@ set_get_server_metadata_item = {
         'required': ['meta']
     }
 }
+
+list_addresses_by_network = {
+    'status_code': [200],
+    'response_body': parameter_types.addresses
+}
