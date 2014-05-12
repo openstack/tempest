@@ -566,6 +566,9 @@ DatabaseGroup = [
     cfg.StrOpt('db_flavor_ref',
                default="1",
                help="Valid primary flavor to use in database tests."),
+    cfg.StrOpt('db_current_version',
+               default="v1.0",
+               help="Current database version to use in database tests."),
 ]
 
 orchestration_group = cfg.OptGroup(name='orchestration',
