@@ -120,9 +120,9 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.servers_client.delete_server(server_id)
         self.servers_client.wait_for_server_termination(server_id)
 
-        self.client.delete_security_group(sg['id'])
+        resp, _ = self.client.delete_security_group(sg['id'])
         self.assertEqual(202, resp.status)
-        self.client.delete_security_group(sg2['id'])
+        resp, _ = self.client.delete_security_group(sg2['id'])
         self.assertEqual(202, resp.status)
 
     @test.attr(type='smoke')
