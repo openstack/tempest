@@ -96,6 +96,7 @@ class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
         cls.client = cls.os_adm.identity_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
+        cls.region_client = cls.os_adm.region_client
         cls.data = DataGenerator(cls.client)
         cls.non_admin_client = cls.os.identity_v3_client
         cls.service_client = cls.os_adm.service_client
