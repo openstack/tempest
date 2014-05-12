@@ -30,29 +30,31 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
     def test_security_groups_create_list_delete(self):
         # Positive test:Should return the list of Security Groups
         # Create 3 Security Groups
+        security_group_list = []
         for i in range(3):
-            resp, securitygroup = self.create_security_group()
+            resp, body = self.create_security_group()
             self.assertEqual(200, resp.status)
+            security_group_list.append(body)
         # Fetch all Security Groups and verify the list
         # has all created Security Groups
         resp, fetched_list = self.client.list_security_groups()
         self.assertEqual(200, resp.status)
         # Now check if all the created Security Groups are in fetched list
         missing_sgs = \
-            [sg for sg in self.security_groups if sg not in fetched_list]
+            [sg for sg in security_group_list if sg not in fetched_list]
         self.assertFalse(missing_sgs,
                          "Failed to find Security Group %s in fetched "
                          "list" % ', '.join(m_group['name']
                                             for m_group in missing_sgs))
         # Delete all security groups
-        for sg in self.security_groups:
+        for sg in security_group_list:
             resp, _ = self.client.delete_security_group(sg['id'])
             self.assertEqual(202, resp.status)
             self.client.wait_for_resource_deletion(sg['id'])
         # Now check if all the created Security Groups are deleted
         resp, fetched_list = self.client.list_security_groups()
         deleted_sgs = \
-            [sg for sg in self.security_groups if sg in fetched_list]
+            [sg for sg in security_group_list if sg in fetched_list]
         self.assertFalse(deleted_sgs,
                          "Failed to delete Security Group %s "
                          "list" % ', '.join(m_group['name']
@@ -78,6 +80,9 @@ class SecurityGroupsTestJSON(base.BaseSecurityGroupsTest):
         self.assertEqual(securitygroup, fetched_group,
                          "The fetched Security Group is different "
                          "from the created Group")
+        resp, _ = self.client.delete_security_group(securitygroup['id'])
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_resource_deletion(securitygroup['id'])
 
     @test.attr(type='smoke')
     def test_server_security_groups(self):
