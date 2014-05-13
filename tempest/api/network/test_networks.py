@@ -402,7 +402,8 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
 
     @test.attr(type='smoke')
     def test_create_delete_subnet_with_gw(self):
-        gateway = '2003::2'
+        net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        gateway = str(netaddr.IPAddress(net.first + 2))
         name = data_utils.rand_name('network-')
         resp, body = self.client.create_network(name=name)
         self.assertEqual('201', resp['status'])
@@ -418,6 +419,8 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
 
     @test.attr(type='smoke')
     def test_create_delete_subnet_without_gw(self):
+        net = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+        gateway_ip = str(netaddr.IPAddress(net.first + 1))
         name = data_utils.rand_name('network-')
         resp, body = self.client.create_network(name=name)
         self.assertEqual('201', resp['status'])
@@ -425,7 +428,7 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
         net_id = network['id']
         subnet = self.create_subnet(network)
         # Verifies Subnet GW in IPv6
-        self.assertEqual(subnet['gateway_ip'], '2003::1')
+        self.assertEqual(subnet['gateway_ip'], gateway_ip)
         # Delete network and subnet
         resp, body = self.client.delete_network(net_id)
         self.assertEqual('204', resp['status'])
