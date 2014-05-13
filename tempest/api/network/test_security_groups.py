@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from tempest.api.network import base_security_groups as base
 from tempest.common.utils import data_utils
 from tempest import test
@@ -88,18 +90,24 @@ class SecGroupTest(base.BaseSecGroupTest):
                             rule_create_body['security_group_rule']['id']
                             )
 
-        # Show details of the created security rule
-        resp, show_rule_body = self.client.show_security_group_rule(
-            rule_create_body['security_group_rule']['id']
-        )
-        self.assertEqual('200', resp['status'])
+            # Show details of the created security rule
+            resp, show_rule_body = self.client.show_security_group_rule(
+                rule_create_body['security_group_rule']['id']
+            )
+            self.assertEqual('200', resp['status'])
+            create_dict = rule_create_body['security_group_rule']
+            for key, value in six.iteritems(create_dict):
+                self.assertEqual(value,
+                                 show_rule_body['security_group_rule'][key],
+                                 "%s does not match." % key)
 
-        # List rules and verify created rule is in response
-        resp, rule_list_body = self.client.list_security_group_rules()
-        self.assertEqual('200', resp['status'])
-        rule_list = [rule['id']
-                     for rule in rule_list_body['security_group_rules']]
-        self.assertIn(rule_create_body['security_group_rule']['id'], rule_list)
+            # List rules and verify created rule is in response
+            resp, rule_list_body = self.client.list_security_group_rules()
+            self.assertEqual('200', resp['status'])
+            rule_list = [rule['id']
+                         for rule in rule_list_body['security_group_rules']]
+            self.assertIn(rule_create_body['security_group_rule']['id'],
+                          rule_list)
 
     @test.attr(type='smoke')
     def test_create_security_group_rule_with_additional_args(self):
