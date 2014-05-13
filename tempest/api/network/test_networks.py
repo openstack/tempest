@@ -234,6 +234,8 @@ class NetworksTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_create_delete_subnet_without_gw(self):
+        net = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        gateway_ip = str(netaddr.IPAddress(net.first + 1))
         name = data_utils.rand_name('network-')
         resp, body = self.client.create_network(name=name)
         self.assertEqual('201', resp['status'])
@@ -241,7 +243,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         net_id = network['id']
         subnet = self.create_subnet(network)
         # Verifies Subnet GW in IPv4
-        self.assertEqual(subnet['gateway_ip'], '10.100.0.1')
+        self.assertEqual(subnet['gateway_ip'], gateway_ip)
         # Delete network and subnet
         resp, body = self.client.delete_network(net_id)
         self.assertEqual('204', resp['status'])
