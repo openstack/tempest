@@ -729,6 +729,11 @@
 # all which indicates every extension is enabled (list value)
 #api_extensions=all
 
+# Allow the execution of IPv6 subnet tests that use the
+# extended IPv6 attributes ipv6_ra_mode and ipv6_address_mode
+# (boolean value)
+#ipv6_subnet_attributes=false
+
 
 [object-storage]
 
