@@ -36,13 +36,13 @@ class TestSshClient(base.TestCase):
             rsa_mock.assert_called_once_with(mock.sentinel.csio)
             cs_mock.assert_called_once_with('mykey')
             rsa_mock.reset_mock()
-            cs_mock.rest_mock()
+            cs_mock.reset_mock()
             pkey = mock.sentinel.pkey
             # Shouldn't call out to load a file from RSAKey, since
             # a sentinel isn't a basestring...
             ssh.Client('localhost', 'root', pkey=pkey)
-            rsa_mock.assert_not_called()
-            cs_mock.assert_not_called()
+            self.assertEqual(0, rsa_mock.call_count)
+            self.assertEqual(0, cs_mock.call_count)
 
     def _set_ssh_connection_mocks(self):
         client_mock = mock.MagicMock()
@@ -75,7 +75,7 @@ class TestSshClient(base.TestCase):
             password=None
         )]
         self.assertEqual(expected_connect, client_mock.connect.mock_calls)
-        s_mock.assert_not_called()
+        self.assertEqual(0, s_mock.call_count)
 
     def test_get_ssh_connection_two_attemps(self):
         c_mock, aa_mock, client_mock = self._set_ssh_connection_mocks()
