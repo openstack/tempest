@@ -14,6 +14,7 @@
 #    under the License.
 
 import json
+import urllib
 
 from lxml import etree
 
@@ -73,6 +74,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "role":
+                array.append(common.xml_to_json(child))
+        return array
+
+    def _parse_users(self, node):
+        array = []
+        for child in node.getchildren():
+            tag_list = child.tag.split('}', 1)
+            if tag_list[1] == "user":
                 array.append(common.xml_to_json(child))
         return array
 
@@ -137,11 +146,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
         body = self._parse_projects(etree.fromstring(body))
         return resp, body
 
-    def get_users(self):
+    def get_users(self, params=None):
         """Get the list of users."""
-        resp, body = self.get("users")
+        url = 'users'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
-        body = self._parse_array(etree.fromstring(body))
+        body = self._parse_users(etree.fromstring(body))
         return resp, body
 
     def get_user(self, user_id):
