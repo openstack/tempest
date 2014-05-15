@@ -85,6 +85,9 @@ class SimpleReadOnlyHeatClientTest(tempest.cli.ClientTestBase):
     def test_heat_help(self):
         self.heat('help')
 
+    def test_heat_bash_completion(self):
+        self.heat('bash-completion')
+
     def test_heat_help_cmd(self):
         # Check requesting help for a specific command works
         help_text = self.heat('help resource-template')
