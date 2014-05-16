@@ -14,6 +14,7 @@
 #    under the License.
 
 import json
+import urllib
 
 from tempest.common import rest_client
 from tempest import config
@@ -120,8 +121,11 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['project']
 
-    def list_projects(self):
-        resp, body = self.get("projects")
+    def list_projects(self, params=None):
+        url = "projects"
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['projects']

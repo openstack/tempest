@@ -121,6 +121,7 @@ class DataGenerator(object):
             self.v3_users = []
             self.projects = []
             self.v3_roles = []
+            self.domains = []
 
         @property
         def test_credentials(self):
@@ -184,6 +185,15 @@ class DataGenerator(object):
             self.test_role = data_utils.rand_name('role')
             _, self.v3_role = self.client.create_role(self.test_role)
             self.v3_roles.append(self.v3_role)
+
+        def setup_test_domain(self):
+            """Set up a test domain."""
+            self.test_domain = data_utils.rand_name('test_domain')
+            self.test_description = data_utils.rand_name('desc')
+            _, self.domain = self.client.create_domain(
+                name=self.test_domain,
+                description=self.test_description)
+            self.domains.append(self.domain)
 
         def teardown_all(self):
             for user in self.users:
