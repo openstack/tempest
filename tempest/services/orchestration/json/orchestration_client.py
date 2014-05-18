@@ -45,28 +45,31 @@ class OrchestrationClient(rest_client.RestClient):
         return resp, body['stacks']
 
     def create_stack(self, name, disable_rollback=True, parameters={},
-                     timeout_mins=60, template=None, template_url=None):
+                     timeout_mins=60, template=None, template_url=None,
+                     environment=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
             parameters,
             timeout_mins,
             template,
-            template_url)
+            template_url,
+            environment)
         uri = 'stacks'
         resp, body = self.post(uri, headers=headers, body=body)
         return resp, body
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
                      parameters={}, timeout_mins=60, template=None,
-                     template_url=None):
+                     template_url=None, environment=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
             parameters,
             timeout_mins,
             template,
-            template_url)
+            template_url,
+            environment)
 
         uri = "stacks/%s" % stack_identifier
         resp, body = self.put(uri, headers=headers, body=body)
@@ -74,13 +77,15 @@ class OrchestrationClient(rest_client.RestClient):
 
     def _prepare_update_create(self, name, disable_rollback=True,
                                parameters={}, timeout_mins=60,
-                               template=None, template_url=None):
+                               template=None, template_url=None,
+                               environment=None):
         post_body = {
             "stack_name": name,
             "disable_rollback": disable_rollback,
             "parameters": parameters,
             "timeout_mins": timeout_mins,
-            "template": "HeatTemplateFormatVersion: '2012-12-12'\n"
+            "template": "HeatTemplateFormatVersion: '2012-12-12'\n",
+            "environment": environment
         }
         if template:
             post_body['template'] = template
