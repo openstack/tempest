@@ -18,7 +18,7 @@ from six import moves
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ServicesTestJSON(base.BaseIdentityV2AdminTest):
@@ -32,7 +32,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertRaises(exceptions.NotFound, self.client.get_service,
                           service_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_get_delete_service(self):
         # GET Service
         # Creating a Service
@@ -66,7 +66,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertEqual(fetched_service['description'],
                          service_data['description'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_service_without_description(self):
         # Create a service only with name and type
         name = data_utils.rand_name('service-')
@@ -80,7 +80,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         self.assertIn('type', service)
         self.assertEqual(type, service['type'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_services(self):
         # Create, List, Verify and Delete Services
         services = []

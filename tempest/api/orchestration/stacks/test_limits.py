@@ -16,7 +16,7 @@ from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 CONF = config.CONF
 
@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 class TestServerStackLimits(base.BaseOrchestrationTest):
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_exceed_max_template_size_fails(self):
         stack_name = data_utils.rand_name('heat')
         fill = 'A' * CONF.orchestration.max_template_size
@@ -38,7 +38,7 @@ Outputs:
                                stack_name, template)
         self.assertIn('Template exceeds maximum allowed size', str(ex))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_exceed_max_resources_per_stack(self):
         stack_name = data_utils.rand_name('heat')
         # Create a big template, one resource more than the limit

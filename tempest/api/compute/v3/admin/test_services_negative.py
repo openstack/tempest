@@ -16,7 +16,7 @@
 
 from tempest.api.compute import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class ServicesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
@@ -31,12 +31,12 @@ class ServicesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
         cls.client = cls.services_admin_client
         cls.non_admin_client = cls.services_client
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_services_with_non_admin_user(self):
         self.assertRaises(exceptions.Unauthorized,
                           self.non_admin_client.list_services)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_service_by_invalid_params(self):
         # return all services if send the request with invalid parameter
         resp, services = self.client.list_services()
@@ -45,7 +45,7 @@ class ServicesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(services), len(services_xxx))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_service_by_invalid_service_and_valid_host(self):
         resp, services = self.client.list_services()
         host_name = services[0]['host']
@@ -54,7 +54,7 @@ class ServicesAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(0, len(services))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_service_with_valid_service_and_invalid_host(self):
         resp, services = self.client.list_services()
         binary_name = services[0]['binary']

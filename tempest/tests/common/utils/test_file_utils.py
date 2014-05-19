@@ -14,7 +14,6 @@
 #    under the License.
 
 import mock
-from mock import patch
 
 from tempest.common.utils import file_utils
 from tempest.tests import base
@@ -23,7 +22,7 @@ from tempest.tests import base
 class TestFileUtils(base.TestCase):
 
     def test_have_effective_read_path(self):
-        with patch('__builtin__.open', mock.mock_open(), create=True):
+        with mock.patch('__builtin__.open', mock.mock_open(), create=True):
             result = file_utils.have_effective_read_access('fake_path')
         self.assertTrue(result)
 

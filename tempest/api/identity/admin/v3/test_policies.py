@@ -15,7 +15,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
@@ -25,7 +25,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         resp, _ = self.policy_client.delete_policy(policy_id)
         self.assertEqual(204, resp.status)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_policies(self):
         # Test to list policies
         policy_ids = list()
@@ -46,7 +46,7 @@ class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
         self.assertEqual(0, len(missing_pols))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_policy(self):
         # Test to update policy
         blob = data_utils.rand_name('BlobName-')
