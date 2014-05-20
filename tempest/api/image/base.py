@@ -129,15 +129,11 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
         if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
             cls.os_alt = clients.Manager(creds)
-            cls.alt_tenant_id = cls.isolated_creds.get_alt_creds().tenant_id
         else:
             cls.os_alt = clients.AltManager()
-            alt_tenant_name = cls.os_alt.credentials['tenant_name']
-            identity_client = cls._get_identity_admin_client()
-            cls.alt_tenant_id = identity_client.get_tenant_by_name(
-                alt_tenant_name)['id']
         cls.os_img_client = cls.os.image_client_v2
         cls.alt_img_client = cls.os_alt.image_client_v2
+        cls.alt_tenant_id = cls.alt_img_client.tenant_id
 
     def _list_image_ids_as_alt(self):
         _, image_list = self.alt_img_client.image_list()
