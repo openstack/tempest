@@ -46,7 +46,7 @@ class OrchestrationClient(rest_client.RestClient):
 
     def create_stack(self, name, disable_rollback=True, parameters={},
                      timeout_mins=60, template=None, template_url=None,
-                     environment=None):
+                     environment=None, files=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
@@ -54,14 +54,15 @@ class OrchestrationClient(rest_client.RestClient):
             timeout_mins,
             template,
             template_url,
-            environment)
+            environment,
+            files)
         uri = 'stacks'
         resp, body = self.post(uri, headers=headers, body=body)
         return resp, body
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
                      parameters={}, timeout_mins=60, template=None,
-                     template_url=None, environment=None):
+                     template_url=None, environment=None, files=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
@@ -78,14 +79,15 @@ class OrchestrationClient(rest_client.RestClient):
     def _prepare_update_create(self, name, disable_rollback=True,
                                parameters={}, timeout_mins=60,
                                template=None, template_url=None,
-                               environment=None):
+                               environment=None, files=None):
         post_body = {
             "stack_name": name,
             "disable_rollback": disable_rollback,
             "parameters": parameters,
             "timeout_mins": timeout_mins,
             "template": "HeatTemplateFormatVersion: '2012-12-12'\n",
-            "environment": environment
+            "environment": environment,
+            "files": files
         }
         if template:
             post_body['template'] = template

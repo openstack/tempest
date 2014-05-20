@@ -61,12 +61,13 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def create_stack(cls, stack_name, template_data, parameters={},
-                     environment=None):
+                     environment=None, files=None):
         resp, body = cls.client.create_stack(
             stack_name,
             template=template_data,
             parameters=parameters,
-            environment=environment)
+            environment=environment,
+            files=files)
         stack_id = resp['location'].split('/')[-1]
         stack_identifier = '%s/%s' % (stack_name, stack_id)
         cls.stacks.append(stack_identifier)
