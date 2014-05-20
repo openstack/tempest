@@ -446,6 +446,30 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         LOG.debug("image:%s" % self.image)
 
 
+# power/provision states as of icehouse
+class BaremetalPowerStates(object):
+    """Possible power states of an Ironic node."""
+    POWER_ON = 'power on'
+    POWER_OFF = 'power off'
+    REBOOT = 'rebooting'
+    SUSPEND = 'suspended'
+
+
+class BaremetalProvisionStates(object):
+    """Possible provision states of an Ironic node."""
+    NOSTATE = None
+    INIT = 'initializing'
+    ACTIVE = 'active'
+    BUILDING = 'building'
+    DEPLOYWAIT = 'wait call-back'
+    DEPLOYING = 'deploying'
+    DEPLOYFAIL = 'deploy failed'
+    DEPLOYDONE = 'deploy complete'
+    DELETING = 'deleting'
+    DELETED = 'deleted'
+    ERROR = 'error'
+
+
 class BaremetalScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
@@ -520,6 +544,55 @@ class BaremetalScenarioTest(OfficialClientTest):
         for port in self.baremetal_client.node.list_ports(node_id):
             ports.append(self.baremetal_client.port.get(port.uuid))
         return ports
+
+    def add_keypair(self):
+        self.keypair = self.create_keypair()
+
+    def verify_connectivity(self, ip=None):
+        if ip:
+            dest = self.get_remote_client(ip)
+        else:
+            dest = self.get_remote_client(self.instance)
+        dest.validate_authentication()
+
+    def boot_instance(self):
+        create_kwargs = {
+            'key_name': self.keypair.id
+        }
+        self.instance = self.create_server(
+            wait=False, create_kwargs=create_kwargs)
+
+        self.set_resource('instance', self.instance)
+
+        self.wait_node(self.instance.id)
+        self.node = self.get_node(instance_id=self.instance.id)
+
+        self.wait_power_state(self.node.uuid, BaremetalPowerStates.POWER_ON)
+
+        self.wait_provisioning_state(
+            self.node.uuid,
+            [BaremetalProvisionStates.DEPLOYWAIT,
+             BaremetalProvisionStates.ACTIVE],
+            timeout=15)
+
+        self.wait_provisioning_state(self.node.uuid,
+                                     BaremetalProvisionStates.ACTIVE,
+                                     timeout=CONF.baremetal.active_timeout)
+
+        self.status_timeout(
+            self.compute_client.servers, self.instance.id, 'ACTIVE')
+
+        self.node = self.get_node(instance_id=self.instance.id)
+        self.instance = self.compute_client.servers.get(self.instance.id)
+
+    def terminate_instance(self):
+        self.instance.delete()
+        self.remove_resource('instance')
+        self.wait_power_state(self.node.uuid, BaremetalPowerStates.POWER_OFF)
+        self.wait_provisioning_state(
+            self.node.uuid,
+            BaremetalProvisionStates.NOSTATE,
+            timeout=CONF.baremetal.unprovision_timeout)
 
 
 class NetworkScenarioTest(OfficialClientTest):
