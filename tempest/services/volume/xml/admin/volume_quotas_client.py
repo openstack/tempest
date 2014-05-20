@@ -14,7 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from ast import literal_eval
+import ast
 from lxml import etree
 
 from tempest.common import xml_utils as xml
@@ -35,7 +35,7 @@ class VolumeQuotasClientXML(volume_quotas_client.VolumeQuotasClientJSON):
         quota = {}
         for k, v in q.items():
             try:
-                v = literal_eval(v)
+                v = ast.literal_eval(v)
             except (ValueError, SyntaxError):
                 pass
 

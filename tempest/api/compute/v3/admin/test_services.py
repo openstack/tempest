@@ -15,7 +15,7 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest import test
 
 
 class ServicesAdminV3Test(base.BaseV3ComputeAdminTest):
@@ -29,13 +29,13 @@ class ServicesAdminV3Test(base.BaseV3ComputeAdminTest):
         super(ServicesAdminV3Test, cls).setUpClass()
         cls.client = cls.services_admin_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_services(self):
         resp, services = self.client.list_services()
         self.assertEqual(200, resp.status)
         self.assertNotEqual(0, len(services))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_service_by_service_binary_name(self):
         binary_name = 'nova-compute'
         params = {'binary': binary_name}
@@ -45,7 +45,7 @@ class ServicesAdminV3Test(base.BaseV3ComputeAdminTest):
         for service in services:
             self.assertEqual(binary_name, service['binary'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_service_by_host_name(self):
         resp, services = self.client.list_services()
         self.assertEqual(200, resp.status)
@@ -65,7 +65,7 @@ class ServicesAdminV3Test(base.BaseV3ComputeAdminTest):
         # on order.
         self.assertEqual(sorted(s1), sorted(s2))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_service_by_service_and_host_name(self):
         resp, services = self.client.list_services()
         host_name = services[0]['host']

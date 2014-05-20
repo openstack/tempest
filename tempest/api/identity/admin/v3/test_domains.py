@@ -16,7 +16,7 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class DomainsTestJSON(base.BaseIdentityV3AdminTest):
@@ -29,7 +29,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         resp, _ = self.client.delete_domain(domain_id)
         self.assertEqual(204, resp.status)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_domains(self):
         # Test to list domains
         domain_ids = list()
@@ -49,7 +49,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         missing_doms = [d for d in domain_ids if d not in fetched_ids]
         self.assertEqual(0, len(missing_doms))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_domain(self):
         d_name = data_utils.rand_name('domain-')
         d_desc = data_utils.rand_name('domain-desc-')

@@ -17,37 +17,37 @@
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class NetworksNegativeTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_show_non_existent_network(self):
         non_exist_id = data_utils.rand_name('network')
         self.assertRaises(exceptions.NotFound, self.client.show_network,
                           non_exist_id)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_show_non_existent_subnet(self):
         non_exist_id = data_utils.rand_name('subnet')
         self.assertRaises(exceptions.NotFound, self.client.show_subnet,
                           non_exist_id)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_show_non_existent_port(self):
         non_exist_id = data_utils.rand_name('port')
         self.assertRaises(exceptions.NotFound, self.client.show_port,
                           non_exist_id)
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_update_non_existent_network(self):
         non_exist_id = data_utils.rand_name('network')
         self.assertRaises(exceptions.NotFound, self.client.update_network,
                           non_exist_id, name="new_name")
 
-    @attr(type=['negative', 'smoke'])
+    @test.attr(type=['negative', 'smoke'])
     def test_delete_non_existent_network(self):
         non_exist_id = data_utils.rand_name('network')
         self.assertRaises(exceptions.NotFound, self.client.delete_network,

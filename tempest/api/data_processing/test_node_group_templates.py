@@ -14,7 +14,7 @@
 
 from tempest.api.data_processing import base as dp_base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
@@ -60,7 +60,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
 
         return body['id'], template_name
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_node_group_template_create(self):
         template_name = data_utils.rand_name('sahara-ng-template')
         resp, body = self.create_node_group_template(
@@ -71,7 +71,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         self.assertEqual(template_name, body['name'])
         self.assertDictContainsSubset(self.node_group_template, body)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_node_group_template_list(self):
         template_info = self._create_node_group_template()
 
@@ -83,7 +83,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
                           for template in templates]
         self.assertIn(template_info, templates_info)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_node_group_template_get(self):
         template_id, template_name = self._create_node_group_template()
 
@@ -94,7 +94,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         self.assertEqual(template_name, template['name'])
         self.assertDictContainsSubset(self.node_group_template, template)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_node_group_template_delete(self):
         template_id = self._create_node_group_template()[0]
 

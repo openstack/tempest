@@ -13,7 +13,7 @@
 #    under the License.
 
 import keystoneclient.v2_0.client as keystoneclient
-from mock import patch
+import mock
 import neutronclient.v2_0.client as neutronclient
 from oslo.config import cfg
 
@@ -114,7 +114,7 @@ class TestTenantIsolation(base.TestCase):
                           {'router': {'id': id, 'name': name}})))
         return router_fix
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_primary_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         iso_creds = isolated_creds.IsolatedCreds('test class',
@@ -128,7 +128,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertEqual(primary_creds.tenant_id, '1234')
         self.assertEqual(primary_creds.user_id, '1234')
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_admin_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         iso_creds = isolated_creds.IsolatedCreds('test class',
@@ -141,12 +141,12 @@ class TestTenantIsolation(base.TestCase):
             return_value=({'status': 200},
                           [{'id': '1234', 'name': 'admin'}])))
 
-        user_mock = patch.object(json_iden_client.IdentityClientJSON,
-                                 'assign_user_role')
+        user_mock = mock.patch.object(json_iden_client.IdentityClientJSON,
+                                      'assign_user_role')
         user_mock.start()
         self.addCleanup(user_mock.stop)
-        with patch.object(json_iden_client.IdentityClientJSON,
-                          'assign_user_role') as user_mock:
+        with mock.patch.object(json_iden_client.IdentityClientJSON,
+                               'assign_user_role') as user_mock:
             admin_creds = iso_creds.get_admin_creds()
         user_mock.assert_called_once_with('1234', '1234', '1234')
         self.assertEqual(admin_creds.username, 'fake_admin_user')
@@ -155,7 +155,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertEqual(admin_creds.tenant_id, '1234')
         self.assertEqual(admin_creds.user_id, '1234')
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_all_cred_cleanup(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         iso_creds = isolated_creds.IsolatedCreds('test class',
@@ -177,8 +177,8 @@ class TestTenantIsolation(base.TestCase):
             'list_roles',
             return_value=({'status': 200},
                           [{'id': '123456', 'name': 'admin'}])))
-        with patch.object(json_iden_client.IdentityClientJSON,
-                          'assign_user_role'):
+        with mock.patch.object(json_iden_client.IdentityClientJSON,
+                               'assign_user_role'):
             iso_creds.get_admin_creds()
         user_mock = self.patch(
             'tempest.services.identity.json.identity_client.'
@@ -202,7 +202,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertIn('12345', args)
         self.assertIn('123456', args)
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_alt_creds(self, MockRestClient):
         cfg.CONF.set_default('neutron', False, 'service_available')
         iso_creds = isolated_creds.IsolatedCreds('test class',
@@ -216,7 +216,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertEqual(alt_creds.tenant_id, '1234')
         self.assertEqual(alt_creds.user_id, '1234')
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_network_creation(self, MockRestClient):
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  password='fake_password')
@@ -240,7 +240,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertEqual(router['id'], '1234')
         self.assertEqual(router['name'], 'fake_router')
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_network_cleanup(self, MockRestClient):
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  password='fake_password')
@@ -289,28 +289,28 @@ class TestTenantIsolation(base.TestCase):
             'list_roles',
             return_value=({'status': 200},
                           [{'id': '123456', 'name': 'admin'}])))
-        with patch.object(json_iden_client.IdentityClientJSON,
-                          'assign_user_role'):
+        with mock.patch.object(json_iden_client.IdentityClientJSON,
+                               'assign_user_role'):
             iso_creds.get_admin_creds()
         self.patch('tempest.services.identity.json.identity_client.'
                    'IdentityClientJSON.delete_user')
         self.patch('tempest.services.identity.json.identity_client.'
                    'IdentityClientJSON.delete_tenant')
-        net = patch.object(iso_creds.network_admin_client,
-                           'delete_network')
+        net = mock.patch.object(iso_creds.network_admin_client,
+                                'delete_network')
         net_mock = net.start()
-        subnet = patch.object(iso_creds.network_admin_client,
-                              'delete_subnet')
+        subnet = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_subnet')
         subnet_mock = subnet.start()
-        router = patch.object(iso_creds.network_admin_client,
-                              'delete_router')
+        router = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_router')
         router_mock = router.start()
         remove_router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClientJSON.'
             'remove_router_interface_with_subnet_id')
-        port_list_mock = patch.object(iso_creds.network_admin_client,
-                                      'list_ports', return_value=(
-                                      {'status': 200}, {'ports': []}))
+        port_list_mock = mock.patch.object(iso_creds.network_admin_client,
+                                           'list_ports', return_value=(
+                                           {'status': 200}, {'ports': []}))
         port_list_mock.start()
         iso_creds.clear_isolated_creds()
         # Verify remove router interface calls
@@ -342,7 +342,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertIn('12345', args)
         self.assertIn('123456', args)
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_network_alt_creation(self, MockRestClient):
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  password='fake_password')
@@ -366,7 +366,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertEqual(router['id'], '1234')
         self.assertEqual(router['name'], 'fake_alt_router')
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_network_admin_creation(self, MockRestClient):
         iso_creds = isolated_creds.IsolatedCreds('test class',
                                                  password='fake_password')
@@ -383,8 +383,8 @@ class TestTenantIsolation(base.TestCase):
             'list_roles',
             return_value=({'status': 200},
                           [{'id': '123456', 'name': 'admin'}])))
-        with patch.object(json_iden_client.IdentityClientJSON,
-                          'assign_user_role'):
+        with mock.patch.object(json_iden_client.IdentityClientJSON,
+                               'assign_user_role'):
             iso_creds.get_admin_creds()
         router_interface_mock.called_once_with('1234', '1234')
         network = iso_creds.get_admin_network()
@@ -397,7 +397,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertEqual(router['id'], '1234')
         self.assertEqual(router['name'], 'fake_admin_router')
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_no_network_resources(self, MockRestClient):
         net_dict = {
             'network': False,
@@ -410,14 +410,14 @@ class TestTenantIsolation(base.TestCase):
                                                  network_resources=net_dict)
         self._mock_user_create('1234', 'fake_prim_user')
         self._mock_tenant_create('1234', 'fake_prim_tenant')
-        net = patch.object(iso_creds.network_admin_client,
-                           'delete_network')
+        net = mock.patch.object(iso_creds.network_admin_client,
+                                'delete_network')
         net_mock = net.start()
-        subnet = patch.object(iso_creds.network_admin_client,
-                              'delete_subnet')
+        subnet = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_subnet')
         subnet_mock = subnet.start()
-        router = patch.object(iso_creds.network_admin_client,
-                              'delete_router')
+        router = mock.patch.object(iso_creds.network_admin_client,
+                                   'delete_router')
         router_mock = router.start()
 
         iso_creds.get_primary_creds()
@@ -431,7 +431,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertIsNone(subnet)
         self.assertIsNone(router)
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_router_without_network(self, MockRestClient):
         net_dict = {
             'network': False,
@@ -447,7 +447,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertRaises(exceptions.InvalidConfiguration,
                           iso_creds.get_primary_creds)
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_subnet_without_network(self, MockRestClient):
         net_dict = {
             'network': False,
@@ -463,7 +463,7 @@ class TestTenantIsolation(base.TestCase):
         self.assertRaises(exceptions.InvalidConfiguration,
                           iso_creds.get_primary_creds)
 
-    @patch('tempest.common.rest_client.RestClient')
+    @mock.patch('tempest.common.rest_client.RestClient')
     def test_dhcp_without_subnet(self, MockRestClient):
         net_dict = {
             'network': False,

@@ -13,7 +13,7 @@
 #    under the License.
 
 from tempest.api.data_processing import base as dp_base
-from tempest.test import attr
+from tempest import test
 
 
 class PluginsTest(dp_base.BaseDataProcessingTest):
@@ -32,11 +32,11 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
 
         return plugins_names
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_plugin_list(self):
         self._list_all_plugin_names()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_plugin_get(self):
         for plugin_name in self._list_all_plugin_names():
             resp, plugin = self.client.get_plugin(plugin_name)

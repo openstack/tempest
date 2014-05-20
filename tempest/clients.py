@@ -17,7 +17,7 @@ import keystoneclient.exceptions
 import keystoneclient.v2_0.client
 
 from tempest import auth
-from tempest.common.rest_client import NegativeRestClient
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest import manager
@@ -355,7 +355,8 @@ class Manager(manager.Manager):
                     self.auth_provider)
             self.token_client = TokenClientJSON()
             self.token_v3_client = V3TokenClientJSON()
-            self.negative_client = NegativeRestClient(self.auth_provider)
+            self.negative_client = rest_client.NegativeRestClient(
+                self.auth_provider)
             self.negative_client.service = service
 
         else:

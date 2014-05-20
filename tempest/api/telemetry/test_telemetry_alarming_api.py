@@ -13,7 +13,7 @@
 from tempest.api.telemetry import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
@@ -29,7 +29,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         for i in range(2):
             cls.create_alarm(threshold_rule=cls.rule)
 
-    @attr(type="gate")
+    @test.attr(type="gate")
     def test_alarm_list(self):
         # List alarms
         resp, alarm_list = self.telemetry_client.list_alarms()
@@ -43,7 +43,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
                          " in a fetched list: %s" %
                          ', '.join(str(a) for a in missing_alarms))
 
-    @attr(type="gate")
+    @test.attr(type="gate")
     def test_create_update_get_delete_alarm(self):
         # Create an alarm
         alarm_name = data_utils.rand_name('telemetry_alarm')
@@ -78,7 +78,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertRaises(exceptions.NotFound,
                           self.telemetry_client.get_alarm, alarm_id)
 
-    @attr(type="gate")
+    @test.attr(type="gate")
     def test_set_get_alarm_state(self):
         alarm_states = ['ok', 'alarm', 'insufficient data']
         _, alarm = self.create_alarm(threshold_rule=self.rule)
@@ -94,7 +94,7 @@ class TelemetryAlarmingAPITestJSON(base.BaseTelemetryTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(new_state, state)
 
-    @attr(type="gate")
+    @test.attr(type="gate")
     def test_create_delete_alarm_with_combination_rule(self):
         rule = {"alarm_ids": self.alarm_ids,
                 "operator": "or"}

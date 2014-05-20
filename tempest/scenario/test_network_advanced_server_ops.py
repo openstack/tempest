@@ -20,7 +20,7 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -140,7 +140,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                             'ACTIVE')
         self._check_network_connectivity()
 
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
         self.server.stop()
         self.status_timeout(self.compute_client.servers, self.server.id,
@@ -149,12 +149,12 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.server.start()
         self._wait_server_status_and_check_network_connectivity()
 
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_connectivity_reboot(self):
         self.server.reboot()
         self._wait_server_status_and_check_network_connectivity()
 
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_connectivity_rebuild(self):
         image_ref_alt = CONF.compute.image_ref_alt
         self.server.rebuild(image_ref_alt)
@@ -162,7 +162,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,
                           'Pause is not available.')
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_connectivity_pause_unpause(self):
         self.server.pause()
         self.status_timeout(self.compute_client.servers, self.server.id,
@@ -173,7 +173,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_connectivity_suspend_resume(self):
         self.server.suspend()
         self.status_timeout(self.compute_client.servers, self.server.id,
@@ -184,7 +184,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize is not available.')
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_connectivity_resize(self):
         resize_flavor = CONF.compute.flavor_ref_alt
         if resize_flavor == CONF.compute.flavor_ref:

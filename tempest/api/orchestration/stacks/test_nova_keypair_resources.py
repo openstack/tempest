@@ -15,7 +15,7 @@ import logging
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 LOG = logging.getLogger(__name__)
@@ -46,7 +46,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_created_resources(self):
         """Verifies created keypair resource."""
         resources = [('KeyPairSavePrivate', 'OS::Nova::KeyPair'),
@@ -59,7 +59,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
             self.assertEqual(resource_type, resource['resource_type'])
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
-    @attr(type='slow')
+    @test.attr(type='slow')
     def test_stack_keypairs_output(self):
         resp, stack = self.client.get_stack(self.stack_name)
         self.assertEqual('200', resp['status'])
