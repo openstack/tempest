@@ -127,6 +127,11 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                               str(xml.Document(put_body)))
         return resp, self._parse_resp(body)
 
+    def list_extensions(self):
+        """List all the extensions."""
+        resp, body = self.get('/extensions')
+        return resp, self._parse_resp(body)
+
 
 class TokenClientXML(identity_client.TokenClientJSON):
     TYPE = "xml"
