@@ -66,3 +66,28 @@ outputs:
         # random_string.yaml specifies a length of 10
         random_value = self.get_stack_output(stack_identifier, 'random_value')
         self.assertEqual(10, len(random_value))
+
+    @test.attr(type='gate')
+    def test_files_provider_resource(self):
+        """Test untyped defining of a provider resource via "files"."""
+        # It's also possible to specify the filename directly in the template.
+        # without adding the type alias to resource_registry
+        stack_name = data_utils.rand_name('heat')
+        template = '''
+heat_template_version: 2013-05-23
+resources:
+  random:
+    type: my_random.yaml
+outputs:
+    random_value:
+        value: {get_attr: [random, random_value]}
+'''
+        files = {'my_random.yaml': self.load_template('random_string')}
+
+        stack_identifier = self.create_stack(stack_name, template,
+                                             files=files)
+        self.client.wait_for_stack_status(stack_identifier, 'CREATE_COMPLETE')
+
+        # random_string.yaml specifies a length of 10
+        random_value = self.get_stack_output(stack_identifier, 'random_value')
+        self.assertEqual(10, len(random_value))
