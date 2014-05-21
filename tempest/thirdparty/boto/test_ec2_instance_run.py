@@ -193,7 +193,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.terminate()
         self.cancelResourceCleanUp(rcuk)
 
-    @test.skip_because(bug="1098891")
     @test.attr(type='smoke')
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
@@ -211,7 +210,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
             pass
         except exception.EC2ResponseError as exc:
             if self.ec2_error_code.\
-                client.InvalidInstanceID.NotFound.match(exc):
+                client.InvalidInstanceID.NotFound.match(exc) is None:
                 pass
             else:
                 raise
