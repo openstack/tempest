@@ -39,6 +39,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         cls._cluster_templates = []
         cls._data_sources = []
         cls._job_binary_internals = []
+        cls._job_binaries = []
 
     @classmethod
     def tearDownClass(cls):
@@ -50,6 +51,8 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
                               cls.client.delete_data_source)
         cls.cleanup_resources(getattr(cls, '_job_binary_internals', []),
                               cls.client.delete_job_binary_internal)
+        cls.cleanup_resources(getattr(cls, '_job_binaries', []),
+                              cls.client.delete_job_binary)
         cls.clear_isolated_creds()
         super(BaseDataProcessingTest, cls).tearDownClass()
 
@@ -126,5 +129,18 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         resp, body = cls.client.create_job_binary_internal(name, data)
         # store id of created job binary internal
         cls._job_binary_internals.append(body['id'])
+
+        return resp, body
+
+    def create_job_binary(cls, name, url, extra=None, **kwargs):
+        """Creates watched job binary with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object. All resources created in this method will be automatically
+        removed in tearDownClass method.
+        """
+        resp, body = cls.client.create_job_binary(name, url, extra, **kwargs)
+        # store id of created job binary
+        cls._job_binaries.append(body['id'])
 
         return resp, body
