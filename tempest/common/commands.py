@@ -28,15 +28,13 @@ def sudo_cmd_call(cmd):
     args = shlex.split(cmd)
     subprocess_args = {'stdout': subprocess.PIPE,
                        'stderr': subprocess.STDOUT}
-    try:
-        proc = subprocess.Popen(['/usr/bin/sudo', '-n'] + args,
-                                **subprocess_args)
-        return proc.communicate()[0]
-        if proc.returncode != 0:
-            LOG.error(cmd + "returned with: " +
-                      proc.returncode + "exit status")
-    except subprocess.CalledProcessError as e:
-        LOG.error("command output:\n%s" % e.output)
+    proc = subprocess.Popen(['/usr/bin/sudo', '-n'] + args,
+                            **subprocess_args)
+    stdout = proc.communicate()[0]
+    if proc.returncode != 0:
+        LOG.error(("Command {0} returned with exit status {1},"
+                   "output {2}").format(cmd, proc.returncode, stdout))
+    return stdout
 
 
 def ip_addr_raw():
