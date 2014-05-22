@@ -17,6 +17,7 @@ import json
 import time
 
 from tempest.api_schema.compute import interfaces as common_schema
+from tempest.api_schema.compute import servers as servers_schema
 from tempest.api_schema.compute.v2 import interfaces as schema
 from tempest.common import rest_client
 from tempest import config
@@ -94,6 +95,8 @@ class InterfacesClientJSON(rest_client.RestClient):
         })
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
+        self.validate_response(servers_schema.server_actions_common_schema,
+                               resp, body)
         return resp, body
 
     def remove_fixed_ip(self, server_id, ip_address):
@@ -105,4 +108,6 @@ class InterfacesClientJSON(rest_client.RestClient):
         })
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
+        self.validate_response(servers_schema.server_actions_common_schema,
+                               resp, body)
         return resp, body

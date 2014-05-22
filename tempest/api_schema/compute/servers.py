@@ -139,3 +139,11 @@ list_servers = {
         'required': ['servers']
     }
 }
+
+server_actions_common_schema = {
+    'status_code': [202]
+}
+
+server_actions_delete_password = {
+    'status_code': [204]
+}

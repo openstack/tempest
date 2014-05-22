@@ -203,12 +203,15 @@ class ServersV3ClientJSON(rest_client.RestClient):
         self.validate_response(schema.list_addresses_by_network, resp, body)
         return resp, body
 
-    def action(self, server_id, action_name, response_key, **kwargs):
+    def action(self, server_id, action_name, response_key,
+               schema=common_schema.server_actions_common_schema, **kwargs):
         post_body = json.dumps({action_name: kwargs})
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
         if response_key is not None:
             body = json.loads(body)[response_key]
+        else:
+            self.validate_response(schema, resp, body)
         return resp, body
 
     def create_backup(self, server_id, backup_type, rotation, name):
@@ -220,7 +223,8 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def change_password(self, server_id, admin_password):
         """Changes the root password for the server."""
-        return self.action(server_id, 'change_password', None,
+        return self.action(server_id, 'change_password',
+                           None, schema.server_actions_change_password,
                            admin_password=admin_password)
 
     def get_password(self, server_id):
@@ -236,8 +240,11 @@ class ServersV3ClientJSON(rest_client.RestClient):
         Note that this does not actually change the instance server
         password.
         """
-        return self.delete("servers/%s/os-server-password" %
-                           str(server_id))
+        resp, body = self.delete("servers/%s/os-server-password" %
+                                 str(server_id))
+        self.validate_response(common_schema.server_actions_delete_password,
+                               resp, body)
+        return resp, body
 
     def reboot(self, server_id, reboot_type):
         """Reboots a server."""
@@ -364,6 +371,8 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.post("servers/%s/action" % str(server_id),
                                req_body)
+        self.validate_response(common_schema.server_actions_common_schema,
+                               resp, body)
         return resp, body
 
     def migrate_server(self, server_id, **kwargs):
@@ -416,7 +425,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, **kwargs)
+        return self.action(server_id, 'rescue', 'admin_password', **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
