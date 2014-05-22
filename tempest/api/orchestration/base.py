@@ -42,12 +42,14 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.keypairs_client = cls.os.keypairs_client
         cls.network_client = cls.os.network_client
         cls.volumes_client = cls.os.volumes_client
+        cls.images_v2_client = cls.os.image_client_v2
         cls.stacks = []
         cls.keypairs = []
+        cls.images = []
 
     @classmethod
     def _get_default_network(cls):
-        resp, networks = cls.network_client.list_networks()
+        __, networks = cls.network_client.list_networks()
         for net in networks['networks']:
             if net['name'] == CONF.compute.fixed_network_name:
                 return net
@@ -91,7 +93,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def _create_keypair(cls, name_start='keypair-heat-'):
         kp_name = data_utils.rand_name(name_start)
-        resp, body = cls.keypairs_client.create_keypair(kp_name)
+        __, body = cls.keypairs_client.create_keypair(kp_name)
         cls.keypairs.append(kp_name)
         return body
 
@@ -101,6 +103,25 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
             try:
                 cls.keypairs_client.delete_keypair(kp_name)
             except Exception:
+                pass
+
+    @classmethod
+    def _create_image(cls, name_start='image-heat-', container_format='bare',
+                      disk_format='iso'):
+        image_name = data_utils.rand_name(name_start)
+        __, body = cls.images_v2_client.create_image(image_name,
+                                                     container_format,
+                                                     disk_format)
+        image_id = body['id']
+        cls.images.append(image_id)
+        return body
+
+    @classmethod
+    def _clear_images(cls):
+        for image_id in cls.images:
+            try:
+                cls.images_v2_client.delete_image(image_id)
+            except exceptions.NotFound:
                 pass
 
     @classmethod
@@ -116,6 +137,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def tearDownClass(cls):
         cls._clear_stacks()
         cls._clear_keypairs()
+        cls._clear_images()
         super(BaseOrchestrationTest, cls).tearDownClass()
 
     @staticmethod

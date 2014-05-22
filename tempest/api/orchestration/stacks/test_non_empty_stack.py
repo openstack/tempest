@@ -14,8 +14,10 @@ import logging
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -27,13 +29,15 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         super(StacksTestJSON, cls).setUpClass()
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.load_template('non_empty_stack')
-
+        image_id = (CONF.orchestration.image_ref or
+                    cls._create_image()['id'])
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
             template,
             parameters={
-                'trigger': 'start'
+                'trigger': 'start',
+                'image': image_id
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.resource_name = 'fluffy'
