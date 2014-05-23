@@ -165,8 +165,8 @@ class TestPorts(base.BaseBaremetalTest):
         resp, body = self.client.list_ports_detail()
         self.assertEqual(200, resp.status)
 
-        ports_dict = {port['uuid']: port for port in body['ports']
-                      if port['uuid'] in uuids}
+        ports_dict = dict((port['uuid'], port) for port in body['ports']
+                          if port['uuid'] in uuids)
 
         for uuid in uuids:
             self.assertIn(uuid, ports_dict)
