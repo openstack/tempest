@@ -108,22 +108,22 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         s_name = data_utils.rand_name('service-')
         s_type = data_utils.rand_name('type--')
         s_description = data_utils.rand_name('description-')
-        resp, self.service2 =\
+        resp, service2 =\
             self.service_client.create_service(s_name, s_type,
                                                description=s_description)
-        self.service_ids.append(self.service2['id'])
+        self.service_ids.append(service2['id'])
         # Updating endpoint with new values
         region2 = data_utils.rand_name('region')
         url2 = data_utils.rand_name('url')
         interface2 = 'internal'
         resp, endpoint = \
             self.client.update_endpoint(endpoint_for_update['id'],
-                                        service_id=self.service2['id'],
+                                        service_id=service2['id'],
                                         interface=interface2, url=url2,
                                         region=region2, enabled=False)
         self.assertEqual(resp['status'], '200')
         # Asserting if the attributes of endpoint are updated
-        self.assertEqual(self.service2['id'], endpoint['service_id'])
+        self.assertEqual(service2['id'], endpoint['service_id'])
         self.assertEqual(interface2, endpoint['interface'])
         self.assertEqual(url2, endpoint['url'])
         self.assertEqual(region2, endpoint['region'])
