@@ -163,7 +163,7 @@ ComputeGroup = [
                help="Password used to authenticate to an instance using "
                     "the alternate image."),
     cfg.IntOpt('build_interval',
-               default=10,
+               default=1,
                help="Time in seconds between build status checks."),
     cfg.IntOpt('build_timeout',
                default=300,
@@ -411,7 +411,7 @@ NetworkGroup = [
                help="Timeout in seconds to wait for network operation to "
                     "complete."),
     cfg.IntOpt('build_interval',
-               default=10,
+               default=1,
                help="Time in seconds between network operation status "
                     "checks."),
 ]
@@ -443,7 +443,7 @@ volume_group = cfg.OptGroup(name='volume',
 
 VolumeGroup = [
     cfg.IntOpt('build_interval',
-               default=10,
+               default=1,
                help='Time in seconds between volume availability checks.'),
     cfg.IntOpt('build_timeout',
                default=300,
