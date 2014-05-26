@@ -84,9 +84,13 @@ base_update_server = {
                     'links': parameter_types.links,
                     'addresses': parameter_types.addresses,
                 },
+                # NOTE(GMann): 'progress' attribute is present in the response
+                # only when server's status is one of the progress statuses
+                # ("ACTIVE","BUILD", "REBUILD", "RESIZE","VERIFY_RESIZE")
+                # So it is not defined as 'required'.
                 'required': ['id', 'name', 'status', 'image', 'flavor',
                              'user_id', 'tenant_id', 'created', 'updated',
-                             'progress', 'metadata', 'links', 'addresses']
+                             'metadata', 'links', 'addresses']
             }
         }
     }
