@@ -943,7 +943,8 @@ class NetworkScenarioTest(OfficialClientTest):
             try:
                 source.ping_host(dest)
             except exceptions.SSHExecCommandFailed:
-                LOG.exception('Failed to ping host via ssh connection')
+                LOG.warn('Failed to ping IP: %s via a ssh connection from: %s.'
+                         % (dest, source.ssh_client.host))
                 return not should_succeed
             return should_succeed
 
