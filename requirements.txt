@@ -17,7 +17,6 @@ python-ironicclient
 python-saharaclient>=0.6.0
 python-swiftclient>=2.0.2
 testresources>=0.2.4
-keyring>=2.1
 testrepository>=0.0.18
 oslo.config>=1.2.0
 six>=1.6.0
