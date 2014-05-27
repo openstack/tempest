@@ -16,9 +16,12 @@
 
 import logging
 import os
+import re
 import six
 import subprocess
+import time
 
+from heatclient import exc as heat_exceptions
 import netaddr
 from neutronclient.common import exceptions as exc
 from novaclient import exceptions as nova_exceptions
@@ -32,6 +35,7 @@ from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log
+from tempest.openstack.common import timeutils
 import tempest.test
 
 CONF = config.CONF
@@ -1069,3 +1073,98 @@ class OrchestrationScenarioTest(OfficialClientTest):
         for net in networks['networks']:
             if net['name'] == CONF.compute.fixed_network_name:
                 return net
+
+    @staticmethod
+    def _stack_output(stack, output_key):
+        """Return a stack output value for a given key."""
+        return next((o['output_value'] for o in stack.outputs
+                    if o['output_key'] == output_key), None)
+
+    def _ping_ip_address(self, ip_address, should_succeed=True):
+        cmd = ['ping', '-c1', '-w1', ip_address]
+
+        def ping():
+            proc = subprocess.Popen(cmd,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            proc.wait()
+            return (proc.returncode == 0) == should_succeed
+
+        return tempest.test.call_until_true(
+            ping, CONF.orchestration.build_timeout, 1)
+
+    def _wait_for_resource_status(self, stack_identifier, resource_name,
+                                  status, failure_pattern='^.*_FAILED$'):
+        """Waits for a Resource to reach a given status."""
+        fail_regexp = re.compile(failure_pattern)
+        build_timeout = CONF.orchestration.build_timeout
+        build_interval = CONF.orchestration.build_interval
+
+        start = timeutils.utcnow()
+        while timeutils.delta_seconds(start,
+                                      timeutils.utcnow()) < build_timeout:
+            try:
+                res = self.client.resources.get(
+                    stack_identifier, resource_name)
+            except heat_exceptions.HTTPNotFound:
+                # ignore this, as the resource may not have
+                # been created yet
+                pass
+            else:
+                if res.resource_status == status:
+                    return
+                if fail_regexp.search(res.resource_status):
+                    raise exceptions.StackResourceBuildErrorException(
+                        resource_name=res.resource_name,
+                        stack_identifier=stack_identifier,
+                        resource_status=res.resource_status,
+                        resource_status_reason=res.resource_status_reason)
+            time.sleep(build_interval)
+
+        message = ('Resource %s failed to reach %s status within '
+                   'the required time (%s s).' %
+                   (res.resource_name, status, build_timeout))
+        raise exceptions.TimeoutException(message)
+
+    def _wait_for_stack_status(self, stack_identifier, status,
+                               failure_pattern='^.*_FAILED$'):
+        """
+        Waits for a Stack to reach a given status.
+
+        Note this compares the full $action_$status, e.g
+        CREATE_COMPLETE, not just COMPLETE which is exposed
+        via the status property of Stack in heatclient
+        """
+        fail_regexp = re.compile(failure_pattern)
+        build_timeout = CONF.orchestration.build_timeout
+        build_interval = CONF.orchestration.build_interval
+
+        start = timeutils.utcnow()
+        while timeutils.delta_seconds(start,
+                                      timeutils.utcnow()) < build_timeout:
+            try:
+                stack = self.client.stacks.get(stack_identifier)
+            except heat_exceptions.HTTPNotFound:
+                # ignore this, as the stackource may not have
+                # been created yet
+                pass
+            else:
+                if stack.stack_status == status:
+                    return
+                if fail_regexp.search(stack.stack_status):
+                    raise exceptions.StackBuildErrorException(
+                        stack_identifier=stack_identifier,
+                        stack_status=stack.stack_status,
+                        stack_status_reason=stack.stack_status_reason)
+            time.sleep(build_interval)
+
+        message = ('Stack %s failed to reach %s status within '
+                   'the required time (%s s).' %
+                   (stack.stack_name, status, build_timeout))
+        raise exceptions.TimeoutException(message)
+
+    def _stack_delete(self, stack_identifier):
+        try:
+            self.client.stacks.delete(stack_identifier)
+        except heat_exceptions.HTTPNotFound:
+            pass
