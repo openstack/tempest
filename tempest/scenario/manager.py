@@ -803,6 +803,30 @@ class NetworkScenarioTest(OfficialClientTest):
             debug.log_net_debug()
             raise
 
+    def _check_tenant_network_connectivity(self, server,
+                                           username,
+                                           private_key,
+                                           should_connect=True,
+                                           servers_for_debug=None):
+        if not CONF.network.tenant_networks_reachable:
+            msg = 'Tenant networks not configured to be reachable.'
+            LOG.info(msg)
+            return
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        try:
+            for net_name, ip_addresses in server.networks.iteritems():
+                for ip_address in ip_addresses:
+                    self._check_vm_connectivity(ip_address,
+                                                username,
+                                                private_key,
+                                                should_connect=should_connect)
+        except Exception:
+            LOG.exception('Tenant network connectivity check failed')
+            self._log_console_output(servers_for_debug)
+            debug.log_net_debug()
+            raise
+
     def _check_remote_connectivity(self, source, dest, should_succeed=True):
         """
         check ping server via source ssh connection
