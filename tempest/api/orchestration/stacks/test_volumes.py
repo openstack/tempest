@@ -39,6 +39,8 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         self.assertEqual(1, volume.get('size'))
         self.assertEqual('a descriptive description',
                          volume.get('display_description'))
+        self.assertEqual('volume_name',
+                         volume.get('display_name'))
 
     def _outputs_verify(self, stack_identifier):
         self.assertEqual('available',
@@ -48,6 +50,9 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         self.assertEqual('a descriptive description',
                          self.get_stack_output(stack_identifier,
                                                'display_description'))
+        self.assertEqual('volume_name',
+                         self.get_stack_output(stack_identifier,
+                                               'display_name'))
 
     @test.attr(type='gate')
     def test_cinder_volume_create_delete(self):
