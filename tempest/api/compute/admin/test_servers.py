@@ -32,6 +32,10 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         cls.client = cls.os_adm.servers_client
         cls.non_admin_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client
+        cls.network_client = cls.os_adm.network_client
+
+        __, networks = cls.network_client.list_networks()
+        cls.networks = [{'uuid': n['id']} for n in networks['networks'] if n['name'] == cls.fixed_network_name]
 
         cls.s1_name = data_utils.rand_name('server')
         resp, server = cls.create_test_server(name=cls.s1_name,
@@ -86,7 +90,7 @@ class ServersAdminTestJSON(base.BaseV2ComputeAdminTest):
         flavor = self.flavor_ref
         image_id = self.image_ref
         resp, test_server = self.client.create_server(
-            name, image_id, flavor)
+            name, image_id, flavor, networks=self.networks)
         self.assertEqual('202', resp['status'])
         self.addCleanup(self.client.delete_server, test_server['id'])
         self.client.wait_for_server_status(test_server['id'], 'ACTIVE')
