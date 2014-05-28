@@ -398,7 +398,9 @@ class BaseComputeAdminTest(BaseComputeTest):
             cls.availability_zone_admin_client = (
                 cls.os_adm.availability_zone_client)
 
-        else:
+        cls.fixed_network_name = CONF.compute.fixed_network_name
+
+        if cls._api_version == 3:
             cls.servers_admin_client = cls.os_adm.servers_v3_client
             cls.services_admin_client = cls.os_adm.services_v3_client
             cls.availability_zone_admin_client = \
