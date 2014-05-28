@@ -19,10 +19,12 @@ class TemplateYAMLTestJSON(base.BaseOrchestrationTest):
     template = """
 HeatTemplateFormatVersion: '2012-12-12'
 Description: |
-  Template which creates only a new user
+  Template which creates only a new cloud config
 Resources:
-  CfnUser:
-    Type: AWS::IAM::User
+  CfnCloudConfig:
+    Type: OS::Heat::CloudConfig
+    Properties:
+      cloud_config: {}
 """
 
     @classmethod
@@ -54,10 +56,13 @@ class TemplateAWSTestJSON(TemplateYAMLTestJSON):
     template = """
 {
   "AWSTemplateFormatVersion" : "2010-09-09",
-  "Description" : "Template which creates only a new user",
+  "Description" : "Template which creates only a new cloud config",
   "Resources" : {
-    "CfnUser" : {
-      "Type" : "AWS::IAM::User"
+    "CfnCloudConfig" : {
+      "Type" : "OS::Heat::CloudConfig",
+      "Properties": {
+        "cloud_config": {}
+      }
     }
   }
 }
