@@ -298,6 +298,23 @@ class ServersClientJSON(rest_client.RestClient):
         """Reverts a server back to its original flavor."""
         return self.action(server_id, 'revertResize', None, **kwargs)
 
+    def create_image(self, server_id, name, meta=None):
+        """Creates an image of the original server."""
+
+        post_body = {
+            'createImage': {
+                'name': name,
+            }
+        }
+
+        if meta is not None:
+            post_body['createImage']['metadata'] = meta
+
+        post_body = json.dumps(post_body)
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        return resp, body
+
     def list_server_metadata(self, server_id):
         resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = json.loads(body)
