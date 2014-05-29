@@ -349,8 +349,7 @@ class ServersClientXML(rest_client.RestClient):
             networks = xml_utils.Element("networks")
             server.append(networks)
             for network in kwargs['networks']:
-                s = xml_utils.Element("network", uuid=network['uuid'],
-                                      fixed_ip=network['fixed_ip'])
+                s = xml_utils.Element("network", uuid=network['uuid'])
                 networks.append(s)
 
         if 'meta' in kwargs:
