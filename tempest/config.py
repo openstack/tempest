@@ -137,11 +137,12 @@ ComputeGroup = [
                      "better parallel execution, but also requires that "
                      "OpenStack Identity API admin credentials are known."),
     cfg.StrOpt('image_ref',
-               default="{$IMAGE_ID}",
-               help="Valid primary image reference to be used in tests."),
+               help="Valid primary image reference to be used in tests. "
+                    "This is a required option"),
     cfg.StrOpt('image_ref_alt',
-               default="{$IMAGE_ID_ALT}",
-               help="Valid secondary image reference to be used in tests."),
+               help="Valid secondary image reference to be used in tests. "
+                    "This is a required option, but if only one image is "
+                    "available duplicate the value of image_ref above"),
     cfg.StrOpt('flavor_ref',
                default="1",
                help="Valid primary flavor to use in tests."),

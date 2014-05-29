@@ -211,13 +211,14 @@
 # admin credentials are known. (boolean value)
 #allow_tenant_isolation=false
 
-# Valid primary image reference to be used in tests. (string
-# value)
-#image_ref={$IMAGE_ID}
+# Valid primary image reference to be used in tests. This is a
+# required option (string value)
+#image_ref=<None>
 
-# Valid secondary image reference to be used in tests. (string
-# value)
-#image_ref_alt={$IMAGE_ID_ALT}
+# Valid secondary image reference to be used in tests. This is
+# a required option, but if only one image is available
+# duplicate the value of image_ref above (string value)
+#image_ref_alt=<None>
 
 # Valid primary flavor to use in tests. (string value)
 #flavor_ref=1
