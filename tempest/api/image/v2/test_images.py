@@ -35,11 +35,14 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         upload the image file, get image and get image file api's
         """
 
+        uuid = '00000000-1111-2222-3333-444455556666'
         image_name = data_utils.rand_name('image')
         resp, body = self.create_image(name=image_name,
                                        container_format='bare',
                                        disk_format='raw',
-                                       visibility='public')
+                                       visibility='public',
+                                       ramdisk_id=uuid)
+
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertIn('name', body)
@@ -60,6 +63,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(image_id, body['id'])
         self.assertEqual(image_name, body['name'])
+        self.assertEqual(uuid, body['ramdisk_id'])
         self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
 
