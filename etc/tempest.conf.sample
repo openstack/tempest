@@ -242,7 +242,7 @@
 #image_alt_ssh_password=password
 
 # Time in seconds between build status checks. (integer value)
-#build_interval=10
+#build_interval=1
 
 # Timeout in seconds to wait for an instance to build.
 # (integer value)
@@ -332,6 +332,9 @@
 # execution, but also requires that OpenStack Identity API
 # admin credentials are known. (boolean value)
 #allow_tenant_isolation=false
+
+# Time in seconds between build status checks. (integer value)
+#build_interval=1
 
 
 [compute-admin]
@@ -706,7 +709,7 @@
 
 # Time in seconds between network operation status checks.
 # (integer value)
-#build_interval=10
+#build_interval=1
 
 
 [network-feature-enabled]
@@ -788,9 +791,6 @@
 # The endpoint type to use for the orchestration service.
 # (string value)
 #endpoint_type=publicURL
-
-# Time in seconds between build status checks. (integer value)
-#build_interval=1
 
 # Timeout in seconds to wait for a stack to build. (integer
 # value)
@@ -981,7 +981,7 @@
 
 # Time in seconds between volume availability checks. (integer
 # value)
-#build_interval=10
+#build_interval=1
 
 # Timeout in seconds to wait for a volume to becomeavailable.
 # (integer value)
