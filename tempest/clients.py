@@ -168,6 +168,8 @@ from tempest.services.volume.json.admin.volume_services_client import \
     VolumesServicesClientJSON
 from tempest.services.volume.json.admin.volume_types_client import \
     VolumeTypesClientJSON
+from tempest.services.volume.json.availability_zone_client import \
+    VolumeAvailabilityZoneClientJSON
 from tempest.services.volume.json.backups_client import BackupsClientJSON
 from tempest.services.volume.json.extensions_client import \
     ExtensionsClientJSON as VolumeExtensionClientJSON
@@ -183,6 +185,8 @@ from tempest.services.volume.xml.admin.volume_services_client import \
     VolumesServicesClientXML
 from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
+from tempest.services.volume.xml.availability_zone_client import \
+    VolumeAvailabilityZoneClientXML
 from tempest.services.volume.xml.backups_client import BackupsClientXML
 from tempest.services.volume.xml.extensions_client import \
     ExtensionsClientXML as VolumeExtensionClientXML
@@ -262,6 +266,8 @@ class Manager(manager.Manager):
                     self.auth_provider)
             self.token_client = TokenClientXML()
             self.token_v3_client = V3TokenClientXML()
+            self.volume_availability_zone_client = \
+                VolumeAvailabilityZoneClientXML(self.auth_provider)
 
         elif self.interface == 'json':
             self.certificates_client = CertificatesClientJSON(
@@ -358,6 +364,8 @@ class Manager(manager.Manager):
             self.negative_client = rest_client.NegativeRestClient(
                 self.auth_provider)
             self.negative_client.service = service
+            self.volume_availability_zone_client = \
+                VolumeAvailabilityZoneClientJSON(self.auth_provider)
 
         else:
             msg = "Unsupported interface type `%s'" % interface
