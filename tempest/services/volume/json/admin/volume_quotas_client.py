@@ -77,3 +77,7 @@ class VolumeQuotasClientJSON(rest_client.RestClient):
         post_body = jsonutils.dumps({'quota_set': post_body})
         resp, body = self.put('os-quota-sets/%s' % tenant_id, post_body)
         return resp, self._parse_resp(body)
+
+    def delete_quota_set(self, tenant_id):
+        """Delete the tenant's quota set."""
+        return self.delete('os-quota-sets/%s' % tenant_id)
