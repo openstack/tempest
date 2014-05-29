@@ -44,9 +44,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 cls.isolated_creds.get_admin_creds())
             # Get isolated creds for alt user
             cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
-            # Add isolated users to operator role so that they can create a
-            # container in swift.
-            cls._assign_member_role()
         else:
             cls.os = clients.Manager()
             cls.os_admin = clients.AdminManager()
@@ -78,22 +75,6 @@ class BaseObjectTest(tempest.test.BaseTestCase):
     def tearDownClass(cls):
         cls.isolated_creds.clear_isolated_creds()
         super(BaseObjectTest, cls).tearDownClass()
-
-    @classmethod
-    def _assign_member_role(cls):
-        primary_creds = cls.isolated_creds.get_primary_creds()
-        alt_creds = cls.isolated_creds.get_alt_creds()
-        swift_role = CONF.object_storage.operator_role
-        try:
-            resp, roles = cls.os_admin.identity_client.list_roles()
-            role = next(r for r in roles if r['name'] == swift_role)
-        except StopIteration:
-            msg = "No role named %s found" % swift_role
-            raise exceptions.NotFound(msg)
-        for creds in [primary_creds, alt_creds]:
-            cls.os_admin.identity_client.assign_user_role(creds.tenant_id,
-                                                          creds.user_id,
-                                                          role['id'])
 
     @classmethod
     def delete_containers(cls, containers, container_client=None,

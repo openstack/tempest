@@ -106,12 +106,23 @@ class IsolatedCreds(object):
             roles = self.identity_admin_client.roles.list()
         return roles
 
-    def _assign_user_role(self, tenant, user, role):
+    def _assign_user_role(self, tenant, user, role_name):
+        role = None
+        try:
+            roles = self._list_roles()
+            if self.tempest_client:
+                role = next(r for r in roles if r['name'] == role_name)
+            else:
+                role = next(r for r in roles if r.name == role_name)
+        except StopIteration:
+            msg = 'No "%s" role found' % role_name
+            raise exceptions.NotFound(msg)
         if self.tempest_client:
-            self.identity_admin_client.assign_user_role(tenant, user, role)
+            self.identity_admin_client.assign_user_role(tenant['id'],
+                                                        user['id'], role['id'])
         else:
-            self.identity_admin_client.roles.add_user_role(user,
-                                                           role, tenant=tenant)
+            self.identity_admin_client.roles.add_user_role(user.id, role.id,
+                                                           tenant.id)
 
     def _delete_user(self, user):
         if self.tempest_client:
@@ -149,22 +160,11 @@ class IsolatedCreds(object):
         email = data_utils.rand_name(root) + suffix + "@example.com"
         user = self._create_user(username, self.password,
                                  tenant, email)
+        # NOTE(andrey-mp): user needs this role to create containers in swift
+        swift_operator_role = CONF.object_storage.operator_role
+        self._assign_user_role(tenant, user, swift_operator_role)
         if admin:
-            role = None
-            try:
-                roles = self._list_roles()
-                admin_role = CONF.identity.admin_role
-                if self.tempest_client:
-                    role = next(r for r in roles if r['name'] == admin_role)
-                else:
-                    role = next(r for r in roles if r.name == admin_role)
-            except StopIteration:
-                msg = "No admin role found"
-                raise exceptions.NotFound(msg)
-            if self.tempest_client:
-                self._assign_user_role(tenant['id'], user['id'], role['id'])
-            else:
-                self._assign_user_role(tenant.id, user.id, role.id)
+            self._assign_user_role(tenant, user, CONF.identity.admin_role)
         return self._get_credentials(user, tenant)
 
     def _get_credentials(self, user, tenant):
