@@ -50,6 +50,42 @@ class BaseQueuingTest(test.BaseTestCase):
 
     @classmethod
     def delete_queue(cls, queue_name):
-        """Wrapper utility that returns a test queue."""
+        """Wrapper utility that deletes a test queue."""
         resp, body = cls.client.delete_queue(queue_name)
+        return resp, body
+
+    @classmethod
+    def check_queue_exists(cls, queue_name):
+        """Wrapper utility that checks the existence of a test queue."""
+        resp, body = cls.client.get_queue(queue_name)
+        return resp, body
+
+    @classmethod
+    def check_queue_exists_head(cls, queue_name):
+        """Wrapper utility checks the head of a queue via http HEAD."""
+        resp, body = cls.client.head_queue(queue_name)
+        return resp, body
+
+    @classmethod
+    def list_queues(cls):
+        """Wrapper utility that lists queues."""
+        resp, body = cls.client.list_queues()
+        return resp, body
+
+    @classmethod
+    def get_queue_stats(cls, queue_name):
+        """Wrapper utility that returns the queue stats."""
+        resp, body = cls.client.get_queue_stats(queue_name)
+        return resp, body
+
+    @classmethod
+    def get_queue_metadata(cls, queue_name):
+        """Wrapper utility that gets a queue metadata."""
+        resp, body = cls.client.get_queue_metadata(queue_name)
+        return resp, body
+
+    @classmethod
+    def set_queue_metadata(cls, queue_name, rbody):
+        """Wrapper utility that sets the metadata of a queue."""
+        resp, body = cls.client.set_queue_metadata(queue_name, rbody)
         return resp, body

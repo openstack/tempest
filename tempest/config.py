@@ -437,6 +437,10 @@ QueuingGroup = [
     cfg.StrOpt('catalog_type',
                default='queuing',
                help='Catalog type of the Queuing service.'),
+    cfg.IntOpt('max_queues_per_page',
+               default=20,
+               help='The maximum number of queue records per page when '
+                    'listing queues'),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
