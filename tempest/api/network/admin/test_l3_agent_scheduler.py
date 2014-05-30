@@ -28,8 +28,9 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         List L3 agents hosting the given router.
         Add and Remove Router to L3 agent
 
-    v2.0 of the Neutron API is assumed. It is also assumed that the following
-    options are defined in the [network] section of etc/tempest.conf:
+    v2.0 of the Neutron API is assumed.
+
+    The l3_agent_scheduler extension is required for these tests.
     """
 
     @classmethod
