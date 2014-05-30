@@ -238,6 +238,14 @@ class RestClient(object):
                 return resp[i]
         return ""
 
+    def _log_request_start(self, method, req_url, req_headers={},
+                           req_body=None):
+        caller_name = misc_utils.find_test_caller()
+        trace_regex = CONF.debug.trace_requests
+        if trace_regex and re.search(trace_regex, caller_name):
+            self.LOG.debug('Starting Request (%s): %s %s' %
+                           (caller_name, method, req_url))
+
     def _log_request(self, method, req_url, resp,
                      secs="", req_headers={},
                      req_body=None, resp_body=None):
@@ -364,6 +372,7 @@ class RestClient(object):
 
         # Do the actual request, and time it
         start = time.time()
+        self._log_request_start(method, req_url)
         resp, resp_body = self.http_obj.request(
             req_url, method, headers=req_headers, body=req_body)
         end = time.time()
