@@ -23,10 +23,8 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
         It ensures response status and main plugins availability.
         """
         resp, plugins = self.client.list_plugins()
-
         self.assertEqual(200, resp.status)
-
-        plugins_names = list([plugin['name'] for plugin in plugins])
+        plugins_names = [plugin['name'] for plugin in plugins]
         self.assertIn('vanilla', plugins_names)
         self.assertIn('hdp', plugins_names)
 
@@ -40,14 +38,12 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
     def test_plugin_get(self):
         for plugin_name in self._list_all_plugin_names():
             resp, plugin = self.client.get_plugin(plugin_name)
-
             self.assertEqual(200, resp.status)
             self.assertEqual(plugin_name, plugin['name'])
 
             for plugin_version in plugin['versions']:
                 resp, detailed_plugin = self.client.get_plugin(plugin_name,
                                                                plugin_version)
-
                 self.assertEqual(200, resp.status)
                 self.assertEqual(plugin_name, detailed_plugin['name'])
 

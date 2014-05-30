@@ -46,7 +46,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         It creates template and ensures response status and template name.
         Returns id and name of created template.
         """
-        if template_name is None:
+        if not template_name:
             # generate random name if it's not specified
             template_name = data_utils.rand_name('sahara-ng-template')
 
@@ -57,19 +57,13 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         # ensure that template created successfully
         self.assertEqual(202, resp.status)
         self.assertEqual(template_name, body['name'])
+        self.assertDictContainsSubset(self.node_group_template, body)
 
         return body['id'], template_name
 
     @test.attr(type='smoke')
     def test_node_group_template_create(self):
-        template_name = data_utils.rand_name('sahara-ng-template')
-        resp, body = self.create_node_group_template(
-            template_name, **self.node_group_template)
-
-        # check that template created successfully
-        self.assertEqual(resp.status, 202)
-        self.assertEqual(template_name, body['name'])
-        self.assertDictContainsSubset(self.node_group_template, body)
+        self._create_node_group_template()
 
     @test.attr(type='smoke')
     def test_node_group_template_list(self):
@@ -77,7 +71,6 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
 
         # check for node group template in list
         resp, templates = self.client.list_node_group_templates()
-
         self.assertEqual(200, resp.status)
         templates_info = [(template['id'], template['name'])
                           for template in templates]
@@ -89,7 +82,6 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
 
         # check node group template fetch by id
         resp, template = self.client.get_node_group_template(template_id)
-
         self.assertEqual(200, resp.status)
         self.assertEqual(template_name, template['name'])
         self.assertDictContainsSubset(self.node_group_template, template)
@@ -100,5 +92,4 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
 
         # delete the node group template by id
         resp = self.client.delete_node_group_template(template_id)[0]
-
         self.assertEqual(204, resp.status)
