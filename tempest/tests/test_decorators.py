@@ -14,13 +14,12 @@
 
 
 import mock
-import testtools
-
 from oslo.config import cfg
+from oslotest import mockpatch
+import testtools
 
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common.fixture import mockpatch
 from tempest import test
 from tempest.tests import base
 from tempest.tests import fake_config

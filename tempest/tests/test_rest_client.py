@@ -15,11 +15,12 @@
 import httplib2
 import json
 
+from oslotest import mockpatch
+
 from tempest.common import rest_client
 from tempest.common import xml_utils as xml
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
