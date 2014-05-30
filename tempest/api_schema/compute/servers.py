@@ -147,3 +147,14 @@ server_actions_common_schema = {
 server_actions_delete_password = {
     'status_code': [204]
 }
+
+get_console_output = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'output': {'type': 'string'}
+        },
+        'required': ['output']
+    }
+}

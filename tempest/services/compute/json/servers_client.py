@@ -210,11 +210,13 @@ class ServersClientJSON(rest_client.RestClient):
                                post_body)
         if response_key is not None:
             body = json.loads(body)
-            # Check for Schema as 'None' because if we donot have any server
+            # Check for Schema as 'None' because if we do not have any server
             # action schema implemented yet then they can pass 'None' to skip
             # the validation.Once all server action has their schema
             # implemented then, this check can be removed if every actions are
             # supposed to validate their response.
+            # TODO(GMann): Remove the below 'if' check once all server actions
+            # schema are implemented.
             if schema is not None:
                 self.validate_response(schema, resp, body)
             body = body[response_key]
@@ -427,7 +429,7 @@ class ServersClientJSON(rest_client.RestClient):
 
     def get_console_output(self, server_id, length):
         return self.action(server_id, 'os-getConsoleOutput', 'output',
-                           None, length=length)
+                           common_schema.get_console_output, length=length)
 
     def list_virtual_interfaces(self, server_id):
         """
