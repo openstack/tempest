@@ -60,6 +60,9 @@ def find_test_caller():
                 break
             elif re.search("^_run_cleanup", name):
                 is_cleanup = True
+            elif name == 'main':
+                caller_name = 'main'
+                break
             else:
                 cname = ""
                 if 'self' in frame.f_locals:
