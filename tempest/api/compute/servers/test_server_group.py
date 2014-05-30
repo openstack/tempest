@@ -75,6 +75,7 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
         policy = ['anti-affinity']
         self._create_delete_server_group(policy)
 
+    @test.skip_because(bug="1324348")
     @test.attr(type='gate')
     def test_create_delete_server_group_with_multiple_policies(self):
         # Create and Delete the server-group with multiple policies
