@@ -161,3 +161,28 @@ class DataProcessingClient(rest_client.RestClient):
 
         uri = 'data-sources/%s' % source_id
         return self.delete(uri)
+
+    def list_job_binary_internals(self):
+        """List all job binary internals for a user."""
+
+        uri = 'job-binary-internals'
+        return self._request_and_parse(self.get, uri, 'binaries')
+
+    def get_job_binary_internal(self, job_binary_id):
+        """Returns the details of a single job binary internal."""
+
+        uri = 'job-binary-internals/%s' % job_binary_id
+        return self._request_and_parse(self.get, uri, 'job_binary_internal')
+
+    def create_job_binary_internal(self, name, data):
+        """Creates job binary internal with specified params."""
+
+        uri = 'job-binary-internals/%s' % name
+        return self._request_and_parse(self.put, uri, 'job_binary_internal',
+                                       data)
+
+    def delete_job_binary_internal(self, job_binary_id):
+        """Deletes the specified job binary internal by id."""
+
+        uri = 'job-binary-internals/%s' % job_binary_id
+        return self.delete(uri)
