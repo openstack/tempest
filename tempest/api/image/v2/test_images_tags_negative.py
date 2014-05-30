@@ -35,7 +35,7 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
         # Delete non existing tag.
         resp, body = self.create_image(container_format='bare',
                                        disk_format='raw',
-                                       is_public=True,
+                                       visibility='public'
                                        )
         image_id = body['id']
         tag = data_utils.rand_name('non-exist-tag-')

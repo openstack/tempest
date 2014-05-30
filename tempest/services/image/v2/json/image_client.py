@@ -70,13 +70,12 @@ class ImageClientV2JSON(rest_client.RestClient):
             "disk_format": disk_format,
         }
 
-        for option in ['visibility']:
-            if option in kwargs:
-                value = kwargs.get(option)
-                if isinstance(value, dict) or isinstance(value, tuple):
-                    params.update(value)
-                else:
-                    params[option] = value
+        for option in kwargs:
+            value = kwargs.get(option)
+            if isinstance(value, dict) or isinstance(value, tuple):
+                params.update(value)
+            else:
+                params[option] = value
 
         data = json.dumps(params)
         self._validate_schema(data)
