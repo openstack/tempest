@@ -54,8 +54,8 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
     def _get_host_name(self):
         hosts = self.compute_client.hosts.list()
         self.assertTrue(len(hosts) >= 1)
-        hostname = hosts[0].host_name
-        return hostname
+        computes = [x for x in hosts if x.service == 'compute']
+        return computes[0].host_name
 
     def _add_host(self, aggregate_name, host):
         aggregate = self.compute_client.aggregates.add_host(aggregate_name,
