@@ -308,6 +308,8 @@ class ServersClientJSON(rest_client.RestClient):
         resp, body = self.post('servers/%s/metadata' % str(server_id),
                                post_body)
         body = json.loads(body)
+        self.validate_response(common_schema.update_server_metadata,
+                               resp, body)
         return resp, body['metadata']
 
     def get_server_metadata_item(self, server_id, key):
