@@ -1,4 +1,4 @@
-
+__author__ = 'Albert'
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
 # Copyright 2012 OpenStack Foundation
@@ -25,19 +25,20 @@ from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import services
+from tempest.common import ssh
 from tempest import exceptions
 from pprint import pprint
 
 LOG = logging.getLogger(__name__)
 
-class TestBasicScenario(manager.NetworkScenarioTest):
+
+class TestMetaData(manager.NetworkScenarioTest):
 
     CONF = config.TempestConfig()
 
-
     @classmethod
     def check_preconditions(cls):
-        super(TestBasicScenario, cls).check_preconditions()
+        super(TestMetaData, cls).check_preconditions()
         cfg = cls.config.network
         if not (cfg.tenant_networks_reachable or cfg.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
@@ -48,7 +49,7 @@ class TestBasicScenario(manager.NetworkScenarioTest):
 
     @classmethod
     def setUpClass(cls):
-        super(TestBasicScenario, cls).setUpClass()
+        super(TestMetaData, cls).setUpClass()
         cls.check_preconditions()
         cls.keypairs = {}
         cls.security_groups = {}
@@ -88,8 +89,8 @@ class TestBasicScenario(manager.NetworkScenarioTest):
                 name=name,
                 admin_state_up=True,
                 tenant_id=tenant_id,
-            ),
-        )
+                ),
+            )
         result = self.network_client.create_router(body=body)
         router = net_common.DeletableRouter(client=self.network_client,
                                             **result['router'])
@@ -143,10 +144,10 @@ class TestBasicScenario(manager.NetworkScenarioTest):
         create_kwargs = {
             'nics': [
                 {'net-id': network.id},
-            ],
+                ],
             'key_name': keypair_name,
             'security_groups': security_groups,
-        }
+            }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
         return server
 
@@ -163,78 +164,50 @@ class TestBasicScenario(manager.NetworkScenarioTest):
             self.floating_ips.setdefault(server, [])
             self.floating_ips[server].append(floating_ip)
 
-    def _do_test_vm_connectivity_admin_state_up(self):
-        must_fail = False
-        try:
-            self._check_public_network_connectivity()
-        except Exception as exc:
-            must_fail = True
-            LOG.exception(exc)
-            debug.log_ip_ns()
-        finally:
-            self.assertEqual(must_fail, True, "No connection to VM")
-
-    def _check_vm_connectivity_router(self):
-        for router in self.routers:
-            self.network_client.update_router(router.id, {'router': {'admin_state_up': False}})
-            pprint("router test")
-            self._do_test_vm_connectivity_admin_state_up()
-            self.network_client.update_router(router.id, {'router': {'admin_state_up': True}})
-
-    def _check_vm_connectivity_net(self):
-        for network in self.networks:
-            pprint("network test")
-            self.network_client.update_network(network.id, {'network': {'admin_state_up': False}})
-            self._do_test_vm_connectivity_admin_state_up()
-            self.network_client.update_network(network.id, {'network': {'admin_state_up': True}})
-
-    def _check_vm_connectivity_port(self):
-        pprint("port test")
-        for server, floating_ips in self.floating_ips.iteritems():
-            for floating_ip in floating_ips:
-                port_id = floating_ip.get("port_id")
-                self.network_client.update_port(port_id, {'port': {'admin_state_up': False}})
-                self._do_test_vm_connectivity_admin_state_up()
-                self.network_client.update_port(port_id, {'port': {'admin_state_up': True}})
-
-    def _check_public_network_connectivity(self):
-        ssh_login = self.config.compute.image_ssh_user
-        private_key = self.keypairs[self.tenant_id].private_key
-        try:
-            for server, floating_ips in self.floating_ips.iteritems():
-                for floating_ip in floating_ips:
-                    ip_address = floating_ip.floating_ip_address
-                    pprint(server.__dict__)
-                    self._check_vm_connectivity(ip_address, ssh_login, private_key)
-        except Exception as exc:
-            LOG.exception(exc)
-            debug.log_ip_ns()
-            raise exc
-
-    def basic_scenario(self):
+    def _scenario(self):
         self._create_keypairs()
         self._create_security_groups()
         self._create_networks()
         self._check_networks()
         self._create_servers()
         self._assign_floating_ips()
-        self._check_public_network_connectivity()
+        self._check_is_reachable_via_ssh()
+        #test if everything is ok
+
+    def _check_is_reachable_via_ssh(self):
+        ssh_login = self.config.compute.image_ssh_user
+        private_key = self.keypairs[self.tenant_id].private_key
+        try:
+            for server, floating_ips in self.floating_ips.iteritems():
+                for floating_ip in floating_ips:
+                    ip_address = floating_ip.floating_ip_address
+                    self._is_reachable_via_ssh(ip_address, ssh_login, private_key, self.config.compute.ssh_timeout)
+        except Exception as exc:
+            #LOG.exception(exc)
+            #debug.log_ip_ns()
+            raise exc
+
+    def _check_metadata(self):
+        ssh_login = self.config.compute.image_ssh_user
+        private_key = self.keypairs[self.tenant_id].private_key
+        try:
+            for server, floating_ips in self.floating_ips.iteritems():
+                for floating_ip in floating_ips:
+                    ip_address = floating_ip.floating_ip_address
+                    ssh_client = ssh.Client(ip_address, ssh_login,
+                                pkey=private_key,
+                                timeout=self.config.compute.ssh_timeout)
+                    result = ssh_client.exec_command("curl http://169.254.169.254")
+                    _expected = "1.0\n2007-01-19\n2007-03-01\n2007-08-29\n2007-10-10\n" \
+                                "2007-12-15\n2008-02-01\n2008-09-01\n2009-04-04\nlatest"
+                    self.assertEqual(_expected, result)
+        except Exception as exc:
+            raise exc
+
 
     @attr(type='smoke')
     @services('compute', 'network')
-    def test_admin_state_up(self):
-        self.basic_scenario()
-        LOG.info("Starting Router test")
-        self._check_vm_connectivity_router()
-        self._check_public_network_connectivity()
-        pprint("End of Rotuer test")
-        LOG.info("Starting Network test")
-        self._check_vm_connectivity_net()
-        self._check_public_network_connectivity()
-        pprint("End of Net test")
-        LOG.info("Starting Port test")
-        self._check_vm_connectivity_port()
-        pprint("End of Port test")
-        self._check_public_network_connectivity()
-
-
+    def test_metadata(self):
+        self._scenario()
+        self._check_is_reachable_via_ssh()
+        self._check_metadata()
