@@ -40,15 +40,14 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         resp, body = self.create_image(name=image_name,
                                        container_format='bare',
                                        disk_format='raw',
-                                       visibility='public',
+                                       visibility='private',
                                        ramdisk_id=uuid)
-
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertIn('name', body)
         self.assertEqual(image_name, body['name'])
         self.assertIn('visibility', body)
-        self.assertEqual('public', body['visibility'])
+        self.assertEqual('private', body['visibility'])
         self.assertIn('status', body)
         self.assertEqual('queued', body['status'])
 
@@ -81,7 +80,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         resp, body = self.client.create_image(name=image_name,
                                               container_format='bare',
                                               disk_format='raw',
-                                              visibility='public')
+                                              visibility='private')
         self.assertEqual(201, resp.status)
         image_id = body['id']
 
@@ -103,7 +102,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         resp, body = self.client.create_image(name=image_name,
                                               container_format='bare',
                                               disk_format='iso',
-                                              visibility='public')
+                                              visibility='private')
         self.assertEqual(201, resp.status)
         self.addCleanup(self.client.delete_image, body['id'])
         self.assertEqual('queued', body['status'])
@@ -117,10 +116,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Update Image
         new_image_name = data_utils.rand_name('new-image')
-        new_visibility = 'private'
         resp, body = self.client.update_image(image_id, [
-            dict(replace='/name', value=new_image_name),
-            dict(replace='/visibility', value=new_visibility)])
+            dict(replace='/name', value=new_image_name)])
 
         self.assertEqual(200, resp.status)
 
@@ -130,7 +127,6 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(image_id, body['id'])
         self.assertEqual(new_image_name, body['name'])
-        self.assertEqual(new_visibility, body['visibility'])
 
 
 class ListImagesTest(base.BaseV2ImageTest):
@@ -164,7 +160,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         resp, body = cls.create_image(name=name,
                                       container_format=container_format,
                                       disk_format=disk_format,
-                                      visibility='public')
+                                      visibility='private')
         image_id = body['id']
         resp, body = cls.client.store_image(image_id, data=image_file)
 
@@ -206,8 +202,8 @@ class ListImagesTest(base.BaseV2ImageTest):
 
     @test.attr(type='gate')
     def test_list_images_param_visibility(self):
-        # Test to get all images with visibility = public
-        params = {"visibility": "public"}
+        # Test to get all images with visibility = private
+        params = {"visibility": "private"}
         self._list_by_param_value_and_assert(params)
 
     @test.attr(type='gate')

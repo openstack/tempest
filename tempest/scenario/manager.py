@@ -411,7 +411,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             'name': name,
             'container_format': fmt,
             'disk_format': fmt,
-            'is_public': 'True',
+            'is_public': 'False',
         }
         params.update(properties)
         image = self.image_client.images.create(**params)
