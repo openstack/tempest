@@ -145,6 +145,9 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_secgroup_list_rules(self):
         self.nova('secgroup-list-rules')
 
+    def test_admin_server_group_list(self):
+        self.nova('server-group-list')
+
     def test_admin_servce_list(self):
         self.nova('service-list')
 
