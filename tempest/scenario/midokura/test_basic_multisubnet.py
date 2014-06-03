@@ -43,7 +43,8 @@ class TestBasicMultisubnet(scenario.TestScenario):
         }
 
     def _check_vm_assignation(self):
-        s1,s2 = 0
+        s1 = 0
+        s2 = 0
         for server in self.servers:
             network = server.addresses
             key, value = network.popitem()
