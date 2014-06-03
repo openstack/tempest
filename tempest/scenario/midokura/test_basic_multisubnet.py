@@ -1,19 +1,18 @@
 __author__ = 'Albert'
-from tempest.api.network import common as net_common
-from tempest.common import debug
-from tempest.common.utils.data_utils import rand_name
+
 from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import services
-from tempest import exceptions
 from pprint import pprint
 from tempest.scenario.midokura.midotools import scenario
+from netaddr import IPNetwork, IPAddress
 
 LOG = logging.getLogger(__name__)
+CIDR1 = "10.10.10.8/29"
+CIDR2 = "10.10.1.8/29"
 
-class TestBasicMultisubnet(manager.NetworkScenarioTest):
+class TestBasicMultisubnet(scenario.TestScenario):
 
     CONF = config.TempestConfig()
 
@@ -21,19 +20,18 @@ class TestBasicMultisubnet(manager.NetworkScenarioTest):
     def setUpClass(cls):
         super(TestBasicMultisubnet, cls).setUpClass()
         cls.scenario = {}
-        cls.scenario_builder = scenario
 
     def _scenario_conf(self):
         subnetA = {
             "network_id": None,
             "ip_version": 4,
-            "cidr": "10.10.10.10/29",
+            "cidr": CIDR1,
             "allocation_pools": None
         }
         subnetB = {
             "network_id": None,
             "ip_version": 4,
-            "cidr": "10.10.1.10/29",
+            "cidr": CIDR2,
             "allocation_pools": None
         }
         networkA = {
@@ -45,14 +43,18 @@ class TestBasicMultisubnet(manager.NetworkScenarioTest):
         }
 
     def _check_vm_assignation(self):
-        servers = self.scenario_builder.get_servers
-        for server in servers:
-            pprint(server.__dict__)
-
+        s = 0
+        for server in self.servers:
+            network = server.addresses
+            key, value = network.popitem()
+            ip = value[0]['addr']
+            if IPAddress(ip) in IPNetwork(CIDR1):
+                s += 1
+        return s == 4
 
     @attr(type='smoke')
     @services('compute', 'network')
     def test_basic_multisubnet_scenario(self):
         self._scenario_conf()
-        self.scenario_builder.custom_scenario(self.scenario)
+        self.custom_scenario(self.scenario)
         self.assertTrue(self._check_vm_assignation())

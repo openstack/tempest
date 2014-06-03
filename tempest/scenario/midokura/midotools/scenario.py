@@ -1,10 +1,10 @@
 __author__ = 'Albert'
 from tempest.api.network import common as net_common
-from tempest.common import debug
 from tempest.common.utils.data_utils import rand_name
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+from neutronclient.common import exceptions as exc
 from tempest.test import attr
 from tempest.test import services
 from tempest.common import ssh
@@ -12,6 +12,7 @@ from tempest import exceptions
 from pprint import pprint
 
 LOG = logging.getLogger(__name__)
+
 
 class TestScenario(manager.NetworkScenarioTest):
 
@@ -51,10 +52,10 @@ class TestScenario(manager.NetworkScenarioTest):
     def custom_scenario(self, scenario):
         self._create_keypairs()
         self._create_security_groups()
-        for network in scenario.networks:
-            self._create_custom_networks()
+        for network in scenario['networks']:
+            self._create_custom_networks(network)
             self._check_networks()
-            for server in network.servers:
+            for server in network['servers']:
                 self._create_servers()
 
     def _get_router(self, tenant_id):
@@ -112,16 +113,39 @@ class TestScenario(manager.NetworkScenarioTest):
         self.subnets.append(subnet)
         self.routers.append(router)
 
-    def _create_custom_network(self, mynetwork):
+    def _create_custom_networks(self, mynetwork):
         network = self._create_network(self.tenant_id)
-        for mysubnet in mynetwork.subnets:
+        for mysubnet in mynetwork['subnets']:
             subnet = self._create_custom_subnet(network, mysubnet)
-        if mynetwork.router:
+        if mynetwork.get('router'):
             router = self._get_router(self.tenant_id)
             subnet.add_to_router(router.id)
             self.routers.append(router)
         self.networks.append(network)
         self.subnets.append(subnet)
+
+    def _check_networks(self):
+        # Checks that we see the newly created network/subnet/router via
+        # checking the result of list_[networks,routers,subnets]
+        seen_nets = self._list_networks()
+        seen_names = [n['name'] for n in seen_nets]
+        seen_ids = [n['id'] for n in seen_nets]
+        for mynet in self.networks:
+            self.assertIn(mynet.name, seen_names)
+            self.assertIn(mynet.id, seen_ids)
+        seen_subnets = self._list_subnets()
+        seen_net_ids = [n['network_id'] for n in seen_subnets]
+        seen_subnet_ids = [n['id'] for n in seen_subnets]
+        for mynet in self.networks:
+            self.assertIn(mynet.id, seen_net_ids)
+        for mysubnet in self.subnets:
+            self.assertIn(mysubnet.id, seen_subnet_ids)
+        seen_routers = self._list_routers()
+        seen_router_ids = [n['id'] for n in seen_routers]
+        seen_router_names = [n['name'] for n in seen_routers]
+        for myrouter in self.routers:
+            self.assertIn(myrouter.name, seen_router_names)
+            self.assertIn(myrouter.id, seen_router_ids)
 
     def _create_custom_subnet(self, network, mysubnet, namestart='subnet-smoke-'):
         """
@@ -134,7 +158,7 @@ class TestScenario(manager.NetworkScenarioTest):
                 ip_version=4,
                 network_id=network.id,
                 tenant_id=network.tenant_id,
-                cidr=str(mysubnet.cidr),
+                cidr=str(mysubnet["cidr"]),
             ),
         )
         try:
@@ -146,7 +170,7 @@ class TestScenario(manager.NetworkScenarioTest):
         self.assertIsNotNone(result, 'Unable to allocate tenant network')
         subnet = net_common.DeletableSubnet(client=self.network_client,
                                             **result['subnet'])
-        self.assertEqual(subnet.cidr, str(mysubnet.cidr))
+        self.assertEqual(subnet.cidr, str(mysubnet['cidr']))
         self.set_resource(rand_name(namestart), subnet)
         return subnet
 
@@ -176,6 +200,3 @@ class TestScenario(manager.NetworkScenarioTest):
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips.setdefault(server, [])
             self.floating_ips[server].append(floating_ip)
-
-    def get_servers(self):
-        return self.servers
