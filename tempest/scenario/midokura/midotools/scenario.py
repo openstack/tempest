@@ -176,3 +176,6 @@ class TestScenario(manager.NetworkScenarioTest):
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips.setdefault(server, [])
             self.floating_ips[server].append(floating_ip)
+
+    def get_servers(self):
+        return self.servers
