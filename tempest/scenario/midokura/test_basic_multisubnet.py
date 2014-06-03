@@ -43,14 +43,17 @@ class TestBasicMultisubnet(scenario.TestScenario):
         }
 
     def _check_vm_assignation(self):
-        s = 0
+        s1,s2 = 0
         for server in self.servers:
             network = server.addresses
             key, value = network.popitem()
             ip = value[0]['addr']
+            pprint(ip)
             if IPAddress(ip) in IPNetwork(CIDR1):
-                s += 1
-        return s == 4
+                s1 += 1
+            else:
+                s2 += 1
+        return s1 == 4 or s2 == 4
 
     @attr(type='smoke')
     @services('compute', 'network')
