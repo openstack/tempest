@@ -75,7 +75,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
                                                    to_port,
                                                    cidr=cidr,
                                                    group_id=group_id)
-        self.addCleanup(self.client.delete_security_group_rule, rule['id'])
         self.assertEqual(200, resp.status)
 
     @test.attr(type='smoke')
@@ -95,8 +94,6 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
                                                    ip_protocol1,
                                                    from_port1, to_port1)
         rule1_id = rule['id']
-        # Delete the Security Group rule1 at the end of this method
-        self.addCleanup(self.client.delete_security_group_rule, rule1_id)
 
         # Add a second rule to the created Security Group
         ip_protocol2 = 'icmp'
