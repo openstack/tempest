@@ -5,6 +5,8 @@ from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from neutronclient.common import exceptions as exc
+from tempest.api.identity import base
+from tempest.common.utils import data_utils
 from tempest.test import attr
 from tempest.test import services
 from tempest.common import ssh
@@ -13,6 +15,9 @@ from pprint import pprint
 
 LOG = logging.getLogger(__name__)
 
+'''
+This needs a heavy refactor since it is mainly though and designed to work with a single tenant
+'''
 
 class TestScenario(manager.NetworkScenarioTest):
 
@@ -27,7 +32,6 @@ class TestScenario(manager.NetworkScenarioTest):
                    'public_network_id must be defined.')
             cls.enabled = False
             raise cls.skipException(msg)
-
 
     @classmethod
     def setUpClass(cls):
@@ -50,13 +54,22 @@ class TestScenario(manager.NetworkScenarioTest):
         self._assign_floating_ips()
 
     def custom_scenario(self, scenario):
-        self._create_keypairs()
-        self._create_security_groups()
-        for network in scenario['networks']:
-            self._create_custom_networks(network)
-            self._check_networks()
-            for server in network['servers']:
-                self._create_servers()
+        tenant_id = None
+        for tenant in scenario['tenants']:
+            if tenant['type'] == 'default':
+               tenant_id = self.tenant_id
+            else:
+                tenant_id = self._create_tenant()
+            self._create_custom_keypairs(tenant_id)
+            self._create_custom_security_groups(tenant_id)
+            for network in tenant['networks']:
+                network['tenand_id'] = tenant_id
+                self._create_custom_networks(network)
+                self._check_networks()
+                for server in network['servers']:
+                    myserver = self._create_servers()
+                    if server['floating_ip']:
+                        self._assign_custom_floating_ips(myserver)
 
     def _get_router(self, tenant_id):
         """Retrieve a router for the given tenant id.
@@ -97,12 +110,28 @@ class TestScenario(manager.NetworkScenarioTest):
         self.set_resource(name, router)
         return router
 
+    def _create_tenant(self):
+        # Create a tenant that is enabled
+        tenant_name = data_utils.rand_name(name='tenant-')
+        resp, body = self.identity_client.create_tenant(tenant_name, enabled=True)
+        tenant = body
+        self.data.tenants.append(tenant)
+        tenant_id = body['id']
+        return tenant_id
+
     def _create_keypairs(self):
         self.keypairs[self.tenant_id] = self.create_keypair(
             name=rand_name('keypair-smoke-'))
 
     def _create_security_groups(self):
         self.security_groups[self.tenant_id] = self._create_security_group()
+
+    def _create_custom_keypairs(self, tenant_id):
+        self.keypairs[tenant_id] = self.create_keypair(
+            name=rand_name('keypair-smoke-'))
+
+    def _create_custom_security_groups(self, tenant_id):
+        self.security_groups[tenant_id] = self._create_security_group()
 
     def _create_networks(self):
         network = self._create_network(self.tenant_id)
@@ -114,11 +143,11 @@ class TestScenario(manager.NetworkScenarioTest):
         self.routers.append(router)
 
     def _create_custom_networks(self, mynetwork):
-        network = self._create_network(self.tenant_id)
+        network = self._create_network(mynetwork['tenand_id'])
         for mysubnet in mynetwork['subnets']:
             subnet = self._create_custom_subnet(network, mysubnet)
         if mynetwork.get('router'):
-            router = self._get_router(self.tenant_id)
+            router = self._get_router(mynetwork['tenand_id'])
             subnet.add_to_router(router.id)
             self.routers.append(router)
         self.networks.append(network)
@@ -149,8 +178,7 @@ class TestScenario(manager.NetworkScenarioTest):
 
     def _create_custom_subnet(self, network, mysubnet, namestart='subnet-smoke-'):
         """
-        Create a subnet for the given network within the cidr block
-        configured for tenant networks.
+        Create a subnet for the given network with the cidr given.
         """
         result = None
         body = dict(
@@ -193,6 +221,7 @@ class TestScenario(manager.NetworkScenarioTest):
             name = rand_name('server-smoke-%d-' % i)
             server = self._create_server(name, network)
             self.servers.append(server)
+            return server
 
     def _assign_floating_ips(self):
         public_network_id = self.config.network.public_network_id
@@ -200,3 +229,9 @@ class TestScenario(manager.NetworkScenarioTest):
             floating_ip = self._create_floating_ip(server, public_network_id)
             self.floating_ips.setdefault(server, [])
             self.floating_ips[server].append(floating_ip)
+
+    def _assign_custom_floating_ips(self, server):
+        public_network_id = self.config.network.public_network_id
+        floating_ip = self._create_floating_ip(server, public_network_id)
+        self.floating_ips.setdefault(server, [])
+        self.floating_ips[server].append(floating_ip)
