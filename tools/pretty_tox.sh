@@ -3,4 +3,4 @@
 set -o pipefail
 
 TESTRARGS=$1
-python setup.py testr --slowest --testr-args="--subunit $TESTRARGS" | $(dirname $0)/subunit-trace.py
+python setup.py testr --slowest --testr-args="--subunit $TESTRARGS" | $(dirname $0)/subunit-trace.py --no-failure-debug -f
