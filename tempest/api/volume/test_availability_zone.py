@@ -22,6 +22,7 @@ class AvailabilityZoneTestJSON(base.BaseVolumeV1Test):
     """
     Tests Availability Zone API List
     """
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
