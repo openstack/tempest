@@ -36,7 +36,7 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
         for x in moves.xrange(2):
-            resp, srv = cls.create_test_server()
+            resp, srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 
         resp, srv = cls.create_test_server()
