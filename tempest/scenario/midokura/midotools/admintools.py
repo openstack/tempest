@@ -19,7 +19,7 @@ class TenantAdmin(object):
         #resp, tenant = self.client.create_tenant(tenant_name, enabled=True)
         resp, tenant = self.client.create_tenant(
             name= tenant_name,
-            description= description)
+            description= description, enabled=True)
         self.tenants.append(tenant)
         return tenant
 

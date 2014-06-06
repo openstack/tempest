@@ -60,14 +60,13 @@ class TestScenario(manager.NetworkScenarioTest):
             self._create_custom_keypairs(tenant_id)
             self._create_custom_security_groups(tenant_id)
             for network in tenant['networks']:
-                pprint("custom_scenario")
-                pprint(tenant_id)
                 network['tenant_id'] = tenant_id
                 mynetwork = self._create_custom_networks(network)
                 self._check_networks()
                 for server in network['servers']:
                     name = rand_name('server-smoke-')
                     myserver = self._create_server(name, mynetwork)
+                    pprint(server['floating_ip'])
                     if server['floating_ip']:
                         self._assign_custom_floating_ips(myserver)
 
@@ -148,8 +147,6 @@ class TestScenario(manager.NetworkScenarioTest):
             subnet = self._create_custom_subnet(network, mysubnet)
             if router:
                 subnet.add_to_router(router.id)
-        pprint("_create_custom_networks")
-        pprint(network)
         self.networks.append(network)
         self.subnets.append(subnet)
         if router:
@@ -210,7 +207,11 @@ class TestScenario(manager.NetworkScenarioTest):
         pprint(network['tenant_id'])
         tenant_id = network['tenant_id']
         keypair_name = self.keypairs[tenant_id].name
+        pprint(keypair_name)
+        pprint(self.security_groups[tenant_id])
         security_groups = [self.security_groups[tenant_id].name]
+        pprint("security groups")
+        pprint(security_groups)
         create_kwargs = {
             'nics': [
                 {'net-id': network['id']},
@@ -218,6 +219,7 @@ class TestScenario(manager.NetworkScenarioTest):
             'key_name': keypair_name,
             'security_groups': security_groups,
             }
+        pprint(create_kwargs)
         server = self.create_server(name=name, create_kwargs=create_kwargs)
         return server
 
@@ -237,6 +239,8 @@ class TestScenario(manager.NetworkScenarioTest):
             self.floating_ips[server].append(floating_ip)
 
     def _assign_custom_floating_ips(self, server):
+        pprint("assign floating ip")
+        pprint(server)
         public_network_id = self.config.network.public_network_id
         floating_ip = self._create_floating_ip(server, public_network_id)
         self.floating_ips.setdefault(server, [])

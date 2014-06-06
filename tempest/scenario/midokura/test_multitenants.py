@@ -68,4 +68,4 @@ class TestMultiTenants(scenario.TestScenario):
     def test_basic_multitenant_scenario(self):
         self._scenario_conf()
         self.custom_scenario(self.scenario)
-        self._check_floatingip()
+
