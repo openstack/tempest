@@ -1070,8 +1070,21 @@ class TempestConfigPrivate(object):
 class TempestConfigProxy(object):
     _config = None
 
+    _extra_log_defaults = [
+        'keystoneclient.session=INFO',
+        'paramiko.transport=INFO',
+        'requests.packages.urllib3.connectionpool=WARN'
+    ]
+
+    def _fix_log_levels(self):
+        """Tweak the oslo log defaults."""
+        for opt in logging.log_opts:
+            if opt.dest == 'default_log_levels':
+                opt.default.extend(self._extra_log_defaults)
+
     def __getattr__(self, attr):
         if not self._config:
+            self._fix_log_levels()
             self._config = TempestConfigPrivate()
 
         return getattr(self._config, attr)
