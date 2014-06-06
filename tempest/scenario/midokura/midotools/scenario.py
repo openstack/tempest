@@ -39,7 +39,7 @@ class TestScenario(manager.NetworkScenarioTest):
         cls.routers = []
         cls.servers = []
         cls.floating_ips = {}
-
+        cls.admin = TenantAdmin()
 
     def basic_scenario(self):
         self._create_keypairs()
@@ -51,6 +51,7 @@ class TestScenario(manager.NetworkScenarioTest):
 
     def custom_scenario(self, scenario):
         tenant_id = None
+        pprint("######")
         for tenant in scenario['tenants']:
             if tenant['type'] == 'default':
                 tenant_id = self.tenant_id
@@ -59,11 +60,14 @@ class TestScenario(manager.NetworkScenarioTest):
             self._create_custom_keypairs(tenant_id)
             self._create_custom_security_groups(tenant_id)
             for network in tenant['networks']:
-                network['tenand_id'] = tenant_id
-                self._create_custom_networks(network)
+                pprint("custom_scenario")
+                pprint(tenant_id)
+                network['tenant_id'] = tenant_id
+                mynetwork = self._create_custom_networks(network)
                 self._check_networks()
                 for server in network['servers']:
-                    myserver = self._create_servers()
+                    name = rand_name('server-smoke-')
+                    myserver = self._create_server(name, mynetwork)
                     if server['floating_ip']:
                         self._assign_custom_floating_ips(myserver)
 
@@ -108,8 +112,7 @@ class TestScenario(manager.NetworkScenarioTest):
 
     def _create_tenant(self):
         # Create a tenant that is enabled
-        tenant = TenantAdmin.tenant_create_enabled()
-        self.data.tenants.append(tenant)
+        tenant = self.admin.tenant_create_enabled()
         tenant_id = tenant['id']
         return tenant_id
 
@@ -137,15 +140,21 @@ class TestScenario(manager.NetworkScenarioTest):
         self.routers.append(router)
 
     def _create_custom_networks(self, mynetwork):
-        network = self._create_network(mynetwork['tenand_id'])
+        network = self._create_network(mynetwork['tenant_id'])
+        router = None
+        if mynetwork.get('router'):
+            router = self._get_router(mynetwork['tenant_id'])
         for mysubnet in mynetwork['subnets']:
             subnet = self._create_custom_subnet(network, mysubnet)
-        if mynetwork.get('router'):
-            router = self._get_router(mynetwork['tenand_id'])
-            subnet.add_to_router(router.id)
-            self.routers.append(router)
+            if router:
+                subnet.add_to_router(router.id)
+        pprint("_create_custom_networks")
+        pprint(network)
         self.networks.append(network)
         self.subnets.append(subnet)
+        if router:
+            self.routers.append(router)
+        return network
 
     def _check_networks(self):
         # Checks that we see the newly created network/subnet/router via
@@ -197,12 +206,14 @@ class TestScenario(manager.NetworkScenarioTest):
         return subnet
 
     def _create_server(self, name, network):
-        tenant_id = network.tenant_id
+        pprint("server creation")
+        pprint(network['tenant_id'])
+        tenant_id = network['tenant_id']
         keypair_name = self.keypairs[tenant_id].name
         security_groups = [self.security_groups[tenant_id].name]
         create_kwargs = {
             'nics': [
-                {'net-id': network.id},
+                {'net-id': network['id']},
                 ],
             'key_name': keypair_name,
             'security_groups': security_groups,
@@ -211,6 +222,7 @@ class TestScenario(manager.NetworkScenarioTest):
         return server
 
     def _create_servers(self):
+        pprint(self.networks)
         for i, network in enumerate(self.networks):
             name = rand_name('server-smoke-%d-' % i)
             server = self._create_server(name, network)
