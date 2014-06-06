@@ -78,7 +78,7 @@ class TestNetworkBasicVMConnectivity(manager.NetworkScenarioTest):
              'key_name': keypair_name,
              'security_groups': security_groups,
         }
-        self.server = self.create_server(name=name,create_kwargs=create_kwargs)
+        self.server = self.create_server(name=name, create_kwargs=create_kwargs)
 
     def _check_networks(self):
     # Checks that we see the newly created network/subnet via
