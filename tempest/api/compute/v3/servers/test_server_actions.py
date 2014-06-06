@@ -180,25 +180,45 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
             if current_flavor == self.flavor_ref else self.flavor_ref
         return current_flavor, new_flavor_ref
 
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
-    @test.attr(type='smoke')
-    def test_resize_server_confirm(self):
+    def _test_resize_server_confirm(self, stop=False):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
 
         previous_flavor_ref, new_flavor_ref = \
             self._detect_server_image_flavor(self.server_id)
 
+        if stop:
+            resp = self.servers_client.stop(self.server_id)[0]
+            self.assertEqual(202, resp.status)
+            self.servers_client.wait_for_server_status(self.server_id,
+                                                       'SHUTOFF')
+
         resp, server = self.client.resize(self.server_id, new_flavor_ref)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
         self.client.confirm_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        expected_status = 'SHUTOFF' if stop else 'ACTIVE'
+        self.client.wait_for_server_status(self.server_id, expected_status)
 
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(new_flavor_ref, server['flavor']['id'])
+
+        if stop:
+            # NOTE(mriedem): tearDown requires the server to be started.
+            self.client.start(self.server_id)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @test.attr(type='smoke')
+    def test_resize_server_confirm(self):
+        self._test_resize_server_confirm(stop=False)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @test.attr(type='smoke')
+    def test_resize_server_confirm_from_stopped(self):
+        self._test_resize_server_confirm(stop=True)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
