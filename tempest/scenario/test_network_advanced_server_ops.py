@@ -84,7 +84,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         self.floating_ip = self._create_floating_ip(self.server,
                                                     public_network_id)
         self.addCleanup(self.cleanup_wrapper, self.floating_ip)
-        self._wait_server_status_and_check_network_connectivity()
 
     def _check_tenant_network_connectivity(self, server,
                                            username,
