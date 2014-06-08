@@ -32,16 +32,28 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     run_ssh = CONF.compute.run_ssh
 
     def setUp(self):
+        # NOTE(afazekas): Normally we use the same server with all test cases,
+        # but if it has an issue, we build a new one
         super(ServerActionsTestJSON, self).setUp()
-        resp, server = self.create_test_server(wait_until='ACTIVE')
-        self.addCleanup(self.client.delete_server, server['id'])
-        self.server_id = server['id']
+        # Check if the server is in a clean state after test
+        try:
+            self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        except Exception:
+            # Rebuild server if something happened to it during a test
+            self.__class__.server_id = self.rebuild_server(self.server_id)
+
+    def tearDown(self):
+        _, server = self.client.get_server(self.server_id)
+        self.assertEqual(self.image_ref, server['image']['id'])
+        self.server_check_teardown()
+        super(ServerActionsTestJSON, self).tearDown()
 
     @classmethod
     def setUpClass(cls):
         cls.prepare_instance_network()
         super(ServerActionsTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
+        cls.server_id = cls.rebuild_server(None)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.change_password,
                           'Change password not available.')
