@@ -142,7 +142,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
                                'quota-show', 'type-list', 'snapshot-list'))
         self.assertFalse(wanted_commands - commands)
 
-     # Optional arguments:
+    # Optional arguments:
 
     def test_cinder_version(self):
         self.cinder('', flags='--version')

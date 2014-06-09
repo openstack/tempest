@@ -259,7 +259,7 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual('200', resp['status'])
         member = body['member']
         for key, value in member.iteritems():
-             # 'status' should not be confirmed in api tests
+            # 'status' should not be confirmed in api tests
             if key != 'status':
                 self.assertEqual(self.member[key], value)
 
@@ -340,7 +340,7 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertEqual('200', resp['status'])
         health_monitor = body['health_monitor']
         for key, value in health_monitor.iteritems():
-             # 'status' should not be confirmed in api tests
+            # 'status' should not be confirmed in api tests
             if key != 'status':
                 self.assertEqual(self.health_monitor[key], value)
 

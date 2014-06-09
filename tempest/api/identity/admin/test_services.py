@@ -101,7 +101,7 @@ class ServicesTestJSON(base.BaseIdentityV2AdminTest):
         # List and Verify Services
         resp, body = self.client.list_services()
         self.assertEqual(200, resp.status)
-        found = [service for service in body if service['id'] in service_ids]
+        found = [serv for serv in body if serv['id'] in service_ids]
         self.assertEqual(len(found), len(services), 'Services not found')
 
 

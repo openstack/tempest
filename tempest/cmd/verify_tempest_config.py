@@ -21,7 +21,7 @@ import sys
 import urlparse
 
 import httplib2
-from six.moves import configparser
+from six import moves
 
 from tempest import clients
 from tempest import config
@@ -46,7 +46,7 @@ def _get_config_file():
 
 
 def change_option(option, group, value):
-    config_parse = configparser.SafeConfigParser()
+    config_parse = moves.configparser.SafeConfigParser()
     config_parse.optionxform = str
     config_parse.readfp(CONF_FILE)
     if not config_parse.has_section(group):

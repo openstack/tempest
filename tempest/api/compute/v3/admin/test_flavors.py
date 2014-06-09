@@ -229,7 +229,7 @@ class FlavorsAdminV3Test(base.BaseV3ComputeAdminTest):
         flavor_name = data_utils.rand_name(self.flavor_name_prefix)
         new_flavor_id = data_utils.rand_int_id(start=1000)
 
-            # Create the flavor
+        # Create the flavor
         resp, flavor = self.client.create_flavor(flavor_name,
                                                  self.ram, self.vcpus,
                                                  self.disk,

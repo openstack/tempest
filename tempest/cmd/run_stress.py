@@ -51,7 +51,7 @@ def discover_stress_tests(path="./", filter_attr=None, call_inherited=False):
         except Exception:
             next
         if 'stress' in attrs:
-            if filter_attr is not None and not filter_attr in attrs:
+            if filter_attr is not None and filter_attr not in attrs:
                 continue
             class_setup_per = getattr(test_func, "st_class_setup_per")
 
