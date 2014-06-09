@@ -28,7 +28,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
     def setUpClass(cls):
         super(NovaKeyPairResourcesYAMLTest, cls).setUpClass()
         cls.stack_name = data_utils.rand_name('heat')
-        template = cls.load_template('nova_keypair', ext=cls._tpl_type)
+        template = cls.read_template('nova_keypair', ext=cls._tpl_type)
 
         # create the stack, avoid any duplicated key.
         cls.stack_identifier = cls.create_stack(
