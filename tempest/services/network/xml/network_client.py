@@ -38,7 +38,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
         return _root_tag_fetcher_and_xml_to_json_parse(body)
 
     def serialize(self, body):
-        #TODO(enikanorov): implement better json to xml conversion
+        # TODO(enikanorov): implement better json to xml conversion
         # expecting the dict with single key
         root = body.keys()[0]
         post_body = common.Element(root)

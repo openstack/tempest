@@ -80,8 +80,8 @@ class InstanceRunTest(boto_test.BotoTestCase):
             if state != "available":
                 for _image in cls.images.itervalues():
                     cls.ec2_client.deregister_image(_image["image_id"])
-                raise exceptions.EC2RegisterImageException(image_id=
-                                                           image["image_id"])
+                raise exceptions.EC2RegisterImageException(
+                    image_id=image["image_id"])
 
     @test.attr(type='smoke')
     def test_run_idempotent_instances(self):

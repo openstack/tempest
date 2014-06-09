@@ -143,4 +143,4 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
         # delete the cluster template by id
         resp = self.client.delete_cluster_template(template_id)[0]
         self.assertEqual(204, resp.status)
-        #TODO(ylobankov): check that cluster template is really deleted
+        # TODO(ylobankov): check that cluster template is really deleted

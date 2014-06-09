@@ -68,13 +68,13 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
         output_map = {}
         for outputs in stack['outputs']:
             output_map[outputs['output_key']] = outputs['output_value']
-        #Test that first key generated public and private keys
+        # Test that first key generated public and private keys
         self.assertTrue('KeyPair_PublicKey' in output_map)
         self.assertTrue("Generated" in output_map['KeyPair_PublicKey'])
         self.assertTrue('KeyPair_PrivateKey' in output_map)
         self.assertTrue('-----BEGIN' in output_map['KeyPair_PrivateKey'])
-        #Test that second key generated public key, and private key is not
-        #in the output due to save_private_key = false
+        # Test that second key generated public key, and private key is not
+        # in the output due to save_private_key = false
         self.assertTrue('KeyPairDontSavePrivate_PublicKey' in output_map)
         self.assertTrue('Generated' in
                         output_map['KeyPairDontSavePrivate_PublicKey'])
