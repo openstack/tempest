@@ -15,6 +15,7 @@
 #    under the License.
 import collections
 import re
+
 import testtools
 
 from tempest.api.network import common as net_common

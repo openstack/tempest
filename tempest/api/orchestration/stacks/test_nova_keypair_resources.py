@@ -56,10 +56,10 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
                                                    ext=self._tpl_type)
         resources = [('KeyPairSavePrivate',
                       nova_keypair_template[self._resource][
-                      'KeyPairSavePrivate'][self._type]),
+                          'KeyPairSavePrivate'][self._type]),
                      ('KeyPairDontSavePrivate',
                       nova_keypair_template[self._resource][
-                      'KeyPairDontSavePrivate'][self._type])]
+                          'KeyPairDontSavePrivate'][self._type])]
 
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name, None)

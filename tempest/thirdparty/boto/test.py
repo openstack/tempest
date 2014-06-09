@@ -17,7 +17,6 @@ import contextlib
 import logging as orig_logging
 import os
 import re
-import six
 import urlparse
 
 import boto
@@ -25,6 +24,7 @@ from boto import ec2
 from boto import exception
 from boto import s3
 import keystoneclient.exceptions
+import six
 
 import tempest.clients
 from tempest.common.utils import file_utils

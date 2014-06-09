@@ -11,6 +11,7 @@
 #    under the License.
 
 import os.path
+
 import yaml
 
 from tempest import clients

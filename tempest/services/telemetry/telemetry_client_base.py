@@ -14,8 +14,9 @@
 #    under the License.
 
 import abc
-import six
 import urllib
+
+import six
 
 from tempest import config
 

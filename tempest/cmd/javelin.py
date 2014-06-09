@@ -19,13 +19,13 @@ resources in a declarative way.
 
 """
 
+import argparse
 import logging
 import os
 import sys
 import unittest
-import yaml
 
-import argparse
+import yaml
 
 import tempest.auth
 from tempest import config
@@ -250,7 +250,7 @@ class JavelinCheck(unittest.TestCase):
                     break
             self.assertNotEqual(count, 59,
                                "Server %s is not pingable at %s" % (
-                               server['name'], addr))
+                                   server['name'], addr))
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""

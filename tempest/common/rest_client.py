@@ -16,12 +16,12 @@
 
 import collections
 import json
-from lxml import etree
 import re
 import string
 import time
 
 import jsonschema
+from lxml import etree
 
 from tempest.common import http
 from tempest.common.utils import misc as misc_utils

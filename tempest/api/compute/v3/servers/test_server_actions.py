@@ -14,9 +14,9 @@
 #    under the License.
 
 import logging
+import urlparse
 
 import testtools
-import urlparse
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils

@@ -15,6 +15,7 @@
 #    under the License.
 
 import ast
+
 from lxml import etree
 
 from tempest.common import xml_utils as xml

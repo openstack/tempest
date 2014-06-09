@@ -15,9 +15,10 @@
 
 import httplib
 import json
+import socket
+
 import mock
 import six
-import socket
 
 from tempest.common import glance_http
 from tempest import exceptions

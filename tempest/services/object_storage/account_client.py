@@ -15,12 +15,12 @@
 
 import json
 import urllib
+from xml.etree import ElementTree as etree
 
 from tempest.common import http
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
-from xml.etree import ElementTree as etree
 
 CONF = config.CONF
 

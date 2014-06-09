@@ -14,6 +14,7 @@
 
 import hashlib
 import os
+
 import yaml
 
 from tempest import auth
