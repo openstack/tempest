@@ -14,6 +14,7 @@
 #    under the License.
 
 import base64
+import logging
 
 import testtools
 import urlparse
@@ -26,6 +27,8 @@ from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
+
+LOG = logging.getLogger(__name__)
 
 
 class ServerActionsTestJSON(base.BaseV2ComputeTest):
@@ -255,7 +258,14 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         # the oldest one should be deleted automatically in this test
         def _clean_oldest_backup(oldest_backup):
             if oldest_backup_exist:
-                self.os.image_client.delete_image(oldest_backup)
+                try:
+                    self.os.image_client.delete_image(oldest_backup)
+                except exceptions.NotFound:
+                    pass
+                else:
+                    LOG.warning("Deletion of oldest backup %s should not have "
+                                "been successful as it should have been "
+                                "deleted during rotation." % oldest_backup)
 
         image1_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)
