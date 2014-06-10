@@ -129,6 +129,7 @@ from tempest.services.identity.v3.json.identity_client import \
     IdentityV3ClientJSON
 from tempest.services.identity.v3.json.identity_client import V3TokenClientJSON
 from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
+from tempest.services.identity.v3.json.region_client import RegionClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
 from tempest.services.identity.v3.xml.credentials_client import \
@@ -138,6 +139,7 @@ from tempest.services.identity.v3.xml.identity_client import \
     IdentityV3ClientXML
 from tempest.services.identity.v3.xml.identity_client import V3TokenClientXML
 from tempest.services.identity.v3.xml.policy_client import PolicyClientXML
+from tempest.services.identity.v3.xml.region_client import RegionClientXML
 from tempest.services.identity.v3.xml.service_client import \
     ServiceClientXML
 from tempest.services.identity.xml.identity_client import IdentityClientXML
@@ -248,6 +250,7 @@ class Manager(manager.Manager):
             self.tenant_usages_client = TenantUsagesClientXML(
                 self.auth_provider)
             self.policy_client = PolicyClientXML(self.auth_provider)
+            self.region_client = RegionClientXML(self.auth_provider)
             self.hosts_client = HostsClientXML(self.auth_provider)
             self.hypervisor_client = HypervisorClientXML(self.auth_provider)
             self.network_client = NetworkClientXML(self.auth_provider)
@@ -334,6 +337,7 @@ class Manager(manager.Manager):
             self.migrations_v3_client = MigrationsV3ClientJSON(
                 self.auth_provider)
             self.policy_client = PolicyClientJSON(self.auth_provider)
+            self.region_client = RegionClientJSON(self.auth_provider)
             self.hosts_client = HostsClientJSON(self.auth_provider)
             self.hypervisor_v3_client = HypervisorV3ClientJSON(
                 self.auth_provider)
