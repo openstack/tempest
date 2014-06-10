@@ -18,12 +18,12 @@ import subprocess
 
 import tempest.cli as cli
 from tempest.openstack.common import log as logging
-import tempest.test
+from tempest.tests import base
 
 LOG = logging.getLogger(__name__)
 
 
-class StressFrameworkTest(tempest.test.BaseTestCase):
+class StressFrameworkTest(base.TestCase):
     """Basic test for the stress test framework.
     """
 
