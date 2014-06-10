@@ -906,14 +906,14 @@ BaremetalGroup = [
                default=300,
                help="Timeout for Ironic node to completely provision"),
     cfg.IntOpt('association_timeout',
-               default=10,
+               default=30,
                help="Timeout for association of Nova instance and Ironic "
                     "node"),
     cfg.IntOpt('power_timeout',
-               default=20,
+               default=60,
                help="Timeout for Ironic power transitions."),
     cfg.IntOpt('unprovision_timeout',
-               default=20,
+               default=60,
                help="Timeout for unprovisioning an Ironic node.")
 ]
 
