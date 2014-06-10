@@ -431,6 +431,9 @@ class ServersV3ClientJSON(rest_client.RestClient):
         return self.action(server_id, 'shelve_offload', None, **kwargs)
 
     def get_console_output(self, server_id, length):
+        if length is None:
+            # NOTE(mriedem): -1 means optional/unlimited in the nova v3 API.
+            length = -1
         return self.action(server_id, 'get_console_output', 'output',
                            common_schema.get_console_output, length=length)
 
