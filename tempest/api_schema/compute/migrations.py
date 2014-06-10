@@ -22,10 +22,7 @@ list_migrations = {
                 'items': {
                     'type': 'object',
                     'properties': {
-                        # NOTE: Now the type of 'id' is integer, but here
-                        # allows 'string' also because we will be able to
-                        # change it to 'uuid' in the future.
-                        'id': {'type': ['integer', 'string']},
+                        'id': {'type': 'integer'},
                         'status': {'type': 'string'},
                         'instance_uuid': {'type': 'string'},
                         'source_node': {'type': 'string'},
@@ -33,12 +30,8 @@ list_migrations = {
                         'dest_node': {'type': 'string'},
                         'dest_compute': {'type': 'string'},
                         'dest_host': {'type': 'string'},
-                        'old_instance_type_id': {
-                            'type': ['integer', 'string']
-                        },
-                        'new_instance_type_id': {
-                            'type': ['integer', 'string']
-                        },
+                        'old_instance_type_id': {'type': 'integer'},
+                        'new_instance_type_id': {'type': 'integer'},
                         'created_at': {'type': 'string'},
                         'updated_at': {'type': ['string', 'null']}
                     },

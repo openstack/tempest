@@ -22,7 +22,7 @@ list_agents = {
                 'items': {
                     'type': 'object',
                     'properties': {
-                        'agent_id': {'type': ['integer', 'string']},
+                        'agent_id': {'type': 'integer'},
                         'hypervisor': {'type': 'string'},
                         'os': {'type': 'string'},
                         'architecture': {'type': 'string'},

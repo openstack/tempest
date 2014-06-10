@@ -22,10 +22,7 @@ list_services = {
                 'items': {
                     'type': 'object',
                     'properties': {
-                        # NOTE: Now the type of 'id' is integer, but here
-                        # allows 'string' also because we will be able to
-                        # change it to 'uuid' in the future.
-                        'id': {'type': ['integer', 'string']},
+                        'id': {'type': 'integer'},
                         'zone': {'type': 'string'},
                         'host': {'type': 'string'},
                         'state': {'type': 'string'},
