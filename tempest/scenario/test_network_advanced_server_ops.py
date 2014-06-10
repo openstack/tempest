@@ -15,7 +15,6 @@
 
 import testtools
 
-from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -85,36 +84,12 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                                     public_network_id)
         self.addCleanup(self.cleanup_wrapper, self.floating_ip)
 
-    def _check_tenant_network_connectivity(self, server,
-                                           username,
-                                           private_key,
-                                           should_connect=True):
-        if not CONF.network.tenant_networks_reachable:
-            msg = 'Tenant networks not configured to be reachable.'
-            LOG.info(msg)
-            return
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        try:
-            for net_name, ip_addresses in server.networks.iteritems():
-                for ip_address in ip_addresses:
-                    self._check_vm_connectivity(ip_address,
-                                                username,
-                                                private_key,
-                                                should_connect=should_connect)
-        except Exception:
-            LOG.exception('Tenant network connectivity check failed')
-            self._log_console_output(servers=[server])
-            debug.log_ip_ns()
-            raise
-
     def _check_network_connectivity(self, should_connect=True):
         username = CONF.compute.image_ssh_user
         private_key = self.keypair.private_key
-        self._check_tenant_network_connectivity(self.server,
-                                                username,
-                                                private_key,
-                                                should_connect=should_connect)
+        self._check_tenant_network_connectivity(
+            self.server, username, private_key, should_connect=should_connect,
+            servers_for_debug=[self.server])
         floating_ip = self.floating_ip.floating_ip_address
         self._check_public_network_connectivity(floating_ip, username,
                                                 private_key, should_connect,
