@@ -23,31 +23,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-# power/provision states as of icehouse
-class PowerStates(object):
-    """Possible power states of an Ironic node."""
-    POWER_ON = 'power on'
-    POWER_OFF = 'power off'
-    REBOOT = 'rebooting'
-    SUSPEND = 'suspended'
-
-
-class ProvisionStates(object):
-    """Possible provision states of an Ironic node."""
-    NOSTATE = None
-    INIT = 'initializing'
-    ACTIVE = 'active'
-    BUILDING = 'building'
-    DEPLOYWAIT = 'wait call-back'
-    DEPLOYING = 'deploying'
-    DEPLOYFAIL = 'deploy failed'
-    DEPLOYDONE = 'deploy complete'
-    DELETING = 'deleting'
-    DELETED = 'deleted'
-    ERROR = 'error'
-
-
-class BaremetalBasicOptsPXESSH(manager.BaremetalScenarioTest):
+class BaremetalBasicOpsPXESSH(manager.BaremetalScenarioTest):
     """
     This smoke test tests the pxe_ssh Ironic driver.  It follows this basic
     set of operations:
@@ -65,20 +41,10 @@ class BaremetalBasicOptsPXESSH(manager.BaremetalScenarioTest):
         * Monitors the associated Ironic node for power and
           expected state transitions
     """
-    def add_keypair(self):
-        self.keypair = self.create_keypair()
-
     def add_floating_ip(self):
         floating_ip = self.compute_client.floating_ips.create()
         self.instance.add_floating_ip(floating_ip)
         return floating_ip.ip
-
-    def verify_connectivity(self, ip=None):
-        if ip:
-            dest = self.get_remote_client(ip)
-        else:
-            dest = self.get_remote_client(self.instance)
-        dest.validate_authentication()
 
     def validate_driver_info(self):
         f_id = self.instance.flavor['id']
@@ -97,43 +63,6 @@ class BaremetalBasicOptsPXESSH(manager.BaremetalScenarioTest):
             n_port = self.network_client.show_port(n_port_id)['port']
             self.assertEqual(n_port['device_id'], self.instance.id)
             self.assertEqual(n_port['mac_address'], port.address)
-
-    def boot_instance(self):
-        create_kwargs = {
-            'key_name': self.keypair.id
-        }
-        self.instance = self.create_server(
-            wait=False, create_kwargs=create_kwargs)
-
-        self.set_resource('instance', self.instance)
-
-        self.wait_node(self.instance.id)
-        self.node = self.get_node(instance_id=self.instance.id)
-
-        self.wait_power_state(self.node.uuid, PowerStates.POWER_ON)
-
-        self.wait_provisioning_state(
-            self.node.uuid,
-            [ProvisionStates.DEPLOYWAIT, ProvisionStates.ACTIVE],
-            timeout=15)
-
-        self.wait_provisioning_state(self.node.uuid, ProvisionStates.ACTIVE,
-                                     timeout=CONF.baremetal.active_timeout)
-
-        self.status_timeout(
-            self.compute_client.servers, self.instance.id, 'ACTIVE')
-
-        self.node = self.get_node(instance_id=self.instance.id)
-        self.instance = self.compute_client.servers.get(self.instance.id)
-
-    def terminate_instance(self):
-        self.instance.delete()
-        self.remove_resource('instance')
-        self.wait_power_state(self.node.uuid, PowerStates.POWER_OFF)
-        self.wait_provisioning_state(
-            self.node.uuid,
-            ProvisionStates.NOSTATE,
-            timeout=CONF.baremetal.unprovision_timeout)
 
     @test.services('baremetal', 'compute', 'image', 'network')
     def test_baremetal_server_ops(self):
