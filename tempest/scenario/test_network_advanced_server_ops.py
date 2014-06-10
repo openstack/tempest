@@ -108,20 +108,6 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             debug.log_ip_ns()
             raise
 
-    def _check_public_network_connectivity(self, floating_ip,
-                                           username,
-                                           private_key,
-                                           should_connect=True):
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        try:
-            self._check_vm_connectivity(floating_ip, username, private_key,
-                                        should_connect=should_connect)
-        except Exception:
-            LOG.exception("Public network connectivity check failed")
-            debug.log_ip_ns()
-            raise
-
     def _check_network_connectivity(self, should_connect=True):
         username = CONF.compute.image_ssh_user
         private_key = self.keypair.private_key
@@ -130,10 +116,9 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                                 private_key,
                                                 should_connect=should_connect)
         floating_ip = self.floating_ip.floating_ip_address
-        self._check_public_network_connectivity(floating_ip,
-                                                username,
-                                                private_key,
-                                                should_connect=should_connect)
+        self._check_public_network_connectivity(floating_ip, username,
+                                                private_key, should_connect,
+                                                servers=[self.server])
 
     def _wait_server_status_and_check_network_connectivity(self):
         self.status_timeout(self.compute_client.servers, self.server.id,

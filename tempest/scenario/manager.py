@@ -29,6 +29,7 @@ from novaclient import exceptions as nova_exceptions
 from tempest.api.network import common as net_common
 from tempest import auth
 from tempest import clients
+from tempest.common import debug
 from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
@@ -853,6 +854,27 @@ class NetworkScenarioTest(OfficialClientTest):
             linux_client = self.get_remote_client(ip_address, username,
                                                   private_key)
             linux_client.validate_authentication()
+
+    def _check_public_network_connectivity(self, ip_address, username,
+                                           private_key, should_connect=True,
+                                           msg=None, servers=None):
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        LOG.debug('checking network connections to IP %s with user: %s' %
+                  (ip_address, username))
+        try:
+            self._check_vm_connectivity(ip_address,
+                                        username,
+                                        private_key,
+                                        should_connect=should_connect)
+        except Exception:
+            ex_msg = 'Public network connectivity check failed'
+            if msg:
+                ex_msg += ": " + msg
+            LOG.exception(ex_msg)
+            self._log_console_output(servers)
+            debug.log_net_debug()
+            raise
 
     def _check_remote_connectivity(self, source, dest, should_succeed=True):
         """
