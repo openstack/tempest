@@ -247,11 +247,17 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
-        super(ListSnapshotImagesTest, cls).setUpClass()
+        # This test class only uses nova v3 api to create snapshot
+        # as the similar test which uses nova v2 api already exists
+        # in nova v2 compute images api tests.
+        # Since nova v3 doesn't have images api proxy, this test
+        # class was added in the image api tests.
         if not CONF.compute_feature_enabled.api_v3:
-            cls.servers_client = cls.os.servers_client
-        else:
-            cls.servers_client = cls.os.servers_v3_client
+            skip_msg = ("%s skipped as nova v3 api is not available" %
+                        cls.__name__)
+            raise cls.skipException(skip_msg)
+        super(ListSnapshotImagesTest, cls).setUpClass()
+        cls.servers_client = cls.os.servers_v3_client
         cls.servers = []
         # We add a few images here to test the listing functionality of
         # the images API
@@ -281,8 +287,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         cls.servers.append(server)
         cls.servers_client.wait_for_server_status(
             server['id'], 'ACTIVE')
-        resp, image = cls.servers_client.create_image(
-            server['id'], name)
+        resp, _ = cls.servers_client.create_image(server['id'], name)
         image_id = data_utils.parse_image_id(resp['location'])
         cls.created_images.append(image_id)
         cls.client.wait_for_image_status(image_id,
