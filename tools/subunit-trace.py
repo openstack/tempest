@@ -18,6 +18,7 @@
 
 """Trace a subunit stream in reasonable detail and high accuracy."""
 
+import argparse
 import functools
 import re
 import sys
@@ -151,7 +152,7 @@ def print_attachments(stream, test, all_channels=False):
                 stream.write("    %s\n" % line)
 
 
-def show_outcome(stream, test):
+def show_outcome(stream, test, print_failures=False):
     global RESULTS
     status = test['status']
     # TODO(sdague): ask lifeless why on this?
@@ -178,14 +179,16 @@ def show_outcome(stream, test):
         FAILS.append(test)
         stream.write('{%s} %s [%s] ... FAILED\n' % (
             worker, name, duration))
-        print_attachments(stream, test, all_channels=True)
+        if not print_failures:
+            print_attachments(stream, test, all_channels=True)
     elif status == 'skip':
         stream.write('{%s} %s ... SKIPPED: %s\n' % (
             worker, name, test['details']['reason'].as_text()))
     else:
         stream.write('{%s} %s [%s] ... %s\n' % (
             worker, name, duration, test['status']))
-        print_attachments(stream, test, all_channels=True)
+        if not print_failures:
+            print_attachments(stream, test, all_channels=True)
 
     stream.flush()
 
@@ -247,12 +250,25 @@ def print_summary(stream):
                              (w, num, time))
 
 
+def parse_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--no-failure-debug', '-n', action='store_true',
+                        dest='print_failures', help='Disable printing failure '
+                        'debug infomation in realtime')
+    parser.add_argument('--fails', '-f', action='store_true',
+                        dest='post_fails', help='Print failure debug '
+                        'information after the stream is proccesed')
+    return parser.parse_args()
+
+
 def main():
+    args = parse_args()
     stream = subunit.ByteStreamToStreamResult(
         sys.stdin, non_subunit_name='stdout')
     starts = Starts(sys.stdout)
     outcomes = testtools.StreamToDict(
-        functools.partial(show_outcome, sys.stdout))
+        functools.partial(show_outcome, sys.stdout,
+                          print_failures=args.print_failures))
     summary = testtools.StreamSummary()
     result = testtools.CopyStreamResult([starts, outcomes, summary])
     result.startTestRun()
@@ -260,6 +276,8 @@ def main():
         stream.run(result)
     finally:
         result.stopTestRun()
+    if args.post_fails:
+        print_fails(sys.stdout)
     print_summary(sys.stdout)
     return (0 if summary.wasSuccessful() else 1)
 
