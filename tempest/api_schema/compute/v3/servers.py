@@ -95,3 +95,7 @@ list_addresses = {
         'required': ['addresses']
     }
 }
+
+update_server_metadata = copy.deepcopy(servers.update_server_metadata)
+# V3 API's response status_code is 201
+update_server_metadata['status_code'] = [201]

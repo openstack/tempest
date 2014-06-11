@@ -114,6 +114,8 @@ set_server_metadata = {
 
 list_server_metadata = copy.deepcopy(set_server_metadata)
 
+update_server_metadata = copy.deepcopy(set_server_metadata)
+
 delete_server_metadata_item = {
     'status_code': [204]
 }
