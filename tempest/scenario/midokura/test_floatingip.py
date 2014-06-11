@@ -25,8 +25,7 @@ from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import services
-from tempest import exceptions
-from pprint import pprint
+
 
 LOG = logging.getLogger(__name__)
 

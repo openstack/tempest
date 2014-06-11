@@ -25,7 +25,6 @@ from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest.test import attr
 from tempest.test import services
-from tempest import exceptions
 from pprint import pprint
 
 LOG = logging.getLogger(__name__)
@@ -204,7 +203,6 @@ class TestBasicScenario(manager.NetworkScenarioTest):
             for server, floating_ips in self.floating_ips.iteritems():
                 for floating_ip in floating_ips:
                     ip_address = floating_ip.floating_ip_address
-                    pprint(server.__dict__)
                     self._check_vm_connectivity(ip_address, ssh_login, private_key)
         except Exception as exc:
             LOG.exception(exc)
