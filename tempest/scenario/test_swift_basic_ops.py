@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
+from tempest.common import http
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
@@ -32,10 +32,12 @@ class TestSwiftBasicOps(manager.ScenarioTest):
      * create container.
      * upload a file to the created container.
      * list container's objects and assure that the uploaded file is present.
+     * download the object and check the content
      * delete object from container.
      * list container's objects and assure that the deleted file is gone.
      * delete a container.
      * list containers and assure that the deleted container is gone.
+     * change ACL of the container and make sure it works successfully
     """
 
     @classmethod
@@ -71,9 +73,9 @@ class TestSwiftBasicOps(manager.ScenarioTest):
 
     def _upload_object_to_container(self, container_name, obj_name=None):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
-        self.object_client.create_object(container_name, obj_name,
-                                         data_utils.arbitrary_string())
-        return obj_name
+        obj_data = data_utils.arbitrary_string()
+        self.object_client.create_object(container_name, obj_name, obj_data)
+        return obj_name, obj_data
 
     def _delete_object(self, container_name, filename):
         self.object_client.delete_object(container_name, filename)
@@ -95,11 +97,46 @@ class TestSwiftBasicOps(manager.ScenarioTest):
             for obj in not_present_obj:
                 self.assertNotIn(obj, object_list)
 
+    def _change_container_acl(self, container_name, acl):
+        metadata_param = {'metadata_prefix': 'x-container-',
+                          'metadata': {'read': acl}}
+        self.container_client.update_container_metadata(container_name,
+                                                        **metadata_param)
+        resp, _ = self.container_client.list_container_metadata(container_name)
+        self.assertEqual(resp['x-container-read'], acl)
+
+    def _download_and_verify(self, container_name, obj_name, expected_data):
+        _, obj = self.object_client.get_object(container_name, obj_name)
+        self.assertEqual(obj, expected_data)
+
     @test.services('object_storage')
     def test_swift_basic_ops(self):
         self._get_swift_stat()
         container_name = self._create_container()
-        obj_name = self._upload_object_to_container(container_name)
+        obj_name, obj_data = self._upload_object_to_container(container_name)
         self._list_and_check_container_objects(container_name, [obj_name])
+        self._download_and_verify(container_name, obj_name, obj_data)
+        self._delete_object(container_name, obj_name)
+        self._delete_container(container_name)
+
+    @test.services('object_storage')
+    def test_swift_acl_anonymous_download(self):
+        """This test will cover below steps:
+        1. Create container
+        2. Upload object to the new container
+        3. Change the ACL of the container
+        4. Check if the object can be download by anonymous user
+        5. Delete the object and container
+        """
+        container_name = self._create_container()
+        obj_name, _ = self._upload_object_to_container(container_name)
+        obj_url = '%s/%s/%s' % (self.object_client.base_url,
+                                container_name, obj_name)
+        http_client = http.ClosingHttp()
+        resp, _ = http_client.request(obj_url, 'GET')
+        self.assertEqual(resp.status, 401)
+        self._change_container_acl(container_name, '.r:*')
+        resp, _ = http_client.request(obj_url, 'GET')
+        self.assertEqual(resp.status, 200)
         self._delete_object(container_name, obj_name)
         self._delete_container(container_name)
