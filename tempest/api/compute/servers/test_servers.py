@@ -70,20 +70,34 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.get_server(server['id'])
         self.assertEqual(key_name, server['key_name'])
 
+    def _update_server_name(self, server_id, status):
+        # The server name should be changed to the the provided value
+        new_name = data_utils.rand_name('server')
+        # Update the server with a new name
+        resp, server = self.client.update_server(server_id,
+                                                 name=new_name)
+        self.client.wait_for_server_status(server_id, status)
+
+        # Verify the name of the server has changed
+        resp, server = self.client.get_server(server_id)
+        self.assertEqual(new_name, server['name'])
+        return server
+
     @test.attr(type='gate')
     def test_update_server_name(self):
         # The server name should be changed to the the provided value
         resp, server = self.create_test_server(wait_until='ACTIVE')
 
-        # Update the server with a new name
-        resp, server = self.client.update_server(server['id'],
-                                                 name='newname')
-        self.assertEqual(200, resp.status)
-        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        self._update_server_name(server['id'], 'ACTIVE')
 
-        # Verify the name of the server has changed
-        resp, server = self.client.get_server(server['id'])
-        self.assertEqual('newname', server['name'])
+    @test.attr(type='gate')
+    def test_update_server_name_in_stop_state(self):
+        # The server name should be changed to the the provided value
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        self.client.stop(server['id'])
+        self.client.wait_for_server_status(server['id'], 'SHUTOFF')
+        updated_server = self._update_server_name(server['id'], 'SHUTOFF')
+        self.assertNotIn('progress', updated_server)
 
     @test.attr(type='gate')
     def test_update_access_server_address(self):
