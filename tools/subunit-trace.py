@@ -221,6 +221,14 @@ def count_tests(key, value):
     return count
 
 
+def run_time():
+    runtime = 0.0
+    for k, v in RESULTS.items():
+        for test in v:
+            runtime += float(get_duration(test['timestamps']).strip('s'))
+    return runtime
+
+
 def worker_stats(worker):
     tests = RESULTS[worker]
     num_tests = len(tests)
@@ -230,7 +238,8 @@ def worker_stats(worker):
 
 def print_summary(stream):
     stream.write("\n======\nTotals\n======\n")
-    stream.write("Run: %s\n" % count_tests('status', '.*'))
+    stream.write("Run: %s in %s sec.\n" % (count_tests('status', '.*'),
+                                           run_time()))
     stream.write(" - Passed: %s\n" % count_tests('status', 'success'))
     stream.write(" - Skipped: %s\n" % count_tests('status', 'skip'))
     stream.write(" - Failed: %s\n" % count_tests('status', 'fail'))
