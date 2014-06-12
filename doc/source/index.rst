@@ -33,14 +33,6 @@ where your test contributions should go.
    field_guide/thirdparty
    field_guide/unit_tests
 
-------------------
-API and test cases
-------------------
-.. toctree::
-   :maxdepth: 1
-
-   api/modules
-
 ==================
 Indices and tables
 ==================
