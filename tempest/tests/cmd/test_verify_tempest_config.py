@@ -15,6 +15,7 @@
 import json
 
 import mock
+from oslo.config import cfg
 
 from tempest.cmd import verify_tempest_config
 from tempest import config
@@ -152,6 +153,7 @@ class TestDiscovery(base.TestCase):
                                            False, True)
 
     def test_verify_nova_versions(self):
+        cfg.CONF.set_default('api_v3', True, 'compute-feature-enabled')
         self.useFixture(mockpatch.PatchObject(
             verify_tempest_config, '_get_unversioned_endpoint',
             return_value='http://fake_endpoint:5000'))
