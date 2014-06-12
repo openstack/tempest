@@ -711,6 +711,10 @@
 # (integer value)
 #build_interval=1
 
+# List of dns servers whichs hould be used for subnet creation
+# (list value)
+#dns_servers=8.8.8.8,8.8.4.4
+
 
 [network-feature-enabled]
 

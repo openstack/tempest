@@ -12,6 +12,7 @@
 
 
 import logging
+import netaddr
 
 from tempest.api.orchestration import base
 from tempest import clients
@@ -41,8 +42,11 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         template = cls.load_template('neutron_basic')
         cls.keypair_name = (CONF.orchestration.keypair_name or
                             cls._create_keypair()['name'])
-        cls.external_router_id = cls._get_external_router_id()
         cls.external_network_id = CONF.network.public_network_id
+
+        tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        mask_bits = CONF.network.tenant_network_mask_bits
+        cls.subnet_cidr = tenant_cidr.subnet(mask_bits).next()
 
         # create the stack
         cls.stack_identifier = cls.create_stack(
@@ -52,9 +56,10 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                 'KeyName': cls.keypair_name,
                 'InstanceType': CONF.orchestration.instance_type,
                 'ImageId': CONF.orchestration.image_ref,
-                'ExternalRouterId': cls.external_router_id,
                 'ExternalNetworkId': cls.external_network_id,
-                'timeout': CONF.orchestration.build_timeout
+                'timeout': CONF.orchestration.build_timeout,
+                'DNSServers': CONF.network.dns_servers,
+                'SubNetCidr': str(cls.subnet_cidr)
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]
         try:
@@ -76,14 +81,6 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         cls.test_resources = {}
         for resource in resources:
             cls.test_resources[resource['logical_resource_id']] = resource
-
-    @classmethod
-    def _get_external_router_id(cls):
-        resp, body = cls.network_client.list_ports()
-        ports = body['ports']
-        router_ports = filter(lambda port: port['device_owner'] ==
-                              'network:router_interface', ports)
-        return router_ports[0]['device_id']
 
     @test.attr(type='slow')
     def test_created_resources(self):
@@ -121,11 +118,10 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(subnet_id, subnet['id'])
         self.assertEqual(network_id, subnet['network_id'])
         self.assertEqual('NewSubnet', subnet['name'])
-        self.assertEqual('8.8.8.8', subnet['dns_nameservers'][0])
-        self.assertEqual('10.0.3.20', subnet['allocation_pools'][0]['start'])
-        self.assertEqual('10.0.3.150', subnet['allocation_pools'][0]['end'])
+        self.assertEqual(sorted(CONF.network.dns_servers),
+                         sorted(subnet['dns_nameservers']))
         self.assertEqual(4, subnet['ip_version'])
-        self.assertEqual('10.0.3.0/24', subnet['cidr'])
+        self.assertEqual(str(self.subnet_cidr), subnet['cidr'])
 
     @test.attr(type='slow')
     def test_created_router(self):
@@ -137,18 +133,19 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual('NewRouter', router['name'])
         self.assertEqual(self.external_network_id,
                          router['external_gateway_info']['network_id'])
-        self.assertEqual(False, router['admin_state_up'])
+        self.assertEqual(True, router['admin_state_up'])
 
     @test.attr(type='slow')
     def test_created_router_interface(self):
         """Verifies created router interface."""
+        router_id = self.test_resources.get('Router')['physical_resource_id']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
         resp, body = self.network_client.list_ports()
         self.assertEqual('200', resp['status'])
         ports = body['ports']
         router_ports = filter(lambda port: port['device_id'] ==
-                              self.external_router_id, ports)
+                              router_id, ports)
         created_network_ports = filter(lambda port: port['network_id'] ==
                                        network_id, router_ports)
         self.assertEqual(1, len(created_network_ports))
@@ -158,7 +155,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                                   subnet_id, fixed_ips)
         self.assertEqual(1, len(subnet_fixed_ips))
         router_interface_ip = subnet_fixed_ips[0]['ip_address']
-        self.assertEqual('10.0.3.1', router_interface_ip)
+        self.assertEqual(str(self.subnet_cidr.iter_hosts().next()),
+                         router_interface_ip)
 
     @test.attr(type='slow')
     def test_created_server(self):
@@ -170,8 +168,4 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual('ACTIVE', server['status'])
         network = server['addresses']['NewNetwork'][0]
         self.assertEqual(4, network['version'])
-        ip_addr_prefix = network['addr'][:7]
-        ip_addr_suffix = int(network['addr'].split('.')[3])
-        self.assertEqual('10.0.3.', ip_addr_prefix)
-        self.assertTrue(ip_addr_suffix >= 20)
-        self.assertTrue(ip_addr_suffix <= 150)
+        self.assertIn(netaddr.IPAddress(network['addr']), self.subnet_cidr)
