@@ -81,9 +81,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.metering_label_rules = []
         cls.fw_rules = []
         cls.fw_policies = []
+        cls.ipsecpolicies = []
 
     @classmethod
     def tearDownClass(cls):
+        # Clean up ipsec policies
+        for ipsecpolicy in cls.ipsecpolicies:
+            cls.client.delete_ipsecpolicy(ipsecpolicy['id'])
         # Clean up firewall policies
         for fw_policy in cls.fw_policies:
             cls.client.delete_firewall_policy(fw_policy['id'])
@@ -341,6 +345,14 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             cls.client.remove_router_interface_with_subnet_id(
                 router['id'], i['fixed_ips'][0]['subnet_id'])
         cls.client.delete_router(router['id'])
+
+    @classmethod
+    def create_ipsecpolicy(cls, name):
+        """Wrapper utility that returns a test ipsec policy."""
+        _, body = cls.client.create_ipsecpolicy(name=name)
+        ipsecpolicy = body['ipsecpolicy']
+        cls.ipsecpolicies.append(ipsecpolicy)
+        return ipsecpolicy
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):

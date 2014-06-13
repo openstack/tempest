@@ -30,6 +30,7 @@ service_resource_prefix_map = {
     'members': 'lb',
     'vpnservices': 'vpn',
     'ikepolicies': 'vpn',
+    'ipsecpolicies': 'vpn',
     'metering_labels': 'metering',
     'metering_label_rules': 'metering',
     'firewall_rules': 'fw',
@@ -47,6 +48,7 @@ resource_plural_map = {
     'security_groups': 'security_groups',
     'security_group_rules': 'security_group_rules',
     'ikepolicy': 'ikepolicies',
+    'ipsecpolicy': 'ipsecpolicies',
     'quotas': 'quotas',
     'firewall_policy': 'firewall_policies'
 }
