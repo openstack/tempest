@@ -415,6 +415,10 @@ NetworkGroup = [
                default=1,
                help="Time in seconds between network operation status "
                     "checks."),
+    cfg.ListOpt('dns_servers',
+                default=["8.8.8.8", "8.8.4.4"],
+                help="List of dns servers whichs hould be used"
+                     " for subnet creation")
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
