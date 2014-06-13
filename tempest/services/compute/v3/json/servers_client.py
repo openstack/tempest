@@ -166,6 +166,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_servers_detail, resp, body)
         return resp, body
 
     def wait_for_server_status(self, server_id, status, extra_timeout=0,

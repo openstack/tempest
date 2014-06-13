@@ -151,3 +151,17 @@ list_server_actions = {
         'required': ['server_actions']
     }
 }
+
+list_servers_detail = copy.deepcopy(servers.base_list_servers_detail)
+list_servers_detail['response_body']['properties']['servers']['items'][
+    'properties'].update({
+        'addresses': addresses_v3,
+        'host_id': {'type': 'string'},
+        'os-access-ips:access_ip_v4': parameter_types.access_ip_v4,
+        'os-access-ips:access_ip_v6': parameter_types.access_ip_v6
+    })
+# NOTE(GMann): os-access-ips:access_ip_v4/v6 are API extension,
+# and some environments return a response without these
+# attributes. So they are not 'required'.
+list_servers_detail['response_body']['properties']['servers']['items'][
+    'required'].append('host_id')
