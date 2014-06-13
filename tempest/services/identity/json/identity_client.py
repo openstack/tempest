@@ -27,7 +27,8 @@ class IdentityClientJSON(rest_client.RestClient):
         self.endpoint_url = 'adminURL'
 
         # Needed for xml service client
-        self.list_tags = ["roles", "tenants", "users", "services"]
+        self.list_tags = ["roles", "tenants", "users", "services",
+                          "extensions"]
 
     def has_admin_extensions(self):
         """
@@ -236,6 +237,12 @@ class IdentityClientJSON(rest_client.RestClient):
         put_body = json.dumps({'user': put_body})
         resp, body = self.put('users/%s/OS-KSADM/password' % user_id, put_body)
         return resp, self._parse_resp(body)
+
+    def list_extensions(self):
+        """List all the extensions."""
+        resp, body = self.get('/extensions')
+        body = json.loads(body)
+        return resp, body['extensions']['values']
 
 
 class TokenClientJSON(IdentityClientJSON):
