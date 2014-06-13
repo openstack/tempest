@@ -186,3 +186,9 @@ class DataProcessingClient(rest_client.RestClient):
 
         uri = 'job-binary-internals/%s' % job_binary_id
         return self.delete(uri)
+
+    def get_job_binary_internal_data(self, job_binary_id):
+        """Returns data of a single job binary internal."""
+
+        uri = 'job-binary-internals/%s/data' % job_binary_id
+        return self.get(uri)
