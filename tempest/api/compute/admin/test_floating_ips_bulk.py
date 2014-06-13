@@ -58,6 +58,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
             pass
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_create_list_delete_floating_ips_bulk(self):
         # Create, List  and delete the Floating IPs Bulk
         pool = 'test_pool'

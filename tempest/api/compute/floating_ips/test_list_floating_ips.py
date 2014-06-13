@@ -37,6 +37,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         super(FloatingIPDetailsTestJSON, cls).tearDownClass()
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_list_floating_ips(self):
         # Positive test:Should return the list of floating IPs
         resp, body = self.client.list_floating_ips()
@@ -48,6 +49,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
             self.assertIn(self.floating_ip[i], floating_ips)
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_get_floating_ip_details(self):
         # Positive test:Should be able to GET the details of floatingIP
         # Creating a floating IP for which details are to be checked
@@ -70,6 +72,7 @@ class FloatingIPDetailsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(floating_ip_id, body['id'])
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_list_floating_ip_pools(self):
         # Positive test:Should return the list of floating IP Pools
         resp, floating_ip_pools = self.client.list_floating_ip_pools()

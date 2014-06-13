@@ -29,6 +29,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         cls.neutron_available = CONF.service_available.neutron
 
     @test.attr(type='smoke')
+    @test.services('network')
     def test_security_group_rules_create(self):
         # Positive test: Creation of Security Group rule
         # should be successful
@@ -48,6 +49,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.assertEqual(200, resp.status)
 
     @test.attr(type='smoke')
+    @test.services('network')
     def test_security_group_rules_create_with_optional_arguments(self):
         # Positive test: Creation of Security Group rule
         # with optional arguments
@@ -78,6 +80,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.assertEqual(200, resp.status)
 
     @test.attr(type='smoke')
+    @test.services('network')
     def test_security_group_rules_list(self):
         # Positive test: Created Security Group rules should be
         # in the list of all rules
@@ -114,6 +117,7 @@ class SecurityGroupRulesTestJSON(base.BaseSecurityGroupsTest):
         self.assertTrue(any([i for i in rules if i['id'] == rule2_id]))
 
     @test.attr(type='smoke')
+    @test.services('network')
     def test_security_group_rules_delete_when_peer_group_deleted(self):
         # Positive test:rule will delete when peer group deleting
         # Creating a Security Group to add rules to it

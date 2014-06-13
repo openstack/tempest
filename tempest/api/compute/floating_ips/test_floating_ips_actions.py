@@ -54,6 +54,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             pass
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
         # should be successful
@@ -69,6 +70,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         self.assertIn(floating_ip_details, body)
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_delete_floating_ip(self):
         # Positive test:Deletion of valid floating IP from project
         # should be successful
@@ -85,6 +87,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         self.client.wait_for_resource_deletion(floating_ip_body['id'])
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_associate_disassociate_floating_ip(self):
         # Positive test:Associate and disassociate the provided floating IP
         # to a specific server should be successful
@@ -101,6 +104,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         self.assertEqual(202, resp.status)
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_associate_already_associated_floating_ip(self):
         # positive test:Association of an already associated floating IP
         # to specific server should change the association of the Floating IP

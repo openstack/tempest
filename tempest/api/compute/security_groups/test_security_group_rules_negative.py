@@ -37,6 +37,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
         cls.client = cls.security_groups_client
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_create_security_group_rule_with_non_existent_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with non existent Parent group id
@@ -50,6 +51,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           parent_group_id, ip_protocol, from_port, to_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_create_security_group_rule_with_invalid_id(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with Parent group id which is not integer
@@ -63,6 +65,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           parent_group_id, ip_protocol, from_port, to_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_create_security_group_rule_duplicate(self):
         # Negative test: Create Security Group rule duplicate should fail
         # Creating a Security Group to add rule to it
@@ -86,6 +89,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           parent_group_id, ip_protocol, from_port, to_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_create_security_group_rule_with_invalid_ip_protocol(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid ip_protocol
@@ -102,6 +106,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           parent_group_id, ip_protocol, from_port, to_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_create_security_group_rule_with_invalid_from_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid from_port
@@ -117,6 +122,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           parent_group_id, ip_protocol, from_port, to_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_create_security_group_rule_with_invalid_to_port(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid to_port
@@ -132,6 +138,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           parent_group_id, ip_protocol, from_port, to_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_create_security_group_rule_with_invalid_port_range(self):
         # Negative test: Creation of Security Group rule should FAIL
         # with invalid port range.
@@ -147,6 +154,7 @@ class SecurityGroupRulesNegativeTestJSON(base.BaseSecurityGroupsTest):
                           secgroup_id, ip_protocol, from_port, to_port)
 
     @test.attr(type=['negative', 'smoke'])
+    @test.services('network')
     def test_delete_security_group_rule_with_non_existent_id(self):
         # Negative test: Deletion of Security Group rule should be FAIL
         # with non existent id

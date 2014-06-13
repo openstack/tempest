@@ -43,6 +43,7 @@ class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
                       "Skipped because neutron do not support all_tenants"
                       "search filter.")
     @test.attr(type='smoke')
+    @test.services('network')
     def test_list_security_groups_list_all_tenants_filter(self):
         # Admin can list security groups of all tenants
         # List of all security groups created
