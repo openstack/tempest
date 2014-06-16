@@ -49,8 +49,9 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         try:
             return self.get_remote_client(server_or_ip)
         except Exception:
-            LOG.exception()
+            LOG.exception('Initializing SSH connection failed')
             self._log_console_output()
+            raise
 
     def _write_timestamp(self, server_or_ip):
         ssh_client = self._ssh_to_server(server_or_ip)
