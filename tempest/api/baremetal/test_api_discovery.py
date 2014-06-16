@@ -20,6 +20,7 @@ class TestApiDiscovery(base.BaseBaremetalTest):
     @test.attr(type='smoke')
     def test_api_versions(self):
         resp, descr = self.client.get_api_description()
+        self.assertEqual('200', resp['status'])
         expected_versions = ('v1',)
 
         versions = [version['id'] for version in descr['versions']]
@@ -30,6 +31,7 @@ class TestApiDiscovery(base.BaseBaremetalTest):
     @test.attr(type='smoke')
     def test_default_version(self):
         resp, descr = self.client.get_api_description()
+        self.assertEqual('200', resp['status'])
         default_version = descr['default_version']
 
         self.assertEqual(default_version['id'], 'v1')
@@ -37,6 +39,7 @@ class TestApiDiscovery(base.BaseBaremetalTest):
     @test.attr(type='smoke')
     def test_version_1_resources(self):
         resp, descr = self.client.get_version_description(version='v1')
+        self.assertEqual('200', resp['status'])
         expected_resources = ('nodes', 'chassis',
                               'ports', 'links', 'media_types')
 
