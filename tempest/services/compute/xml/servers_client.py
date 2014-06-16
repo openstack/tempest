@@ -318,6 +318,7 @@ class ServersClientXML(rest_client.RestClient):
         min_count: Count of minimum number of instances to launch.
         max_count: Count of maximum number of instances to launch.
         disk_config: Determines if user or admin controls disk configuration.
+        block_device_mapping: Block device mapping for the server.
         """
         server = xml_utils.Element("server",
                                    xmlns=xml_utils.XMLNS_11,
@@ -327,7 +328,8 @@ class ServersClientXML(rest_client.RestClient):
 
         for attr in ["adminPass", "accessIPv4", "accessIPv6", "key_name",
                      "user_data", "availability_zone", "min_count",
-                     "max_count", "return_reservation_id"]:
+                     "max_count", "return_reservation_id",
+                     "block_device_mapping"]:
             if attr in kwargs:
                 server.add_attr(attr, kwargs[attr])
 
