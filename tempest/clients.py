@@ -50,6 +50,7 @@ from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.limits_client import LimitsClientJSON
 from tempest.services.compute.json.migrations_client import \
     MigrationsClientJSON
+from tempest.services.compute.json.quotas_client import QuotaClassesClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClientJSON
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
@@ -105,6 +106,7 @@ from tempest.services.compute.xml.interfaces_client import \
     InterfacesClientXML
 from tempest.services.compute.xml.keypairs_client import KeyPairsClientXML
 from tempest.services.compute.xml.limits_client import LimitsClientXML
+from tempest.services.compute.xml.quotas_client import QuotaClassesClientXML
 from tempest.services.compute.xml.quotas_client import QuotasClientXML
 from tempest.services.compute.xml.security_groups_client \
     import SecurityGroupsClientXML
@@ -220,6 +222,8 @@ class Manager(manager.Manager):
             self.images_client = ImagesClientXML(self.auth_provider)
             self.keypairs_client = KeyPairsClientXML(self.auth_provider)
             self.quotas_client = QuotasClientXML(self.auth_provider)
+            self.quota_classes_client = QuotaClassesClientXML(
+                self.auth_provider)
             self.flavors_client = FlavorsClientXML(self.auth_provider)
             self.extensions_client = ExtensionsClientXML(self.auth_provider)
             self.volumes_extensions_client = VolumesExtensionsClientXML(
@@ -288,6 +292,8 @@ class Manager(manager.Manager):
             self.keypairs_v3_client = KeyPairsV3ClientJSON(
                 self.auth_provider)
             self.quotas_client = QuotasClientJSON(self.auth_provider)
+            self.quota_classes_client = QuotaClassesClientJSON(
+                self.auth_provider)
             self.quotas_v3_client = QuotasV3ClientJSON(self.auth_provider)
             self.flavors_client = FlavorsClientJSON(self.auth_provider)
             self.flavors_v3_client = FlavorsV3ClientJSON(self.auth_provider)

@@ -22,24 +22,25 @@ from tempest import config
 CONF = config.CONF
 
 
+def format_quota(q):
+    quota = {}
+    for k, v in q.items():
+        try:
+            v = int(v)
+        except ValueError:
+            pass
+
+        quota[k] = v
+
+    return quota
+
+
 class QuotasClientXML(rest_client.RestClient):
     TYPE = "xml"
 
     def __init__(self, auth_provider):
         super(QuotasClientXML, self).__init__(auth_provider)
         self.service = CONF.compute.catalog_type
-
-    def _format_quota(self, q):
-        quota = {}
-        for k, v in q.items():
-            try:
-                v = int(v)
-            except ValueError:
-                pass
-
-            quota[k] = v
-
-        return quota
 
     def get_quota_set(self, tenant_id, user_id=None):
         """List the quota set for a tenant."""
@@ -49,7 +50,7 @@ class QuotasClientXML(rest_client.RestClient):
             url += '?user_id=%s' % str(user_id)
         resp, body = self.get(url)
         body = xml_utils.xml_to_json(etree.fromstring(body))
-        body = self._format_quota(body)
+        body = format_quota(body)
         return resp, body
 
     def get_default_quota_set(self, tenant_id):
@@ -58,7 +59,7 @@ class QuotasClientXML(rest_client.RestClient):
         url = 'os-quota-sets/%s/defaults' % str(tenant_id)
         resp, body = self.get(url)
         body = xml_utils.xml_to_json(etree.fromstring(body))
-        body = self._format_quota(body)
+        body = format_quota(body)
         return resp, body
 
     def update_quota_set(self, tenant_id, user_id=None,
@@ -124,9 +125,41 @@ class QuotasClientXML(rest_client.RestClient):
                                   str(xml_utils.Document(post_body)))
 
         body = xml_utils.xml_to_json(etree.fromstring(body))
-        body = self._format_quota(body)
+        body = format_quota(body)
         return resp, body
 
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set."""
         return self.delete('os-quota-sets/%s' % str(tenant_id))
+
+
+class QuotaClassesClientXML(rest_client.RestClient):
+    TYPE = "xml"
+
+    def __init__(self, auth_provider):
+        super(QuotaClassesClientXML, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
+
+    def get_quota_class_set(self, quota_class_id):
+        """List the quota class set for a quota class."""
+
+        url = 'os-quota-class-sets/%s' % str(quota_class_id)
+        resp, body = self.get(url)
+        body = xml_utils.xml_to_json(etree.fromstring(body))
+        body = format_quota(body)
+        return resp, body
+
+    def update_quota_class_set(self, quota_class_id, **kwargs):
+        """
+        Updates the quota class's limits for one or more resources.
+        """
+        post_body = xml_utils.Element("quota_class_set",
+                                      xmlns=xml_utils.XMLNS_11,
+                                      **kwargs)
+
+        resp, body = self.put('os-quota-class-sets/%s' % str(quota_class_id),
+                              str(xml_utils.Document(post_body)))
+
+        body = xml_utils.xml_to_json(etree.fromstring(body))
+        body = format_quota(body)
+        return resp, body
