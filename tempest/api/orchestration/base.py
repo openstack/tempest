@@ -64,8 +64,10 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         return admin_client
 
     @classmethod
-    def create_stack(cls, stack_name, template_data, parameters={},
+    def create_stack(cls, stack_name, template_data, parameters=None,
                      environment=None, files=None):
+        if parameters is None:
+            parameters = {}
         resp, body = cls.client.create_stack(
             stack_name,
             template=template_data,

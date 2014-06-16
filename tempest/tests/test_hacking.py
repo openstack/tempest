@@ -107,3 +107,16 @@ class HackingTestCase(base.TestCase):
         self.assertFalse(checks.no_official_client_manager_in_api_tests(
             "cls.official_client = clients.OfficialClientManager(credentials)",
             "tempest/scenario/fake_test.py"))
+
+    def test_no_mutable_default_args(self):
+        self.assertEqual(1, len(list(checks.no_mutable_default_args(
+            " def function1(para={}):"))))
+
+        self.assertEqual(1, len(list(checks.no_mutable_default_args(
+            "def function2(para1, para2, para3=[])"))))
+
+        self.assertEqual(0, len(list(checks.no_mutable_default_args(
+            "defined = []"))))
+
+        self.assertEqual(0, len(list(checks.no_mutable_default_args(
+            "defined, undefined = [], {}"))))
