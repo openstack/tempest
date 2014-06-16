@@ -23,12 +23,11 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesTransfersTest(base.BaseVolumeV1Test):
-    _interface = "json"
+class VolumesV2TransfersTest(base.BaseVolumeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(VolumesTransfersTest, cls).setUpClass()
+        super(VolumesV2TransfersTest, cls).setUpClass()
 
         # Add another tenant to test volume-transfer
         if CONF.compute.allow_tenant_isolation:
@@ -110,5 +109,13 @@ class VolumesTransfersTest(base.BaseVolumeV1Test):
         self.client.wait_for_volume_status(volume['id'], 'available')
 
 
-class VolumesTransfersTestXML(VolumesTransfersTest):
+class VolumesV2TransfersTestXML(VolumesV2TransfersTest):
+    _interface = "xml"
+
+
+class VolumesV1TransfersTest(VolumesV2TransfersTest):
+    _api_version = 1
+
+
+class VolumesV1TransfersTestXML(VolumesV1TransfersTest):
     _interface = "xml"

@@ -19,13 +19,12 @@ from tempest.api.volume import base
 from tempest import test
 
 
-class VolumeMetadataTest(base.BaseVolumeV1Test):
-    _interface = "json"
+class VolumesV2MetadataTest(base.BaseVolumeTest):
 
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
-        super(VolumeMetadataTest, cls).setUpClass()
+        super(VolumesV2MetadataTest, cls).setUpClass()
         # Create a volume
         cls.volume = cls.create_volume()
         cls.volume_id = cls.volume['id']
@@ -33,7 +32,7 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
     def tearDown(self):
         # Update the metadata to {}
         self.volumes_client.update_volume_metadata(self.volume_id, {})
-        super(VolumeMetadataTest, self).tearDown()
+        super(VolumesV2MetadataTest, self).tearDown()
 
     @test.attr(type='gate')
     def test_create_get_delete_volume_metadata(self):
@@ -117,5 +116,13 @@ class VolumeMetadataTest(base.BaseVolumeV1Test):
         self.assertThat(body.items(), matchers.ContainsAll(expect.items()))
 
 
-class VolumeMetadataTestXML(VolumeMetadataTest):
+class VolumesV2MetadataTestXML(VolumesV2MetadataTest):
+    _interface = "xml"
+
+
+class VolumesV1MetadataTest(VolumesV2MetadataTest):
+    _api_version = 1
+
+
+class VolumesV1MetadataTestXML(VolumesV1MetadataTest):
     _interface = "xml"

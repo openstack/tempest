@@ -21,13 +21,12 @@ from tempest import test
 CONF = config.CONF
 
 
-class VolumesActionsTest(base.BaseVolumeV1Test):
-    _interface = "json"
+class VolumesV2ActionsTest(base.BaseVolumeTest):
 
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
-        super(VolumesActionsTest, cls).setUpClass()
+        super(VolumesV2ActionsTest, cls).setUpClass()
         cls.client = cls.volumes_client
         cls.image_client = cls.os.image_client
 
@@ -47,7 +46,7 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
         cls.servers_client.delete_server(cls.server['id'])
         cls.servers_client.wait_for_server_termination(cls.server['id'])
 
-        super(VolumesActionsTest, cls).tearDownClass()
+        super(VolumesV2ActionsTest, cls).tearDownClass()
 
     @test.stresstest(class_setup_per='process')
     @test.attr(type='smoke')
@@ -165,5 +164,13 @@ class VolumesActionsTest(base.BaseVolumeV1Test):
         self.assertEqual(False, bool_flag)
 
 
-class VolumesActionsTestXML(VolumesActionsTest):
+class VolumesV2ActionsTestXML(VolumesV2ActionsTest):
+    _interface = "xml"
+
+
+class VolumesV1ActionsTest(VolumesV2ActionsTest):
+    _api_version = 1
+
+
+class VolumesV1ActionsTestXML(VolumesV1ActionsTest):
     _interface = "xml"
