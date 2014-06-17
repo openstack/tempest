@@ -509,11 +509,14 @@ class ServersClientJSON(rest_client.RestClient):
         resp, body = self.post('os-server-groups', post_body)
 
         body = json.loads(body)
+        self.validate_response(schema.create_get_server_group, resp, body)
         return resp, body['server_group']
 
     def delete_server_group(self, server_group_id):
         """Delete the given server-group."""
-        return self.delete("os-server-groups/%s" % str(server_group_id))
+        resp, body = self.delete("os-server-groups/%s" % str(server_group_id))
+        self.validate_response(schema.delete_server_group, resp, body)
+        return resp, body
 
     def list_server_groups(self):
         """List the server-groups."""
@@ -525,4 +528,5 @@ class ServersClientJSON(rest_client.RestClient):
         """Get the details of given server_group."""
         resp, body = self.get("os-server-groups/%s" % str(server_group_id))
         body = json.loads(body)
+        self.validate_response(schema.create_get_server_group, resp, body)
         return resp, body['server_group']

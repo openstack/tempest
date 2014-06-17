@@ -142,3 +142,38 @@ list_addresses = {
         'required': ['addresses']
     }
 }
+
+common_server_group = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'name': {'type': 'string'},
+        'policies': {
+            'type': 'array',
+            'items': {'type': 'string'}
+        },
+        # 'members' attribute contains the array of instance's UUID of
+        # instances present in server group
+        'members': {
+            'type': 'array',
+            'items': {'type': 'string'}
+        },
+        'metadata': {'type': 'object'}
+    },
+    'required': ['id', 'name', 'policies', 'members', 'metadata']
+}
+
+create_get_server_group = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server_group': common_server_group
+        },
+        'required': ['server_group']
+    }
+}
+
+delete_server_group = {
+    'status_code': [204]
+}
