@@ -31,8 +31,6 @@ class BaremetalBasicOpsPXESSH(manager.BaremetalScenarioTest):
         * Boots an instance using the keypair
         * Monitors the associated Ironic node for power and
           expected state transitions
-        * Validates Ironic node's driver_info has been properly
-          updated
         * Validates Ironic node's port data has been properly updated
         * Verifies SSH connectivity using created keypair via fixed IP
         * Associates a floating ip
@@ -46,17 +44,6 @@ class BaremetalBasicOpsPXESSH(manager.BaremetalScenarioTest):
         self.instance.add_floating_ip(floating_ip)
         return floating_ip.ip
 
-    def validate_driver_info(self):
-        f_id = self.instance.flavor['id']
-        flavor_extra = self.compute_client.flavors.get(f_id).get_keys()
-        driver_info = self.node.driver_info
-        self.assertEqual(driver_info['pxe_deploy_kernel'],
-                         flavor_extra['baremetal:deploy_kernel_id'])
-        self.assertEqual(driver_info['pxe_deploy_ramdisk'],
-                         flavor_extra['baremetal:deploy_ramdisk_id'])
-        self.assertEqual(driver_info['pxe_image_source'],
-                         self.instance.image['id'])
-
     def validate_ports(self):
         for port in self.get_ports(self.node.uuid):
             n_port_id = port.extra['vif_port_id']
@@ -68,7 +55,6 @@ class BaremetalBasicOpsPXESSH(manager.BaremetalScenarioTest):
     def test_baremetal_server_ops(self):
         self.add_keypair()
         self.boot_instance()
-        self.validate_driver_info()
         self.validate_ports()
         self.verify_connectivity()
         floating_ip = self.add_floating_ip()
