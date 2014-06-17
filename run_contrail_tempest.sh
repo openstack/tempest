@@ -64,7 +64,7 @@ while [ $# -gt 0 ]; do
     -p|--populate-config) populate_config=1;;
     -r|--result-xml) result_xml=$2; shift;;
     --) [ "yes" == "$first_uu" ] || testrargs="$testrargs $1"; first_uu=no  ;;
-    *) testrargs+="$testrargs $1";;
+    *) testrargs+=" $1";;
   esac
   shift
 done
