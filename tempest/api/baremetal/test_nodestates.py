@@ -13,6 +13,8 @@
 #    under the License.
 
 from tempest.api.baremetal import base
+from tempest import exceptions
+from tempest.openstack.common import timeutils
 from tempest import test
 
 
@@ -20,10 +22,25 @@ class TestNodeStates(base.BaseBaremetalTest):
     """Tests for baremetal NodeStates."""
 
     @classmethod
-    def setUpClass(self):
-        super(TestNodeStates, self).setUpClass()
-        chassis = self.create_chassis()['chassis']
-        self.node = self.create_node(chassis['uuid'])['node']
+    def setUpClass(cls):
+        super(TestNodeStates, cls).setUpClass()
+        cls.chassis = cls.create_chassis()['chassis']
+        cls.node = cls.create_node(cls.chassis['uuid'])['node']
+
+    def _validate_power_state(self, node_uuid, power_state):
+        # Validate that power state is set within timeout
+        if power_state == 'rebooting':
+            power_state = 'power on'
+        start = timeutils.utcnow()
+        while timeutils.delta_seconds(
+                start, timeutils.utcnow()) < self.power_timeout:
+            resp, node = self.client.show_node(node_uuid)
+            self.assertEqual(200, resp.status)
+            if node['power_state'] == power_state:
+                return
+        message = ('Failed to set power state within '
+                   'the required time: %s sec.' % self.power_timeout)
+        raise exceptions.TimeoutException(message)
 
     @test.attr(type='smoke')
     def test_list_nodestates(self):
@@ -31,3 +48,15 @@ class TestNodeStates(base.BaseBaremetalTest):
         self.assertEqual('200', resp['status'])
         for key in nodestates:
             self.assertEqual(nodestates[key], self.node[key])
+
+    @test.attr(type='smoke')
+    def test_set_node_power_state(self):
+        node = self.create_node(self.chassis['uuid'])['node']
+        states = ["power on", "rebooting", "power off"]
+        for state in states:
+            # Set power state
+            resp, _ = self.client.set_node_power_state(node['uuid'],
+                                                       state)
+            self.assertEqual('202', resp['status'])
+            # Check power state after state is set
+            self._validate_power_state(node['uuid'], state)

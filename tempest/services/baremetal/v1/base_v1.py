@@ -226,3 +226,16 @@ class BaremetalClientV1(base.BaremetalClient):
         """
 
         return self._patch_request('ports', uuid, patch)
+
+    @base.handle_errors
+    def set_node_power_state(self, node_uuid, state):
+        """
+        Set power state of the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+        :state: desired state to set (on/off/reboot).
+
+        """
+        target = {'target': state}
+        return self._put_request('nodes/%s/states/power' % node_uuid,
+                                 target)
