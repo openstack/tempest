@@ -255,7 +255,7 @@ compute_features_group = cfg.OptGroup(name='compute-feature-enabled',
 
 ComputeFeaturesGroup = [
     cfg.BoolOpt('api_v3',
-                default=True,
+                default=False,
                 help="If false, skip all nova v3 tests."),
     cfg.BoolOpt('disk_config',
                 default=True,
