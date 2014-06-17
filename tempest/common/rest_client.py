@@ -191,17 +191,25 @@ class RestClient(object):
         """
         self._skip_path = False
 
-    def expected_success(self, expected_code, read_code):
+    @classmethod
+    def expected_success(cls, expected_code, read_code):
         assert_msg = ("This function only allowed to use for HTTP status"
                       "codes which explicitly defined in the RFC 2616. {0}"
                       " is not a defined Success Code!").format(expected_code)
-        assert expected_code in HTTP_SUCCESS, assert_msg
+        if isinstance(expected_code, list):
+            for code in expected_code:
+                assert code in HTTP_SUCCESS, assert_msg
+        else:
+            assert expected_code in HTTP_SUCCESS, assert_msg
 
         # NOTE(afazekas): the http status code above 400 is processed by
         # the _error_checker method
-        if read_code < 400 and read_code != expected_code:
-                pattern = """Unexpected http success status code {0},
-                             The expected status code is {1}"""
+        if read_code < 400:
+            pattern = """Unexpected http success status code {0},
+                         The expected status code is {1}"""
+            if ((not isinstance(expected_code, list) and
+                (read_code != expected_code)) or (isinstance(expected_code,
+                list) and (read_code not in expected_code))):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 
@@ -555,11 +563,7 @@ class RestClient(object):
         # declared in the V3 API and so we should be able to export this in
         # the response schema. For now we'll ignore it.
         if resp.status in HTTP_SUCCESS:
-            response_code = schema['status_code']
-            if resp.status not in response_code:
-                msg = ("The status code(%s) is different than the expected "
-                       "one(%s)") % (resp.status, response_code)
-                raise exceptions.InvalidHttpSuccessCode(msg)
+            cls.expected_success(schema['status_code'], resp.status)
 
             # Check the body of a response
             body_schema = schema.get('response_body')
