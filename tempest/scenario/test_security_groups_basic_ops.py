@@ -134,6 +134,8 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
 
     @classmethod
     def setUpClass(cls):
+        # Create no network resources for these tests.
+        cls.set_network_resources()
         super(TestSecurityGroupsBasicOps, cls).setUpClass()
         cls.alt_creds = cls.alt_credentials()
         cls.alt_manager = clients.OfficialClientManager(cls.alt_creds)
