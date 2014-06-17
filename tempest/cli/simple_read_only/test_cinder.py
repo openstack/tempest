@@ -96,7 +96,6 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
         self.cinder('type-list')
 
     def test_cinder_list_extensions(self):
-        self.cinder('list-extensions')
         roles = self.parser.listing(self.cinder('list-extensions'))
         self.assertTableStruct(roles, ['Name', 'Summary', 'Alias', 'Updated'])
 
