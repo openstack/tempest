@@ -55,9 +55,11 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
         bd_map = {
             'vda': vol_id + ':::0'
         }
+        security_groups = [self.security_group.name]
         create_kwargs = {
             'block_device_mapping': bd_map,
-            'key_name': keypair.name
+            'key_name': keypair.name,
+            'security_groups': security_groups
         }
         return self.create_server(image='', create_kwargs=create_kwargs)
 
@@ -135,7 +137,7 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
-        self._create_loginable_secgroup_rule_nova()
+        self.security_group = self._create_security_group_nova()
 
         # create an instance from volume
         volume_origin = self._create_volume_from_image()
@@ -182,8 +184,10 @@ class TestVolumeBootPatternV2(TestVolumeBootPattern):
         bdms = [{'uuid': vol_id, 'source_type': 'volume',
                  'destination_type': 'volume', 'boot_index': 0,
                  'delete_on_termination': False}]
+        security_groups = [self.security_group.name]
         create_kwargs = {
             'block_device_mapping_v2': bdms,
-            'key_name': keypair.name
+            'key_name': keypair.name,
+            'security_groups': security_groups
         }
         return self.create_server(image='', create_kwargs=create_kwargs)

@@ -112,6 +112,11 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         volume = self.volume_client.volumes.get(self.volume.id)
         self.assertEqual('available', volume.status)
 
+    def create_and_add_security_group(self):
+        secgroup = self._create_security_group_nova()
+        self.server.add_security_group(secgroup.name)
+        self.addCleanup(self.server.remove_security_group, secgroup.name)
+
     @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         self.glance_image_create()
@@ -128,7 +133,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
 
         self.nova_floating_ip_create()
         self.nova_floating_ip_add()
-        self._create_loginable_secgroup_rule_nova()
+        self.create_and_add_security_group()
         self.ssh_to_server()
         self.nova_reboot()
         self.ssh_to_server()

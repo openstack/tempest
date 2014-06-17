@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
@@ -68,22 +67,12 @@ class TestServerBasicOps(manager.OfficialClientTest):
     def add_keypair(self):
         self.keypair = self.create_keypair()
 
-    def create_security_group(self):
-        sg_name = data_utils.rand_name('secgroup-smoke')
-        sg_desc = sg_name + " description"
-        self.secgroup = self.compute_client.security_groups.create(sg_name,
-                                                                   sg_desc)
-        self.assertEqual(self.secgroup.name, sg_name)
-        self.assertEqual(self.secgroup.description, sg_desc)
-        self.set_resource('secgroup', self.secgroup)
-
-        # Add rules to the security group
-        self._create_loginable_secgroup_rule_nova(secgroup_id=self.secgroup.id)
-
     def boot_instance(self):
         # Create server with image and flavor from input scenario
+        security_groups = [self.security_group.name]
         create_kwargs = {
-            'key_name': self.keypair.id
+            'key_name': self.keypair.id,
+            'security_groups': security_groups
         }
         instance = self.create_server(image=self.image_ref,
                                       flavor=self.flavor_ref,
@@ -117,7 +106,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
     @test.services('compute', 'network')
     def test_server_basicops(self):
         self.add_keypair()
-        self.create_security_group()
+        self.security_group = self._create_security_group_nova()
         self.boot_instance()
         self.verify_ssh()
         self.terminate_instance()
