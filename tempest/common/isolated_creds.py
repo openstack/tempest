@@ -21,6 +21,7 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
+import time
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
