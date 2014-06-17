@@ -26,6 +26,11 @@ LOG = logging.getLogger(__name__)
 
 class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
 
+    def tearDown(self):
+        """Terminate test instances created after a test is executed."""
+        self.server_check_teardown()
+        super(ImagesOneServerTestJSON, self).tearDown()
+
     def setUp(self):
         # NOTE(afazekas): Normally we use the same server with all test cases,
         # but if it has an issue, we build a new one

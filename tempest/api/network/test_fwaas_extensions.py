@@ -14,8 +14,11 @@
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 
 class FWaaSExtensionTestJSON(base.BaseNetworkTest):
@@ -66,6 +69,20 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         # if firewall is not found, this means it was deleted in the test
         except exceptions.NotFound:
             pass
+
+        self.client.wait_for_resource_deletion('firewall', fw_id)
+
+    def _wait_for_active(self, fw_id):
+        def _wait():
+            resp, firewall = self.client.show_firewall(fw_id)
+            self.assertEqual('200', resp['status'])
+            firewall = firewall['firewall']
+            return firewall['status'] == 'ACTIVE'
+
+        if not test.call_until_true(_wait, CONF.network.build_timeout,
+                                    CONF.network.build_interval):
+            m = 'Timed out waiting for firewall %s to become ACTIVE.' % fw_id
+            raise exceptions.TimeoutException(m)
 
     @test.attr(type='smoke')
     def test_list_firewall_rules(self):
@@ -168,6 +185,15 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_create_show_delete_firewall(self):
+        # Create tenant network resources required for an ACTIVE firewall
+        network = self.create_network()
+        subnet = self.create_subnet(network)
+        router = self.create_router(
+            data_utils.rand_name('router-'),
+            admin_state_up=True)
+        self.client.add_router_interface_with_subnet_id(
+            router['id'], subnet['id'])
+
         # Create firewall
         resp, body = self.client.create_firewall(
             name=data_utils.rand_name("firewall"),
@@ -177,11 +203,16 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         firewall_id = created_firewall['id']
         self.addCleanup(self._try_delete_firewall, firewall_id)
 
+        self._wait_for_active(firewall_id)
+
         # show a created firewall
         resp, firewall = self.client.show_firewall(firewall_id)
         self.assertEqual('200', resp['status'])
         firewall = firewall['firewall']
+
         for key, value in firewall.iteritems():
+            if key == 'status':
+                continue
             self.assertEqual(created_firewall[key], value)
 
         # list firewall
@@ -198,9 +229,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         # Delete firewall
         resp, _ = self.client.delete_firewall(firewall_id)
         self.assertEqual('204', resp['status'])
-        # Confirm deletion
-        # TODO(raies): Confirm deletion can be done only when,
-        # deleted firewall status is not "PENDING_DELETE".
 
 
 class FWaaSExtensionTestXML(FWaaSExtensionTestJSON):

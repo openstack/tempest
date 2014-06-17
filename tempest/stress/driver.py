@@ -19,6 +19,7 @@ import time
 
 from six import moves
 
+from tempest import auth
 from tempest import clients
 from tempest.common import ssh
 from tempest.common.utils import data_utils
@@ -80,17 +81,23 @@ def _has_error_in_logs(logfiles, nodes, ssh_user, ssh_key=None,
     return ret
 
 
-def sigchld_handler(signal, frame):
+def sigchld_handler(signalnum, frame):
     """
     Signal handler (only active if stop_on_error is True).
     """
-    terminate_all_processes()
+    for process in processes:
+        if (not process['process'].is_alive() and
+                process['process'].exitcode != 0):
+            signal.signal(signalnum, signal.SIG_DFL)
+            terminate_all_processes()
+            break
 
 
 def terminate_all_processes(check_interval=20):
     """
     Goes through the process list and terminates all child processes.
     """
+    LOG.info("Stopping all processes.")
     for process in processes:
         if process['process'].is_alive():
             try:
@@ -141,9 +148,10 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
                                             password,
                                             tenant['id'],
                                             "email")
-                manager = clients.Manager(username=username,
-                                          password="pass",
-                                          tenant_name=tenant_name)
+                creds = auth.get_credentials(username=username,
+                                             password=password,
+                                             tenant_name=tenant_name)
+                manager = clients.Manager(credentials=creds)
 
             test_obj = importutils.import_class(test['action'])
             test_run = test_obj(manager, max_runs, stop_on_error)
@@ -174,34 +182,39 @@ def stress_openstack(tests, duration, max_runs=None, stop_on_error=False):
         signal.signal(signal.SIGCHLD, sigchld_handler)
     end_time = time.time() + duration
     had_errors = False
-    while True:
-        if max_runs is None:
-            remaining = end_time - time.time()
-            if remaining <= 0:
-                break
-        else:
-            remaining = log_check_interval
-            all_proc_term = True
-            for process in processes:
-                if process['process'].is_alive():
-                    all_proc_term = False
+    try:
+        while True:
+            if max_runs is None:
+                remaining = end_time - time.time()
+                if remaining <= 0:
                     break
-            if all_proc_term:
-                break
-
-        time.sleep(min(remaining, log_check_interval))
-        if stop_on_error:
-            for process in processes:
-                if process['statistic']['fails'] > 0:
+            else:
+                remaining = log_check_interval
+                all_proc_term = True
+                for process in processes:
+                    if process['process'].is_alive():
+                        all_proc_term = False
+                        break
+                if all_proc_term:
                     break
 
-        if not logfiles:
-            continue
-        if _has_error_in_logs(logfiles, computes, ssh_user, ssh_key,
-                              stop_on_error):
-            had_errors = True
-            break
+            time.sleep(min(remaining, log_check_interval))
+            if stop_on_error:
+                if any([True for proc in processes
+                        if proc['statistic']['fails'] > 0]):
+                    break
 
+            if not logfiles:
+                continue
+            if _has_error_in_logs(logfiles, computes, ssh_user, ssh_key,
+                                  stop_on_error):
+                had_errors = True
+                break
+    except KeyboardInterrupt:
+        LOG.warning("Interrupted, going to print statistics and exit ...")
+
+    if stop_on_error:
+        signal.signal(signal.SIGCHLD, signal.SIG_DFL)
     terminate_all_processes()
 
     sum_fails = 0

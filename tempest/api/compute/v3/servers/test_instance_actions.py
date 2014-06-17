@@ -27,25 +27,27 @@ class InstanceActionsV3Test(base.BaseV3ComputeTest):
         cls.resp = resp
         cls.server_id = server['id']
 
+    @test.skip_because(bug="1206032")
     @test.attr(type='gate')
-    def test_list_instance_actions(self):
+    def test_list_server_actions(self):
         # List actions of the provided server
         resp, body = self.client.reboot(self.server_id, 'HARD')
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
-        resp, body = self.client.list_instance_actions(self.server_id)
+        resp, body = self.client.list_server_actions(self.server_id)
         self.assertEqual(200, resp.status)
         self.assertTrue(len(body) == 2, str(body))
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
 
+    @test.skip_because(bug="1206032")
     @test.attr(type='gate')
     @test.skip_because(bug="1281915")
-    def test_get_instance_action(self):
+    def test_get_server_action(self):
         # Get the action details of the provided server
         request_id = self.resp['x-compute-request-id']
-        resp, body = self.client.get_instance_action(self.server_id,
-                                                     request_id)
+        resp, body = self.client.get_server_action(self.server_id,
+                                                   request_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(self.server_id, body['instance_uuid'])
+        self.assertEqual(self.server_id, body['server_uuid'])
         self.assertEqual('create', body['action'])

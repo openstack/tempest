@@ -14,7 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from ast import literal_eval
+import ast
 from lxml import etree
 
 from tempest.common import xml_utils as xml
@@ -35,7 +35,7 @@ class VolumeQuotasClientXML(volume_quotas_client.VolumeQuotasClientJSON):
         quota = {}
         for k, v in q.items():
             try:
-                v = literal_eval(v)
+                v = ast.literal_eval(v)
             except (ValueError, SyntaxError):
                 pass
 
@@ -68,3 +68,7 @@ class VolumeQuotasClientXML(volume_quotas_client.VolumeQuotasClientJSON):
                               str(xml.Document(element)))
         body = xml.xml_to_json(etree.fromstring(body))
         return resp, self._format_quota(body)
+
+    def delete_quota_set(self, tenant_id):
+        """Delete the tenant's quota set."""
+        return self.delete('os-quota-sets/%s' % tenant_id)

@@ -50,3 +50,39 @@ class TestMisc(base.TestCase):
         self.assertEqual(test, test2)
         test3 = TestBar()
         self.assertNotEqual(test, test3)
+
+    def test_find_test_caller_test_case(self):
+        # Calling it from here should give us the method we're in.
+        self.assertEqual('TestMisc:test_find_test_caller_test_case',
+                         misc.find_test_caller())
+
+    def test_find_test_caller_setup_self(self):
+        def setUp(self):
+            return misc.find_test_caller()
+        self.assertEqual('TestMisc:setUp', setUp(self))
+
+    def test_find_test_caller_setup_no_self(self):
+        def setUp():
+            return misc.find_test_caller()
+        self.assertEqual(':setUp', setUp())
+
+    def test_find_test_caller_setupclass_cls(self):
+        def setUpClass(cls):  # noqa
+            return misc.find_test_caller()
+        self.assertEqual('TestMisc:setUpClass', setUpClass(self.__class__))
+
+    def test_find_test_caller_teardown_self(self):
+        def tearDown(self):
+            return misc.find_test_caller()
+        self.assertEqual('TestMisc:tearDown', tearDown(self))
+
+    def test_find_test_caller_teardown_no_self(self):
+        def tearDown():
+            return misc.find_test_caller()
+        self.assertEqual(':tearDown', tearDown())
+
+    def test_find_test_caller_teardown_class(self):
+        def tearDownClass(cls):
+            return misc.find_test_caller()
+        self.assertEqual('TestMisc:tearDownClass',
+                         tearDownClass(self.__class__))

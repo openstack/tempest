@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 import urllib
 
+from tempest.api_schema.compute import migrations as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -34,4 +36,6 @@ class MigrationsV3ClientJSON(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
-        return resp, self._parse_resp(body)
+        body = json.loads(body)
+        self.validate_response(schema.list_migrations, resp, body)
+        return resp, body['migrations']

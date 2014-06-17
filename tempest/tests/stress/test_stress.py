@@ -18,12 +18,12 @@ import subprocess
 
 import tempest.cli as cli
 from tempest.openstack.common import log as logging
-import tempest.test
+from tempest.tests import base
 
 LOG = logging.getLogger(__name__)
 
 
-class StressFrameworkTest(tempest.test.BaseTestCase):
+class StressFrameworkTest(base.TestCase):
     """Basic test for the stress test framework.
     """
 
@@ -51,5 +51,5 @@ class StressFrameworkTest(tempest.test.BaseTestCase):
         return proc.returncode
 
     def test_help_function(self):
-        result = self._cmd("python", "-m tempest.stress.run_stress -h")
+        result = self._cmd("python", "-m tempest.cmd.run_stress -h")
         self.assertEqual(0, result)

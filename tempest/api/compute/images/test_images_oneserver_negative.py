@@ -33,6 +33,7 @@ class ImagesOneServerNegativeTestJSON(base.BaseV2ComputeTest):
         for image_id in self.image_ids:
             self.client.delete_image(image_id)
             self.image_ids.remove(image_id)
+        self.server_check_teardown()
         super(ImagesOneServerNegativeTestJSON, self).tearDown()
 
     def setUp(self):

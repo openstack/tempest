@@ -20,12 +20,17 @@ import urlparse
 
 from tempest.api.object_storage import base
 from tempest.common.utils import data_utils
+from tempest import exceptions
 from tempest import test
 
 
 class ObjectFormPostNegativeTest(base.BaseObjectTest):
 
+    metadata = {}
+    containers = []
+
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ObjectFormPostNegativeTest, cls).setUpClass()
         cls.container_name = data_utils.rand_name(name='TestContainer')
@@ -37,6 +42,18 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         cls.key = 'Meta'
         cls.metadata = {'Temp-URL-Key': cls.key}
         cls.account_client.create_account_metadata(metadata=cls.metadata)
+
+    def setUp(self):
+        super(ObjectFormPostNegativeTest, self).setUp()
+
+        # make sure the metadata has been set
+        account_client_metadata, _ = \
+            self.account_client.list_account_metadata()
+        self.assertIn('x-account-meta-temp-url-key',
+                      account_client_metadata)
+        self.assertEqual(
+            account_client_metadata['x-account-meta-temp-url-key'],
+            self.key)
 
     @classmethod
     def tearDownClass(cls):
@@ -100,12 +117,25 @@ class ObjectFormPostNegativeTest(base.BaseObjectTest):
         headers = {'Content-Type': content_type,
                    'Content-Length': str(len(body))}
 
-        url = "%s/%s/%s" % (self.container_client.base_url,
-                            self.container_name,
-                            self.object_name)
+        url = "%s/%s" % (self.container_name, self.object_name)
+        exc = self.assertRaises(
+            exceptions.Unauthorized,
+            self.object_client.post,
+            url, body, headers=headers)
+        self.assertIn('FormPost: Form Expired', str(exc))
 
-        # Use a raw request, otherwise authentication headers are used
-        resp, body = self.object_client.http_obj.request(url, "POST",
-                                                         body, headers=headers)
-        self.assertEqual(int(resp['status']), 401)
-        self.assertIn('FormPost: Form Expired', body)
+    @test.requires_ext(extension='formpost', service='object')
+    @test.attr(type='gate')
+    def test_post_object_using_form_invalid_signature(self):
+        self.key = "Wrong"
+        body, content_type = self.get_multipart_form()
+
+        headers = {'Content-Type': content_type,
+                   'Content-Length': str(len(body))}
+
+        url = "%s/%s" % (self.container_name, self.object_name)
+        exc = self.assertRaises(
+            exceptions.Unauthorized,
+            self.object_client.post,
+            url, body, headers=headers)
+        self.assertIn('FormPost: Invalid Signature', str(exc))

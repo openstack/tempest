@@ -36,6 +36,7 @@ class ExtraDHCPOptionsTestJSON(base.BaseNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ExtraDHCPOptionsTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('extra_dhcp_opt', 'network'):

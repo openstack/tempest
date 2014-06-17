@@ -33,12 +33,12 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         resp, body = self.create_image(name='New Name',
                                        container_format='bare',
                                        disk_format='raw',
-                                       is_public=True,
+                                       is_public=False,
                                        properties=properties)
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertEqual('New Name', body.get('name'))
-        self.assertTrue(body.get('is_public'))
+        self.assertFalse(body.get('is_public'))
         self.assertEqual('queued', body.get('status'))
         for key, val in properties.items():
             self.assertEqual(val, body.get('properties')[key])
@@ -54,14 +54,14 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         # Register a new remote image
         resp, body = self.create_image(name='New Remote Image',
                                        container_format='bare',
-                                       disk_format='raw', is_public=True,
+                                       disk_format='raw', is_public=False,
                                        location='http://example.com'
                                                 '/someimage.iso',
                                        properties={'key1': 'value1',
                                                    'key2': 'value2'})
         self.assertIn('id', body)
         self.assertEqual('New Remote Image', body.get('name'))
-        self.assertTrue(body.get('is_public'))
+        self.assertFalse(body.get('is_public'))
         self.assertEqual('active', body.get('status'))
         properties = body.get('properties')
         self.assertEqual(properties['key1'], 'value1')
@@ -71,12 +71,12 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
     def test_register_http_image(self):
         resp, body = self.create_image(name='New Http Image',
                                        container_format='bare',
-                                       disk_format='raw', is_public=True,
+                                       disk_format='raw', is_public=False,
                                        copy_from=CONF.image.http_image)
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertEqual('New Http Image', body.get('name'))
-        self.assertTrue(body.get('is_public'))
+        self.assertFalse(body.get('is_public'))
         self.client.wait_for_image_status(image_id, 'active')
         resp, body = self.client.get_image(image_id)
         self.assertEqual(resp['status'], '200')
@@ -88,12 +88,12 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         resp, body = self.create_image(name='New_image_with_min_ram',
                                        container_format='bare',
                                        disk_format='raw',
-                                       is_public=True,
+                                       is_public=False,
                                        min_ram=40,
                                        properties=properties)
         self.assertIn('id', body)
         self.assertEqual('New_image_with_min_ram', body.get('name'))
-        self.assertTrue(body.get('is_public'))
+        self.assertFalse(body.get('is_public'))
         self.assertEqual('queued', body.get('status'))
         self.assertEqual(40, body.get('min_ram'))
         for key, val in properties.items():
@@ -147,7 +147,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         resp, image = cls.create_image(name=name,
                                        container_format=container_format,
                                        disk_format=disk_format,
-                                       is_public=True,
+                                       is_public=False,
                                        location=location)
         image_id = image['id']
         return image_id
@@ -165,7 +165,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         resp, image = cls.create_image(name=name,
                                        container_format=container_format,
                                        disk_format=disk_format,
-                                       is_public=True, data=image_file)
+                                       is_public=False, data=image_file)
         image_id = image['id']
         return image_id
 
@@ -247,11 +247,17 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
-        super(ListSnapshotImagesTest, cls).setUpClass()
+        # This test class only uses nova v3 api to create snapshot
+        # as the similar test which uses nova v2 api already exists
+        # in nova v2 compute images api tests.
+        # Since nova v3 doesn't have images api proxy, this test
+        # class was added in the image api tests.
         if not CONF.compute_feature_enabled.api_v3:
-            cls.servers_client = cls.os.servers_client
-        else:
-            cls.servers_client = cls.os.servers_v3_client
+            skip_msg = ("%s skipped as nova v3 api is not available" %
+                        cls.__name__)
+            raise cls.skipException(skip_msg)
+        super(ListSnapshotImagesTest, cls).setUpClass()
+        cls.servers_client = cls.os.servers_v3_client
         cls.servers = []
         # We add a few images here to test the listing functionality of
         # the images API
@@ -264,7 +270,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         resp, image = cls.create_image(name="Standard Image",
                                        container_format='ami',
                                        disk_format='ami',
-                                       is_public=True, data=image_file)
+                                       is_public=False, data=image_file)
         cls.image_id = image['id']
         cls.client.wait_for_image_status(image['id'], 'active')
 
@@ -281,8 +287,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         cls.servers.append(server)
         cls.servers_client.wait_for_server_status(
             server['id'], 'ACTIVE')
-        resp, image = cls.servers_client.create_image(
-            server['id'], name)
+        resp, _ = cls.servers_client.create_image(server['id'], name)
         image_id = data_utils.parse_image_id(resp['location'])
         cls.created_images.append(image_id)
         cls.client.wait_for_image_status(image_id,
@@ -290,6 +295,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         return image_id
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_server_id(self):
         # The images should contain images filtered by server id
         resp, images = self.client.image_list_detail(
@@ -299,6 +305,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         self.assertEqual(self.snapshot_set, result_set)
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_type(self):
         # The list of servers should be filtered by image type
         params = {'image_type': 'snapshot'}
@@ -309,6 +316,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         self.assertIn(self.snapshot, result_set)
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_limit(self):
         # Verify only the expected number of results are returned
         resp, images = self.client.image_list_detail(limit=1)
@@ -317,6 +325,7 @@ class ListSnapshotImagesTest(base.BaseV1ImageTest):
         self.assertEqual(1, len(images))
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_index_by_change_since(self):
         # Verify an update image is returned
         # Becoming ACTIVE will modify the updated time
@@ -352,7 +361,7 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
         resp, image = cls.create_image(name=name,
                                        container_format=container_format,
                                        disk_format=disk_format,
-                                       is_public=True, data=image_file,
+                                       is_public=False, data=image_file,
                                        properties={'key1': 'value1'})
         image_id = image['id']
         return image_id

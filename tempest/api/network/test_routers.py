@@ -262,10 +262,25 @@ class RoutersTest(base.BaseRouterTest):
         self.addCleanup(
             self._delete_extra_routes,
             self.router['id'])
-        # Update router extra route
+        # Update router extra route, second ip of the range is
+        # used as next hop
         cidr = netaddr.IPNetwork(self.subnet['cidr'])
+        next_hop = str(cidr[2])
+        destination = str(self.subnet['cidr'])
         resp, extra_route = self.client.update_extra_routes(
-            self.router['id'], str(cidr[0]), str(self.subnet['cidr']))
+            self.router['id'], next_hop, destination)
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(1, len(extra_route['router']['routes']))
+        self.assertEqual(destination,
+                         extra_route['router']['routes'][0]['destination'])
+        self.assertEqual(next_hop,
+                         extra_route['router']['routes'][0]['nexthop'])
+        resp, show_body = self.client.show_router(self.router['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(destination,
+                         show_body['router']['routes'][0]['destination'])
+        self.assertEqual(next_hop,
+                         show_body['router']['routes'][0]['nexthop'])
 
     def _delete_extra_routes(self, router_id):
         resp, _ = self.client.delete_extra_routes(router_id)
@@ -285,9 +300,13 @@ class RoutersTest(base.BaseRouterTest):
 
     @test.attr(type='smoke')
     def test_add_multiple_router_interfaces(self):
-        network = self.create_network()
-        subnet01 = self.create_subnet(network)
-        subnet02 = self.create_subnet(network)
+        network01 = self.create_network(
+            network_name=data_utils.rand_name('router-network01-'))
+        network02 = self.create_network(
+            network_name=data_utils.rand_name('router-network02-'))
+        subnet01 = self.create_subnet(network01)
+        sub02_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr).next()
+        subnet02 = self.create_subnet(network02, cidr=sub02_cidr)
         router = self._create_router(data_utils.rand_name('router-'))
         interface01 = self._add_router_interface_with_subnet_id(router['id'],
                                                                 subnet01['id'])
@@ -297,15 +316,6 @@ class RoutersTest(base.BaseRouterTest):
                                                                 subnet02['id'])
         self._verify_router_interface(router['id'], subnet02['id'],
                                       interface02['port_id'])
-
-    def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
-        resp, interface = self.client.add_router_interface_with_subnet_id(
-            router_id, subnet_id)
-        self.assertEqual('200', resp['status'])
-        self.addCleanup(self._remove_router_interface_with_subnet_id,
-                        router_id, subnet_id)
-        self.assertEqual(subnet_id, interface['subnet_id'])
-        return interface
 
     def _verify_router_interface(self, router_id, subnet_id, port_id):
         resp, show_port_body = self.client.show_port(port_id)

@@ -13,7 +13,7 @@
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
 from tempest.openstack.common import log as logging
-from tempest.test import attr
+from tempest import test
 
 
 LOG = logging.getLogger(__name__)
@@ -26,13 +26,13 @@ class StacksTestJSON(base.BaseOrchestrationTest):
     def setUpClass(cls):
         super(StacksTestJSON, cls).setUpClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_stack_list_responds(self):
         resp, stacks = self.client.list_stacks()
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(stacks, list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_stack_crud_no_resources(self):
         stack_name = data_utils.rand_name('heat')
 

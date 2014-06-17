@@ -12,16 +12,31 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-body = {
-    'type': 'object',
-    'properties': {
-        'host': {'type': 'string'},
-        'power_action': {'enum': ['startup']}
-    },
-    'required': ['host', 'power_action']
-}
+import copy
+
+from tempest.api_schema.compute import hosts
+
 
 startup_host = {
     'status_code': [200],
-    'response_body': body
+    'response_body': hosts.common_start_up_body
+}
+
+# The 'power_action' attribute of 'shutdown_host' API is 'shutdown'
+shutdown_host = copy.deepcopy(startup_host)
+
+shutdown_host['response_body']['properties']['power_action'] = {
+    'enum': ['shutdown']
+}
+
+# The 'power_action' attribute of 'reboot_host' API is 'reboot'
+reboot_host = copy.deepcopy(startup_host)
+
+reboot_host['response_body']['properties']['power_action'] = {
+    'enum': ['reboot']
+}
+
+update_host = {
+    'status_code': [200],
+    'response_body': hosts.update_host_common
 }

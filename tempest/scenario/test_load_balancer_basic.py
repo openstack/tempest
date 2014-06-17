@@ -13,11 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
+import httplib
+import tempfile
 import time
-import urllib
+import urllib2
 
 from tempest.api.network import common as net_common
-from tempest.common.utils import data_utils
+from tempest.common import commands
 from tempest import config
 from tempest import exceptions
 from tempest.scenario import manager
@@ -59,20 +62,28 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def setUpClass(cls):
         super(TestLoadBalancerBasic, cls).setUpClass()
         cls.check_preconditions()
-        cls.security_groups = {}
         cls.servers_keypairs = {}
         cls.members = []
         cls.floating_ips = {}
-        cls.server_ip = None
-        cls.vip_ip = None
+        cls.server_ips = {}
         cls.port1 = 80
         cls.port2 = 88
 
-    def _create_security_groups(self):
-        self.security_groups[self.tenant_id] =\
-            self._create_security_group_neutron(tenant_id=self.tenant_id)
+    def setUp(self):
+        super(TestLoadBalancerBasic, self).setUp()
+        self.server_ips = {}
+        self.server_fixed_ips = {}
+        self._create_security_group()
+
+    def cleanup_wrapper(self, resource):
+        self.cleanup_resource(resource, self.__class__.__name__)
+
+    def _create_security_group(self):
+        self.security_group = self._create_security_group_neutron(
+            tenant_id=self.tenant_id)
         self._create_security_group_rules_for_port(self.port1)
         self._create_security_group_rules_for_port(self.port2)
+        self.addCleanup(self.cleanup_wrapper, self.security_group)
 
     def _create_security_group_rules_for_port(self, port):
         rule = {
@@ -83,15 +94,14 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         }
         self._create_security_group_rule(
             client=self.network_client,
-            secgroup=self.security_groups[self.tenant_id],
+            secgroup=self.security_group,
             tenant_id=self.tenant_id,
             **rule)
 
-    def _create_server(self):
-        tenant_id = self.tenant_id
-        name = data_utils.rand_name("smoke_server-")
+    def _create_server(self, name):
         keypair = self.create_keypair(name='keypair-%s' % name)
-        security_groups = [self.security_groups[tenant_id].name]
+        self.addCleanup(self.cleanup_wrapper, keypair)
+        security_groups = [self.security_group.name]
         net = self._list_networks(tenant_id=self.tenant_id)[0]
         create_kwargs = {
             'nics': [
@@ -102,51 +112,89 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         }
         server = self.create_server(name=name,
                                     create_kwargs=create_kwargs)
-        self.servers_keypairs[server] = keypair
+        self.addCleanup(self.cleanup_wrapper, server)
+        self.servers_keypairs[server.id] = keypair
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             public_network_id = config.network.public_network_id
             floating_ip = self._create_floating_ip(
                 server, public_network_id)
+            self.addCleanup(self.cleanup_wrapper, floating_ip)
             self.floating_ips[floating_ip] = server
-            self.server_ip = floating_ip.floating_ip_address
+            self.server_ips[server.id] = floating_ip.floating_ip_address
         else:
-            self.server_ip = server.networks[net['name']][0]
+            self.server_ips[server.id] = server.networks[net['name']][0]
+        self.server_fixed_ips[server.id] = server.networks[net['name']][0]
         self.assertTrue(self.servers_keypairs)
         return server
 
-    def _start_servers(self, server):
+    def _create_servers(self):
+        for count in range(2):
+            self._create_server(name=("server%s" % (count + 1)))
+        self.assertEqual(len(self.servers_keypairs), 2)
+
+    def _start_servers(self):
         """
+        Start two backends
+
         1. SSH to the instance
         2. Start two http backends listening on ports 80 and 88 respectively
         """
 
-        private_key = self.servers_keypairs[server].private_key
-        ssh_client = self.get_remote_client(
-            server_or_ip=self.server_ip,
-            private_key=private_key).ssh_client
-        start_server = "while true; do echo -e 'HTTP/1.0 200 OK\r\n\r\n" \
-                       "%(server)s' | sudo nc -l -p %(port)s ; done &"
-        cmd = start_server % {'server': 'server1',
-                              'port': self.port1}
-        ssh_client.exec_command(cmd)
-        cmd = start_server % {'server': 'server2',
-                              'port': self.port2}
-        ssh_client.exec_command(cmd)
+        for server_id, ip in self.server_ips.iteritems():
+            private_key = self.servers_keypairs[server_id].private_key
+            server_name = self.compute_client.servers.get(server_id).name
+            username = config.scenario.ssh_user
+            ssh_client = self.get_remote_client(
+                server_or_ip=ip,
+                private_key=private_key)
+            ssh_client.validate_authentication()
 
-    def _check_connection(self, check_ip):
-        def try_connect(ip):
+            # Write a backend's responce into a file
+            resp = """HTTP/1.0 200 OK\r\nContent-Length: 8\r\n\r\n%s"""
+            with tempfile.NamedTemporaryFile() as script:
+                script.write(resp % server_name)
+                script.flush()
+                with tempfile.NamedTemporaryFile() as key:
+                    key.write(private_key)
+                    key.flush()
+                    commands.copy_file_to_host(script.name,
+                                               "~/script1",
+                                               ip,
+                                               username, key.name)
+            # Start netcat
+            start_server = """sudo nc -ll -p %(port)s -e cat """ \
+                           """~/%(script)s &"""
+            cmd = start_server % {'port': self.port1,
+                                  'script': 'script1'}
+            ssh_client.exec_command(cmd)
+            if len(self.server_ips) == 1:
+                with tempfile.NamedTemporaryFile() as script:
+                    script.write(resp % 'server2')
+                    script.flush()
+                    with tempfile.NamedTemporaryFile() as key:
+                        key.write(private_key)
+                        key.flush()
+                        commands.copy_file_to_host(script.name,
+                                                   "~/script2", ip,
+                                                   username, key.name)
+                cmd = start_server % {'port': self.port2,
+                                      'script': 'script2'}
+                ssh_client.exec_command(cmd)
+
+    def _check_connection(self, check_ip, port=80):
+        def try_connect(ip, port):
             try:
-                urllib.urlopen("http://{0}/".format(ip))
-                return True
+                resp = urllib2.urlopen("http://{0}:{1}/".format(ip, port))
+                if resp.getcode() == 200:
+                    return True
+                return False
             except IOError:
                 return False
         timeout = config.compute.ping_timeout
-        timer = 0
-        while not try_connect(check_ip):
-            time.sleep(1)
-            timer += 1
-            if timer >= timeout:
+        start = time.time()
+        while not try_connect(check_ip, port):
+            if (time.time() - start) > timeout:
                 message = "Timed out trying to connect to %s" % check_ip
                 raise exceptions.TimeoutException(message)
 
@@ -157,30 +205,37 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         self.subnet = net_common.DeletableSubnet(client=self.network_client,
                                                  **subnet)
         self.pool = super(TestLoadBalancerBasic, self)._create_pool(
-            'ROUND_ROBIN',
-            'HTTP',
-            self.subnet.id)
+            lb_method='ROUND_ROBIN',
+            protocol='HTTP',
+            subnet_id=self.subnet.id)
+        self.addCleanup(self.cleanup_wrapper, self.pool)
         self.assertTrue(self.pool)
 
-    def _create_members(self, server_ids):
+    def _create_members(self):
         """
         Create two members.
 
         In case there is only one server, create both members with the same ip
         but with different ports to listen on.
         """
-        servers = self.compute_client.servers.list()
-        for server in servers:
-            if server.id in server_ids:
-                ip = self.server_ip
-                pool_id = self.pool.id
-                if len(set(server_ids)) == 1 or len(servers) == 1:
-                    member1 = self._create_member(ip, self.port1, pool_id)
-                    member2 = self._create_member(ip, self.port2, pool_id)
-                    self.members.extend([member1, member2])
-                else:
-                    member = self._create_member(ip, self.port1, pool_id)
-                    self.members.append(member)
+
+        for server_id, ip in self.server_fixed_ips.iteritems():
+            if len(self.server_fixed_ips) == 1:
+                member1 = self._create_member(address=ip,
+                                              protocol_port=self.port1,
+                                              pool_id=self.pool.id)
+                self.addCleanup(self.cleanup_wrapper, member1)
+                member2 = self._create_member(address=ip,
+                                              protocol_port=self.port2,
+                                              pool_id=self.pool.id)
+                self.addCleanup(self.cleanup_wrapper, member2)
+                self.members.extend([member1, member2])
+            else:
+                member = self._create_member(address=ip,
+                                             protocol_port=self.port1,
+                                             pool_id=self.pool.id)
+                self.addCleanup(self.cleanup_wrapper, member)
+                self.members.append(member)
         self.assertTrue(self.members)
 
     def _assign_floating_ip_to_vip(self, vip):
@@ -188,22 +243,23 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         port_id = vip.port_id
         floating_ip = self._create_floating_ip(vip, public_network_id,
                                                port_id=port_id)
+        self.addCleanup(self.cleanup_wrapper, floating_ip)
         self.floating_ips.setdefault(vip.id, [])
         self.floating_ips[vip.id].append(floating_ip)
 
     def _create_load_balancer(self):
         self._create_pool()
-        self._create_members([self.servers_keypairs.keys()[0].id])
-        subnet_id = self.subnet.id
-        pool_id = self.pool.id
-        self.vip = super(TestLoadBalancerBasic, self)._create_vip('HTTP', 80,
-                                                                  subnet_id,
-                                                                  pool_id)
-        self._status_timeout(NeutronRetriever(self.network_client,
-                                              self.network_client.vip_path,
-                                              net_common.DeletableVip),
-                             self.vip.id,
-                             expected_status='ACTIVE')
+        self._create_members()
+        self.vip = self._create_vip(protocol='HTTP',
+                                    protocol_port=80,
+                                    subnet_id=self.subnet.id,
+                                    pool_id=self.pool.id)
+        self.addCleanup(self.cleanup_wrapper, self.vip)
+        self.status_timeout(NeutronRetriever(self.network_client,
+                                             self.network_client.vip_path,
+                                             net_common.DeletableVip),
+                            self.vip.id,
+                            expected_status='ACTIVE')
         if (config.network.public_network_id and not
                 config.network.tenant_networks_reachable):
             self._assign_floating_ip_to_vip(self.vip)
@@ -221,26 +277,48 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         """
 
         self._check_connection(self.vip_ip)
-        resp = []
-        for count in range(10):
-            resp.append(
-                urllib.urlopen(
-                    "http://{0}/".format(self.vip_ip)).read())
-        self.assertEqual(set(["server1\n", "server2\n"]), set(resp))
-        self.assertEqual(5, resp.count("server1\n"))
-        self.assertEqual(5, resp.count("server2\n"))
+        self._send_requests(self.vip_ip, set(["server1", "server2"]))
+
+    def _send_requests(self, vip_ip, expected, num_req=10):
+        count = 0
+        while count < num_req:
+            try:
+                resp = []
+                for i in range(len(self.members)):
+                    resp.append(
+                        urllib2.urlopen(
+                            "http://{0}/".format(vip_ip)).read())
+                count += 1
+                self.assertEqual(expected,
+                                 set(resp))
+            # NOTE: There always is a slim chance of getting this exception
+            #       due to special aspects of haproxy internal behavior.
+            except httplib.BadStatusLine:
+                pass
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
-        self._create_security_groups()
-        server = self._create_server()
-        self._start_servers(server)
+        self._create_server('server1')
+        self._start_servers()
         self._create_load_balancer()
         self._check_load_balancing()
 
 
 class NeutronRetriever(object):
+    """
+    Helper class to make possible handling neutron objects returned by GET
+    requests as attribute dicts.
+
+    Whet get() method is called, the returned dictionary is wrapped into
+    a corresponding DeletableResource class which provides attribute access
+    to dictionary values.
+
+    Usage:
+        This retriever is used to allow using status_timeout from
+        tempest.manager with Neutron objects.
+    """
+
     def __init__(self, network_client, path, resource):
         self.network_client = network_client
         self.path = path

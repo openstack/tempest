@@ -18,6 +18,8 @@ import urllib
 
 from tempest.api_schema.compute import flavors as common_schema
 from tempest.api_schema.compute import flavors_access as schema_access
+from tempest.api_schema.compute import flavors_extra_specs \
+    as schema_extra_specs
 from tempest.api_schema.compute.v2 import flavors as v2schema
 from tempest.common import rest_client
 from tempest import config
@@ -54,6 +56,7 @@ class FlavorsClientJSON(rest_client.RestClient):
     def get_flavor_details(self, flavor_id):
         resp, body = self.get("flavors/%s" % str(flavor_id))
         body = json.loads(body)
+        self.validate_response(v2schema.create_get_flavor_details, resp, body)
         return resp, body['flavor']
 
     def create_flavor(self, name, ram, vcpus, disk, flavor_id, **kwargs):
@@ -77,11 +80,14 @@ class FlavorsClientJSON(rest_client.RestClient):
         resp, body = self.post('flavors', post_body)
 
         body = json.loads(body)
+        self.validate_response(v2schema.create_get_flavor_details, resp, body)
         return resp, body['flavor']
 
     def delete_flavor(self, flavor_id):
         """Deletes the given flavor."""
-        return self.delete("flavors/%s" % str(flavor_id))
+        resp, body = self.delete("flavors/{0}".format(flavor_id))
+        self.validate_response(v2schema.delete_flavor, resp, body)
+        return resp, body
 
     def is_resource_deleted(self, id):
         # Did not use get_flavor_details(id) for verification as it gives
@@ -99,12 +105,16 @@ class FlavorsClientJSON(rest_client.RestClient):
         resp, body = self.post('flavors/%s/os-extra_specs' % flavor_id,
                                post_body)
         body = json.loads(body)
+        self.validate_response(schema_extra_specs.flavor_extra_specs,
+                               resp, body)
         return resp, body['extra_specs']
 
     def get_flavor_extra_spec(self, flavor_id):
         """Gets extra Specs details of the mentioned flavor."""
         resp, body = self.get('flavors/%s/os-extra_specs' % flavor_id)
         body = json.loads(body)
+        self.validate_response(schema_extra_specs.flavor_extra_specs,
+                               resp, body)
         return resp, body['extra_specs']
 
     def get_flavor_extra_spec_with_key(self, flavor_id, key):
@@ -112,6 +122,8 @@ class FlavorsClientJSON(rest_client.RestClient):
         resp, body = self.get('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
                               key))
         body = json.loads(body)
+        self.validate_response(schema_extra_specs.flavor_extra_specs_key,
+                               resp, body)
         return resp, body
 
     def update_flavor_extra_spec(self, flavor_id, key, **kwargs):
@@ -119,18 +131,23 @@ class FlavorsClientJSON(rest_client.RestClient):
         resp, body = self.put('flavors/%s/os-extra_specs/%s' %
                               (flavor_id, key), json.dumps(kwargs))
         body = json.loads(body)
+        self.validate_response(schema_extra_specs.flavor_extra_specs_key,
+                               resp, body)
         return resp, body
 
     def unset_flavor_extra_spec(self, flavor_id, key):
         """Unsets extra Specs from the mentioned flavor."""
-        return self.delete('flavors/%s/os-extra_specs/%s' % (str(flavor_id),
-                           key))
+        resp, body = self.delete('flavors/%s/os-extra_specs/%s' %
+                                 (str(flavor_id), key))
+        self.validate_response(v2schema.unset_flavor_extra_specs, resp, body)
+        return resp, body
 
     def list_flavor_access(self, flavor_id):
         """Gets flavor access information given the flavor id."""
         resp, body = self.get('flavors/%s/os-flavor-access' % flavor_id)
         body = json.loads(body)
-        self.validate_response(schema_access.list_flavor_access, resp, body)
+        self.validate_response(schema_access.add_remove_list_flavor_access,
+                               resp, body)
         return resp, body['flavor_access']
 
     def add_flavor_access(self, flavor_id, tenant_id):
@@ -143,6 +160,8 @@ class FlavorsClientJSON(rest_client.RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post('flavors/%s/action' % flavor_id, post_body)
         body = json.loads(body)
+        self.validate_response(schema_access.add_remove_list_flavor_access,
+                               resp, body)
         return resp, body['flavor_access']
 
     def remove_flavor_access(self, flavor_id, tenant_id):
@@ -155,4 +174,6 @@ class FlavorsClientJSON(rest_client.RestClient):
         post_body = json.dumps(post_body)
         resp, body = self.post('flavors/%s/action' % flavor_id, post_body)
         body = json.loads(body)
+        self.validate_response(schema_access.add_remove_list_flavor_access,
+                               resp, body)
         return resp, body['flavor_access']

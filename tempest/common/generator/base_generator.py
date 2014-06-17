@@ -123,7 +123,7 @@ class BasicGeneratorSet(object):
                 raise Exception("non-integer list types not supported")
         result = []
         if schema_type not in self.types_dict:
-            raise Exception("generator (%s) doesn't support type: %s"
+            raise TypeError("generator (%s) doesn't support type: %s"
                             % (self.__class__.__name__, schema_type))
         for generator in self.types_dict[schema_type]:
             ret = generator(schema)

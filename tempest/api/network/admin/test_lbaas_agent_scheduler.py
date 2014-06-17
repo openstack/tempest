@@ -35,6 +35,7 @@ class LBaaSAgentSchedulerTestJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(LBaaSAgentSchedulerTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('lbaas_agent_scheduler', 'network'):

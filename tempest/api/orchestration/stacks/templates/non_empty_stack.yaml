@@ -5,6 +5,8 @@ Parameters:
   trigger:
     Type: String
     Default: not_yet
+  image:
+    Type: String
 Resources:
   fluffy:
     Type: AWS::AutoScaling::LaunchConfiguration
@@ -13,7 +15,7 @@ Resources:
       - Tom
       - Stinky
     Properties:
-      ImageId: not_used
+      ImageId: {Ref: image}
       InstanceType: not_used
       UserData:
         Fn::Replace:

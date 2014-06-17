@@ -13,12 +13,23 @@
 
 import time
 
+from tempest.common.utils import misc as misc_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
+
+
+def _console_dump(client, server_id):
+    try:
+        resp, output = client.get_console_output(server_id, None)
+        LOG.debug("Console Output for Server %s:\n%s" % (
+            server_id, output))
+    except exceptions.NotFound:
+        LOG.debug("Server %s: doesn't have a console" % server_id)
+        pass
 
 
 # NOTE(afazekas): This function needs to know a token and a subject.
@@ -70,7 +81,9 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                      '/'.join((old_status, str(old_task_state))),
                      '/'.join((server_status, str(task_state))),
                      time.time() - start_time)
+
         if (server_status == 'ERROR') and raise_on_error:
+            _console_dump(client, server_id)
             raise exceptions.BuildErrorException(server_id=server_id)
 
         timed_out = int(time.time()) - start_time >= timeout
@@ -86,6 +99,11 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
                         'timeout': timeout})
             message += ' Current status: %s.' % server_status
             message += ' Current task state: %s.' % task_state
+
+            caller = misc_utils.find_test_caller()
+            if caller:
+                message = '(%s) %s' % (caller, message)
+            _console_dump(client, server_id)
             raise exceptions.TimeoutException(message)
         old_status = server_status
         old_task_state = task_state
@@ -119,4 +137,7 @@ def wait_for_image_status(client, image_id, status):
                         'status': status,
                         'timeout': client.build_timeout})
             message += ' Current status: %s.' % image['status']
+            caller = misc_utils.find_test_caller()
+            if caller:
+                message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)

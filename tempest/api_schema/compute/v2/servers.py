@@ -12,7 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 from tempest.api_schema.compute import parameter_types
+from tempest.api_schema.compute import servers
 
 create_server = {
     'status_code': [202],
@@ -41,4 +44,136 @@ create_server = {
         },
         'required': ['server']
     }
+}
+
+update_server = copy.deepcopy(servers.base_update_server)
+update_server['response_body']['properties']['server']['properties'].update({
+    'hostId': {'type': 'string'},
+    'OS-DCF:diskConfig': {'type': 'string'},
+    'accessIPv4': parameter_types.access_ip_v4,
+    'accessIPv6': parameter_types.access_ip_v6
+})
+update_server['response_body']['properties']['server']['required'].append(
+    # NOTE: OS-DCF:diskConfig and accessIPv4/v6 are API
+    # extensions, and some environments return a response
+    # without these attributes. So they are not 'required'.
+    'hostId'
+)
+
+list_virtual_interfaces = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'virtual_interfaces': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'string'},
+                        'mac_address': parameter_types.mac_address,
+                        'OS-EXT-VIF-NET:net_id': {'type': 'string'}
+                    },
+                    # 'OS-EXT-VIF-NET:net_id' is API extension So it is
+                    # not defined as 'required'
+                    'required': ['id', 'mac_address']
+                }
+            }
+        },
+        'required': ['virtual_interfaces']
+    }
+}
+
+attach_volume = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'volumeAttachment': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string'},
+                    'device': {'type': 'string'},
+                    'volumeId': {'type': 'string'},
+                    'serverId': {'type': ['integer', 'string']}
+                },
+                'required': ['id', 'device', 'volumeId', 'serverId']
+            }
+        },
+        'required': ['volumeAttachment']
+    }
+}
+
+detach_volume = {
+    'status_code': [202]
+}
+
+set_get_server_metadata_item = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'meta': {
+                'type': 'object',
+                'patternProperties': {
+                    '^.+$': {'type': 'string'}
+                }
+            }
+        },
+        'required': ['meta']
+    }
+}
+
+list_addresses_by_network = {
+    'status_code': [200],
+    'response_body': parameter_types.addresses
+}
+
+server_actions_confirm_resize = copy.deepcopy(
+    servers.server_actions_delete_password)
+
+list_addresses = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'addresses': parameter_types.addresses
+        },
+        'required': ['addresses']
+    }
+}
+
+common_server_group = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'name': {'type': 'string'},
+        'policies': {
+            'type': 'array',
+            'items': {'type': 'string'}
+        },
+        # 'members' attribute contains the array of instance's UUID of
+        # instances present in server group
+        'members': {
+            'type': 'array',
+            'items': {'type': 'string'}
+        },
+        'metadata': {'type': 'object'}
+    },
+    'required': ['id', 'name', 'policies', 'members', 'metadata']
+}
+
+create_get_server_group = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server_group': common_server_group
+        },
+        'required': ['server_group']
+    }
+}
+
+delete_server_group = {
+    'status_code': [204]
 }

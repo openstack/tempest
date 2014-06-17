@@ -18,7 +18,7 @@
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
@@ -45,7 +45,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
             cls.service_client.delete_service(s)
         super(EndpointsNegativeTestJSON, cls).tearDownClass()
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_with_enabled_False(self):
         # Enabled should be a boolean, not a string like 'False'
         interface = 'public'
@@ -55,7 +55,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
                           self.service_id, interface, url, region=region,
                           force_enabled='False')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_with_enabled_True(self):
         # Enabled should be a boolean, not a string like 'True'
         interface = 'public'
@@ -79,12 +79,12 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(exceptions.BadRequest, self.client.update_endpoint,
                           endpoint_for_update['id'], force_enabled=enabled)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_with_enabled_False(self):
         # Enabled should be a boolean, not a string like 'False'
         self._assert_update_raises_bad_request('False')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_update_with_enabled_True(self):
         # Enabled should be a boolean, not a string like 'True'
         self._assert_update_raises_bad_request('True')

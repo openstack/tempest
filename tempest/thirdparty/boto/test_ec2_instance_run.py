@@ -193,7 +193,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.terminate()
         self.cancelResourceCleanUp(rcuk)
 
-    @test.skip_because(bug="1098891")
     @test.attr(type='smoke')
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
@@ -211,17 +210,15 @@ class InstanceRunTest(boto_test.BotoTestCase):
             pass
         except exception.EC2ResponseError as exc:
             if self.ec2_error_code.\
-                client.InvalidInstanceID.NotFound.match(exc):
+                client.InvalidInstanceID.NotFound.match(exc) is None:
                 pass
             else:
                 raise
         else:
             self.assertNotEqual(instance.state, "running")
 
-    # NOTE(afazekas): doctored test case,
-    # with normal validation it would fail
     @test.attr(type='smoke')
-    def test_integration_1(self):
+    def test_compute_with_volumes(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])
         sec_group_name = data_utils.rand_name("securitygroup-")
@@ -249,14 +246,20 @@ class InstanceRunTest(boto_test.BotoTestCase):
                                     instance_type=self.instance_type,
                                     key_name=self.keypair_name,
                                     security_groups=(sec_group_name,))
+
+        LOG.debug("Instance booted - state: %s",
+                  reservation.instances[0].state)
+
         self.addResourceCleanUp(self.destroy_reservation,
                                 reservation)
         volume = self.ec2_client.create_volume(1, self.zone)
+        LOG.debug("Volume created - status: %s", volume.status)
+
         self.addResourceCleanUp(self.destroy_volume_wait, volume)
         instance = reservation.instances[0]
-        LOG.info("state: %s", instance.state)
         if instance.state != "running":
             self.assertInstanceStateWait(instance, "running")
+        LOG.debug("Instance now running - state: %s", instance.state)
 
         address = self.ec2_client.allocate_address()
         rcuk_a = self.addResourceCleanUp(address.delete)
@@ -284,10 +287,21 @@ class InstanceRunTest(boto_test.BotoTestCase):
         volume.attach(instance.id, "/dev/vdh")
 
         def _volume_state():
+            """Return volume state realizing that 'in-use' is overloaded."""
             volume.update(validate=True)
-            return volume.status
+            status = volume.status
+            attached = volume.attach_data.status
+            LOG.debug("Volume %s is in status: %s, attach_status: %s",
+                      volume.id, status, attached)
+            # Nova reports 'in-use' on 'attaching' volumes because we
+            # have a single volume status, and EC2 has 2. Ensure that
+            # if we aren't attached yet we return something other than
+            # 'in-use'
+            if status == 'in-use' and attached != 'attached':
+                return 'attaching'
+            else:
+                return status
 
-        self.assertVolumeStatusWait(_volume_state, "in-use")
         wait.re_search_wait(_volume_state, "in-use")
 
         # NOTE(afazekas):  Different Hypervisor backends names
@@ -296,6 +310,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         def _part_state():
             current = ssh.get_partitions().split('\n')
+            LOG.debug("Partition map for instance: %s", current)
             if current > part_lines:
                 return 'INCREASE'
             if current < part_lines:
@@ -311,7 +326,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         self.assertVolumeStatusWait(_volume_state, "available")
         wait.re_search_wait(_volume_state, "available")
-        LOG.info("Volume %s state: %s", volume.id, volume.status)
 
         wait.state_wait(_part_state, 'DECREASE')
 
@@ -323,7 +337,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
         self.assertAddressReleasedWait(address)
         self.cancelResourceCleanUp(rcuk_a)
 
-        LOG.info("state: %s", instance.state)
+        LOG.debug("Instance %s state: %s", instance.id, instance.state)
         if instance.state != "stopped":
             self.assertInstanceStateWait(instance, "stopped")
         # TODO(afazekas): move steps from teardown to the test case

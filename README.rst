@@ -7,7 +7,7 @@ Scenarios, and other specific tests useful in validating an OpenStack
 deployment.
 
 Design Principles
-----------
+-----------------
 Tempest Design Principles that we strive to live by.
 
 - Tempest should be able to run against any OpenStack cloud, be it a
@@ -127,6 +127,6 @@ currently only run with Python 2.7, so there are no guarantees about the state
 of tempest when running with Python 2.6. Additionally, to enable testr to work
 with tempest using python 2.6 the discover module from the unittest-ext
 project has to be patched to switch the unittest.TestSuite to use
-unittest2.TestSuite instead. See::
+unittest2.TestSuite instead. See:
 
 https://code.google.com/p/unittest-ext/issues/detail?id=79

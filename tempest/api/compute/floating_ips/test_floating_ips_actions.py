@@ -45,6 +45,14 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
             resp, body = cls.client.delete_floating_ip(cls.floating_ip_id)
         super(FloatingIPsTestJSON, cls).tearDownClass()
 
+    def _try_delete_floating_ip(self, floating_ip_id):
+        # delete floating ip, if it exists
+        try:
+            self.client.delete_floating_ip(floating_ip_id)
+        # if not found, it depicts it was deleted in the test
+        except exceptions.NotFound:
+            pass
+
     @test.attr(type='gate')
     def test_allocate_floating_ip(self):
         # Positive test:Allocation of a new floating IP to a project
@@ -66,6 +74,7 @@ class FloatingIPsTestJSON(base.BaseFloatingIPsTest):
         # should be successful
         # Creating the floating IP that is to be deleted in this method
         resp, floating_ip_body = self.client.create_floating_ip()
+        self.addCleanup(self._try_delete_floating_ip, floating_ip_body['id'])
         # Storing the details of floating IP before deleting it
         cli_resp = self.client.get_floating_ip_details(floating_ip_body['id'])
         resp, floating_ip_details = cli_resp

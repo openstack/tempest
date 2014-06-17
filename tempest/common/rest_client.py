@@ -15,7 +15,6 @@
 #    under the License.
 
 import collections
-import inspect
 import json
 from lxml import etree
 import re
@@ -24,6 +23,7 @@ import time
 import jsonschema
 
 from tempest.common import http
+from tempest.common.utils import misc as misc_utils
 from tempest.common import xml_utils as common
 from tempest import config
 from tempest import exceptions
@@ -140,15 +140,23 @@ class RestClient(object):
 
     @property
     def user(self):
-        return self.auth_provider.credentials.get('username', None)
+        return self.auth_provider.credentials.username
+
+    @property
+    def user_id(self):
+        return self.auth_provider.credentials.user_id
 
     @property
     def tenant_name(self):
-        return self.auth_provider.credentials.get('tenant_name', None)
+        return self.auth_provider.credentials.tenant_name
+
+    @property
+    def tenant_id(self):
+        return self.auth_provider.credentials.tenant_id
 
     @property
     def password(self):
-        return self.auth_provider.credentials.get('password', None)
+        return self.auth_provider.credentials.password
 
     @property
     def base_url(self):
@@ -197,26 +205,26 @@ class RestClient(object):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 
-    def post(self, url, body, headers=None):
-        return self.request('POST', url, headers, body)
+    def post(self, url, body, headers=None, extra_headers=False):
+        return self.request('POST', url, extra_headers, headers, body)
 
-    def get(self, url, headers=None):
-        return self.request('GET', url, headers)
+    def get(self, url, headers=None, extra_headers=False):
+        return self.request('GET', url, extra_headers, headers)
 
-    def delete(self, url, headers=None, body=None):
-        return self.request('DELETE', url, headers, body)
+    def delete(self, url, headers=None, body=None, extra_headers=False):
+        return self.request('DELETE', url, extra_headers, headers, body)
 
-    def patch(self, url, body, headers=None):
-        return self.request('PATCH', url, headers, body)
+    def patch(self, url, body, headers=None, extra_headers=False):
+        return self.request('PATCH', url, extra_headers, headers, body)
 
-    def put(self, url, body, headers=None):
-        return self.request('PUT', url, headers, body)
+    def put(self, url, body, headers=None, extra_headers=False):
+        return self.request('PUT', url, extra_headers, headers, body)
 
-    def head(self, url, headers=None):
-        return self.request('HEAD', url, headers)
+    def head(self, url, headers=None, extra_headers=False):
+        return self.request('HEAD', url, extra_headers, headers)
 
-    def copy(self, url, headers=None):
-        return self.request('COPY', url, headers)
+    def copy(self, url, headers=None, extra_headers=False):
+        return self.request('COPY', url, extra_headers, headers)
 
     def get_versions(self):
         resp, body = self.get('')
@@ -224,65 +232,22 @@ class RestClient(object):
         versions = map(lambda x: x['id'], body)
         return resp, versions
 
-    def _find_caller(self):
-        """Find the caller class and test name.
-
-        Because we know that the interesting things that call us are
-        test_* methods, and various kinds of setUp / tearDown, we
-        can look through the call stack to find appropriate methods,
-        and the class we were in when those were called.
-        """
-        caller_name = None
-        names = []
-        frame = inspect.currentframe()
-        is_cleanup = False
-        # Start climbing the ladder until we hit a good method
-        while True:
-            try:
-                frame = frame.f_back
-                name = frame.f_code.co_name
-                names.append(name)
-                if re.search("^(test_|setUp|tearDown)", name):
-                    cname = ""
-                    if 'self' in frame.f_locals:
-                        cname = frame.f_locals['self'].__class__.__name__
-                    if 'cls' in frame.f_locals:
-                        cname = frame.f_locals['cls'].__name__
-                    caller_name = cname + ":" + name
-                    break
-                elif re.search("^_run_cleanup", name):
-                    is_cleanup = True
-                else:
-                    cname = ""
-                    if 'self' in frame.f_locals:
-                        cname = frame.f_locals['self'].__class__.__name__
-                    if 'cls' in frame.f_locals:
-                        cname = frame.f_locals['cls'].__name__
-
-                    # the fact that we are running cleanups is indicated pretty
-                    # deep in the stack, so if we see that we want to just
-                    # start looking for a real class name, and declare victory
-                    # once we do.
-                    if is_cleanup and cname:
-                        if not re.search("^RunTest", cname):
-                            caller_name = cname + ":_run_cleanups"
-                            break
-            except Exception:
-                break
-        # prevents frame leaks
-        del frame
-        if caller_name is None:
-            self.LOG.debug("Sane call name not found in %s" % names)
-        return caller_name
-
     def _get_request_id(self, resp):
         for i in ('x-openstack-request-id', 'x-compute-request-id'):
             if i in resp:
                 return resp[i]
         return ""
 
+    def _log_request_start(self, method, req_url, req_headers={},
+                           req_body=None):
+        caller_name = misc_utils.find_test_caller()
+        trace_regex = CONF.debug.trace_requests
+        if trace_regex and re.search(trace_regex, caller_name):
+            self.LOG.debug('Starting Request (%s): %s %s' %
+                           (caller_name, method, req_url))
+
     def _log_request(self, method, req_url, resp,
-                     secs="", req_headers=None,
+                     secs="", req_headers={},
                      req_body=None, resp_body=None):
         # if we have the request id, put it in the right part of the log
         extra = dict(request_id=self._get_request_id(resp))
@@ -290,7 +255,7 @@ class RestClient(object):
         # we're going to just provide work around on who is actually
         # providing timings by gracefully adding no content if they don't.
         # Once we're down to 1 caller, clean this up.
-        caller_name = self._find_caller()
+        caller_name = misc_utils.find_test_caller()
         if secs:
             secs = " %.3fs" % secs
         self.LOG.info(
@@ -306,6 +271,8 @@ class RestClient(object):
         # world this is important to match
         trace_regex = CONF.debug.trace_requests
         if trace_regex and re.search(trace_regex, caller_name):
+            if 'X-Auth-Token' in req_headers:
+                req_headers['X-Auth-Token'] = '<omitted>'
             log_fmt = """Request (%s): %s %s %s%s
     Request - Headers: %s
         Body: %s
@@ -369,7 +336,7 @@ class RestClient(object):
             # Parse one-item-like xmls (user, role, etc)
             return common.xml_to_json(element)
 
-    def response_checker(self, method, url, headers, body, resp, resp_body):
+    def response_checker(self, method, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
                 method.upper() == 'HEAD') and resp_body:
             raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
@@ -405,6 +372,7 @@ class RestClient(object):
 
         # Do the actual request, and time it
         start = time.time()
+        self._log_request_start(method, req_url)
         resp, resp_body = self.http_obj.request(
             req_url, method, headers=req_headers, body=req_body)
         end = time.time()
@@ -413,18 +381,26 @@ class RestClient(object):
                           resp_body=resp_body)
 
         # Verify HTTP response codes
-        self.response_checker(method, url, req_headers, req_body, resp,
-                              resp_body)
+        self.response_checker(method, resp, resp_body)
 
         return resp, resp_body
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
+        # if extra_headers is True
+        # default headers would be added to headers
         retry = 0
 
         if headers is None:
             # NOTE(vponomaryov): if some client do not need headers,
             # it should explicitly pass empty dict
             headers = self.get_headers()
+        elif extra_headers:
+            try:
+                headers = headers.copy()
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = self.get_headers()
 
         resp, resp_body = self._request(method, url,
                                         headers=headers, body=body)
@@ -481,7 +457,7 @@ class RestClient(object):
             raise exceptions.InvalidContentType(str(resp.status))
 
         if resp.status == 401 or resp.status == 403:
-            raise exceptions.Unauthorized()
+            raise exceptions.Unauthorized(resp_body)
 
         if resp.status == 404:
             raise exceptions.NotFound(resp_body)
@@ -584,10 +560,12 @@ class RestClient(object):
                 msg = ("The status code(%s) is different than the expected "
                        "one(%s)") % (resp.status, response_code)
                 raise exceptions.InvalidHttpSuccessCode(msg)
-            response_schema = schema.get('response_body')
-            if response_schema:
+
+            # Check the body of a response
+            body_schema = schema.get('response_body')
+            if body_schema:
                 try:
-                    jsonschema.validate(body, response_schema)
+                    jsonschema.validate(body, body_schema)
                 except jsonschema.ValidationError as ex:
                     msg = ("HTTP response body is invalid (%s)") % ex
                     raise exceptions.InvalidHTTPResponseBody(msg)
@@ -595,6 +573,15 @@ class RestClient(object):
                 if body:
                     msg = ("HTTP response body should not exist (%s)") % body
                     raise exceptions.InvalidHTTPResponseBody(msg)
+
+            # Check the header of a response
+            header_schema = schema.get('response_header')
+            if header_schema:
+                try:
+                    jsonschema.validate(resp, header_schema)
+                except jsonschema.ValidationError as ex:
+                    msg = ("HTTP response header is invalid (%s)") % ex
+                    raise exceptions.InvalidHTTPResponseHeader(msg)
 
 
 class NegativeRestClient(RestClient):

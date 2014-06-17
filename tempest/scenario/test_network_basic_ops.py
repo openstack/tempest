@@ -87,6 +87,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @classmethod
     def setUpClass(cls):
+        # Create no network resources for these tests.
+        cls.set_network_resources()
         super(TestNetworkBasicOps, cls).setUpClass()
         for ext in ['router', 'security-group']:
             if not test.is_extension_enabled(ext, 'network'):
@@ -156,24 +158,13 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         return dict(server=server, keypair=keypair)
 
     def _check_tenant_network_connectivity(self):
-        if not CONF.network.tenant_networks_reachable:
-            msg = 'Tenant networks not configured to be reachable.'
-            LOG.info(msg)
-            return
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
         ssh_login = CONF.compute.image_ssh_user
-        try:
-            for server, key in self.servers.iteritems():
-                for net_name, ip_addresses in server.networks.iteritems():
-                    for ip_address in ip_addresses:
-                        self._check_vm_connectivity(ip_address, ssh_login,
-                                                    key.private_key)
-        except Exception:
-            LOG.exception('Tenant connectivity check failed')
-            self._log_console_output(servers=self.servers.keys())
-            debug.log_net_debug()
-            raise
+        for server, key in self.servers.iteritems():
+            # call the common method in the parent class
+            super(TestNetworkBasicOps, self).\
+                _check_tenant_network_connectivity(
+                    server, ssh_login, key.private_key,
+                    servers_for_debug=self.servers.keys())
 
     def _create_and_associate_floating_ips(self):
         public_network_id = CONF.network.public_network_id
@@ -184,28 +175,16 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     def _check_public_network_connectivity(self, should_connect=True,
                                            msg=None):
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
         ssh_login = CONF.compute.image_ssh_user
-        LOG.debug('checking network connections')
         floating_ip, server = self.floating_ip_tuple
         ip_address = floating_ip.floating_ip_address
         private_key = None
         if should_connect:
             private_key = self.servers[server].private_key
-        try:
-            self._check_vm_connectivity(ip_address,
-                                        ssh_login,
-                                        private_key,
-                                        should_connect=should_connect)
-        except Exception:
-            ex_msg = 'Public network connectivity check failed'
-            if msg:
-                ex_msg += ": " + msg
-            LOG.exception(ex_msg)
-            self._log_console_output(servers=self.servers.keys())
-            debug.log_net_debug()
-            raise
+        # call the common method in the parent class
+        super(TestNetworkBasicOps, self)._check_public_network_connectivity(
+            ip_address, ssh_login, private_key, should_connect, msg,
+            self.servers.keys())
 
     def _disassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple

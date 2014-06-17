@@ -28,19 +28,16 @@ class FlavorsAccessTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FlavorsAccessTestJSON, cls).setUpClass()
-        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
-            msg = "FlavorExtraData extension not enabled."
+        if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
+            msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
+        # Compute admin flavor client
         cls.client = cls.os_adm.flavors_client
-        admin_client = cls._get_identity_admin_client()
-        cls.tenant = admin_client.get_tenant_by_name(cls.flavors_client.
-                                                     tenant_name)
-        cls.tenant_id = cls.tenant['id']
-        cls.adm_tenant = admin_client.get_tenant_by_name(cls.os_adm.
-                                                         flavors_client.
-                                                         tenant_name)
-        cls.adm_tenant_id = cls.adm_tenant['id']
+        # Non admin tenant ID
+        cls.tenant_id = cls.flavors_client.tenant_id
+        # Compute admin tenant ID
+        cls.adm_tenant_id = cls.client.tenant_id
         cls.flavor_name_prefix = 'test_flavor_access_'
         cls.ram = 512
         cls.vcpus = 1

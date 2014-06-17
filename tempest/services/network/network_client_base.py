@@ -30,6 +30,7 @@ service_resource_prefix_map = {
     'members': 'lb',
     'vpnservices': 'vpn',
     'ikepolicies': 'vpn',
+    'ipsecpolicies': 'vpn',
     'metering_labels': 'metering',
     'metering_label_rules': 'metering',
     'firewall_rules': 'fw',
@@ -47,6 +48,7 @@ resource_plural_map = {
     'security_groups': 'security_groups',
     'security_group_rules': 'security_group_rules',
     'ikepolicy': 'ikepolicies',
+    'ipsecpolicy': 'ipsecpolicies',
     'quotas': 'quotas',
     'firewall_policy': 'firewall_policies'
 }
@@ -104,7 +106,7 @@ class NetworkClientBase(object):
         def _list(**filters):
             uri = self.get_uri(plural_name)
             if filters:
-                uri += '?' + urllib.urlencode(filters)
+                uri += '?' + urllib.urlencode(filters, doseq=1)
             resp, body = self.get(uri)
             result = {plural_name: self.deserialize_list(body)}
             return resp, result
@@ -120,14 +122,14 @@ class NetworkClientBase(object):
         return _delete
 
     def _shower(self, resource_name):
-        def _show(resource_id, field_list=[]):
-            # field_list is a sequence of two-element tuples, with the
-            # first element being 'fields'. An example:
-            # [('fields', 'id'), ('fields', 'name')]
+        def _show(resource_id, **fields):
+            # fields is a dict which key is 'fields' and value is a
+            # list of field's name. An example:
+            # {'fields': ['id', 'name']}
             plural = self.pluralize(resource_name)
             uri = '%s/%s' % (self.get_uri(plural), resource_id)
-            if field_list:
-                uri += '?' + urllib.urlencode(field_list)
+            if fields:
+                uri += '?' + urllib.urlencode(fields, doseq=1)
             resp, body = self.get(uri)
             body = self.deserialize_single(body)
             return resp, body

@@ -15,6 +15,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute import migrations as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -36,4 +37,5 @@ class MigrationsClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_migrations, resp, body)
         return resp, body['migrations']

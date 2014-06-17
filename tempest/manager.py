@@ -29,7 +29,7 @@ class Manager(object):
     and a client object for a test case to use in performing actions.
     """
 
-    def __init__(self, username=None, password=None, tenant_name=None):
+    def __init__(self, credentials=None):
         """
         We allow overriding of the credentials used within the various
         client classes managed by the Manager object. Left as None, the
@@ -38,28 +38,17 @@ class Manager(object):
         :param credentials: Override of the credentials
         """
         self.auth_version = CONF.identity.auth_version
-        # FIXME(andreaf) Change Manager __init__ to accept a credentials dict
-        if username is None or password is None:
-            # Tenant None is a valid use case
-            self.credentials = self.get_default_credentials()
+        if credentials is None:
+            self.credentials = auth.get_default_credentials('user')
         else:
-            self.credentials = dict(username=username, password=password,
-                                    tenant_name=tenant_name)
-        if self.auth_version == 'v3':
-            self.credentials['domain_name'] = 'Default'
+            self.credentials = credentials
+        # Check if passed or default credentials are valid
+        if not self.credentials.is_valid():
+            raise exceptions.InvalidCredentials()
         # Creates an auth provider for the credentials
         self.auth_provider = self.get_auth_provider(self.credentials)
         # FIXME(andreaf) unused
         self.client_attr_names = []
-
-    # we do this everywhere, have it be part of the super class
-    def _validate_credentials(self, username, password, tenant_name):
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials. "
-                   "username: %(u)s, password: %(p)s, "
-                   "tenant_name: %(t)s" %
-                   {'u': username, 'p': password, 't': tenant_name})
-            raise exceptions.InvalidConfiguration(msg)
 
     @classmethod
     def get_auth_provider_class(cls, auth_version):
@@ -67,13 +56,6 @@ class Manager(object):
             return auth.KeystoneV2AuthProvider
         else:
             return auth.KeystoneV3AuthProvider
-
-    def get_default_credentials(self):
-        return dict(
-            username=CONF.identity.username,
-            password=CONF.identity.password,
-            tenant_name=CONF.identity.tenant_name
-        )
 
     def get_auth_provider(self, credentials):
         if credentials is None:

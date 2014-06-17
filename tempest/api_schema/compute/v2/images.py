@@ -14,43 +14,46 @@
 
 from tempest.api_schema.compute import parameter_types
 
+common_image_schema = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'status': {'type': 'string'},
+        'updated': {'type': 'string'},
+        'links': parameter_types.links,
+        'name': {'type': 'string'},
+        'created': {'type': 'string'},
+        'minDisk': {'type': 'integer'},
+        'minRam': {'type': 'integer'},
+        'progress': {'type': 'integer'},
+        'metadata': {'type': 'object'},
+        'server': {
+            'type': 'object',
+            'properties': {
+                # NOTE: Now the type of 'id' is integer, but here
+                # allows 'string' also because we will be able to
+                # change it to 'uuid' in the future.
+                'id': {'type': ['integer', 'string']},
+                'links': parameter_types.links
+            },
+            'required': ['id', 'links']
+        },
+        'OS-EXT-IMG-SIZE:size': {'type': 'integer'}
+    },
+    # 'server' attributes only comes in response body if image is
+    # associated with any server. 'OS-EXT-IMG-SIZE:size' is API
+    # extension, So those are not defined as 'required'.
+    'required': ['id', 'status', 'updated', 'links', 'name',
+                 'created', 'minDisk', 'minRam', 'progress',
+                 'metadata']
+}
+
 get_image = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
         'properties': {
-            'image': {
-                'type': 'object',
-                'properties': {
-                    'id': {'type': 'string'},
-                    'status': {'type': 'string'},
-                    'updated': {'type': 'string'},
-                    'links': parameter_types.links,
-                    'name': {'type': 'string'},
-                    'created': {'type': 'string'},
-                    'OS-EXT-IMG-SIZE:size': {'type': 'integer'},
-                    'minDisk': {'type': 'integer'},
-                    'minRam': {'type': 'integer'},
-                    'progress': {'type': 'integer'},
-                    'metadata': {'type': 'object'},
-                    'server': {
-                        'type': 'object',
-                        'properties': {
-                            # NOTE: Now the type of 'id' is integer, but here
-                            # allows 'string' also because we will be able to
-                            # change it to 'uuid' in the future.
-                            'id': {'type': ['integer', 'string']},
-                            'links': parameter_types.links
-                        },
-                        'required': ['id', 'links']
-                    }
-                },
-                # 'server' attributes only comes in response body if image is
-                # associated with any server. So it is not 'required'
-                'required': ['id', 'status', 'updated', 'links', 'name',
-                             'created', 'OS-EXT-IMG-SIZE:size', 'minDisk',
-                             'minRam', 'progress', 'metadata']
-            }
+            'image': common_image_schema
         },
         'required': ['image']
     }
@@ -67,20 +70,7 @@ list_images = {
                     'type': 'object',
                     'properties': {
                         'id': {'type': 'string'},
-                        'links': {
-                            'type': 'array',
-                            'items': {
-                                'type': 'object',
-                                'properties': {
-                                    'href': {
-                                        'type': 'string',
-                                        'format': 'uri'
-                                    },
-                                    'rel': {'type': 'string'}
-                                },
-                                'required': ['href', 'rel']
-                            }
-                        },
+                        'links': parameter_types.links,
                         'name': {'type': 'string'}
                     },
                     'required': ['id', 'links', 'name']
@@ -92,7 +82,17 @@ list_images = {
 }
 
 create_image = {
-    'status_code': [202]
+    'status_code': [202],
+    'response_header': {
+        'type': 'object',
+        'properties': {
+            'location': {
+                'type': 'string',
+                'format': 'uri'
+            }
+        },
+        'required': ['location']
+    }
 }
 
 delete = {
@@ -118,5 +118,19 @@ image_meta_item = {
             'meta': {'type': 'object'}
         },
         'required': ['meta']
+    }
+}
+
+list_images_details = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'images': {
+                'type': 'array',
+                'items': common_image_schema
+            }
+        },
+        'required': ['images']
     }
 }

@@ -42,6 +42,11 @@ class BaremetalClientV1(base.BaremetalClient):
         return self._list_request('ports', **kwargs)
 
     @base.handle_errors
+    def list_nodestates(self, uuid):
+        """List all existing states."""
+        return self._list_request('/nodes/%s/states' % uuid)
+
+    @base.handle_errors
     def list_ports_detail(self):
         """Details list all existing ports."""
         return self._list_request('/ports/detail')

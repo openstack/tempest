@@ -15,13 +15,13 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class TokensTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_get_delete_token(self):
         # get a token by username and password
         user_name = data_utils.rand_name(name='user-')
@@ -56,7 +56,7 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         resp, body = self.client.delete_token(token_id)
         self.assertEqual(resp['status'], '204')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rescope_token(self):
         """An unscoped token can be requested, that token can be used to
            request a scoped token.

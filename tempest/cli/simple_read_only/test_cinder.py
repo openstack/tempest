@@ -118,6 +118,12 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
     def test_cinder_bash_completion(self):
         self.cinder('bash-completion')
 
+    def test_cinder_qos_list(self):
+        self.cinder('qos-list')
+
+    def test_cinder_encryption_type_list(self):
+        self.cinder('encryption-type-list')
+
     def test_admin_help(self):
         help_text = self.cinder('help')
         lines = help_text.split('\n')

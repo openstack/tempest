@@ -1,0 +1,51 @@
+# This is a yaml description for the most basic definitions
+# of what should exist across the resource boundary. Perhaps
+# one day this will grow into a Heat resource template, but as
+# Heat isn't a known working element in the upgrades, we do
+# this much simpler thing for now.
+
+tenants:
+  - javelin
+  - discuss
+
+users:
+  - name: javelin
+    pass: gungnir
+    tenant: javelin
+  - name: javelin2
+    pass: gungnir2
+    tenant: discuss
+
+secgroups:
+  - angon:
+    owner: javelin
+    rules:
+      - 'icmp -1 -1 0.0.0.0/0'
+      - 'tcp 22 22 0.0.0.0/0'
+
+# resources that we want to create
+images:
+  - name: javelin_cirros
+    owner: javelin
+    file: cirros-0.3.2-x86_64-blank.img
+    format: ami
+    aki: cirros-0.3.2-x86_64-vmlinuz
+    ari: cirros-0.3.2-x86_64-initrd
+volumes:
+  - assegai:
+    - owner: javelin
+    - gb: 1
+servers:
+  - name: peltast
+    owner: javelin
+    flavor: m1.small
+    image: javelin_cirros
+  - name: hoplite
+    owner: javelin
+    flavor: m1.medium
+    image: javelin_cirros
+objects:
+  - container: jc1
+    name: javelin1
+    owner: javelin
+    file: /etc/hosts

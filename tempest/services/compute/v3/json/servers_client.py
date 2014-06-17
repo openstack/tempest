@@ -55,6 +55,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         max_count: Count of maximum number of instances to launch.
         disk_config: Determines if user or admin controls disk configuration.
         return_reservation_id: Enable/Disable the return of reservation id
+        block_device_mapping: Block device mapping for the server.
         """
         post_body = {
             'name': name,
@@ -75,7 +76,9 @@ class ServersV3ClientJSON(rest_client.RestClient):
                        ('metadata', 'meta'),
                        ('os-disk-config:disk_config', 'disk_config'),
                        ('os-multiple-create:return_reservation_id',
-                        'return_reservation_id')]:
+                        'return_reservation_id'),
+                       ('os-block-device-mapping:block_device_mapping',
+                        'block_device_mapping')]:
             if isinstance(option, tuple):
                 post_param = option[0]
                 key = option[1]
@@ -126,6 +129,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         post_body = json.dumps({'server': post_body})
         resp, body = self.put("servers/%s" % str(server_id), post_body)
         body = json.loads(body)
+        self.validate_response(schema.update_server, resp, body)
         return resp, body['server']
 
     def get_server(self, server_id):
@@ -136,7 +140,9 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def delete_server(self, server_id):
         """Deletes the given server."""
-        return self.delete("servers/%s" % str(server_id))
+        resp, body = self.delete("servers/%s" % str(server_id))
+        self.validate_response(common_schema.delete_server, resp, body)
+        return resp, body
 
     def list_servers(self, params=None):
         """Lists all servers for a user."""
@@ -147,6 +153,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(common_schema.list_servers, resp, body)
         return resp, body
 
     def list_servers_with_detail(self, params=None):
@@ -189,6 +196,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         """Lists all addresses for a server."""
         resp, body = self.get("servers/%s/ips" % str(server_id))
         body = json.loads(body)
+        self.validate_response(schema.list_addresses, resp, body)
         return resp, body['addresses']
 
     def list_addresses_by_network(self, server_id, network_id):
@@ -196,14 +204,28 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.get("servers/%s/ips/%s" %
                               (str(server_id), network_id))
         body = json.loads(body)
+        self.validate_response(schema.list_addresses_by_network, resp, body)
         return resp, body
 
-    def action(self, server_id, action_name, response_key, **kwargs):
+    def action(self, server_id, action_name, response_key,
+               schema=common_schema.server_actions_common_schema, **kwargs):
         post_body = json.dumps({action_name: kwargs})
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
         if response_key is not None:
-            body = json.loads(body)[response_key]
+            body = json.loads(body)
+            # Check for Schema as 'None' because if we do not have any server
+            # action schema implemented yet then they can pass 'None' to skip
+            # the validation.Once all server action has their schema
+            # implemented then, this check can be removed if every actions are
+            # supposed to validate their response.
+            # TODO(GMann): Remove the below 'if' check once all server actions
+            # schema are implemented.
+            if schema is not None:
+                self.validate_response(schema, resp, body)
+            body = body[response_key]
+        else:
+            self.validate_response(schema, resp, body)
         return resp, body
 
     def create_backup(self, server_id, backup_type, rotation, name):
@@ -215,7 +237,8 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def change_password(self, server_id, admin_password):
         """Changes the root password for the server."""
-        return self.action(server_id, 'change_password', None,
+        return self.action(server_id, 'change_password',
+                           None, schema.server_actions_change_password,
                            admin_password=admin_password)
 
     def get_password(self, server_id):
@@ -231,8 +254,11 @@ class ServersV3ClientJSON(rest_client.RestClient):
         Note that this does not actually change the instance server
         password.
         """
-        return self.delete("servers/%s/os-server-password" %
-                           str(server_id))
+        resp, body = self.delete("servers/%s/os-server-password" %
+                                 str(server_id))
+        self.validate_response(common_schema.server_actions_delete_password,
+                               resp, body)
+        return resp, body
 
     def reboot(self, server_id, reboot_type):
         """Reboots a server."""
@@ -244,7 +270,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         if 'disk_config' in kwargs:
             kwargs['os-disk-config:disk_config'] = kwargs['disk_config']
             del kwargs['disk_config']
-        return self.action(server_id, 'rebuild', 'server', **kwargs)
+        return self.action(server_id, 'rebuild', 'server', None, **kwargs)
 
     def resize(self, server_id, flavor_ref, **kwargs):
         """Changes the flavor of a server."""
@@ -282,6 +308,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
     def list_server_metadata(self, server_id):
         resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = json.loads(body)
+        self.validate_response(common_schema.list_server_metadata, resp, body)
         return resp, body['metadata']
 
     def set_server_metadata(self, server_id, meta, no_metadata_field=False):
@@ -292,6 +319,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.put('servers/%s/metadata' % str(server_id),
                               post_body)
         body = json.loads(body)
+        self.validate_response(common_schema.set_server_metadata, resp, body)
         return resp, body['metadata']
 
     def update_server_metadata(self, server_id, meta):
@@ -299,11 +327,14 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.post('servers/%s/metadata' % str(server_id),
                                post_body)
         body = json.loads(body)
+        self.validate_response(schema.update_server_metadata, resp, body)
         return resp, body['metadata']
 
     def get_server_metadata_item(self, server_id, key):
         resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key))
         body = json.loads(body)
+        self.validate_response(schema.set_get_server_metadata_item,
+                               resp, body)
         return resp, body['metadata']
 
     def set_server_metadata_item(self, server_id, key, meta):
@@ -311,11 +342,15 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
                               post_body)
         body = json.loads(body)
+        self.validate_response(schema.set_get_server_metadata_item,
+                               resp, body)
         return resp, body['metadata']
 
     def delete_server_metadata_item(self, server_id, key):
         resp, body = self.delete("servers/%s/metadata/%s" %
                                  (str(server_id), key))
+        self.validate_response(common_schema.delete_server_metadata_item,
+                               resp, body)
         return resp, body
 
     def stop(self, server_id, **kwargs):
@@ -326,12 +361,17 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
         """Attaches a volume to a server instance."""
-        return self.action(server_id, 'attach', None, volume_id=volume_id,
-                           device=device)
+        resp, body = self.action(server_id, 'attach', None,
+                                 volume_id=volume_id, device=device)
+        self.validate_response(schema.attach_detach_volume, resp, body)
+        return resp, body
 
     def detach_volume(self, server_id, volume_id):
         """Detaches a volume from a server instance."""
-        return self.action(server_id, 'detach', None, volume_id=volume_id)
+        resp, body = self.action(server_id, 'detach', None,
+                                 volume_id=volume_id)
+        self.validate_response(schema.attach_detach_volume, resp, body)
+        return resp, body
 
     def live_migrate_server(self, server_id, dest_host, use_block_migration):
         """This should be called with administrator privileges ."""
@@ -346,6 +386,8 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.post("servers/%s/action" % str(server_id),
                                req_body)
+        self.validate_response(common_schema.server_actions_common_schema,
+                               resp, body)
         return resp, body
 
     def migrate_server(self, server_id, **kwargs):
@@ -393,12 +435,16 @@ class ServersV3ClientJSON(rest_client.RestClient):
         return self.action(server_id, 'shelve_offload', None, **kwargs)
 
     def get_console_output(self, server_id, length):
+        if length is None:
+            # NOTE(mriedem): -1 means optional/unlimited in the nova v3 API.
+            length = -1
         return self.action(server_id, 'get_console_output', 'output',
-                           length=length)
+                           common_schema.get_console_output, length=length)
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, **kwargs)
+        return self.action(server_id, 'rescue', 'admin_password',
+                           None, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
@@ -410,19 +456,19 @@ class ServersV3ClientJSON(rest_client.RestClient):
                               str(server_id))
         return resp, json.loads(body)
 
-    def list_instance_actions(self, server_id):
+    def list_server_actions(self, server_id):
         """List the provided server action."""
-        resp, body = self.get("servers/%s/os-instance-actions" %
+        resp, body = self.get("servers/%s/os-server-actions" %
                               str(server_id))
         body = json.loads(body)
-        return resp, body['instance_actions']
+        return resp, body['server_actions']
 
-    def get_instance_action(self, server_id, request_id):
+    def get_server_action(self, server_id, request_id):
         """Returns the action details of the provided server."""
-        resp, body = self.get("servers/%s/os-instance-actions/%s" %
+        resp, body = self.get("servers/%s/os-server-actions/%s" %
                               (str(server_id), str(request_id)))
         body = json.loads(body)
-        return resp, body['instance_action']
+        return resp, body['server_action']
 
     def force_delete_server(self, server_id, **kwargs):
         """Force delete a server."""
@@ -442,6 +488,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         resp, body = self.post('servers/%s/action' % str(server_id),
                                post_body)
         body = json.loads(body)
+        self.validate_response(common_schema.get_vnc_console, resp, body)
         return resp, body['console']
 
     def reset_network(self, server_id, **kwargs):
@@ -451,3 +498,13 @@ class ServersV3ClientJSON(rest_client.RestClient):
     def inject_network_info(self, server_id, **kwargs):
         """Inject the Network Info into server"""
         return self.action(server_id, 'inject_network_info', None, **kwargs)
+
+    def get_spice_console(self, server_id, console_type):
+        """Get URL of Spice console."""
+        return self.action(server_id, "get_spice_console"
+                           "console", None, type=console_type)
+
+    def get_rdp_console(self, server_id, console_type):
+        """Get URL of RDP console."""
+        return self.action(server_id, "get_rdp_console"
+                           "console", None, type=console_type)

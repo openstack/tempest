@@ -42,8 +42,15 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # Rebuild server if something happened to it during a test
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
+    def tearDown(self):
+        _, server = self.client.get_server(self.server_id)
+        self.assertEqual(self.image_ref, server['image']['id'])
+        self.server_check_teardown()
+        super(ServerActionsTestJSON, self).tearDown()
+
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServerActionsTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
         cls.server_id = cls.rebuild_server(None)
@@ -125,7 +132,6 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                                                    metadata=meta,
                                                    personality=personality,
                                                    adminPass=password)
-        self.addCleanup(self.client.rebuild, self.server_id, self.image_ref)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -145,6 +151,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             linux_client = remote_client.RemoteClient(server, self.ssh_user,
                                                       password)
             linux_client.validate_authentication()
+        if self.image_ref_alt != self.image_ref:
+            self.client.rebuild(self.server_id, self.image_ref)
 
     @test.attr(type='gate')
     def test_rebuild_server_in_stop_state(self):
@@ -157,11 +165,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         resp, server = self.client.stop(self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
-        self.addCleanup(self.client.start, self.server_id)
         resp, rebuilt_server = self.client.rebuild(self.server_id, new_image)
-        self.addCleanup(self.client.wait_for_server_status, self.server_id,
-                        'SHUTOFF')
-        self.addCleanup(self.client.rebuild, self.server_id, old_image)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -175,6 +179,12 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
 
+        # Restore to the original image (The tearDown will test it again)
+        if self.image_ref_alt != self.image_ref:
+            self.client.rebuild(self.server_id, old_image)
+            self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
+        self.client.start(self.server_id)
+
     def _detect_server_image_flavor(self, server_id):
         # Detects the current server image flavor ref.
         resp, server = self.client.get_server(server_id)
@@ -183,25 +193,45 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             if current_flavor == self.flavor_ref else self.flavor_ref
         return current_flavor, new_flavor_ref
 
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
-    @test.attr(type='smoke')
-    def test_resize_server_confirm(self):
+    def _test_resize_server_confirm(self, stop=False):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
 
         previous_flavor_ref, new_flavor_ref = \
             self._detect_server_image_flavor(self.server_id)
 
+        if stop:
+            resp = self.servers_client.stop(self.server_id)[0]
+            self.assertEqual(202, resp.status)
+            self.servers_client.wait_for_server_status(self.server_id,
+                                                       'SHUTOFF')
+
         resp, server = self.client.resize(self.server_id, new_flavor_ref)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
         self.client.confirm_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        expected_status = 'SHUTOFF' if stop else 'ACTIVE'
+        self.client.wait_for_server_status(self.server_id, expected_status)
 
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(new_flavor_ref, server['flavor']['id'])
+
+        if stop:
+            # NOTE(mriedem): tearDown requires the server to be started.
+            self.client.start(self.server_id)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @test.attr(type='smoke')
+    def test_resize_server_confirm(self):
+        self._test_resize_server_confirm(stop=False)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @test.attr(type='smoke')
+    def test_resize_server_confirm_from_stopped(self):
+        self._test_resize_server_confirm(stop=True)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')

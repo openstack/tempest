@@ -16,22 +16,27 @@
 
 import logging
 import os
+import re
 import six
 import subprocess
+import time
 
-from ironicclient import exc as ironic_exceptions
+from heatclient import exc as heat_exceptions
 import netaddr
 from neutronclient.common import exceptions as exc
 from novaclient import exceptions as nova_exceptions
 
 from tempest.api.network import common as net_common
+from tempest import auth
 from tempest import clients
+from tempest.common import debug
 from tempest.common import isolated_creds
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log
+from tempest.openstack.common import timeutils
 import tempest.test
 
 CONF = config.CONF
@@ -66,10 +71,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             cls.__name__, tempest_client=False,
             network_resources=cls.network_resources)
 
-        username, password, tenant_name = cls.credentials()
-
         cls.manager = clients.OfficialClientManager(
-            username, password, tenant_name)
+            credentials=cls.credentials())
         cls.compute_client = cls.manager.compute_client
         cls.image_client = cls.manager.image_client
         cls.baremetal_client = cls.manager.baremetal_client
@@ -78,31 +81,32 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.volume_client = cls.manager.volume_client
         cls.object_storage_client = cls.manager.object_storage_client
         cls.orchestration_client = cls.manager.orchestration_client
+        cls.data_processing_client = cls.manager.data_processing_client
         cls.resource_keys = {}
         cls.os_resources = []
 
     @classmethod
-    def _get_credentials(cls, get_creds, prefix):
+    def _get_credentials(cls, get_creds, ctype):
         if CONF.compute.allow_tenant_isolation:
-            username, tenant_name, password = get_creds()
+            creds = get_creds()
         else:
-            username = getattr(CONF.identity, prefix + 'username')
-            password = getattr(CONF.identity, prefix + 'password')
-            tenant_name = getattr(CONF.identity, prefix + 'tenant_name')
-        return username, password, tenant_name
+            creds = auth.get_default_credentials(ctype)
+        return creds
 
     @classmethod
     def credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_primary_creds, '')
+        return cls._get_credentials(cls.isolated_creds.get_primary_creds,
+                                    'user')
 
     @classmethod
     def alt_credentials(cls):
-        return cls._get_credentials(cls.isolated_creds.get_alt_creds, 'alt_')
+        return cls._get_credentials(cls.isolated_creds.get_alt_creds,
+                                    'alt_user')
 
     @classmethod
     def admin_credentials(cls):
         return cls._get_credentials(cls.isolated_creds.get_admin_creds,
-                                    'admin_')
+                                    'identity_admin')
 
     @staticmethod
     def cleanup_resource(resource, test_name):
@@ -115,8 +119,10 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             resource.delete()
         except Exception as e:
             # If the resource is already missing, mission accomplished.
-            # add status code as workaround for bug 1247568
-            if (e.__class__.__name__ == 'NotFound' or
+            # - Status code tolerated as a workaround for bug 1247568
+            # - HTTPNotFound tolerated as this is currently raised when
+            # attempting to delete an already-deleted heat stack.
+            if (e.__class__.__name__ in ('NotFound', 'HTTPNotFound') or
                     (hasattr(e, 'status_code') and e.status_code == 404)):
                 return
             raise
@@ -280,7 +286,6 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         for ruleset in rulesets:
             sg_rule = client.security_group_rules.create(secgroup_id,
                                                          **ruleset)
-            self.set_resource(sg_rule.id, sg_rule)
             rules.append(sg_rule)
         return rules
 
@@ -406,7 +411,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             'name': name,
             'container_format': fmt,
             'disk_format': fmt,
-            'is_public': 'True',
+            'is_public': 'False',
         }
         params.update(properties)
         image = self.image_client.images.create(**params)
@@ -442,6 +447,30 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         LOG.debug("image:%s" % self.image)
 
 
+# power/provision states as of icehouse
+class BaremetalPowerStates(object):
+    """Possible power states of an Ironic node."""
+    POWER_ON = 'power on'
+    POWER_OFF = 'power off'
+    REBOOT = 'rebooting'
+    SUSPEND = 'suspended'
+
+
+class BaremetalProvisionStates(object):
+    """Possible provision states of an Ironic node."""
+    NOSTATE = None
+    INIT = 'initializing'
+    ACTIVE = 'active'
+    BUILDING = 'building'
+    DEPLOYWAIT = 'wait call-back'
+    DEPLOYING = 'deploying'
+    DEPLOYFAIL = 'deploy failed'
+    DEPLOYDONE = 'deploy complete'
+    DELETING = 'deleting'
+    DELETED = 'deleted'
+    ERROR = 'error'
+
+
 class BaremetalScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
@@ -453,8 +482,8 @@ class BaremetalScenarioTest(OfficialClientTest):
             raise cls.skipException(msg)
 
         # use an admin client manager for baremetal client
-        username, password, tenant = cls.admin_credentials()
-        manager = clients.OfficialClientManager(username, password, tenant)
+        admin_creds = cls.admin_credentials()
+        manager = clients.OfficialClientManager(credentials=admin_creds)
         cls.baremetal_client = manager.baremetal_client
 
         # allow any issues obtaining the node list to raise early
@@ -489,6 +518,8 @@ class BaremetalScenarioTest(OfficialClientTest):
 
     def wait_node(self, instance_id):
         """Waits for a node to be associated with instance_id."""
+        from ironicclient import exc as ironic_exceptions
+
         def _get_node():
             node = None
             try:
@@ -515,6 +546,55 @@ class BaremetalScenarioTest(OfficialClientTest):
             ports.append(self.baremetal_client.port.get(port.uuid))
         return ports
 
+    def add_keypair(self):
+        self.keypair = self.create_keypair()
+
+    def verify_connectivity(self, ip=None):
+        if ip:
+            dest = self.get_remote_client(ip)
+        else:
+            dest = self.get_remote_client(self.instance)
+        dest.validate_authentication()
+
+    def boot_instance(self):
+        create_kwargs = {
+            'key_name': self.keypair.id
+        }
+        self.instance = self.create_server(
+            wait=False, create_kwargs=create_kwargs)
+
+        self.set_resource('instance', self.instance)
+
+        self.wait_node(self.instance.id)
+        self.node = self.get_node(instance_id=self.instance.id)
+
+        self.wait_power_state(self.node.uuid, BaremetalPowerStates.POWER_ON)
+
+        self.wait_provisioning_state(
+            self.node.uuid,
+            [BaremetalProvisionStates.DEPLOYWAIT,
+             BaremetalProvisionStates.ACTIVE],
+            timeout=15)
+
+        self.wait_provisioning_state(self.node.uuid,
+                                     BaremetalProvisionStates.ACTIVE,
+                                     timeout=CONF.baremetal.active_timeout)
+
+        self.status_timeout(
+            self.compute_client.servers, self.instance.id, 'ACTIVE')
+
+        self.node = self.get_node(instance_id=self.instance.id)
+        self.instance = self.compute_client.servers.get(self.instance.id)
+
+    def terminate_instance(self):
+        self.instance.delete()
+        self.remove_resource('instance')
+        self.wait_power_state(self.node.uuid, BaremetalPowerStates.POWER_OFF)
+        self.wait_provisioning_state(
+            self.node.uuid,
+            BaremetalProvisionStates.NOSTATE,
+            timeout=CONF.baremetal.unprovision_timeout)
+
 
 class NetworkScenarioTest(OfficialClientTest):
     """
@@ -539,13 +619,7 @@ class NetworkScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
         super(NetworkScenarioTest, cls).setUpClass()
-        if CONF.compute.allow_tenant_isolation:
-            cls.tenant_id = cls.isolated_creds.get_primary_tenant().id
-        else:
-            cls.tenant_id = cls.manager._get_identity_client(
-                CONF.identity.username,
-                CONF.identity.password,
-                CONF.identity.tenant_name).tenant_id
+        cls.tenant_id = cls.manager.identity_client.tenant_id
 
     def _create_network(self, tenant_id, namestart='network-smoke-'):
         name = data_utils.rand_name(namestart)
@@ -781,6 +855,51 @@ class NetworkScenarioTest(OfficialClientTest):
                                                   private_key)
             linux_client.validate_authentication()
 
+    def _check_public_network_connectivity(self, ip_address, username,
+                                           private_key, should_connect=True,
+                                           msg=None, servers=None):
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        LOG.debug('checking network connections to IP %s with user: %s' %
+                  (ip_address, username))
+        try:
+            self._check_vm_connectivity(ip_address,
+                                        username,
+                                        private_key,
+                                        should_connect=should_connect)
+        except Exception:
+            ex_msg = 'Public network connectivity check failed'
+            if msg:
+                ex_msg += ": " + msg
+            LOG.exception(ex_msg)
+            self._log_console_output(servers)
+            debug.log_net_debug()
+            raise
+
+    def _check_tenant_network_connectivity(self, server,
+                                           username,
+                                           private_key,
+                                           should_connect=True,
+                                           servers_for_debug=None):
+        if not CONF.network.tenant_networks_reachable:
+            msg = 'Tenant networks not configured to be reachable.'
+            LOG.info(msg)
+            return
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        try:
+            for net_name, ip_addresses in server.networks.iteritems():
+                for ip_address in ip_addresses:
+                    self._check_vm_connectivity(ip_address,
+                                                username,
+                                                private_key,
+                                                should_connect=should_connect)
+        except Exception:
+            LOG.exception('Tenant network connectivity check failed')
+            self._log_console_output(servers_for_debug)
+            debug.log_net_debug()
+            raise
+
     def _check_remote_connectivity(self, source, dest, should_succeed=True):
         """
         check ping server via source ssh connection
@@ -922,7 +1041,6 @@ class NetworkScenarioTest(OfficialClientTest):
             client=client,
             **sg_rule['security_group_rule']
         )
-        self.set_resource(sg_rule.id, sg_rule)
         self.assertEqual(secgroup.tenant_id, sg_rule.tenant_id)
         self.assertEqual(secgroup.id, sg_rule.security_group_id)
 
@@ -1051,10 +1169,10 @@ class OrchestrationScenarioTest(OfficialClientTest):
 
     @classmethod
     def credentials(cls):
-        username = CONF.identity.admin_username
-        password = CONF.identity.admin_password
-        tenant_name = CONF.identity.tenant_name
-        return username, password, tenant_name
+        admin_creds = auth.get_default_credentials('identity_admin')
+        creds = auth.get_default_credentials('user')
+        admin_creds.tenant_name = creds.tenant_name
+        return admin_creds
 
     def _load_template(self, base_file, file_name):
         filepath = os.path.join(os.path.dirname(os.path.realpath(base_file)),
@@ -1072,3 +1190,98 @@ class OrchestrationScenarioTest(OfficialClientTest):
         for net in networks['networks']:
             if net['name'] == CONF.compute.fixed_network_name:
                 return net
+
+    @staticmethod
+    def _stack_output(stack, output_key):
+        """Return a stack output value for a given key."""
+        return next((o['output_value'] for o in stack.outputs
+                    if o['output_key'] == output_key), None)
+
+    def _ping_ip_address(self, ip_address, should_succeed=True):
+        cmd = ['ping', '-c1', '-w1', ip_address]
+
+        def ping():
+            proc = subprocess.Popen(cmd,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            proc.wait()
+            return (proc.returncode == 0) == should_succeed
+
+        return tempest.test.call_until_true(
+            ping, CONF.orchestration.build_timeout, 1)
+
+    def _wait_for_resource_status(self, stack_identifier, resource_name,
+                                  status, failure_pattern='^.*_FAILED$'):
+        """Waits for a Resource to reach a given status."""
+        fail_regexp = re.compile(failure_pattern)
+        build_timeout = CONF.orchestration.build_timeout
+        build_interval = CONF.orchestration.build_interval
+
+        start = timeutils.utcnow()
+        while timeutils.delta_seconds(start,
+                                      timeutils.utcnow()) < build_timeout:
+            try:
+                res = self.client.resources.get(
+                    stack_identifier, resource_name)
+            except heat_exceptions.HTTPNotFound:
+                # ignore this, as the resource may not have
+                # been created yet
+                pass
+            else:
+                if res.resource_status == status:
+                    return
+                if fail_regexp.search(res.resource_status):
+                    raise exceptions.StackResourceBuildErrorException(
+                        resource_name=res.resource_name,
+                        stack_identifier=stack_identifier,
+                        resource_status=res.resource_status,
+                        resource_status_reason=res.resource_status_reason)
+            time.sleep(build_interval)
+
+        message = ('Resource %s failed to reach %s status within '
+                   'the required time (%s s).' %
+                   (res.resource_name, status, build_timeout))
+        raise exceptions.TimeoutException(message)
+
+    def _wait_for_stack_status(self, stack_identifier, status,
+                               failure_pattern='^.*_FAILED$'):
+        """
+        Waits for a Stack to reach a given status.
+
+        Note this compares the full $action_$status, e.g
+        CREATE_COMPLETE, not just COMPLETE which is exposed
+        via the status property of Stack in heatclient
+        """
+        fail_regexp = re.compile(failure_pattern)
+        build_timeout = CONF.orchestration.build_timeout
+        build_interval = CONF.orchestration.build_interval
+
+        start = timeutils.utcnow()
+        while timeutils.delta_seconds(start,
+                                      timeutils.utcnow()) < build_timeout:
+            try:
+                stack = self.client.stacks.get(stack_identifier)
+            except heat_exceptions.HTTPNotFound:
+                # ignore this, as the stackource may not have
+                # been created yet
+                pass
+            else:
+                if stack.stack_status == status:
+                    return
+                if fail_regexp.search(stack.stack_status):
+                    raise exceptions.StackBuildErrorException(
+                        stack_identifier=stack_identifier,
+                        stack_status=stack.stack_status,
+                        stack_status_reason=stack.stack_status_reason)
+            time.sleep(build_interval)
+
+        message = ('Stack %s failed to reach %s status within '
+                   'the required time (%s s).' %
+                   (stack.stack_name, status, build_timeout))
+        raise exceptions.TimeoutException(message)
+
+    def _stack_delete(self, stack_identifier):
+        try:
+            self.client.stacks.delete(stack_identifier)
+        except heat_exceptions.HTTPNotFound:
+            pass

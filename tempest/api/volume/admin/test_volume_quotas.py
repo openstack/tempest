@@ -15,6 +15,7 @@
 #    under the License.
 
 from tempest.api.volume import base
+from tempest.common.utils import data_utils
 from tempest import test
 
 QUOTA_KEYS = ['gigabytes', 'snapshots', 'volumes']
@@ -29,8 +30,7 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
     def setUpClass(cls):
         super(VolumeQuotasAdminTestJSON, cls).setUpClass()
         cls.admin_volume_client = cls.os_adm.volumes_client
-        cls.demo_tenant_id = cls.isolated_creds.get_primary_user().get(
-            'tenantId')
+        cls.demo_tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
 
     @test.attr(type='gate')
     def test_list_quotas(self):
@@ -99,6 +99,27 @@ class VolumeQuotasAdminTestJSON(base.BaseVolumeV1AdminTest):
 
         self.assertEqual(quota_usage['gigabytes']['in_use'] + 1,
                          new_quota_usage['gigabytes']['in_use'])
+
+    @test.attr(type='gate')
+    def test_delete_quota(self):
+        # Admin can delete the resource quota set for a tenant
+        tenant_name = data_utils.rand_name('quota_tenant_')
+        identity_client = self.os_adm.identity_client
+        tenant = identity_client.create_tenant(tenant_name)[1]
+        tenant_id = tenant['id']
+        self.addCleanup(identity_client.delete_tenant, tenant_id)
+        _, quota_set_default = self.quotas_client.get_default_quota_set(
+            tenant_id)
+        volume_default = quota_set_default['volumes']
+
+        self.quotas_client.update_quota_set(tenant_id,
+                                            volumes=(int(volume_default) + 5))
+
+        resp, _ = self.quotas_client.delete_quota_set(tenant_id)
+        self.assertEqual(200, resp.status)
+
+        _, quota_set_new = self.quotas_client.get_quota_set(tenant_id)
+        self.assertEqual(volume_default, quota_set_new['volumes'])
 
 
 class VolumeQuotasAdminTestXML(VolumeQuotasAdminTestJSON):

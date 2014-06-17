@@ -26,8 +26,8 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeV1AdminTest):
     @test.safe_setup
     def setUpClass(cls):
         super(VolumeQuotasNegativeTestJSON, cls).setUpClass()
-        demo_user = cls.isolated_creds.get_primary_user()
-        cls.demo_tenant_id = demo_user.get('tenantId')
+        demo_user = cls.isolated_creds.get_primary_creds()
+        cls.demo_tenant_id = demo_user.tenant_id
         cls.shared_quota_set = {'gigabytes': 3, 'volumes': 1, 'snapshots': 1}
 
         # NOTE(gfidente): no need to restore original quota set

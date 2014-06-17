@@ -14,7 +14,10 @@
 #    under the License.
 
 import hashlib
+import random
+import re
 from six import moves
+import time
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
@@ -34,6 +37,29 @@ class ObjectTest(base.BaseObjectTest):
     def tearDownClass(cls):
         cls.delete_containers(cls.containers)
         super(ObjectTest, cls).tearDownClass()
+
+    def _create_object(self, metadata=None):
+        # setup object
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        self.object_client.create_object(self.container_name,
+                                         object_name, data, metadata=metadata)
+
+        return object_name, data
+
+    def _upload_segments(self):
+        # create object
+        object_name = data_utils.rand_name(name='LObject')
+        data = data_utils.arbitrary_string()
+        segments = 10
+        data_segments = [data + str(i) for i in moves.xrange(segments)]
+        # uploading segments
+        for i in moves.xrange(segments):
+            resp, _ = self.object_client.create_object_segments(
+                self.container_name, object_name, i, data_segments[i])
+            self.assertEqual(resp['status'], '201')
+
+        return object_name, data_segments
 
     @test.attr(type='smoke')
     def test_create_object(self):
@@ -64,48 +90,410 @@ class ObjectTest(base.BaseObjectTest):
         self.assertHeaders(resp, 'Object', 'DELETE')
 
     @test.attr(type='smoke')
-    def test_object_metadata(self):
-        # add metadata to storage object, test if metadata is retrievable
+    def test_update_object_metadata(self):
+        # update object metadata
+        object_name, data = self._create_object()
 
-        # create Object
-        object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   object_name, data)
-        # set object metadata
-        meta_key = data_utils.rand_name(name='test-')
-        meta_value = data_utils.rand_name(name='MetaValue-')
-        orig_metadata = {meta_key: meta_value}
+        metadata = {'X-Object-Meta-test-meta': 'Meta'}
         resp, _ = self.object_client.update_object_metadata(
-            self.container_name, object_name, orig_metadata)
+            self.container_name,
+            object_name,
+            metadata,
+            metadata_prefix='')
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'POST')
 
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertIn('x-object-meta-test-meta', resp)
+        self.assertEqual(resp['x-object-meta-test-meta'], 'Meta')
+
+    def test_update_object_metadata_with_remove_metadata(self):
+        # update object metadata with remove metadata
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        create_metadata = {'X-Object-Meta-test-meta1': 'Meta1'}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=create_metadata)
+
+        update_metadata = {'X-Remove-Object-Meta-test-meta1': 'Meta1'}
+        resp, _ = self.object_client.update_object_metadata(
+            self.container_name,
+            object_name,
+            update_metadata,
+            metadata_prefix='')
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'POST')
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertNotIn('x-object-meta-test-meta1', resp)
+
+    @test.attr(type='smoke')
+    def test_update_object_metadata_with_create_and_remove_metadata(self):
+        # creation and deletion of metadata with one request
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        create_metadata = {'X-Object-Meta-test-meta1': 'Meta1'}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=create_metadata)
+
+        update_metadata = {'X-Object-Meta-test-meta2': 'Meta2',
+                           'X-Remove-Object-Meta-test-meta1': 'Meta1'}
+        resp, _ = self.object_client.update_object_metadata(
+            self.container_name,
+            object_name,
+            update_metadata,
+            metadata_prefix='')
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'POST')
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertNotIn('x-object-meta-test-meta1', resp)
+        self.assertIn('x-object-meta-test-meta2', resp)
+        self.assertEqual(resp['x-object-meta-test-meta2'], 'Meta2')
+
+    @test.attr(type='smoke')
+    def test_update_object_metadata_with_x_object_manifest(self):
+        # update object metadata with x_object_manifest
+
+        # uploading segments
+        object_name, data_segments = self._upload_segments()
+        # creating a manifest file
+        data_empty = ''
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data_empty,
+                                         metadata=None)
+        object_prefix = '%s/%s' % (self.container_name, object_name)
+        update_metadata = {'X-Object-Manifest': object_prefix}
+        resp, _ = self.object_client.update_object_metadata(
+            self.container_name,
+            object_name,
+            update_metadata,
+            metadata_prefix='')
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'POST')
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertIn('x-object-manifest', resp)
+        self.assertNotEqual(len(resp['x-object-manifest']), 0)
+
+    def test_update_object_metadata_with_x_object_metakey(self):
+        # update object metadata with a blenk value of metadata
+        object_name, data = self._create_object()
+
+        update_metadata = {'X-Object-Meta-test-meta': ''}
+        resp, _ = self.object_client.update_object_metadata(
+            self.container_name,
+            object_name,
+            update_metadata,
+            metadata_prefix='')
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'POST')
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertIn('x-object-meta-test-meta', resp)
+        self.assertEqual(resp['x-object-meta-test-meta'], '')
+
+    @test.attr(type='smoke')
+    def test_update_object_metadata_with_x_remove_object_metakey(self):
+        # update object metadata with a blank value of remove metadata
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        create_metadata = {'X-Object-Meta-test-meta': 'Meta'}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=create_metadata)
+
+        update_metadata = {'X-Remove-Object-Meta-test-meta': ''}
+        resp, _ = self.object_client.update_object_metadata(
+            self.container_name,
+            object_name,
+            update_metadata,
+            metadata_prefix='')
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'POST')
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertNotIn('x-object-meta-test-meta', resp)
+
+    @test.attr(type='smoke')
+    def test_list_object_metadata(self):
         # get object metadata
-        resp, resp_metadata = self.object_client.list_object_metadata(
-            self.container_name, object_name)
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata = {'X-Object-Meta-test-meta': 'Meta'}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=metadata)
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
+        self.assertIn('x-object-meta-test-meta', resp)
+        self.assertEqual(resp['x-object-meta-test-meta'], 'Meta')
 
-        actual_meta_key = 'x-object-meta-' + meta_key
-        self.assertIn(actual_meta_key, resp)
-        self.assertEqual(resp[actual_meta_key], meta_value)
+    @test.attr(type='smoke')
+    def test_list_no_object_metadata(self):
+        # get empty list of object metadata
+        object_name, data = self._create_object()
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'HEAD')
+        self.assertNotIn('x-object-meta-', str(resp))
+
+    @test.attr(type='smoke')
+    def test_list_object_metadata_with_x_object_manifest(self):
+        # get object metadata with x_object_manifest
+
+        # uploading segments
+        object_name, data_segments = self._upload_segments()
+        # creating a manifest file
+        object_prefix = '%s/%s' % (self.container_name, object_name)
+        metadata = {'X-Object-Manifest': object_prefix}
+        data_empty = ''
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data_empty,
+            metadata=metadata)
+
+        resp, _ = self.object_client.list_object_metadata(
+            self.container_name,
+            object_name)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+
+        # Check only the existence of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
+                        'Object', 'HEAD'))
+        self.assertIn('x-object-manifest', resp)
+
+        # Etag value of a large object is enclosed in double-quotations.
+        # This is a special case, therefore the formats of response headers
+        # are checked without a custom matcher.
+        self.assertTrue(resp['etag'].startswith('\"'))
+        self.assertTrue(resp['etag'].endswith('\"'))
+        self.assertTrue(resp['etag'].strip('\"').isalnum())
+        self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
+        self.assertNotEqual(len(resp['content-type']), 0)
+        self.assertTrue(re.match("^tx[0-9a-f]*-[0-9a-f]*$",
+                                 resp['x-trans-id']))
+        self.assertNotEqual(len(resp['date']), 0)
+        self.assertEqual(resp['accept-ranges'], 'bytes')
+        self.assertEqual(resp['x-object-manifest'],
+                         '%s/%s' % (self.container_name, object_name))
 
     @test.attr(type='smoke')
     def test_get_object(self):
         # retrieve object's data (in response body)
 
         # create object
-        object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
-        resp, _ = self.object_client.create_object(self.container_name,
-                                                   object_name, data)
+        object_name, data = self._create_object()
         # get object
         resp, body = self.object_client.get_object(self.container_name,
                                                    object_name)
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'GET')
 
+        self.assertEqual(body, data)
+
+    @test.attr(type='smoke')
+    def test_get_object_with_metadata(self):
+        # get object with metadata
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata = {'X-Object-Meta-test-meta': 'Meta'}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=metadata)
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=None)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertIn('x-object-meta-test-meta', resp)
+        self.assertEqual(resp['x-object-meta-test-meta'], 'Meta')
+        self.assertEqual(body, data)
+
+    @test.attr(type='smoke')
+    def test_get_object_with_range(self):
+        # get object with range
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string(100)
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=None)
+        rand_num = random.randint(3, len(data) - 1)
+        metadata = {'Range': 'bytes=%s-%s' % (rand_num - 3, rand_num - 1)}
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=metadata)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertEqual(body, data[rand_num - 3: rand_num])
+
+    @test.attr(type='smoke')
+    def test_get_object_with_x_object_manifest(self):
+        # get object with x_object_manifest
+
+        # uploading segments
+        object_name, data_segments = self._upload_segments()
+        # creating a manifest file
+        object_prefix = '%s/%s' % (self.container_name, object_name)
+        metadata = {'X-Object-Manifest': object_prefix}
+        data_empty = ''
+        resp, body = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data_empty,
+            metadata=metadata)
+
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=None)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+
+        # Check only the existence of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
+                        'Object', 'GET'))
+        self.assertIn('x-object-manifest', resp)
+
+        # Etag value of a large object is enclosed in double-quotations.
+        # This is a special case, therefore the formats of response headers
+        # are checked without a custom matcher.
+        self.assertTrue(resp['etag'].startswith('\"'))
+        self.assertTrue(resp['etag'].endswith('\"'))
+        self.assertTrue(resp['etag'].strip('\"').isalnum())
+        self.assertTrue(re.match("^\d+\.?\d*\Z", resp['x-timestamp']))
+        self.assertNotEqual(len(resp['content-type']), 0)
+        self.assertTrue(re.match("^tx[0-9a-f]*-[0-9a-f]*$",
+                                 resp['x-trans-id']))
+        self.assertNotEqual(len(resp['date']), 0)
+        self.assertEqual(resp['accept-ranges'], 'bytes')
+        self.assertEqual(resp['x-object-manifest'],
+                         '%s/%s' % (self.container_name, object_name))
+
+        self.assertEqual(''.join(data_segments), body)
+
+    @test.attr(type='smoke')
+    def test_get_object_with_if_match(self):
+        # get object with if_match
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string(10)
+        create_md5 = hashlib.md5(data).hexdigest()
+        create_metadata = {'Etag': create_md5}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=create_metadata)
+
+        list_metadata = {'If-Match': create_md5}
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=list_metadata)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertEqual(body, data)
+
+    @test.attr(type='smoke')
+    def test_get_object_with_if_modified_since(self):
+        # get object with if_modified_since
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        time_now = time.time()
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=None)
+
+        http_date = time.ctime(time_now - 86400)
+        list_metadata = {'If-Modified-Since': http_date}
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=list_metadata)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertEqual(body, data)
+
+    def test_get_object_with_if_none_match(self):
+        # get object with if_none_match
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string(10)
+        create_md5 = hashlib.md5(data).hexdigest()
+        create_metadata = {'Etag': create_md5}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=create_metadata)
+
+        list_data = data_utils.arbitrary_string(15)
+        list_md5 = hashlib.md5(list_data).hexdigest()
+        list_metadata = {'If-None-Match': list_md5}
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=list_metadata)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertEqual(body, data)
+
+    @test.attr(type='smoke')
+    def test_get_object_with_if_unmodified_since(self):
+        # get object with if_unmodified_since
+        object_name, data = self._create_object()
+
+        time_now = time.time()
+        http_date = time.ctime(time_now + 86400)
+        list_metadata = {'If-Unmodified-Since': http_date}
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=list_metadata)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertEqual(body, data)
+
+    @test.attr(type='smoke')
+    def test_get_object_with_x_newest(self):
+        # get object with x_newest
+        object_name, data = self._create_object()
+
+        list_metadata = {'X-Newest': 'true'}
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=list_metadata)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, data)
 
     @test.attr(type='smoke')
@@ -286,10 +674,7 @@ class ObjectTest(base.BaseObjectTest):
         # Make a conditional request for an object using the If-None-Match
         # header, it should get downloaded only if the local file is different,
         # otherwise the response code should be 304 Not Modified
-        object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
-        self.object_client.create_object(self.container_name,
-                                         object_name, data)
+        object_name, data = self._create_object()
         # local copy is identical, no download
         md5 = hashlib.md5(data).hexdigest()
         headers = {'If-None-Match': md5}

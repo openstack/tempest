@@ -154,6 +154,7 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')
 
     @test.attr(type=['negative', 'gate'])
+    @test.services('compute')
     def test_attach_volumes_with_nonexistent_volume_id(self):
         srv_name = data_utils.rand_name('Instance-')
         resp, server = self.servers_client.create_server(srv_name,

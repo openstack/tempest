@@ -23,13 +23,8 @@ class QuotasTestJSON(base.BaseV2ComputeTest):
     def setUpClass(cls):
         super(QuotasTestJSON, cls).setUpClass()
         cls.client = cls.quotas_client
-        cls.admin_client = cls._get_identity_admin_client()
-        resp, tenants = cls.admin_client.list_tenants()
-        cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
-                         cls.client.tenant_name][0]
-        resp, users = cls.admin_client.list_users_for_tenant(cls.tenant_id)
-        cls.user_id = [user['id'] for user in users if user['name'] ==
-                       cls.client.user][0]
+        cls.tenant_id = cls.client.tenant_id
+        cls.user_id = cls.client.user_id
         cls.default_quota_set = set(('injected_file_content_bytes',
                                      'metadata_items', 'injected_files',
                                      'ram', 'floating_ips',

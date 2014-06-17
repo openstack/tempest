@@ -29,12 +29,16 @@ class ObjectClient(rest_client.RestClient):
 
         self.service = CONF.object_storage.catalog_type
 
-    def create_object(self, container, object_name, data, params=None):
+    def create_object(self, container, object_name, data,
+                      params=None, metadata=None):
         """Create storage object."""
 
         headers = self.get_headers()
         if not data:
             headers['content-length'] = '0'
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
         url = "%s/%s" % (str(container), str(object_name))
         if params:
             url += '?%s' % urllib.urlencode(params)
@@ -73,11 +77,16 @@ class ObjectClient(rest_client.RestClient):
         resp, body = self.head(url)
         return resp, body
 
-    def get_object(self, container, object_name):
+    def get_object(self, container, object_name, metadata=None):
         """Retrieve object's data."""
 
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
         url = "{0}/{1}".format(container, object_name)
-        resp, body = self.get(url)
+        resp, body = self.get(url, headers=headers)
         return resp, body
 
     def copy_object_in_same_container(self, container, src_object_name,
@@ -146,13 +155,19 @@ class ObjectClientCustomizedHeader(rest_client.RestClient):
         self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
         """A simple HTTP request interface."""
         dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
+        elif extra_headers:
+            try:
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = {}
 
         # Authorize the request
         req_url, req_headers, req_body = self.auth_provider.auth_request(

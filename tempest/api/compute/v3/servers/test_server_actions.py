@@ -14,6 +14,7 @@
 #    under the License.
 
 import testtools
+import urlparse
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -39,8 +40,15 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
             # Rebuild server if something happened to it during a test
             self.__class__.server_id = self.rebuild_server(self.server_id)
 
+    def tearDown(self):
+        _, server = self.client.get_server(self.server_id)
+        self.assertEqual(self.image_ref, server['image']['id'])
+        self.server_check_teardown()
+        super(ServerActionsV3Test, self).tearDown()
+
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServerActionsV3Test, cls).setUpClass()
         cls.client = cls.servers_client
         cls.server_id = cls.rebuild_server(None)
@@ -116,7 +124,6 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
                                                    name=new_name,
                                                    metadata=meta,
                                                    admin_password=password)
-        self.addCleanup(self.client.rebuild, self.server_id, self.image_ref)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -137,6 +144,9 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
                                                       password)
             linux_client.validate_authentication()
 
+        if self.image_ref_alt != self.image_ref:
+            self.client.rebuild(self.server_id, self.image_ref)
+
     @test.attr(type='gate')
     def test_rebuild_server_in_stop_state(self):
         # The server in stop state  should be rebuilt using the provided
@@ -148,11 +158,7 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         resp, server = self.client.stop(self.server_id)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
-        self.addCleanup(self.client.start, self.server_id)
         resp, rebuilt_server = self.client.rebuild(self.server_id, new_image)
-        self.addCleanup(self.client.wait_for_server_status, self.server_id,
-                        'SHUTOFF')
-        self.addCleanup(self.client.rebuild, self.server_id, old_image)
 
         # Verify the properties in the initial response are correct
         self.assertEqual(self.server_id, rebuilt_server['id'])
@@ -166,6 +172,12 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         rebuilt_image_id = server['image']['id']
         self.assertEqual(new_image, rebuilt_image_id)
 
+        # Restore to the original image (The tearDown will test it again)
+        if self.image_ref_alt != self.image_ref:
+            self.client.rebuild(self.server_id, old_image)
+            self.client.wait_for_server_status(self.server_id, 'SHUTOFF')
+        self.client.start(self.server_id)
+
     def _detect_server_image_flavor(self, server_id):
         # Detects the current server image flavor ref.
         resp, server = self.client.get_server(server_id)
@@ -174,25 +186,45 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
             if current_flavor == self.flavor_ref else self.flavor_ref
         return current_flavor, new_flavor_ref
 
-    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
-                          'Resize not available.')
-    @test.attr(type='smoke')
-    def test_resize_server_confirm(self):
+    def _test_resize_server_confirm(self, stop=False):
         # The server's RAM and disk space should be modified to that of
         # the provided flavor
 
         previous_flavor_ref, new_flavor_ref = \
             self._detect_server_image_flavor(self.server_id)
 
+        if stop:
+            resp = self.servers_client.stop(self.server_id)[0]
+            self.assertEqual(202, resp.status)
+            self.servers_client.wait_for_server_status(self.server_id,
+                                                       'SHUTOFF')
+
         resp, server = self.client.resize(self.server_id, new_flavor_ref)
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
 
         self.client.confirm_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
+        expected_status = 'SHUTOFF' if stop else 'ACTIVE'
+        self.client.wait_for_server_status(self.server_id, expected_status)
 
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(new_flavor_ref, server['flavor']['id'])
+
+        if stop:
+            # NOTE(mriedem): tearDown requires the server to be started.
+            self.client.start(self.server_id)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @test.attr(type='smoke')
+    def test_resize_server_confirm(self):
+        self._test_resize_server_confirm(stop=False)
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @test.attr(type='smoke')
+    def test_resize_server_confirm_from_stopped(self):
+        self._test_resize_server_confirm(stop=True)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
@@ -329,6 +361,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         self.wait_for(self._get_output)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     @test.attr(type='gate')
     def test_pause_unpause_server(self):
         resp, server = self.client.pause_server(self.server_id)
@@ -407,6 +441,12 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+    def _validate_url(self, url):
+        valid_scheme = ['http', 'https']
+        parsed_url = urlparse.urlparse(url)
+        self.assertNotEqual('None', parsed_url.hostname)
+        self.assertIn(parsed_url.scheme, valid_scheme)
+
     @testtools.skipUnless(CONF.compute_feature_enabled.vnc_console,
                           'VNC Console feature is disabled')
     @test.attr(type='gate')
@@ -416,6 +456,35 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         for console_type in console_types:
             resp, body = self.servers_client.get_vnc_console(self.server_id,
                                                              console_type)
-            self.assertEqual(200, resp.status)
+            self.assertEqual(
+                200, resp.status,
+                "Failed to get Console Type: %s" % (console_type))
             self.assertEqual(console_type, body['type'])
             self.assertNotEqual('', body['url'])
+            self._validate_url(body['url'])
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.spice_console,
+                          'Spice Console feature is disabled.')
+    @test.attr(type='gate')
+    def test_get_spice_console(self):
+        # Get the Spice console of type "spice-html5"
+        console_type = 'spice-html5'
+        resp, body = self.servers_client.get_spice_console(self.server_id,
+                                                           console_type)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(console_type, body['type'])
+        self.assertNotEqual('', body['url'])
+        self._validate_url(body['url'])
+
+    @testtools.skipUnless(CONF.compute_feature_enabled.rdp_console,
+                          'RDP Console feature is disabled.')
+    @test.attr(type='gate')
+    def test_get_rdp_console(self):
+        # Get the RDP console of type "rdp-html5"
+        console_type = 'rdp-html5'
+        resp, body = self.servers_client.get_rdp_console(self.server_id,
+                                                         console_type)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(console_type, body['type'])
+        self.assertNotEqual('', body['url'])
+        self._validate_url(body['url'])

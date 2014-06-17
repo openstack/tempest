@@ -45,28 +45,32 @@ class OrchestrationClient(rest_client.RestClient):
         return resp, body['stacks']
 
     def create_stack(self, name, disable_rollback=True, parameters={},
-                     timeout_mins=60, template=None, template_url=None):
+                     timeout_mins=60, template=None, template_url=None,
+                     environment=None, files=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
             parameters,
             timeout_mins,
             template,
-            template_url)
+            template_url,
+            environment,
+            files)
         uri = 'stacks'
         resp, body = self.post(uri, headers=headers, body=body)
         return resp, body
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
                      parameters={}, timeout_mins=60, template=None,
-                     template_url=None):
+                     template_url=None, environment=None, files=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
             parameters,
             timeout_mins,
             template,
-            template_url)
+            template_url,
+            environment)
 
         uri = "stacks/%s" % stack_identifier
         resp, body = self.put(uri, headers=headers, body=body)
@@ -74,13 +78,16 @@ class OrchestrationClient(rest_client.RestClient):
 
     def _prepare_update_create(self, name, disable_rollback=True,
                                parameters={}, timeout_mins=60,
-                               template=None, template_url=None):
+                               template=None, template_url=None,
+                               environment=None, files=None):
         post_body = {
             "stack_name": name,
             "disable_rollback": disable_rollback,
             "parameters": parameters,
             "timeout_mins": timeout_mins,
-            "template": "HeatTemplateFormatVersion: '2012-12-12'\n"
+            "template": "HeatTemplateFormatVersion: '2012-12-12'\n",
+            "environment": environment,
+            "files": files
         }
         if template:
             post_body['template'] = template
@@ -154,7 +161,8 @@ class OrchestrationClient(rest_client.RestClient):
                 if resource_status == status:
                     return
                 if fail_regexp.search(resource_status):
-                    raise exceptions.StackBuildErrorException(
+                    raise exceptions.StackResourceBuildErrorException(
+                        resource_name=resource_name,
                         stack_identifier=stack_identifier,
                         resource_status=resource_status,
                         resource_status_reason=body['resource_status_reason'])

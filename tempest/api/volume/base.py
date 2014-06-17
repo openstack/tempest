@@ -107,7 +107,9 @@ class BaseVolumeV1Test(BaseVolumeTest):
         cls.snapshots_client = cls.os.snapshots_client
         cls.volumes_client = cls.os.volumes_client
         cls.backups_client = cls.os.backups_client
+        cls.volume_services_client = cls.os.volume_services_client
         cls.volumes_extension_client = cls.os.volumes_extension_client
+        cls.availability_zone_client = cls.os.volume_availability_zone_client
 
     @classmethod
     def create_volume(cls, size=1, **kwargs):
@@ -135,11 +137,7 @@ class BaseVolumeV1AdminTest(BaseVolumeV1Test):
                    "in configuration.")
             raise cls.skipException(msg)
         if CONF.compute.allow_tenant_isolation:
-            creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = creds
-            cls.os_adm = clients.Manager(username=admin_username,
-                                         password=admin_password,
-                                         tenant_name=admin_tenant_name,
+            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
                                          interface=cls._interface)
         else:
             cls.os_adm = clients.AdminManager(interface=cls._interface)

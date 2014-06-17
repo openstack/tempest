@@ -37,6 +37,15 @@ class BaseRouterTest(base.BaseAdminNetworkTest):
             routers_list.append(router['id'])
         self.assertNotIn(router_id, routers_list)
 
+    def _add_router_interface_with_subnet_id(self, router_id, subnet_id):
+        resp, interface = self.client.add_router_interface_with_subnet_id(
+            router_id, subnet_id)
+        self.assertEqual('200', resp['status'])
+        self.addCleanup(self._remove_router_interface_with_subnet_id,
+                        router_id, subnet_id)
+        self.assertEqual(subnet_id, interface['subnet_id'])
+        return interface
+
     def _remove_router_interface_with_subnet_id(self, router_id, subnet_id):
         resp, body = self.client.remove_router_interface_with_subnet_id(
             router_id, subnet_id)

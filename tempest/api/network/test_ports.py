@@ -26,7 +26,18 @@ CONF = config.CONF
 class PortsTestJSON(base.BaseNetworkTest):
     _interface = 'json'
 
+    """
+    Test the following operations for ports:
+
+        port create
+        port delete
+        port list
+        port show
+        port update
+    """
+
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(PortsTestJSON, cls).setUpClass()
         cls.network = cls.create_network()
@@ -46,6 +57,8 @@ class PortsTestJSON(base.BaseNetworkTest):
         resp, body = self.client.create_port(network_id=self.network['id'])
         self.assertEqual('201', resp['status'])
         port = body['port']
+        # Schedule port deletion with verification upon test completion
+        self.addCleanup(self._delete_port, port['id'])
         self.assertTrue(port['admin_state_up'])
         # Verify port update
         new_name = "New_Port"
@@ -57,9 +70,6 @@ class PortsTestJSON(base.BaseNetworkTest):
         updated_port = body['port']
         self.assertEqual(updated_port['name'], new_name)
         self.assertFalse(updated_port['admin_state_up'])
-        # Verify port deletion
-        resp, body = self.client.delete_port(port['id'])
-        self.assertEqual('204', resp['status'])
 
     @test.attr(type='smoke')
     def test_show_port(self):
@@ -79,17 +89,18 @@ class PortsTestJSON(base.BaseNetworkTest):
         self.assertEqual(self.port['network_id'], port['network_id'])
         self.assertEqual(self.port['security_groups'],
                          port['security_groups'])
+        self.assertEqual(port['fixed_ips'], [])
 
     @test.attr(type='smoke')
     def test_show_port_fields(self):
         # Verify specific fields of a port
-        field_list = [('fields', 'id'), ]
+        fields = ['id', 'mac_address']
         resp, body = self.client.show_port(self.port['id'],
-                                           field_list=field_list)
+                                           fields=fields)
         self.assertEqual('200', resp['status'])
         port = body['port']
-        self.assertEqual(len(port), len(field_list))
-        for label, field_name in field_list:
+        self.assertEqual(sorted(port.keys()), sorted(fields))
+        for field_name in fields:
             self.assertEqual(port[field_name], self.port[field_name])
 
     @test.attr(type='smoke')
@@ -125,14 +136,37 @@ class PortsTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_list_ports_fields(self):
         # Verify specific fields of ports
-        resp, body = self.client.list_ports(fields='id')
+        fields = ['id', 'mac_address']
+        resp, body = self.client.list_ports(fields=fields)
         self.assertEqual('200', resp['status'])
         ports = body['ports']
         self.assertNotEmpty(ports, "Port list returned is empty")
         # Asserting the fields returned are correct
         for port in ports:
-            self.assertEqual(len(port), 1)
-            self.assertIn('id', port)
+            self.assertEqual(sorted(fields), sorted(port.keys()))
+
+    @test.attr(type='smoke')
+    def test_update_port_with_second_ip(self):
+        # Create a network with two subnets
+        network = self.create_network()
+        subnet_1 = self.create_subnet(network)
+        subnet_2 = self.create_subnet(network)
+        fixed_ip_1 = [{'subnet_id': subnet_1['id']}]
+        fixed_ip_2 = [{'subnet_id': subnet_2['id']}]
+
+        # Create a port with a single IP address from first subnet
+        port = self.create_port(network,
+                                fixed_ips=fixed_ip_1)
+        self.assertEqual(1, len(port['fixed_ips']))
+
+        # Update the port with a second IP address from second subnet
+        fixed_ips = fixed_ip_1 + fixed_ip_2
+        port = self.update_port(port, fixed_ips=fixed_ips)
+        self.assertEqual(2, len(port['fixed_ips']))
+
+        # Update the port to return to a single IP address
+        port = self.update_port(port, fixed_ips=fixed_ip_1)
+        self.assertEqual(1, len(port['fixed_ips']))
 
 
 class PortsTestXML(PortsTestJSON):
@@ -143,6 +177,7 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(PortsAdminExtendedAttrsTestJSON, cls).setUpClass()
         cls.identity_client = cls._get_identity_admin_client()
@@ -180,15 +215,31 @@ class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_list_ports_binding_ext_attr(self):
-        resp, body = self.admin_client.list_ports(
-            **{'tenant_id': self.tenant['id']})
+        # Create a new port
+        post_body = {"network_id": self.network['id']}
+        resp, body = self.admin_client.create_port(**post_body)
+        self.assertEqual('201', resp['status'])
+        port = body['port']
+        self.addCleanup(self.admin_client.delete_port, port['id'])
+
+        # Update the port's binding attributes so that is now 'bound'
+        # to a host
+        update_body = {"binding:host_id": self.host_id}
+        resp, _ = self.admin_client.update_port(port['id'], **update_body)
+        self.assertEqual('200', resp['status'])
+
+        # List all ports, ensure new port is part of list and its binding
+        # attributes are set and accurate
+        resp, body = self.admin_client.list_ports()
         self.assertEqual('200', resp['status'])
         ports_list = body['ports']
-        for port in ports_list:
-            vif_type = port['binding:vif_type']
-            self.assertIsNotNone(vif_type)
-            vif_details = port['binding:vif_details']['port_filter']
-            self.assertIsNotNone(vif_details)
+        pids_list = [p['id'] for p in ports_list]
+        self.assertIn(port['id'], pids_list)
+        listed_port = [p for p in ports_list if p['id'] == port['id']]
+        self.assertEqual(1, len(listed_port),
+                         'Multiple ports listed with id %s in ports listing: '
+                         '%s' % (port['id'], ports_list))
+        self.assertEqual(self.host_id, listed_port[0]['binding:host_id'])
 
     @test.attr(type='smoke')
     def test_show_port_binding_ext_attr(self):
@@ -237,11 +288,10 @@ class PortsAdminExtendedAttrsIpV6TestJSON(PortsAdminExtendedAttrsTestJSON):
 
     @classmethod
     def setUpClass(cls):
-        super(PortsAdminExtendedAttrsIpV6TestJSON, cls).setUpClass()
         if not CONF.network_feature_enabled.ipv6:
-            cls.tearDownClass()
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
+        super(PortsAdminExtendedAttrsIpV6TestJSON, cls).setUpClass()
 
 
 class PortsAdminExtendedAttrsIpV6TestXML(

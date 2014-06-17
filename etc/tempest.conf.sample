@@ -211,13 +211,14 @@
 # admin credentials are known. (boolean value)
 #allow_tenant_isolation=false
 
-# Valid primary image reference to be used in tests. (string
-# value)
-#image_ref={$IMAGE_ID}
+# Valid primary image reference to be used in tests. This is a
+# required option (string value)
+#image_ref=<None>
 
-# Valid secondary image reference to be used in tests. (string
-# value)
-#image_ref_alt={$IMAGE_ID_ALT}
+# Valid secondary image reference to be used in tests. This is
+# a required option, but if only one image is available
+# duplicate the value of image_ref above (string value)
+#image_ref_alt=<None>
 
 # Valid primary flavor to use in tests. (string value)
 #flavor_ref=1
@@ -241,7 +242,7 @@
 #image_alt_ssh_password=password
 
 # Time in seconds between build status checks. (integer value)
-#build_interval=10
+#build_interval=1
 
 # Timeout in seconds to wait for an instance to build.
 # (integer value)
@@ -249,6 +250,19 @@
 
 # Should the tests ssh to instances? (boolean value)
 #run_ssh=false
+
+# Auth method used for authenticate to the instance. Valid
+# choices are: keypair, configured, adminpass. keypair: start
+# the servers with an ssh keypair. configured: use the
+# configured user and password. adminpass: use the injected
+# adminPass. disabled: avoid using ssh when it is an option.
+# (string value)
+#ssh_auth_method=keypair
+
+# How to connect to the instance? fixed: using the first ip
+# belongs the fixed network floating: creating and using a
+# floating ip (string value)
+#ssh_connect_method=fixed
 
 # User name used to authenticate to an instance. (string
 # value)
@@ -319,6 +333,9 @@
 # admin credentials are known. (boolean value)
 #allow_tenant_isolation=false
 
+# Time in seconds between build status checks. (integer value)
+#build_interval=1
+
 
 [compute-admin]
 
@@ -337,6 +354,10 @@
 # API key to use when authenticating as admin. (string value)
 #password=<None>
 
+# Domain name for authentication as admin (Keystone V3).The
+# same domain applies to user and project (string value)
+#domain_name=<None>
+
 
 [compute-feature-enabled]
 
@@ -351,11 +372,13 @@
 #disk_config=true
 
 # A list of enabled compute extensions with a special entry
-# all which indicates every extension is enabled (list value)
+# all which indicates every extension is enabled. Each
+# extension should be specified with alias name (list value)
 #api_extensions=all
 
 # A list of enabled v3 extensions with a special entry all
-# which indicates every extension is enabled (list value)
+# which indicates every extension is enabled. Each extension
+# should be specified with alias name (list value)
 #api_v3_extensions=all
 
 # Does the test environment support changing the admin
@@ -387,6 +410,14 @@
 # Enable VNC console. This configuration value should be same
 # as [nova.vnc]->vnc_enabled in nova.conf (boolean value)
 #vnc_console=false
+
+# Enable Spice console. This configuration value should be
+# same as [nova.spice]->enabled in nova.conf (boolean value)
+#spice_console=false
+
+# Enable RDP console. This configuration value should be same
+# as [nova.rdp]->enabled in nova.conf (boolean value)
+#rdp_console=false
 
 
 [dashboard]
@@ -428,6 +459,10 @@
 # Valid primary flavor to use in database tests. (string
 # value)
 #db_flavor_ref=1
+
+# Current database version to use in database tests. (string
+# value)
+#db_current_version=v1.0
 
 
 [debug]
@@ -503,6 +538,10 @@
 # API key to use when authenticating. (string value)
 #password=<None>
 
+# Domain name for authentication (Keystone V3).The same domain
+# applies to user and project (string value)
+#domain_name=<None>
+
 # Username of alternate user to use for Nova API requests.
 # (string value)
 #alt_username=<None>
@@ -515,6 +554,10 @@
 # (string value)
 #alt_password=<None>
 
+# Alternate domain name for authentication (Keystone V3).The
+# same domain applies to user and project (string value)
+#alt_domain_name=<None>
+
 # Administrative Username to use for Keystone API requests.
 # (string value)
 #admin_username=<None>
@@ -525,6 +568,10 @@
 
 # API key to use when authenticating as admin. (string value)
 #admin_password=<None>
+
+# Admin domain name for authentication (Keystone V3).The same
+# domain applies to user and project (string value)
+#admin_domain_name=<None>
 
 
 [identity-feature-enabled]
@@ -664,7 +711,11 @@
 
 # Time in seconds between network operation status checks.
 # (integer value)
-#build_interval=10
+#build_interval=1
+
+# List of dns servers whichs hould be used for subnet creation
+# (list value)
+#dns_servers=8.8.8.8,8.8.4.4
 
 
 [network-feature-enabled]
@@ -747,12 +798,9 @@
 # (string value)
 #endpoint_type=publicURL
 
-# Time in seconds between build status checks. (integer value)
-#build_interval=1
-
 # Timeout in seconds to wait for a stack to build. (integer
 # value)
-#build_timeout=600
+#build_timeout=1200
 
 # Instance type for tests. Needs to be big enough for a full
 # OS plus the test workload (string value)
@@ -783,6 +831,10 @@
 
 # Catalog type of the Queuing service. (string value)
 #catalog_type=queuing
+
+# The maximum number of queue records per page when listing
+# queues (integer value)
+#max_queues_per_page=20
 
 
 [scenario]
@@ -930,6 +982,10 @@
 # value)
 #endpoint_type=publicURL
 
+# This variable is used as flag to enable notification tests
+# (boolean value)
+#too_slow_to_test=true
+
 
 [volume]
 
@@ -939,7 +995,7 @@
 
 # Time in seconds between volume availability checks. (integer
 # value)
-#build_interval=10
+#build_interval=1
 
 # Timeout in seconds to wait for a volume to becomeavailable.
 # (integer value)

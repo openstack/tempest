@@ -17,13 +17,13 @@ from six import moves
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_list_delete(self):
         # Create several tenants and delete them
         tenants = []
@@ -48,7 +48,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         found = [tenant for tenant in body if tenant['id'] in tenant_ids]
         self.assertFalse(any(found), 'Tenants failed to delete')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_create_with_description(self):
         # Create tenant with a description
         tenant_name = data_utils.rand_name(name='tenant-')
@@ -69,7 +69,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
         tenant_name = data_utils.rand_name(name='tenant-')
@@ -86,7 +86,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
         tenant_name = data_utils.rand_name(name='tenant-')
@@ -105,7 +105,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
         t_name1 = data_utils.rand_name(name='tenant-')
@@ -133,7 +133,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
         t_name = data_utils.rand_name(name='tenant-')
@@ -162,7 +162,7 @@ class TenantsTestJSON(base.BaseIdentityV2AdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
         t_name = data_utils.rand_name(name='tenant-')

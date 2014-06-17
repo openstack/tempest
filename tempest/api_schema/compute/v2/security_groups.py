@@ -12,6 +12,49 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+common_security_group_rule = {
+    'from_port': {'type': ['integer', 'null']},
+    'to_port': {'type': ['integer', 'null']},
+    'group': {
+        'type': 'object',
+        'properties': {
+            'tenant_id': {'type': 'string'},
+            'name': {'type': 'string'}
+        }
+    },
+    'ip_protocol': {'type': ['string', 'null']},
+    # 'parent_group_id' can be UUID so defining it as 'string' also.
+    'parent_group_id': {'type': ['string', 'integer', 'null']},
+    'ip_range': {
+        'type': 'object',
+        'properties': {
+            'cidr': {'type': 'string'}
+        }
+        # When optional argument is provided in request body
+        # like 'group_id' then, attribute 'cidr' does not
+        # comes in response body. So it is not 'required'.
+    },
+    'id': {'type': ['string', 'integer']}
+}
+
+common_security_group = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': ['integer', 'string']},
+        'name': {'type': 'string'},
+        'tenant_id': {'type': 'string'},
+        'rules': {
+            'type': 'array',
+            'items': {
+                'type': ['object', 'null'],
+                'properties': common_security_group_rule
+            }
+        },
+        'description': {'type': 'string'},
+    },
+    'required': ['id', 'name', 'tenant_id', 'rules', 'description'],
+}
+
 list_security_groups = {
     'status_code': [200],
     'response_body': {
@@ -19,22 +62,26 @@ list_security_groups = {
         'properties': {
             'security_groups': {
                 'type': 'array',
-                'items': {
-                    'type': 'object',
-                    'properties': {
-                        'id': {'type': ['integer', 'string']},
-                        'name': {'type': 'string'},
-                        'tenant_id': {'type': 'string'},
-                        'rules': {'type': 'array'},
-                        'description': {'type': 'string'},
-                    },
-                    'required': ['id', 'name', 'tenant_id', 'rules',
-                                 'description'],
-                }
+                'items': common_security_group
             }
         },
         'required': ['security_groups']
     }
+}
+
+get_security_group = create_security_group = update_security_group = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'security_group': common_security_group
+        },
+        'required': ['security_group']
+    }
+}
+
+delete_security_group = {
+    'status_code': [202]
 }
 
 create_security_group_rule = {
@@ -44,25 +91,7 @@ create_security_group_rule = {
         'properties': {
             'security_group_rule': {
                 'type': 'object',
-                'properties': {
-                    'from_port': {'type': 'integer'},
-                    'to_port': {'type': 'integer'},
-                    'group': {'type': 'object'},
-                    'ip_protocol': {'type': 'string'},
-                    # 'parent_group_id' can be UUID so defining it
-                    # as 'string' also.
-                    'parent_group_id': {'type': ['integer', 'string']},
-                    'id': {'type': ['integer', 'string']},
-                    'ip_range': {
-                        'type': 'object',
-                        'properties': {
-                            'cidr': {'type': 'string'}
-                        }
-                        # When optional argument is provided in request body
-                        # like 'group_id' then, attribute 'cidr' does not
-                        # comes in response body. So it is not 'required'.
-                    }
-                },
+                'properties': common_security_group_rule,
                 'required': ['from_port', 'to_port', 'group', 'ip_protocol',
                              'parent_group_id', 'id', 'ip_range']
             }

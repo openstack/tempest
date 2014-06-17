@@ -23,7 +23,15 @@ class TestNodes(base.BaseBaremetalTest):
     def setUp(self):
         super(TestNodes, self).setUp()
 
-        self.chassis = self.create_chassis()['chassis']
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
+
+    def _assertExpected(self, expected, actual):
+        # Check if not expected keys/values exists in actual response body
+        for key, value in six.iteritems(expected):
+            if key not in ('created_at', 'updated_at'):
+                self.assertIn(key, actual)
+                self.assertEqual(value, actual[key])
 
     @test.attr(type='smoke')
     def test_create_node(self):
@@ -32,45 +40,32 @@ class TestNodes(base.BaseBaremetalTest):
                   'storage': '10240',
                   'memory': '1024'}
 
-        node = self.create_node(self.chassis['uuid'], **params)['node']
-
-        for key in params:
-            self.assertEqual(node['properties'][key], params[key])
+        resp, body = self.create_node(self.chassis['uuid'], **params)
+        self.assertEqual('201', resp['status'])
+        self._assertExpected(params, body['properties'])
 
     @test.attr(type='smoke')
     def test_delete_node(self):
-        node = self.create_node(self.chassis['uuid'])['node']
-        node_id = node['uuid']
+        resp, node = self.create_node(self.chassis['uuid'])
+        self.assertEqual('201', resp['status'])
 
-        resp = self.delete_node(node_id)
+        resp = self.delete_node(node['uuid'])
 
         self.assertEqual(resp['status'], '204')
-        self.assertRaises(exc.NotFound, self.client.show_node, node_id)
+        self.assertRaises(exc.NotFound, self.client.show_node, node['uuid'])
 
     @test.attr(type='smoke')
     def test_show_node(self):
-        params = {'cpu_arch': 'x86_64',
-                  'cpu_num': '4',
-                  'storage': '100',
-                  'memory': '512'}
-
-        created_node = self.create_node(self.chassis['uuid'], **params)['node']
-        resp, loaded_node = self.client.show_node(created_node['uuid'])
-
-        for key, val in created_node.iteritems():
-            if key not in ('created_at', 'updated_at'):
-                self.assertEqual(loaded_node[key], val)
+        resp, loaded_node = self.client.show_node(self.node['uuid'])
+        self.assertEqual('200', resp['status'])
+        self._assertExpected(self.node, loaded_node)
 
     @test.attr(type='smoke')
     def test_list_nodes(self):
-        uuids = [self.create_node(self.chassis['uuid'])['node']['uuid']
-                 for i in range(0, 5)]
-
         resp, body = self.client.list_nodes()
-        loaded_uuids = [n['uuid'] for n in body['nodes']]
-
-        for u in uuids:
-            self.assertIn(u, loaded_uuids)
+        self.assertEqual('200', resp['status'])
+        self.assertIn(self.node['uuid'],
+                      [i['uuid'] for i in body['nodes']])
 
     @test.attr(type='smoke')
     def test_update_node(self):
@@ -79,17 +74,16 @@ class TestNodes(base.BaseBaremetalTest):
                  'storage': '10',
                  'memory': '128'}
 
-        node = self.create_node(self.chassis['uuid'], **props)['node']
-        node_id = node['uuid']
+        resp, node = self.create_node(self.chassis['uuid'], **props)
+        self.assertEqual('201', resp['status'])
 
-        new_props = {'cpu_arch': 'x86',
-                     'cpu_num': '1',
-                     'storage': '10000',
-                     'memory': '12300'}
+        new_p = {'cpu_arch': 'x86',
+                 'cpu_num': '1',
+                 'storage': '10000',
+                 'memory': '12300'}
 
-        self.client.update_node(node_id, properties=new_props)
-        resp, node = self.client.show_node(node_id)
-
-        for name, value in six.iteritems(new_props):
-            if name not in ('created_at', 'updated_at'):
-                self.assertEqual(node['properties'][name], value)
+        resp, body = self.client.update_node(node['uuid'], properties=new_p)
+        self.assertEqual('200', resp['status'])
+        resp, node = self.client.show_node(node['uuid'])
+        self.assertEqual('200', resp['status'])
+        self._assertExpected(new_p, node['properties'])

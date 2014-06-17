@@ -12,11 +12,15 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import testtools
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
 from tempest import test
+
+CONF = config.CONF
 
 
 class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
@@ -67,6 +71,8 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         self.servers_client.wait_for_server_status(server_id, 'ACTIVE')
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.pause,
+                          'Pause is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_rescue_paused_instance(self):
         # Rescue a paused server

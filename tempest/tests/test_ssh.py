@@ -14,6 +14,7 @@
 
 import contextlib
 import socket
+import time
 
 import mock
 import testtools
@@ -43,25 +44,21 @@ class TestSshClient(base.TestCase):
             rsa_mock.assert_not_called()
             cs_mock.assert_not_called()
 
-    def test_get_ssh_connection(self):
-        c_mock = self.patch('paramiko.SSHClient')
-        aa_mock = self.patch('paramiko.AutoAddPolicy')
-        s_mock = self.patch('time.sleep')
-        t_mock = self.patch('time.time')
+    def _set_ssh_connection_mocks(self):
+        client_mock = mock.MagicMock()
+        client_mock.connect.return_value = True
+        return (self.patch('paramiko.SSHClient'),
+                self.patch('paramiko.AutoAddPolicy'),
+                client_mock)
 
+    def test_get_ssh_connection(self):
+        c_mock, aa_mock, client_mock = self._set_ssh_connection_mocks()
+        s_mock = self.patch('time.sleep')
+
+        c_mock.return_value = client_mock
         aa_mock.return_value = mock.sentinel.aa
 
-        def reset_mocks():
-            aa_mock.reset_mock()
-            c_mock.reset_mock()
-            s_mock.reset_mock()
-            t_mock.reset_mock()
-
         # Test normal case for successful connection on first try
-        client_mock = mock.MagicMock()
-        c_mock.return_value = client_mock
-        client_mock.connect.return_value = True
-
         client = ssh.Client('localhost', 'root', timeout=2)
         client._get_ssh_connection(sleep=1)
 
@@ -79,50 +76,40 @@ class TestSshClient(base.TestCase):
         )]
         self.assertEqual(expected_connect, client_mock.connect.mock_calls)
         s_mock.assert_not_called()
-        t_mock.assert_called_once_with()
 
-        reset_mocks()
+    def test_get_ssh_connection_two_attemps(self):
+        c_mock, aa_mock, client_mock = self._set_ssh_connection_mocks()
 
-        # Test case when connection fails on first two tries and
-        # succeeds on third try (this validates retry logic)
-        client_mock.connect.side_effect = [socket.error, socket.error, True]
-        t_mock.side_effect = [
-            1000,  # Start time
-            1000,  # LOG.warning() calls time.time() loop 1
-            1001,  # Sleep loop 1
-            1001,  # LOG.warning() calls time.time() loop 2
-            1002   # Sleep loop 2
+        c_mock.return_value = client_mock
+        client_mock.connect.side_effect = [
+            socket.error,
+            mock.MagicMock()
         ]
 
+        client = ssh.Client('localhost', 'root', timeout=1)
+        start_time = int(time.time())
         client._get_ssh_connection(sleep=1)
+        end_time = int(time.time())
+        self.assertTrue((end_time - start_time) < 3)
+        self.assertTrue((end_time - start_time) > 1)
 
-        expected_sleeps = [
-            mock.call(2),
-            mock.call(3)
-        ]
-        self.assertEqual(expected_sleeps, s_mock.mock_calls)
+    def test_get_ssh_connection_timeout(self):
+        c_mock, aa_mock, client_mock = self._set_ssh_connection_mocks()
 
-        reset_mocks()
-
-        # Test case when connection fails on first three tries and
-        # exceeds the timeout, so expect to raise a Timeout exception
+        c_mock.return_value = client_mock
         client_mock.connect.side_effect = [
             socket.error,
             socket.error,
-            socket.error
-        ]
-        t_mock.side_effect = [
-            1000,  # Start time
-            1000,  # LOG.warning() calls time.time() loop 1
-            1001,  # Sleep loop 1
-            1001,  # LOG.warning() calls time.time() loop 2
-            1002,  # Sleep loop 2
-            1003,  # Sleep loop 3
-            1004  # LOG.error() calls time.time()
+            socket.error,
         ]
 
+        client = ssh.Client('localhost', 'root', timeout=2)
+        start_time = int(time.time())
         with testtools.ExpectedException(exceptions.SSHTimeout):
             client._get_ssh_connection()
+        end_time = int(time.time())
+        self.assertTrue((end_time - start_time) < 4)
+        self.assertTrue((end_time - start_time) >= 2)
 
     def test_exec_command(self):
         gsc_mock = self.patch('tempest.common.ssh.Client._get_ssh_connection')

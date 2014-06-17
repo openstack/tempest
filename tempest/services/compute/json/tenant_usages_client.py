@@ -16,6 +16,7 @@
 import json
 import urllib
 
+from tempest.api_schema.compute.v2 import tenant_usages as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -35,6 +36,7 @@ class TenantUsagesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_tenant, resp, body)
         return resp, body['tenant_usages'][0]
 
     def get_tenant_usage(self, tenant_id, params=None):
@@ -44,4 +46,5 @@ class TenantUsagesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.get_tenant, resp, body)
         return resp, body['tenant_usage']

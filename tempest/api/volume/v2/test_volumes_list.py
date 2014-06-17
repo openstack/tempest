@@ -203,7 +203,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeV2Test):
         def _list_details_with_multiple_params(limit=2,
                                                status='available',
                                                sort_dir='asc',
-                                               sort_key='created_at'):
+                                               sort_key='id'):
             params = {'limit': limit,
                       'status': status,
                       'sort_dir': sort_dir,

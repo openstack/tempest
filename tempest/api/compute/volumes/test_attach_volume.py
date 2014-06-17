@@ -33,6 +33,7 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(AttachVolumeTestJSON, cls).setUpClass()
         cls.device = CONF.compute.volume_device_name
         if not CONF.service_available.cinder:
@@ -52,28 +53,28 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
     def _create_and_attach(self):
         # Start a server and wait for it to become ready
         admin_pass = self.image_ssh_password
-        resp, server = self.create_test_server(wait_until='ACTIVE',
-                                               adminPass=admin_pass)
-        self.server = server
+        _, self.server = self.create_test_server(wait_until='ACTIVE',
+                                                 adminPass=admin_pass)
 
         # Record addresses so that we can ssh later
-        resp, server['addresses'] = \
-            self.servers_client.list_addresses(server['id'])
+        _, self.server['addresses'] = \
+            self.servers_client.list_addresses(self.server['id'])
 
         # Create a volume and wait for it to become ready
-        resp, volume = self.volumes_client.create_volume(1,
-                                                         display_name='test')
-        self.volume = volume
+        _, self.volume = self.volumes_client.create_volume(
+            1, display_name='test')
         self.addCleanup(self._delete_volume)
-        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        self.volumes_client.wait_for_volume_status(self.volume['id'],
+                                                   'available')
 
         # Attach the volume to the server
-        self.servers_client.attach_volume(server['id'], volume['id'],
+        self.servers_client.attach_volume(self.server['id'],
+                                          self.volume['id'],
                                           device='/dev/%s' % self.device)
-        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+        self.volumes_client.wait_for_volume_status(self.volume['id'], 'in-use')
 
         self.attached = True
-        self.addCleanup(self._detach, server['id'], volume['id'])
+        self.addCleanup(self._detach, self.server['id'], self.volume['id'])
 
     @testtools.skipUnless(CONF.compute.run_ssh, 'SSH required for this test')
     @test.attr(type='gate')
@@ -81,31 +82,33 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
         # Stop and Start a server with an attached volume, ensuring that
         # the volume remains attached.
         self._create_and_attach()
-        server = self.server
-        volume = self.volume
 
-        self.servers_client.stop(server['id'])
-        self.servers_client.wait_for_server_status(server['id'], 'SHUTOFF')
+        self.servers_client.stop(self.server['id'])
+        self.servers_client.wait_for_server_status(self.server['id'],
+                                                   'SHUTOFF')
 
-        self.servers_client.start(server['id'])
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        self.servers_client.start(self.server['id'])
+        self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(server, self.image_ssh_user,
-                                                  server['adminPass'])
+        linux_client = remote_client.RemoteClient(self.server,
+                                                  self.image_ssh_user,
+                                                  self.server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertIn(self.device, partitions)
 
-        self._detach(server['id'], volume['id'])
+        self._detach(self.server['id'], self.volume['id'])
         self.attached = False
 
-        self.servers_client.stop(server['id'])
-        self.servers_client.wait_for_server_status(server['id'], 'SHUTOFF')
+        self.servers_client.stop(self.server['id'])
+        self.servers_client.wait_for_server_status(self.server['id'],
+                                                   'SHUTOFF')
 
-        self.servers_client.start(server['id'])
-        self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
+        self.servers_client.start(self.server['id'])
+        self.servers_client.wait_for_server_status(self.server['id'], 'ACTIVE')
 
-        linux_client = remote_client.RemoteClient(server, self.image_ssh_user,
-                                                  server['adminPass'])
+        linux_client = remote_client.RemoteClient(self.server,
+                                                  self.image_ssh_user,
+                                                  self.server['adminPass'])
         partitions = linux_client.get_partitions()
         self.assertNotIn(self.device, partitions)
 

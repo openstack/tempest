@@ -16,13 +16,13 @@
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_tokens(self):
         # Valid user's token is authenticated
         # Create a User
@@ -50,7 +50,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(exceptions.NotFound, self.client.get_token,
                           subject_token)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_rescope_token(self):
         """Rescope a token.
 

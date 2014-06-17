@@ -15,13 +15,13 @@
 
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
 class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_user_update(self):
         # Test case to check if updating of user attributes is successful.
         # Creating first user
@@ -66,7 +66,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(u_email2, new_user_get['email'])
         self.assertEqual('false', str(new_user_get['enabled']).lower())
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_user_projects(self):
         # List the projects that a user has access upon
         assigned_project_ids = list()
@@ -120,7 +120,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                          ', '.join(m_project for m_project
                                    in missing_projects))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_user(self):
         # Get a user detail
         self.data.setup_test_v3_user()

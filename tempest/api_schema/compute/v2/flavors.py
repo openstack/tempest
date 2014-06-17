@@ -31,3 +31,27 @@ list_flavors_details['response_body']['properties']['flavors']['items'][
                           'OS-FLV-EXT-DATA:ephemeral': {'type': 'integer'}})
 # 'OS-FLV-DISABLED', 'os-flavor-access', 'rxtx_factor' and 'OS-FLV-EXT-DATA'
 # are API extensions. So they are not 'required'.
+
+unset_flavor_extra_specs = {
+    'status_code': [200]
+}
+
+create_get_flavor_details = copy.deepcopy(flavors.common_flavor_details)
+
+# 'swap' attributes comes as integre value but if it is empty it comes as "".
+# So defining type of as string and integer.
+create_get_flavor_details['response_body']['properties']['flavor'][
+    'properties']['swap'] = {'type': ['string', 'integer']}
+
+# Defining extra attributes for V2 flavor schema
+create_get_flavor_details['response_body']['properties']['flavor'][
+    'properties'].update({'OS-FLV-DISABLED:disabled': {'type': 'boolean'},
+                          'os-flavor-access:is_public': {'type': 'boolean'},
+                          'rxtx_factor': {'type': 'number'},
+                          'OS-FLV-EXT-DATA:ephemeral': {'type': 'integer'}})
+# 'OS-FLV-DISABLED', 'os-flavor-access', 'rxtx_factor' and 'OS-FLV-EXT-DATA'
+# are API extensions. So they are not 'required'.
+
+delete_flavor = {
+    'status_code': [202]
+}

@@ -57,7 +57,7 @@ class QuotasV3ClientJSON(rest_client.RestClient):
         self.validate_response(schema.quota_set, resp, body)
         return resp, body['quota_set']
 
-    def update_quota_set(self, tenant_id, force=None,
+    def update_quota_set(self, tenant_id, user_id=None, force=None,
                          metadata_items=None, ram=None, floating_ips=None,
                          fixed_ips=None, key_pairs=None, instances=None,
                          security_group_rules=None, cores=None,
@@ -98,7 +98,13 @@ class QuotasV3ClientJSON(rest_client.RestClient):
             post_body['security_groups'] = security_groups
 
         post_body = json.dumps({'quota_set': post_body})
-        resp, body = self.put('os-quota-sets/%s' % str(tenant_id), post_body)
+
+        if user_id:
+            resp, body = self.put('os-quota-sets/%s?user_id=%s' %
+                                  (str(tenant_id), str(user_id)), post_body)
+        else:
+            resp, body = self.put('os-quota-sets/%s' % str(tenant_id),
+                                  post_body)
 
         body = json.loads(body)
         self.validate_response(schema.quota_set, resp, body)

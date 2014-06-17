@@ -32,6 +32,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServersTestJSON, cls).setUpClass()
         cls.meta = {'hello': 'world'}
         cls.accessIPv4 = '1.1.1.1'
@@ -51,13 +52,6 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         cls.password = cls.server_initial['adminPass']
         cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
         resp, cls.server = cls.client.get_server(cls.server_initial['id'])
-
-    @test.attr(type='smoke')
-    def test_create_server_response(self):
-        # Check that the required fields are returned with values
-        self.assertEqual(202, self.resp.status)
-        self.assertTrue(self.server_initial['id'] is not None)
-        self.assertTrue(self.server_initial['adminPass'] is not None)
 
     @test.attr(type='smoke')
     def test_verify_server_details(self):
@@ -114,26 +108,10 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.prepare_instance_network()
         super(ServersWithSpecificFlavorTestJSON, cls).setUpClass()
-        cls.meta = {'hello': 'world'}
-        cls.accessIPv4 = '1.1.1.1'
-        cls.accessIPv6 = '0000:0000:0000:0000:0000:babe:220.12.22.2'
-        cls.name = data_utils.rand_name('server')
-        file_contents = 'This is a test file.'
-        personality = [{'path': '/test.txt',
-                       'contents': base64.b64encode(file_contents)}]
-        cls.client = cls.servers_client
         cls.flavor_client = cls.os_adm.flavors_client
-        cli_resp = cls.create_test_server(name=cls.name,
-                                          meta=cls.meta,
-                                          accessIPv4=cls.accessIPv4,
-                                          accessIPv6=cls.accessIPv6,
-                                          personality=personality,
-                                          disk_config=cls.disk_config)
-        cls.resp, cls.server_initial = cli_resp
-        cls.password = cls.server_initial['adminPass']
-        cls.client.wait_for_server_status(cls.server_initial['id'], 'ACTIVE')
-        resp, cls.server = cls.client.get_server(cls.server_initial['id'])
+        cls.client = cls.servers_client
 
     @testtools.skipUnless(CONF.compute.run_ssh,
                           'Instance validation tests are disabled.')
@@ -141,7 +119,7 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     def test_verify_created_server_ephemeral_disk(self):
         # Verify that the ephemeral disk is created when creating server
 
-        def create_flavor_with_extra_specs(self):
+        def create_flavor_with_extra_specs():
             flavor_with_eph_disk_name = data_utils.rand_name('eph_flavor')
             flavor_with_eph_disk_id = data_utils.rand_int_id(start=1000)
             ram = 64
@@ -154,12 +132,12 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                                           ram, vcpus, disk,
                                           flavor_with_eph_disk_id,
                                           ephemeral=1))
-            self.addCleanup(self.flavor_clean_up, flavor['id'])
+            self.addCleanup(flavor_clean_up, flavor['id'])
             self.assertEqual(200, resp.status)
 
             return flavor['id']
 
-        def create_flavor_without_extra_specs(self):
+        def create_flavor_without_extra_specs():
             flavor_no_eph_disk_name = data_utils.rand_name('no_eph_flavor')
             flavor_no_eph_disk_id = data_utils.rand_int_id(start=1000)
 
@@ -172,18 +150,18 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                             create_flavor(flavor_no_eph_disk_name,
                                           ram, vcpus, disk,
                                           flavor_no_eph_disk_id))
-            self.addCleanup(self.flavor_clean_up, flavor['id'])
+            self.addCleanup(flavor_clean_up, flavor['id'])
             self.assertEqual(200, resp.status)
 
             return flavor['id']
 
-        def flavor_clean_up(self, flavor_id):
+        def flavor_clean_up(flavor_id):
             resp, body = self.flavor_client.delete_flavor(flavor_id)
             self.assertEqual(resp.status, 202)
             self.flavor_client.wait_for_resource_deletion(flavor_id)
 
-        flavor_with_eph_disk_id = self.create_flavor_with_extra_specs()
-        flavor_no_eph_disk_id = self.create_flavor_without_extra_specs()
+        flavor_with_eph_disk_id = create_flavor_with_extra_specs()
+        flavor_no_eph_disk_id = create_flavor_without_extra_specs()
 
         admin_pass = self.image_ssh_password
 
@@ -196,13 +174,18 @@ class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
                                       adminPass=admin_pass,
                                       flavor=flavor_with_eph_disk_id))
         # Get partition number of server without extra specs.
+        _, server_no_eph_disk = self.client.get_server(
+            server_no_eph_disk['id'])
         linux_client = remote_client.RemoteClient(server_no_eph_disk,
-                                                  self.ssh_user, self.password)
-        partition_num = len(linux_client.get_partitions())
+                                                  self.ssh_user, admin_pass)
+        partition_num = len(linux_client.get_partitions().split('\n'))
 
+        _, server_with_eph_disk = self.client.get_server(
+            server_with_eph_disk['id'])
         linux_client = remote_client.RemoteClient(server_with_eph_disk,
-                                                  self.ssh_user, self.password)
-        self.assertEqual(partition_num + 1, linux_client.get_partitions())
+                                                  self.ssh_user, admin_pass)
+        partition_num_emph = len(linux_client.get_partitions().split('\n'))
+        self.assertEqual(partition_num + 1, partition_num_emph)
 
 
 class ServersTestManualDisk(ServersTestJSON):

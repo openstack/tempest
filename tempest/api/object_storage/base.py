@@ -38,23 +38,12 @@ class BaseObjectTest(tempest.test.BaseTestCase):
             cls.__name__, network_resources=cls.network_resources)
         if CONF.compute.allow_tenant_isolation:
             # Get isolated creds for normal user
-            creds = cls.isolated_creds.get_primary_creds()
-            username, tenant_name, password = creds
-            cls.os = clients.Manager(username=username,
-                                     password=password,
-                                     tenant_name=tenant_name)
+            cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
             # Get isolated creds for admin user
-            admin_creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = admin_creds
-            cls.os_admin = clients.Manager(username=admin_username,
-                                           password=admin_password,
-                                           tenant_name=admin_tenant_name)
+            cls.os_admin = clients.Manager(
+                cls.isolated_creds.get_admin_creds())
             # Get isolated creds for alt user
-            alt_creds = cls.isolated_creds.get_alt_creds()
-            alt_username, alt_tenant, alt_password = alt_creds
-            cls.os_alt = clients.Manager(username=alt_username,
-                                         password=alt_password,
-                                         tenant_name=alt_tenant)
+            cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
             # Add isolated users to operator role so that they can create a
             # container in swift.
             cls._assign_member_role()
@@ -92,8 +81,8 @@ class BaseObjectTest(tempest.test.BaseTestCase):
 
     @classmethod
     def _assign_member_role(cls):
-        primary_user = cls.isolated_creds.get_primary_user()
-        alt_user = cls.isolated_creds.get_alt_user()
+        primary_creds = cls.isolated_creds.get_primary_creds()
+        alt_creds = cls.isolated_creds.get_alt_creds()
         swift_role = CONF.object_storage.operator_role
         try:
             resp, roles = cls.os_admin.identity_client.list_roles()
@@ -101,9 +90,9 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         except StopIteration:
             msg = "No role named %s found" % swift_role
             raise exceptions.NotFound(msg)
-        for user in [primary_user, alt_user]:
-            cls.os_admin.identity_client.assign_user_role(user['tenantId'],
-                                                          user['id'],
+        for creds in [primary_creds, alt_creds]:
+            cls.os_admin.identity_client.assign_user_role(creds.tenant_id,
+                                                          creds.user_id,
                                                           role['id'])
 
     @classmethod

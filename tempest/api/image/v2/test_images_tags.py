@@ -23,7 +23,7 @@ class ImagesTagsTest(base.BaseV2ImageTest):
     def test_update_delete_tags_for_image(self):
         resp, body = self.create_image(container_format='bare',
                                        disk_format='raw',
-                                       visibility='public')
+                                       visibility='private')
         image_id = body['id']
         tag = data_utils.rand_name('tag-')
         self.addCleanup(self.client.delete_image, image_id)

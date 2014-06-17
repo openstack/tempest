@@ -14,8 +14,10 @@ import logging
 
 from tempest.api.orchestration import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import config
+from tempest import test
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -27,33 +29,37 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         super(StacksTestJSON, cls).setUpClass()
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.load_template('non_empty_stack')
-
+        image_id = (CONF.orchestration.image_ref or
+                    cls._create_image()['id'])
         # create the stack
         cls.stack_identifier = cls.create_stack(
             cls.stack_name,
             template,
             parameters={
-                'trigger': 'start'
+                'trigger': 'start',
+                'image': image_id
             })
         cls.stack_id = cls.stack_identifier.split('/')[1]
         cls.resource_name = 'fluffy'
         cls.resource_type = 'AWS::AutoScaling::LaunchConfiguration'
         cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
 
-    def assert_fields_in_dict(self, obj, *fields):
-        for field in fields:
-            self.assertIn(field, obj)
-
-    @attr(type='gate')
-    def test_stack_list(self):
-        """Created stack should be in the list of existing stacks."""
-        resp, stacks = self.client.list_stacks()
+    def _list_stacks(self, expected_num=None, **filter_kwargs):
+        resp, stacks = self.client.list_stacks(params=filter_kwargs)
         self.assertEqual('200', resp['status'])
         self.assertIsInstance(stacks, list)
+        if expected_num is not None:
+            self.assertEqual(expected_num, len(stacks))
+        return stacks
+
+    @test.attr(type='gate')
+    def test_stack_list(self):
+        """Created stack should be in the list of existing stacks."""
+        stacks = self._list_stacks()
         stacks_names = map(lambda stack: stack['stack_name'], stacks)
         self.assertIn(self.stack_name, stacks_names)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_stack_show(self):
         """Getting details about created stack should be possible."""
         resp, stack = self.client.get_stack(self.stack_name)
@@ -73,7 +79,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(self.stack_id, stack['id'])
         self.assertEqual('fluffy', stack['outputs'][0]['output_key'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_suspend_resume_stack(self):
         """Suspend and resume a stack."""
         resp, suspend_stack = self.client.suspend_stack(self.stack_identifier)
@@ -85,26 +91,14 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.client.wait_for_stack_status(self.stack_identifier,
                                           'RESUME_COMPLETE')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_resources(self):
         """Getting list of created resources for the stack should be possible.
         """
-        resp, resources = self.client.list_resources(self.stack_identifier)
-        self.assertEqual('200', resp['status'])
-        self.assertIsInstance(resources, list)
-        for res in resources:
-            self.assert_fields_in_dict(res, 'logical_resource_id',
-                                       'resource_type', 'resource_status',
-                                       'updated_time')
+        resources = self.list_resources(self.stack_identifier)
+        self.assertEqual({self.resource_name: self.resource_type}, resources)
 
-        resources_names = map(lambda resource: resource['logical_resource_id'],
-                              resources)
-        self.assertIn(self.resource_name, resources_names)
-        resources_types = map(lambda resource: resource['resource_type'],
-                              resources)
-        self.assertIn(self.resource_type, resources_types)
-
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_show_resource(self):
         """Getting details about created resource should be possible."""
         resp, resource = self.client.get_resource(self.stack_identifier,
@@ -118,7 +112,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(self.resource_name, resource['logical_resource_id'])
         self.assertEqual(self.resource_type, resource['resource_type'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_resource_metadata(self):
         """Getting metadata for created resources should be possible."""
         resp, metadata = self.client.show_resource_metadata(
@@ -128,7 +122,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertIsInstance(metadata, dict)
         self.assertEqual(['Tom', 'Stinky'], metadata.get('kittens', None))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_events(self):
         """Getting list of created events for the stack should be possible."""
         resp, events = self.client.list_events(self.stack_identifier)
@@ -144,7 +138,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.assertIn('CREATE_IN_PROGRESS', resource_statuses)
         self.assertIn('CREATE_COMPLETE', resource_statuses)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_show_event(self):
         """Getting details about an event should be possible."""
         resp, events = self.client.list_resource_events(self.stack_identifier,

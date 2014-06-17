@@ -14,19 +14,17 @@
 #    under the License.
 
 from tempest.common.utils import data_utils
-from tempest.common.utils import test_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
+from tempest.scenario import utils as test_utils
 from tempest import test
-
-import testscenarios
 
 CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
-load_tests = testscenarios.load_tests_apply_scenarios
+load_tests = test_utils.load_tests_input_scenario_utils
 
 
 class TestServerBasicOps(manager.OfficialClientTest):
@@ -42,13 +40,6 @@ class TestServerBasicOps(manager.OfficialClientTest):
      * Suspend/resume the instance
      * Terminate the instance
     """
-
-    scenario_utils = test_utils.InputScenarioUtils()
-    scenario_flavor = scenario_utils.scenario_flavors
-    scenario_image = scenario_utils.scenario_images
-
-    scenarios = testscenarios.multiply_scenarios(scenario_image,
-                                                 scenario_flavor)
 
     def setUp(self):
         super(TestServerBasicOps, self).setUp()

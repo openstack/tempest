@@ -31,7 +31,7 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
     Test large operations.
 
     This test below:
-    * Spin up multiple instances in one nova call
+    * Spin up multiple instances in one nova call, and repeat three times
     * as a regular user
     * TODO: same thing for cinder
 
@@ -63,9 +63,20 @@ class TestLargeOpsScenario(manager.NetworkScenarioTest):
             self.set_resource(server.name, server)
         self._wait_for_server_status('ACTIVE')
 
-    @test.services('compute', 'image')
-    def test_large_ops_scenario(self):
+    def _large_ops_scenario(self):
         if CONF.scenario.large_ops_number < 1:
             return
         self.glance_image_create()
         self.nova_boot()
+
+    @test.services('compute', 'image')
+    def test_large_ops_scenario_1(self):
+        self._large_ops_scenario()
+
+    @test.services('compute', 'image')
+    def test_large_ops_scenario_2(self):
+        self._large_ops_scenario()
+
+    @test.services('compute', 'image')
+    def test_large_ops_scenario_3(self):
+        self._large_ops_scenario()

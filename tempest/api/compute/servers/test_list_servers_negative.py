@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import datetime
-
 from six import moves
 
 from tempest.api.compute import base
@@ -37,9 +35,8 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # tearDownClass method of the super-class.
         cls.existing_fixtures = []
         cls.deleted_fixtures = []
-        cls.start_time = datetime.datetime.utcnow()
         for x in moves.xrange(2):
-            resp, srv = cls.create_test_server()
+            resp, srv = cls.create_test_server(wait_until='ACTIVE')
             cls.existing_fixtures.append(srv)
 
         resp, srv = cls.create_test_server()
@@ -126,19 +123,6 @@ class ListServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Return an error if a negative value for limit is passed
         self.assertRaises(exceptions.BadRequest, self.client.list_servers,
                           {'limit': -1})
-
-    @test.attr(type='gate')
-    def test_list_servers_by_changes_since(self):
-        # Servers are listed by specifying changes-since date
-        changes_since = {'changes-since': self.start_time.isoformat()}
-        resp, body = self.client.list_servers(changes_since)
-        self.assertEqual('200', resp['status'])
-        # changes-since returns all instances, including deleted.
-        num_expected = (len(self.existing_fixtures) +
-                        len(self.deleted_fixtures))
-        self.assertEqual(num_expected, len(body['servers']),
-                         "Number of servers %d is wrong in %s" %
-                         (num_expected, body['servers']))
 
     @test.attr(type=['negative', 'gate'])
     def test_list_servers_by_changes_since_invalid_date(self):

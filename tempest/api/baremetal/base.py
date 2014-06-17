@@ -27,13 +27,12 @@ def creates(resource):
     def decorator(f):
         @functools.wraps(f)
         def wrapper(cls, *args, **kwargs):
-            result = f(cls, *args, **kwargs)
-            body = result[resource]
+            resp, body = f(cls, *args, **kwargs)
 
             if 'uuid' in body:
                 cls.created_objects[resource].add(body['uuid'])
 
-            return result
+            return resp, body
         return wrapper
     return decorator
 
@@ -81,8 +80,7 @@ class BaseBaremetalTest(test.BaseTestCase):
         """
         description = description or data_utils.rand_name('test-chassis-')
         resp, body = cls.client.create_chassis(description=description)
-
-        return {'chassis': body, 'response': resp}
+        return resp, body
 
     @classmethod
     @creates('node')
@@ -102,7 +100,7 @@ class BaseBaremetalTest(test.BaseTestCase):
                                             cpu_num=cpu_num, storage=storage,
                                             memory=memory, driver=driver)
 
-        return {'node': body, 'response': resp}
+        return resp, body
 
     @classmethod
     @creates('port')
@@ -121,7 +119,7 @@ class BaseBaremetalTest(test.BaseTestCase):
         resp, body = cls.client.create_port(address=address, node_id=node_id,
                                             extra=extra, uuid=uuid)
 
-        return {'port': body, 'response': resp}
+        return resp, body
 
     @classmethod
     def delete_chassis(cls, chassis_id):

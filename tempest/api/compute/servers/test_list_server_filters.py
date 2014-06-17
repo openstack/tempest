@@ -28,6 +28,7 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
+        cls.set_network_resources(network=True, subnet=True, dhcp=True)
         super(ListServerFiltersTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 
@@ -69,8 +70,12 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         resp, cls.s3 = cls.create_test_server(name=cls.s3_name,
                                               flavor=cls.flavor_ref_alt,
                                               wait_until='ACTIVE')
-
-        cls.fixed_network_name = CONF.compute.fixed_network_name
+        if (CONF.service_available.neutron and
+                CONF.compute.allow_tenant_isolation):
+            network = cls.isolated_creds.get_primary_network()
+            cls.fixed_network_name = network['name']
+        else:
+            cls.fixed_network_name = CONF.compute.fixed_network_name
 
     @utils.skip_unless_attr('multiple_images', 'Only one image found')
     @test.attr(type='gate')
@@ -226,7 +231,6 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
-    @test.skip_because(bug="1170718")
     @test.attr(type='gate')
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip

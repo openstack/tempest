@@ -26,9 +26,7 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
     def setUpClass(cls):
         super(ObjectACLsNegativeTest, cls).setUpClass()
         cls.data.setup_test_user()
-        test_os = clients.Manager(cls.data.test_user,
-                                  cls.data.test_password,
-                                  cls.data.test_tenant)
+        test_os = clients.Manager(cls.data.test_credentials)
         cls.test_auth_data = test_os.auth_provider.auth_data
 
     @classmethod

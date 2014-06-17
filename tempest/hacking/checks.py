@@ -12,7 +12,10 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 
+import os
 import re
+
+import pep8
 
 
 PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
@@ -22,7 +25,7 @@ PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
 PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 TEST_DEFINITION = re.compile(r'^\s*def test.*')
 SETUPCLASS_DEFINITION = re.compile(r'^\s*def setUpClass')
-SCENARIO_DECORATOR = re.compile(r'\s*@.*services\(')
+SCENARIO_DECORATOR = re.compile(r'\s*@.*services\((.*)\)')
 VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
 
 
@@ -47,7 +50,7 @@ def scenario_tests_need_service_tags(physical_line, filename,
     T104: Scenario tests require a services decorator
     """
 
-    if 'tempest/scenario' in filename:
+    if 'tempest/scenario/test_' in filename:
         if TEST_DEFINITION.match(physical_line):
             if not SCENARIO_DECORATOR.match(previous_logical):
                 return (physical_line.find('def'),
@@ -55,6 +58,10 @@ def scenario_tests_need_service_tags(physical_line, filename,
 
 
 def no_setupclass_for_unit_tests(physical_line, filename):
+
+    if pep8.noqa(physical_line):
+        return
+
     if 'tempest/tests' in filename:
         if SETUPCLASS_DEFINITION.match(physical_line):
             return (physical_line.find('def'),
@@ -75,8 +82,32 @@ def no_vi_headers(physical_line, line_number, lines):
             return 0, "T106: Don't put vi configuration in source files"
 
 
+def service_tags_not_in_module_path(physical_line, filename):
+    """Check that a service tag isn't in the module path
+
+    A service tag should only be added if the service name isn't already in
+    the module path.
+
+    T107
+    """
+    # NOTE(mtreinish) Scenario tests always need service tags, but subdirs are
+    # created for services like heat which would cause false negatives for
+    # those tests, so just exclude the scenario tests.
+    if 'tempest/scenario' not in filename:
+        matches = SCENARIO_DECORATOR.match(physical_line)
+        if matches:
+            services = matches.group(1).split(',')
+            for service in services:
+                service_name = service.strip().strip("'")
+                modulepath = os.path.split(filename)[0]
+                if service_name in modulepath:
+                    return (physical_line.find(service_name),
+                            "T107: service tag should not be in path")
+
+
 def factory(register):
     register(import_no_clients_in_api)
     register(scenario_tests_need_service_tags)
     register(no_setupclass_for_unit_tests)
     register(no_vi_headers)
+    register(service_tags_not_in_module_path)

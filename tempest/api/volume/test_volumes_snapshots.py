@@ -63,6 +63,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                 self.assertEqual(params[key], snap[key], msg)
 
     @test.attr(type='gate')
+    @test.services('compute')
     def test_snapshot_create_with_volume_in_use(self):
         # Create a snapshot when volume status is in-use
         # Create a test instance

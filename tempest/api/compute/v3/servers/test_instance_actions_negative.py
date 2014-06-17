@@ -29,15 +29,15 @@ class InstanceActionsNegativeV3Test(base.BaseV3ComputeTest):
         cls.server_id = server['id']
 
     @test.attr(type=['negative', 'gate'])
-    def test_list_instance_actions_invalid_server(self):
+    def test_list_server_actions_invalid_server(self):
         # List actions of the invalid server id
         invalid_server_id = data_utils.rand_uuid()
         self.assertRaises(exceptions.NotFound,
-                          self.client.list_instance_actions, invalid_server_id)
+                          self.client.list_server_actions, invalid_server_id)
 
     @test.attr(type=['negative', 'gate'])
-    def test_get_instance_action_invalid_request(self):
+    def test_get_server_action_invalid_request(self):
         # Get the action details of the provided server with invalid request
         invalid_request_id = 'req-' + data_utils.rand_uuid()
-        self.assertRaises(exceptions.NotFound, self.client.get_instance_action,
+        self.assertRaises(exceptions.NotFound, self.client.get_server_action,
                           self.server_id, invalid_request_id)

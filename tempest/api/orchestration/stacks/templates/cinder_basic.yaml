@@ -1,0 +1,28 @@
+heat_template_version: 2013-05-23
+
+resources:
+    volume:
+        type: OS::Cinder::Volume
+        properties:
+            size: 1
+            description: a descriptive description
+            name: volume_name
+
+outputs:
+  status:
+    description: status
+    value: { get_attr: ['volume', 'status'] }
+
+  size:
+    description: size
+    value: { get_attr: ['volume', 'size'] }
+
+  display_description:
+    description: display_description
+    value: { get_attr: ['volume', 'display_description'] }
+
+  display_name:
+    value: { get_attr: ['volume', 'display_name'] }
+
+  volume_id:
+    value: { get_resource: volume }

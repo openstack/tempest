@@ -46,7 +46,6 @@ allowed_dirty = set([
     'n-api',
     'n-cpu',
     'n-net',
-    'n-sch',
     'q-agt',
     'q-dhcp',
     'q-lbaas',

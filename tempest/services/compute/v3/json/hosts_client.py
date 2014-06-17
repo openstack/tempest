@@ -61,6 +61,7 @@ class HostsV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.put("os-hosts/%s" % str(hostname), request_body)
         body = json.loads(body)
+        self.validate_response(v3_schema.update_host, resp, body)
         return resp, body
 
     def startup_host(self, hostname):
@@ -76,6 +77,7 @@ class HostsV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s/shutdown" % str(hostname))
         body = json.loads(body)
+        self.validate_response(v3_schema.shutdown_host, resp, body)
         return resp, body['host']
 
     def reboot_host(self, hostname):
@@ -83,4 +85,5 @@ class HostsV3ClientJSON(rest_client.RestClient):
 
         resp, body = self.get("os-hosts/%s/reboot" % str(hostname))
         body = json.loads(body)
+        self.validate_response(v3_schema.reboot_host, resp, body)
         return resp, body['host']

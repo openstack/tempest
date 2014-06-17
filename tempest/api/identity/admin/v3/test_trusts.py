@@ -13,6 +13,7 @@
 import datetime
 import re
 from tempest.api.identity import base
+from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -88,10 +89,13 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.assertIsNotNone(self.trustee_user_id)
 
         # Initialize a new client with the trustor credentials
-        os = clients.Manager(username=self.trustor_username,
-                             password=self.trustor_password,
-                             tenant_name=self.trustor_project_name,
-                             interface=self._interface)
+        creds = auth.get_credentials(
+            username=self.trustor_username,
+            password=self.trustor_password,
+            tenant_name=self.trustor_project_name)
+        os = clients.Manager(
+            credentials=creds,
+            interface=self._interface)
         self.trustor_client = os.identity_v3_client
 
     def cleanup_user_and_roles(self):

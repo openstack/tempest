@@ -47,6 +47,7 @@ class SecurityGroupsClientJSON(rest_client.RestClient):
         url = "os-security-groups/%s" % str(security_group_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.get_security_group, resp, body)
         return resp, body['security_group']
 
     def create_security_group(self, name, description):
@@ -62,6 +63,7 @@ class SecurityGroupsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'security_group': post_body})
         resp, body = self.post('os-security-groups', post_body)
         body = json.loads(body)
+        self.validate_response(schema.get_security_group, resp, body)
         return resp, body['security_group']
 
     def update_security_group(self, security_group_id, name=None,
@@ -81,11 +83,15 @@ class SecurityGroupsClientJSON(rest_client.RestClient):
         resp, body = self.put('os-security-groups/%s' % str(security_group_id),
                               post_body)
         body = json.loads(body)
+        self.validate_response(schema.update_security_group, resp, body)
         return resp, body['security_group']
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
-        return self.delete('os-security-groups/%s' % str(security_group_id))
+        resp, body = self.delete(
+            'os-security-groups/%s' % str(security_group_id))
+        self.validate_response(schema.delete_security_group, resp, body)
+        return resp, body
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
                                    to_port, **kwargs):

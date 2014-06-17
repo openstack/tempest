@@ -43,10 +43,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
         if CONF.compute.allow_tenant_isolation:
             creds = cls.isolated_creds.get_alt_creds()
-            username, tenant_name, password = creds
-            cls.alt_manager = clients.Manager(username=username,
-                                              password=password,
-                                              tenant_name=tenant_name)
+            cls.alt_manager = clients.Manager(credentials=creds)
         else:
             # Use the alt_XXX credentials in the config file
             cls.alt_manager = clients.AltManager()
@@ -60,7 +57,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         resp, cls.server = cls.client.get_server(server['id'])
 
         name = data_utils.rand_name('image')
-        resp, body = cls.client.create_image(server['id'], name)
+        resp, body = cls.images_client.create_image(server['id'], name)
         image_id = data_utils.parse_image_id(resp['location'])
         cls.images_client.wait_for_image_status(image_id, 'ACTIVE')
         resp, cls.image = cls.images_client.get_image(image_id)

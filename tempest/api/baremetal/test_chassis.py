@@ -20,57 +20,64 @@ from tempest import test
 class TestChassis(base.BaseBaremetalTest):
     """Tests for chassis."""
 
+    @classmethod
+    def setUpClass(cls):
+        super(TestChassis, cls).setUpClass()
+        _, cls.chassis = cls.create_chassis()
+
+    def _assertExpected(self, expected, actual):
+        # Check if not expected keys/values exists in actual response body
+        for key, value in expected.iteritems():
+            if key not in ('created_at', 'updated_at'):
+                self.assertIn(key, actual)
+                self.assertEqual(value, actual[key])
+
     @test.attr(type='smoke')
     def test_create_chassis(self):
         descr = data_utils.rand_name('test-chassis-')
-        ch = self.create_chassis(description=descr)['chassis']
-
-        self.assertEqual(ch['description'], descr)
+        resp, chassis = self.create_chassis(description=descr)
+        self.assertEqual('201', resp['status'])
+        self.assertEqual(chassis['description'], descr)
 
     @test.attr(type='smoke')
     def test_create_chassis_unicode_description(self):
         # Use a unicode string for testing:
         # 'We ♡ OpenStack in Ukraine'
         descr = u'В Україні ♡ OpenStack!'
-        ch = self.create_chassis(description=descr)['chassis']
-
-        self.assertEqual(ch['description'], descr)
+        resp, chassis = self.create_chassis(description=descr)
+        self.assertEqual('201', resp['status'])
+        self.assertEqual(chassis['description'], descr)
 
     @test.attr(type='smoke')
     def test_show_chassis(self):
-        descr = data_utils.rand_name('test-chassis-')
-        uuid = self.create_chassis(description=descr)['chassis']['uuid']
-
-        resp, chassis = self.client.show_chassis(uuid)
-
-        self.assertEqual(chassis['uuid'], uuid)
-        self.assertEqual(chassis['description'], descr)
+        resp, chassis = self.client.show_chassis(self.chassis['uuid'])
+        self.assertEqual('200', resp['status'])
+        self._assertExpected(self.chassis, chassis)
 
     @test.attr(type="smoke")
     def test_list_chassis(self):
-        created_ids = [self.create_chassis()['chassis']['uuid']
-                       for i in range(0, 5)]
-
         resp, body = self.client.list_chassis()
-        loaded_ids = [ch['uuid'] for ch in body['chassis']]
-
-        for i in created_ids:
-            self.assertIn(i, loaded_ids)
+        self.assertEqual('200', resp['status'])
+        self.assertIn(self.chassis['uuid'],
+                      [i['uuid'] for i in body['chassis']])
 
     @test.attr(type='smoke')
     def test_delete_chassis(self):
-        uuid = self.create_chassis()['chassis']['uuid']
+        resp, body = self.create_chassis()
+        uuid = body['uuid']
 
-        self.delete_chassis(uuid)
-
+        resp = self.delete_chassis(uuid)
+        self.assertEqual('204', resp['status'])
         self.assertRaises(exc.NotFound, self.client.show_chassis, uuid)
 
     @test.attr(type='smoke')
     def test_update_chassis(self):
-        chassis_id = self.create_chassis()['chassis']['uuid']
+        resp, body = self.create_chassis()
+        uuid = body['uuid']
 
         new_description = data_utils.rand_name('new-description-')
-        self.client.update_chassis(chassis_id, description=new_description)
-
-        resp, chassis = self.client.show_chassis(chassis_id)
+        resp, body = (self.client.update_chassis(uuid,
+                      description=new_description))
+        self.assertEqual('200', resp['status'])
+        resp, chassis = self.client.show_chassis(uuid)
         self.assertEqual(chassis['description'], new_description)

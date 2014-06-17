@@ -30,7 +30,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseOrchestrationTest, cls).setUpClass()
-        cls.os = clients.OrchestrationManager()
+        cls.os = clients.Manager()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
         cls.build_timeout = CONF.orchestration.build_timeout
@@ -41,12 +41,15 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         cls.servers_client = cls.os.servers_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.network_client = cls.os.network_client
+        cls.volumes_client = cls.os.volumes_client
+        cls.images_v2_client = cls.os.image_client_v2
         cls.stacks = []
         cls.keypairs = []
+        cls.images = []
 
     @classmethod
     def _get_default_network(cls):
-        resp, networks = cls.network_client.list_networks()
+        __, networks = cls.network_client.list_networks()
         for net in networks['networks']:
             if net['name'] == CONF.compute.fixed_network_name:
                 return net
@@ -59,11 +62,14 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         return admin_client
 
     @classmethod
-    def create_stack(cls, stack_name, template_data, parameters={}):
+    def create_stack(cls, stack_name, template_data, parameters={},
+                     environment=None, files=None):
         resp, body = cls.client.create_stack(
             stack_name,
             template=template_data,
-            parameters=parameters)
+            parameters=parameters,
+            environment=environment,
+            files=files)
         stack_id = resp['location'].split('/')[-1]
         stack_identifier = '%s/%s' % (stack_name, stack_id)
         cls.stacks.append(stack_identifier)
@@ -87,7 +93,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def _create_keypair(cls, name_start='keypair-heat-'):
         kp_name = data_utils.rand_name(name_start)
-        resp, body = cls.keypairs_client.create_keypair(kp_name)
+        __, body = cls.keypairs_client.create_keypair(kp_name)
         cls.keypairs.append(kp_name)
         return body
 
@@ -100,10 +106,28 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
+    def _create_image(cls, name_start='image-heat-', container_format='bare',
+                      disk_format='iso'):
+        image_name = data_utils.rand_name(name_start)
+        __, body = cls.images_v2_client.create_image(image_name,
+                                                     container_format,
+                                                     disk_format)
+        image_id = body['id']
+        cls.images.append(image_id)
+        return body
+
+    @classmethod
+    def _clear_images(cls):
+        for image_id in cls.images:
+            try:
+                cls.images_v2_client.delete_image(image_id)
+            except exceptions.NotFound:
+                pass
+
+    @classmethod
     def load_template(cls, name, ext='yaml'):
-        loc = ["tempest", "api", "orchestration",
-               "stacks", "templates", "%s.%s" % (name, ext)]
-        fullpath = os.path.join(*loc)
+        loc = ["stacks", "templates", "%s.%s" % (name, ext)]
+        fullpath = os.path.join(os.path.dirname(__file__), *loc)
 
         with open(fullpath, "r") as f:
             content = f.read()
@@ -113,6 +137,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def tearDownClass(cls):
         cls._clear_stacks()
         cls._clear_keypairs()
+        cls._clear_images()
         super(BaseOrchestrationTest, cls).tearDownClass()
 
     @staticmethod
@@ -120,3 +145,25 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
         """Return a stack output value for a given key."""
         return next((o['output_value'] for o in stack['outputs']
                     if o['output_key'] == output_key), None)
+
+    def assert_fields_in_dict(self, obj, *fields):
+        for field in fields:
+            self.assertIn(field, obj)
+
+    def list_resources(self, stack_identifier):
+        """Get a dict mapping of resource names to types."""
+        resp, resources = self.client.list_resources(stack_identifier)
+        self.assertEqual('200', resp['status'])
+        self.assertIsInstance(resources, list)
+        for res in resources:
+            self.assert_fields_in_dict(res, 'logical_resource_id',
+                                       'resource_type', 'resource_status',
+                                       'updated_time')
+
+        return dict((r['resource_name'], r['resource_type'])
+                    for r in resources)
+
+    def get_stack_output(self, stack_identifier, output_key):
+        resp, body = self.client.get_stack(stack_identifier)
+        self.assertEqual('200', resp['status'])
+        return self.stack_output(body, output_key)

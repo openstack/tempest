@@ -15,11 +15,12 @@
 import httplib2
 import json
 
+from oslotest import mockpatch
+
 from tempest.common import rest_client
 from tempest.common import xml_utils as xml
 from tempest import config
 from tempest import exceptions
-from tempest.openstack.common.fixture import mockpatch
 from tempest.tests import base
 from tempest.tests import fake_auth_provider
 from tempest.tests import fake_config
@@ -137,6 +138,102 @@ class TestRestClientHeadersJSON(TestRestClientHTTPMethods):
     def test_copy(self):
         resp, __ = self.rest_client.copy(self.url)
         self._verify_headers(resp)
+
+
+class TestRestClientUpdateHeaders(BaseRestClientTestClass):
+    def setUp(self):
+        self.fake_http = fake_http.fake_httplib2()
+        super(TestRestClientUpdateHeaders, self).setUp()
+        self.useFixture(mockpatch.PatchObject(self.rest_client,
+                                              '_error_checker'))
+        self.headers = {'X-Configuration-Session': 'session_id'}
+
+    def test_post_update_headers(self):
+        __, return_dict = self.rest_client.post(self.url, {},
+                                                extra_headers=True,
+                                                headers=self.headers)
+
+        self.assertDictContainsSubset(
+            {'X-Configuration-Session': 'session_id',
+             'Content-Type': 'application/json',
+             'Accept': 'application/json'},
+            return_dict['headers']
+        )
+
+    def test_get_update_headers(self):
+        __, return_dict = self.rest_client.get(self.url,
+                                               extra_headers=True,
+                                               headers=self.headers)
+
+        self.assertDictContainsSubset(
+            {'X-Configuration-Session': 'session_id',
+             'Content-Type': 'application/json',
+             'Accept': 'application/json'},
+            return_dict['headers']
+        )
+
+    def test_delete_update_headers(self):
+        __, return_dict = self.rest_client.delete(self.url,
+                                                  extra_headers=True,
+                                                  headers=self.headers)
+
+        self.assertDictContainsSubset(
+            {'X-Configuration-Session': 'session_id',
+             'Content-Type': 'application/json',
+             'Accept': 'application/json'},
+            return_dict['headers']
+        )
+
+    def test_patch_update_headers(self):
+        __, return_dict = self.rest_client.patch(self.url, {},
+                                                 extra_headers=True,
+                                                 headers=self.headers)
+
+        self.assertDictContainsSubset(
+            {'X-Configuration-Session': 'session_id',
+             'Content-Type': 'application/json',
+             'Accept': 'application/json'},
+            return_dict['headers']
+        )
+
+    def test_put_update_headers(self):
+        __, return_dict = self.rest_client.put(self.url, {},
+                                               extra_headers=True,
+                                               headers=self.headers)
+
+        self.assertDictContainsSubset(
+            {'X-Configuration-Session': 'session_id',
+             'Content-Type': 'application/json',
+             'Accept': 'application/json'},
+            return_dict['headers']
+        )
+
+    def test_head_update_headers(self):
+        self.useFixture(mockpatch.PatchObject(self.rest_client,
+                                              'response_checker'))
+
+        __, return_dict = self.rest_client.head(self.url,
+                                                extra_headers=True,
+                                                headers=self.headers)
+
+        self.assertDictContainsSubset(
+            {'X-Configuration-Session': 'session_id',
+             'Content-Type': 'application/json',
+             'Accept': 'application/json'},
+            return_dict['headers']
+        )
+
+    def test_copy_update_headers(self):
+        __, return_dict = self.rest_client.copy(self.url,
+                                                extra_headers=True,
+                                                headers=self.headers)
+
+        self.assertDictContainsSubset(
+            {'X-Configuration-Session': 'session_id',
+             'Content-Type': 'application/json',
+             'Accept': 'application/json'},
+            return_dict['headers']
+        )
 
 
 class TestRestClientHeadersXML(TestRestClientHeadersJSON):

@@ -29,6 +29,7 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(LoadBalancerAdminTestJSON, cls).setUpClass()
         if not test.is_extension_enabled('lbaas', 'network'):
@@ -37,11 +38,11 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         cls.force_tenant_isolation = True
         manager = cls.get_client_manager()
         cls.client = manager.network_client
-        username, tenant_name, passwd = cls.isolated_creds.get_primary_creds()
-        cls.tenant_id = cls.os_adm.identity_client.get_tenant_by_name(
-            tenant_name)['id']
+        cls.tenant_id = cls.isolated_creds.get_primary_creds().tenant_id
         cls.network = cls.create_network()
         cls.subnet = cls.create_subnet(cls.network)
+        cls.pool = cls.create_pool(data_utils.rand_name('pool-'),
+                                   "ROUND_ROBIN", "HTTP", cls.subnet)
 
     @test.attr(type='smoke')
     def test_create_vip_as_admin_for_another_tenant(self):
@@ -88,6 +89,29 @@ class LoadBalancerAdminTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual('200', resp['status'])
         show_health_monitor = body['health_monitor']
         self.assertEqual(health_monitor['id'], show_health_monitor['id'])
+
+    @test.attr(type='smoke')
+    def test_create_pool_from_admin_user_other_tenant(self):
+        resp, body = self.admin_client.create_pool(
+            name=data_utils.rand_name('pool-'), lb_method="ROUND_ROBIN",
+            protocol="HTTP", subnet_id=self.subnet['id'],
+            tenant_id=self.tenant_id)
+        self.assertEqual('201', resp['status'])
+        pool = body['pool']
+        self.addCleanup(self.admin_client.delete_pool, pool['id'])
+        self.assertIsNotNone(pool['id'])
+        self.assertEqual(self.tenant_id, pool['tenant_id'])
+
+    @test.attr(type='smoke')
+    def test_create_member_from_admin_user_other_tenant(self):
+        resp, body = self.admin_client.create_member(
+            address="10.0.9.47", protocol_port=80, pool_id=self.pool['id'],
+            tenant_id=self.tenant_id)
+        self.assertEqual('201', resp['status'])
+        member = body['member']
+        self.addCleanup(self.admin_client.delete_member, member['id'])
+        self.assertIsNotNone(member['id'])
+        self.assertEqual(self.tenant_id, member['tenant_id'])
 
 
 class LoadBalancerAdminTestXML(LoadBalancerAdminTestJSON):

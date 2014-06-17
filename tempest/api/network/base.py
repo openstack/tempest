@@ -81,9 +81,13 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.metering_label_rules = []
         cls.fw_rules = []
         cls.fw_policies = []
+        cls.ipsecpolicies = []
 
     @classmethod
     def tearDownClass(cls):
+        # Clean up ipsec policies
+        for ipsecpolicy in cls.ipsecpolicies:
+            cls.client.delete_ipsecpolicy(ipsecpolicy['id'])
         # Clean up firewall policies
         for fw_policy in cls.fw_policies:
             cls.client.delete_firewall_policy(fw_policy['id'])
@@ -145,25 +149,31 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return network
 
     @classmethod
-    def create_subnet(cls, network):
+    def create_subnet(cls, network, gateway=None, cidr=None, mask_bits=None):
         """Wrapper utility that returns a test subnet."""
         # The cidr and mask_bits depend on the ip version.
         if cls._ip_version == 4:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-            mask_bits = CONF.network.tenant_network_mask_bits
+            cidr = cidr or netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = mask_bits or CONF.network.tenant_network_mask_bits
         elif cls._ip_version == 6:
-            cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
-            mask_bits = CONF.network.tenant_network_v6_mask_bits
+            cidr = (
+                cidr or netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr))
+            mask_bits = mask_bits or CONF.network.tenant_network_v6_mask_bits
         # Find a cidr that is not in use yet and create a subnet with it
         for subnet_cidr in cidr.subnet(mask_bits):
+            if not gateway:
+                gateway = str(netaddr.IPAddress(subnet_cidr) + 1)
             try:
                 resp, body = cls.client.create_subnet(
                     network_id=network['id'],
                     cidr=str(subnet_cidr),
-                    ip_version=cls._ip_version)
+                    ip_version=cls._ip_version,
+                    gateway_ip=gateway)
                 break
             except exceptions.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)
+                # Unset gateway value if there is an overlapping subnet
+                gateway = None
                 if not is_overlapping_cidr:
                     raise
         else:
@@ -174,12 +184,20 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return subnet
 
     @classmethod
-    def create_port(cls, network):
+    def create_port(cls, network, **kwargs):
         """Wrapper utility that returns a test port."""
-        resp, body = cls.client.create_port(network_id=network['id'])
+        resp, body = cls.client.create_port(network_id=network['id'],
+                                            **kwargs)
         port = body['port']
         cls.ports.append(port)
         return port
+
+    @classmethod
+    def update_port(cls, port, **kwargs):
+        """Wrapper utility that updates a test port."""
+        resp, body = cls.client.update_port(port['id'],
+                                            **kwargs)
+        return body['port']
 
     @classmethod
     def create_router(cls, router_name=None, admin_state_up=False,
@@ -286,7 +304,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     def create_vpnservice(cls, subnet_id, router_id):
         """Wrapper utility that returns a test vpn service."""
         resp, body = cls.client.create_vpnservice(
-            subnet_id, router_id, admin_state_up=True,
+            subnet_id=subnet_id, router_id=router_id, admin_state_up=True,
             name=data_utils.rand_name("vpnservice-"))
         vpnservice = body['vpnservice']
         cls.vpnservices.append(vpnservice)
@@ -295,7 +313,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
     @classmethod
     def create_ikepolicy(cls, name):
         """Wrapper utility that returns a test ike policy."""
-        resp, body = cls.client.create_ikepolicy(name)
+        resp, body = cls.client.create_ikepolicy(name=name)
         ikepolicy = body['ikepolicy']
         cls.ikepolicies.append(ikepolicy)
         return ikepolicy
@@ -329,6 +347,14 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                 router['id'], i['fixed_ips'][0]['subnet_id'])
         cls.client.delete_router(router['id'])
 
+    @classmethod
+    def create_ipsecpolicy(cls, name):
+        """Wrapper utility that returns a test ipsec policy."""
+        _, body = cls.client.create_ipsecpolicy(name=name)
+        ipsecpolicy = body['ipsecpolicy']
+        cls.ipsecpolicies.append(ipsecpolicy)
+        return ipsecpolicy
+
 
 class BaseAdminNetworkTest(BaseNetworkTest):
 
@@ -344,11 +370,7 @@ class BaseAdminNetworkTest(BaseNetworkTest):
             raise cls.skipException(msg)
         if (CONF.compute.allow_tenant_isolation or
             cls.force_tenant_isolation is True):
-            creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = creds
-            cls.os_adm = clients.Manager(username=admin_username,
-                                         password=admin_password,
-                                         tenant_name=admin_tenant_name,
+            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
                                          interface=cls._interface)
         else:
             cls.os_adm = clients.ComputeAdminManager(interface=cls._interface)

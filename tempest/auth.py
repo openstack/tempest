@@ -43,11 +43,11 @@ class AuthProvider(object):
         :param client_type: 'tempest' or 'official'
         :param interface: 'json' or 'xml'. Applicable for tempest client only
         """
+        credentials = self._convert_credentials(credentials)
         if self.check_credentials(credentials):
             self.credentials = credentials
         else:
             raise TypeError("Invalid credentials")
-        self.credentials = credentials
         self.client_type = client_type
         self.interface = interface
         if self.client_type == 'tempest' and self.interface is None:
@@ -55,6 +55,13 @@ class AuthProvider(object):
         self.cache = None
         self.alt_auth_data = None
         self.alt_part = None
+
+    def _convert_credentials(self, credentials):
+        # Support dict credentials for backwards compatibility
+        if isinstance(credentials, dict):
+            return get_credentials(**credentials)
+        else:
+            return credentials
 
     def __str__(self):
         return "Creds :{creds}, client type: {client_type}, interface: " \
@@ -73,22 +80,47 @@ class AuthProvider(object):
     def _get_auth(self):
         raise NotImplementedError
 
+    def _fill_credentials(self, auth_data_body):
+        raise NotImplementedError
+
+    def fill_credentials(self):
+        """
+        Fill credentials object with data from auth
+        """
+        auth_data = self.get_auth()
+        self._fill_credentials(auth_data[1])
+        return self.credentials
+
     @classmethod
     def check_credentials(cls, credentials):
         """
-        Verify credentials are valid. Subclasses can do a better check.
+        Verify credentials are valid.
         """
-        return isinstance(credentials, dict)
+        return isinstance(credentials, Credentials) and credentials.is_valid()
 
     @property
     def auth_data(self):
-        if self.cache is None or self.is_expired(self.cache):
-            self.cache = self._get_auth()
-        return self.cache
+        return self.get_auth()
 
     @auth_data.deleter
     def auth_data(self):
         self.clear_auth()
+
+    def get_auth(self):
+        """
+        Returns auth from cache if available, else auth first
+        """
+        if self.cache is None or self.is_expired(self.cache):
+            self.set_auth()
+        return self.cache
+
+    def set_auth(self):
+        """
+        Forces setting auth, ignores cache if it exists.
+        Refills credentials
+        """
+        self.cache = self._get_auth()
+        self._fill_credentials(self.cache[1])
 
     def clear_auth(self):
         """
@@ -96,6 +128,7 @@ class AuthProvider(object):
         will fetch a new token and base_url.
         """
         self.cache = None
+        self.credentials.reset()
 
     def is_expired(self, auth_data):
         raise NotImplementedError
@@ -218,16 +251,6 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
 
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%SZ'
 
-    @classmethod
-    def check_credentials(cls, credentials, scoped=True):
-        # tenant_name is optional if not scoped
-        valid = super(KeystoneV2AuthProvider, cls).check_credentials(
-            credentials) and 'username' in credentials and \
-            'password' in credentials
-        if scoped:
-            valid = valid and 'tenant_name' in credentials
-        return valid
-
     def _auth_client(self):
         if self.client_type == 'tempest':
             if self.interface == 'json':
@@ -240,12 +263,24 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
     def _auth_params(self):
         if self.client_type == 'tempest':
             return dict(
-                user=self.credentials['username'],
-                password=self.credentials['password'],
-                tenant=self.credentials.get('tenant_name', None),
+                user=self.credentials.username,
+                password=self.credentials.password,
+                tenant=self.credentials.tenant_name,
                 auth_data=True)
         else:
             raise NotImplementedError
+
+    def _fill_credentials(self, auth_data_body):
+        tenant = auth_data_body['token']['tenant']
+        user = auth_data_body['user']
+        if self.credentials.tenant_name is None:
+            self.credentials.tenant_name = tenant['name']
+        if self.credentials.tenant_id is None:
+            self.credentials.tenant_id = tenant['id']
+        if self.credentials.username is None:
+            self.credentials.username = user['name']
+        if self.credentials.user_id is None:
+            self.credentials.user_id = user['id']
 
     def base_url(self, filters, auth_data=None):
         """
@@ -303,16 +338,6 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
 
     EXPIRY_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'
 
-    @classmethod
-    def check_credentials(cls, credentials, scoped=True):
-        # tenant_name is optional if not scoped
-        valid = super(KeystoneV3AuthProvider, cls).check_credentials(
-            credentials) and 'username' in credentials and \
-            'password' in credentials and 'domain_name' in credentials
-        if scoped:
-            valid = valid and 'tenant_name' in credentials
-        return valid
-
     def _auth_client(self):
         if self.client_type == 'tempest':
             if self.interface == 'json':
@@ -325,13 +350,46 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
     def _auth_params(self):
         if self.client_type == 'tempest':
             return dict(
-                user=self.credentials['username'],
-                password=self.credentials['password'],
-                tenant=self.credentials.get('tenant_name', None),
-                domain=self.credentials['domain_name'],
+                user=self.credentials.username,
+                password=self.credentials.password,
+                tenant=self.credentials.tenant_name,
+                domain=self.credentials.user_domain_name,
                 auth_data=True)
         else:
             raise NotImplementedError
+
+    def _fill_credentials(self, auth_data_body):
+        # project or domain, depending on the scope
+        project = auth_data_body.get('project', None)
+        domain = auth_data_body.get('domain', None)
+        # user is always there
+        user = auth_data_body['user']
+        # Set project fields
+        if project is not None:
+            if self.credentials.project_name is None:
+                self.credentials.project_name = project['name']
+            if self.credentials.project_id is None:
+                self.credentials.project_id = project['id']
+            if self.credentials.project_domain_id is None:
+                self.credentials.project_domain_id = project['domain']['id']
+            if self.credentials.project_domain_name is None:
+                self.credentials.project_domain_name = \
+                    project['domain']['name']
+        # Set domain fields
+        if domain is not None:
+            if self.credentials.domain_id is None:
+                self.credentials.domain_id = domain['id']
+            if self.credentials.domain_name is None:
+                self.credentials.domain_name = domain['name']
+        # Set user fields
+        if self.credentials.username is None:
+            self.credentials.username = user['name']
+        if self.credentials.user_id is None:
+            self.credentials.user_id = user['id']
+        if self.credentials.user_domain_id is None:
+            self.credentials.user_domain_id = user['domain']['id']
+        if self.credentials.user_domain_name is None:
+            self.credentials.user_domain_name = user['domain']['name']
 
     def base_url(self, filters, auth_data=None):
         """
@@ -398,3 +456,248 @@ class KeystoneV3AuthProvider(KeystoneAuthProvider):
                                             self.EXPIRY_DATE_FORMAT)
         return expiry - self.token_expiry_threshold <= \
             datetime.datetime.utcnow()
+
+
+def get_default_credentials(credential_type, fill_in=True):
+    """
+    Returns configured credentials of the specified type
+    based on the configured auth_version
+    """
+    return get_credentials(fill_in=fill_in, credential_type=credential_type)
+
+
+def get_credentials(credential_type=None, fill_in=True, **kwargs):
+    """
+    Builds a credentials object based on the configured auth_version
+
+    :param credential_type (string): requests credentials from tempest
+           configuration file. Valid values are defined in
+           Credentials.TYPE.
+    :param kwargs (dict): take into account only if credential_type is
+           not specified or None. Dict of credential key/value pairs
+
+    Examples:
+
+        Returns credentials from the provided parameters:
+        >>> get_credentials(username='foo', password='bar')
+
+        Returns credentials from tempest configuration:
+        >>> get_credentials(credential_type='user')
+    """
+    if CONF.identity.auth_version == 'v2':
+        credential_class = KeystoneV2Credentials
+        auth_provider_class = KeystoneV2AuthProvider
+    elif CONF.identity.auth_version == 'v3':
+        credential_class = KeystoneV3Credentials
+        auth_provider_class = KeystoneV3AuthProvider
+    else:
+        raise exceptions.InvalidConfiguration('Unsupported auth version')
+    if credential_type is not None:
+        creds = credential_class.get_default(credential_type)
+    else:
+        creds = credential_class(**kwargs)
+    # Fill in the credentials fields that were not specified
+    if fill_in:
+        auth_provider = auth_provider_class(creds)
+        creds = auth_provider.fill_credentials()
+    return creds
+
+
+class Credentials(object):
+    """
+    Set of credentials for accessing OpenStack services
+
+    ATTRIBUTES: list of valid class attributes representing credentials.
+
+    TYPES: types of credentials available in the configuration file.
+           For each key there's a tuple (section, prefix) to match the
+           configuration options.
+    """
+
+    ATTRIBUTES = []
+    TYPES = {
+        'identity_admin': ('identity', 'admin'),
+        'compute_admin': ('compute_admin', None),
+        'user': ('identity', None),
+        'alt_user': ('identity', 'alt')
+    }
+
+    def __init__(self, **kwargs):
+        """
+        Enforce the available attributes at init time (only).
+        Additional attributes can still be set afterwards if tests need
+        to do so.
+        """
+        self._initial = kwargs
+        self._apply_credentials(kwargs)
+
+    def _apply_credentials(self, attr):
+        for key in attr.keys():
+            if key in self.ATTRIBUTES:
+                setattr(self, key, attr[key])
+            else:
+                raise exceptions.InvalidCredentials
+
+    def __str__(self):
+        """
+        Represent only attributes included in self.ATTRIBUTES
+        """
+        _repr = dict((k, getattr(self, k)) for k in self.ATTRIBUTES)
+        return str(_repr)
+
+    def __eq__(self, other):
+        """
+        Credentials are equal if attributes in self.ATTRIBUTES are equal
+        """
+        return str(self) == str(other)
+
+    def __getattr__(self, key):
+        # If an attribute is set, __getattr__ is not invoked
+        # If an attribute is not set, and it is a known one, return None
+        if key in self.ATTRIBUTES:
+            return None
+        else:
+            raise AttributeError
+
+    def __delitem__(self, key):
+        # For backwards compatibility, support dict behaviour
+        if key in self.ATTRIBUTES:
+            delattr(self, key)
+        else:
+            raise AttributeError
+
+    def get(self, item, default):
+        # In this patch act as dict for backward compatibility
+        try:
+            return getattr(self, item)
+        except AttributeError:
+            return default
+
+    @classmethod
+    def get_default(cls, credentials_type):
+        if credentials_type not in cls.TYPES:
+            raise exceptions.InvalidCredentials()
+        creds = cls._get_default(credentials_type)
+        if not creds.is_valid():
+            raise exceptions.InvalidConfiguration()
+        return creds
+
+    @classmethod
+    def _get_default(cls, credentials_type):
+        raise NotImplementedError
+
+    def is_valid(self):
+        raise NotImplementedError
+
+    def reset(self):
+        # First delete all known attributes
+        for key in self.ATTRIBUTES:
+            if getattr(self, key) is not None:
+                delattr(self, key)
+        # Then re-apply initial setup
+        self._apply_credentials(self._initial)
+
+
+class KeystoneV2Credentials(Credentials):
+
+    CONF_ATTRIBUTES = ['username', 'password', 'tenant_name']
+    ATTRIBUTES = ['user_id', 'tenant_id']
+    ATTRIBUTES.extend(CONF_ATTRIBUTES)
+
+    @classmethod
+    def _get_default(cls, credentials_type='user'):
+        params = {}
+        section, prefix = cls.TYPES[credentials_type]
+        for attr in cls.CONF_ATTRIBUTES:
+            _section = getattr(CONF, section)
+            if prefix is None:
+                params[attr] = getattr(_section, attr)
+            else:
+                params[attr] = getattr(_section, prefix + "_" + attr)
+        return cls(**params)
+
+    def is_valid(self):
+        """
+        Minimum set of valid credentials, are username and password.
+        Tenant is optional.
+        """
+        return None not in (self.username, self.password)
+
+
+class KeystoneV3Credentials(KeystoneV2Credentials):
+    """
+    Credentials suitable for the Keystone Identity V3 API
+    """
+
+    CONF_ATTRIBUTES = ['domain_name', 'password', 'tenant_name', 'username']
+    ATTRIBUTES = ['project_domain_id', 'project_domain_name', 'project_id',
+                  'project_name', 'tenant_id', 'tenant_name', 'user_domain_id',
+                  'user_domain_name', 'user_id']
+    ATTRIBUTES.extend(CONF_ATTRIBUTES)
+
+    def __init__(self, **kwargs):
+        """
+        If domain is not specified, load the one configured for the
+        identity manager.
+        """
+        domain_fields = set(x for x in self.ATTRIBUTES if 'domain' in x)
+        if not domain_fields.intersection(kwargs.keys()):
+            kwargs['user_domain_name'] = CONF.identity.admin_domain_name
+        super(KeystoneV3Credentials, self).__init__(**kwargs)
+
+    def __setattr__(self, key, value):
+        parent = super(KeystoneV3Credentials, self)
+        # for tenant_* set both project and tenant
+        if key == 'tenant_id':
+            parent.__setattr__('project_id', value)
+        elif key == 'tenant_name':
+            parent.__setattr__('project_name', value)
+        # for project_* set both project and tenant
+        if key == 'project_id':
+            parent.__setattr__('tenant_id', value)
+        elif key == 'project_name':
+            parent.__setattr__('tenant_name', value)
+        # for *_domain_* set both user and project if not set yet
+        if key == 'user_domain_id':
+            if self.project_domain_id is None:
+                parent.__setattr__('project_domain_id', value)
+        if key == 'project_domain_id':
+            if self.user_domain_id is None:
+                parent.__setattr__('user_domain_id', value)
+        if key == 'user_domain_name':
+            if self.project_domain_name is None:
+                parent.__setattr__('project_domain_name', value)
+        if key == 'project_domain_name':
+            if self.user_domain_name is None:
+                parent.__setattr__('user_domain_name', value)
+        # support domain_name coming from config
+        if key == 'domain_name':
+            parent.__setattr__('user_domain_name', value)
+            parent.__setattr__('project_domain_name', value)
+        # finally trigger default behaviour for all attributes
+        parent.__setattr__(key, value)
+
+    def is_valid(self):
+        """
+        Valid combinations of v3 credentials (excluding token, scope)
+        - User id, password (optional domain)
+        - User name, password and its domain id/name
+        For the scope, valid combinations are:
+        - None
+        - Project id (optional domain)
+        - Project name and its domain id/name
+        """
+        valid_user_domain = any(
+            [self.user_domain_id is not None,
+             self.user_domain_name is not None])
+        valid_project_domain = any(
+            [self.project_domain_id is not None,
+             self.project_domain_name is not None])
+        valid_user = any(
+            [self.user_id is not None,
+             self.username is not None and valid_user_domain])
+        valid_project = any(
+            [self.project_name is None and self.project_id is None,
+             self.project_id is not None,
+             self.project_name is not None and valid_project_domain])
+        return all([self.password is not None, valid_user, valid_project])

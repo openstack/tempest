@@ -29,10 +29,13 @@ CONF = config.CONF
 
 
 class AccountTest(base.BaseObjectTest):
+
+    containers = []
+
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(AccountTest, cls).setUpClass()
-        cls.containers = []
         for i in moves.xrange(ord('a'), ord('f') + 1):
             name = data_utils.rand_name(name='%s-' % chr(i))
             cls.container_client.create_container(name)
@@ -64,9 +67,7 @@ class AccountTest(base.BaseObjectTest):
         self.data.setup_test_user()
 
         os_test_user = clients.Manager(
-            self.data.test_user,
-            self.data.test_password,
-            self.data.test_tenant)
+            self.data.test_credentials)
 
         # Retrieve the id of an operator role of object storage
         test_role_id = None

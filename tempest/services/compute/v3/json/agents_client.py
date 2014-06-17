@@ -15,6 +15,8 @@
 import json
 import urllib
 
+from tempest.api_schema.compute import agents as common_schema
+from tempest.api_schema.compute.v3 import agents as schema
 from tempest.common import rest_client
 from tempest import config
 
@@ -33,7 +35,9 @@ class AgentsV3ClientJSON(rest_client.RestClient):
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
-        return resp, self._parse_resp(body)
+        body = json.loads(body)
+        self.validate_response(common_schema.list_agents, resp, body)
+        return resp, body['agents']
 
     def create_agent(self, **kwargs):
         """Create an agent build."""
@@ -43,7 +47,9 @@ class AgentsV3ClientJSON(rest_client.RestClient):
 
     def delete_agent(self, agent_id):
         """Delete an existing agent build."""
-        return self.delete('os-agents/%s' % str(agent_id))
+        resp, body = self.delete("os-agents/%s" % str(agent_id))
+        self.validate_response(schema.delete_agent, resp, body)
+        return resp, body
 
     def update_agent(self, agent_id, **kwargs):
         """Update an agent build."""

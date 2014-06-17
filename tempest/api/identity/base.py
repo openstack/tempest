@@ -14,6 +14,7 @@
 #    under the License.
 
 
+from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
@@ -96,6 +97,7 @@ class BaseIdentityV3AdminTest(BaseIdentityAdminTest):
         cls.client = cls.os_adm.identity_v3_client
         cls.token = cls.os_adm.token_v3_client
         cls.endpoints_client = cls.os_adm.endpoints_client
+        cls.region_client = cls.os_adm.region_client
         cls.data = DataGenerator(cls.client)
         cls.non_admin_client = cls.os.identity_v3_client
         cls.service_client = cls.os_adm.service_client
@@ -120,6 +122,14 @@ class DataGenerator(object):
             self.v3_users = []
             self.projects = []
             self.v3_roles = []
+
+        @property
+        def test_credentials(self):
+            return auth.get_credentials(username=self.test_user,
+                                        user_id=self.user['id'],
+                                        password=self.test_password,
+                                        tenant_name=self.test_tenant,
+                                        tenant_id=self.tenant['id'])
 
         def setup_test_user(self):
             """Set up a test user."""

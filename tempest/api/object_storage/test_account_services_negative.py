@@ -17,20 +17,18 @@
 from tempest.api.object_storage import base
 from tempest import clients
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
 class AccountNegativeTest(base.BaseObjectTest):
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_list_containers_with_non_authorized_user(self):
         # list containers using non-authorized user
 
         # create user
         self.data.setup_test_user()
-        test_os = clients.Manager(self.data.test_user,
-                                  self.data.test_password,
-                                  self.data.test_tenant)
+        test_os = clients.Manager(self.data.test_credentials)
         test_auth_provider = test_os.auth_provider
         # Get auth for the test user
         test_auth_provider.auth_data

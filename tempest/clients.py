@@ -13,24 +13,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# Default client libs
-import cinderclient.client
-import glanceclient
-import heatclient.client
-import ironicclient.client
 import keystoneclient.exceptions
 import keystoneclient.v2_0.client
-import neutronclient.v2_0.client
-import novaclient.client
-import swiftclient
 
-from tempest.common.rest_client import NegativeRestClient
+from tempest import auth
+from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 from tempest import manager
 from tempest.openstack.common import log as logging
 from tempest.services.baremetal.v1.client_json import BaremetalClientJSON
 from tempest.services import botoclients
+from tempest.services.compute.json.agents_client import \
+    AgentsClientJSON
 from tempest.services.compute.json.aggregates_client import \
     AggregatesClientJSON
 from tempest.services.compute.json.availability_zone_client import \
@@ -122,6 +117,8 @@ from tempest.services.compute.xml.volumes_extensions_client import \
 from tempest.services.data_processing.v1_1.client import DataProcessingClient
 from tempest.services.database.json.flavors_client import \
     DatabaseFlavorsClientJSON
+from tempest.services.database.json.versions_client import \
+    DatabaseVersionsClientJSON
 from tempest.services.identity.json.identity_client import IdentityClientJSON
 from tempest.services.identity.json.identity_client import TokenClientJSON
 from tempest.services.identity.v3.json.credentials_client import \
@@ -132,6 +129,7 @@ from tempest.services.identity.v3.json.identity_client import \
     IdentityV3ClientJSON
 from tempest.services.identity.v3.json.identity_client import V3TokenClientJSON
 from tempest.services.identity.v3.json.policy_client import PolicyClientJSON
+from tempest.services.identity.v3.json.region_client import RegionClientJSON
 from tempest.services.identity.v3.json.service_client import \
     ServiceClientJSON
 from tempest.services.identity.v3.xml.credentials_client import \
@@ -141,6 +139,7 @@ from tempest.services.identity.v3.xml.identity_client import \
     IdentityV3ClientXML
 from tempest.services.identity.v3.xml.identity_client import V3TokenClientXML
 from tempest.services.identity.v3.xml.policy_client import PolicyClientXML
+from tempest.services.identity.v3.xml.region_client import RegionClientXML
 from tempest.services.identity.v3.xml.service_client import \
     ServiceClientXML
 from tempest.services.identity.xml.identity_client import IdentityClientXML
@@ -167,8 +166,12 @@ from tempest.services.volume.json.admin.volume_hosts_client import \
     VolumeHostsClientJSON
 from tempest.services.volume.json.admin.volume_quotas_client import \
     VolumeQuotasClientJSON
+from tempest.services.volume.json.admin.volume_services_client import \
+    VolumesServicesClientJSON
 from tempest.services.volume.json.admin.volume_types_client import \
     VolumeTypesClientJSON
+from tempest.services.volume.json.availability_zone_client import \
+    VolumeAvailabilityZoneClientJSON
 from tempest.services.volume.json.backups_client import BackupsClientJSON
 from tempest.services.volume.json.extensions_client import \
     ExtensionsClientJSON as VolumeExtensionClientJSON
@@ -180,8 +183,12 @@ from tempest.services.volume.xml.admin.volume_hosts_client import \
     VolumeHostsClientXML
 from tempest.services.volume.xml.admin.volume_quotas_client import \
     VolumeQuotasClientXML
+from tempest.services.volume.xml.admin.volume_services_client import \
+    VolumesServicesClientXML
 from tempest.services.volume.xml.admin.volume_types_client import \
     VolumeTypesClientXML
+from tempest.services.volume.xml.availability_zone_client import \
+    VolumeAvailabilityZoneClientXML
 from tempest.services.volume.xml.backups_client import BackupsClientXML
 from tempest.services.volume.xml.extensions_client import \
     ExtensionsClientXML as VolumeExtensionClientXML
@@ -198,22 +205,12 @@ class Manager(manager.Manager):
     Top level manager for OpenStack tempest clients
     """
 
-    def __init__(self, username=None, password=None, tenant_name=None,
-                 interface='json', service=None):
-        """
-        We allow overriding of the credentials used within the various
-        client classes managed by the Manager object. Left as None, the
-        standard username/password/tenant_name is used.
-
-        :param username: Override of the username
-        :param password: Override of the password
-        :param tenant_name: Override of the tenant name
-        """
+    def __init__(self, credentials=None, interface='json', service=None):
+        # Set interface and client type first
         self.interface = interface
         self.client_type = 'tempest'
         # super cares for credentials validation
-        super(Manager, self).__init__(
-            username=username, password=password, tenant_name=tenant_name)
+        super(Manager, self).__init__(credentials=credentials)
 
         if self.interface == 'xml':
             self.certificates_client = CertificatesClientXML(
@@ -246,11 +243,14 @@ class Manager(manager.Manager):
             self.availability_zone_client = AvailabilityZoneClientXML(
                 self.auth_provider)
             self.service_client = ServiceClientXML(self.auth_provider)
+            self.volume_services_client = VolumesServicesClientXML(
+                self.auth_provider)
             self.aggregates_client = AggregatesClientXML(self.auth_provider)
             self.services_client = ServicesClientXML(self.auth_provider)
             self.tenant_usages_client = TenantUsagesClientXML(
                 self.auth_provider)
             self.policy_client = PolicyClientXML(self.auth_provider)
+            self.region_client = RegionClientXML(self.auth_provider)
             self.hosts_client = HostsClientXML(self.auth_provider)
             self.hypervisor_client = HypervisorClientXML(self.auth_provider)
             self.network_client = NetworkClientXML(self.auth_provider)
@@ -269,6 +269,8 @@ class Manager(manager.Manager):
                     self.auth_provider)
             self.token_client = TokenClientXML()
             self.token_v3_client = V3TokenClientXML()
+            self.volume_availability_zone_client = \
+                VolumeAvailabilityZoneClientXML(self.auth_provider)
 
         elif self.interface == 'json':
             self.certificates_client = CertificatesClientJSON(
@@ -321,6 +323,8 @@ class Manager(manager.Manager):
             self.services_v3_client = ServicesV3ClientJSON(
                 self.auth_provider)
             self.service_client = ServiceClientJSON(self.auth_provider)
+            self.volume_services_client = VolumesServicesClientJSON(
+                self.auth_provider)
             self.agents_v3_client = AgentsV3ClientJSON(self.auth_provider)
             self.aggregates_v3_client = AggregatesV3ClientJSON(
                 self.auth_provider)
@@ -333,6 +337,7 @@ class Manager(manager.Manager):
             self.migrations_v3_client = MigrationsV3ClientJSON(
                 self.auth_provider)
             self.policy_client = PolicyClientJSON(self.auth_provider)
+            self.region_client = RegionClientJSON(self.auth_provider)
             self.hosts_client = HostsClientJSON(self.auth_provider)
             self.hypervisor_v3_client = HypervisorV3ClientJSON(
                 self.auth_provider)
@@ -352,27 +357,33 @@ class Manager(manager.Manager):
             self.hosts_v3_client = HostsV3ClientJSON(self.auth_provider)
             self.database_flavors_client = DatabaseFlavorsClientJSON(
                 self.auth_provider)
+            self.database_versions_client = DatabaseVersionsClientJSON(
+                self.auth_provider)
             self.queuing_client = QueuingClientJSON(self.auth_provider)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientJSON(
                     self.auth_provider)
             self.token_client = TokenClientJSON()
             self.token_v3_client = V3TokenClientJSON()
-            self.negative_client = NegativeRestClient(self.auth_provider)
+            self.negative_client = rest_client.NegativeRestClient(
+                self.auth_provider)
             self.negative_client.service = service
+            self.volume_availability_zone_client = \
+                VolumeAvailabilityZoneClientJSON(self.auth_provider)
 
         else:
             msg = "Unsupported interface type `%s'" % interface
             raise exceptions.InvalidConfiguration(msg)
 
         # TODO(andreaf) EC2 client still do their auth, v2 only
-        ec2_client_args = (self.credentials.get('username'),
-                           self.credentials.get('password'),
+        ec2_client_args = (self.credentials.username,
+                           self.credentials.password,
                            CONF.identity.uri,
-                           self.credentials.get('tenant_name'))
+                           self.credentials.tenant_name)
 
         # common clients
         self.account_client = AccountClient(self.auth_provider)
+        self.agents_client = AgentsClientJSON(self.auth_provider)
         if CONF.service_available.glance:
             self.image_client = ImageClientJSON(self.auth_provider)
             self.image_client_v2 = ImageClientV2JSON(self.auth_provider)
@@ -399,11 +410,10 @@ class AltManager(Manager):
     """
 
     def __init__(self, interface='json', service=None):
-        super(AltManager, self).__init__(CONF.identity.alt_username,
-                                         CONF.identity.alt_password,
-                                         CONF.identity.alt_tenant_name,
-                                         interface=interface,
-                                         service=service)
+        super(AltManager, self).__init__(
+            credentials=auth.get_default_credentials('alt_user'),
+            interface=interface,
+            service=service)
 
 
 class AdminManager(Manager):
@@ -414,11 +424,10 @@ class AdminManager(Manager):
     """
 
     def __init__(self, interface='json', service=None):
-        super(AdminManager, self).__init__(CONF.identity.admin_username,
-                                           CONF.identity.admin_password,
-                                           CONF.identity.admin_tenant_name,
-                                           interface=interface,
-                                           service=service)
+        super(AdminManager, self).__init__(
+            credentials=auth.get_default_credentials('identity_admin'),
+            interface=interface,
+            service=service)
 
 
 class ComputeAdminManager(Manager):
@@ -430,29 +439,10 @@ class ComputeAdminManager(Manager):
 
     def __init__(self, interface='json', service=None):
         base = super(ComputeAdminManager, self)
-        base.__init__(CONF.compute_admin.username,
-                      CONF.compute_admin.password,
-                      CONF.compute_admin.tenant_name,
-                      interface=interface,
-                      service=service)
-
-
-class OrchestrationManager(Manager):
-    """
-    Manager object that uses the admin credentials for its
-    so that heat templates can create users
-    """
-    def __init__(self, interface='json', service=None):
-        base = super(OrchestrationManager, self)
-        # heat currently needs an admin user so that stacks can create users
-        # however the tests need the demo tenant so that the neutron
-        # private network is the default. DO NOT change this auth combination
-        # until heat can run with the demo user.
-        base.__init__(CONF.identity.admin_username,
-                      CONF.identity.admin_password,
-                      CONF.identity.tenant_name,
-                      interface=interface,
-                      service=service)
+        base.__init__(
+            credentials=auth.get_default_credentials('compute_admin'),
+            interface=interface,
+            service=service)
 
 
 class OfficialClientManager(manager.Manager):
@@ -465,44 +455,34 @@ class OfficialClientManager(manager.Manager):
     CINDERCLIENT_VERSION = '1'
     HEATCLIENT_VERSION = '1'
     IRONICCLIENT_VERSION = '1'
+    SAHARACLIENT_VERSION = '1.1'
 
-    def __init__(self, username, password, tenant_name):
+    def __init__(self, credentials):
         # FIXME(andreaf) Auth provider for client_type 'official' is
         # not implemented yet, setting to 'tempest' for now.
         self.client_type = 'tempest'
         self.interface = None
         # super cares for credentials validation
-        super(OfficialClientManager, self).__init__(
-            username=username, password=password, tenant_name=tenant_name)
+        super(OfficialClientManager, self).__init__(credentials=credentials)
         self.baremetal_client = self._get_baremetal_client()
-        self.compute_client = self._get_compute_client(username,
-                                                       password,
-                                                       tenant_name)
-        self.identity_client = self._get_identity_client(username,
-                                                         password,
-                                                         tenant_name)
+        self.compute_client = self._get_compute_client(credentials)
+        self.identity_client = self._get_identity_client(credentials)
         self.image_client = self._get_image_client()
         self.network_client = self._get_network_client()
-        self.volume_client = self._get_volume_client(username,
-                                                     password,
-                                                     tenant_name)
+        self.volume_client = self._get_volume_client(credentials)
         self.object_storage_client = self._get_object_storage_client(
-            username,
-            password,
-            tenant_name)
+            credentials)
         self.orchestration_client = self._get_orchestration_client(
-            username,
-            password,
-            tenant_name)
+            credentials)
+        self.data_processing_client = self._get_data_processing_client(
+            credentials)
 
     def _get_roles(self):
-        keystone_admin = self._get_identity_client(
-            CONF.identity.admin_username,
-            CONF.identity.admin_password,
-            CONF.identity.admin_tenant_name)
+        admin_credentials = auth.get_default_credentials('identity_admin')
+        keystone_admin = self._get_identity_client(admin_credentials)
 
-        username = self.credentials['username']
-        tenant_name = self.credentials['tenant_name']
+        username = self.credentials.username
+        tenant_name = self.credentials.tenant_name
         user_id = keystone_admin.users.find(name=username).id
         tenant_id = keystone_admin.tenants.find(name=tenant_name).id
 
@@ -511,17 +491,20 @@ class OfficialClientManager(manager.Manager):
 
         return [r.name for r in roles]
 
-    def _get_compute_client(self, username, password, tenant_name):
+    def _get_compute_client(self, credentials):
         # Novaclient will not execute operations for anyone but the
         # identified user, so a new client needs to be created for
         # each user that operations need to be performed for.
-        self._validate_credentials(username, password, tenant_name)
+        if not CONF.service_available.nova:
+            return None
+        import novaclient.client
 
         auth_url = CONF.identity.uri
         dscv = CONF.identity.disable_ssl_certificate_validation
         region = CONF.identity.region
 
-        client_args = (username, password, tenant_name, auth_url)
+        client_args = (credentials.username, credentials.password,
+                       credentials.tenant_name, auth_url)
 
         # Create our default Nova client to use in testing
         service_type = CONF.compute.catalog_type
@@ -536,6 +519,9 @@ class OfficialClientManager(manager.Manager):
                                         http_log_debug=True)
 
     def _get_image_client(self):
+        if not CONF.service_available.glance:
+            return None
+        import glanceclient
         token = self.identity_client.auth_token
         region = CONF.identity.region
         endpoint_type = CONF.image.endpoint_type
@@ -546,26 +532,32 @@ class OfficialClientManager(manager.Manager):
         return glanceclient.Client('1', endpoint=endpoint, token=token,
                                    insecure=dscv)
 
-    def _get_volume_client(self, username, password, tenant_name):
+    def _get_volume_client(self, credentials):
+        if not CONF.service_available.cinder:
+            return None
+        import cinderclient.client
         auth_url = CONF.identity.uri
         region = CONF.identity.region
         endpoint_type = CONF.volume.endpoint_type
+        dscv = CONF.identity.disable_ssl_certificate_validation
         return cinderclient.client.Client(self.CINDERCLIENT_VERSION,
-                                          username,
-                                          password,
-                                          tenant_name,
+                                          credentials.username,
+                                          credentials.password,
+                                          credentials.tenant_name,
                                           auth_url,
                                           region_name=region,
                                           endpoint_type=endpoint_type,
+                                          insecure=dscv,
                                           http_log_debug=True)
 
-    def _get_object_storage_client(self, username, password, tenant_name):
+    def _get_object_storage_client(self, credentials):
+        if not CONF.service_available.swift:
+            return None
+        import swiftclient
         auth_url = CONF.identity.uri
         # add current tenant to swift operator role group.
-        keystone_admin = self._get_identity_client(
-            CONF.identity.admin_username,
-            CONF.identity.admin_password,
-            CONF.identity.admin_tenant_name)
+        admin_credentials = auth.get_default_credentials('identity_admin')
+        keystone_admin = self._get_identity_client(admin_credentials)
 
         # enable test user to operate swift by adding operator role to him.
         roles = keystone_admin.roles.list()
@@ -582,23 +574,18 @@ class OfficialClientManager(manager.Manager):
 
         endpoint_type = CONF.object_storage.endpoint_type
         os_options = {'endpoint_type': endpoint_type}
-        return swiftclient.Connection(auth_url, username, password,
-                                      tenant_name=tenant_name,
+        return swiftclient.Connection(auth_url, credentials.username,
+                                      credentials.password,
+                                      tenant_name=credentials.tenant_name,
                                       auth_version='2',
                                       os_options=os_options)
 
-    def _get_orchestration_client(self, username=None, password=None,
-                                  tenant_name=None):
-        if not username:
-            username = CONF.identity.admin_username
-        if not password:
-            password = CONF.identity.admin_password
-        if not tenant_name:
-            tenant_name = CONF.identity.tenant_name
+    def _get_orchestration_client(self, credentials):
+        if not CONF.service_available.heat:
+            return None
+        import heatclient.client
 
-        self._validate_credentials(username, password, tenant_name)
-
-        keystone = self._get_identity_client(username, password, tenant_name)
+        keystone = self._get_identity_client(credentials)
         region = CONF.identity.region
         endpoint_type = CONF.orchestration.endpoint_type
         token = keystone.auth_token
@@ -615,25 +602,28 @@ class OfficialClientManager(manager.Manager):
             return heatclient.client.Client(self.HEATCLIENT_VERSION,
                                             endpoint,
                                             token=token,
-                                            username=username,
-                                            password=password)
+                                            username=credentials.username,
+                                            password=credentials.password)
 
-    def _get_identity_client(self, username, password, tenant_name):
+    def _get_identity_client(self, credentials):
         # This identity client is not intended to check the security
         # of the identity service, so use admin credentials by default.
-        self._validate_credentials(username, password, tenant_name)
 
         auth_url = CONF.identity.uri
         dscv = CONF.identity.disable_ssl_certificate_validation
 
-        return keystoneclient.v2_0.client.Client(username=username,
-                                                 password=password,
-                                                 tenant_name=tenant_name,
-                                                 auth_url=auth_url,
-                                                 insecure=dscv)
+        return keystoneclient.v2_0.client.Client(
+            username=credentials.username,
+            password=credentials.password,
+            tenant_name=credentials.tenant_name,
+            auth_url=auth_url,
+            insecure=dscv)
 
     def _get_baremetal_client(self):
         # ironic client is currently intended to by used by admin users
+        if not CONF.service_available.ironic:
+            return None
+        import ironicclient.client
         roles = self._get_roles()
         if CONF.identity.admin_role not in roles:
             return None
@@ -644,9 +634,9 @@ class OfficialClientManager(manager.Manager):
         service_type = CONF.baremetal.catalog_type
         endpoint_type = CONF.baremetal.endpoint_type
         creds = {
-            'os_username': self.credentials['username'],
-            'os_password': self.credentials['password'],
-            'os_tenant_name': self.credentials['tenant_name']
+            'os_username': self.credentials.username,
+            'os_password': self.credentials.password,
+            'os_tenant_name': self.credentials.tenant_name
         }
 
         try:
@@ -667,19 +657,42 @@ class OfficialClientManager(manager.Manager):
         # preferable to authenticating as a specific user because
         # working with certain resources (public routers and networks)
         # often requires admin privileges anyway.
-        username = CONF.identity.admin_username
-        password = CONF.identity.admin_password
-        tenant_name = CONF.identity.admin_tenant_name
+        if not CONF.service_available.neutron:
+            return None
+        import neutronclient.v2_0.client
 
-        self._validate_credentials(username, password, tenant_name)
+        credentials = auth.get_default_credentials('identity_admin')
 
         auth_url = CONF.identity.uri
         dscv = CONF.identity.disable_ssl_certificate_validation
         endpoint_type = CONF.network.endpoint_type
 
-        return neutronclient.v2_0.client.Client(username=username,
-                                                password=password,
-                                                tenant_name=tenant_name,
-                                                endpoint_type=endpoint_type,
-                                                auth_url=auth_url,
-                                                insecure=dscv)
+        return neutronclient.v2_0.client.Client(
+            username=credentials.username,
+            password=credentials.password,
+            tenant_name=credentials.tenant_name,
+            endpoint_type=endpoint_type,
+            auth_url=auth_url,
+            insecure=dscv)
+
+    def _get_data_processing_client(self, credentials):
+        if not CONF.service_available.sahara:
+            # Sahara isn't available
+            return None
+
+        import saharaclient.client
+
+        endpoint_type = CONF.data_processing.endpoint_type
+        catalog_type = CONF.data_processing.catalog_type
+        auth_url = CONF.identity.uri
+
+        client = saharaclient.client.Client(
+            self.SAHARACLIENT_VERSION,
+            credentials.username,
+            credentials.password,
+            project_name=credentials.tenant_name,
+            endpoint_type=endpoint_type,
+            service_type=catalog_type,
+            auth_url=auth_url)
+
+        return client

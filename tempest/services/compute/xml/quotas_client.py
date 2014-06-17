@@ -61,8 +61,8 @@ class QuotasClientXML(rest_client.RestClient):
         body = self._format_quota(body)
         return resp, body
 
-    def update_quota_set(self, tenant_id, force=None,
-                         injected_file_content_bytes=None,
+    def update_quota_set(self, tenant_id, user_id=None,
+                         force=None, injected_file_content_bytes=None,
                          metadata_items=None, ram=None, floating_ips=None,
                          fixed_ips=None, key_pairs=None, instances=None,
                          security_group_rules=None, injected_files=None,
@@ -115,8 +115,14 @@ class QuotasClientXML(rest_client.RestClient):
         if security_groups is not None:
             post_body.add_attr('security_groups', security_groups)
 
-        resp, body = self.put('os-quota-sets/%s' % str(tenant_id),
-                              str(xml_utils.Document(post_body)))
+        if user_id:
+            resp, body = self.put('os-quota-sets/%s?user_id=%s' %
+                                  (str(tenant_id), str(user_id)),
+                                  str(xml_utils.Document(post_body)))
+        else:
+            resp, body = self.put('os-quota-sets/%s' % str(tenant_id),
+                                  str(xml_utils.Document(post_body)))
+
         body = xml_utils.xml_to_json(etree.fromstring(body))
         body = self._format_quota(body)
         return resp, body

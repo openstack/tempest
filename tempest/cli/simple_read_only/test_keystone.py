@@ -117,6 +117,11 @@ class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
     def test_admin_bashcompletion(self):
         self.keystone('bash-completion')
 
+    def test_admin_ec2_credentials_list(self):
+        creds = self.keystone('ec2-credentials-list')
+        creds = self.parser.listing(creds)
+        self.assertTableStruct(creds, ['tenant', 'access', 'secret'])
+
     # Optional arguments:
 
     def test_admin_version(self):

@@ -72,6 +72,10 @@ IdentityGroup = [
                default=None,
                help="API key to use when authenticating.",
                secret=True),
+    cfg.StrOpt('domain_name',
+               default=None,
+               help="Domain name for authentication (Keystone V3)."
+                    "The same domain applies to user and project"),
     cfg.StrOpt('alt_username',
                default=None,
                help="Username of alternate user to use for Nova API "
@@ -84,6 +88,10 @@ IdentityGroup = [
                default=None,
                help="API key to use when authenticating as alternate user.",
                secret=True),
+    cfg.StrOpt('alt_domain_name',
+               default=None,
+               help="Alternate domain name for authentication (Keystone V3)."
+                    "The same domain applies to user and project"),
     cfg.StrOpt('admin_username',
                default=None,
                help="Administrative Username to use for "
@@ -96,6 +104,10 @@ IdentityGroup = [
                default=None,
                help="API key to use when authenticating as admin.",
                secret=True),
+    cfg.StrOpt('admin_domain_name',
+               default=None,
+               help="Admin domain name for authentication (Keystone V3)."
+                    "The same domain applies to user and project"),
 ]
 
 identity_feature_group = cfg.OptGroup(name='identity-feature-enabled',
@@ -125,11 +137,12 @@ ComputeGroup = [
                      "better parallel execution, but also requires that "
                      "OpenStack Identity API admin credentials are known."),
     cfg.StrOpt('image_ref',
-               default="{$IMAGE_ID}",
-               help="Valid primary image reference to be used in tests."),
+               help="Valid primary image reference to be used in tests. "
+                    "This is a required option"),
     cfg.StrOpt('image_ref_alt',
-               default="{$IMAGE_ID_ALT}",
-               help="Valid secondary image reference to be used in tests."),
+               help="Valid secondary image reference to be used in tests. "
+                    "This is a required option, but if only one image is "
+                    "available duplicate the value of image_ref above"),
     cfg.StrOpt('flavor_ref',
                default="1",
                help="Valid primary flavor to use in tests."),
@@ -151,7 +164,7 @@ ComputeGroup = [
                help="Password used to authenticate to an instance using "
                     "the alternate image."),
     cfg.IntOpt('build_interval',
-               default=10,
+               default=1,
                help="Time in seconds between build status checks."),
     cfg.IntOpt('build_timeout',
                default=300,
@@ -159,6 +172,19 @@ ComputeGroup = [
     cfg.BoolOpt('run_ssh',
                 default=False,
                 help="Should the tests ssh to instances?"),
+    cfg.StrOpt('ssh_auth_method',
+               default='keypair',
+               help="Auth method used for authenticate to the instance. "
+                    "Valid choices are: keypair, configured, adminpass. "
+                    "keypair: start the servers with an ssh keypair. "
+                    "configured: use the configured user and password. "
+                    "adminpass: use the injected adminPass. "
+                    "disabled: avoid using ssh when it is an option."),
+    cfg.StrOpt('ssh_connect_method',
+               default='fixed',
+               help="How to connect to the instance? "
+                    "fixed: using the first ip belongs the fixed network "
+                    "floating: creating and using a floating ip"),
     cfg.StrOpt('ssh_user',
                default='root',
                help="User name used to authenticate to an instance."),
@@ -237,11 +263,13 @@ ComputeFeaturesGroup = [
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled compute extensions with a special '
-                     'entry all which indicates every extension is enabled'),
+                     'entry all which indicates every extension is enabled. '
+                     'Each extension should be specified with alias name'),
     cfg.ListOpt('api_v3_extensions',
                 default=['all'],
                 help='A list of enabled v3 extensions with a special entry all'
-                     ' which indicates every extension is enabled'),
+                     ' which indicates every extension is enabled. '
+                     'Each extension should be specified with alias name'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
@@ -270,7 +298,15 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('vnc_console',
                 default=False,
                 help='Enable VNC console. This configuration value should '
-                     'be same as [nova.vnc]->vnc_enabled in nova.conf')
+                     'be same as [nova.vnc]->vnc_enabled in nova.conf'),
+    cfg.BoolOpt('spice_console',
+                default=False,
+                help='Enable Spice console. This configuration value should '
+                     'be same as [nova.spice]->enabled in nova.conf'),
+    cfg.BoolOpt('rdp_console',
+                default=False,
+                help='Enable RDP console. This configuration value should '
+                     'be same as [nova.rdp]->enabled in nova.conf')
 ]
 
 
@@ -289,6 +325,10 @@ ComputeAdminGroup = [
                default=None,
                help="API key to use when authenticating as admin.",
                secret=True),
+    cfg.StrOpt('domain_name',
+               default=None,
+               help="Domain name for authentication as admin (Keystone V3)."
+                    "The same domain applies to user and project"),
 ]
 
 image_group = cfg.OptGroup(name='image',
@@ -374,9 +414,13 @@ NetworkGroup = [
                help="Timeout in seconds to wait for network operation to "
                     "complete."),
     cfg.IntOpt('build_interval',
-               default=10,
+               default=1,
                help="Time in seconds between network operation status "
                     "checks."),
+    cfg.ListOpt('dns_servers',
+                default=["8.8.8.8", "8.8.4.4"],
+                help="List of dns servers whichs hould be used"
+                     " for subnet creation")
 ]
 
 network_feature_group = cfg.OptGroup(name='network-feature-enabled',
@@ -399,6 +443,10 @@ QueuingGroup = [
     cfg.StrOpt('catalog_type',
                default='queuing',
                help='Catalog type of the Queuing service.'),
+    cfg.IntOpt('max_queues_per_page',
+               default=20,
+               help='The maximum number of queue records per page when '
+                    'listing queues'),
 ]
 
 volume_group = cfg.OptGroup(name='volume',
@@ -406,7 +454,7 @@ volume_group = cfg.OptGroup(name='volume',
 
 VolumeGroup = [
     cfg.IntOpt('build_interval',
-               default=10,
+               default=1,
                help='Time in seconds between volume availability checks.'),
     cfg.IntOpt('build_timeout',
                default=300,
@@ -529,6 +577,9 @@ DatabaseGroup = [
     cfg.StrOpt('db_flavor_ref',
                default="1",
                help="Valid primary flavor to use in database tests."),
+    cfg.StrOpt('db_current_version',
+               default="v1.0",
+               help="Current database version to use in database tests."),
 ]
 
 orchestration_group = cfg.OptGroup(name='orchestration',
@@ -559,7 +610,7 @@ OrchestrationGroup = [
                default=1,
                help="Time in seconds between build status checks."),
     cfg.IntOpt('build_timeout',
-               default=600,
+               default=1200,
                help="Timeout in seconds to wait for a stack to build."),
     cfg.StrOpt('instance_type',
                default='m1.micro',
@@ -593,6 +644,10 @@ TelemetryGroup = [
                choices=['public', 'admin', 'internal',
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the telemetry service."),
+    cfg.BoolOpt('too_slow_to_test',
+                default=True,
+                help="This variable is used as flag to enable "
+                     "notification tests")
 ]
 
 
@@ -983,6 +1038,13 @@ class TempestConfigPrivate(object):
             self.compute_admin.username = self.identity.admin_username
             self.compute_admin.password = self.identity.admin_password
             self.compute_admin.tenant_name = self.identity.admin_tenant_name
+        cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
+                             group='identity')
+        cfg.CONF.set_default('alt_domain_name',
+                             self.identity.admin_domain_name,
+                             group='identity')
+        cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
+                             group='compute-admin')
 
     def __init__(self, parse_conf=True):
         """Initialize a configuration from a conf directory and conf file."""
@@ -1018,8 +1080,21 @@ class TempestConfigPrivate(object):
 class TempestConfigProxy(object):
     _config = None
 
+    _extra_log_defaults = [
+        'keystoneclient.session=INFO',
+        'paramiko.transport=INFO',
+        'requests.packages.urllib3.connectionpool=WARN'
+    ]
+
+    def _fix_log_levels(self):
+        """Tweak the oslo log defaults."""
+        for opt in logging.log_opts:
+            if opt.dest == 'default_log_levels':
+                opt.default.extend(self._extra_log_defaults)
+
     def __getattr__(self, attr):
         if not self._config:
+            self._fix_log_levels()
             self._config = TempestConfigPrivate()
 
         return getattr(self._config, attr)

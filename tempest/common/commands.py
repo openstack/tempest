@@ -28,15 +28,13 @@ def sudo_cmd_call(cmd):
     args = shlex.split(cmd)
     subprocess_args = {'stdout': subprocess.PIPE,
                        'stderr': subprocess.STDOUT}
-    try:
-        proc = subprocess.Popen(['/usr/bin/sudo', '-n'] + args,
-                                **subprocess_args)
-        return proc.communicate()[0]
-        if proc.returncode != 0:
-            LOG.error(cmd + "returned with: " +
-                      proc.returncode + "exit status")
-    except subprocess.CalledProcessError as e:
-        LOG.error("command output:\n%s" % e.output)
+    proc = subprocess.Popen(['/usr/bin/sudo', '-n'] + args,
+                            **subprocess_args)
+    stdout = proc.communicate()[0]
+    if proc.returncode != 0:
+        LOG.error(("Command {0} returned with exit status {1},"
+                   "output {2}").format(cmd, proc.returncode, stdout))
+    return stdout
 
 
 def ip_addr_raw():
@@ -77,3 +75,22 @@ def iptables_ns(ns, table):
 
 def ovs_db_dump():
     return sudo_cmd_call("ovsdb-client dump")
+
+
+def copy_file_to_host(file_from, dest, host, username, pkey):
+    dest = "%s@%s:%s" % (username, host, dest)
+    cmd = "scp -v -o UserKnownHostsFile=/dev/null " \
+          "-o StrictHostKeyChecking=no " \
+          "-i %(pkey)s %(file1)s %(dest)s" % {'pkey': pkey,
+                                              'file1': file_from,
+                                              'dest': dest}
+    args = shlex.split(cmd)
+    subprocess_args = {'stdout': subprocess.PIPE,
+                       'stderr': subprocess.STDOUT}
+    proc = subprocess.Popen(args, **subprocess_args)
+    stdout, stderr = proc.communicate()
+    if proc.returncode != 0:
+        LOG.error(("Command {0} returned with exit status {1},"
+                  "output {2}, error {3}").format(cmd, proc.returncode,
+                                                  stdout, stderr))
+    return stdout
