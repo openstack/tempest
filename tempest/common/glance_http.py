@@ -160,6 +160,9 @@ class HTTPClient(object):
     def json_request(self, method, url, **kwargs):
         kwargs.setdefault('headers', {})
         kwargs['headers'].setdefault('Content-Type', 'application/json')
+        if kwargs['headers']['Content-Type'] != 'application/json':
+            msg = "Only application/json content-type is supported."
+            raise exc.InvalidContentType(msg)
 
         if 'body' in kwargs:
             kwargs['body'] = json.dumps(kwargs['body'])
@@ -173,7 +176,8 @@ class HTTPClient(object):
             except ValueError:
                 LOG.error('Could not decode response body as JSON')
         else:
-            body = None
+            msg = "Only json/application content-type is supported."
+            raise exc.InvalidContentType(msg)
 
         return resp, body
 
