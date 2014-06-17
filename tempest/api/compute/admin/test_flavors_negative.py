@@ -32,8 +32,8 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(FlavorsAdminNegativeTestJSON, cls).setUpClass()
-        if not test.is_extension_enabled('FlavorExtraData', 'compute'):
-            msg = "FlavorExtraData extension not enabled."
+        if not test.is_extension_enabled('OS-FLV-EXT-DATA', 'compute'):
+            msg = "OS-FLV-EXT-DATA extension not enabled."
             raise cls.skipException(msg)
 
         cls.client = cls.os_adm.flavors_client
