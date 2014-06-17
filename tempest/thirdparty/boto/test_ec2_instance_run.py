@@ -20,7 +20,6 @@ from tempest.common.utils.linux import remote_client
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 from tempest.thirdparty.boto.utils import s3
 from tempest.thirdparty.boto.utils import wait
@@ -83,7 +82,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
                 raise exceptions.EC2RegisterImageException(image_id=
                                                            image["image_id"])
 
-    @test.attr(type='smoke')
     def test_run_idempotent_instances(self):
         # EC2 run instances idempotently
 
@@ -121,7 +119,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
         _terminate_reservation(reservation_1, rcuk_1)
         _terminate_reservation(reservation_2, rcuk_2)
 
-    @test.attr(type='smoke')
     def test_run_stop_terminate_instance(self):
         # EC2 run, stop and terminate instance
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -146,7 +143,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.terminate()
         self.cancelResourceCleanUp(rcuk)
 
-    @test.attr(type='smoke')
     def test_run_stop_terminate_instance_with_tags(self):
         # EC2 run, stop and terminate instance with tags
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -193,7 +189,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.terminate()
         self.cancelResourceCleanUp(rcuk)
 
-    @test.attr(type='smoke')
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
         image_ami = self.ec2_client.get_image(self.images["ami"]
@@ -217,7 +212,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
         else:
             self.assertNotEqual(instance.state, "running")
 
-    @test.attr(type='smoke')
     def test_compute_with_volumes(self):
         # EC2 1. integration test (not strict)
         image_ami = self.ec2_client.get_image(self.images["ami"]["image_id"])

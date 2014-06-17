@@ -17,7 +17,6 @@ import os
 
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import test
 from tempest.thirdparty.boto import test as boto_test
 from tempest.thirdparty.boto.utils import s3
 
@@ -48,7 +47,6 @@ class S3ImagesTest(boto_test.BotoTestCase):
                                cls.bucket_name)
         s3.s3_upload_dir(bucket, cls.materials_path)
 
-    @test.attr(type='smoke')
     def test_register_get_deregister_ami_image(self):
         # Register and deregister ami image
         image = {"name": data_utils.rand_name("ami-name-"),
