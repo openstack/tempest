@@ -92,7 +92,8 @@ base_update_server = {
                              'user_id', 'tenant_id', 'created', 'updated',
                              'metadata', 'links', 'addresses']
             }
-        }
+        },
+        'required': ['server']
     }
 }
 
