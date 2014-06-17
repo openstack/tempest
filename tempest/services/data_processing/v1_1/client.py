@@ -192,3 +192,43 @@ class DataProcessingClient(rest_client.RestClient):
 
         uri = 'job-binary-internals/%s/data' % job_binary_id
         return self.get(uri)
+
+    def list_job_binaries(self):
+        """List all job binaries for a user."""
+
+        uri = 'job-binaries'
+        return self._request_and_parse(self.get, uri, 'binaries')
+
+    def get_job_binary(self, job_binary_id):
+        """Returns the details of a single job binary."""
+
+        uri = 'job-binaries/%s' % job_binary_id
+        return self._request_and_parse(self.get, uri, 'job_binary')
+
+    def create_job_binary(self, name, url, extra=None, **kwargs):
+        """Creates job binary with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object.
+        """
+        uri = 'job-binaries'
+        body = kwargs.copy()
+        body.update({
+            'name': name,
+            'url': url,
+            'extra': extra or dict(),
+        })
+        return self._request_and_parse(self.post, uri, 'job_binary',
+                                       body=json.dumps(body))
+
+    def delete_job_binary(self, job_binary_id):
+        """Deletes the specified job binary by id."""
+
+        uri = 'job-binaries/%s' % job_binary_id
+        return self.delete(uri)
+
+    def get_job_binary_data(self, job_binary_id):
+        """Returns data of a single job binary."""
+
+        uri = 'job-binaries/%s/data' % job_binary_id
+        return self.get(uri)
