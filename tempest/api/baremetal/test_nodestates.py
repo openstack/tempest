@@ -24,8 +24,8 @@ class TestNodeStates(base.BaseBaremetalTest):
     @classmethod
     def setUpClass(cls):
         super(TestNodeStates, cls).setUpClass()
-        cls.chassis = cls.create_chassis()['chassis']
-        cls.node = cls.create_node(cls.chassis['uuid'])['node']
+        resp, cls.chassis = cls.create_chassis()
+        resp, cls.node = cls.create_node(cls.chassis['uuid'])
 
     def _validate_power_state(self, node_uuid, power_state):
         # Validate that power state is set within timeout
@@ -51,7 +51,8 @@ class TestNodeStates(base.BaseBaremetalTest):
 
     @test.attr(type='smoke')
     def test_set_node_power_state(self):
-        node = self.create_node(self.chassis['uuid'])['node']
+        resp, node = self.create_node(self.chassis['uuid'])
+        self.assertEqual('201', resp['status'])
         states = ["power on", "rebooting", "power off"]
         for state in states:
             # Set power state
