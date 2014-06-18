@@ -30,9 +30,9 @@ class TestNegativeAutoTest(base.TestCase):
                        "http-method": "GET",
                        "url": "flavors/detail",
                        "json-schema": {"type": "object",
-                                      "properties":
-                                      {"minRam": {"type": "integer"},
-                                       "minDisk": {"type": "integer"}}
+                                       "properties":
+                                       {"minRam": {"type": "integer"},
+                                        "minDisk": {"type": "integer"}}
                                        },
                        "resources": ["flavor", "volume", "image"]
                        }

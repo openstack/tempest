@@ -192,7 +192,7 @@ class VolumeVerifyStress(stressaction.StressAction):
             self._create_volume()
         servers_client = self.manager.servers_client
         self.logger.info("attach volume (%s) to vm %s" %
-                        (self.volume['id'], self.server_id))
+                         (self.volume['id'], self.server_id))
         resp, body = servers_client.attach_volume(self.server_id,
                                                   self.volume['id'],
                                                   self.part_name)

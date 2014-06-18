@@ -115,11 +115,11 @@ class RoutersTest(base.BaseRouterTest):
     def test_create_router_with_default_snat_value(self):
         # Create a router with default snat rule
         name = data_utils.rand_name('router')
-        router = self._create_router(name,
-                 external_network_id=CONF.network.public_network_id)
-        self._verify_router_gateway(router['id'],
-              {'network_id': CONF.network.public_network_id,
-              'enable_snat': True})
+        router = self._create_router(
+            name, external_network_id=CONF.network.public_network_id)
+        self._verify_router_gateway(
+            router['id'], {'network_id': CONF.network.public_network_id,
+                           'enable_snat': True})
 
     @test.requires_ext(extension='ext-gw-mode', service='network')
     @test.attr(type='smoke')
@@ -135,10 +135,10 @@ class RoutersTest(base.BaseRouterTest):
                 name, external_gateway_info=external_gateway_info)
             self.assertEqual('201', resp['status'])
             self.addCleanup(self.admin_client.delete_router,
-                    create_body['router']['id'])
+                            create_body['router']['id'])
             # Verify snat attributes after router creation
             self._verify_router_gateway(create_body['router']['id'],
-                    exp_ext_gw_info=external_gateway_info)
+                                        exp_ext_gw_info=external_gateway_info)
 
     @test.attr(type='smoke')
     def test_add_remove_router_interface_with_subnet_id(self):

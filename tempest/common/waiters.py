@@ -74,7 +74,7 @@ def wait_for_server_status(client, server_id, status, ready_wait=True,
         if (server_status == 'ERROR') and raise_on_error:
             if 'fault' in body:
                 raise exceptions.BuildErrorException(body['fault'],
-                                                    server_id=server_id)
+                                                     server_id=server_id)
             else:
                 raise exceptions.BuildErrorException(server_id=server_id)
 

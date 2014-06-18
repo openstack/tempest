@@ -42,17 +42,17 @@ class TestGlanceHTTPClient(base.TestCase):
 
         self.fake_auth.base_url = mock.MagicMock(return_value=self.endpoint)
 
-        self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
-                        'request',
-                        side_effect=self.fake_http.request(self.endpoint)[1]))
+        self.useFixture(mockpatch.PatchObject(
+            httplib.HTTPConnection,
+            'request',
+            side_effect=self.fake_http.request(self.endpoint)[1]))
         self.client = glance_http.HTTPClient(self.fake_auth, {})
 
     def _set_response_fixture(self, header, status, resp_body):
         resp = fake_http.fake_httplib(header, status=status,
                                       body=six.StringIO(resp_body))
         self.useFixture(mockpatch.PatchObject(httplib.HTTPConnection,
-                        'getresponse',
-                        return_value=resp))
+                        'getresponse', return_value=resp))
         return resp
 
     def test_json_request_without_content_type_header_in_response(self):

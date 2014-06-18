@@ -137,7 +137,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
 
     def add_router_interface_with_subnet_id(self, router_id, subnet_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
-              router_id)
+                                                      router_id)
         subnet = common.Element("subnet_id", subnet_id)
         resp, body = self.put(uri, str(common.Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
@@ -145,7 +145,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
 
     def add_router_interface_with_port_id(self, router_id, port_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
-              router_id)
+                                                      router_id)
         port = common.Element("port_id", port_id)
         resp, body = self.put(uri, str(common.Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
@@ -153,7 +153,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
 
     def remove_router_interface_with_subnet_id(self, router_id, subnet_id):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
-              router_id)
+                                                         router_id)
         subnet = common.Element("subnet_id", subnet_id)
         resp, body = self.put(uri, str(common.Document(subnet)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
@@ -161,7 +161,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
 
     def remove_router_interface_with_port_id(self, router_id, port_id):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
-              router_id)
+                                                         router_id)
         port = common.Element("port_id", port_id)
         resp, body = self.put(uri, str(common.Document(port)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)

@@ -249,8 +249,8 @@ class JavelinCheck(unittest.TestCase):
                 if return_code is 0:
                     break
             self.assertNotEqual(count, 59,
-                               "Server %s is not pingable at %s" % (
-                                   server['name'], addr))
+                                "Server %s is not pingable at %s" % (
+                                    server['name'], addr))
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
@@ -401,7 +401,7 @@ def create_servers(servers):
         image_id = _get_image_by_name(client, server['image'])['id']
         flavor_id = _get_flavor_by_name(client, server['flavor'])['id']
         resp, body = client.servers.create_server(server['name'], image_id,
-                                                 flavor_id)
+                                                  flavor_id)
         server_id = body['id']
         client.servers.wait_for_server_status(server_id, 'ACTIVE')
 
@@ -420,7 +420,7 @@ def destroy_servers(servers):
 
         client.servers.delete_server(response['id'])
         client.servers.wait_for_server_termination(response['id'],
-                ignore_error=True)
+                                                   ignore_error=True)
 
 
 #######################
