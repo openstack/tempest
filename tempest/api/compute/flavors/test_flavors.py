@@ -67,8 +67,8 @@ class FlavorsV3Test(base.BaseComputeTest):
     @test.attr(type='gate')
     def test_list_flavors_using_marker(self):
         # The list of flavors should start from the provided marker
-        resp, flavors = self.client.list_flavors()
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
         params = {'marker': flavor_id}
         resp, flavors = self.client.list_flavors(params)
@@ -78,8 +78,8 @@ class FlavorsV3Test(base.BaseComputeTest):
     @test.attr(type='gate')
     def test_list_flavors_detailed_using_marker(self):
         # The list of flavors should start from the provided marker
-        resp, flavors = self.client.list_flavors_with_detail()
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
         params = {'marker': flavor_id}
         resp, flavors = self.client.list_flavors_with_detail(params)
