@@ -523,6 +523,7 @@ class ServersClientJSON(rest_client.RestClient):
         """List the server-groups."""
         resp, body = self.get("os-server-groups")
         body = json.loads(body)
+        self.validate_response(schema.list_server_groups, resp, body)
         return resp, body['server_groups']
 
     def get_server_group(self, server_group_id):
