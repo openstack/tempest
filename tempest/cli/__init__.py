@@ -89,14 +89,15 @@ class ClientTestBase(tempest.test.BaseTestCase):
         return self.cmd_with_auth(
             'neutron', action, flags, params, admin, fail_ok)
 
-    def sahara(self, action, flags='', params='', admin=True, fail_ok=False):
+    def sahara(self, action, flags='', params='', admin=True,
+               fail_ok=False, merge_stderr=True):
         """Executes sahara command for the given action."""
         flags += ' --endpoint-type %s' % CONF.data_processing.endpoint_type
         return self.cmd_with_auth(
-            'sahara', action, flags, params, admin, fail_ok)
+            'sahara', action, flags, params, admin, fail_ok, merge_stderr)
 
     def cmd_with_auth(self, cmd, action, flags='', params='',
-                      admin=True, fail_ok=False):
+                      admin=True, fail_ok=False, merge_stderr=False):
         """Executes given command with auth attributes appended."""
         # TODO(jogo) make admin=False work
         creds = ('--os-username %s --os-tenant-name %s --os-password %s '
@@ -106,7 +107,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
                   CONF.identity.admin_password,
                   CONF.identity.uri))
         flags = creds + ' ' + flags
-        return self.cmd(cmd, action, flags, params, fail_ok)
+        return self.cmd(cmd, action, flags, params, fail_ok, merge_stderr)
 
     def cmd(self, cmd, action, flags='', params='', fail_ok=False,
             merge_stderr=False):
