@@ -165,3 +165,17 @@ get_console_output = {
         'required': ['output']
     }
 }
+
+common_instance_actions = {
+    'type': 'object',
+    'properties': {
+        'action': {'type': 'string'},
+        'request_id': {'type': 'string'},
+        'user_id': {'type': 'string'},
+        'project_id': {'type': 'string'},
+        'start_time': {'type': 'string'},
+        'message': {'type': ['string', 'null']}
+    },
+    'required': ['action', 'request_id', 'user_id', 'project_id',
+                 'start_time', 'message']
+}

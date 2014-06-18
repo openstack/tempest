@@ -463,6 +463,7 @@ class ServersClientJSON(rest_client.RestClient):
         resp, body = self.get("servers/%s/os-instance-actions" %
                               str(server_id))
         body = json.loads(body)
+        self.validate_response(schema.list_instance_actions, resp, body)
         return resp, body['instanceActions']
 
     def get_instance_action(self, server_id, request_id):

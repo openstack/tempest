@@ -177,3 +177,22 @@ create_get_server_group = {
 delete_server_group = {
     'status_code': [204]
 }
+
+instance_actions_object = copy.deepcopy(servers.common_instance_actions)
+instance_actions_object[
+    'properties'].update({'instance_uuid': {'type': 'string'}})
+instance_actions_object['required'].extend(['instance_uuid'])
+
+list_instance_actions = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'instanceActions': {
+                'type': 'array',
+                'items': instance_actions_object
+            }
+        },
+        'required': ['instanceActions']
+    }
+}
