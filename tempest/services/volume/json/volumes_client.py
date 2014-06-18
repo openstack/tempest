@@ -24,13 +24,13 @@ from tempest import exceptions
 CONF = config.CONF
 
 
-class VolumesClientJSON(rest_client.RestClient):
+class BaseVolumesClientJSON(rest_client.RestClient):
     """
-    Client class to send CRUD Volume API requests to a Cinder endpoint
+    Base client class to send CRUD Volume API requests to a Cinder endpoint
     """
 
     def __init__(self, auth_provider):
-        super(VolumesClientJSON, self).__init__(auth_provider)
+        super(BaseVolumesClientJSON, self).__init__(auth_provider)
 
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval
@@ -72,7 +72,8 @@ class VolumesClientJSON(rest_client.RestClient):
         Creates a new Volume.
         size: Size of volume in GB.
         Following optional keyword arguments are accepted:
-        display_name: Optional Volume Name.
+        display_name: Optional Volume Name(only for V1).
+        name: Optional Volume Name(only for V2).
         metadata: A dictionary of values to be used as metadata.
         volume_type: Optional Name of volume_type for the volume
         snapshot_id: When specified the volume is created from this snapshot
@@ -150,7 +151,6 @@ class VolumesClientJSON(rest_client.RestClient):
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
         resp, body = self.get_volume(volume_id)
-        volume_name = body['display_name']
         volume_status = body['status']
         start = int(time.time())
 
@@ -162,9 +162,10 @@ class VolumesClientJSON(rest_client.RestClient):
                 raise exceptions.VolumeBuildErrorException(volume_id=volume_id)
 
             if int(time.time()) - start >= self.build_timeout:
-                message = ('Volume %s failed to reach %s status within '
-                           'the required time (%s s).' %
-                           (volume_name, status, self.build_timeout))
+                message = 'Volume %s failed to reach %s status within '\
+                          'the required time (%s s).' % (volume_id,
+                                                         status,
+                                                         self.build_timeout)
                 raise exceptions.TimeoutException(message)
 
     def is_resource_deleted(self, id):
@@ -297,3 +298,9 @@ class VolumesClientJSON(rest_client.RestClient):
         url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
         resp, body = self.delete(url)
         return resp, body
+
+
+class VolumesClientJSON(BaseVolumesClientJSON):
+    """
+    Client class to send CRUD Volume V1 API requests to a Cinder endpoint
+    """

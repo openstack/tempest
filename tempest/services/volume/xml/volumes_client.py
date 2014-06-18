@@ -32,14 +32,14 @@ VOLUME_MIG_STATUS_NS = VOLUME_NS_BASE + 'volume_mig_status_attribute/api/v1'
 VOLUMES_TENANT_NS = VOLUME_NS_BASE + 'volume_tenant_attribute/api/v1'
 
 
-class VolumesClientXML(rest_client.RestClient):
+class BaseVolumesClientXML(rest_client.RestClient):
     """
-    Client class to send CRUD Volume API requests to a Cinder endpoint
+    Base client class to send CRUD Volume API requests to a Cinder endpoint
     """
     TYPE = "xml"
 
     def __init__(self, auth_provider):
-        super(VolumesClientXML, self).__init__(auth_provider)
+        super(BaseVolumesClientXML, self).__init__(auth_provider)
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout
@@ -141,6 +141,8 @@ class VolumesClientXML(rest_client.RestClient):
         """Creates a new Volume.
 
         :param size: Size of volume in GB.
+        :param display_name: Optional Volume Name(only for V1).
+        :param name: Optional Volume Name(only for V2).
         :param display_name: Optional Volume Name.
         :param metadata: An optional dictionary of values for metadata.
         :param volume_type: Optional Name of volume_type for the volume
@@ -428,3 +430,9 @@ class VolumesClientXML(rest_client.RestClient):
         """Delete metadata item for the volume."""
         url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
         return self.delete(url)
+
+
+class VolumesClientXML(BaseVolumesClientXML):
+    """
+    Client class to send CRUD Volume API V1 requests to a Cinder endpoint
+    """
