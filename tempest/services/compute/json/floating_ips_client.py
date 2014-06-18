@@ -123,6 +123,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'floating_ips_bulk_create': post_body})
         resp, body = self.post('os-floating-ips-bulk', post_body)
         body = json.loads(body)
+        self.validate_response(schema.create_floating_ips_bulk, resp, body)
         return resp, body['floating_ips_bulk_create']
 
     def list_floating_ips_bulk(self):

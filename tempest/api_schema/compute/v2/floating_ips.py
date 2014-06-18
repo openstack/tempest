@@ -98,3 +98,22 @@ floating_ip_pools = {
 add_remove_floating_ip = {
     'status_code': [202]
 }
+
+create_floating_ips_bulk = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'floating_ips_bulk_create': {
+                'type': 'object',
+                'properties': {
+                    'interface': {'type': ['string', 'null']},
+                    'ip_range': {'type': 'string'},
+                    'pool': {'type': ['string', 'null']},
+                },
+                'required': ['interface', 'ip_range', 'pool']
+            }
+        },
+        'required': ['floating_ips_bulk_create']
+    }
+}

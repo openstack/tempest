@@ -74,7 +74,7 @@ class FloatingIPsBulkAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.assertEqual(self.ip_range, body['ip_range'])
         resp, ips_list = self.client.list_floating_ips_bulk()
         self.assertEqual(200, resp.status)
-        self.assertNotEqual(0, len(body))
+        self.assertNotEqual(0, len(ips_list))
         for ip in netaddr.IPNetwork(self.ip_range).iter_hosts():
             self.assertIn(str(ip), map(lambda x: x['address'], ips_list))
         resp, body = self.client.delete_floating_ips_bulk(self.ip_range)
