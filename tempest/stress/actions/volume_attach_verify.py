@@ -81,9 +81,9 @@ class VolumeVerifyStress(stressaction.StressAction):
         name = data_utils.rand_name("volume")
         self.logger.info("creating volume: %s" % name)
         volumes_client = self.manager.volumes_client
-        resp, self.volume = volumes_client.create_volume(size=1,
-                                                         display_name=
-                                                         name)
+        resp, self.volume = volumes_client.create_volume(
+            size=1,
+            display_name=name)
         assert(resp.status == 200)
         volumes_client.wait_for_volume_status(self.volume['id'],
                                               'available')

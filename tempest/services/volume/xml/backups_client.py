@@ -22,5 +22,5 @@ class BackupsClientXML(backups_client.BackupsClientJSON):
     """
     TYPE = "xml"
 
-    #TODO(gfidente): XML client isn't yet implemented because of bug 1270589
+    # TODO(gfidente): XML client isn't yet implemented because of bug 1270589
     pass

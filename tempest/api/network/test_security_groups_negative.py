@@ -55,7 +55,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     def test_create_security_group_rule_with_bad_protocol(self):
         group_create_body, _ = self._create_security_group()
 
-        #Create rule with bad protocol name
+        # Create rule with bad protocol name
         pname = 'bad_protocol_name'
         self.assertRaises(
             exceptions.BadRequest, self.client.create_security_group_rule,
@@ -66,7 +66,7 @@ class NegativeSecGroupTest(base.BaseSecGroupTest):
     def test_create_security_group_rule_with_invalid_ports(self):
         group_create_body, _ = self._create_security_group()
 
-        #Create rule with invalid ports
+        # Create rule with invalid ports
         states = [(-16, 80, 'Invalid value for port -16'),
                   (80, 79, 'port_range_min must be <= port_range_max'),
                   (80, 65536, 'Invalid value for port 65536'),

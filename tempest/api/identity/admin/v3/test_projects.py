@@ -171,13 +171,13 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
     @test.attr(type='gate')
     def test_associate_user_to_project(self):
-        #Associate a user to a project
-        #Create a Project
+        # Associate a user to a project
+        # Create a Project
         p_name = data_utils.rand_name('project-')
         resp, project = self.client.create_project(p_name)
         self.data.projects.append(project)
 
-        #Create a User
+        # Create a User
         u_name = data_utils.rand_name('user-')
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
@@ -191,7 +191,7 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
 
         # Get User To validate the user details
         resp, new_user_get = self.client.get_user(user['id'])
-        #Assert response body of GET
+        # Assert response body of GET
         self.assertEqual(u_name, new_user_get['name'])
         self.assertEqual(u_desc, new_user_get['description'])
         self.assertEqual(project['id'],

@@ -39,7 +39,7 @@ class VolumesGetTest(base.BaseVolumeV1Test):
     def _is_true(self, val):
         # NOTE(jdg): Temporary conversion method to get cinder patch
         # merged.  Then we'll make this strict again and
-        #specifically check "true" or "false"
+        # specifically check "true" or "false"
         if val in ['true', 'True', True]:
             return True
         else:
@@ -121,19 +121,19 @@ class VolumesGetTest(base.BaseVolumeV1Test):
         new_volume = {}
         new_v_desc = data_utils.rand_name('@#$%^* description')
         resp, new_volume = \
-            self.client.create_volume(size=1,
-                                      display_description=new_v_desc,
-                                      availability_zone=
-                                      volume['availability_zone'])
+            self.client.create_volume(
+                size=1,
+                display_description=new_v_desc,
+                availability_zone=volume['availability_zone'])
         self.assertEqual(200, resp.status)
         self.assertIn('id', new_volume)
         self.addCleanup(self._delete_volume, new_volume['id'])
         self.client.wait_for_volume_status(new_volume['id'], 'available')
         resp, update_volume = \
-            self.client.update_volume(new_volume['id'],
-                                      display_name=volume['display_name'],
-                                      display_description=
-                                      volume['display_description'])
+            self.client.update_volume(
+                new_volume['id'],
+                display_name=volume['display_name'],
+                display_description=volume['display_description'])
         self.assertEqual(200, resp.status)
 
         # NOTE(jdg): Revert back to strict true/false checking

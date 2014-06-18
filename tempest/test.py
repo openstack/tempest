@@ -396,7 +396,7 @@ class NegativeAutoTest(BaseTestCase):
 
         :param file: the file name
         """
-        #NOTE(mkoderer): must be extended for xml support
+        # NOTE(mkoderer): must be extended for xml support
         fn = os.path.join(
             os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
             "etc", "schemas", file)

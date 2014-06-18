@@ -29,9 +29,9 @@ class ExtraSpecsNegativeTest(base.BaseVolumeV1AdminTest):
         super(ExtraSpecsNegativeTest, cls).setUpClass()
         vol_type_name = data_utils.rand_name('Volume-type-')
         cls.extra_specs = {"spec1": "val1"}
-        resp, cls.volume_type = cls.client.create_volume_type(vol_type_name,
-                                                              extra_specs=
-                                                              cls.extra_specs)
+        resp, cls.volume_type = cls.client.create_volume_type(
+            vol_type_name,
+            extra_specs=cls.extra_specs)
 
     @classmethod
     def tearDownClass(cls):
