@@ -26,7 +26,6 @@ class EC2NetworkTest(boto_test.BotoTestCase):
 
     # Note(afazekas): these tests for things duable without an instance
     @test.skip_because(bug="1080406")
-    @test.attr(type='smoke')
     def test_disassociate_not_associated_floating_ip(self):
         # EC2 disassociate not associated floating ip
         ec2_codes = self.ec2_error_code

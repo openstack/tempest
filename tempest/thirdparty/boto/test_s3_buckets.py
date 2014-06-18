@@ -26,7 +26,6 @@ class S3BucketsTest(boto_test.BotoTestCase):
         cls.client = cls.os.s3_client
 
     @test.skip_because(bug="1076965")
-    @test.attr(type='smoke')
     def test_create_and_get_delete_bucket(self):
         # S3 Create, get and delete bucket
         bucket_name = data_utils.rand_name("s3bucket-")
