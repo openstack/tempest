@@ -32,7 +32,6 @@ class fake_httplib2(object):
                 'headers': headers
             }
             return (fake_headers, return_obj)
-           # return (headers, return_obj)
         elif isinstance(self.return_type, int):
             body = "fake_body"
             header_info = {

@@ -56,8 +56,8 @@ def decision_maker():
     A_I_IMAGES_READY = all_read(ami_path, aki_path, ari_path)
     boto_logger = logging.getLogger('boto')
     level = boto_logger.logger.level
-    boto_logger.logger.setLevel(orig_logging.CRITICAL)  # suppress logging
-                                                        # for these
+    # suppress logging for boto
+    boto_logger.logger.setLevel(orig_logging.CRITICAL)
 
     def _cred_sub_check(connection_data):
         if not id_matcher.match(connection_data["aws_access_key_id"]):
