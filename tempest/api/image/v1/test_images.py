@@ -55,8 +55,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
         resp, body = self.create_image(name='New Remote Image',
                                        container_format='bare',
                                        disk_format='raw', is_public=False,
-                                       location='http://example.com'
-                                                '/someimage.iso',
+                                       location=CONF.image.http_image,
                                        properties={'key1': 'value1',
                                                    'key2': 'value2'})
         self.assertIn('id', body)
@@ -143,7 +142,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         image
         """
         name = 'New Remote Image %s' % name
-        location = 'http://example.com/someimage_%s.iso' % name
+        location = CONF.image.http_image
         resp, image = cls.create_image(name=name,
                                        container_format=container_format,
                                        disk_format=disk_format,
