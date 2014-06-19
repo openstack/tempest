@@ -21,8 +21,8 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
     @test.attr(type=['negative', 'gate'])
     def test_image_share_invalid_status(self):
         image_id = self._create_image()
-        resp, member = self.os_img_client.add_member(image_id,
-                                                     self.alt_tenant_id)
+        _, member = self.os_img_client.add_member(image_id,
+                                                  self.alt_tenant_id)
         self.assertEqual(member['status'], 'pending')
         self.assertRaises(exceptions.BadRequest,
                           self.alt_img_client.update_member_status,
@@ -31,8 +31,8 @@ class ImagesMemberNegativeTest(base.BaseV2MemberImageTest):
     @test.attr(type=['negative', 'gate'])
     def test_image_share_owner_cannot_accept(self):
         image_id = self._create_image()
-        resp, member = self.os_img_client.add_member(image_id,
-                                                     self.alt_tenant_id)
+        _, member = self.os_img_client.add_member(image_id,
+                                                  self.alt_tenant_id)
         self.assertEqual(member['status'], 'pending')
         self.assertNotIn(image_id, self._list_image_ids_as_alt())
         self.assertRaises(exceptions.Unauthorized,
