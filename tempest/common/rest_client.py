@@ -18,6 +18,7 @@ import collections
 import json
 from lxml import etree
 import re
+import string
 import time
 
 import jsonschema
@@ -295,9 +296,11 @@ class RestClient(object):
                     req_url,
                     secs,
                     str(req_headers),
-                    str(req_body)[:2048],
+                    filter(lambda x: x in string.printable,
+                           str(req_body)[:2048]),
                     str(resp),
-                    str(resp_body)[:2048]),
+                    filter(lambda x: x in string.printable,
+                           str(resp_body)[:2048])),
                 extra=extra)
 
     def _parse_resp(self, body):
