@@ -50,7 +50,7 @@ def scenario_tests_need_service_tags(physical_line, filename,
     T104: Scenario tests require a services decorator
     """
 
-    if 'tempest/scenario/test_' in filename:
+    if 'tempest/scenario/' in filename and '/test_' in filename:
         if TEST_DEFINITION.match(physical_line):
             if not SCENARIO_DECORATOR.match(previous_logical):
                 return (physical_line.find('def'),

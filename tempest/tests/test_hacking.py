@@ -70,9 +70,15 @@ class HackingTestCase(base.TestCase):
         self.assertFalse(checks.scenario_tests_need_service_tags(
             'def test_fake_test:', './tempest/api/compute/test_fake.py',
             "@test.services('image')"))
+        self.assertFalse(checks.scenario_tests_need_service_tags(
+            'def test_fake:', './tempest/scenario/orchestration/test_fake.py',
+            "@test.services('compute')"))
         self.assertTrue(checks.scenario_tests_need_service_tags(
             'def test_fake_test:', './tempest/scenario/test_fake.py',
             '\n'))
+        self.assertTrue(checks.scenario_tests_need_service_tags(
+            'def test_fake:', './tempest/scenario/orchestration/test_fake.py',
+            "\n"))
 
     def test_no_vi_headers(self):
         # NOTE(mtreinish)  The lines parameter is used only for finding the
