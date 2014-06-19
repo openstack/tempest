@@ -432,8 +432,9 @@ class ServersClientJSON(rest_client.RestClient):
         return self.action(server_id, 'shelveOffload', None, **kwargs)
 
     def get_console_output(self, server_id, length):
+        kwargs = {'length': length} if length else {}
         return self.action(server_id, 'os-getConsoleOutput', 'output',
-                           common_schema.get_console_output, length=length)
+                           common_schema.get_console_output, **kwargs)
 
     def list_virtual_interfaces(self, server_id):
         """

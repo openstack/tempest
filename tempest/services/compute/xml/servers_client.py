@@ -594,8 +594,9 @@ class ServersClientXML(rest_client.RestClient):
         return resp, body
 
     def get_console_output(self, server_id, length):
+        kwargs = {'length': length} if length else {}
         return self.action(server_id, 'os-getConsoleOutput', 'output',
-                           length=length)
+                           **kwargs)
 
     def list_virtual_interfaces(self, server_id):
         """
