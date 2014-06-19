@@ -28,6 +28,10 @@ class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
+        if not CONF.compute_feature_enabled.rescue:
+            msg = "Server rescue not available."
+            raise cls.skipException(msg)
+
         super(ServerRescueNegativeV3Test, cls).setUpClass()
         cls.device = 'vdf'
 
