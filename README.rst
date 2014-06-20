@@ -176,3 +176,11 @@ If a test is being added for a feature that exists in all the current releases
 of the projects then the only concern is that the API behavior is the same
 across all the versions of the project being tested. If the behavior is not
 consistent the test will not be able to merge.
+
+API Stability
+-------------
+
+For new tests being added to Tempest the assumption is that the API being
+tested is considered stable and adheres to the OpenStack API stability
+guidelines. If an API is still considered experimental or in development then
+it should not be tested by Tempest until it is considered stable.
