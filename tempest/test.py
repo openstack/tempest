@@ -257,6 +257,12 @@ class BaseTestCase(BaseDeps):
 
     network_resources = {}
 
+    # NOTE(sdague): log_format is defined inline here instead of using the oslo
+    # default because going through the config path recouples config to the
+    # stress tests too early, and depending on testr order will fail unit tests
+    log_format = ('%(asctime)s %(process)d %(levelname)-8s '
+                  '[%(name)s] %(message)s')
+
     @classmethod
     def setUpClass(cls):
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
@@ -294,9 +300,8 @@ class BaseTestCase(BaseDeps):
             self.useFixture(fixtures.MonkeyPatch('sys.stderr', stderr))
         if (os.environ.get('OS_LOG_CAPTURE') != 'False' and
             os.environ.get('OS_LOG_CAPTURE') != '0'):
-            log_format = '%(asctime)-15s %(message)s'
             self.useFixture(fixtures.LoggerFixture(nuke_handlers=False,
-                                                   format=log_format,
+                                                   format=self.log_format,
                                                    level=None))
 
     @classmethod
