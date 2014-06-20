@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest import config
 from tempest.openstack.common import log
 from tempest.scenario import manager
@@ -71,6 +73,8 @@ class TestSnapshotPattern(manager.OfficialClientTest):
     def _set_floating_ip_to_server(self, server, floating_ip):
         server.add_floating_ip(floating_ip)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     @test.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting a instance
