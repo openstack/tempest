@@ -130,3 +130,49 @@ project has to be patched to switch the unittest.TestSuite to use
 unittest2.TestSuite instead. See:
 
 https://code.google.com/p/unittest-ext/issues/detail?id=79
+
+Branchless Tempest Considerations
+---------------------------------
+
+Starting with the OpenStack Icehouse release Tempest no longer has any stable
+branches. This is to better ensure API consistency between releases because
+the API behavior should not change between releases. This means that the stable
+branches are also gated by the Tempest master branch, which also means that
+proposed commits to Tempest must work against both the master and all the
+currently supported stable branches of the projects. As such there are a few
+special considerations that have to be accounted for when pushing new changes
+to tempest.
+
+1. New Tests for new features
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When adding tests for new features that were not in previous releases of the
+projects the new test has to be properly skipped with a feature flag. Whether
+this is just as simple as using the @test.requires_ext() decorator to check
+if the required extension (or discoverable optional API) is enabled or adding
+a new config option to the appropriate section. If there isn't a method of
+selecting the new **feature** from the config file then there won't be a
+mechanism to disable the test with older stable releases and the new test won't
+be able to merge.
+
+2. Bug fix on core project needing Tempest changes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When trying to land a bug fix which changes a tested API you'll have to use the
+following procedure::
+
+    - Propose change to the project, get a +2 on the change even with failing
+    - Propose skip on Tempest which will only be approved after the
+      corresponding change in the project has a +2 on change
+    - Land project change in master and all open stable branches (if required)
+    - Land changed test in Tempest
+
+Otherwise the bug fix won't be able to land in the project.
+
+3. New Tests for existing features
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If a test is being added for a feature that exists in all the current releases
+of the projects then the only concern is that the API behavior is the same
+across all the versions of the project being tested. If the behavior is not
+consistent the test will not be able to merge.
