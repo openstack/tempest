@@ -310,7 +310,11 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('rdp_console',
                 default=False,
                 help='Enable RDP console. This configuration value should '
-                     'be same as [nova.rdp]->enabled in nova.conf')
+                     'be same as [nova.rdp]->enabled in nova.conf'),
+    cfg.BoolOpt('rescue',
+                default=True,
+                help='Does the test environment support instance rescue '
+                     'mode?')
 ]
 
 

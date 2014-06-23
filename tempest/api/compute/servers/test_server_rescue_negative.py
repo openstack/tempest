@@ -28,6 +28,10 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
+        if not CONF.compute_feature_enabled.rescue:
+            msg = "Server rescue not available."
+            raise cls.skipException(msg)
+
         cls.set_network_resources(network=True, subnet=True, router=True)
         super(ServerRescueNegativeTestJSON, cls).setUpClass()
         cls.device = 'vdf'

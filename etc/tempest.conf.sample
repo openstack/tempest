@@ -424,6 +424,10 @@
 # as [nova.rdp]->enabled in nova.conf (boolean value)
 #rdp_console=false
 
+# Does the test environment support instance rescue mode?
+# (boolean value)
+#rescue=true
+
 
 [dashboard]
 

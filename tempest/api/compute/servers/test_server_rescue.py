@@ -15,7 +15,10 @@
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class ServerRescueTestJSON(base.BaseV2ComputeTest):
@@ -23,6 +26,10 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
+        if not CONF.compute_feature_enabled.rescue:
+            msg = "Server rescue not available."
+            raise cls.skipException(msg)
+
         cls.set_network_resources(network=True, subnet=True, router=True)
         super(ServerRescueTestJSON, cls).setUpClass()
 
