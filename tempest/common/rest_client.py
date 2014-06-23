@@ -372,7 +372,7 @@ class RestClient(object):
         # The warning is normal for SHOULD/SHOULD NOT case
 
         # Likely it will cause an error
-        if not resp_body and resp.status >= 400:
+        if method != 'HEAD' and not resp_body and resp.status >= 400:
             self.LOG.warning("status >= 400 response with empty body")
 
     def _request(self, method, url, headers=None, body=None):
