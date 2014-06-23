@@ -239,3 +239,19 @@ class BaremetalClientV1(base.BaremetalClient):
         target = {'target': state}
         return self._put_request('nodes/%s/states/power' % node_uuid,
                                  target)
+
+    @base.handle_errors
+    def validate_driver_interface(self, node_uuid):
+        """
+        Get all driver interfaces of a specific node.
+
+        :param uuid: Unique identifier of the node in UUID format.
+
+        """
+
+        uri = '{pref}/{res}/{uuid}/{postf}'.format(pref=self.uri_prefix,
+                                                   res='nodes',
+                                                   uuid=node_uuid,
+                                                   postf='validate')
+
+        return self._show_request('nodes', node_uuid, uri=uri)

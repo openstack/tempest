@@ -122,7 +122,7 @@ class BaremetalClient(rest_client.RestClient):
 
         return resp, self.deserialize(body)
 
-    def _show_request(self, resource, uuid, permanent=False):
+    def _show_request(self, resource, uuid, permanent=False, **kwargs):
         """
         Gets a specific object of the specified type.
 
@@ -130,7 +130,10 @@ class BaremetalClient(rest_client.RestClient):
         :return: Serialized object as a dictionary.
 
         """
-        uri = self._get_uri(resource, uuid=uuid, permanent=permanent)
+        if 'uri' in kwargs:
+            uri = kwargs['uri']
+        else:
+            uri = self._get_uri(resource, uuid=uuid, permanent=permanent)
         resp, body = self.get(uri)
 
         return resp, self.deserialize(body)
