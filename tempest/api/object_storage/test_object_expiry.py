@@ -54,14 +54,18 @@ class ObjectExpiryTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'HEAD')
         self.assertIn('x-delete-at', resp)
+        # we want to ensure that we will sleep long enough for things to
+        # actually expire, so figure out how many secs in the future that is.
+        sleepy_time = int(resp['x-delete-at']) - int(time.time())
+
         resp, body = self.object_client.get_object(self.container_name,
                                                    self.object_name)
         self.assertEqual(resp['status'], '200')
         self.assertHeaders(resp, 'Object', 'GET')
         self.assertIn('x-delete-at', resp)
 
-        # sleep for over 5 seconds, so that object expires
-        time.sleep(5)
+        # add a couple of seconds for safety.
+        time.sleep(sleepy_time + 3)
 
         # object should not be there anymore
         self.assertRaises(exceptions.NotFound, self.object_client.get_object,
@@ -69,10 +73,12 @@ class ObjectExpiryTest(base.BaseObjectTest):
 
     @test.attr(type='gate')
     def test_get_object_after_expiry_time(self):
-        metadata = {'X-Delete-After': '3'}
+        # the 10s is important, because the get calls can take 3s each
+        # some times
+        metadata = {'X-Delete-After': '10'}
         self._test_object_expiry(metadata)
 
     @test.attr(type='gate')
     def test_get_object_at_expiry_time(self):
-        metadata = {'X-Delete-At': str(int(time.time()) + 3)}
+        metadata = {'X-Delete-At': str(int(time.time()) + 10)}
         self._test_object_expiry(metadata)
