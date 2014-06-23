@@ -90,8 +90,8 @@ class TestSshClient(base.TestCase):
         start_time = int(time.time())
         client._get_ssh_connection(sleep=1)
         end_time = int(time.time())
-        self.assertTrue((end_time - start_time) < 3)
-        self.assertTrue((end_time - start_time) > 1)
+        self.assertLess((end_time - start_time), 4)
+        self.assertGreater((end_time - start_time), 1)
 
     def test_get_ssh_connection_timeout(self):
         c_mock, aa_mock, client_mock = self._set_ssh_connection_mocks()
@@ -108,8 +108,8 @@ class TestSshClient(base.TestCase):
         with testtools.ExpectedException(exceptions.SSHTimeout):
             client._get_ssh_connection()
         end_time = int(time.time())
-        self.assertTrue((end_time - start_time) < 4)
-        self.assertTrue((end_time - start_time) >= 2)
+        self.assertLess((end_time - start_time), 5)
+        self.assertGreaterEqual((end_time - start_time), 2)
 
     def test_exec_command(self):
         gsc_mock = self.patch('tempest.common.ssh.Client._get_ssh_connection')
