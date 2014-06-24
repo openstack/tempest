@@ -44,6 +44,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
     # TODO(afazekas): Add dedicated tenant to the skiped quota tests
     # it can be moved into the setUpClass as well
+    @test.skip_because(bug="1298131")
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_cpu_quota_is_full(self):
         # Disallow server creation when tenant's vcpu quota is full
@@ -57,8 +58,9 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         cores=default_vcpu_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_test_server)
+        self.assertRaises(exceptions.Unauthorized, self.create_test_server)
 
+    @test.skip_because(bug="1298131")
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_memory_quota_is_full(self):
         # Disallow server creation when tenant's memory quota is full
@@ -72,8 +74,9 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
 
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         ram=default_mem_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_test_server)
+        self.assertRaises(exceptions.Unauthorized, self.create_test_server)
 
+    @test.skip_because(bug="1298131")
     @test.attr(type=['negative', 'gate'])
     def test_create_server_when_instances_quota_is_full(self):
         # Once instances quota limit is reached, disallow server creation
@@ -86,7 +89,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                          instances=instances_quota)
         self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
                         instances=default_instances_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_test_server)
+        self.assertRaises(exceptions.Unauthorized, self.create_test_server)
 
     @test.skip_because(bug="1186354",
                        condition=CONF.service_available.neutron)

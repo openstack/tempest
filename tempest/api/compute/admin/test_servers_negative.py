@@ -54,6 +54,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
             flavor_id = data_utils.rand_int_id(start=1000)
         return flavor_id
 
+    @test.skip_because(bug="1298131")
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_ram(self):
         flavor_name = data_utils.rand_name("flavor-")
@@ -67,11 +68,12 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                              ram, vcpus, disk,
                                                              flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(exceptions.Unauthorized,
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
 
+    @test.skip_because(bug="1298131")
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_vcpus(self):
         flavor_name = data_utils.rand_name("flavor-")
@@ -85,7 +87,7 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                                                              ram, vcpus, disk,
                                                              flavor_id)
         self.addCleanup(self.flavors_client.delete_flavor, flavor_id)
-        self.assertRaises(exceptions.OverLimit,
+        self.assertRaises(exceptions.Unauthorized,
                           self.client.resize,
                           self.servers[0]['id'],
                           flavor_ref['id'])
