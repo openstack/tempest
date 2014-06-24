@@ -119,13 +119,13 @@
 
 # Timeout for association of Nova instance and Ironic node
 # (integer value)
-#association_timeout=10
+#association_timeout=30
 
 # Timeout for Ironic power transitions. (integer value)
-#power_timeout=20
+#power_timeout=60
 
 # Timeout for unprovisioning an Ironic node. (integer value)
-#unprovision_timeout=20
+#unprovision_timeout=60
 
 
 [boto]
