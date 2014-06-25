@@ -22,6 +22,7 @@ import urllib
 
 from tempest.common import glance_http
 from tempest.common import rest_client
+from tempest.common.utils import misc as misc_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
@@ -297,6 +298,9 @@ class ImageClientJSON(rest_client.RestClient):
                            'while waiting for %s, '
                            'but we got %s.' %
                            (self.build_timeout, status, value))
+                caller = misc_utils.find_test_caller()
+                if caller:
+                    message = '(%s) %s' % (caller, message)
                 raise exceptions.TimeoutException(message)
             time.sleep(self.build_interval)
             old_value = value
