@@ -83,6 +83,12 @@ class ClientTestBase(tempest.test.BaseTestCase):
         return self.cmd_with_auth(
             'cinder', action, flags, params, admin, fail_ok)
 
+    def swift(self, action, flags='', params='', admin=True, fail_ok=False):
+        """Executes swift command for the given action."""
+        flags += ' --os-endpoint-type %s' % CONF.object_storage.endpoint_type
+        return self.cmd_with_auth(
+            'swift', action, flags, params, admin, fail_ok)
+
     def neutron(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes neutron command for the given action."""
         flags += ' --endpoint-type %s' % CONF.network.endpoint_type
