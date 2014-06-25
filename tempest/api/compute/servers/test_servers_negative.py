@@ -106,6 +106,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest,
                           self.create_test_server, accessIPv6=IPv6)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resize_nonexistent_server(self):
         # Resize a non-existent server
@@ -114,6 +116,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.resize,
                           nonexistent_server, self.flavor_ref)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_with_non_existent_flavor(self):
         # Resize a server with non-existent flavor
@@ -121,6 +125,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.resize,
                           self.server_id, flavor_ref=nonexistent_flavor)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_with_null_flavor(self):
         # Resize a server with null flavor
