@@ -13,7 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import httplib
 import urllib
+import urlparse
 
 from tempest.common import http
 from tempest.common import rest_client
@@ -143,6 +145,31 @@ class ObjectClient(rest_client.RestClient):
         resp, body = self.put(url, data)
         return resp, body
 
+    def put_object_with_chunk(self, container, name, contents, chunk_size):
+        """
+        Put an object with Transfer-Encoding header
+        """
+        if self.base_url is None:
+            self._set_auth()
+
+        headers = {'Transfer-Encoding': 'chunked'}
+        if self.token:
+            headers['X-Auth-Token'] = self.token
+
+        conn = put_object_connection(self.base_url, container, name, contents,
+                                     chunk_size, headers)
+
+        resp = conn.getresponse()
+        body = resp.read()
+
+        resp_headers = {}
+        for header, value in resp.getheaders():
+            resp_headers[header.lower()] = value
+
+        self._error_checker('PUT', None, headers, contents, resp, body)
+
+        return resp.status, resp.reason, resp_headers
+
 
 class ObjectClientCustomizedHeader(rest_client.RestClient):
 
@@ -220,3 +247,89 @@ class ObjectClientCustomizedHeader(rest_client.RestClient):
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.delete(url, headers=headers)
         return resp, body
+
+    def create_object_continue(self, container, object_name,
+                               data, metadata=None):
+        """Create storage object."""
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
+        if not data:
+            headers['content-length'] = '0'
+
+        if self.base_url is None:
+            self._set_auth()
+        headers['X-Auth-Token'] = self.token
+
+        conn = put_object_connection(self.base_url, str(container),
+                                     str(object_name), data, None, headers)
+
+        response = conn.response_class(conn.sock,
+                                       strict=conn.strict,
+                                       method=conn._method)
+        version, status, reason = response._read_status()
+        resp = {'version': version,
+                'status': str(status),
+                'reason': reason}
+
+        return resp
+
+
+def put_object_connection(base_url, container, name, contents=None,
+                          chunk_size=65536, headers=None, query_string=None):
+    """
+    Helper function to make connection to put object with httplib
+    :param base_url: base_url of an object client
+    :param container: container name that the object is in
+    :param name: object name to put
+    :param contents: a string or a file like object to read object data
+                     from; if None, a zero-byte put will be done
+    :param chunk_size: chunk size of data to write; it defaults to 65536;
+                       used only if the the contents object has a 'read'
+                       method, eg. file-like objects, ignored otherwise
+    :param headers: additional headers to include in the request, if any
+    :param query_string: if set will be appended with '?' to generated path
+    """
+    parsed = urlparse.urlparse(base_url)
+    if parsed.scheme == 'https':
+        conn = httplib.HTTPSConnection(parsed.netloc)
+    else:
+        conn = httplib.HTTPConnection(parsed.netloc)
+    path = str(parsed.path) + "/"
+    path += "%s/%s" % (str(container), str(name))
+
+    if query_string:
+        path += '?' + query_string
+    if headers:
+        headers = dict(headers)
+    else:
+        headers = {}
+    if hasattr(contents, 'read'):
+        conn.putrequest('PUT', path)
+        for header, value in headers.iteritems():
+            conn.putheader(header, value)
+        if 'Content-Length' not in headers:
+            if 'Transfer-Encoding' not in headers:
+                conn.putheader('Transfer-Encoding', 'chunked')
+            conn.endheaders()
+            chunk = contents.read(chunk_size)
+            while chunk:
+                conn.send('%x\r\n%s\r\n' % (len(chunk), chunk))
+                chunk = contents.read(chunk_size)
+            conn.send('0\r\n\r\n')
+        else:
+            conn.endheaders()
+            left = headers['Content-Length']
+            while left > 0:
+                size = chunk_size
+                if size > left:
+                    size = left
+                chunk = contents.read(size)
+                conn.send(chunk)
+                left -= len(chunk)
+    else:
+        conn.request('PUT', path, contents, headers)
+
+    return conn
