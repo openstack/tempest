@@ -320,3 +320,30 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         self.rest_client.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body
+
+    def insert_firewall_rule_in_policy(self, firewall_policy_id,
+                                       firewall_rule_id, insert_after="",
+                                       insert_before=""):
+        uri = '%s/fw/firewall_policies/%s/insert_rule' % (self.uri_prefix,
+                                                          firewall_policy_id)
+        body = {
+            "firewall_rule_id": firewall_rule_id,
+            "insert_after": insert_after,
+            "insert_before": insert_before
+        }
+        body = json.dumps(body)
+        resp, body = self.put(uri, body)
+        self.rest_client.expected_success(200, resp.status)
+        body = json.loads(body)
+        return resp, body
+
+    def remove_firewall_rule_from_policy(self, firewall_policy_id,
+                                         firewall_rule_id):
+        uri = '%s/fw/firewall_policies/%s/remove_rule' % (self.uri_prefix,
+                                                          firewall_policy_id)
+        update_body = {"firewall_rule_id": firewall_rule_id}
+        update_body = json.dumps(update_body)
+        resp, body = self.put(uri, update_body)
+        self.rest_client.expected_success(200, resp.status)
+        body = json.loads(body)
+        return resp, body
