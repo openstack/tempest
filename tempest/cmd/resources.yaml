@@ -32,9 +32,14 @@ images:
     aki: cirros-0.3.2-x86_64-vmlinuz
     ari: cirros-0.3.2-x86_64-initrd
 volumes:
-  - assegai:
-    - owner: javelin
-    - gb: 1
+  - name: assegai
+    server: peltast
+    owner: javelin
+    size: 1
+  - name: pifpouf
+    server: hoplite
+    owner: javelin
+    size: 2
 servers:
   - name: peltast
     owner: javelin
