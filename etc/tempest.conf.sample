@@ -845,6 +845,28 @@
 # queues (integer value)
 #max_queues_per_page=20
 
+# The maximum metadata size for a queue (integer value)
+#max_queue_metadata=65536
+
+# The maximum number of queue message per page when listing
+# (or) posting messages (integer value)
+#max_messages_per_page=20
+
+# The maximum size of a message body (integer value)
+#max_message_size=262144
+
+# The maximum number of messages per claim (integer value)
+#max_messages_per_claim=20
+
+# The maximum ttl for a message (integer value)
+#max_message_ttl=1209600
+
+# The maximum ttl for a claim (integer value)
+#max_claim_ttl=43200
+
+# The maximum grace period for a claim (integer value)
+#max_claim_grace=43200
+
 
 [scenario]
 
