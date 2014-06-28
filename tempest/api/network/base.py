@@ -149,7 +149,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return network
 
     @classmethod
-    def create_subnet(cls, network, gateway=None, cidr=None, mask_bits=None):
+    def create_subnet(cls, network, gateway=None, cidr=None, mask_bits=None,
+                      **kwargs):
         """Wrapper utility that returns a test subnet."""
         # The cidr and mask_bits depend on the ip version.
         if cls._ip_version == 4:
@@ -168,7 +169,8 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
                     network_id=network['id'],
                     cidr=str(subnet_cidr),
                     ip_version=cls._ip_version,
-                    gateway_ip=gateway)
+                    gateway_ip=gateway,
+                    **kwargs)
                 break
             except exceptions.BadRequest as e:
                 is_overlapping_cidr = 'overlaps with another subnet' in str(e)

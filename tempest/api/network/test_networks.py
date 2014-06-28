@@ -14,6 +14,7 @@
 #    under the License.
 
 import netaddr
+import testtools
 
 from tempest.api.network import base
 from tempest.common.utils import data_utils
@@ -428,6 +429,29 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
         subnet = self.create_subnet(network)
         # Verifies Subnet GW in IPv6
         self.assertEqual(subnet['gateway_ip'], '2003::1')
+        # Delete network and subnet
+        resp, body = self.client.delete_network(net_id)
+        self.assertEqual('204', resp['status'])
+        self.subnets.pop()
+
+    @testtools.skipUnless(CONF.network_feature_enabled.ipv6_subnet_attributes,
+                          "IPv6 extended attributes for subnets not "
+                          "available")
+    @test.attr(type='smoke')
+    def test_create_delete_subnet_with_v6_attributes(self):
+        name = data_utils.rand_name('network-')
+        resp, body = self.client.create_network(name=name)
+        self.assertEqual('201', resp['status'])
+        network = body['network']
+        net_id = network['id']
+        subnet = self.create_subnet(network,
+                                    gateway='fe80::1',
+                                    ipv6_ra_mode='slaac',
+                                    ipv6_address_mode='slaac')
+        # Verifies Subnet GW in IPv6
+        self.assertEqual(subnet['gateway_ip'], 'fe80::1')
+        self.assertEqual(subnet['ipv6_ra_mode'], 'slaac')
+        self.assertEqual(subnet['ipv6_address_mode'], 'slaac')
         # Delete network and subnet
         resp, body = self.client.delete_network(net_id)
         self.assertEqual('204', resp['status'])

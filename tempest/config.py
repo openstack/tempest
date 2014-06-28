@@ -442,6 +442,12 @@ NetworkFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled network extensions with a special '
                      'entry all which indicates every extension is enabled'),
+    cfg.BoolOpt('ipv6_subnet_attributes',
+                default=False,
+                help="Allow the execution of IPv6 subnet tests that use "
+                     "the extended IPv6 attributes ipv6_ra_mode "
+                     "and ipv6_address_mode"
+                )
 ]
 
 queuing_group = cfg.OptGroup(name='queuing',
