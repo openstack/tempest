@@ -101,17 +101,17 @@ class TelemetryClientBase(object):
             uri += "?%s" % urllib.urlencode(uri_dict)
         return self.get(uri)
 
-    def list_resources(self):
+    def list_resources(self, query=None):
         uri = '%s/resources' % self.uri_prefix
-        return self.get(uri)
+        return self.helper_list(uri, query)
 
-    def list_meters(self):
+    def list_meters(self, query=None):
         uri = '%s/meters' % self.uri_prefix
-        return self.get(uri)
+        return self.helper_list(uri, query)
 
-    def list_alarms(self):
+    def list_alarms(self, query=None):
         uri = '%s/alarms' % self.uri_prefix
-        return self.get(uri)
+        return self.helper_list(uri, query)
 
     def list_statistics(self, meter, period=None, query=None):
         uri = "%s/meters/%s/statistics" % (self.uri_prefix, meter)
