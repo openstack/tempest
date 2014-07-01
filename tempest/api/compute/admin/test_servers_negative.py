@@ -55,6 +55,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         return flavor_id
 
     @test.skip_because(bug="1298131")
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_ram(self):
         flavor_name = data_utils.rand_name("flavor-")
@@ -74,6 +76,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           flavor_ref['id'])
 
     @test.skip_because(bug="1298131")
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @test.attr(type=['negative', 'gate'])
     def test_resize_server_using_overlimit_vcpus(self):
         flavor_name = data_utils.rand_name("flavor-")
