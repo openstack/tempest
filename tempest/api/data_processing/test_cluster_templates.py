@@ -22,6 +22,7 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
     sahara/restapi/rest_api_v1.0.html#cluster-templates
     """
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ClusterTemplateTest, cls).setUpClass()
         # create node group template
@@ -39,6 +40,7 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
             }
         }
         resp_body = cls.create_node_group_template(**node_group_template)[1]
+        node_group_template_id = resp_body['id']
 
         cls.full_cluster_template = {
             'description': 'Test cluster template',
@@ -65,7 +67,7 @@ class ClusterTemplateTest(dp_base.BaseDataProcessingTest):
                 },
                 {
                     'name': 'worker-node',
-                    'node_group_template_id': resp_body['id'],
+                    'node_group_template_id': node_group_template_id,
                     'count': 3
                 }
             ]

@@ -14,10 +14,7 @@
 
 from tempest.api.data_processing import base as dp_base
 from tempest.common.utils import data_utils
-from tempest import config
 from tempest import test
-
-CONF = config.CONF
 
 
 class DataSourceTest(dp_base.BaseDataProcessingTest):
@@ -28,8 +25,8 @@ class DataSourceTest(dp_base.BaseDataProcessingTest):
             'url': 'swift://sahara-container.sahara/input-source',
             'description': 'Test data source',
             'credentials': {
-                'user': CONF.identity.username,
-                'password': CONF.identity.password
+                'user': cls.os.credentials.username,
+                'password': cls.os.credentials.password
             },
             'type': 'swift'
         }
