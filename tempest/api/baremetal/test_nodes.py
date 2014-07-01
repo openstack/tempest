@@ -87,3 +87,11 @@ class TestNodes(base.BaseBaremetalTest):
         resp, node = self.client.show_node(node['uuid'])
         self.assertEqual('200', resp['status'])
         self._assertExpected(new_p, node['properties'])
+
+    @test.attr(type='smoke')
+    def test_validate_driver_interface(self):
+        resp, body = self.client.validate_driver_interface(self.node['uuid'])
+        self.assertEqual('200', resp['status'])
+        core_interfaces = ['power', 'deploy']
+        for interface in core_interfaces:
+            self.assertIn(interface, body)
