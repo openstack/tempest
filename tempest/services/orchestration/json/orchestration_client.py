@@ -264,6 +264,27 @@ class OrchestrationClient(rest_client.RestClient):
         }
         return self._validate_template(post_body)
 
+    def list_resource_types(self):
+        """List resource types."""
+        resp, body = self.get('resource_types')
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return body['resource_types']
+
+    def get_resource_type(self, resource_type_name):
+        """Return the schema of a resource type."""
+        url = 'resource_types/%s' % resource_type_name
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def get_resource_type_template(self, resource_type_name):
+        """Return the template of a resource type."""
+        url = 'resource_types/%s/template' % resource_type_name
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
     def create_software_config(self, name=None, config=None, group=None,
                                inputs=None, outputs=None, options=None):
         headers, body = self._prep_software_config_create(
