@@ -99,3 +99,11 @@ class HackingTestCase(base.TestCase):
             './tempest/scenario/compute/fake_test.py'))
         self.assertFalse(checks.service_tags_not_in_module_path(
             "@test.services('compute')", './tempest/api/image/fake_test.py'))
+
+    def test_no_official_client_manager_in_api_tests(self):
+        self.assertTrue(checks.no_official_client_manager_in_api_tests(
+            "cls.official_client = clients.OfficialClientManager(credentials)",
+            "tempest/api/compute/base.py"))
+        self.assertFalse(checks.no_official_client_manager_in_api_tests(
+            "cls.official_client = clients.OfficialClientManager(credentials)",
+            "tempest/scenario/fake_test.py"))
