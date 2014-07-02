@@ -37,13 +37,16 @@ class BotoClientBase(object):
                  *args, **kwargs):
         # FIXME(andreaf) replace credentials and auth_url with auth_provider
 
+        insecure_ssl = CONF.identity.disable_ssl_certificate_validation
+
         self.connection_timeout = str(CONF.boto.http_socket_timeout)
         self.num_retries = str(CONF.boto.num_retries)
         self.build_timeout = CONF.boto.build_timeout
         self.ks_cred = {"username": username,
                         "password": password,
                         "auth_url": auth_url,
-                        "tenant_name": tenant_name}
+                        "tenant_name": tenant_name,
+                        "insecure": insecure_ssl}
 
     def _keystone_aws_get(self):
         # FIXME(andreaf) Move EC2 credentials to AuthProvider
@@ -90,7 +93,10 @@ class BotoClientBase(object):
         self._config_boto_timeout(self.connection_timeout, self.num_retries)
         if not all((self.connection_data["aws_access_key_id"],
                    self.connection_data["aws_secret_access_key"])):
-            if all(self.ks_cred.itervalues()):
+            if all([self.ks_cred.get('auth_url'),
+                    self.ks_cred.get('username'),
+                    self.ks_cred.get('tenant_name'),
+                    self.ks_cred.get('password')]):
                 ec2_cred = self._keystone_aws_get()
                 self.connection_data["aws_access_key_id"] = \
                     ec2_cred.access
@@ -109,6 +115,7 @@ class APIClientEC2(BotoClientBase):
 
     def __init__(self, *args, **kwargs):
         super(APIClientEC2, self).__init__(*args, **kwargs)
+        insecure_ssl = CONF.identity.disable_ssl_certificate_validation
         aws_access = CONF.boto.aws_access
         aws_secret = CONF.boto.aws_secret
         purl = urlparse.urlparse(CONF.boto.ec2_url)
@@ -129,6 +136,7 @@ class APIClientEC2(BotoClientBase):
         self.connection_data = {"aws_access_key_id": aws_access,
                                 "aws_secret_access_key": aws_secret,
                                 "is_secure": purl.scheme == "https",
+                                "validate_certs": not insecure_ssl,
                                 "region": region,
                                 "host": purl.hostname,
                                 "port": port,
@@ -187,6 +195,7 @@ class ObjectClientS3(BotoClientBase):
 
     def __init__(self, *args, **kwargs):
         super(ObjectClientS3, self).__init__(*args, **kwargs)
+        insecure_ssl = CONF.identity.disable_ssl_certificate_validation
         aws_access = CONF.boto.aws_access
         aws_secret = CONF.boto.aws_secret
         purl = urlparse.urlparse(CONF.boto.s3_url)
@@ -201,6 +210,7 @@ class ObjectClientS3(BotoClientBase):
         self.connection_data = {"aws_access_key_id": aws_access,
                                 "aws_secret_access_key": aws_secret,
                                 "is_secure": purl.scheme == "https",
+                                "validate_certs": not insecure_ssl,
                                 "host": purl.hostname,
                                 "port": port,
                                 "calling_format": boto.s3.connection.
