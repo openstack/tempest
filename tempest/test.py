@@ -621,7 +621,6 @@ def call_until_true(func, duration, sleep_for):
     while now < timeout:
         if func():
             return True
-        LOG.debug("Sleeping for %d seconds", sleep_for)
         time.sleep(sleep_for)
         now = time.time()
     return False
