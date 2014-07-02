@@ -34,126 +34,108 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         u_desc = '%s description' % u_name
         u_email = '%s@testmail.tm' % u_name
         cls.u_password = data_utils.rand_name('pass-')
-        resp = [None] * 5
-        resp[0], cls.domain = cls.client.create_domain(
+        _, cls.domain = cls.client.create_domain(
             data_utils.rand_name('domain-'),
             description=data_utils.rand_name('domain-desc-'))
-        resp[1], cls.project = cls.client.create_project(
+        _, cls.project = cls.client.create_project(
             data_utils.rand_name('project-'),
             description=data_utils.rand_name('project-desc-'),
             domain_id=cls.domain['id'])
-        resp[2], cls.group_body = cls.client.create_group(
+        _, cls.group_body = cls.client.create_group(
             data_utils.rand_name('Group-'), project_id=cls.project['id'],
             domain_id=cls.domain['id'])
-        resp[3], cls.user_body = cls.client.create_user(
+        _, cls.user_body = cls.client.create_user(
             u_name, description=u_desc, password=cls.u_password,
             email=u_email, project_id=cls.project['id'],
             domain_id=cls.domain['id'])
-        resp[4], cls.role = cls.client.create_role(
+        _, cls.role = cls.client.create_role(
             data_utils.rand_name('Role-'))
-        for r in resp:
-            assert r['status'] == '201', (
-                "Expected 201, but got: %s" % r['status'])
 
     @classmethod
     def tearDownClass(cls):
-        resp = [None] * 5
-        resp[0], _ = cls.client.delete_role(cls.role['id'])
-        resp[1], _ = cls.client.delete_group(cls.group_body['id'])
-        resp[2], _ = cls.client.delete_user(cls.user_body['id'])
-        resp[3], _ = cls.client.delete_project(cls.project['id'])
+        cls.client.delete_role(cls.role['id'])
+        cls.client.delete_group(cls.group_body['id'])
+        cls.client.delete_user(cls.user_body['id'])
+        cls.client.delete_project(cls.project['id'])
         # NOTE(harika-vakadi): It is necessary to disable the domain
         # before deleting,or else it would result in unauthorized error
         cls.client.update_domain(cls.domain['id'], enabled=False)
-        resp[4], _ = cls.client.delete_domain(cls.domain['id'])
-        for r in resp:
-            assert r['status'] == '204', (
-                "Expected 204, but got: %s" % r['status'])
+        cls.client.delete_domain(cls.domain['id'])
         super(RolesV3TestJSON, cls).tearDownClass()
 
-    def _list_assertions(self, resp, body, fetched_role_ids, role_id):
-        self.assertEqual(resp['status'], '200')
+    def _list_assertions(self, body, fetched_role_ids, role_id):
         self.assertEqual(len(body), 1)
         self.assertIn(role_id, fetched_role_ids)
 
     @test.attr(type='smoke')
     def test_role_create_update_get_list(self):
         r_name = data_utils.rand_name('Role-')
-        resp, role = self.client.create_role(r_name)
+        _, role = self.client.create_role(r_name)
         self.addCleanup(self.client.delete_role, role['id'])
-        self.assertEqual(resp['status'], '201')
         self.assertIn('name', role)
         self.assertEqual(role['name'], r_name)
 
         new_name = data_utils.rand_name('NewRole-')
-        resp, updated_role = self.client.update_role(new_name, role['id'])
-        self.assertEqual(resp['status'], '200')
+        _, updated_role = self.client.update_role(new_name, role['id'])
         self.assertIn('name', updated_role)
         self.assertIn('id', updated_role)
         self.assertIn('links', updated_role)
         self.assertNotEqual(r_name, updated_role['name'])
 
-        resp, new_role = self.client.get_role(role['id'])
-        self.assertEqual(resp['status'], '200')
+        _, new_role = self.client.get_role(role['id'])
         self.assertEqual(new_name, new_role['name'])
         self.assertEqual(updated_role['id'], new_role['id'])
 
-        resp, roles = self.client.list_roles()
-        self.assertEqual(resp['status'], '200')
+        _, roles = self.client.list_roles()
         self.assertIn(role['id'], [r['id'] for r in roles])
 
     @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_user_on_project(self):
-        resp, _ = self.client.assign_user_role_on_project(
+        self.client.assign_user_role_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
 
-        resp, roles = self.client.list_user_roles_on_project(
+        _, roles = self.client.list_user_roles_on_project(
             self.project['id'], self.user_body['id'])
 
         for i in roles:
             self.fetched_role_ids.append(i['id'])
 
-        self._list_assertions(resp, roles, self.fetched_role_ids,
+        self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        resp, _ = self.client.revoke_role_from_user_on_project(
+        self.client.revoke_role_from_user_on_project(
             self.project['id'], self.user_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
 
     @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_user_on_domain(self):
-        resp, _ = self.client.assign_user_role_on_domain(
+        self.client.assign_user_role_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
 
-        resp, roles = self.client.list_user_roles_on_domain(
+        _, roles = self.client.list_user_roles_on_domain(
             self.domain['id'], self.user_body['id'])
 
         for i in roles:
             self.fetched_role_ids.append(i['id'])
 
-        self._list_assertions(resp, roles, self.fetched_role_ids,
+        self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        resp, _ = self.client.revoke_role_from_user_on_domain(
+        self.client.revoke_role_from_user_on_domain(
             self.domain['id'], self.user_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
 
     @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_group_on_project(self):
         # Grant role to group on project
-        resp, _ = self.client.assign_group_role_on_project(
+        self.client.assign_group_role_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
         # List group roles on project
-        resp, roles = self.client.list_group_roles_on_project(
+        _, roles = self.client.list_group_roles_on_project(
             self.project['id'], self.group_body['id'])
 
         for i in roles:
             self.fetched_role_ids.append(i['id'])
 
-        self._list_assertions(resp, roles, self.fetched_role_ids,
+        self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
         # Add user to group, and insure user has role on project
         self.client.add_group_user(self.group_body['id'], self.user_body['id'])
@@ -167,34 +149,30 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])
         # Revoke role to group on project
-        resp, _ = self.client.revoke_role_from_group_on_project(
+        self.client.revoke_role_from_group_on_project(
             self.project['id'], self.group_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
 
     @test.attr(type='smoke')
     def test_grant_list_revoke_role_to_group_on_domain(self):
-        resp, _ = self.client.assign_group_role_on_domain(
+        self.client.assign_group_role_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
 
-        resp, roles = self.client.list_group_roles_on_domain(
+        _, roles = self.client.list_group_roles_on_domain(
             self.domain['id'], self.group_body['id'])
 
         for i in roles:
             self.fetched_role_ids.append(i['id'])
 
-        self._list_assertions(resp, roles, self.fetched_role_ids,
+        self._list_assertions(roles, self.fetched_role_ids,
                               self.role['id'])
 
-        resp, _ = self.client.revoke_role_from_group_on_domain(
+        self.client.revoke_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
-        self.assertEqual(resp['status'], '204')
 
     @test.attr(type='gate')
     def test_list_roles(self):
         # Return a list of all roles
-        resp, body = self.client.list_roles()
-        self.assertEqual(200, resp.status)
+        _, body = self.client.list_roles()
         found = [role for role in body if role in self.data.v3_roles]
         self.assertEqual(len(found), len(self.data.v3_roles))
 

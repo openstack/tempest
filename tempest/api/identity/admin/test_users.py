@@ -34,11 +34,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_create_user(self):
         # Create a user
         self.data.setup_test_tenant()
-        resp, user = self.client.create_user(self.alt_user, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email)
+        _, user = self.client.create_user(self.alt_user, self.alt_password,
+                                          self.data.tenant['id'],
+                                          self.alt_email)
         self.data.users.append(user)
-        self.assertEqual('200', resp['status'])
         self.assertEqual(self.alt_user, user['name'])
 
     @test.attr(type='smoke')
@@ -46,11 +45,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Create a user with enabled : False
         self.data.setup_test_tenant()
         name = data_utils.rand_name('test_user_')
-        resp, user = self.client.create_user(name, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email, enabled=False)
+        _, user = self.client.create_user(name, self.alt_password,
+                                          self.data.tenant['id'],
+                                          self.alt_email, enabled=False)
         self.data.users.append(user)
-        self.assertEqual('200', resp['status'])
         self.assertEqual(name, user['name'])
         self.assertEqual('false', str(user['enabled']).lower())
         self.assertEqual(self.alt_email, user['email'])
@@ -60,24 +58,22 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Test case to check if updating of user attributes is successful.
         test_user = data_utils.rand_name('test_user_')
         self.data.setup_test_tenant()
-        resp, user = self.client.create_user(test_user, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email)
+        _, user = self.client.create_user(test_user, self.alt_password,
+                                          self.data.tenant['id'],
+                                          self.alt_email)
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user['id'])
         # Updating user details with new values
         u_name2 = data_utils.rand_name('user2-')
         u_email2 = u_name2 + '@testmail.tm'
-        resp, update_user = self.client.update_user(user['id'], name=u_name2,
-                                                    email=u_email2,
-                                                    enabled=False)
-        # Assert response body of update user.
-        self.assertEqual(200, resp.status)
+        _, update_user = self.client.update_user(user['id'], name=u_name2,
+                                                 email=u_email2,
+                                                 enabled=False)
         self.assertEqual(u_name2, update_user['name'])
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual('false', str(update_user['enabled']).lower())
         # GET by id after updating
-        resp, updated_user = self.client.get_user(user['id'])
+        _, updated_user = self.client.get_user(user['id'])
         # Assert response body of GET after updating
         self.assertEqual(u_name2, updated_user['name'])
         self.assertEqual(u_email2, updated_user['email'])
@@ -88,12 +84,10 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         # Delete a user
         test_user = data_utils.rand_name('test_user_')
         self.data.setup_test_tenant()
-        resp, user = self.client.create_user(test_user, self.alt_password,
-                                             self.data.tenant['id'],
-                                             self.alt_email)
-        self.assertEqual('200', resp['status'])
-        resp, body = self.client.delete_user(user['id'])
-        self.assertEqual('204', resp['status'])
+        _, user = self.client.create_user(test_user, self.alt_password,
+                                          self.data.tenant['id'],
+                                          self.alt_email)
+        self.client.delete_user(user['id'])
 
     @test.attr(type='smoke')
     def test_user_authentication(self):
@@ -129,7 +123,7 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
     def test_get_users(self):
         # Get a list of users and find the test user
         self.data.setup_test_user()
-        resp, users = self.client.get_users()
+        _, users = self.client.get_users()
         self.assertThat([u['name'] for u in users],
                         matchers.Contains(self.data.test_user),
                         "Could not find %s" % self.data.test_user)
@@ -141,23 +135,20 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         user_ids = list()
         fetched_user_ids = list()
         alt_tenant_user1 = data_utils.rand_name('tenant_user1_')
-        resp, user1 = self.client.create_user(alt_tenant_user1, 'password1',
-                                              self.data.tenant['id'],
-                                              'user1@123')
-        self.assertEqual('200', resp['status'])
+        _, user1 = self.client.create_user(alt_tenant_user1, 'password1',
+                                           self.data.tenant['id'],
+                                           'user1@123')
         user_ids.append(user1['id'])
         self.data.users.append(user1)
 
         alt_tenant_user2 = data_utils.rand_name('tenant_user2_')
-        resp, user2 = self.client.create_user(alt_tenant_user2, 'password2',
-                                              self.data.tenant['id'],
-                                              'user2@123')
-        self.assertEqual('200', resp['status'])
+        _, user2 = self.client.create_user(alt_tenant_user2, 'password2',
+                                           self.data.tenant['id'],
+                                           'user2@123')
         user_ids.append(user2['id'])
         self.data.users.append(user2)
         # List of users for the respective tenant ID
-        resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
-        self.assertIn(resp['status'], ('200', '203'))
+        _, body = self.client.list_users_for_tenant(self.data.tenant['id'])
         for i in body:
             fetched_user_ids.append(i['id'])
         # verifying the user Id in the list
@@ -179,24 +170,20 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         user_ids = list()
         fetched_user_ids = list()
         user_ids.append(user['id'])
-        resp, role = self.client.assign_user_role(tenant['id'], user['id'],
-                                                  role['id'])
-        self.assertEqual('200', resp['status'])
+        _, role = self.client.assign_user_role(tenant['id'], user['id'],
+                                               role['id'])
 
         alt_user2 = data_utils.rand_name('second_user_')
-        resp, second_user = self.client.create_user(alt_user2, 'password1',
-                                                    self.data.tenant['id'],
-                                                    'user2@123')
-        self.assertEqual('200', resp['status'])
+        _, second_user = self.client.create_user(alt_user2, 'password1',
+                                                 self.data.tenant['id'],
+                                                 'user2@123')
         user_ids.append(second_user['id'])
         self.data.users.append(second_user)
-        resp, role = self.client.assign_user_role(tenant['id'],
-                                                  second_user['id'],
-                                                  role['id'])
-        self.assertEqual('200', resp['status'])
+        _, role = self.client.assign_user_role(tenant['id'],
+                                               second_user['id'],
+                                               role['id'])
         # List of users with roles for the respective tenant ID
-        resp, body = self.client.list_users_for_tenant(self.data.tenant['id'])
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.list_users_for_tenant(self.data.tenant['id'])
         for i in body:
             fetched_user_ids.append(i['id'])
         # verifying the user Id in the list
@@ -212,10 +199,8 @@ class UsersTestJSON(base.BaseIdentityV2AdminTest):
         self.data.setup_test_user()
         # Updating the user with new password
         new_pass = data_utils.rand_name('pass-')
-        resp, update_user = self.client.update_user_password(
+        _, update_user = self.client.update_user_password(
             self.data.user['id'], new_pass)
-        # Assert response body of update user.
-        self.assertEqual(200, resp.status)
         self.assertEqual(update_user['id'], self.data.user['id'])
 
         # Validate the updated password

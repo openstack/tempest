@@ -51,7 +51,6 @@ class TenantUsagesNegativeTestJSON(base.BaseV2ComputeAdminTest):
         # Get usage for tenant with invalid date
         params = {'start': self.end,
                   'end': self.start}
-        resp, tenants = self.identity_client.list_tenants()
         self.assertRaises(exceptions.BadRequest,
                           self.adm_client.get_tenant_usage,
                           self.client.tenant_id, params)
