@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import StringIO
+
 from tempest.api.compute import base
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -27,9 +29,10 @@ LOG = logging.getLogger(__name__)
 
 
 class AuthorizationTestJSON(base.BaseV2ComputeTest):
-
     @classmethod
     def setUpClass(cls):
+        if not CONF.service_available.glance:
+            raise cls.skipException('Glance is not available.')
         # No network resources required for this test
         cls.set_network_resources()
         super(AuthorizationTestJSON, cls).setUpClass()
@@ -38,6 +41,7 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
             raise cls.skipException(msg)
         cls.client = cls.os.servers_client
         cls.images_client = cls.os.images_client
+        cls.glance_client = cls.os.image_client
         cls.keypairs_client = cls.os.keypairs_client
         cls.security_client = cls.os.security_groups_client
 
@@ -57,9 +61,14 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
         resp, cls.server = cls.client.get_server(server['id'])
 
         name = data_utils.rand_name('image')
-        resp, body = cls.images_client.create_image(server['id'], name)
-        image_id = data_utils.parse_image_id(resp['location'])
-        cls.images_client.wait_for_image_status(image_id, 'ACTIVE')
+        resp, body = cls.glance_client.create_image(name=name,
+                                                   container_format='bare',
+                                                   disk_format='raw',
+                                                   is_public=False)
+        image_id = body['id']
+        image_file = StringIO.StringIO(('*' * 1024))
+        resp, body = cls.glance_client.update_image(image_id, data=image_file)
+        cls.glance_client.wait_for_image_status(image_id, 'active')
         resp, cls.image = cls.images_client.get_image(image_id)
 
         cls.keypairname = data_utils.rand_name('keypair')

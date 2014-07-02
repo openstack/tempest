@@ -270,7 +270,7 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         if not policy:
             policy = ['affinity']
         resp, body = cls.servers_client.create_server_group(name, policy)
-        cls.server_groups.append(body)
+        cls.server_groups.append(body['id'])
         return resp, body
 
     def wait_for(self, condition):

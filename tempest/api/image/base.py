@@ -142,9 +142,9 @@ class BaseV2MemberImageTest(BaseV2ImageTest):
 
     def _create_image(self):
         name = data_utils.rand_name('image')
-        resp, image = self.os_img_client.create_image(name,
-                                                      container_format='bare',
-                                                      disk_format='raw')
+        _, image = self.os_img_client.create_image(name,
+                                                   container_format='bare',
+                                                   disk_format='raw')
         image_id = image['id']
         self.addCleanup(self.os_img_client.delete_image, image_id)
         return image_id

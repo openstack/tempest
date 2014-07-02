@@ -61,6 +61,7 @@ class ImageClientV2JSON(rest_client.RestClient):
         headers = {"Content-Type": "application/openstack-images-v2.0"
                                    "-json-patch"}
         resp, body = self.patch('v2/images/%s' % image_id, data, headers)
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def create_image(self, name, container_format, disk_format, **kwargs):
@@ -81,12 +82,14 @@ class ImageClientV2JSON(rest_client.RestClient):
         self._validate_schema(data)
 
         resp, body = self.post('v2/images', data)
+        self.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body
 
     def delete_image(self, image_id):
         url = 'v2/images/%s' % image_id
-        self.delete(url)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp.status)
 
     def image_list(self, params=None):
         url = 'v2/images'
@@ -95,6 +98,7 @@ class ImageClientV2JSON(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         self._validate_schema(body, type='images')
         return resp, body['images']
@@ -102,6 +106,7 @@ class ImageClientV2JSON(rest_client.RestClient):
     def get_image(self, image_id):
         url = 'v2/images/%s' % image_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -117,36 +122,40 @@ class ImageClientV2JSON(rest_client.RestClient):
         headers = {'Content-Type': 'application/octet-stream'}
         resp, body = self.http.raw_request('PUT', url, headers=headers,
                                            body=data)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def get_image_file(self, image_id):
         url = 'v2/images/%s/file' % image_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def add_image_tag(self, image_id, tag):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)
         resp, body = self.put(url, body=None)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def delete_image_tag(self, image_id, tag):
         url = 'v2/images/%s/tags/%s' % (image_id, tag)
         resp, _ = self.delete(url)
+        self.expected_success(204, resp.status)
         return resp
 
     def get_image_membership(self, image_id):
         url = 'v2/images/%s/members' % image_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
-        self.expected_success(200, resp)
         return resp, body
 
     def add_member(self, image_id, member_id):
         url = 'v2/images/%s/members' % image_id
         data = json.dumps({'member': member_id})
         resp, body = self.post(url, data)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
-        self.expected_success(200, resp)
         return resp, body
 
     def update_member_status(self, image_id, member_id, status):
@@ -154,24 +163,25 @@ class ImageClientV2JSON(rest_client.RestClient):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         data = json.dumps({'status': status})
         resp, body = self.put(url, data)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
-        self.expected_success(200, resp)
         return resp, body
 
     def get_member(self, image_id, member_id):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         return resp, json.loads(body)
 
     def remove_member(self, image_id, member_id):
         url = 'v2/images/%s/members/%s' % (image_id, member_id)
         resp, _ = self.delete(url)
-        self.expected_success(204, resp)
+        self.expected_success(204, resp.status)
         return resp
 
     def get_schema(self, schema):
         url = 'v2/schemas/%s' % schema
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body

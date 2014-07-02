@@ -14,7 +14,6 @@
 #    under the License.
 
 
-import httplib
 import tempfile
 import time
 import urllib2
@@ -150,7 +149,10 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                 private_key=private_key)
 
             # Write a backend's responce into a file
-            resp = """HTTP/1.0 200 OK\r\nContent-Length: 8\r\n\r\n%s"""
+            resp = """echo -ne "HTTP/1.1 200 OK\r\nContent-Length: 7\r\n""" \
+                   """Connection: close\r\nContent-Type: text/html; """ \
+                   """charset=UTF-8\r\n\r\n%s"; cat >/dev/null"""
+
             with tempfile.NamedTemporaryFile() as script:
                 script.write(resp % server_name)
                 script.flush()
@@ -158,15 +160,17 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                     key.write(private_key)
                     key.flush()
                     commands.copy_file_to_host(script.name,
-                                               "~/script1",
+                                               "/tmp/script1",
                                                ip,
                                                username, key.name)
+
             # Start netcat
-            start_server = """sudo nc -ll -p %(port)s -e cat """ \
-                           """~/%(script)s &"""
+            start_server = """sudo nc -ll -p %(port)s -e sh """ \
+                           """/tmp/%(script)s &"""
             cmd = start_server % {'port': self.port1,
                                   'script': 'script1'}
             ssh_client.exec_command(cmd)
+
             if len(self.server_ips) == 1:
                 with tempfile.NamedTemporaryFile() as script:
                     script.write(resp % 'server2')
@@ -175,7 +179,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                         key.write(private_key)
                         key.flush()
                         commands.copy_file_to_host(script.name,
-                                                   "~/script2", ip,
+                                                   "/tmp/script2", ip,
                                                    username, key.name)
                 cmd = start_server % {'port': self.port2,
                                       'script': 'script2'}
@@ -281,19 +285,14 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
     def _send_requests(self, vip_ip, expected, num_req=10):
         count = 0
         while count < num_req:
-            try:
-                resp = []
-                for i in range(len(self.members)):
-                    resp.append(
-                        urllib2.urlopen(
-                            "http://{0}/".format(vip_ip)).read())
-                count += 1
-                self.assertEqual(expected,
-                                 set(resp))
-            # NOTE: There always is a slim chance of getting this exception
-            #       due to special aspects of haproxy internal behavior.
-            except httplib.BadStatusLine:
-                pass
+            resp = []
+            for i in range(len(self.members)):
+                resp.append(
+                    urllib2.urlopen(
+                        "http://{0}/".format(vip_ip)).read())
+            count += 1
+            self.assertEqual(expected,
+                             set(resp))
 
     @test.attr(type='smoke')
     @test.services('compute', 'network')

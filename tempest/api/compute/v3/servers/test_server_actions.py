@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+
 import testtools
 import urlparse
 
@@ -24,6 +26,8 @@ from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
+
+LOG = logging.getLogger(__name__)
 
 
 class ServerActionsV3Test(base.BaseV3ComputeTest):
@@ -260,7 +264,14 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         # the oldest one should be deleted automatically in this test
         def _clean_oldest_backup(oldest_backup):
             if oldest_backup_exist:
-                self.images_client.delete_image(oldest_backup)
+                try:
+                    self.images_client.delete_image(oldest_backup)
+                except exceptions.NotFound:
+                    pass
+                else:
+                    LOG.warning("Deletion of oldest backup %s should not have "
+                                "been successful as it should have been "
+                                "deleted during rotation." % oldest_backup)
 
         image1_id = data_utils.parse_image_id(resp['location'])
         self.addCleanup(_clean_oldest_backup, image1_id)

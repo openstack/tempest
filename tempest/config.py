@@ -442,6 +442,12 @@ NetworkFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled network extensions with a special '
                      'entry all which indicates every extension is enabled'),
+    cfg.BoolOpt('ipv6_subnet_attributes',
+                default=False,
+                help="Allow the execution of IPv6 subnet tests that use "
+                     "the extended IPv6 attributes ipv6_ra_mode "
+                     "and ipv6_address_mode"
+                )
 ]
 
 queuing_group = cfg.OptGroup(name='queuing',
@@ -455,6 +461,28 @@ QueuingGroup = [
                default=20,
                help='The maximum number of queue records per page when '
                     'listing queues'),
+    cfg.IntOpt('max_queue_metadata',
+               default=65536,
+               help='The maximum metadata size for a queue'),
+    cfg.IntOpt('max_messages_per_page',
+               default=20,
+               help='The maximum number of queue message per page when '
+                    'listing (or) posting messages'),
+    cfg.IntOpt('max_message_size',
+               default=262144,
+               help='The maximum size of a message body'),
+    cfg.IntOpt('max_messages_per_claim',
+               default=20,
+               help='The maximum number of messages per claim'),
+    cfg.IntOpt('max_message_ttl',
+               default=1209600,
+               help='The maximum ttl for a message'),
+    cfg.IntOpt('max_claim_ttl',
+               default=43200,
+               help='The maximum ttl for a claim'),
+    cfg.IntOpt('max_claim_grace',
+               default=43200,
+               help='The maximum grace period for a claim'),
 ]
 
 volume_group = cfg.OptGroup(name='volume',

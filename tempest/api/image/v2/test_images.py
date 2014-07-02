@@ -37,11 +37,11 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         uuid = '00000000-1111-2222-3333-444455556666'
         image_name = data_utils.rand_name('image')
-        resp, body = self.create_image(name=image_name,
-                                       container_format='bare',
-                                       disk_format='raw',
-                                       visibility='private',
-                                       ramdisk_id=uuid)
+        _, body = self.create_image(name=image_name,
+                                    container_format='bare',
+                                    disk_format='raw',
+                                    visibility='private',
+                                    ramdisk_id=uuid)
         self.assertIn('id', body)
         image_id = body.get('id')
         self.assertIn('name', body)
@@ -54,12 +54,10 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         # Now try uploading an image file
         file_content = '*' * 1024
         image_file = StringIO.StringIO(file_content)
-        resp, body = self.client.store_image(image_id, image_file)
-        self.assertEqual(resp.status, 204)
+        self.client.store_image(image_id, image_file)
 
         # Now try to get image details
-        resp, body = self.client.get_image(image_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_image(image_id)
         self.assertEqual(image_id, body['id'])
         self.assertEqual(image_name, body['name'])
         self.assertEqual(uuid, body['ramdisk_id'])
@@ -67,8 +65,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual(1024, body.get('size'))
 
         # Now try get image file
-        resp, body = self.client.get_image_file(image_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_image_file(image_id)
         self.assertEqual(file_content, body)
 
     @test.attr(type='gate')
@@ -77,11 +74,10 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Create image
         image_name = data_utils.rand_name('image')
-        resp, body = self.client.create_image(name=image_name,
-                                              container_format='bare',
-                                              disk_format='raw',
-                                              visibility='private')
-        self.assertEqual(201, resp.status)
+        _, body = self.client.create_image(name=image_name,
+                                           container_format='bare',
+                                           disk_format='raw',
+                                           visibility='private')
         image_id = body['id']
 
         # Delete Image
@@ -89,8 +85,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.client.wait_for_resource_deletion(image_id)
 
         # Verifying deletion
-        resp, images = self.client.image_list()
-        self.assertEqual(resp.status, 200)
+        _, images = self.client.image_list()
         self.assertNotIn(image_id, images)
 
     @test.attr(type='gate')
@@ -99,11 +94,10 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Create image
         image_name = data_utils.rand_name('image')
-        resp, body = self.client.create_image(name=image_name,
-                                              container_format='bare',
-                                              disk_format='iso',
-                                              visibility='private')
-        self.assertEqual(201, resp.status)
+        _, body = self.client.create_image(name=image_name,
+                                           container_format='bare',
+                                           disk_format='iso',
+                                           visibility='private')
         self.addCleanup(self.client.delete_image, body['id'])
         self.assertEqual('queued', body['status'])
         image_id = body['id']
@@ -111,20 +105,16 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         # Now try uploading an image file
         file_content = '*' * 1024
         image_file = StringIO.StringIO(file_content)
-        resp, body = self.client.store_image(image_id, image_file)
-        self.assertEqual(204, resp.status)
+        self.client.store_image(image_id, image_file)
 
         # Update Image
         new_image_name = data_utils.rand_name('new-image')
-        resp, body = self.client.update_image(image_id, [
+        _, body = self.client.update_image(image_id, [
             dict(replace='/name', value=new_image_name)])
-
-        self.assertEqual(200, resp.status)
 
         # Verifying updating
 
-        resp, body = self.client.get_image(image_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_image(image_id)
         self.assertEqual(image_id, body['id'])
         self.assertEqual(new_image_name, body['name'])
 
@@ -157,12 +147,12 @@ class ListImagesTest(base.BaseV2ImageTest):
         """
         image_file = StringIO.StringIO('*' * random.randint(1024, 4096))
         name = data_utils.rand_name('image-')
-        resp, body = cls.create_image(name=name,
-                                      container_format=container_format,
-                                      disk_format=disk_format,
-                                      visibility='private')
+        _, body = cls.create_image(name=name,
+                                   container_format=container_format,
+                                   disk_format=disk_format,
+                                   visibility='private')
         image_id = body['id']
-        resp, body = cls.client.store_image(image_id, data=image_file)
+        cls.client.store_image(image_id, data=image_file)
 
         return image_id
 
@@ -170,8 +160,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         """
         Perform list action with given params and validates result.
         """
-        resp, images_list = self.client.image_list(params=params)
-        self.assertEqual(200, resp.status)
+        _, images_list = self.client.image_list(params=params)
         # Validating params of fetched images
         for image in images_list:
             for key in params:
@@ -181,8 +170,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     @test.attr(type='gate')
     def test_index_no_params(self):
         # Simple test to see all fixture images returned
-        resp, images_list = self.client.image_list()
-        self.assertEqual(resp['status'], '200')
+        _, images_list = self.client.image_list()
         image_list = map(lambda x: x['id'], images_list)
 
         for image in self.created_images:
@@ -211,8 +199,7 @@ class ListImagesTest(base.BaseV2ImageTest):
         # Test to get all images by size
         image_id = self.created_images[1]
         # Get image metadata
-        resp, image = self.client.get_image(image_id)
-        self.assertEqual(resp['status'], '200')
+        _, image = self.client.get_image(image_id)
 
         params = {"size": image['size']}
         self._list_by_param_value_and_assert(params)
@@ -222,13 +209,11 @@ class ListImagesTest(base.BaseV2ImageTest):
         # Test to get all images with size between 2000 to 3000
         image_id = self.created_images[1]
         # Get image metadata
-        resp, image = self.client.get_image(image_id)
-        self.assertEqual(resp['status'], '200')
+        _, image = self.client.get_image(image_id)
 
         size = image['size']
         params = {"size_min": size - 500, "size_max": size + 500}
-        resp, images_list = self.client.image_list(params=params)
-        self.assertEqual(resp['status'], '200')
+        _, images_list = self.client.image_list(params=params)
         image_size_list = map(lambda x: x['size'], images_list)
 
         for image_size in image_size_list:
@@ -246,8 +231,7 @@ class ListImagesTest(base.BaseV2ImageTest):
     def test_list_images_param_limit(self):
         # Test to get images by limit
         params = {"limit": 2}
-        resp, images_list = self.client.image_list(params=params)
-        self.assertEqual(resp['status'], '200')
+        _, images_list = self.client.image_list(params=params)
 
         self.assertEqual(len(images_list), params['limit'],
                          "Failed to get images by limit")
@@ -256,14 +240,12 @@ class ListImagesTest(base.BaseV2ImageTest):
     def test_get_image_schema(self):
         # Test to get image schema
         schema = "image"
-        resp, body = self.client.get_schema(schema)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_schema(schema)
         self.assertEqual("image", body['name'])
 
     @test.attr(type='gate')
     def test_get_images_schema(self):
         # Test to get images schema
         schema = "images"
-        resp, body = self.client.get_schema(schema)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_schema(schema)
         self.assertEqual("images", body['name'])

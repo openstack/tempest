@@ -22,27 +22,21 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
     @test.attr(type='gate')
     def test_add_image_member(self):
         image = self._create_image()
-        resp = self.client.add_member(self.alt_tenant_id, image)
-        self.assertEqual(204, resp.status)
-        resp, body = self.client.get_image_membership(image)
-        self.assertEqual(200, resp.status)
+        self.client.add_member(self.alt_tenant_id, image)
+        _, body = self.client.get_image_membership(image)
         members = body['members']
         members = map(lambda x: x['member_id'], members)
         self.assertIn(self.alt_tenant_id, members)
         # get image as alt user
-        resp, body = self.alt_img_cli.get_image(image)
-        self.assertEqual(200, resp.status)
+        self.alt_img_cli.get_image(image)
 
     @test.attr(type='gate')
     def test_get_shared_images(self):
         image = self._create_image()
-        resp = self.client.add_member(self.alt_tenant_id, image)
-        self.assertEqual(204, resp.status)
+        self.client.add_member(self.alt_tenant_id, image)
         share_image = self._create_image()
-        resp = self.client.add_member(self.alt_tenant_id, share_image)
-        self.assertEqual(204, resp.status)
-        resp, body = self.client.get_shared_images(self.alt_tenant_id)
-        self.assertEqual(200, resp.status)
+        self.client.add_member(self.alt_tenant_id, share_image)
+        _, body = self.client.get_shared_images(self.alt_tenant_id)
         images = body['shared_images']
         images = map(lambda x: x['image_id'], images)
         self.assertIn(share_image, images)
@@ -51,11 +45,8 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
     @test.attr(type='gate')
     def test_remove_member(self):
         image_id = self._create_image()
-        resp = self.client.add_member(self.alt_tenant_id, image_id)
-        self.assertEqual(204, resp.status)
-        resp = self.client.delete_member(self.alt_tenant_id, image_id)
-        self.assertEqual(204, resp.status)
-        resp, body = self.client.get_image_membership(image_id)
-        self.assertEqual(200, resp.status)
+        self.client.add_member(self.alt_tenant_id, image_id)
+        self.client.delete_member(self.alt_tenant_id, image_id)
+        _, body = self.client.get_image_membership(image_id)
         members = body['members']
         self.assertEqual(0, len(members), str(members))

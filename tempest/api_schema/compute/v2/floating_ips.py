@@ -117,3 +117,14 @@ create_floating_ips_bulk = {
         'required': ['floating_ips_bulk_create']
     }
 }
+
+delete_floating_ips_bulk = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'floating_ips_bulk_delete': {'type': 'string'}
+        },
+        'required': ['floating_ips_bulk_delete']
+    }
+}

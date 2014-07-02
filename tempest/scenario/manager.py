@@ -21,6 +21,7 @@ import six
 import subprocess
 import time
 
+from cinderclient import exceptions as cinder_exceptions
 from heatclient import exc as heat_exceptions
 import netaddr
 from neutronclient.common import exceptions as exc
@@ -354,7 +355,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return server
 
     def create_volume(self, client=None, size=1, name=None,
-                      snapshot_id=None, imageRef=None):
+                      snapshot_id=None, imageRef=None, volume_type=None):
         if client is None:
             client = self.volume_client
         if name is None:
@@ -362,7 +363,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         LOG.debug("Creating a volume (size: %s, name: %s)", size, name)
         volume = client.volumes.create(size=size, display_name=name,
                                        snapshot_id=snapshot_id,
-                                       imageRef=imageRef)
+                                       imageRef=imageRef,
+                                       volume_type=volume_type)
         self.set_resource(name, volume)
         self.assertEqual(name, volume.display_name)
         self.status_timeout(client.volumes, volume.id, 'available')
@@ -621,6 +623,84 @@ class BaremetalScenarioTest(OfficialClientTest):
             self.node.uuid,
             BaremetalProvisionStates.NOSTATE,
             timeout=CONF.baremetal.unprovision_timeout)
+
+
+class EncryptionScenarioTest(OfficialClientTest):
+    """
+    Base class for encryption scenario tests
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        super(EncryptionScenarioTest, cls).setUpClass()
+
+        # use admin credentials to create encrypted volume types
+        admin_creds = cls.admin_credentials()
+        manager = clients.OfficialClientManager(credentials=admin_creds)
+        cls.admin_volume_client = manager.volume_client
+
+    def _wait_for_volume_status(self, status):
+        self.status_timeout(
+            self.volume_client.volumes, self.volume.id, status)
+
+    def _wait_for_volume_deletion(self):
+        self.delete_timeout(
+            self.volume_client.volumes, self.volume.id,
+            not_found_exception=cinder_exceptions.NotFound)
+
+    def nova_boot(self):
+        self.keypair = self.create_keypair()
+        create_kwargs = {'key_name': self.keypair.name}
+        self.server = self.create_server(self.compute_client,
+                                         image=self.image,
+                                         create_kwargs=create_kwargs)
+
+    def create_volume_type(self, client=None, name=None):
+        if not client:
+            client = self.admin_volume_client
+        if not name:
+            name = 'generic'
+        randomized_name = data_utils.rand_name('scenario-type-' + name + '-')
+        LOG.debug("Creating a volume type: %s", randomized_name)
+        volume_type = client.volume_types.create(randomized_name)
+        self.addCleanup(client.volume_types.delete, volume_type.id)
+        return volume_type
+
+    def create_encryption_type(self, client=None, type_id=None, provider=None,
+                               key_size=None, cipher=None,
+                               control_location=None):
+        if not client:
+            client = self.admin_volume_client
+        if not type_id:
+            volume_type = self.create_volume_type()
+            type_id = volume_type.id
+        LOG.debug("Creating an encryption type for volume type: %s", type_id)
+        client.volume_encryption_types.create(type_id,
+                                              {'provider': provider,
+                                               'key_size': key_size,
+                                               'cipher': cipher,
+                                               'control_location':
+                                               control_location})
+
+    def nova_volume_attach(self):
+        attach_volume_client = self.compute_client.volumes.create_server_volume
+        volume = attach_volume_client(self.server.id,
+                                      self.volume.id,
+                                      '/dev/vdb')
+        self.assertEqual(self.volume.id, volume.id)
+        self._wait_for_volume_status('in-use')
+
+    def nova_volume_detach(self):
+        detach_volume_client = self.compute_client.volumes.delete_server_volume
+        detach_volume_client(self.server.id, self.volume.id)
+        self._wait_for_volume_status('available')
+
+        volume = self.volume_client.volumes.get(self.volume.id)
+        self.assertEqual('available', volume.status)
+
+    def cinder_delete_encrypted(self):
+        self.volume_client.volumes.delete(self.volume.id)
+        self._wait_for_volume_deletion()
 
 
 class NetworkScenarioTest(OfficialClientTest):

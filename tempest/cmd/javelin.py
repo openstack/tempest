@@ -35,6 +35,7 @@ from tempest.services.identity.json import identity_client
 from tempest.services.image.v2.json import image_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
+from tempest.services.volume.json import volumes_client
 
 OPTS = {}
 USERS = {}
@@ -60,6 +61,7 @@ class OSClient(object):
         self.containers = container_client.ContainerClient(_auth)
         self.images = image_client.ImageClientV2JSON(_auth)
         self.flavors = flavors_client.FlavorsClientJSON(_auth)
+        self.volumes = volumes_client.VolumesClientJSON(_auth)
 
 
 def load_resources(fname):
@@ -190,6 +192,7 @@ class JavelinCheck(unittest.TestCase):
         self.check_users()
         self.check_objects()
         self.check_servers()
+        self.check_volumes()
 
     def check_users(self):
         """Check that the users we expect to exist, do.
@@ -234,6 +237,21 @@ class JavelinCheck(unittest.TestCase):
             self.assertEqual(os.system("ping -c 1 " + addr), 0,
                              "Server %s is not pingable at %s" % (
                                  server['name'], addr))
+
+    def check_volumes(self):
+        """Check that the volumes are still there and attached."""
+        for volume in self.res['volumes']:
+            client = client_for_user(volume['owner'])
+            found = _get_volume_by_name(client, volume['name'])
+            self.assertIsNotNone(
+                found,
+                "Couldn't find expected volume %s" % volume['name'])
+
+            # Verify that a volume's attachment retrieved
+            server_id = _get_server_by_name(client, volume['server'])['id']
+            attachment = self.client.get_attachment_from_volume(volume)
+            self.assertEqual(volume['id'], attachment['volume_id'])
+            self.assertEqual(server_id, attachment['server_id'])
 
 
 #######################
@@ -339,6 +357,40 @@ def create_servers(servers):
 
 #######################
 #
+# VOLUMES
+#
+#######################
+
+def _get_volume_by_name(client, name):
+    r, body = client.volumes.list_volumes()
+    for volume in body['volumes']:
+        if name == volume['name']:
+            return volume
+    return None
+
+
+def create_volumes(volumes):
+    for volume in volumes:
+        client = client_for_user(volume['owner'])
+
+        # only create a volume if the name isn't here
+        r, body = client.volumes.list_volumes()
+        if any(item['name'] == volume['name'] for item in body):
+            continue
+
+        client.volumes.create_volume(volume['name'], volume['size'])
+
+
+def attach_volumes(volumes):
+    for volume in volumes:
+        client = client_for_user(volume['owner'])
+
+        server_id = _get_server_by_name(client, volume['server'])['id']
+        client.volumes.attach_volume(volume['name'], server_id)
+
+
+#######################
+#
 # MAIN LOGIC
 #
 #######################
@@ -355,6 +407,8 @@ def create_resources():
     create_objects(RES['objects'])
     create_images(RES['images'])
     create_servers(RES['servers'])
+    create_volumes(RES['volumes'])
+    attach_volumes(RES['volumes'])
 
 
 def get_options():

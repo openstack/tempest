@@ -52,11 +52,10 @@ class ImagesNegativeTest(base.BaseV2ImageTest):
     def test_get_delete_deleted_image(self):
         # get and delete the deleted image
         # create and delete image
-        resp, body = self.client.create_image(name='test',
-                                              container_format='bare',
-                                              disk_format='raw')
+        _, body = self.client.create_image(name='test',
+                                           container_format='bare',
+                                           disk_format='raw')
         image_id = body['id']
-        self.assertEqual(201, resp.status)
         self.client.delete_image(image_id)
         self.client.wait_for_resource_deletion(image_id)
 

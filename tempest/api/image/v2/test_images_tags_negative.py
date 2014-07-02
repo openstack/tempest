@@ -33,10 +33,10 @@ class ImagesTagsNegativeTest(base.BaseV2ImageTest):
     @test.attr(type=['negative', 'gate'])
     def test_delete_non_existing_tag(self):
         # Delete non existing tag.
-        resp, body = self.create_image(container_format='bare',
-                                       disk_format='raw',
-                                       visibility='private'
-                                       )
+        _, body = self.create_image(container_format='bare',
+                                    disk_format='raw',
+                                    visibility='private'
+                                    )
         image_id = body['id']
         tag = data_utils.rand_name('non-exist-tag-')
         self.addCleanup(self.client.delete_image, image_id)

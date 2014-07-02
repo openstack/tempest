@@ -137,4 +137,5 @@ class FloatingIPsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'ip_range': ip_range})
         resp, body = self.put('os-floating-ips-bulk/delete', post_body)
         body = json.loads(body)
+        self.validate_response(schema.delete_floating_ips_bulk, resp, body)
         return resp, body['floating_ips_bulk_delete']

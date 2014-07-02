@@ -29,8 +29,8 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         if not CONF.service_available.sahara:
             raise cls.skipException('Sahara support is required')
 
-        os = cls.get_client_manager()
-        cls.client = os.data_processing_client
+        cls.os = cls.get_client_manager()
+        cls.client = cls.os.data_processing_client
 
         cls.flavor_ref = CONF.compute.flavor_ref
 

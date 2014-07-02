@@ -13,11 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import cStringIO as StringIO
 import hashlib
 import random
 import re
 from six import moves
 import time
+import zlib
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers
@@ -61,7 +63,7 @@ class ObjectTest(base.BaseObjectTest):
 
         return object_name, data_segments
 
-    @test.attr(type='smoke')
+    @test.attr(type='gate')
     def test_create_object(self):
         # create object
         object_name = data_utils.rand_name(name='TestObject')
@@ -76,7 +78,242 @@ class ObjectTest(base.BaseObjectTest):
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'PUT')
 
-    @test.attr(type='smoke')
+        # check uploaded content
+        _, body = self.object_client.get_object(self.container_name,
+                                                object_name)
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_content_disposition(self):
+        # create object with content_disposition
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata = {}
+        metadata['content-disposition'] = 'inline'
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=None)
+        self.assertIn('content-disposition', resp)
+        self.assertEqual(resp['content-disposition'], 'inline')
+        self.assertEqual(body, data)
+
+    @test.attr(type='gate')
+    def test_create_object_with_content_encoding(self):
+        # create object with content_encoding
+        object_name = data_utils.rand_name(name='TestObject')
+
+        # put compressed string
+        data_before = 'x' * 2000
+        data = zlib.compress(data_before)
+        metadata = {}
+        metadata['content-encoding'] = 'deflate'
+
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        # download compressed object
+        metadata = {}
+        metadata['accept-encoding'] = 'deflate'
+        resp, body = self.object_client.get_object(
+            self.container_name,
+            object_name,
+            metadata=metadata)
+        self.assertEqual(body, data_before)
+
+    @test.attr(type='gate')
+    def test_create_object_with_etag(self):
+        # create object with etag
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        md5 = hashlib.md5(data).hexdigest()
+        metadata = {'Etag': md5}
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        # check uploaded content
+        _, body = self.object_client.get_object(self.container_name,
+                                                object_name)
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_expect_continue(self):
+        # create object with expect_continue
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata = {'Expect': '100-continue'}
+        resp = self.custom_object_client.create_object_continue(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata)
+
+        self.assertIn('status', resp)
+        self.assertEqual(resp['status'], '100')
+
+        self.custom_object_client.create_object_continue(
+            self.container_name,
+            object_name,
+            data,
+            metadata=None)
+
+        # check uploaded content
+        _, body = self.object_client.get_object(self.container_name,
+                                                object_name)
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_transfer_encoding(self):
+        # create object with transfer_encoding
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string(1024)
+        status, _, resp_headers = self.object_client.put_object_with_chunk(
+            container=self.container_name,
+            name=object_name,
+            contents=StringIO.StringIO(data),
+            chunk_size=512)
+        self.assertEqual(status, 201)
+        self.assertHeaders(resp_headers, 'Object', 'PUT')
+
+        # check uploaded content
+        _, body = self.object_client.get_object(self.container_name,
+                                                object_name)
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_x_fresh_metadata(self):
+        # create object with x_fresh_metadata
+        object_name_base = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata_1 = {'X-Object-Meta-test-meta': 'Meta'}
+        self.object_client.create_object(self.container_name,
+                                         object_name_base,
+                                         data,
+                                         metadata=metadata_1)
+        object_name = data_utils.rand_name(name='TestObject')
+        metadata_2 = {'X-Copy-From': '%s/%s' % (self.container_name,
+                                                object_name_base),
+                      'X-Fresh-Metadata': 'true'}
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            '',
+            metadata=metadata_2)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   object_name)
+        self.assertNotIn('x-object-meta-test-meta', resp)
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_x_object_meta(self):
+        # create object with object_meta
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata = {'X-Object-Meta-test-meta': 'Meta'}
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   object_name)
+        self.assertIn('x-object-meta-test-meta', resp)
+        self.assertEqual(resp['x-object-meta-test-meta'], 'Meta')
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_x_object_metakey(self):
+        # create object with the blank value of metadata
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata = {'X-Object-Meta-test-meta': ''}
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   object_name)
+        self.assertIn('x-object-meta-test-meta', resp)
+        self.assertEqual(resp['x-object-meta-test-meta'], '')
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_x_remove_object_meta(self):
+        # create object with x_remove_object_meta
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata_add = {'X-Object-Meta-test-meta': 'Meta'}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=metadata_add)
+        metadata_remove = {'X-Remove-Object-Meta-test-meta': 'Meta'}
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata_remove)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   object_name)
+        self.assertNotIn('x-object-meta-test-meta', resp)
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
+    def test_create_object_with_x_remove_object_metakey(self):
+        # create object with the blank value of remove metadata
+        object_name = data_utils.rand_name(name='TestObject')
+        data = data_utils.arbitrary_string()
+        metadata_add = {'X-Object-Meta-test-meta': 'Meta'}
+        self.object_client.create_object(self.container_name,
+                                         object_name,
+                                         data,
+                                         metadata=metadata_add)
+        metadata_remove = {'X-Remove-Object-Meta-test-meta': ''}
+        resp, _ = self.object_client.create_object(
+            self.container_name,
+            object_name,
+            data,
+            metadata=metadata_remove)
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'PUT')
+
+        resp, body = self.object_client.get_object(self.container_name,
+                                                   object_name)
+        self.assertNotIn('x-object-meta-test-meta', resp)
+        self.assertEqual(data, body)
+
+    @test.attr(type='gate')
     def test_delete_object(self):
         # create object
         object_name = data_utils.rand_name(name='TestObject')

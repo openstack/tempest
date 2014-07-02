@@ -102,6 +102,28 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                                   self.password)
         self.assertTrue(linux_client.hostname_equals_servername(self.name))
 
+    @test.skip_because(bug="1306367", interface="xml")
+    @test.attr(type='gate')
+    def test_create_server_with_scheduler_hint_group(self):
+        # Create a server with the scheduler hint "group".
+        name = data_utils.rand_name('server_group')
+        policies = ['affinity']
+        resp, body = self.client.create_server_group(name=name,
+                                                     policies=policies)
+        self.assertEqual(200, resp.status)
+        group_id = body['id']
+        self.addCleanup(self.client.delete_server_group, group_id)
+
+        hints = {'group': group_id}
+        resp, server = self.create_test_server(sched_hints=hints,
+                                               wait_until='ACTIVE')
+        self.assertEqual(202, resp.status)
+
+        # Check a server is in the group
+        resp, server_group = self.client.get_server_group(group_id)
+        self.assertEqual(200, resp.status)
+        self.assertIn(server['id'], server_group['members'])
+
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     disk_config = 'AUTO'
