@@ -25,10 +25,7 @@ create_server = {
             'server': {
                 'type': 'object',
                 'properties': {
-                    # NOTE: Now the type of 'id' is uuid, but here allows
-                    # 'integer' also because old OpenStack uses 'integer'
-                    # as a server id.
-                    'id': {'type': ['integer', 'string']},
+                    'id': {'type': 'string'},
                     'os-security-groups:security_groups': {'type': 'array'},
                     'links': parameter_types.links,
                     'admin_password': {'type': 'string'},

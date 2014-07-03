@@ -38,7 +38,7 @@ create_get_volume = {
                                 'id': {'type': 'string'},
                                 'device': {'type': 'string'},
                                 'volumeId': {'type': 'string'},
-                                'serverId': {'type': ['integer', 'string']}
+                                'serverId': {'type': 'string'}
                             }
                             # NOTE- If volume is not attached to any server
                             # then, 'attachments' attributes comes as array
@@ -86,7 +86,7 @@ list_volumes = {
                                     'id': {'type': 'string'},
                                     'device': {'type': 'string'},
                                     'volumeId': {'type': 'string'},
-                                    'serverId': {'type': ['integer', 'string']}
+                                    'serverId': {'type': 'string'}
                                 }
                                 # NOTE- If volume is not attached to any server
                                 # then, 'attachments' attributes comes as array

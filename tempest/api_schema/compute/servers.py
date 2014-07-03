@@ -56,13 +56,13 @@ base_update_server = {
             'server': {
                 'type': 'object',
                 'properties': {
-                    'id': {'type': ['integer', 'string']},
+                    'id': {'type': 'string'},
                     'name': {'type': 'string'},
                     'status': {'type': 'string'},
                     'image': {
                         'type': 'object',
                         'properties': {
-                            'id': {'type': ['integer', 'string']},
+                            'id': {'type': 'string'},
                             'links': parameter_types.links
                         },
                         'required': ['id', 'links']
@@ -70,7 +70,7 @@ base_update_server = {
                     'flavor': {
                         'type': 'object',
                         'properties': {
-                            'id': {'type': ['integer', 'string']},
+                            'id': {'type': 'string'},
                             'links': parameter_types.links
                         },
                         'required': ['id', 'links']

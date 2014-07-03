@@ -30,10 +30,7 @@ common_image_schema = {
         'server': {
             'type': 'object',
             'properties': {
-                # NOTE: Now the type of 'id' is integer, but here
-                # allows 'string' also because we will be able to
-                # change it to 'uuid' in the future.
-                'id': {'type': ['integer', 'string']},
+                'id': {'type': 'string'},
                 'links': parameter_types.links
             },
             'required': ['id', 'links']

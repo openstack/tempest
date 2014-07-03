@@ -27,7 +27,7 @@ list_floating_ips = {
                         # able to change it to 'uuid' in the future.
                         'id': {'type': ['integer', 'string']},
                         'pool': {'type': ['string', 'null']},
-                        'instance_id': {'type': ['integer', 'string', 'null']},
+                        'instance_id': {'type': ['string', 'null']},
                         'ip': {
                             'type': 'string',
                             'format': 'ip-address'
@@ -58,7 +58,7 @@ floating_ip = {
                     # 'uuid' in the future.
                     'id': {'type': ['integer', 'string']},
                     'pool': {'type': ['string', 'null']},
-                    'instance_id': {'type': ['integer', 'string', 'null']},
+                    'instance_id': {'type': ['string', 'null']},
                     'ip': {
                         'type': 'string',
                         'format': 'ip-address'
