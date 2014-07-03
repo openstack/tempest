@@ -40,12 +40,10 @@ class InstanceActionsV3Test(base.BaseV3ComputeTest):
         self.assertTrue(any([i for i in body if i['action'] == 'create']))
         self.assertTrue(any([i for i in body if i['action'] == 'reboot']))
 
-    @test.skip_because(bug="1206032")
     @test.attr(type='gate')
-    @test.skip_because(bug="1281915")
     def test_get_server_action(self):
         # Get the action details of the provided server
-        request_id = self.resp['x-compute-request-id']
+        request_id = self.resp['x-openstack-request-id']
         resp, body = self.client.get_server_action(self.server_id,
                                                    request_id)
         self.assertEqual(200, resp.status)
