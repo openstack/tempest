@@ -50,7 +50,7 @@ def ip_ns_raw():
 
 
 def iptables_raw(table):
-    return sudo_cmd_call("iptables -v -S -t " + table)
+    return sudo_cmd_call("iptables --line-numbers -L -nv -t " + table)
 
 
 def ip_ns_list():
