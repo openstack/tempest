@@ -208,6 +208,20 @@ delete_server_group = {
     'status_code': [204]
 }
 
+list_server_groups = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server_groups': {
+                'type': 'array',
+                'items': common_server_group
+            }
+        },
+        'required': ['server_groups']
+    }
+}
+
 instance_actions_object = copy.deepcopy(servers.common_instance_actions)
 instance_actions_object[
     'properties'].update({'instance_uuid': {'type': 'string'}})
