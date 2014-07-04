@@ -67,6 +67,8 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             cls.keypairs_client = cls.os.keypairs_client
             cls.security_groups_client = cls.os.security_groups_client
             cls.quotas_client = cls.os.quotas_client
+            # NOTE(mriedem): os-quota-class-sets is v2 API only
+            cls.quota_classes_client = cls.os.quota_classes_client
             cls.limits_client = cls.os.limits_client
             cls.volumes_extensions_client = cls.os.volumes_extensions_client
             cls.volumes_client = cls.os.volumes_client
