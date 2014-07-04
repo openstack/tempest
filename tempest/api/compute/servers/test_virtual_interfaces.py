@@ -36,6 +36,7 @@ class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
     @test.skip_because(bug="1183436",
                        condition=CONF.service_available.neutron)
     @test.attr(type='gate')
+    @test.services('network')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
