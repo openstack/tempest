@@ -24,7 +24,7 @@ hypervisor_statistics = {
                 'properties': {
                     'count': {'type': 'integer'},
                     'current_workload': {'type': 'integer'},
-                    'disk_available_least': {'type': 'integer'},
+                    'disk_available_least': {'type': ['integer', 'null']},
                     'free_disk_gb': {'type': 'integer'},
                     'free_ram_mb': {'type': 'integer'},
                     'local_gb': {'type': 'integer'},
@@ -110,7 +110,7 @@ common_show_hypervisor = {
                 'properties': {
                     'cpu_info': {'type': 'string'},
                     'current_workload': {'type': 'integer'},
-                    'disk_available_least': {'type': 'integer'},
+                    'disk_available_least': {'type': ['integer', 'null']},
                     'host_ip': {
                         'type': 'string',
                         'format': 'ip-address'
