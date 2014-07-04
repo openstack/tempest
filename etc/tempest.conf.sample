@@ -109,6 +109,9 @@
 # value)
 #driver_enabled=false
 
+# Driver name which Ironic uses (string value)
+#driver=fake
+
 # The endpoint type to use for the baremetal provisioning
 # service (string value)
 #endpoint_type=publicURL
