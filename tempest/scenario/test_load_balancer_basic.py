@@ -258,6 +258,13 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
         else:
             self.vip_ip = self.vip.address
 
+        # Currently the ovs-agent is not enforcing security groups on the
+        # vip port - see https://bugs.launchpad.net/neutron/+bug/1163569
+        # However the linuxbridge-agent does, and it is necessary to add a
+        # security group with a rule that allows tcp port 80 to the vip port.
+        body = {'port': {'security_groups': [self.security_group.id]}}
+        self.network_client.update_port(self.vip.port_id, body)
+
     def _check_load_balancing(self):
         """
         1. Send 10 requests on the floating ip associated with the VIP
