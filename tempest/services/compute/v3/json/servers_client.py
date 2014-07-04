@@ -136,6 +136,7 @@ class ServersV3ClientJSON(rest_client.RestClient):
         """Returns the details of an existing server."""
         resp, body = self.get("servers/%s" % str(server_id))
         body = json.loads(body)
+        self.validate_response(schema.get_server, resp, body)
         return resp, body['server']
 
     def delete_server(self, server_id):

@@ -54,7 +54,7 @@ addresses_v3['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][
         ['type', 'mac_addr']
     )
 
-update_server = copy.deepcopy(servers.base_update_server)
+update_server = copy.deepcopy(servers.base_update_get_server)
 update_server['response_body']['properties']['server']['properties'].update({
     'addresses': addresses_v3,
     'host_id': {'type': 'string'},
@@ -65,6 +65,43 @@ update_server['response_body']['properties']['server']['required'].append(
     # NOTE: os-access-ips:access_ip_v4/v6 are API extension,
     # and some environments return a response without these
     # attributes. So they are not 'required'.
+    'host_id'
+)
+
+get_server = copy.deepcopy(servers.base_update_get_server)
+get_server['response_body']['properties']['server']['properties'].update({
+    'key_name': {'type': ['string', 'null']},
+    'host_id': {'type': 'string'},
+
+    # NOTE: Non-admin users also can see "os-server-usage" and
+    # "os-extended-availability-zone" attributes.
+    'os-server-usage:launched_at': {'type': ['string', 'null']},
+    'os-server-usage:terminated_at': {'type': ['string', 'null']},
+    'os-extended-availability-zone:availability_zone': {'type': 'string'},
+
+    # NOTE: Admin users only can see "os-extended-status" and
+    # "os-extended-server-attributes" attributes.
+    'os-extended-status:task_state': {'type': ['string', 'null']},
+    'os-extended-status:vm_state': {'type': 'string'},
+    'os-extended-status:power_state': {'type': 'integer'},
+    'os-extended-status:locked_by': {'type': ['string', 'null']},
+    'os-extended-server-attributes:host': {'type': ['string', 'null']},
+    'os-extended-server-attributes:instance_name': {'type': 'string'},
+    'os-extended-server-attributes:hypervisor_hostname': {
+        'type': ['string', 'null']
+    },
+    'os-extended-volumes:volumes_attached': {'type': 'array'},
+    'os-pci:pci_devices': {'type': 'array'},
+    'os-access-ips:access_ip_v4': parameter_types.access_ip_v4,
+    'os-access-ips:access_ip_v6': parameter_types.access_ip_v6,
+    'os-config-drive:config_drive': {'type': 'string'}
+})
+get_server['response_body']['properties']['server']['required'].append(
+    # NOTE: os-server-usage, os-extended-availability-zone,
+    # os-extended-status, os-extended-server-attributes,
+    # os-extended-volumes, os-pci, os-access-ips and
+    # os-config-driveare API extension, and some environments
+    # return a response without these attributes. So they are not 'required'.
     'host_id'
 )
 

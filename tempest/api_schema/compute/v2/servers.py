@@ -43,7 +43,7 @@ create_server = {
     }
 }
 
-update_server = copy.deepcopy(servers.base_update_server)
+update_server = copy.deepcopy(servers.base_update_get_server)
 update_server['response_body']['properties']['server']['properties'].update({
     'hostId': {'type': 'string'},
     'OS-DCF:diskConfig': {'type': 'string'},
@@ -54,6 +54,39 @@ update_server['response_body']['properties']['server']['required'].append(
     # NOTE: OS-DCF:diskConfig and accessIPv4/v6 are API
     # extensions, and some environments return a response
     # without these attributes. So they are not 'required'.
+    'hostId'
+)
+
+get_server = copy.deepcopy(servers.base_update_get_server)
+get_server['response_body']['properties']['server']['properties'].update({
+    'key_name': {'type': ['string', 'null']},
+    'hostId': {'type': 'string'},
+
+    # NOTE: Non-admin users also can see "OS-SRV-USG" and "OS-EXT-AZ"
+    # attributes.
+    'OS-SRV-USG:launched_at': {'type': ['string', 'null']},
+    'OS-SRV-USG:terminated_at': {'type': ['string', 'null']},
+    'OS-EXT-AZ:availability_zone': {'type': 'string'},
+
+    # NOTE: Admin users only can see "OS-EXT-STS" and "OS-EXT-SRV-ATTR"
+    # attributes.
+    'OS-EXT-STS:task_state': {'type': ['string', 'null']},
+    'OS-EXT-STS:vm_state': {'type': 'string'},
+    'OS-EXT-STS:power_state': {'type': 'integer'},
+    'OS-EXT-SRV-ATTR:host': {'type': ['string', 'null']},
+    'OS-EXT-SRV-ATTR:instance_name': {'type': 'string'},
+    'OS-EXT-SRV-ATTR:hypervisor_hostname': {'type': ['string', 'null']},
+    'os-extended-volumes:volumes_attached': {'type': 'array'},
+    'OS-DCF:diskConfig': {'type': 'string'},
+    'accessIPv4': parameter_types.access_ip_v4,
+    'accessIPv6': parameter_types.access_ip_v6,
+    'config_drive': {'type': 'string'}
+})
+get_server['response_body']['properties']['server']['required'].append(
+    # NOTE: OS-SRV-USG, OS-EXT-AZ, OS-EXT-STS, OS-EXT-SRV-ATTR,
+    # os-extended-volumes, OS-DCF and accessIPv4/v6 are API
+    # extension, and some environments return a response without
+    # these attributes. So they are not 'required'.
     'hostId'
 )
 
