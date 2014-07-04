@@ -65,7 +65,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
 
     def _create_floating_ip(self):
         floating_ip = self.compute_client.floating_ips.create()
-        self.addCleanup(floating_ip.delete)
+        self.addCleanup(self.delete_wrapper, floating_ip)
         return floating_ip
 
     def _set_floating_ip_to_server(self, server, floating_ip):

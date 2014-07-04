@@ -85,7 +85,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
 
     def nova_floating_ip_create(self):
         self.floating_ip = self.compute_client.floating_ips.create()
-        self.addCleanup(self.floating_ip.delete)
+        self.addCleanup(self.delete_wrapper, self.floating_ip)
 
     def nova_floating_ip_add(self):
         self.server.add_floating_ip(self.floating_ip)

@@ -74,23 +74,17 @@ class TestServerBasicOps(manager.OfficialClientTest):
             'key_name': self.keypair.id,
             'security_groups': security_groups
         }
-        instance = self.create_server(image=self.image_ref,
-                                      flavor=self.flavor_ref,
-                                      create_kwargs=create_kwargs)
-        self.set_resource('instance', instance)
-
-    def terminate_instance(self):
-        instance = self.get_resource('instance')
-        instance.delete()
-        self.remove_resource('instance')
+        self.instance = self.create_server(image=self.image_ref,
+                                           flavor=self.flavor_ref,
+                                           create_kwargs=create_kwargs)
 
     def verify_ssh(self):
         if self.run_ssh:
             # Obtain a floating IP
             floating_ip = self.compute_client.floating_ips.create()
+            self.addCleanup(self.delete_wrapper, floating_ip)
             # Attach a floating IP
-            instance = self.get_resource('instance')
-            instance.add_floating_ip(floating_ip)
+            self.instance.add_floating_ip(floating_ip)
             # Check ssh
             try:
                 self.get_remote_client(
@@ -108,4 +102,4 @@ class TestServerBasicOps(manager.OfficialClientTest):
         self.security_group = self._create_security_group_nova()
         self.boot_instance()
         self.verify_ssh()
-        self.terminate_instance()
+        self.instance.delete()

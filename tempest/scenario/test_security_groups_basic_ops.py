@@ -165,7 +165,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _create_tenant_keypairs(self, tenant_id):
         keypair = self.create_keypair(
             name=data_utils.rand_name('keypair-smoke-'))
-        self.addCleanup(self.cleanup_wrapper, keypair)
         self.tenants[tenant_id].keypair = keypair
 
     def _create_tenant_security_groups(self, tenant):
@@ -173,14 +172,12 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             namestart='secgroup_access-',
             tenant_id=tenant.creds.tenant_id
         )
-        self.addCleanup(self.cleanup_wrapper, access_sg)
 
         # don't use default secgroup since it allows in-tenant traffic
         def_sg = self._create_empty_security_group(
             namestart='secgroup_general-',
             tenant_id=tenant.creds.tenant_id
         )
-        self.addCleanup(self.cleanup_wrapper, def_sg)
         tenant.security_groups.update(access=access_sg, default=def_sg)
         ssh_rule = dict(
             protocol='tcp',
@@ -188,9 +185,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             port_range_max=22,
             direction='ingress',
         )
-        rule = self._create_security_group_rule(secgroup=access_sg,
-                                                **ssh_rule)
-        self.addCleanup(self.cleanup_wrapper, rule)
+        self._create_security_group_rule(secgroup=access_sg, **ssh_rule)
 
     def _verify_network_details(self, tenant):
         # Checks that we see the newly created network/subnet/router via
@@ -238,7 +233,6 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             'tenant_id': tenant.creds.tenant_id
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
-        self.addCleanup(self.cleanup_wrapper, server)
         return server
 
     def _create_tenant_servers(self, tenant, num=1):
@@ -269,13 +263,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
     def _assign_floating_ips(self, server):
         public_network_id = CONF.network.public_network_id
         floating_ip = self._create_floating_ip(server, public_network_id)
-        self.addCleanup(self.cleanup_wrapper, floating_ip)
         self.floating_ips.setdefault(server, floating_ip)
 
     def _create_tenant_network(self, tenant):
         network, subnet, router = self._create_networks(tenant.creds.tenant_id)
-        for r in [network, router, subnet]:
-            self.addCleanup(self.cleanup_wrapper, r)
         tenant.set_network(network, subnet, router)
 
     def _set_compute_context(self, tenant):
@@ -355,11 +346,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             remote_group_id=tenant.security_groups['default'].id,
             direction='ingress'
         )
-        rule = self._create_security_group_rule(
+        self._create_security_group_rule(
             secgroup=tenant.security_groups['default'],
             **ruleset
         )
-        self.addCleanup(self.cleanup_wrapper, rule)
         access_point_ssh = self._connect_to_access_point(tenant)
         for server in tenant.servers:
             self._check_connectivity(access_point=access_point_ssh,
@@ -385,11 +375,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
             protocol='icmp',
             direction='ingress'
         )
-        rule_s2d = self._create_security_group_rule(
+        self._create_security_group_rule(
             secgroup=dest_tenant.security_groups['default'],
             **ruleset
         )
-        self.addCleanup(self.cleanup_wrapper, rule_s2d)
         access_point_ssh = self._connect_to_access_point(source_tenant)
         ip = self._get_server_ip(dest_tenant.access_point,
                                  floating=self.floating_ip_access)
@@ -399,11 +388,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self._test_cross_tenant_block(dest_tenant, source_tenant)
 
         # allow reverse traffic and check
-        rule_d2s = self._create_security_group_rule(
+        self._create_security_group_rule(
             secgroup=source_tenant.security_groups['default'],
             **ruleset
         )
-        self.addCleanup(self.cleanup_wrapper, rule_d2s)
 
         access_point_ssh_2 = self._connect_to_access_point(dest_tenant)
         ip = self._get_server_ip(source_tenant.access_point,
