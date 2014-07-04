@@ -25,6 +25,10 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.safe_setup
     def setUpClass(cls):
         super(RolesV3TestJSON, cls).setUpClass()
+        for _ in range(3):
+            role_name = data_utils.rand_name(name='role-')
+            _, role = cls.client.create_role(role_name)
+            cls.data.v3_roles.append(role)
         cls.fetched_role_ids = list()
         u_name = data_utils.rand_name('user-')
         u_desc = '%s description' % u_name
@@ -185,6 +189,14 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         resp, _ = self.client.revoke_role_from_group_on_domain(
             self.domain['id'], self.group_body['id'], self.role['id'])
         self.assertEqual(resp['status'], '204')
+
+    @test.attr(type='gate')
+    def test_list_roles(self):
+        # Return a list of all roles
+        resp, body = self.client.list_roles()
+        self.assertEqual(200, resp.status)
+        found = [role for role in body if role in self.data.v3_roles]
+        self.assertEqual(len(found), len(self.data.v3_roles))
 
 
 class RolesV3TestXML(RolesV3TestJSON):
