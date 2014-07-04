@@ -40,6 +40,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         cls._data_sources = []
         cls._job_binary_internals = []
         cls._job_binaries = []
+        cls._jobs = []
 
     @classmethod
     def tearDownClass(cls):
@@ -47,12 +48,13 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
                               cls.client.delete_cluster_template)
         cls.cleanup_resources(getattr(cls, '_node_group_templates', []),
                               cls.client.delete_node_group_template)
-        cls.cleanup_resources(getattr(cls, '_data_sources', []),
-                              cls.client.delete_data_source)
-        cls.cleanup_resources(getattr(cls, '_job_binary_internals', []),
-                              cls.client.delete_job_binary_internal)
+        cls.cleanup_resources(getattr(cls, '_jobs', []), cls.client.delete_job)
         cls.cleanup_resources(getattr(cls, '_job_binaries', []),
                               cls.client.delete_job_binary)
+        cls.cleanup_resources(getattr(cls, '_job_binary_internals', []),
+                              cls.client.delete_job_binary_internal)
+        cls.cleanup_resources(getattr(cls, '_data_sources', []),
+                              cls.client.delete_data_source)
         cls.clear_isolated_creds()
         super(BaseDataProcessingTest, cls).tearDownClass()
 
@@ -132,6 +134,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
 
         return resp_body
 
+    @classmethod
     def create_job_binary(cls, name, url, extra=None, **kwargs):
         """Creates watched job binary with specified params.
 
@@ -142,5 +145,20 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         _, resp_body = cls.client.create_job_binary(name, url, extra, **kwargs)
         # store id of created job binary
         cls._job_binaries.append(resp_body['id'])
+
+        return resp_body
+
+    @classmethod
+    def create_job(cls, name, job_type, mains, libs=None, **kwargs):
+        """Creates watched job with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object. All resources created in this method will be automatically
+        removed in tearDownClass method.
+        """
+        _, resp_body = cls.client.create_job(name,
+                                             job_type, mains, libs, **kwargs)
+        # store id of created job
+        cls._jobs.append(resp_body['id'])
 
         return resp_body
