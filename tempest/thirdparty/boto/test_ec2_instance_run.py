@@ -177,7 +177,10 @@ class InstanceRunTest(boto_test.BotoTestCase):
             instance.remove_tag('key1', value='value1')
 
         tags = self.ec2_client.get_all_tags()
-        self.assertEqual(len(tags), 0, str(tags))
+
+        # NOTE: Volume-attach and detach causes metadata (tags) to be created
+        # for the volume. So exclude them while asserting.
+        self.assertNotIn('key1', tags)
 
         for instance in reservation.instances:
             instance.stop()
