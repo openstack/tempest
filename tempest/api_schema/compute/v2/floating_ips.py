@@ -128,3 +128,31 @@ delete_floating_ips_bulk = {
         'required': ['floating_ips_bulk_delete']
     }
 }
+
+list_floating_ips_bulk = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'floating_ip_info': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'address': {
+                            'type': 'string',
+                            'format': 'ip-address'
+                        },
+                        'instance_uuid': {'type': ['string', 'null']},
+                        'interface': {'type': ['string', 'null']},
+                        'pool': {'type': ['string', 'null']},
+                        'project_id': {'type': ['string', 'null']}
+                    },
+                    'required': ['address', 'instance_uuid', 'interface',
+                                 'pool', 'project_id']
+                }
+            }
+        },
+        'required': ['floating_ip_info']
+    }
+}

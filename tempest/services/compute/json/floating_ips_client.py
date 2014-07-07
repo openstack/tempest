@@ -130,6 +130,7 @@ class FloatingIPsClientJSON(rest_client.RestClient):
         """Returns a list of all floating IPs bulk."""
         resp, body = self.get('os-floating-ips-bulk')
         body = json.loads(body)
+        self.validate_response(schema.list_floating_ips_bulk, resp, body)
         return resp, body['floating_ip_info']
 
     def delete_floating_ips_bulk(self, ip_range):
