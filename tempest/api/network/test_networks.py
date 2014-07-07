@@ -277,13 +277,6 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         block defined by tenant-network_cidr
     """
 
-    @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(BulkNetworkOpsTestJSON, cls).setUpClass()
-        cls.network1 = cls.create_network()
-        cls.network2 = cls.create_network()
-
     def _delete_networks(self, created_networks):
         for n in created_networks:
             resp, body = self.client.delete_network(n['id'])
@@ -332,11 +325,11 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_bulk_create_delete_subnet(self):
+        networks = [self.create_network(), self.create_network()]
         # Creates 2 subnets in one request
         cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
         mask_bits = CONF.network.tenant_network_mask_bits
         cidrs = [subnet_cidr for subnet_cidr in cidr.subnet(mask_bits)]
-        networks = [self.network1['id'], self.network2['id']]
         names = [data_utils.rand_name('subnet-') for i in range(len(networks))]
         subnets_list = []
         # TODO(raies): "for IPv6, version list [4, 6] will be used.
@@ -344,7 +337,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         ip_version = [4, 4]
         for i in range(len(names)):
             p1 = {
-                'network_id': networks[i],
+                'network_id': networks[i]['id'],
                 'cidr': str(cidrs[(i)]),
                 'name': names[i],
                 'ip_version': ip_version[i]
@@ -364,14 +357,14 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_bulk_create_delete_port(self):
+        networks = [self.create_network(), self.create_network()]
         # Creates 2 ports in one request
-        networks = [self.network1['id'], self.network2['id']]
         names = [data_utils.rand_name('port-') for i in range(len(networks))]
         port_list = []
         state = [True, False]
         for i in range(len(names)):
             p1 = {
-                'network_id': networks[i],
+                'network_id': networks[i]['id'],
                 'name': names[i],
                 'admin_state_up': state[i],
             }
