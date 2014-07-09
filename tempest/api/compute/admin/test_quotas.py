@@ -169,7 +169,10 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
             'default', **original_defaults)
         self.assertEqual(200, resp.status)
 
-    @test.attr(type='gate')
+    # NOTE(sdague): this test is problematic as it changes
+    # global state, and possibly needs to be part of a set of
+    # tests that get run all by themselves at the end under a
+    # 'danger' flag.
     def test_update_default_quotas(self):
         LOG.debug("get the current 'default' quota class values")
         resp, body = self.adm_client.get_quota_class_set('default')
@@ -180,7 +183,10 @@ class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
         self.addCleanup(self._restore_default_quotas, body.copy())
         # increment all of the values for updating the default quota class
         for quota, default in six.iteritems(body):
-            body[quota] = default + 1
+            # NOTE(sdague): we need to increment a lot, otherwise
+            # there is a real chance that we go from -1 (unlimitted)
+            # to a very small number which causes issues.
+            body[quota] = default + 100
         LOG.debug("update limits for the default quota class set")
         resp, update_body = self.adm_client.update_quota_class_set('default',
                                                                    **body)
