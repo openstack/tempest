@@ -32,7 +32,7 @@ class StressFrameworkTest(base.TestCase):
         cmd = ' '.join([cmd, param])
         LOG.info("running: '%s'" % cmd)
         cmd_str = cmd
-        cmd = shlex.split(cmd)
+        cmd = shlex.split(cmd.encode('utf-8'))
         result = ''
         result_err = ''
         try:
