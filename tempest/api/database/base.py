@@ -25,7 +25,6 @@ class BaseDatabaseTest(tempest.test.BaseTestCase):
     """Base test case class for all Database API tests."""
 
     _interface = 'json'
-    force_tenant_isolation = False
 
     @classmethod
     def setUpClass(cls):
