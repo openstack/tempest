@@ -23,6 +23,8 @@ LOG = logging.getLogger(__name__)
 
 class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
     _tpl_type = 'yaml'
+    _resource = 'resources'
+    _type = 'type'
 
     @classmethod
     def setUpClass(cls):
@@ -49,8 +51,15 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
     @test.attr(type='slow')
     def test_created_resources(self):
         """Verifies created keypair resource."""
-        resources = [('KeyPairSavePrivate', 'OS::Nova::KeyPair'),
-                     ('KeyPairDontSavePrivate', 'OS::Nova::KeyPair')]
+
+        nova_keypair_template = self.load_template('nova_keypair',
+                                                   ext=self._tpl_type)
+        resources = [('KeyPairSavePrivate',
+                      nova_keypair_template[self._resource][
+                      'KeyPairSavePrivate'][self._type]),
+                     ('KeyPairDontSavePrivate',
+                      nova_keypair_template[self._resource][
+                      'KeyPairDontSavePrivate'][self._type])]
 
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name, None)
@@ -85,3 +94,5 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
 
 class NovaKeyPairResourcesAWSTest(NovaKeyPairResourcesYAMLTest):
     _tpl_type = 'json'
+    _resource = 'Resources'
+    _type = 'Type'
