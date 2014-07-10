@@ -69,6 +69,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
             if not CONF.volume_feature_enabled.api_v2:
                 msg = "Volume API v2 is disabled"
                 raise cls.skipException(msg)
+            cls.snapshots_client = cls.os.snapshots_v2_client
             cls.volumes_client = cls.os.volumes_v2_client
             cls.volumes_extension_client = cls.os.volumes_v2_extension_client
             cls.availability_zone_client = (
