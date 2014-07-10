@@ -142,10 +142,6 @@ class BaseVolumeV1Test(BaseVolumeTest):
     _api_version = 1
 
 
-class BaseVolumeV2Test(BaseVolumeTest):
-    _api_version = 2
-
-
 class BaseVolumeV1AdminTest(BaseVolumeV1Test):
     """Base test case class for all Volume Admin API tests."""
     @classmethod
