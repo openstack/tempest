@@ -203,11 +203,13 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         params = {'status': 'active'}
         resp, body = self.client.list_servers_with_detail(params)
         servers = body['servers']
+        test_ids = [s['id'] for s in (self.s1, self.s2, self.s3)]
 
         self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s2['id'], map(lambda x: x['id'], servers))
         self.assertIn(self.s3['id'], map(lambda x: x['id'], servers))
-        self.assertEqual(['ACTIVE'] * 3, [x['status'] for x in servers])
+        self.assertEqual(['ACTIVE'] * 3, [x['status'] for x in servers
+                                          if x['id'] in test_ids])
 
     @test.attr(type='gate')
     def test_list_servers_filtered_by_name_wildcard(self):
