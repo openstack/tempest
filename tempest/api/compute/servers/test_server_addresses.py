@@ -34,6 +34,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
     @test.skip_because(bug="1210483",
                        condition=CONF.service_available.neutron)
     @test.attr(type='smoke')
+    @test.services('network')
     def test_list_server_addresses(self):
         # All public and private addresses for
         # a server should be returned
@@ -51,6 +52,7 @@ class ServerAddressesTestJSON(base.BaseV2ComputeTest):
                 self.assertTrue(address['version'])
 
     @test.attr(type='smoke')
+    @test.services('network')
     def test_list_server_addresses_by_network(self):
         # Providing a network type should filter
         # the addresses return by that type

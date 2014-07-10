@@ -10,6 +10,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from cinderclient import exceptions as cinder_exc
+
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log
@@ -69,7 +71,8 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
         snap = volume_snapshots.create(volume_id=vol_id,
                                        force=True,
                                        display_name=snap_name)
-        self.set_resource(snap.id, snap)
+        self.addCleanup_with_wait(self.volume_client.volume_snapshots, snap.id,
+                                  exc_type=cinder_exc.NotFound)
         self.status_timeout(volume_snapshots,
                             snap.id,
                             'available')
@@ -100,8 +103,7 @@ class TestVolumeBootPattern(manager.OfficialClientTest):
     def _ssh_to_server(self, server, keypair):
         if CONF.compute.use_floatingip_for_ssh:
             floating_ip = self.compute_client.floating_ips.create()
-            fip_name = data_utils.rand_name('scenario-fip')
-            self.set_resource(fip_name, floating_ip)
+            self.addCleanup(self.delete_wrapper, floating_ip)
             server.add_floating_ip(floating_ip)
             ip = floating_ip.ip
         else:

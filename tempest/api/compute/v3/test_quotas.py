@@ -14,10 +14,16 @@
 #    under the License.
 
 from tempest.api.compute import base
+from tempest.common import tempest_fixtures as fixtures
 from tempest import test
 
 
 class QuotasV3Test(base.BaseV3ComputeTest):
+
+    def setUp(self):
+        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
+        super(QuotasV3Test, self).setUp()
 
     @classmethod
     def setUpClass(cls):

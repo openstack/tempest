@@ -25,10 +25,7 @@ get_keypair = {
                     'public_key': {'type': 'string'},
                     'name': {'type': 'string'},
                     'fingerprint': {'type': 'string'},
-                    # NOTE: Now the type of 'user_id' is integer, but here
-                    # allows 'string' also because we will be able to change
-                    # it to 'uuid' in the future.
-                    'user_id': {'type': ['integer', 'string']},
+                    'user_id': {'type': 'string'},
                     'deleted': {'type': 'boolean'},
                     'created_at': {'type': 'string'},
                     'updated_at': {'type': ['string', 'null']},

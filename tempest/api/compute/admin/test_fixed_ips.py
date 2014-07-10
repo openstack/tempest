@@ -40,17 +40,20 @@ class FixedIPsTestJson(base.BaseV2ComputeAdminTest):
                 break
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_list_fixed_ip_details(self):
         resp, fixed_ip = self.client.get_fixed_ip_details(self.ip)
         self.assertEqual(fixed_ip['address'], self.ip)
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_set_reserve(self):
         body = {"reserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)
         self.assertEqual(resp.status, 202)
 
     @test.attr(type='gate')
+    @test.services('network')
     def test_set_unreserve(self):
         body = {"unreserve": "None"}
         resp, body = self.client.reserve_fixed_ip(self.ip, body)

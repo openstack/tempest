@@ -27,7 +27,7 @@ list_floating_ips = {
                         # able to change it to 'uuid' in the future.
                         'id': {'type': ['integer', 'string']},
                         'pool': {'type': ['string', 'null']},
-                        'instance_id': {'type': ['integer', 'string', 'null']},
+                        'instance_id': {'type': ['string', 'null']},
                         'ip': {
                             'type': 'string',
                             'format': 'ip-address'
@@ -58,7 +58,7 @@ floating_ip = {
                     # 'uuid' in the future.
                     'id': {'type': ['integer', 'string']},
                     'pool': {'type': ['string', 'null']},
-                    'instance_id': {'type': ['integer', 'string', 'null']},
+                    'instance_id': {'type': ['string', 'null']},
                     'ip': {
                         'type': 'string',
                         'format': 'ip-address'
@@ -126,5 +126,33 @@ delete_floating_ips_bulk = {
             'floating_ips_bulk_delete': {'type': 'string'}
         },
         'required': ['floating_ips_bulk_delete']
+    }
+}
+
+list_floating_ips_bulk = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'floating_ip_info': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'address': {
+                            'type': 'string',
+                            'format': 'ip-address'
+                        },
+                        'instance_uuid': {'type': ['string', 'null']},
+                        'interface': {'type': ['string', 'null']},
+                        'pool': {'type': ['string', 'null']},
+                        'project_id': {'type': ['string', 'null']}
+                    },
+                    'required': ['address', 'instance_uuid', 'interface',
+                                 'pool', 'project_id']
+                }
+            }
+        },
+        'required': ['floating_ip_info']
     }
 }

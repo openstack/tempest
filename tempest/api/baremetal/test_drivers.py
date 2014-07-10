@@ -13,14 +13,29 @@
 #    under the License.
 
 from tempest.api.baremetal import base
+from tempest import config
 from tempest import test
+
+CONF = config.CONF
 
 
 class TestDrivers(base.BaseBaremetalTest):
     """Tests for drivers."""
+    @classmethod
+    @test.safe_setup
+    def setUpClass(cls):
+        super(TestDrivers, cls).setUpClass()
+        cls.driver_name = CONF.baremetal.driver
 
     @test.attr(type="smoke")
     def test_list_drivers(self):
         resp, drivers = self.client.list_drivers()
         self.assertEqual('200', resp['status'])
-        self.assertIn('fake', [d['name'] for d in drivers['drivers']])
+        self.assertIn(self.driver_name,
+                      [d['name'] for d in drivers['drivers']])
+
+    @test.attr(type="smoke")
+    def test_show_driver(self):
+        resp, driver = self.client.show_driver(self.driver_name)
+        self.assertEqual('200', resp['status'])
+        self.assertEqual(self.driver_name, driver['name'])

@@ -89,6 +89,15 @@ class BaremetalClientV1(base.BaremetalClient):
         """
         return self._show_request('ports', uuid)
 
+    def show_driver(self, driver_name):
+        """
+        Gets a specific driver.
+
+        :param driver_name: Name of driver.
+        :return: Serialized driver as a dictionary.
+        """
+        return self._show_request('drivers', driver_name)
+
     @base.handle_errors
     def create_node(self, chassis_id, **kwargs):
         """

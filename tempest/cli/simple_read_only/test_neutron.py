@@ -49,7 +49,8 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
 
     @test.attr(type='smoke')
     def test_neutron_net_list(self):
-        self.neutron('net-list')
+        net_list = self.parser.listing(self.neutron('net-list'))
+        self.assertTableStruct(net_list, ['id', 'name', 'subnets'])
 
     @test.attr(type='smoke')
     def test_neutron_ext_list(self):
@@ -111,11 +112,14 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     @test.attr(type='smoke')
     @test.requires_ext(extension='external-net', service='network')
     def test_neutron_net_external_list(self):
-        self.neutron('net-external-list')
+        net_ext_list = self.parser.listing(self.neutron('net-external-list'))
+        self.assertTableStruct(net_ext_list, ['id', 'name', 'subnets'])
 
     @test.attr(type='smoke')
     def test_neutron_port_list(self):
-        self.neutron('port-list')
+        port_list = self.parser.listing(self.neutron('port-list'))
+        self.assertTableStruct(port_list, ['id', 'name', 'mac_address',
+                                           'fixed_ips'])
 
     @test.attr(type='smoke')
     @test.requires_ext(extension='quotas', service='network')
@@ -125,7 +129,9 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     @test.attr(type='smoke')
     @test.requires_ext(extension='router', service='network')
     def test_neutron_router_list(self):
-        self.neutron('router-list')
+        router_list = self.parser.listing(self.neutron('router-list'))
+        self.assertTableStruct(router_list, ['id', 'name',
+                                             'external_gateway_info'])
 
     @test.attr(type='smoke')
     @test.requires_ext(extension='security-group', service='network')
@@ -136,11 +142,18 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     @test.attr(type='smoke')
     @test.requires_ext(extension='security-group', service='network')
     def test_neutron_security_group_rule_list(self):
-        self.neutron('security-group-rule-list')
+        security_grp = self.parser.listing(self.neutron
+                                           ('security-group-rule-list'))
+        self.assertTableStruct(security_grp, ['id', 'security_group',
+                                              'direction', 'protocol',
+                                              'remote_ip_prefix',
+                                              'remote_group'])
 
     @test.attr(type='smoke')
     def test_neutron_subnet_list(self):
-        self.neutron('subnet-list')
+        subnet_list = self.parser.listing(self.neutron('subnet-list'))
+        self.assertTableStruct(subnet_list, ['id', 'name', 'cidr',
+                                             'allocation_pools'])
 
     @test.attr(type='smoke')
     def test_neutron_help(self):

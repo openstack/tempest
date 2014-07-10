@@ -134,6 +134,7 @@ class ServersClientJSON(rest_client.RestClient):
         """Returns the details of an existing server."""
         resp, body = self.get("servers/%s" % str(server_id))
         body = json.loads(body)
+        self.validate_response(schema.get_server, resp, body)
         return resp, body['server']
 
     def delete_server(self, server_id):
@@ -524,6 +525,7 @@ class ServersClientJSON(rest_client.RestClient):
         """List the server-groups."""
         resp, body = self.get("os-server-groups")
         body = json.loads(body)
+        self.validate_response(schema.list_server_groups, resp, body)
         return resp, body['server_groups']
 
     def get_server_group(self, server_group_id):

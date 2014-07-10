@@ -42,13 +42,12 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
         availability_zone = kwargs['availability_zone']
         self.assertEqual(aggregate.name, aggregate_name)
         self.assertEqual(aggregate.availability_zone, availability_zone)
-        self.set_resource(aggregate.id, aggregate)
+        self.addCleanup(self._delete_aggregate, aggregate)
         LOG.debug("Aggregate %s created." % (aggregate.name))
         return aggregate
 
     def _delete_aggregate(self, aggregate):
         self.compute_client.aggregates.delete(aggregate.id)
-        self.remove_resource(aggregate.id)
         LOG.debug("Aggregate %s deleted. " % (aggregate.name))
 
     def _get_host_name(self):
@@ -60,6 +59,7 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
     def _add_host(self, aggregate_name, host):
         aggregate = self.compute_client.aggregates.add_host(aggregate_name,
                                                             host)
+        self.addCleanup(self._remove_host, aggregate, host)
         self.assertIn(host, aggregate.hosts)
         LOG.debug("Host %s added to Aggregate %s." % (host, aggregate.name))
 
@@ -128,6 +128,3 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
         metadata.update(additional_metadata)
         self._check_aggregate_details(aggregate, aggregate.name, az, [host],
                                       metadata)
-
-        self._remove_host(aggregate, host)
-        self._delete_aggregate(aggregate)
