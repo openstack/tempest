@@ -76,7 +76,7 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
         commands = set(commands)
         wanted_commands = set(('image-create', 'image-delete', 'help',
                                'image-download', 'image-show', 'image-update',
-                               'member-add', 'member-create', 'member-delete',
+                               'member-create', 'member-delete',
                                'member-list'))
         self.assertFalse(wanted_commands - commands)
 
