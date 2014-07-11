@@ -25,9 +25,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     def _delete_domain(self, domain_id):
         # It is necessary to disable the domain before deleting,
         # or else it would result in unauthorized error
-        _, body = self.client.update_domain(domain_id, enabled=False)
-        resp, _ = self.client.delete_domain(domain_id)
-        self.assertEqual(204, resp.status)
+        self.client.update_domain(domain_id, enabled=False)
+        self.client.delete_domain(domain_id)
 
     @test.attr(type='smoke')
     def test_list_domains(self):
@@ -42,8 +41,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
             self.addCleanup(self._delete_domain, domain['id'])
             domain_ids.append(domain['id'])
         # List and Verify Domains
-        resp, body = self.client.list_domains()
-        self.assertEqual(resp['status'], '200')
+        _, body = self.client.list_domains()
         for d in body:
             fetched_ids.append(d['id'])
         missing_doms = [d for d in domain_ids if d not in fetched_ids]
@@ -53,9 +51,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_update_delete_domain(self):
         d_name = data_utils.rand_name('domain-')
         d_desc = data_utils.rand_name('domain-desc-')
-        resp_1, domain = self.client.create_domain(
+        _, domain = self.client.create_domain(
             d_name, description=d_desc)
-        self.assertEqual(resp_1['status'], '201')
         self.addCleanup(self._delete_domain, domain['id'])
         self.assertIn('id', domain)
         self.assertIn('description', domain)
@@ -72,9 +69,8 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         new_desc = data_utils.rand_name('new-desc-')
         new_name = data_utils.rand_name('new-name-')
 
-        resp_2, updated_domain = self.client.update_domain(
+        _, updated_domain = self.client.update_domain(
             domain['id'], name=new_name, description=new_desc)
-        self.assertEqual(resp_2['status'], '200')
         self.assertIn('id', updated_domain)
         self.assertIn('description', updated_domain)
         self.assertIn('name', updated_domain)
@@ -85,8 +81,7 @@ class DomainsTestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(new_desc, updated_domain['description'])
         self.assertEqual('true', str(updated_domain['enabled']).lower())
 
-        resp_3, fetched_domain = self.client.get_domain(domain['id'])
-        self.assertEqual(resp_3['status'], '200')
+        _, fetched_domain = self.client.get_domain(domain['id'])
         self.assertEqual(new_name, fetched_domain['name'])
         self.assertEqual(new_desc, fetched_domain['description'])
         self.assertEqual('true', str(fetched_domain['enabled']).lower())

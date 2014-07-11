@@ -28,9 +28,8 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         name = data_utils.rand_name('service-')
         serv_type = data_utils.rand_name('type--')
         desc = data_utils.rand_name('description-')
-        resp, body = self.service_client.create_service(name, serv_type,
-                                                        description=desc)
-        self.assertEqual('201', resp['status'])
+        _, body = self.service_client.create_service(name, serv_type,
+                                                     description=desc)
         # Deleting the service created in this method
         self.addCleanup(self.service_client.delete_service, body['id'])
 
@@ -38,14 +37,13 @@ class ServicesTestJSON(base.BaseIdentityV3AdminTest):
         resp1_desc = body['description']
 
         s_desc2 = data_utils.rand_name('desc2-')
-        resp, body = self.service_client.update_service(
+        _, body = self.service_client.update_service(
             s_id, description=s_desc2)
         resp2_desc = body['description']
-        self.assertEqual('200', resp['status'])
         self.assertNotEqual(resp1_desc, resp2_desc)
 
         # Get service
-        resp, body = self.service_client.get_service(s_id)
+        _, body = self.service_client.get_service(s_id)
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)

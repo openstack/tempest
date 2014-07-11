@@ -57,7 +57,7 @@ class IsolatedCreds(object):
 
     def _create_tenant(self, name, description):
         if self.tempest_client:
-            resp, tenant = self.identity_admin_client.create_tenant(
+            _, tenant = self.identity_admin_client.create_tenant(
                 name=name, description=description)
         else:
             tenant = self.identity_admin_client.tenants.create(
@@ -67,7 +67,7 @@ class IsolatedCreds(object):
 
     def _get_tenant_by_name(self, name):
         if self.tempest_client:
-            resp, tenant = self.identity_admin_client.get_tenant_by_name(name)
+            _, tenant = self.identity_admin_client.get_tenant_by_name(name)
         else:
             tenants = self.identity_admin_client.tenants.list()
             for ten in tenants:
@@ -80,10 +80,10 @@ class IsolatedCreds(object):
 
     def _create_user(self, username, password, tenant, email):
         if self.tempest_client:
-            resp, user = self.identity_admin_client.create_user(username,
-                                                                password,
-                                                                tenant['id'],
-                                                                email)
+            _, user = self.identity_admin_client.create_user(username,
+                                                             password,
+                                                             tenant['id'],
+                                                             email)
         else:
             user = self.identity_admin_client.users.create(username, password,
                                                            email,
@@ -92,7 +92,7 @@ class IsolatedCreds(object):
 
     def _get_user(self, tenant, username):
         if self.tempest_client:
-            resp, user = self.identity_admin_client.get_user_by_username(
+            _, user = self.identity_admin_client.get_user_by_username(
                 tenant['id'],
                 username)
         else:
@@ -101,7 +101,7 @@ class IsolatedCreds(object):
 
     def _list_roles(self):
         if self.tempest_client:
-            resp, roles = self.identity_admin_client.list_roles()
+            _, roles = self.identity_admin_client.list_roles()
         else:
             roles = self.identity_admin_client.roles.list()
         return roles

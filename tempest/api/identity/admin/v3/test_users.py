@@ -29,13 +29,13 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_desc = u_name + 'description'
         u_email = u_name + '@testmail.tm'
         u_password = data_utils.rand_name('pass-')
-        resp, user = self.client.create_user(
+        _, user = self.client.create_user(
             u_name, description=u_desc, password=u_password,
             email=u_email, enabled=False)
         # Delete the User at the end of this method
         self.addCleanup(self.client.delete_user, user['id'])
         # Creating second project for updation
-        resp, project = self.client.create_project(
+        _, project = self.client.create_project(
             data_utils.rand_name('project-'),
             description=data_utils.rand_name('project-desc-'))
         # Delete the Project at the end of this method
@@ -44,12 +44,10 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         u_name2 = data_utils.rand_name('user2-')
         u_email2 = u_name2 + '@testmail.tm'
         u_description2 = u_name2 + ' description'
-        resp, update_user = self.client.update_user(
+        _, update_user = self.client.update_user(
             user['id'], name=u_name2, description=u_description2,
             project_id=project['id'],
             email=u_email2, enabled=False)
-        # Assert response body of update user.
-        self.assertEqual(200, resp.status)
         self.assertEqual(u_name2, update_user['name'])
         self.assertEqual(u_description2, update_user['description'])
         self.assertEqual(project['id'],
@@ -57,7 +55,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual(u_email2, update_user['email'])
         self.assertEqual('false', str(update_user['enabled']).lower())
         # GET by id after updation
-        resp, new_user_get = self.client.get_user(user['id'])
+        _, new_user_get = self.client.get_user(user['id'])
         # Assert response body of GET after updation
         self.assertEqual(u_name2, new_user_get['name'])
         self.assertEqual(u_description2, new_user_get['description'])
@@ -107,8 +105,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
                                          user['id'],
                                          role['id'])
             assigned_project_ids.append(project['id'])
-        resp, body = self.client.list_user_projects(user['id'])
-        self.assertEqual(200, resp.status)
+        _, body = self.client.list_user_projects(user['id'])
         for i in body:
             fetched_project_ids.append(i['id'])
         # verifying the project ids in list
@@ -124,7 +121,7 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_get_user(self):
         # Get a user detail
         self.data.setup_test_v3_user()
-        resp, user = self.client.get_user(self.data.v3_user['id'])
+        _, user = self.client.get_user(self.data.v3_user['id'])
         self.assertEqual(self.data.v3_user['id'], user['id'])
 
 

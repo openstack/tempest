@@ -29,24 +29,21 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     def test_group_create_update_get(self):
         name = data_utils.rand_name('Group')
         description = data_utils.rand_name('Description')
-        resp, group = self.client.create_group(name,
-                                               description=description)
+        _, group = self.client.create_group(name,
+                                            description=description)
         self.addCleanup(self.client.delete_group, group['id'])
-        self.assertEqual(resp['status'], '201')
         self.assertEqual(group['name'], name)
         self.assertEqual(group['description'], description)
 
         new_name = data_utils.rand_name('UpdateGroup')
         new_desc = data_utils.rand_name('UpdateDescription')
-        resp, updated_group = self.client.update_group(group['id'],
-                                                       name=new_name,
-                                                       description=new_desc)
-        self.assertEqual(resp['status'], '200')
+        _, updated_group = self.client.update_group(group['id'],
+                                                    name=new_name,
+                                                    description=new_desc)
         self.assertEqual(updated_group['name'], new_name)
         self.assertEqual(updated_group['description'], new_desc)
 
-        resp, new_group = self.client.get_group(group['id'])
-        self.assertEqual(resp['status'], '200')
+        _, new_group = self.client.get_group(group['id'])
         self.assertEqual(group['id'], new_group['id'])
         self.assertEqual(new_name, new_group['name'])
         self.assertEqual(new_desc, new_group['description'])
@@ -54,33 +51,31 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='smoke')
     def test_group_users_add_list_delete(self):
         name = data_utils.rand_name('Group')
-        resp, group = self.client.create_group(name)
+        _, group = self.client.create_group(name)
         self.addCleanup(self.client.delete_group, group['id'])
         # add user into group
         users = []
         for i in range(3):
             name = data_utils.rand_name('User')
-            resp, user = self.client.create_user(name)
+            _, user = self.client.create_user(name)
             users.append(user)
             self.addCleanup(self.client.delete_user, user['id'])
             self.client.add_group_user(group['id'], user['id'])
 
         # list users in group
-        resp, group_users = self.client.list_group_users(group['id'])
-        self.assertEqual(resp['status'], '200')
+        _, group_users = self.client.list_group_users(group['id'])
         self.assertEqual(sorted(users), sorted(group_users))
         # delete user in group
         for user in users:
-            resp, body = self.client.delete_group_user(group['id'],
-                                                       user['id'])
-            self.assertEqual(resp['status'], '204')
-        resp, group_users = self.client.list_group_users(group['id'])
+            self.client.delete_group_user(group['id'],
+                                          user['id'])
+        _, group_users = self.client.list_group_users(group['id'])
         self.assertEqual(len(group_users), 0)
 
     @test.attr(type='smoke')
     def test_list_user_groups(self):
         # create a user
-        resp, user = self.client.create_user(
+        _, user = self.client.create_user(
             data_utils.rand_name('User-'),
             password=data_utils.rand_name('Pass-'))
         self.addCleanup(self.client.delete_user, user['id'])
@@ -88,13 +83,12 @@ class GroupsV3TestJSON(base.BaseIdentityV3AdminTest):
         groups = []
         for i in range(2):
             name = data_utils.rand_name('Group-')
-            resp, group = self.client.create_group(name)
+            _, group = self.client.create_group(name)
             groups.append(group)
             self.addCleanup(self.client.delete_group, group['id'])
             self.client.add_group_user(group['id'], user['id'])
         # list groups which user belongs to
-        resp, user_groups = self.client.list_user_groups(user['id'])
-        self.assertEqual('200', resp['status'])
+        _, user_groups = self.client.list_user_groups(user['id'])
         self.assertEqual(sorted(groups), sorted(user_groups))
         self.assertEqual(2, len(user_groups))
 
