@@ -433,22 +433,27 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
     @test.attr(type='smoke')
     def test_create_delete_subnet_with_v6_attributes(self):
         name = data_utils.rand_name('network-')
-        resp, body = self.client.create_network(name=name)
-        self.assertEqual('201', resp['status'])
-        network = body['network']
-        net_id = network['id']
-        subnet = self.create_subnet(network,
-                                    gateway='fe80::1',
-                                    ipv6_ra_mode='slaac',
-                                    ipv6_address_mode='slaac')
-        # Verifies Subnet GW in IPv6
-        self.assertEqual(subnet['gateway_ip'], 'fe80::1')
-        self.assertEqual(subnet['ipv6_ra_mode'], 'slaac')
-        self.assertEqual(subnet['ipv6_address_mode'], 'slaac')
-        # Delete network and subnet
-        resp, body = self.client.delete_network(net_id)
-        self.assertEqual('204', resp['status'])
-        self.subnets.pop()
+        # from https://www.dropbox.com/s/9bojvv9vywsz8sd/IPv6%20Two%20Modes%20v3.0.pdf
+        # TODO: the document also lists attribute off in various combination, which is not supported
+        ipv6_valid_modes_combinations = [('slaac', 'slaac'),  # RA mode A=1,M=0,O=0
+                                         ('dhcpv6-stateful', 'dhcpv6-stateful'),  # RA mode A=0,M=1,O=1
+                                         ('dhcpv6-stateless', 'dhcpv6-stateless')]  # RA mode A=1,M=0,O=1
+        for ra_mode, address_mode in ipv6_valid_modes_combinations:
+            resp, body = self.client.create_network(name=name)
+            self.assertEqual('201', resp['status'])
+            network = body['network']
+            net_id = network['id']
+            subnet = self.create_subnet(network, gateway='fe80::1',
+                                        ipv6_ra_mode=ra_mode,
+                                        ipv6_address_mode=address_mode)
+            # Verifies Subnet GW in IPv6
+            self.assertEqual(subnet['gateway_ip'], 'fe80::1')
+            self.assertEqual(subnet['ipv6_ra_mode'], ra_mode)
+            self.assertEqual(subnet['ipv6_address_mode'], address_mode)
+            # Delete network and subnet
+            resp, body = self.client.delete_network(net_id)
+            self.assertEqual('204', resp['status'])
+            self.subnets.pop()
 
 
 class NetworksIpV6TestXML(NetworksIpV6TestJSON):
