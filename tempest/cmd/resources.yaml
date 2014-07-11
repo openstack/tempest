@@ -27,6 +27,7 @@ secgroups:
 images:
   - name: javelin_cirros
     owner: javelin
+    imgdir: files/images/cirros-0.3.2-x86_64-uec
     file: cirros-0.3.2-x86_64-blank.img
     format: ami
     aki: cirros-0.3.2-x86_64-vmlinuz
