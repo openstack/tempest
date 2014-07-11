@@ -49,7 +49,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_with_enabled_False(self):
         # Enabled should be a boolean, not a string like 'False'
         interface = 'public'
-        url = data_utils.rand_name('url')
+        url = data_utils.rand_url()
         region = data_utils.rand_name('region')
         self.assertRaises(exceptions.BadRequest, self.client.create_endpoint,
                           self.service_id, interface, url, region=region,
@@ -59,7 +59,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
     def test_create_with_enabled_True(self):
         # Enabled should be a boolean, not a string like 'True'
         interface = 'public'
-        url = data_utils.rand_name('url')
+        url = data_utils.rand_url()
         region = data_utils.rand_name('region')
         self.assertRaises(exceptions.BadRequest, self.client.create_endpoint,
                           self.service_id, interface, url, region=region,
@@ -69,7 +69,7 @@ class EndpointsNegativeTestJSON(base.BaseIdentityV3AdminTest):
 
         # Create an endpoint
         region1 = data_utils.rand_name('region')
-        url1 = data_utils.rand_name('url')
+        url1 = data_utils.rand_url()
         interface1 = 'public'
         resp, endpoint_for_update = (
             self.client.create_endpoint(self.service_id, interface1,
