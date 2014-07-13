@@ -170,8 +170,9 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                     server, ssh_login, self._get_server_key(server),
                     servers_for_debug=self.servers)
 
-    def check_public_network_connectivity(self, should_connect=True,
-                                          msg=None):
+    def check_public_network_connectivity(
+            self, should_connect=True, msg=None,
+            should_check_floating_ip_status=True):
         """Verifies connectivty to a VM via public network and floating IP,
         and verifies floating IP has resource status is correct.
 
@@ -180,6 +181,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         :param msg: Failure message to add to Error message. Should describe
         the place in the test scenario where the method was called,
         to indicate the context of the failure
+        :param should_check_floating_ip_status: bool. should status of
+        floating_ip be checked or not
         """
         ssh_login = CONF.compute.image_ssh_user
         floating_ip, server = self.floating_ip_tuple
@@ -193,7 +196,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         super(TestNetworkBasicOps, self).check_public_network_connectivity(
             ip_address, ssh_login, private_key, should_connect, msg,
             self.servers)
-        self.check_floating_ip_status(floating_ip, floatingip_status)
+        if should_check_floating_ip_status:
+            self.check_floating_ip_status(floating_ip, floatingip_status)
 
     def _disassociate_floating_ips(self):
         floating_ip, server = self.floating_ip_tuple
@@ -393,3 +397,31 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._create_new_network()
         self._hotplug_server()
         self._check_network_internal_connectivity(network=self.new_net)
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_update_router_admin_state(self):
+        """
+        1. Check public connectivity before updating
+                admin_state_up attribute of router to False
+        2. Check public connectivity after updating
+                admin_state_up attribute of router to False
+        3. Check public connectivity after updating
+                admin_state_up attribute of router to True
+        """
+        self._setup_network_and_servers()
+        self.check_public_network_connectivity(
+            should_connect=True, msg="before updating "
+            "admin_state_up of router to False")
+        self._update_router_admin_state(self.router, False)
+        # TODO(alokmaurya): Remove should_check_floating_ip_status=False check
+        # once bug 1396310 is fixed
+
+        self.check_public_network_connectivity(
+            should_connect=False, msg="after updating "
+            "admin_state_up of router to False",
+            should_check_floating_ip_status=False)
+        self._update_router_admin_state(self.router, True)
+        self.check_public_network_connectivity(
+            should_connect=True, msg="after updating "
+            "admin_state_up of router to True")
