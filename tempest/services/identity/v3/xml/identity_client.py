@@ -104,12 +104,13 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    project_id=project_id,
                                    domain_id=domain_id)
         resp, body = self.post('users', str(common.Document(post_body)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def update_user(self, user_id, name, **kwargs):
         """Updates a user."""
-        resp, body = self.get_user(user_id)
+        _, body = self.get_user(user_id)
         email = kwargs.get('email', body['email'])
         en = kwargs.get('enabled', body['enabled'])
         project_id = kwargs.get('project_id', body['project_id'])
@@ -125,30 +126,35 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                      enabled=str(en).lower())
         resp, body = self.patch('users/%s' % user_id,
                                 str(common.Document(update_user)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_user_projects(self, user_id):
         """Lists the projects on which a user has roles assigned."""
         resp, body = self.get('users/%s/projects' % user_id)
+        self.expected_success(200, resp.status)
         body = self._parse_projects(etree.fromstring(body))
         return resp, body
 
     def get_users(self):
         """Get the list of users."""
         resp, body = self.get("users")
+        self.expected_success(200, resp.status)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_user(self, user_id):
         """GET a user."""
         resp, body = self.get("users/%s" % user_id)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_user(self, user_id):
         """Deletes a User."""
         resp, body = self.delete("users/%s" % user_id)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def create_project(self, name, **kwargs):
@@ -164,12 +170,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    name=name)
         resp, body = self.post('projects',
                                str(common.Document(post_body)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_projects(self):
         """Get the list of projects."""
         resp, body = self.get("projects")
+        self.expected_success(200, resp.status)
         body = self._parse_projects(etree.fromstring(body))
         return resp, body
 
@@ -188,18 +196,21 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    domain_id=domain_id)
         resp, body = self.patch('projects/%s' % project_id,
                                 str(common.Document(post_body)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_project(self, project_id):
         """GET a Project."""
         resp, body = self.get("projects/%s" % project_id)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_project(self, project_id):
         """Delete a project."""
         resp, body = self.delete('projects/%s' % str(project_id))
+        self.expected_success(204, resp.status)
         return resp, body
 
     def create_role(self, name):
@@ -208,18 +219,21 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    xmlns=XMLNS,
                                    name=name)
         resp, body = self.post('roles', str(common.Document(post_body)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_role(self, role_id):
         """GET a Role."""
         resp, body = self.get('roles/%s' % str(role_id))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_roles(self):
         """Get the list of Roles."""
         resp, body = self.get("roles")
+        self.expected_success(200, resp.status)
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
@@ -230,18 +244,21 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    name=name)
         resp, body = self.patch('roles/%s' % str(role_id),
                                 str(common.Document(post_body)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_role(self, role_id):
         """Delete a role."""
         resp, body = self.delete('roles/%s' % str(role_id))
+        self.expected_success(204, resp.status)
         return resp, body
 
     def assign_user_role(self, project_id, user_id, role_id):
         """Add roles to a user on a tenant."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
                               (project_id, user_id, role_id), '')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def create_domain(self, name, **kwargs):
@@ -254,23 +271,26 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    description=description,
                                    enabled=str(en).lower())
         resp, body = self.post('domains', str(common.Document(post_body)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_domains(self):
         """Get the list of domains."""
         resp, body = self.get("domains")
+        self.expected_success(200, resp.status)
         body = self._parse_domains(etree.fromstring(body))
         return resp, body
 
     def delete_domain(self, domain_id):
         """Delete a domain."""
         resp, body = self.delete('domains/%s' % domain_id)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def update_domain(self, domain_id, **kwargs):
         """Updates a domain."""
-        resp, body = self.get_domain(domain_id)
+        _, body = self.get_domain(domain_id)
         description = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
         name = kwargs.get('name', body['name'])
@@ -281,12 +301,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    enabled=str(en).lower())
         resp, body = self.patch('domains/%s' % domain_id,
                                 str(common.Document(post_body)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_domain(self, domain_id):
         """Get Domain details."""
         resp, body = self.get('domains/%s' % domain_id)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -296,6 +318,7 @@ class IdentityV3ClientXML(rest_client.RestClient):
                    'Accept': 'application/xml',
                    'X-Subject-Token': resp_token}
         resp, body = self.get("auth/tokens", headers=headers)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -303,6 +326,7 @@ class IdentityV3ClientXML(rest_client.RestClient):
         """Delete a Given Token."""
         headers = {'X-Subject-Token': resp_token}
         resp, body = self.delete("auth/tokens", headers=headers)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def create_group(self, name, **kwargs):
@@ -317,18 +341,20 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    domain_id=domain_id,
                                    project_id=project_id)
         resp, body = self.post('groups', str(common.Document(post_body)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_group(self, group_id):
         """Get group details."""
         resp, body = self.get('groups/%s' % group_id)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def update_group(self, group_id, **kwargs):
         """Updates a group."""
-        resp, body = self.get_group(group_id)
+        _, body = self.get_group(group_id)
         name = kwargs.get('name', body['name'])
         description = kwargs.get('description', body['description'])
         post_body = common.Element("group",
@@ -337,52 +363,61 @@ class IdentityV3ClientXML(rest_client.RestClient):
                                    description=description)
         resp, body = self.patch('groups/%s' % group_id,
                                 str(common.Document(post_body)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_group(self, group_id):
         """Delete a group."""
         resp, body = self.delete('groups/%s' % group_id)
+        self.expected_success(204, resp.status)
         return resp, body
 
     def add_group_user(self, group_id, user_id):
         """Add user into group."""
         resp, body = self.put('groups/%s/users/%s' % (group_id, user_id), '')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def list_group_users(self, group_id):
         """List users in group."""
         resp, body = self.get('groups/%s/users' % group_id)
+        self.expected_success(200, resp.status)
         body = self._parse_group_users(etree.fromstring(body))
         return resp, body
 
     def list_user_groups(self, user_id):
         """Lists the groups which a user belongs to."""
         resp, body = self.get('users/%s/groups' % user_id)
+        self.expected_success(200, resp.status)
         body = self._parse_groups(etree.fromstring(body))
         return resp, body
 
     def delete_group_user(self, group_id, user_id):
         """Delete user in group."""
         resp, body = self.delete('groups/%s/users/%s' % (group_id, user_id))
+        self.expected_success(204, resp.status)
         return resp, body
 
     def assign_user_role_on_project(self, project_id, user_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/users/%s/roles/%s' %
                               (project_id, user_id, role_id), '')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def assign_user_role_on_domain(self, domain_id, user_id, role_id):
         """Add roles to a user on a domain."""
         resp, body = self.put('domains/%s/users/%s/roles/%s' %
                               (domain_id, user_id, role_id), '')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def list_user_roles_on_project(self, project_id, user_id):
         """list roles of a user on a project."""
         resp, body = self.get('projects/%s/users/%s/roles' %
                               (project_id, user_id))
+        self.expected_success(200, resp.status)
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
@@ -390,6 +425,7 @@ class IdentityV3ClientXML(rest_client.RestClient):
         """list roles of a user on a domain."""
         resp, body = self.get('domains/%s/users/%s/roles' %
                               (domain_id, user_id))
+        self.expected_success(200, resp.status)
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
@@ -397,30 +433,35 @@ class IdentityV3ClientXML(rest_client.RestClient):
         """Delete role of a user on a project."""
         resp, body = self.delete('projects/%s/users/%s/roles/%s' %
                                  (project_id, user_id, role_id))
+        self.expected_success(204, resp.status)
         return resp, body
 
     def revoke_role_from_user_on_domain(self, domain_id, user_id, role_id):
         """Delete role of a user on a domain."""
         resp, body = self.delete('domains/%s/users/%s/roles/%s' %
                                  (domain_id, user_id, role_id))
+        self.expected_success(204, resp.status)
         return resp, body
 
     def assign_group_role_on_project(self, project_id, group_id, role_id):
         """Add roles to a user on a project."""
         resp, body = self.put('projects/%s/groups/%s/roles/%s' %
                               (project_id, group_id, role_id), '')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def assign_group_role_on_domain(self, domain_id, group_id, role_id):
         """Add roles to a user on a domain."""
         resp, body = self.put('domains/%s/groups/%s/roles/%s' %
                               (domain_id, group_id, role_id), '')
+        self.expected_success(204, resp.status)
         return resp, body
 
     def list_group_roles_on_project(self, project_id, group_id):
         """list roles of a user on a project."""
         resp, body = self.get('projects/%s/groups/%s/roles' %
                               (project_id, group_id))
+        self.expected_success(200, resp.status)
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
@@ -428,6 +469,7 @@ class IdentityV3ClientXML(rest_client.RestClient):
         """list roles of a user on a domain."""
         resp, body = self.get('domains/%s/groups/%s/roles' %
                               (domain_id, group_id))
+        self.expected_success(200, resp.status)
         body = self._parse_roles(etree.fromstring(body))
         return resp, body
 
@@ -435,12 +477,14 @@ class IdentityV3ClientXML(rest_client.RestClient):
         """Delete role of a user on a project."""
         resp, body = self.delete('projects/%s/groups/%s/roles/%s' %
                                  (project_id, group_id, role_id))
+        self.expected_success(204, resp.status)
         return resp, body
 
     def revoke_role_from_group_on_domain(self, domain_id, group_id, role_id):
         """Delete role of a user on a domain."""
         resp, body = self.delete('domains/%s/groups/%s/roles/%s' %
                                  (domain_id, group_id, role_id))
+        self.expected_success(204, resp.status)
         return resp, body
 
 

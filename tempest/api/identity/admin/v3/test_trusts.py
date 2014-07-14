@@ -54,25 +54,22 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         u_desc = self.trustor_username + 'description'
         u_email = self.trustor_username + '@testmail.xx'
         self.trustor_password = data_utils.rand_name('pass-')
-        resp, user = self.client.create_user(
+        _, user = self.client.create_user(
             self.trustor_username,
             description=u_desc,
             password=self.trustor_password,
             email=u_email,
             project_id=self.trustor_project_id)
-        self.assertEqual(resp['status'], '201')
         self.trustor_user_id = user['id']
 
         # And two roles, one we'll delegate and one we won't
         self.delegated_role = data_utils.rand_name('DelegatedRole-')
         self.not_delegated_role = data_utils.rand_name('NotDelegatedRole-')
 
-        resp, role = self.client.create_role(self.delegated_role)
-        self.assertEqual(resp['status'], '201')
+        _, role = self.client.create_role(self.delegated_role)
         self.delegated_role_id = role['id']
 
-        resp, role = self.client.create_role(self.not_delegated_role)
-        self.assertEqual(resp['status'], '201')
+        _, role = self.client.create_role(self.not_delegated_role)
         self.not_delegated_role_id = role['id']
 
         # Assign roles to trustor
@@ -108,14 +105,13 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
     def create_trust(self, impersonate=True, expires=None):
 
-        resp, trust_create = self.trustor_client.create_trust(
+        _, trust_create = self.trustor_client.create_trust(
             trustor_user_id=self.trustor_user_id,
             trustee_user_id=self.trustee_user_id,
             project_id=self.trustor_project_id,
             role_names=[self.delegated_role],
             impersonation=impersonate,
             expires_at=expires)
-        self.assertEqual('201', resp['status'])
         self.trust_id = trust_create['id']
         return trust_create
 
@@ -141,8 +137,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
             self.assertEqual(1, len(trust['roles']))
 
     def get_trust(self):
-        resp, trust_get = self.trustor_client.get_trust(self.trust_id)
-        self.assertEqual('200', resp['status'])
+        _, trust_get = self.trustor_client.get_trust(self.trust_id)
         return trust_get
 
     def validate_role(self, role):
@@ -158,20 +153,23 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
     @test.skip_because(bug='1334368')
     def check_trust_roles(self):
         # Check we find the delegated role
-        resp, roles_get = self.trustor_client.get_trust_roles(
+        _, roles_get = self.trustor_client.get_trust_roles(
             self.trust_id)
-        self.assertEqual('200', resp['status'])
         self.assertEqual(1, len(roles_get))
         self.validate_role(roles_get[0])
 
-        resp, role_get = self.trustor_client.get_trust_role(
+        _, role_get = self.trustor_client.get_trust_role(
             self.trust_id, self.delegated_role_id)
-        self.assertEqual('200', resp['status'])
         self.validate_role(role_get)
 
-        resp, role_get = self.trustor_client.check_trust_role(
+        _, role_get = self.trustor_client.check_trust_role(
             self.trust_id, self.delegated_role_id)
-        self.assertEqual('200', resp['status'])
+        # This tempest two-step change conflicted with the change
+        # moving response checking to the client. This test should be
+        # re-enabled by removing the following assert and changing
+        # the response code in tempest/services/identity/v3/json/
+        # identity_client.py in the check_trust_role_method.
+        # self.assertEqual('200', resp['status'])
 
         # And that we don't find not_delegated_role
         self.assertRaises(exceptions.NotFound,
@@ -185,8 +183,7 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
                           self.not_delegated_role_id)
 
     def delete_trust(self):
-        resp, trust_delete = self.trustor_client.delete_trust(self.trust_id)
-        self.assertEqual('204', resp['status'])
+        self.trustor_client.delete_trust(self.trust_id)
         self.assertRaises(exceptions.NotFound,
                           self.trustor_client.get_trust,
                           self.trust_id)
@@ -254,17 +251,15 @@ class TrustsV3TestJSON(BaseTrustsV3Test):
     @test.attr(type='smoke')
     def test_get_trusts_query(self):
         self.create_trust()
-        resp, trusts_get = self.trustor_client.get_trusts(
+        _, trusts_get = self.trustor_client.get_trusts(
             trustor_user_id=self.trustor_user_id)
-        self.assertEqual('200', resp['status'])
         self.assertEqual(1, len(trusts_get))
         self.validate_trust(trusts_get[0], summary=True)
 
     @test.attr(type='smoke')
     def test_get_trusts_all(self):
         self.create_trust()
-        resp, trusts_get = self.client.get_trusts()
-        self.assertEqual('200', resp['status'])
+        _, trusts_get = self.client.get_trusts()
         trusts = [t for t in trusts_get
                   if t['id'] == self.trust_id]
         self.assertEqual(1, len(trusts))

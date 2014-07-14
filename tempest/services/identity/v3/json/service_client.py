@@ -42,6 +42,7 @@ class ServiceClientJSON(rest_client.RestClient):
         }
         patch_body = json.dumps({'service': patch_body})
         resp, body = self.patch('services/%s' % service_id, patch_body)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['service']
 
@@ -49,6 +50,7 @@ class ServiceClientJSON(rest_client.RestClient):
         """Get Service."""
         url = 'services/%s' % service_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['service']
 
@@ -62,10 +64,12 @@ class ServiceClientJSON(rest_client.RestClient):
         }
         body = json.dumps({'service': body_dict})
         resp, body = self.post("services", body)
+        self.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body["service"]
 
     def delete_service(self, serv_id):
         url = "services/" + serv_id
         resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
         return resp, body

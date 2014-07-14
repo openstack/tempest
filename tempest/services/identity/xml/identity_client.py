@@ -29,11 +29,13 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
         create_role = xml.Element("role", xmlns=XMLNS, name=name)
         resp, body = self.post('OS-KSADM/roles',
                                str(xml.Document(create_role)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def get_role(self, role_id):
         """Get a role by its id."""
         resp, body = self.get('OS-KSADM/roles/%s' % role_id)
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def create_tenant(self, name, **kwargs):
@@ -50,16 +52,18 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                                     description=kwargs.get('description', ''),
                                     enabled=str(en).lower())
         resp, body = self.post('tenants', str(xml.Document(create_tenant)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def list_tenants(self):
         """Returns tenants."""
         resp, body = self.get('tenants')
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant."""
-        resp, body = self.get_tenant(tenant_id)
+        _, body = self.get_tenant(tenant_id)
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
@@ -72,6 +76,7 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
 
         resp, body = self.post('tenants/%s' % tenant_id,
                                str(xml.Document(update_tenant)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def create_user(self, name, password, tenant_id, email, **kwargs):
@@ -87,6 +92,7 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
             create_user.add_attr('enabled', str(kwargs['enabled']).lower())
 
         resp, body = self.post('users', str(xml.Document(create_user)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def update_user(self, user_id, **kwargs):
@@ -97,6 +103,7 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
 
         resp, body = self.put('users/%s' % user_id,
                               str(xml.Document(update_user)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def enable_disable_user(self, user_id, enabled):
@@ -104,6 +111,7 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
         enable_user = xml.Element("user", enabled=str(enabled).lower())
         resp, body = self.put('users/%s/enabled' % user_id,
                               str(xml.Document(enable_user)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def create_service(self, name, service_type, **kwargs):
@@ -116,6 +124,7 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                                      description=kwargs.get('description'))
         resp, body = self.post('OS-KSADM/services',
                                str(xml.Document(create_service)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def update_user_password(self, user_id, new_pass):
@@ -125,11 +134,13 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                                password=new_pass)
         resp, body = self.put('users/%s/OS-KSADM/password' % user_id,
                               str(xml.Document(put_body)))
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def list_extensions(self):
         """List all the extensions."""
         resp, body = self.get('/extensions')
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
 

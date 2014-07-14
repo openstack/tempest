@@ -28,13 +28,11 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_password = data_utils.rand_name(name='pass-')
         # first:create a tenant
         tenant_name = data_utils.rand_name(name='tenant-')
-        resp, tenant = self.client.create_tenant(tenant_name)
-        self.assertEqual(200, resp.status)
+        _, tenant = self.client.create_tenant(tenant_name)
         self.data.tenants.append(tenant)
         # second:create a user
-        resp, user = self.client.create_user(user_name, user_password,
-                                             tenant['id'], '')
-        self.assertEqual(200, resp.status)
+        _, user = self.client.create_user(user_name, user_password,
+                                          tenant['id'], '')
         self.data.users.append(user)
         # then get a token for the user
         rsp, body = self.token_client.auth(user_name,
@@ -45,16 +43,14 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
                          tenant['name'])
         # Perform GET Token
         token_id = body['token']['id']
-        resp, token_details = self.client.get_token(token_id)
-        self.assertEqual(resp['status'], '200')
+        _, token_details = self.client.get_token(token_id)
         self.assertEqual(token_id, token_details['token']['id'])
         self.assertEqual(user['id'], token_details['user']['id'])
         self.assertEqual(user_name, token_details['user']['name'])
         self.assertEqual(tenant['name'],
                          token_details['token']['tenant']['name'])
         # then delete the token
-        resp, body = self.client.delete_token(token_id)
-        self.assertEqual(resp['status'], '204')
+        self.client.delete_token(token_id)
 
     @test.attr(type='gate')
     def test_rescope_token(self):
@@ -67,56 +63,51 @@ class TokensTestJSON(base.BaseIdentityV2AdminTest):
         user_password = data_utils.rand_name(name='pass-')
         tenant_id = None  # No default tenant so will get unscoped token.
         email = ''
-        resp, user = self.client.create_user(user_name, user_password,
-                                             tenant_id, email)
-        self.assertEqual(200, resp.status)
+        _, user = self.client.create_user(user_name, user_password,
+                                          tenant_id, email)
         self.data.users.append(user)
 
         # Create a couple tenants.
         tenant1_name = data_utils.rand_name(name='tenant-')
-        resp, tenant1 = self.client.create_tenant(tenant1_name)
-        self.assertEqual(200, resp.status)
+        _, tenant1 = self.client.create_tenant(tenant1_name)
         self.data.tenants.append(tenant1)
 
         tenant2_name = data_utils.rand_name(name='tenant-')
-        resp, tenant2 = self.client.create_tenant(tenant2_name)
-        self.assertEqual(200, resp.status)
+        _, tenant2 = self.client.create_tenant(tenant2_name)
         self.data.tenants.append(tenant2)
 
         # Create a role
         role_name = data_utils.rand_name(name='role-')
-        resp, role = self.client.create_role(role_name)
-        self.assertEqual(200, resp.status)
+        _, role = self.client.create_role(role_name)
         self.data.roles.append(role)
 
         # Grant the user the role on the tenants.
-        resp, _ = self.client.assign_user_role(tenant1['id'], user['id'],
-                                               role['id'])
-        self.assertEqual(200, resp.status)
+        self.client.assign_user_role(tenant1['id'], user['id'],
+                                     role['id'])
 
-        resp, _ = self.client.assign_user_role(tenant2['id'], user['id'],
-                                               role['id'])
-        self.assertEqual(200, resp.status)
+        self.client.assign_user_role(tenant2['id'], user['id'],
+                                     role['id'])
 
         # Get an unscoped token.
-        rsp, body = self.token_client.auth(user_name, user_password)
+        resp, body = self.token_client.auth(user_name, user_password)
         self.assertEqual(200, resp.status)
 
         token_id = body['token']['id']
 
         # Use the unscoped token to get a token scoped to tenant1
-        rsp, body = self.token_client.auth_token(token_id, tenant=tenant1_name)
+        resp, body = self.token_client.auth_token(token_id,
+                                                  tenant=tenant1_name)
         self.assertEqual(200, resp.status)
 
         scoped_token_id = body['token']['id']
 
         # Revoke the scoped token
-        resp, body = self.client.delete_token(scoped_token_id)
-        self.assertEqual(204, resp.status)
+        self.client.delete_token(scoped_token_id)
 
         # Use the unscoped token to get a token scoped to tenant2
-        rsp, body = self.token_client.auth_token(token_id, tenant=tenant2_name)
-        self.assertEqual(204, resp.status)
+        resp, body = self.token_client.auth_token(token_id,
+                                                  tenant=tenant2_name)
+        self.assertEqual(200, resp.status)
 
 
 class TokensTestXML(TokensTestJSON):
