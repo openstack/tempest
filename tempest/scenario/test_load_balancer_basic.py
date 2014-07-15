@@ -141,7 +141,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
                 server_or_ip=ip,
                 private_key=private_key)
 
-            # Write a backend's responce into a file
+            # Write a backend's response into a file
             resp = """echo -ne "HTTP/1.1 200 OK\r\nContent-Length: 7\r\n""" \
                    """Connection: close\r\nContent-Type: text/html; """ \
                    """charset=UTF-8\r\n\r\n%s"; cat >/dev/null"""
