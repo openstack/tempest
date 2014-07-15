@@ -12,8 +12,8 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
 import logging
+import re
 import subprocess
 
 from tempest import cli
@@ -138,3 +138,30 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
             'cluster_id',
             'status'
         ])
+
+    def test_sahara_bash_completion(self):
+        self.sahara('bash-completion')
+
+    # Optional arguments
+    def test_sahara_help(self):
+        help_text = self.sahara('help')
+        lines = help_text.split('\n')
+        self.assertFirstLineStartsWith(lines, 'usage: sahara')
+
+        commands = []
+        cmds_start = lines.index('Positional arguments:')
+        cmds_end = lines.index('Optional arguments:')
+        command_pattern = re.compile('^ {4}([a-z0-9\-\_]+)')
+        for line in lines[cmds_start:cmds_end]:
+            match = command_pattern.match(line)
+            if match:
+                commands.append(match.group(1))
+        commands = set(commands)
+        wanted_commands = set(('cluster-create', 'data-source-create',
+                               'image-unregister', 'job-binary-create',
+                               'plugin-list', 'job-binary-create', 'help'))
+        self.assertFalse(wanted_commands - commands)
+
+    def test_sahara_version(self):
+        version = self.sahara('', flags='--version')
+        self.assertTrue(re.search('[0-9.]+', version))
