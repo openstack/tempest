@@ -280,6 +280,10 @@ ComputeFeaturesGroup = [
                 default=False,
                 help="Does the test environment support changing the admin "
                      "password?"),
+    cfg.BoolOpt('console_output',
+                default=True,
+                help="Does the test environment support obtaining instance "
+                     "serial console output?"),
     cfg.BoolOpt('resize',
                 default=False,
                 help="Does the test environment support resizing?"),

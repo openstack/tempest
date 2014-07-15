@@ -339,6 +339,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
+                          'Console output not supported.')
     @test.attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
@@ -355,6 +357,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         self.wait_for(self._get_output)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
+                          'Console output not supported.')
     @test.attr(type='gate')
     def test_get_console_output_server_id_in_shutoff_status(self):
         # Positive test:Should be able to GET the console output

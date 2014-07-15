@@ -66,16 +66,17 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             cls.client.wait_for_stack_status(cls.stack_id, 'CREATE_COMPLETE')
             _, resources = cls.client.list_resources(cls.stack_identifier)
         except exceptions.TimeoutException as e:
-            # attempt to log the server console to help with debugging
-            # the cause of the server not signalling the waitcondition
-            # to heat.
-            resp, body = cls.client.get_resource(cls.stack_identifier,
-                                                 'Server')
-            server_id = body['physical_resource_id']
-            LOG.debug('Console output for %s', server_id)
-            resp, output = cls.servers_client.get_console_output(
-                server_id, None)
-            LOG.debug(output)
+            if CONF.compute_feature_enabled.console_output:
+                # attempt to log the server console to help with debugging
+                # the cause of the server not signalling the waitcondition
+                # to heat.
+                resp, body = cls.client.get_resource(cls.stack_identifier,
+                                                     'Server')
+                server_id = body['physical_resource_id']
+                LOG.debug('Console output for %s', server_id)
+                resp, output = cls.servers_client.get_console_output(
+                    server_id, None)
+                LOG.debug(output)
             raise e
 
         cls.test_resources = {}
