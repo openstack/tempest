@@ -392,8 +392,11 @@ class BaseComputeAdminTest(BaseComputeTest):
                 msg = ("Missing Compute Admin API credentials "
                        "in configuration.")
                 raise cls.skipException(msg)
+        if cls._api_version == 2:
+            cls.availability_zone_admin_client = (
+                cls.os_adm.availability_zone_client)
 
-        if cls._api_version == 3:
+        else:
             cls.servers_admin_client = cls.os_adm.servers_v3_client
             cls.services_admin_client = cls.os_adm.services_v3_client
             cls.availability_zone_admin_client = \
