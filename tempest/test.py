@@ -215,6 +215,8 @@ def is_extension_enabled(extension_name, service):
         'network': CONF.network_feature_enabled.api_extensions,
         'object': CONF.object_storage_feature_enabled.discoverable_apis,
     }
+    if len(config_dict[service]) == 0:
+        return False
     if config_dict[service][0] == 'all':
         return True
     if extension_name in config_dict[service]:

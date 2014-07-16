@@ -391,12 +391,14 @@
 
 # A list of enabled compute extensions with a special entry
 # all which indicates every extension is enabled. Each
-# extension should be specified with alias name (list value)
+# extension should be specified with alias name. Empty list
+# indicates all extensions are disabled (list value)
 #api_extensions=all
 
 # A list of enabled v3 extensions with a special entry all
 # which indicates every extension is enabled. Each extension
-# should be specified with alias name (list value)
+# should be specified with alias name. Empty list indicates
+# all extensions are disabled (list value)
 #api_v3_extensions=all
 
 # Does the test environment support changing the admin
@@ -750,7 +752,8 @@
 #ipv6=true
 
 # A list of enabled network extensions with a special entry
-# all which indicates every extension is enabled (list value)
+# all which indicates every extension is enabled. Empty list
+# indicates all extensions are disabled (list value)
 #api_extensions=all
 
 # Allow the execution of IPv6 subnet tests that use the
@@ -1105,7 +1108,8 @@
 #snapshot=true
 
 # A list of enabled volume extensions with a special entry all
-# which indicates every extension is enabled (list value)
+# which indicates every extension is enabled. Empty list
+# indicates all extensions are disabled (list value)
 #api_extensions=all
 
 # Is the v1 volume API enabled (boolean value)
