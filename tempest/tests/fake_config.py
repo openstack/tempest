@@ -61,3 +61,4 @@ class FakePrivate(config.TempestConfigPrivate):
     def __init__(self, parse_conf=True, config_path=None):
         cfg.CONF([], default_config_files=[])
         self._set_attrs()
+        self.lock_path = cfg.CONF.lock_path
