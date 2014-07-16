@@ -53,6 +53,32 @@ LOG_cinder_client = logging.getLogger('cinderclient.client')
 LOG_cinder_client.addHandler(log.NullHandler())
 
 
+class ScenarioTest(tempest.test.BaseTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(ScenarioTest, cls).setUpClass()
+        cls.isolated_creds = isolated_creds.IsolatedCreds(
+            cls.__name__, tempest_client=True,
+            network_resources=cls.network_resources)
+        cls.manager = clients.Manager(
+            credentials=cls.credentials()
+        )
+
+    @classmethod
+    def _get_credentials(cls, get_creds, ctype):
+        if CONF.compute.allow_tenant_isolation:
+            creds = get_creds()
+        else:
+            creds = auth.get_default_credentials(ctype)
+        return creds
+
+    @classmethod
+    def credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_primary_creds,
+                                    'user')
+
+
 class OfficialClientTest(tempest.test.BaseTestCase):
     """
     Official Client test base class for scenario testing.
