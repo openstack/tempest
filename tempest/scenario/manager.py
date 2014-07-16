@@ -78,6 +78,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return cls._get_credentials(cls.isolated_creds.get_primary_creds,
                                     'user')
 
+    @classmethod
+    def admin_credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_admin_creds,
+                                    'identity_admin')
+
 
 class OfficialClientTest(tempest.test.BaseTestCase):
     """
