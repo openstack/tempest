@@ -54,16 +54,37 @@ LOG_cinder_client.addHandler(log.NullHandler())
 
 
 class ScenarioTest(tempest.test.BaseTestCase):
+    """Replaces the OfficialClientTest base class.
+
+    Uses tempest own clients as opposed to OfficialClients.
+
+    Common differences:
+    - replace resource.attribute with resource['attribute']
+    - replace resouce.delete with delete_callable(resource['id'])
+    - replace local waiters with common / rest_client waiters
+    """
 
     @classmethod
     def setUpClass(cls):
         super(ScenarioTest, cls).setUpClass()
+        # Using tempest client for isolated credentials as well
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             cls.__name__, tempest_client=True,
             network_resources=cls.network_resources)
         cls.manager = clients.Manager(
             credentials=cls.credentials()
         )
+        cls.admin_manager = clients.Manager(cls.admin_credentials())
+        # Clients (in alphabetical order)
+        cls.floating_ips_client = cls.manager.floating_ips_client
+        # Glance image client v1
+        cls.image_client = cls.manager.image_client
+        cls.keypairs_client = cls.manager.keypairs_client
+        cls.networks_client = cls.admin_manager.networks_client
+        # Nova security groups client
+        cls.security_groups_client = cls.manager.security_groups_client
+        cls.servers_client = cls.manager.servers_client
+        cls.volumes_client = cls.manager.volumes_client
 
     @classmethod
     def _get_credentials(cls, get_creds, ctype):
@@ -82,6 +103,289 @@ class ScenarioTest(tempest.test.BaseTestCase):
     def admin_credentials(cls):
         return cls._get_credentials(cls.isolated_creds.get_admin_creds,
                                     'identity_admin')
+
+    # ## Methods to handle sync and async deletes
+
+    def setUp(self):
+        super(ScenarioTest, self).setUp()
+        self.cleanup_waits = []
+        # NOTE(mtreinish) This is safe to do in setUp instead of setUp class
+        # because scenario tests in the same test class should not share
+        # resources. If resources were shared between test cases then it
+        # should be a single scenario test instead of multiples.
+
+        # NOTE(yfried): this list is cleaned at the end of test_methods and
+        # not at the end of the class
+        self.addCleanup(self._wait_for_cleanups)
+
+    def delete_wrapper(self, delete_thing, thing_id):
+        """Ignores NotFound exceptions for delete operations.
+
+        @param delete_thing: delete method of a resource
+        @param thing_id: id of the resource to be deleted
+        """
+        try:
+            # Tempest clients return dicts, so there is no common delete
+            # method available. Using a callable instead
+            delete_thing(thing_id)
+        except exceptions.NotFound:
+            # If the resource is already missing, mission accomplished.
+            pass
+
+    def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
+                             cleanup_callable, cleanup_args=[],
+                             cleanup_kwargs={}, ignore_error=True):
+        """Adds wait for ansyc resource deletion at the end of cleanups
+
+        @param waiter_callable: callable to wait for the resource to delete
+        @param thing_id: the id of the resource to be cleaned-up
+        @param thing_id_param: the name of the id param in the waiter
+        @param cleanup_callable: method to load pass to self.addCleanup with
+            the following *cleanup_args, **cleanup_kwargs.
+            usually a delete method.
+        """
+        self.addCleanup(cleanup_callable, *cleanup_args, **cleanup_kwargs)
+        wait_dict = {
+            'waiter_callable': waiter_callable,
+            thing_id_param: thing_id
+        }
+        self.cleanup_waits.append(wait_dict)
+
+    def _wait_for_cleanups(self):
+        """To handle async delete actions, a list of waits is added
+        which will be iterated over as the last step of clearing the
+        cleanup queue. That way all the delete calls are made up front
+        and the tests won't succeed unless the deletes are eventually
+        successful. This is the same basic approach used in the api tests to
+        limit cleanup execution time except here it is multi-resource,
+        because of the nature of the scenario tests.
+        """
+        for wait in self.cleanup_waits:
+            waiter_callable = wait.pop('waiter_callable')
+            waiter_callable(**wait)
+
+    # ## Test functions library
+    #
+    # The create_[resource] functions only return body and discard the
+    # resp part which is not used in scenario tests
+
+    def create_keypair(self):
+        name = data_utils.rand_name(self.__class__.__name__)
+        # We don't need to create a keypair by pubkey in scenario
+        resp, body = self.keypairs_client.create_keypair(name)
+        self.addCleanup(self.keypairs_client.delete_keypair, name)
+        return body
+
+    def create_server(self, name=None, image=None, flavor=None,
+                      wait_on_boot=True, wait_on_delete=True,
+                      create_kwargs={}):
+        """Creates VM instance.
+
+        @param image: image from which to create the instance
+        @param wait_on_boot: wait for status ACTIVE before continue
+        @param wait_on_delete: force synchronous delete on cleanup
+        @param create_kwargs: additional details for instance creation
+        @return: server dict
+        """
+        if name is None:
+            name = data_utils.rand_name(self.__class__.__name__)
+        if image is None:
+            image = CONF.compute.image_ref
+        if flavor is None:
+            flavor = CONF.compute.flavor_ref
+
+        fixed_network_name = CONF.compute.fixed_network_name
+        if 'nics' not in create_kwargs and fixed_network_name:
+            _, networks = self.networks_client.list_networks()
+            # If several networks found, set the NetID on which to connect the
+            # server to avoid the following error "Multiple possible networks
+            # found, use a Network ID to be more specific."
+            # See Tempest #1250866
+            if len(networks) > 1:
+                for network in networks:
+                    if network['label'] == fixed_network_name:
+                        create_kwargs['nics'] = [{'net-id': network['id']}]
+                        break
+                # If we didn't find the network we were looking for :
+                else:
+                    msg = ("The network on which the NIC of the server must "
+                           "be connected can not be found : "
+                           "fixed_network_name=%s. Starting instance without "
+                           "specifying a network.") % fixed_network_name
+                    LOG.info(msg)
+
+        LOG.debug("Creating a server (name: %s, image: %s, flavor: %s)",
+                  name, image, flavor)
+        _, server = self.servers_client.create_server(name, image, flavor,
+                                                      **create_kwargs)
+        if wait_on_delete:
+            self.addCleanup(self.servers_client.wait_for_server_termination,
+                            server['id'])
+        self.addCleanup_with_wait(
+            waiter_callable=self.servers_client.wait_for_server_termination,
+            thing_id=server['id'], thing_id_param='server_id',
+            cleanup_callable=self.delete_wrapper,
+            cleanup_args=[self.servers_client.delete_server, server['id']])
+        if wait_on_boot:
+            self.servers_client.wait_for_server_status(server_id=server['id'],
+                                                       status='ACTIVE')
+        # The instance retrieved on creation is missing network
+        # details, necessitating retrieval after it becomes active to
+        # ensure correct details.
+        _, server = self.servers_client.get_server(server['id'])
+        self.assertEqual(server['name'], name)
+        return server
+
+    def create_volume(self, size=1, name=None, snapshot_id=None,
+                      imageRef=None, volume_type=None, wait_on_delete=True):
+        if name is None:
+            name = data_utils.rand_name(self.__class__.__name__)
+        _, volume = self.volumes_client.create_volume(
+            size=size, display_name=name, snapshot_id=snapshot_id,
+            imageRef=imageRef, volume_type=volume_type)
+        if wait_on_delete:
+            self.addCleanup(self.volumes_client.wait_for_resource_deletion,
+                            volume['id'])
+        self.addCleanup_with_wait(
+            waiter_callable=self.volumes_client.wait_for_resource_deletion,
+            thing_id=volume['id'], thing_id_param='id',
+            cleanup_callable=self.delete_wrapper,
+            cleanup_args=[self.volumes_client.delete_volume, volume['id']])
+
+        self.assertEqual(name, volume['display_name'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+        # The volume retrieved on creation has a non-up-to-date status.
+        # Retrieval after it becomes active ensures correct details.
+        _, volume = self.volumes_client.get_volume(volume['id'])
+        return volume
+
+    def _create_loginable_secgroup_rule_nova(self, secgroup_id=None):
+        _client = self.security_groups_client
+        if secgroup_id is None:
+            _, sgs = _client.list_security_groups()
+            for sg in sgs:
+                if sg['name'] == 'default':
+                    secgroup_id = sg['id']
+
+        # These rules are intended to permit inbound ssh and icmp
+        # traffic from all sources, so no group_id is provided.
+        # Setting a group_id would only permit traffic from ports
+        # belonging to the same security group.
+        rulesets = [
+            {
+                # ssh
+                'ip_proto': 'tcp',
+                'from_port': 22,
+                'to_port': 22,
+                'cidr': '0.0.0.0/0',
+            },
+            {
+                # ping
+                'ip_proto': 'icmp',
+                'from_port': -1,
+                'to_port': -1,
+                'cidr': '0.0.0.0/0',
+            }
+        ]
+        rules = list()
+        for ruleset in rulesets:
+            _, sg_rule = _client.create_security_group_rule(secgroup_id,
+                                                            **ruleset)
+            self.addCleanup(self.delete_wrapper,
+                            _client.delete_security_group_rule,
+                            sg_rule['id'])
+            rules.append(sg_rule)
+        return rules
+
+    def _create_security_group_nova(self):
+        # Create security group
+        sg_name = data_utils.rand_name(self.__class__.__name__)
+        sg_desc = sg_name + " description"
+        _, secgroup = self.security_groups_client.create_security_group(
+            sg_name, sg_desc)
+        self.assertEqual(secgroup['name'], sg_name)
+        self.assertEqual(secgroup['description'], sg_desc)
+        self.addCleanup(self.delete_wrapper,
+                        self.security_groups_client.delete_security_group,
+                        secgroup['id'])
+
+        # Add rules to the security group
+        self._create_loginable_secgroup_rule_nova(secgroup['id'])
+
+        return secgroup
+
+    def get_remote_client(self, server_or_ip, username=None, private_key=None):
+        if isinstance(server_or_ip, six.string_types):
+            ip = server_or_ip
+        else:
+            network_name_for_ssh = CONF.compute.network_for_ssh
+            ip = server_or_ip.networks[network_name_for_ssh][0]
+        if username is None:
+            username = CONF.scenario.ssh_user
+        if private_key is None:
+            private_key = self.keypair['private_key']
+        linux_client = remote_client.RemoteClient(ip, username,
+                                                  pkey=private_key)
+        try:
+            linux_client.validate_authentication()
+        except exceptions.SSHTimeout:
+            LOG.exception('ssh connection to %s failed' % ip)
+            debug.log_net_debug()
+            raise
+
+        return linux_client
+
+    def _image_create(self, name, fmt, path, properties={}):
+        name = data_utils.rand_name('%s-' % name)
+        image_file = open(path, 'rb')
+        self.addCleanup(image_file.close)
+        params = {
+            'name': name,
+            'container_format': fmt,
+            'disk_format': fmt,
+            'is_public': 'False',
+        }
+        params.update(properties)
+        _, image = self.image_client.create_image(**params)
+        self.addCleanup(self.image_client.delete_image, image['id'])
+        self.assertEqual("queued", image['status'])
+        self.image_client.update_image(image['id'], data=image_file)
+        return image['id']
+
+    def glance_image_create(self):
+        qcow2_img_path = (CONF.scenario.img_dir + "/" +
+                          CONF.scenario.qcow2_img_file)
+        aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
+        ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
+        ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
+        LOG.debug("paths: img: %s, ami: %s, ari: %s, aki: %s"
+                  % (qcow2_img_path, ami_img_path, ari_img_path, aki_img_path))
+        try:
+            self.image = self._image_create('scenario-img',
+                                            'bare',
+                                            qcow2_img_path,
+                                            properties={'disk_format':
+                                                        'qcow2'})
+        except IOError:
+            LOG.debug("A qcow2 image was not found. Try to get a uec image.")
+            kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
+            ramdisk = self._image_create('scenario-ari', 'ari', ari_img_path)
+            properties = {
+                'properties': {'kernel_id': kernel, 'ramdisk_id': ramdisk}
+            }
+            self.image = self._image_create('scenario-ami', 'ami',
+                                            path=ami_img_path,
+                                            properties=properties)
+        LOG.debug("image:%s" % self.image)
+
+    def _log_console_output(self, servers=None):
+        if not servers:
+            _, servers = self.servers_client.list_servers()
+            servers = servers['servers']
+        for server in servers:
+            LOG.debug('Console output for %s', server['id'])
+            LOG.debug(self.servers_client.get_console_output(server['id'],
+                                                             length=None))
 
 
 class OfficialClientTest(tempest.test.BaseTestCase):
@@ -494,7 +798,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             ip = server_or_ip
         else:
             network_name_for_ssh = CONF.compute.network_for_ssh
-            ip = server_or_ip.networks[network_name_for_ssh][0]
+            ip = server_or_ip['networks'][network_name_for_ssh][0]
         if username is None:
             username = CONF.scenario.ssh_user
         if private_key is None:
