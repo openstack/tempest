@@ -121,7 +121,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
         cmd = ' '.join([os.path.join(CONF.cli.cli_dir, cmd),
                         flags, action, params])
         LOG.info("running: '%s'" % cmd)
-        cmd = shlex.split(cmd)
+        cmd = shlex.split(cmd.encode('utf-8'))
         result = ''
         result_err = ''
         stdout = subprocess.PIPE
