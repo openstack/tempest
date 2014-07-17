@@ -182,6 +182,29 @@ common_instance_actions = {
                  'start_time', 'message']
 }
 
+instance_action_events = {
+    'type': 'array',
+    'items': {
+        'type': 'object',
+        'properties': {
+            'event': {'type': 'string'},
+            'start_time': {'type': 'string'},
+            'finish_time': {'type': 'string'},
+            'result': {'type': 'string'},
+            'traceback': {'type': ['string', 'null']}
+        },
+        'required': ['event', 'start_time', 'finish_time', 'result',
+                     'traceback']
+    }
+}
+
+common_get_instance_action = copy.deepcopy(common_instance_actions)
+
+common_get_instance_action['properties'].update({
+    'events': instance_action_events})
+# 'events' does not come in response body always so it is not
+# defined as 'required'
+
 base_list_servers_detail = {
     'status_code': [200],
     'response_body': {

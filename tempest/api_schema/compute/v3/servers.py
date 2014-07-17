@@ -152,6 +152,22 @@ list_server_actions = {
     }
 }
 
+get_server_actions_object = copy.deepcopy(servers.common_get_instance_action)
+get_server_actions_object[
+    'properties'].update({'server_uuid': {'type': 'string'}})
+get_server_actions_object['required'].extend(['server_uuid'])
+
+get_server_action = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'server_action': get_server_actions_object
+        },
+        'required': ['server_action']
+    }
+}
+
 list_servers_detail = copy.deepcopy(servers.base_list_servers_detail)
 list_servers_detail['response_body']['properties']['servers']['items'][
     'properties'].update({
