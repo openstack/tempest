@@ -169,7 +169,7 @@ def create_users(users):
 
 def collect_users(users):
     global USERS
-    LOG.info("Creating users")
+    LOG.info("Collecting users")
     admin = keystone_admin()
     for u in users:
         tenant = admin.identity.get_tenant_by_name(u['tenant'])
@@ -202,6 +202,7 @@ class JavelinCheck(unittest.TestCase):
         We don't use the resource list for this because we need to validate
         that things like tenantId didn't drift across versions.
         """
+        LOG.info("checking users")
         for name, user in self.users.iteritems():
             client = keystone_admin()
             _, found = client.identity.get_user(user['id'])
@@ -217,6 +218,7 @@ class JavelinCheck(unittest.TestCase):
 
     def check_objects(self):
         """Check that the objects created are still there."""
+        LOG.info("checking objects")
         for obj in self.res['objects']:
             client = client_for_user(obj['owner'])
             r, contents = client.objects.get_object(
@@ -226,6 +228,7 @@ class JavelinCheck(unittest.TestCase):
 
     def check_servers(self):
         """Check that the servers are still up and running."""
+        LOG.info("checking servers")
         for server in self.res['servers']:
             client = client_for_user(server['owner'])
             found = _get_server_by_name(client, server['name'])
@@ -242,6 +245,7 @@ class JavelinCheck(unittest.TestCase):
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
+        LOG.info("checking volumes")
         for volume in self.res['volumes']:
             client = client_for_user(volume['owner'])
             found = _get_volume_by_name(client, volume['name'])
