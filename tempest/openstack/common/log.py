@@ -15,7 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""Openstack logging handler.
+"""OpenStack logging handler.
 
 This module adds to logging functionality by adding the option to specify
 a context object when calling the various log methods.  If the context object
@@ -33,7 +33,6 @@ import logging
 import logging.config
 import logging.handlers
 import os
-import re
 import sys
 import traceback
 
@@ -45,26 +44,12 @@ from tempest.openstack.common.gettextutils import _
 from tempest.openstack.common import importutils
 from tempest.openstack.common import jsonutils
 from tempest.openstack.common import local
+# NOTE(flaper87): Pls, remove when graduating this module
+# from the incubator.
+from tempest.openstack.common.strutils import mask_password  # noqa
 
 
 _DEFAULT_LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
-
-_SANITIZE_KEYS = ['adminPass', 'admin_pass', 'password', 'admin_password']
-
-# NOTE(ldbragst): Let's build a list of regex objects using the list of
-# _SANITIZE_KEYS we already have. This way, we only have to add the new key
-# to the list of _SANITIZE_KEYS and we can generate regular expressions
-# for XML and JSON automatically.
-_SANITIZE_PATTERNS = []
-_FORMAT_PATTERNS = [r'(%(key)s\s*[=]\s*[\"\']).*?([\"\'])',
-                    r'(<%(key)s>).*?(</%(key)s>)',
-                    r'([\"\']%(key)s[\"\']\s*:\s*[\"\']).*?([\"\'])',
-                    r'([\'"].*?%(key)s[\'"]\s*:\s*u?[\'"]).*?([\'"])']
-
-for key in _SANITIZE_KEYS:
-    for pattern in _FORMAT_PATTERNS:
-        reg_ex = re.compile(pattern % {'key': key}, re.DOTALL)
-        _SANITIZE_PATTERNS.append(reg_ex)
 
 
 common_cli_opts = [
@@ -84,14 +69,11 @@ logging_cli_opts = [
     cfg.StrOpt('log-config-append',
                metavar='PATH',
                deprecated_name='log-config',
-               help='The name of logging configuration file. It does not '
-                    'disable existing loggers, but just appends specified '
-                    'logging configuration to any other existing logging '
-                    'options. Please see the Python logging module '
-                    'documentation for details on logging configuration '
-                    'files.'),
+               help='The name of a logging configuration file. This file '
+                    'is appended to any existing logging configuration '
+                    'files. For details about logging configuration files, '
+                    'see the Python logging module documentation.'),
     cfg.StrOpt('log-format',
-               default=None,
                metavar='FORMAT',
                help='DEPRECATED. '
                     'A logging.Formatter log message format string which may '
@@ -103,7 +85,7 @@ logging_cli_opts = [
                default=_DEFAULT_LOG_DATE_FORMAT,
                metavar='DATE_FORMAT',
                help='Format string for %%(asctime)s in log records. '
-                    'Default: %(default)s'),
+                    'Default: %(default)s .'),
     cfg.StrOpt('log-file',
                metavar='PATH',
                deprecated_name='logfile',
@@ -112,67 +94,76 @@ logging_cli_opts = [
     cfg.StrOpt('log-dir',
                deprecated_name='logdir',
                help='(Optional) The base directory used for relative '
-                    '--log-file paths'),
+                    '--log-file paths.'),
     cfg.BoolOpt('use-syslog',
                 default=False,
-                help='Use syslog for logging.'),
+                help='Use syslog for logging. '
+                     'Existing syslog format is DEPRECATED during I, '
+                     'and will change in J to honor RFC5424.'),
+    cfg.BoolOpt('use-syslog-rfc-format',
+                # TODO(bogdando) remove or use True after existing
+                #    syslog format deprecation in J
+                default=False,
+                help='(Optional) Enables or disables syslog rfc5424 format '
+                     'for logging. If enabled, prefixes the MSG part of the '
+                     'syslog message with APP-NAME (RFC5424). The '
+                     'format without the APP-NAME is deprecated in I, '
+                     'and will be removed in J.'),
     cfg.StrOpt('syslog-log-facility',
                default='LOG_USER',
-               help='syslog facility to receive log lines')
+               help='Syslog facility to receive log lines.')
 ]
 
 generic_log_opts = [
     cfg.BoolOpt('use_stderr',
                 default=True,
-                help='Log output to standard error')
+                help='Log output to standard error.')
 ]
+
+DEFAULT_LOG_LEVELS = ['amqp=WARN', 'amqplib=WARN', 'boto=WARN',
+                      'qpid=WARN', 'sqlalchemy=WARN', 'suds=INFO',
+                      'oslo.messaging=INFO', 'iso8601=WARN',
+                      'requests.packages.urllib3.connectionpool=WARN',
+                      'urllib3.connectionpool=WARN']
 
 log_opts = [
     cfg.StrOpt('logging_context_format_string',
                default='%(asctime)s.%(msecs)03d %(process)d %(levelname)s '
                        '%(name)s [%(request_id)s %(user_identity)s] '
                        '%(instance)s%(message)s',
-               help='format string to use for log messages with context'),
+               help='Format string to use for log messages with context.'),
     cfg.StrOpt('logging_default_format_string',
                default='%(asctime)s.%(msecs)03d %(process)d %(levelname)s '
                        '%(name)s [-] %(instance)s%(message)s',
-               help='format string to use for log messages without context'),
+               help='Format string to use for log messages without context.'),
     cfg.StrOpt('logging_debug_format_suffix',
                default='%(funcName)s %(pathname)s:%(lineno)d',
-               help='data to append to log format when level is DEBUG'),
+               help='Data to append to log format when level is DEBUG.'),
     cfg.StrOpt('logging_exception_prefix',
                default='%(asctime)s.%(msecs)03d %(process)d TRACE %(name)s '
                '%(instance)s',
-               help='prefix each line of exception output with this format'),
+               help='Prefix each line of exception output with this format.'),
     cfg.ListOpt('default_log_levels',
-                default=[
-                    'amqp=WARN',
-                    'amqplib=WARN',
-                    'boto=WARN',
-                    'qpid=WARN',
-                    'sqlalchemy=WARN',
-                    'suds=INFO',
-                    'iso8601=WARN',
-                ],
-                help='list of logger=LEVEL pairs'),
+                default=DEFAULT_LOG_LEVELS,
+                help='List of logger=LEVEL pairs.'),
     cfg.BoolOpt('publish_errors',
                 default=False,
-                help='publish error events'),
+                help='Enables or disables publication of error events.'),
     cfg.BoolOpt('fatal_deprecations',
                 default=False,
-                help='make deprecations fatal'),
+                help='Enables or disables fatal status of deprecations.'),
 
     # NOTE(mikal): there are two options here because sometimes we are handed
     # a full instance (and could include more information), and other times we
     # are just handed a UUID for the instance.
     cfg.StrOpt('instance_format',
                default='[instance: %(uuid)s] ',
-               help='If an instance is passed with the log message, format '
-                    'it like this'),
+               help='The format for an instance that is passed with the log '
+                    'message.'),
     cfg.StrOpt('instance_uuid_format',
                default='[instance: %(uuid)s] ',
-               help='If an instance UUID is passed with the log message, '
-                    'format it like this'),
+               help='The format for an instance UUID that is passed with the '
+                    'log message.'),
 ]
 
 CONF = cfg.CONF
@@ -231,40 +222,6 @@ def _get_log_file_path(binary=None):
     return None
 
 
-def mask_password(message, secret="***"):
-    """Replace password with 'secret' in message.
-
-    :param message: The string which includes security information.
-    :param secret: value with which to replace passwords.
-    :returns: The unicode value of message with the password fields masked.
-
-    For example:
-
-    >>> mask_password("'adminPass' : 'aaaaa'")
-    "'adminPass' : '***'"
-    >>> mask_password("'admin_pass' : 'aaaaa'")
-    "'admin_pass' : '***'"
-    >>> mask_password('"password" : "aaaaa"')
-    '"password" : "***"'
-    >>> mask_password("'original_password' : 'aaaaa'")
-    "'original_password' : '***'"
-    >>> mask_password("u'original_password' :   u'aaaaa'")
-    "u'original_password' :   u'***'"
-    """
-    message = six.text_type(message)
-
-    # NOTE(ldbragst): Check to see if anything in message contains any key
-    # specified in _SANITIZE_KEYS, if not then just return the message since
-    # we don't have to mask any passwords.
-    if not any(key in message for key in _SANITIZE_KEYS):
-        return message
-
-    secret = r'\g<1>' + secret + r'\g<2>'
-    for pattern in _SANITIZE_PATTERNS:
-        message = re.sub(pattern, secret, message)
-    return message
-
-
 class BaseLoggerAdapter(logging.LoggerAdapter):
 
     def audit(self, msg, *args, **kwargs):
@@ -282,6 +239,11 @@ class LazyAdapter(BaseLoggerAdapter):
     def logger(self):
         if not self._logger:
             self._logger = getLogger(self.name, self.version)
+            if six.PY3:
+                # In Python 3, the code fails because the 'manager' attribute
+                # cannot be found when using a LoggerAdapter as the
+                # underlying logger. Work around this issue.
+                self._logger.manager = self._logger.logger.manager
         return self._logger
 
 
@@ -292,18 +254,39 @@ class ContextAdapter(BaseLoggerAdapter):
         self.logger = logger
         self.project = project_name
         self.version = version_string
+        self._deprecated_messages_sent = dict()
 
     @property
     def handlers(self):
         return self.logger.handlers
 
     def deprecated(self, msg, *args, **kwargs):
+        """Call this method when a deprecated feature is used.
+
+        If the system is configured for fatal deprecations then the message
+        is logged at the 'critical' level and :class:`DeprecatedConfig` will
+        be raised.
+
+        Otherwise, the message will be logged (once) at the 'warn' level.
+
+        :raises: :class:`DeprecatedConfig` if the system is configured for
+                 fatal deprecations.
+
+        """
         stdmsg = _("Deprecated: %s") % msg
         if CONF.fatal_deprecations:
             self.critical(stdmsg, *args, **kwargs)
             raise DeprecatedConfig(msg=stdmsg)
-        else:
-            self.warn(stdmsg, *args, **kwargs)
+
+        # Using a list because a tuple with dict can't be stored in a set.
+        sent_args = self._deprecated_messages_sent.setdefault(msg, list())
+
+        if args in sent_args:
+            # Already logged this message, so don't log it again.
+            return
+
+        sent_args.append(args)
+        self.warn(stdmsg, *args, **kwargs)
 
     def process(self, msg, kwargs):
         # NOTE(mrodden): catch any Message/other object and
@@ -324,7 +307,7 @@ class ContextAdapter(BaseLoggerAdapter):
             extra.update(_dictify_context(context))
 
         instance = kwargs.pop('instance', None)
-        instance_uuid = (extra.get('instance_uuid', None) or
+        instance_uuid = (extra.get('instance_uuid') or
                          kwargs.pop('instance_uuid', None))
         instance_extra = ''
         if instance:
@@ -390,10 +373,10 @@ class JSONFormatter(logging.Formatter):
 
 def _create_logging_excepthook(product_name):
     def logging_excepthook(exc_type, value, tb):
-        extra = {}
-        if CONF.verbose:
-            extra['exc_info'] = (exc_type, value, tb)
-        getLogger(product_name).critical(str(value), **extra)
+        extra = {'exc_info': (exc_type, value, tb)}
+        getLogger(product_name).critical(
+            "".join(traceback.format_exception_only(exc_type, value)),
+            **extra)
     return logging_excepthook
 
 
@@ -414,23 +397,31 @@ def _load_log_config(log_config_append):
     try:
         logging.config.fileConfig(log_config_append,
                                   disable_existing_loggers=False)
-    except moves.configparser.Error as exc:
-        raise LogConfigError(log_config_append, str(exc))
+    except (moves.configparser.Error, KeyError) as exc:
+        raise LogConfigError(log_config_append, six.text_type(exc))
 
 
-def setup(product_name):
+def setup(product_name, version='unknown'):
     """Setup logging."""
     if CONF.log_config_append:
         _load_log_config(CONF.log_config_append)
     else:
-        _setup_logging_from_conf()
+        _setup_logging_from_conf(product_name, version)
     sys.excepthook = _create_logging_excepthook(product_name)
 
 
-def set_defaults(logging_context_format_string):
-    cfg.set_defaults(log_opts,
-                     logging_context_format_string=
-                     logging_context_format_string)
+def set_defaults(logging_context_format_string,
+                 default_log_levels=None):
+    # Just in case the caller is not setting the
+    # default_log_level. This is insurance because
+    # we introduced the default_log_level parameter
+    # later in a backwards in-compatible change
+    if default_log_levels is None:
+        default_log_levels = DEFAULT_LOG_LEVELS
+    cfg.set_defaults(
+            log_opts,
+            logging_context_format_string=logging_context_format_string,
+            default_log_levels=default_log_levels)
 
 
 def _find_facility_from_conf():
@@ -457,15 +448,38 @@ def _find_facility_from_conf():
     return facility
 
 
-def _setup_logging_from_conf():
+class RFCSysLogHandler(logging.handlers.SysLogHandler):
+    def __init__(self, *args, **kwargs):
+        self.binary_name = _get_binary_name()
+        # Do not use super() unless type(logging.handlers.SysLogHandler)
+        #  is 'type' (Python 2.7).
+        # Use old style calls, if the type is 'classobj' (Python 2.6)
+        logging.handlers.SysLogHandler.__init__(self, *args, **kwargs)
+
+    def format(self, record):
+        # Do not use super() unless type(logging.handlers.SysLogHandler)
+        #  is 'type' (Python 2.7).
+        # Use old style calls, if the type is 'classobj' (Python 2.6)
+        msg = logging.handlers.SysLogHandler.format(self, record)
+        msg = self.binary_name + ' ' + msg
+        return msg
+
+
+def _setup_logging_from_conf(project, version):
     log_root = getLogger(None).logger
     for handler in log_root.handlers:
         log_root.removeHandler(handler)
 
     if CONF.use_syslog:
         facility = _find_facility_from_conf()
-        syslog = logging.handlers.SysLogHandler(address='/dev/log',
-                                                facility=facility)
+        # TODO(bogdando) use the format provided by RFCSysLogHandler
+        #   after existing syslog format deprecation in J
+        if CONF.use_syslog_rfc_format:
+            syslog = RFCSysLogHandler(address='/dev/log',
+                                      facility=facility)
+        else:
+            syslog = logging.handlers.SysLogHandler(address='/dev/log',
+                                                    facility=facility)
         log_root.addHandler(syslog)
 
     logpath = _get_log_file_path()
@@ -484,9 +498,14 @@ def _setup_logging_from_conf():
         log_root.addHandler(streamlog)
 
     if CONF.publish_errors:
-        handler = importutils.import_object(
-            "tempest.openstack.common.log_handler.PublishErrorsHandler",
-            logging.ERROR)
+        try:
+            handler = importutils.import_object(
+                "tempest.openstack.common.log_handler.PublishErrorsHandler",
+                logging.ERROR)
+        except ImportError:
+            handler = importutils.import_object(
+                "oslo.messaging.notify.log_handler.PublishErrorsHandler",
+                logging.ERROR)
         log_root.addHandler(handler)
 
     datefmt = CONF.log_date_format
@@ -499,7 +518,9 @@ def _setup_logging_from_conf():
             log_root.info('Deprecated: log_format is now deprecated and will '
                           'be removed in the next release')
         else:
-            handler.setFormatter(ContextFormatter(datefmt=datefmt))
+            handler.setFormatter(ContextFormatter(project=project,
+                                                  version=version,
+                                                  datefmt=datefmt))
 
     if CONF.debug:
         log_root.setLevel(logging.DEBUG)
@@ -510,9 +531,15 @@ def _setup_logging_from_conf():
 
     for pair in CONF.default_log_levels:
         mod, _sep, level_name = pair.partition('=')
-        level = logging.getLevelName(level_name)
         logger = logging.getLogger(mod)
-        logger.setLevel(level)
+        # NOTE(AAzza) in python2.6 Logger.setLevel doesn't convert string name
+        # to integer code.
+        if sys.version_info < (2, 7):
+            level = logging.getLevelName(level_name)
+            logger.setLevel(level)
+        else:
+            logger.setLevel(level_name)
+
 
 _loggers = {}
 
@@ -543,7 +570,7 @@ class WritableLogger(object):
         self.level = level
 
     def write(self, msg):
-        self.logger.log(self.level, msg)
+        self.logger.log(self.level, msg.rstrip())
 
 
 class ContextFormatter(logging.Formatter):
@@ -557,27 +584,64 @@ class ContextFormatter(logging.Formatter):
     For information about what variables are available for the formatter see:
     http://docs.python.org/library/logging.html#formatter
 
+    If available, uses the context value stored in TLS - local.store.context
+
     """
+
+    def __init__(self, *args, **kwargs):
+        """Initialize ContextFormatter instance
+
+        Takes additional keyword arguments which can be used in the message
+        format string.
+
+        :keyword project: project name
+        :type project: string
+        :keyword version: project version
+        :type version: string
+
+        """
+
+        self.project = kwargs.pop('project', 'unknown')
+        self.version = kwargs.pop('version', 'unknown')
+
+        logging.Formatter.__init__(self, *args, **kwargs)
 
     def format(self, record):
         """Uses contextstring if request_id is set, otherwise default."""
-        # NOTE(sdague): default the fancier formating params
+
+        # store project info
+        record.project = self.project
+        record.version = self.version
+
+        # store request info
+        context = getattr(local.store, 'context', None)
+        if context:
+            d = _dictify_context(context)
+            for k, v in d.items():
+                setattr(record, k, v)
+
+        # NOTE(sdague): default the fancier formatting params
         # to an empty string so we don't throw an exception if
         # they get used
-        for key in ('instance', 'color'):
+        for key in ('instance', 'color', 'user_identity'):
             if key not in record.__dict__:
                 record.__dict__[key] = ''
 
-        if record.__dict__.get('request_id', None):
-            self._fmt = CONF.logging_context_format_string
+        if record.__dict__.get('request_id'):
+            fmt = CONF.logging_context_format_string
         else:
-            self._fmt = CONF.logging_default_format_string
+            fmt = CONF.logging_default_format_string
 
         if (record.levelno == logging.DEBUG and
                 CONF.logging_debug_format_suffix):
-            self._fmt += " " + CONF.logging_debug_format_suffix
+            fmt += " " + CONF.logging_debug_format_suffix
 
-        # Cache this on the record, Logger will respect our formated copy
+        if sys.version_info < (3, 2):
+            self._fmt = fmt
+        else:
+            self._style = logging.PercentStyle(fmt)
+            self._fmt = self._style._fmt
+        # Cache this on the record, Logger will respect our formatted copy
         if record.exc_info:
             record.exc_text = self.formatException(record.exc_info, record)
         return logging.Formatter.format(self, record)

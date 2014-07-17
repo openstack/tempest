@@ -26,7 +26,7 @@ class AZAdminV3Test(base.BaseComputeAdminTest):
     @classmethod
     def setUpClass(cls):
         super(AZAdminV3Test, cls).setUpClass()
-        cls.client = cls.os_adm.availability_zone_client
+        cls.client = cls.availability_zone_admin_client
 
     @test.attr(type='gate')
     def test_get_availability_zone_list(self):

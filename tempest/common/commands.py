@@ -25,7 +25,7 @@ LOG = logging.getLogger(__name__)
 
 
 def sudo_cmd_call(cmd):
-    args = shlex.split(cmd)
+    args = shlex.split(cmd.encode('utf-8'))
     subprocess_args = {'stdout': subprocess.PIPE,
                        'stderr': subprocess.STDOUT}
     proc = subprocess.Popen(['/usr/bin/sudo', '-n'] + args,
@@ -84,7 +84,7 @@ def copy_file_to_host(file_from, dest, host, username, pkey):
           "-i %(pkey)s %(file1)s %(dest)s" % {'pkey': pkey,
                                               'file1': file_from,
                                               'dest': dest}
-    args = shlex.split(cmd)
+    args = shlex.split(cmd.encode('utf-8'))
     subprocess_args = {'stdout': subprocess.PIPE,
                        'stderr': subprocess.STDOUT}
     proc = subprocess.Popen(args, **subprocess_args)
