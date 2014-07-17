@@ -28,6 +28,7 @@ import yaml
 import argparse
 
 import tempest.auth
+from tempest import config
 from tempest import exceptions
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import servers_client
@@ -452,11 +453,17 @@ def get_options():
                         required=True,
                         metavar='resourcefile.yaml',
                         help='Resources definition yaml file')
+
     parser.add_argument(
         '-d', '--devstack-base',
         required=True,
         metavar='/opt/stack/old',
         help='Devstack base directory for retrieving artifacts')
+    parser.add_argument(
+        '-c', '--config-file',
+        metavar='/etc/tempest.conf',
+        help='path to javelin2(tempest) config file')
+
     # auth bits, letting us also just source the devstack openrc
     parser.add_argument('--os-username',
                         metavar='<auth-user-name>',
@@ -476,6 +483,8 @@ def get_options():
         print("ERROR: Unknown mode -m %s\n" % OPTS.mode)
         parser.print_help()
         sys.exit(1)
+    if OPTS.config_file:
+        config.CONF.set_config_path(OPTS.config_file)
 
 
 def setup_logging(debug=True):
