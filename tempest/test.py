@@ -29,8 +29,8 @@ import testscenarios
 import testtools
 
 from tempest import clients
+from tempest.common import credentials
 import tempest.common.generator.valid_generator as valid
-from tempest.common import isolated_creds
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import importutils
@@ -362,31 +362,20 @@ class BaseTestCase(BaseDeps):
         """
         Returns an OpenStack client manager
         """
-        cls.isolated_creds = isolated_creds.IsolatedCreds(
-            cls.__name__, network_resources=cls.network_resources)
-
         force_tenant_isolation = getattr(cls, 'force_tenant_isolation', None)
-        if CONF.compute.allow_tenant_isolation or force_tenant_isolation:
-            creds = cls.isolated_creds.get_primary_creds()
-            if getattr(cls, '_interface', None):
-                os = clients.Manager(credentials=creds,
-                                     interface=cls._interface,
-                                     service=cls._service)
-            elif interface:
-                os = clients.Manager(credentials=creds,
-                                     interface=interface,
-                                     service=cls._service)
-            else:
-                os = clients.Manager(credentials=creds,
-                                     service=cls._service)
-        else:
-            if getattr(cls, '_interface', None):
-                os = clients.Manager(interface=cls._interface,
-                                     service=cls._service)
-            elif interface:
-                os = clients.Manager(interface=interface, service=cls._service)
-            else:
-                os = clients.Manager(service=cls._service)
+
+        cls.isolated_creds = credentials.get_isolated_credentials(
+            name=cls.__name__, network_resources=cls.network_resources,
+            force_tenant_isolation=force_tenant_isolation,
+        )
+
+        creds = cls.isolated_creds.get_primary_creds()
+        params = dict(credentials=creds, service=cls._service)
+        if getattr(cls, '_interface', None):
+            interface = cls._interface
+        if interface:
+            params['interface'] = interface
+        os = clients.Manager(**params)
         return os
 
     @classmethod

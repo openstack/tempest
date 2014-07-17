@@ -44,9 +44,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
 
         # TODO(andreaf) WE should care also for the alt_manager here
         # but only once client lazy load in the manager is done
-        os = cls.get_client_manager()
+        cls.os = cls.get_client_manager()
+        cls.multi_user = cls.check_multi_user()
 
-        cls.os = os
         cls.build_interval = CONF.compute.build_interval
         cls.build_timeout = CONF.compute.build_timeout
         cls.ssh_user = CONF.compute.ssh_user
@@ -58,7 +58,6 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         cls.image_ssh_password = CONF.compute.image_ssh_password
         cls.servers = []
         cls.images = []
-        cls.multi_user = cls.get_multi_user()
         cls.security_groups = []
         cls.server_groups = []
 
@@ -118,27 +117,12 @@ class BaseComputeTest(tempest.test.BaseTestCase):
             raise exceptions.InvalidConfiguration(message=msg)
 
     @classmethod
-    def get_multi_user(cls):
-        multi_user = True
-        # Determine if there are two regular users that can be
-        # used in testing. If the test cases are allowed to create
-        # users (config.compute.allow_tenant_isolation is true,
-        # then we allow multi-user.
-        if not CONF.compute.allow_tenant_isolation:
-            user1 = CONF.identity.username
-            user2 = CONF.identity.alt_username
-            if not user2 or user1 == user2:
-                multi_user = False
-            else:
-                user2_password = CONF.identity.alt_password
-                user2_tenant_name = CONF.identity.alt_tenant_name
-                if not user2_password or not user2_tenant_name:
-                    msg = ("Alternate user specified but not alternate "
-                           "tenant or password: alt_tenant_name=%s "
-                           "alt_password=%s"
-                           % (user2_tenant_name, user2_password))
-                    raise exceptions.InvalidConfiguration(msg)
-        return multi_user
+    def check_multi_user(cls):
+        # We have a list of accounts now, so just checking if the list is gt 2
+        if not cls.isolated_creds.is_multi_user():
+            msg = "Not enough users available for multi-user testing"
+            raise exceptions.InvalidConfiguration(msg)
+        return True
 
     @classmethod
     def clear_servers(cls):
@@ -390,19 +374,14 @@ class BaseComputeAdminTest(BaseComputeTest):
     @classmethod
     def resource_setup(cls):
         super(BaseComputeAdminTest, cls).resource_setup()
-        if (CONF.compute.allow_tenant_isolation or
-            cls.force_tenant_isolation is True):
+        try:
             creds = cls.isolated_creds.get_admin_creds()
-            cls.os_adm = clients.Manager(credentials=creds,
-                                         interface=cls._interface)
-        else:
-            try:
-                cls.os_adm = clients.ComputeAdminManager(
-                    interface=cls._interface)
-            except exceptions.InvalidCredentials:
-                msg = ("Missing Compute Admin API credentials "
-                       "in configuration.")
-                raise cls.skipException(msg)
+            cls.os_adm = clients.Manager(
+                credentials=creds, interface=cls._interface)
+        except NotImplementedError:
+            msg = ("Missing Compute Admin API credentials in configuration.")
+            raise cls.skipException(msg)
+
         if cls._api_version == 2:
             cls.availability_zone_admin_client = (
                 cls.os_adm.availability_zone_client)

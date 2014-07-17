@@ -154,19 +154,14 @@ class BaseVolumeAdminTest(BaseVolumeTest):
     @classmethod
     def resource_setup(cls):
         super(BaseVolumeAdminTest, cls).resource_setup()
-        cls.adm_user = CONF.identity.admin_username
-        cls.adm_pass = CONF.identity.admin_password
-        cls.adm_tenant = CONF.identity.admin_tenant_name
-        if not all((cls.adm_user, cls.adm_pass, cls.adm_tenant)):
-            msg = ("Missing Volume Admin API credentials "
-                   "in configuration.")
-            raise cls.skipException(msg)
 
-        if CONF.compute.allow_tenant_isolation:
-            cls.os_adm = clients.Manager(cls.isolated_creds.get_admin_creds(),
-                                         interface=cls._interface)
-        else:
-            cls.os_adm = clients.AdminManager(interface=cls._interface)
+        try:
+            cls.adm_creds = cls.isolated_creds.get_admin_creds()
+            cls.os_adm = clients.Manager(
+                credentials=cls.adm_creds, interface=cls._interface)
+        except NotImplementedError:
+            msg = "Missing Volume Admin API credentials in configuration."
+            raise cls.skipException(msg)
 
         cls.qos_specs = []
 
