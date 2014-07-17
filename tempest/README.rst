@@ -62,13 +62,10 @@ Scenario tests can and should use the OpenStack python clients.
 stress
 ------
 
-Stress tests are designed to stress an OpenStack environment by
-running a high workload against it and seeing what breaks. Tools may
-be provided to help detect breaks (stack traces in the logs).
-
-TODO: old stress tests deleted, new_stress that david is working on
-moves into here.
-
+Stress tests are designed to stress an OpenStack environment by running a high
+workload against it and seeing what breaks. The stress test framework runs
+several test jobs in parallel and can run any existing test in Tempest as a
+stress job.
 
 thirdparty
 ----------
