@@ -474,6 +474,7 @@ class ServersClientJSON(rest_client.RestClient):
         resp, body = self.get("servers/%s/os-instance-actions/%s" %
                               (str(server_id), str(request_id)))
         body = json.loads(body)
+        self.validate_response(schema.get_instance_action, resp, body)
         return resp, body['instanceAction']
 
     def force_delete_server(self, server_id, **kwargs):
