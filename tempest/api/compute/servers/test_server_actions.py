@@ -129,9 +129,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         personality = [{'path': 'rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
         password = 'rebuildPassw0rd'
+        ipv4access = '1.2.3.4'
+        ipv6access = 'fe80::100'
         resp, rebuilt_server = self.client.rebuild(self.server_id,
                                                    self.image_ref_alt,
                                                    name=new_name,
+                                                   accessIPv4=ipv4access,
+                                                   accessIPv6=ipv6access,
                                                    metadata=meta,
                                                    personality=personality,
                                                    adminPass=password)
@@ -148,6 +152,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         rebuilt_image_id = server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, server['name'])
+        self.assertEqual(ipv4access, server['accessIPv4'])
+        self.assertEqual(ipv6access, server['accessIPv6'])
 
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
