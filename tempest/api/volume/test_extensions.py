@@ -25,8 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class ExtensionsTestJSON(base.BaseVolumeV1Test):
-    _interface = 'json'
+class ExtensionsV2TestJSON(base.BaseVolumeTest):
 
     @test.attr(type='gate')
     def test_list_extensions(self):
@@ -46,5 +45,13 @@ class ExtensionsTestJSON(base.BaseVolumeV1Test):
             raise self.skipException('There are not any extensions configured')
 
 
-class ExtensionsTestXML(ExtensionsTestJSON):
+class ExtensionsV2TestXML(ExtensionsV2TestJSON):
+    _interface = 'xml'
+
+
+class ExtensionsV1TestJSON(ExtensionsV2TestJSON):
+    _api_version = 1
+
+
+class ExtensionsV1TestXML(ExtensionsV1TestJSON):
     _interface = 'xml'

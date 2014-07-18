@@ -22,11 +22,11 @@ from tempest import config
 CONF = config.CONF
 
 
-class ExtensionsClientXML(rest_client.RestClient):
+class BaseExtensionsClientXML(rest_client.RestClient):
     TYPE = "xml"
 
     def __init__(self, auth_provider):
-        super(ExtensionsClientXML, self).__init__(auth_provider)
+        super(BaseExtensionsClientXML, self).__init__(auth_provider)
         self.service = CONF.volume.catalog_type
 
     def _parse_array(self, node):
@@ -40,3 +40,9 @@ class ExtensionsClientXML(rest_client.RestClient):
         resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
+
+
+class ExtensionsClientXML(BaseExtensionsClientXML):
+    """
+    Volume V1 extensions client.
+    """
