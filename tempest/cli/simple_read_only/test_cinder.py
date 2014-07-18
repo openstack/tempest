@@ -15,17 +15,16 @@
 
 import logging
 import re
-import subprocess
 import testtools
 
-import tempest.cli
+from tempest import cli
 from tempest import config
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
     """Basic, read-only tests for Cinder CLI client.
 
     Checks return values and output of read-only commands.
@@ -41,7 +40,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
         super(SimpleReadOnlyCinderClientTest, cls).setUpClass()
 
     def test_cinder_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.cinder,
                           'this-does-not-exist')
 
@@ -66,7 +65,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
                                       'Attached to'])
         self.cinder('list', params='--all-tenants 1')
         self.cinder('list', params='--all-tenants 0')
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.cinder,
                           'list',
                           params='--all-tenants bad')

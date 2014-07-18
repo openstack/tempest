@@ -14,15 +14,14 @@
 #    under the License.
 
 import re
-import subprocess
 
-import tempest.cli
+from tempest import cli
 from tempest import config
 
 CONF = config.CONF
 
 
-class SimpleReadOnlySwiftClientTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlySwiftClientTest(cli.ClientTestBase):
     """Basic, read-only tests for Swift CLI client.
 
     Checks return values and output of read-only commands.
@@ -38,7 +37,7 @@ class SimpleReadOnlySwiftClientTest(tempest.cli.ClientTestBase):
         super(SimpleReadOnlySwiftClientTest, cls).setUpClass()
 
     def test_swift_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.swift,
                           'this-does-not-exist')
 

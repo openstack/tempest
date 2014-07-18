@@ -14,9 +14,8 @@
 #    under the License.
 
 import re
-import subprocess
 
-import tempest.cli
+from tempest import cli
 from tempest import config
 from tempest.openstack.common import log as logging
 
@@ -25,7 +24,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlyGlanceClientTest(cli.ClientTestBase):
     """Basic, read-only tests for Glance CLI client.
 
     Checks return values and output of read-only commands.
@@ -41,7 +40,7 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
         super(SimpleReadOnlyGlanceClientTest, cls).setUpClass()
 
     def test_glance_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.glance,
                           'this-does-not-exist')
 

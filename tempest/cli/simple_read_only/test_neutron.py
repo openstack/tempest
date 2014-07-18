@@ -14,7 +14,6 @@
 #    under the License.
 
 import re
-import subprocess
 
 from tempest import cli
 from tempest import config
@@ -43,7 +42,7 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
 
     @test.attr(type='smoke')
     def test_neutron_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.neutron,
                           'this-does-not-exist')
 
