@@ -110,6 +110,36 @@ class RoutersTest(base.BaseRouterTest):
                         create_body['router']['id'])
         self.assertEqual(tenant_id, create_body['router']['tenant_id'])
 
+    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @test.attr(type='smoke')
+    def test_create_router_with_default_snat_value(self):
+        # Create a router with default snat rule
+        name = data_utils.rand_name('router')
+        router = self._create_router(name,
+                 external_network_id=CONF.network.public_network_id)
+        self._verify_router_gateway(router['id'],
+              {'network_id': CONF.network.public_network_id,
+              'enable_snat': True})
+
+    @test.requires_ext(extension='ext-gw-mode', service='network')
+    @test.attr(type='smoke')
+    def test_create_router_with_snat_explicit(self):
+        name = data_utils.rand_name('snat-router')
+        # Create a router enabling snat attributes
+        enable_snat_states = [False, True]
+        for enable_snat in enable_snat_states:
+            external_gateway_info = {
+                'network_id': CONF.network.public_network_id,
+                'enable_snat': enable_snat}
+            resp, create_body = self.admin_client.create_router(
+                name, external_gateway_info=external_gateway_info)
+            self.assertEqual('201', resp['status'])
+            self.addCleanup(self.admin_client.delete_router,
+                    create_body['router']['id'])
+            # Verify snat attributes after router creation
+            self._verify_router_gateway(create_body['router']['id'],
+                    exp_ext_gw_info=external_gateway_info)
+
     @test.attr(type='smoke')
     def test_add_remove_router_interface_with_subnet_id(self):
         network = self.create_network()
@@ -151,7 +181,7 @@ class RoutersTest(base.BaseRouterTest):
                          router['id'])
 
     def _verify_router_gateway(self, router_id, exp_ext_gw_info=None):
-        resp, show_body = self.client.show_router(router_id)
+        resp, show_body = self.admin_client.show_router(router_id)
         self.assertEqual('200', resp['status'])
         actual_ext_gw_info = show_body['router']['external_gateway_info']
         if exp_ext_gw_info is None:
