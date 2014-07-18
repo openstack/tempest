@@ -288,6 +288,7 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             self.assertEqual(expected,
                              set(resp))
 
+    @test.skip_because(bug="1342124")
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
