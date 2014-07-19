@@ -34,6 +34,11 @@ def rand_name(name=''):
         return randbits
 
 
+def rand_url():
+    randbits = str(random.randint(1, 0x7fffffff))
+    return 'https://url-' + randbits + '.com'
+
+
 def rand_int_id(start=0, end=0x7fffffff):
     return random.randint(start, end)
 
