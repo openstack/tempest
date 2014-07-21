@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import StringIO
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -31,24 +33,20 @@ class ImagesMetadataTestJSON(base.BaseV2ComputeTest):
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
+        cls.glance_client = cls.os.image_client
         cls.client = cls.images_client
         cls.image_id = None
 
-        resp, server = cls.create_test_server(wait_until='ACTIVE')
-        cls.server_id = server['id']
-
-        # Snapshot the server once to save time
         name = data_utils.rand_name('image')
-        resp, _ = cls.client.create_image(cls.server_id, name, {})
-        cls.image_id = resp['location'].rsplit('/', 1)[1]
-
+        resp, body = cls.glance_client.create_image(name=name,
+                                                    container_format='bare',
+                                                    disk_format='raw',
+                                                    is_public=False)
+        cls.image_id = body['id']
+        cls.images.append(cls.image_id)
+        image_file = StringIO.StringIO(('*' * 1024))
+        cls.glance_client.update_image(cls.image_id, data=image_file)
         cls.client.wait_for_image_status(cls.image_id, 'ACTIVE')
-
-    @classmethod
-    def tearDownClass(cls):
-        if cls.image_id:
-            cls.client.delete_image(cls.image_id)
-        super(ImagesMetadataTestJSON, cls).tearDownClass()
 
     def setUp(self):
         super(ImagesMetadataTestJSON, self).setUp()
