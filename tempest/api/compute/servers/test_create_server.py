@@ -124,6 +124,54 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(200, resp.status)
         self.assertIn(server['id'], server_group['members'])
 
+    def _delete_volume(self, volume_id):
+        if self.attached:
+            self.volumes_client.wait_for_volume_status(volume_id, 'available')
+
+        self.volumes_client.delete_volume(volume_id)
+        self.attached = False
+
+    @test.attr(type='gate')
+    def test_create_server_with_block_device_mapping(self):
+        # Create a test volume
+        v_name = data_utils.rand_name('volume')
+        metadata = {'Type': 'work'}
+        resp, volume = self.volumes_client.create_volume(size=1,
+                                                         display_name=v_name,
+                                                         metadata=metadata)
+        self.addCleanup(self._delete_volume, volume['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+
+        # Create a server with a block device mapping.
+        name = data_utils.rand_name('server')
+        mapping = [{
+                   "device_name": "/dev/sdb1",
+                   "source_type": "blank",
+                   "destination_type": "local",
+                   "delete_on_termination": "True",
+                   "guest_format": "swap",
+                   "boot_index": "-1"
+                   },
+                   {
+                   "device_name": "/dev/sda1",
+                   "source_type": "volume",
+                   "destination_type": "volume",
+                   "uuid": volume['id'],
+                   "boot_index": "0"
+                   }]
+        resp, server = self.create_test_server(name=name,
+                                               meta=metadata,
+                                               block_device_mapping_v2=mapping)
+        self.assertEqual(202, resp.status)
+        self.attached = True
+        self.addCleanup(self.client.delete_server, server['id'])
+        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+
+        resp, server = self.client.get_server(server['id'])
+        self.assertIn(volume['id'],
+                      map(lambda x: x['id'],
+                          server['os-extended-volumes:volumes_attached']))
+
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
     disk_config = 'AUTO'
