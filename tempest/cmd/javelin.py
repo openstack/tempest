@@ -218,6 +218,8 @@ class JavelinCheck(unittest.TestCase):
 
     def check_objects(self):
         """Check that the objects created are still there."""
+        if 'objects' not in self.res:
+            return
         LOG.info("checking objects")
         for obj in self.res['objects']:
             client = client_for_user(obj['owner'])
@@ -228,6 +230,8 @@ class JavelinCheck(unittest.TestCase):
 
     def check_servers(self):
         """Check that the servers are still up and running."""
+        if 'servers' not in self.res:
+            return
         LOG.info("checking servers")
         for server in self.res['servers']:
             client = client_for_user(server['owner'])
@@ -245,6 +249,8 @@ class JavelinCheck(unittest.TestCase):
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
+        if 'volumes' not in self.res:
+            return
         LOG.info("checking volumes")
         for volume in self.res['volumes']:
             client = client_for_user(volume['owner'])
@@ -273,6 +279,8 @@ def _file_contents(fname):
 
 
 def create_objects(objects):
+    if not objects:
+        return
     LOG.info("Creating objects")
     for obj in objects:
         LOG.debug("Object %s" % obj)
@@ -297,6 +305,8 @@ def _resolve_image(image, imgtype):
 
 
 def create_images(images):
+    if not images:
+        return
     for image in images:
         client = client_for_user(image['owner'])
 
@@ -359,6 +369,8 @@ def _get_flavor_by_name(client, name):
 
 
 def create_servers(servers):
+    if not servers:
+        return
     for server in servers:
         client = client_for_user(server['owner'])
 
