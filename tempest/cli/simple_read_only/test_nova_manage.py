@@ -13,9 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import subprocess
-
-import tempest.cli
+from tempest import cli
 from tempest import config
 from tempest.openstack.common import log as logging
 
@@ -24,7 +22,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
 
     """
     This is a first pass at a simple read only nova-manage test. This
@@ -48,7 +46,7 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
         super(SimpleReadOnlyNovaManageTest, cls).setUpClass()
 
     def test_admin_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.nova_manage,
                           'this-does-nova-exist')
 

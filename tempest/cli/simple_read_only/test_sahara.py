@@ -14,7 +14,6 @@
 # limitations under the License.
 import logging
 import re
-import subprocess
 
 from tempest import cli
 from tempest import config
@@ -42,7 +41,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
 
     @test.attr(type='negative')
     def test_sahara_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.sahara,
                           'this-does-not-exist')
 

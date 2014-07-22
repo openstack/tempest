@@ -14,9 +14,8 @@
 #    under the License.
 
 import re
-import subprocess
 
-import tempest.cli
+from tempest import cli
 from tempest import config
 from tempest.openstack.common import log as logging
 
@@ -26,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlyKeystoneClientTest(cli.ClientTestBase):
     """Basic, read-only tests for Keystone CLI client.
 
     Checks return values and output of read-only commands.
@@ -35,7 +34,7 @@ class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
     """
 
     def test_admin_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.keystone,
                           'this-does-not-exist')
 
