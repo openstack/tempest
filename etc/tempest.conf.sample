@@ -409,6 +409,10 @@
 # Does the test environment support pausing? (boolean value)
 #pause=true
 
+# Does the test environment support shelving/unshelving?
+# (boolean value)
+#shelve=true
+
 # Does the test environment support suspend/resume? (boolean
 # value)
 #suspend=true
