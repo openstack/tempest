@@ -1,3 +1,4 @@
-tempest.api.network.test_networks.NetworksIpV6TestJSON.test_create_delete_subnet_with_v6_attributes[smoke]
-tempest.api.network.test_networks.NetworksIpV6TestXML.test_create_delete_subnet_with_v6_attributes[smoke]
+tempest.api.network.test_networks.NetworksIpV6TestJSON.test_create_delete_subnet_with_v6_attributes[gate,smoke]
+tempest.api.network.test_networks.NetworksIpV6TestXML.test_create_delete_subnet_with_v6_attributes[gate,smoke]
 tempest.scenario.test_network6_basics.TestNetwork6Basics.test_ping6_ssh
+
