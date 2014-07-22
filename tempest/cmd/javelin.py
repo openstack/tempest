@@ -512,6 +512,7 @@ def main():
     else:
         LOG.error('Unknown mode %s' % OPTS.mode)
         return 1
+    LOG.info('javelin2 successfully finished')
     return 0
 
 if __name__ == "__main__":
