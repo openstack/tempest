@@ -58,6 +58,6 @@ class ConfigFixture(conf_fixture.Config):
 
 
 class FakePrivate(config.TempestConfigPrivate):
-    def __init__(self):
+    def __init__(self, parse_conf=True, config_path=None):
         cfg.CONF([], default_config_files=[])
         self._set_attrs()
