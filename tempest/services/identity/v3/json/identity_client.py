@@ -502,10 +502,7 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         """HEAD Check if role is delegated by a trust."""
         resp, body = self.head("OS-TRUST/trusts/%s/roles/%s"
                                % (trust_id, role_id))
-        # This code needs to change to 200 when the keystone changes
-        # for bug 1334368 merge and check_trust_roles test is
-        # unskipped
-        self.expected_success(204, resp.status)
+        self.expected_success(200, resp.status)
         return resp, body
 
 
