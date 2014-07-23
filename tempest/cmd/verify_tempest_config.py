@@ -29,13 +29,12 @@ from tempest import config
 
 CONF = config.CONF
 RAW_HTTP = httplib2.Http()
-CONF_FILE = None
-OUTFILE = sys.stdout
+CONF_PARSER = None
 
 
 def _get_config_file():
     default_config_dir = os.path.join(os.path.abspath(
-        os.path.dirname(os.path.dirname(__file__))), "etc")
+        os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "etc")
     default_config_file = "tempest.conf"
 
     conf_dir = os.environ.get('TEMPEST_CONFIG_DIR', default_config_dir)
@@ -46,14 +45,9 @@ def _get_config_file():
 
 
 def change_option(option, group, value):
-    config_parse = moves.configparser.SafeConfigParser()
-    config_parse.optionxform = str
-    config_parse.readfp(CONF_FILE)
-    if not config_parse.has_section(group):
-        config_parse.add_section(group)
-    config_parse.set(group, option, str(value))
-    global OUTFILE
-    config_parse.write(OUTFILE)
+    if not CONF_PARSER.has_section(group):
+        CONF_PARSER.add_section(group)
+    CONF_PARSER.set(group, option, str(value))
 
 
 def print_and_or_update(option, group, value, update):
@@ -288,6 +282,9 @@ def check_service_availability(os, update):
                     if update:
                         change_option(codename_match[cfgname],
                                       'service_available', True)
+                        # If we are going to enable this we should allow
+                        # extension checks.
+                        avail_services.append(codename_match[cfgname])
                 else:
                     avail_services.append(codename_match[cfgname])
     return avail_services
@@ -321,12 +318,16 @@ def main():
     opts = parse_args()
     update = opts.update
     replace = opts.replace_ext
-    global CONF_FILE
-    global OUTFILE
+    global CONF_PARSER
+
+    outfile = sys.stdout
     if update:
-        CONF_FILE = _get_config_file()
+        conf_file = _get_config_file()
         if opts.output:
-            OUTFILE = open(opts.output, 'w+')
+            outfile = open(opts.output, 'w+')
+        CONF_PARSER = moves.configparser.SafeConfigParser()
+        CONF_PARSER.optionxform = str
+        CONF_PARSER.readfp(conf_file)
     os = clients.ComputeAdminManager(interface='json')
     services = check_service_availability(os, update)
     results = {}
@@ -341,9 +342,10 @@ def main():
     verify_nova_api_versions(os, update)
     verify_cinder_api_versions(os, update)
     display_results(results, update, replace)
-    if CONF_FILE:
-        CONF_FILE.close()
-    OUTFILE.close()
+    if update:
+        conf_file.close()
+        CONF_PARSER.write(outfile)
+    outfile.close()
 
 
 if __name__ == "__main__":
