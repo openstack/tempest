@@ -324,7 +324,11 @@ ComputeFeaturesGroup = [
                 default=True,
                 help='Enables returning of the instance password by the '
                      'relevant server API calls such as create, rebuild '
-                     'or rescue.')
+                     'or rescue.'),
+    cfg.BoolOpt('interface_attach',
+                default=True,
+                help='Does the test environment support dynamic network '
+                     'interface attachment?')
 ]
 
 
