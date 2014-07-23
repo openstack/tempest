@@ -30,7 +30,7 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
     def setUpClass(cls):
         super(SwiftResourcesTestJSON, cls).setUpClass()
         cls.stack_name = data_utils.rand_name('heat')
-        template = cls.load_template('swift_basic')
+        template = cls.read_template('swift_basic')
         os = clients.Manager()
         if not CONF.service_available.swift:
             raise cls.skipException("Swift support is required")

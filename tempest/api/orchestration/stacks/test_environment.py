@@ -28,7 +28,7 @@ class StackEnvironmentTest(base.BaseOrchestrationTest):
     def test_environment_parameter(self):
         """Test passing a stack parameter via the environment."""
         stack_name = data_utils.rand_name('heat')
-        template = self.load_template('random_string')
+        template = self.read_template('random_string')
         environment = {'parameters': {'random_length': 20}}
 
         stack_identifier = self.create_stack(stack_name, template,
@@ -56,7 +56,7 @@ outputs:
 '''
         environment = {'resource_registry':
                        {'My:Random::String': 'my_random.yaml'}}
-        files = {'my_random.yaml': self.load_template('random_string')}
+        files = {'my_random.yaml': self.read_template('random_string')}
 
         stack_identifier = self.create_stack(stack_name, template,
                                              environment=environment,
@@ -82,7 +82,7 @@ outputs:
     random_value:
         value: {get_attr: [random, random_value]}
 '''
-        files = {'my_random.yaml': self.load_template('random_string')}
+        files = {'my_random.yaml': self.read_template('random_string')}
 
         stack_identifier = self.create_stack(stack_name, template,
                                              files=files)

@@ -39,7 +39,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             raise cls.skipException("Neutron support is required")
         cls.network_client = os.network_client
         cls.stack_name = data_utils.rand_name('heat')
-        template = cls.load_template('neutron_basic')
+        template = cls.read_template('neutron_basic')
         cls.keypair_name = (CONF.orchestration.keypair_name or
                             cls._create_keypair()['name'])
         cls.external_network_id = CONF.network.public_network_id
