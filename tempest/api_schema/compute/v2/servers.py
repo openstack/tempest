@@ -240,3 +240,33 @@ list_instance_actions = {
         'required': ['instanceActions']
     }
 }
+
+get_instance_actions_object = copy.deepcopy(servers.common_get_instance_action)
+get_instance_actions_object[
+    'properties'].update({'instance_uuid': {'type': 'string'}})
+get_instance_actions_object['required'].extend(['instance_uuid'])
+
+get_instance_action = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'instanceAction': get_instance_actions_object
+        },
+        'required': ['instanceAction']
+    }
+}
+
+list_servers_detail = copy.deepcopy(servers.base_list_servers_detail)
+list_servers_detail['response_body']['properties']['servers']['items'][
+    'properties'].update({
+        'hostId': {'type': 'string'},
+        'OS-DCF:diskConfig': {'type': 'string'},
+        'accessIPv4': parameter_types.access_ip_v4,
+        'accessIPv6': parameter_types.access_ip_v6
+    })
+# NOTE(GMann): OS-DCF:diskConfig and accessIPv4/v6 are API
+# extensions, and some environments return a response
+# without these attributes. So they are not 'required'.
+list_servers_detail['response_body']['properties']['servers']['items'][
+    'required'].append('hostId')

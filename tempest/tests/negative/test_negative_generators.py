@@ -102,7 +102,7 @@ class BaseNegativeGenerator(object):
                                      }
                       }
 
-    unkown_type_schema = {
+    unknown_type_schema = {
         "type": "not_defined"
     }
 
@@ -131,7 +131,7 @@ class BaseNegativeGenerator(object):
 
     def test_generate_with_unknown_type(self):
         self.assertRaises(TypeError, self.generator.generate,
-                          self.unkown_type_schema)
+                          self.unknown_type_schema)
 
 
 class TestNegativeValidGenerator(base.TestCase, BaseNegativeGenerator):

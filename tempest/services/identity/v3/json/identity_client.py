@@ -14,6 +14,7 @@
 #    under the License.
 
 import json
+import urllib
 
 from tempest.common import rest_client
 from tempest import config
@@ -83,9 +84,12 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['projects']
 
-    def get_users(self):
+    def get_users(self, params=None):
         """Get the list of users."""
-        resp, body = self.get("users")
+        url = 'users'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['users']
@@ -498,10 +502,7 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         """HEAD Check if role is delegated by a trust."""
         resp, body = self.head("OS-TRUST/trusts/%s/roles/%s"
                                % (trust_id, role_id))
-        # This code needs to change to 200 when the keystone changes
-        # for bug 1334368 merge and check_trust_roles test is
-        # unskipped
-        self.expected_success(204, resp.status)
+        self.expected_success(200, resp.status)
         return resp, body
 
 

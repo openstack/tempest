@@ -40,7 +40,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         cls.setup_endpoints = list()
         for i in range(2):
             region = data_utils.rand_name('region')
-            url = data_utils.rand_name('url')
+            url = data_utils.rand_url()
             interface = 'public'
             resp, endpoint = cls.client.create_endpoint(
                 cls.service_id, interface, url, region=region, enabled=True)
@@ -69,7 +69,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     @test.attr(type='gate')
     def test_create_list_delete_endpoint(self):
         region = data_utils.rand_name('region')
-        url = data_utils.rand_name('url')
+        url = data_utils.rand_url()
         interface = 'public'
         resp, endpoint =\
             self.client.create_endpoint(self.service_id, interface, url,
@@ -97,7 +97,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         # Creating an endpoint so as to check update endpoint
         # with new values
         region1 = data_utils.rand_name('region')
-        url1 = data_utils.rand_name('url')
+        url1 = data_utils.rand_url()
         interface1 = 'public'
         resp, endpoint_for_update =\
             self.client.create_endpoint(self.service_id, interface1,
@@ -114,7 +114,7 @@ class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
         self.service_ids.append(service2['id'])
         # Updating endpoint with new values
         region2 = data_utils.rand_name('region')
-        url2 = data_utils.rand_name('url')
+        url2 = data_utils.rand_url()
         interface2 = 'internal'
         resp, endpoint = \
             self.client.update_endpoint(endpoint_for_update['id'],

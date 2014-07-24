@@ -259,3 +259,140 @@ class OrchestrationClient(rest_client.RestClient):
             'parameters': parameters,
         }
         return self._validate_template(post_body)
+
+    def create_software_config(self, name=None, config=None, group=None,
+                               inputs=None, outputs=None, options=None):
+        headers, body = self._prep_software_config_create(
+            name, config, group, inputs, outputs, options)
+
+        url = 'software_configs'
+        resp, body = self.post(url, headers=headers, body=body)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_config(self, conf_id):
+        """Returns a software configuration resource."""
+        url = 'software_configs/%s' % str(conf_id)
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def delete_software_config(self, conf_id):
+        """Deletes a specific software configuration."""
+        url = 'software_configs/%s' % str(conf_id)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp)
+
+    def create_software_deploy(self, server_id=None, config_id=None,
+                               action=None, status=None,
+                               input_values=None, output_values=None,
+                               status_reason=None, signal_transport=None):
+        """Creates or updates a software deployment."""
+        headers, body = self._prep_software_deploy_update(
+            None, server_id, config_id, action, status, input_values,
+            output_values, status_reason, signal_transport)
+
+        url = 'software_deployments'
+        resp, body = self.post(url, headers=headers, body=body)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def update_software_deploy(self, deploy_id=None, server_id=None,
+                               config_id=None, action=None, status=None,
+                               input_values=None, output_values=None,
+                               status_reason=None, signal_transport=None):
+        """Creates or updates a software deployment."""
+        headers, body = self._prep_software_deploy_update(
+            deploy_id, server_id, config_id, action, status, input_values,
+            output_values, status_reason, signal_transport)
+
+        url = 'software_deployments/%s' % str(deploy_id)
+        resp, body = self.put(url, headers=headers, body=body)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_deploy_list(self):
+        """Returns a list of all deployments."""
+        url = 'software_deployments'
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_deploy(self, deploy_id):
+        """Returns a specific software deployment."""
+        url = 'software_deployments/%s' % str(deploy_id)
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_deploy_meta(self, server_id):
+        """Return a config metadata for a specific server."""
+        url = 'software_deployments/metadata/%s' % server_id
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def delete_software_deploy(self, deploy_id):
+        """Deletes a specific software deployment."""
+        url = 'software_deployments/%s' % str(deploy_id)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp)
+
+    def _prep_software_config_create(self, name=None, conf=None, group=None,
+                                     inputs=None, outputs=None, options=None):
+        """Prepares a software configuration body."""
+        post_body = {}
+        if name is not None:
+            post_body["name"] = name
+        if conf is not None:
+            post_body["config"] = conf
+        if group is not None:
+            post_body["group"] = group
+        if inputs is not None:
+            post_body["inputs"] = inputs
+        if outputs is not None:
+            post_body["outputs"] = outputs
+        if options is not None:
+            post_body["options"] = options
+        body = json.dumps(post_body)
+
+        headers = self.get_headers()
+        return headers, body
+
+    def _prep_software_deploy_update(self, deploy_id=None, server_id=None,
+                                     config_id=None, action=None, status=None,
+                                     input_values=None, output_values=None,
+                                     status_reason=None,
+                                     signal_transport=None):
+        """Prepares a deployment create or update (if an id was given)."""
+        post_body = {}
+
+        if deploy_id is not None:
+            post_body["id"] = deploy_id
+        if server_id is not None:
+            post_body["server_id"] = server_id
+        if config_id is not None:
+            post_body["config_id"] = config_id
+        if action is not None:
+            post_body["action"] = action
+        if status is not None:
+            post_body["status"] = status
+        if input_values is not None:
+            post_body["input_values"] = input_values
+        if output_values is not None:
+            post_body["output_values"] = output_values
+        if status_reason is not None:
+            post_body["status_reason"] = status_reason
+        if signal_transport is not None:
+            post_body["signal_transport"] = signal_transport
+        body = json.dumps(post_body)
+
+        headers = self.get_headers()
+        return headers, body

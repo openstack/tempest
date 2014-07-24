@@ -263,7 +263,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--no-failure-debug', '-n', action='store_true',
                         dest='print_failures', help='Disable printing failure '
-                        'debug infomation in realtime')
+                        'debug information in realtime')
     parser.add_argument('--fails', '-f', action='store_true',
                         dest='post_fails', help='Print failure debug '
                         'information after the stream is proccesed')

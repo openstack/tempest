@@ -21,6 +21,14 @@ from tempest import test
 CONF = config.CONF
 
 
+# NOTE(adam_g): The baremetal API tests exercise operations such as enroll
+# node, power on, power off, etc.  Testing against real drivers (ie, IPMI)
+# will require passing driver-specific data to Tempest (addresses,
+# credentials, etc).  Until then, only support testing against the fake driver,
+# which has no external dependencies.
+SUPPORTED_DRIVERS = ['fake']
+
+
 def creates(resource):
     """Decorator that adds resources to the appropriate cleanup list."""
 
@@ -47,6 +55,13 @@ class BaseBaremetalTest(test.BaseTestCase):
         if not CONF.service_available.ironic:
             skip_msg = ('%s skipped as Ironic is not available' % cls.__name__)
             raise cls.skipException(skip_msg)
+
+        if CONF.baremetal.driver not in SUPPORTED_DRIVERS:
+            skip_msg = ('%s skipped as Ironic driver %s is not supported for '
+                        'testing.' %
+                        (cls.__name__, CONF.baremetal.driver))
+            raise cls.skipException(skip_msg)
+        cls.driver = CONF.baremetal.driver
 
         mgr = clients.AdminManager()
         cls.client = mgr.baremetal_client
@@ -85,7 +100,7 @@ class BaseBaremetalTest(test.BaseTestCase):
     @classmethod
     @creates('node')
     def create_node(cls, chassis_id, cpu_arch='x86', cpu_num=8, storage=1024,
-                    memory=4096, driver='fake'):
+                    memory=4096):
         """
         Wrapper utility for creating test baremetal nodes.
 
@@ -98,7 +113,7 @@ class BaseBaremetalTest(test.BaseTestCase):
         """
         resp, body = cls.client.create_node(chassis_id, cpu_arch=cpu_arch,
                                             cpu_num=cpu_num, storage=storage,
-                                            memory=memory, driver=driver)
+                                            memory=memory, driver=cls.driver)
 
         return resp, body
 

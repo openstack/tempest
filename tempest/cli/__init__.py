@@ -133,7 +133,7 @@ class ClientTestBase(tempest.test.BaseTestCase):
             raise CommandFailed(proc.returncode,
                                 cmd,
                                 result,
-                                stderr=result_err)
+                                result_err)
         return result
 
     def assertTableStruct(self, items, field_names):
@@ -148,9 +148,15 @@ class ClientTestBase(tempest.test.BaseTestCase):
                              % lines[:3]))
 
 
-class CommandFailed(subprocess.CalledProcessError):
-    # adds output attribute for python2.6
-    def __init__(self, returncode, cmd, output, stderr=""):
-        super(CommandFailed, self).__init__(returncode, cmd)
-        self.output = output
+class CommandFailed(Exception):
+    def __init__(self, returncode, cmd, output, stderr):
+        super(CommandFailed, self).__init__()
+        self.returncode = returncode
+        self.cmd = cmd
+        self.stdout = output
         self.stderr = stderr
+
+    def __str__(self):
+        return ("Command '%s' returned non-zero exit status %d.\n"
+        "stdout:\n%s\n"
+        "stderr:\n%s" % (self.cmd, self.returncode, self.stdout, self.stderr))

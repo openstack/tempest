@@ -13,11 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import subprocess
-
 import testtools
 
-import tempest.cli
+from tempest import cli
 from tempest import config
 from tempest.openstack.common import log as logging
 import tempest.test
@@ -27,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
+class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
 
     """
     This is a first pass at a simple read only python-novaclient test. This
@@ -49,7 +47,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
         super(SimpleReadOnlyNovaClientTest, cls).setUpClass()
 
     def test_admin_fake_action(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.nova,
                           'this-does-nova-exist')
 
@@ -86,11 +84,11 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
         self.nova('endpoints')
 
     def test_admin_flavor_acces_list(self):
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.nova,
                           'flavor-access-list')
         # Failed to get access list for public flavor type
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.nova,
                           'flavor-access-list',
                           params='--flavor m1.tiny')
@@ -127,7 +125,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
         self.nova('list')
         self.nova('list', params='--all-tenants 1')
         self.nova('list', params='--all-tenants 0')
-        self.assertRaises(subprocess.CalledProcessError,
+        self.assertRaises(cli.CommandFailed,
                           self.nova,
                           'list',
                           params='--all-tenants bad')

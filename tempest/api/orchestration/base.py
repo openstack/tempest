@@ -11,6 +11,7 @@
 #    under the License.
 
 import os.path
+import yaml
 
 from tempest import clients
 from tempest.common.utils import data_utils
@@ -125,13 +126,21 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                 pass
 
     @classmethod
-    def load_template(cls, name, ext='yaml'):
+    def read_template(cls, name, ext='yaml'):
         loc = ["stacks", "templates", "%s.%s" % (name, ext)]
         fullpath = os.path.join(os.path.dirname(__file__), *loc)
 
         with open(fullpath, "r") as f:
             content = f.read()
             return content
+
+    @classmethod
+    def load_template(cls, name, ext='yaml'):
+        loc = ["stacks", "templates", "%s.%s" % (name, ext)]
+        fullpath = os.path.join(os.path.dirname(__file__), *loc)
+
+        with open(fullpath, "r") as f:
+            return yaml.safe_load(f)
 
     @classmethod
     def tearDownClass(cls):

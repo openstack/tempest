@@ -28,6 +28,7 @@ import yaml
 import argparse
 
 import tempest.auth
+from tempest import config
 from tempest import exceptions
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import servers_client
@@ -169,7 +170,7 @@ def create_users(users):
 
 def collect_users(users):
     global USERS
-    LOG.info("Creating users")
+    LOG.info("Collecting users")
     admin = keystone_admin()
     for u in users:
         tenant = admin.identity.get_tenant_by_name(u['tenant'])
@@ -202,6 +203,7 @@ class JavelinCheck(unittest.TestCase):
         We don't use the resource list for this because we need to validate
         that things like tenantId didn't drift across versions.
         """
+        LOG.info("checking users")
         for name, user in self.users.iteritems():
             client = keystone_admin()
             _, found = client.identity.get_user(user['id'])
@@ -217,6 +219,9 @@ class JavelinCheck(unittest.TestCase):
 
     def check_objects(self):
         """Check that the objects created are still there."""
+        if 'objects' not in self.res:
+            return
+        LOG.info("checking objects")
         for obj in self.res['objects']:
             client = client_for_user(obj['owner'])
             r, contents = client.objects.get_object(
@@ -226,6 +231,9 @@ class JavelinCheck(unittest.TestCase):
 
     def check_servers(self):
         """Check that the servers are still up and running."""
+        if 'servers' not in self.res:
+            return
+        LOG.info("checking servers")
         for server in self.res['servers']:
             client = client_for_user(server['owner'])
             found = _get_server_by_name(client, server['name'])
@@ -242,6 +250,9 @@ class JavelinCheck(unittest.TestCase):
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
+        if 'volumes' not in self.res:
+            return
+        LOG.info("checking volumes")
         for volume in self.res['volumes']:
             client = client_for_user(volume['owner'])
             found = _get_volume_by_name(client, volume['name'])
@@ -269,6 +280,8 @@ def _file_contents(fname):
 
 
 def create_objects(objects):
+    if not objects:
+        return
     LOG.info("Creating objects")
     for obj in objects:
         LOG.debug("Object %s" % obj)
@@ -293,6 +306,8 @@ def _resolve_image(image, imgtype):
 
 
 def create_images(images):
+    if not images:
+        return
     for image in images:
         client = client_for_user(image['owner'])
 
@@ -355,6 +370,8 @@ def _get_flavor_by_name(client, name):
 
 
 def create_servers(servers):
+    if not servers:
+        return
     for server in servers:
         client = client_for_user(server['owner'])
 
@@ -436,11 +453,17 @@ def get_options():
                         required=True,
                         metavar='resourcefile.yaml',
                         help='Resources definition yaml file')
+
     parser.add_argument(
         '-d', '--devstack-base',
         required=True,
         metavar='/opt/stack/old',
         help='Devstack base directory for retrieving artifacts')
+    parser.add_argument(
+        '-c', '--config-file',
+        metavar='/etc/tempest.conf',
+        help='path to javelin2(tempest) config file')
+
     # auth bits, letting us also just source the devstack openrc
     parser.add_argument('--os-username',
                         metavar='<auth-user-name>',
@@ -460,6 +483,8 @@ def get_options():
         print("ERROR: Unknown mode -m %s\n" % OPTS.mode)
         parser.print_help()
         sys.exit(1)
+    if OPTS.config_file:
+        config.CONF.set_config_path(OPTS.config_file)
 
 
 def setup_logging(debug=True):
@@ -496,6 +521,7 @@ def main():
     else:
         LOG.error('Unknown mode %s' % OPTS.mode)
         return 1
+    LOG.info('javelin2 successfully finished')
     return 0
 
 if __name__ == "__main__":

@@ -150,7 +150,6 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
         self.assertNotIn('v3/roles/%s' % self.not_delegated_role_id,
                          role['links']['self'])
 
-    @test.skip_because(bug='1334368')
     def check_trust_roles(self):
         # Check we find the delegated role
         _, roles_get = self.trustor_client.get_trust_roles(
@@ -164,12 +163,6 @@ class BaseTrustsV3Test(base.BaseIdentityV3AdminTest):
 
         _, role_get = self.trustor_client.check_trust_role(
             self.trust_id, self.delegated_role_id)
-        # This tempest two-step change conflicted with the change
-        # moving response checking to the client. This test should be
-        # re-enabled by removing the following assert and changing
-        # the response code in tempest/services/identity/v3/json/
-        # identity_client.py in the check_trust_role_method.
-        # self.assertEqual('200', resp['status'])
 
         # And that we don't find not_delegated_role
         self.assertRaises(exceptions.NotFound,

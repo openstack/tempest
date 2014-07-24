@@ -86,8 +86,27 @@ class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
         # Verify that GET shows the specified hypervisor uptime
         hypers = self._list_hypervisors()
 
-        has_valid_uptime = False
+        # Ironic will register each baremetal node as a 'hypervisor',
+        # so the hypervisor list can contain many hypervisors of type
+        # 'ironic'. If they are ALL ironic, skip this test since ironic
+        # doesn't support hypervisor uptime. Otherwise, remove them
+        # from the list of hypervisors to test.
+        ironic_only = True
+        hypers_without_ironic = []
         for hyper in hypers:
+            resp, details = (self.client.
+                             get_hypervisor_show_details(hypers[0]['id']))
+            self.assertEqual(200, resp.status)
+            if details['hypervisor_type'] != 'ironic':
+                hypers_without_ironic.append(hyper)
+                ironic_only = False
+
+        if ironic_only:
+            raise self.skipException(
+                "Ironic does not support hypervisor uptime")
+
+        has_valid_uptime = False
+        for hyper in hypers_without_ironic:
             # because hypervisors might be disabled, this loops looking
             # for any good hit.
             try:

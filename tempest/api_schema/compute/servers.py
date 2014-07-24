@@ -48,50 +48,52 @@ get_vnc_console = {
     }
 }
 
+common_show_server = {
+    'type': 'object',
+    'properties': {
+        'id': {'type': 'string'},
+        'name': {'type': 'string'},
+        'status': {'type': 'string'},
+        'image': {
+            'type': 'object',
+            'properties': {
+                'id': {'type': 'string'},
+                'links': parameter_types.links
+            },
+            'required': ['id', 'links']
+        },
+        'flavor': {
+            'type': 'object',
+            'properties': {
+                'id': {'type': 'string'},
+                'links': parameter_types.links
+            },
+            'required': ['id', 'links']
+        },
+        'user_id': {'type': 'string'},
+        'tenant_id': {'type': 'string'},
+        'created': {'type': 'string'},
+        'updated': {'type': 'string'},
+        'progress': {'type': 'integer'},
+        'metadata': {'type': 'object'},
+        'links': parameter_types.links,
+        'addresses': parameter_types.addresses,
+    },
+    # NOTE(GMann): 'progress' attribute is present in the response
+    # only when server's status is one of the progress statuses
+    # ("ACTIVE","BUILD", "REBUILD", "RESIZE","VERIFY_RESIZE")
+    # So it is not defined as 'required'.
+    'required': ['id', 'name', 'status', 'image', 'flavor',
+                 'user_id', 'tenant_id', 'created', 'updated',
+                 'metadata', 'links', 'addresses']
+}
+
 base_update_get_server = {
     'status_code': [200],
     'response_body': {
         'type': 'object',
         'properties': {
-            'server': {
-                'type': 'object',
-                'properties': {
-                    'id': {'type': 'string'},
-                    'name': {'type': 'string'},
-                    'status': {'type': 'string'},
-                    'image': {
-                        'type': 'object',
-                        'properties': {
-                            'id': {'type': 'string'},
-                            'links': parameter_types.links
-                        },
-                        'required': ['id', 'links']
-                    },
-                    'flavor': {
-                        'type': 'object',
-                        'properties': {
-                            'id': {'type': 'string'},
-                            'links': parameter_types.links
-                        },
-                        'required': ['id', 'links']
-                    },
-                    'user_id': {'type': 'string'},
-                    'tenant_id': {'type': 'string'},
-                    'created': {'type': 'string'},
-                    'updated': {'type': 'string'},
-                    'progress': {'type': 'integer'},
-                    'metadata': {'type': 'object'},
-                    'links': parameter_types.links,
-                    'addresses': parameter_types.addresses,
-                },
-                # NOTE(GMann): 'progress' attribute is present in the response
-                # only when server's status is one of the progress statuses
-                # ("ACTIVE","BUILD", "REBUILD", "RESIZE","VERIFY_RESIZE")
-                # So it is not defined as 'required'.
-                'required': ['id', 'name', 'status', 'image', 'flavor',
-                             'user_id', 'tenant_id', 'created', 'updated',
-                             'metadata', 'links', 'addresses']
-            }
+            'server': common_show_server
         },
         'required': ['server']
     }
@@ -178,4 +180,41 @@ common_instance_actions = {
     },
     'required': ['action', 'request_id', 'user_id', 'project_id',
                  'start_time', 'message']
+}
+
+instance_action_events = {
+    'type': 'array',
+    'items': {
+        'type': 'object',
+        'properties': {
+            'event': {'type': 'string'},
+            'start_time': {'type': 'string'},
+            'finish_time': {'type': 'string'},
+            'result': {'type': 'string'},
+            'traceback': {'type': ['string', 'null']}
+        },
+        'required': ['event', 'start_time', 'finish_time', 'result',
+                     'traceback']
+    }
+}
+
+common_get_instance_action = copy.deepcopy(common_instance_actions)
+
+common_get_instance_action['properties'].update({
+    'events': instance_action_events})
+# 'events' does not come in response body always so it is not
+# defined as 'required'
+
+base_list_servers_detail = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'servers': {
+                'type': 'array',
+                'items': common_show_server
+            }
+        },
+        'required': ['servers']
+    }
 }

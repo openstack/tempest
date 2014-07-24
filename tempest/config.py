@@ -1085,18 +1085,22 @@ class TempestConfigPrivate(object):
         cfg.CONF.set_default('domain_name', self.identity.admin_domain_name,
                              group='compute-admin')
 
-    def __init__(self, parse_conf=True):
+    def __init__(self, parse_conf=True, config_path=None):
         """Initialize a configuration from a conf directory and conf file."""
         super(TempestConfigPrivate, self).__init__()
         config_files = []
         failsafe_path = "/etc/tempest/" + self.DEFAULT_CONFIG_FILE
 
-        # Environment variables override defaults...
-        conf_dir = os.environ.get('TEMPEST_CONFIG_DIR',
-                                  self.DEFAULT_CONFIG_DIR)
-        conf_file = os.environ.get('TEMPEST_CONFIG', self.DEFAULT_CONFIG_FILE)
+        if config_path:
+            path = config_path
+        else:
+            # Environment variables override defaults...
+            conf_dir = os.environ.get('TEMPEST_CONFIG_DIR',
+                                      self.DEFAULT_CONFIG_DIR)
+            conf_file = os.environ.get('TEMPEST_CONFIG',
+                                       self.DEFAULT_CONFIG_FILE)
 
-        path = os.path.join(conf_dir, conf_file)
+            path = os.path.join(conf_dir, conf_file)
 
         if not os.path.isfile(path):
             path = failsafe_path
@@ -1118,6 +1122,7 @@ class TempestConfigPrivate(object):
 
 class TempestConfigProxy(object):
     _config = None
+    _path = None
 
     _extra_log_defaults = [
         'keystoneclient.session=INFO',
@@ -1134,9 +1139,12 @@ class TempestConfigProxy(object):
     def __getattr__(self, attr):
         if not self._config:
             self._fix_log_levels()
-            self._config = TempestConfigPrivate()
+            self._config = TempestConfigPrivate(config_path=self._path)
 
         return getattr(self._config, attr)
+
+    def set_config_path(self, path):
+        self._path = path
 
 
 CONF = TempestConfigProxy()
