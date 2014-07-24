@@ -373,6 +373,21 @@ class ServersClientJSON(rest_client.RestClient):
         self.validate_response(schema.detach_volume, resp, body)
         return resp, body
 
+    def list_volume_attachment(self, server_id):
+        """List all attachments from a server instance."""
+        resp, body = self.get('servers/%s/os-volume_attachments' % server_id)
+        body = json.loads(body)
+        self.validate_response(schema.list_volume_attachment, resp, body)
+        return resp, body['volumeAttachments']
+
+    def get_volume_attachment(self, server_id, volume_id):
+        """Shows details for the specified attachment from a server instance."""
+        resp, body = self.get('servers/%s/os-volume_attachments/%s' %
+                              (server_id, volume_id))
+        body = json.loads(body)
+        self.validate_response(schema.get_volume_attachment, resp, body)
+        return resp, body['volumeAttachment']
+
     def add_security_group(self, server_id, name):
         """Adds a security group to the server."""
         return self.action(server_id, 'addSecurityGroup', None, name=name)

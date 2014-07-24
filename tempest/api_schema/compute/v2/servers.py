@@ -138,6 +138,49 @@ detach_volume = {
     'status_code': [202]
 }
 
+list_volume_attachment = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'volumeAttachments': {
+                'type': 'array',
+                'items': {
+                    'type': 'object',
+                    'properties': {
+                        'id': {'type': 'string'},
+                        'device': {'type': 'string'},
+                        'volumeId': {'type': 'string'},
+                        'serverId': {'type': ['integer', 'string']}
+                    },
+                    'required': ['id', 'device', 'volumeId', 'serverId']
+                }
+            }
+        },
+        'required': ['volumeAttachments']
+    }
+}
+
+get_volume_attachment = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'volumeAttachment': {
+                'type': 'object',
+                'properties': {
+                    'id': {'type': 'string'},
+                    'device': {'type': 'string'},
+                    'volumeId': {'type': 'string'},
+                    'serverId': {'type': ['integer', 'string']}
+                },
+                'required': ['id', 'device', 'volumeId', 'serverId']
+            }
+        },
+        'required': ['volumeAttachment']
+    }
+}
+
 set_get_server_metadata_item = {
     'status_code': [200],
     'response_body': {

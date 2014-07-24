@@ -636,6 +636,17 @@ class ServersClientXML(rest_client.RestClient):
                                  (server_id, volume_id), headers)
         return resp, body
 
+    def list_volume_attachment(self, server_id):
+        resp, body = self.get('servers/%s/os-volume_attachments' % server_id)
+        body = self._parse_array(etree.fromstring(body))
+        return resp, body
+
+    def get_volume_attachment(self, server_id, volume_id):
+        resp, body = self.get('servers/%s/os-volume_attachments/%s' %
+                              (server_id, volume_id))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
+        return resp, body
+
     def get_server_diagnostics(self, server_id):
         """Get the usage data for a server."""
         resp, body = self.get("servers/%s/diagnostics" % server_id)
