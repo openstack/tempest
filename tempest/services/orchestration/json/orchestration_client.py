@@ -181,7 +181,11 @@ class OrchestrationClient(rest_client.RestClient):
         fail_regexp = re.compile(failure_pattern)
 
         while True:
-            resp, body = self.get_stack(stack_identifier)
+            try:
+                resp, body = self.get_stack(stack_identifier)
+            except exceptions.NotFound:
+                if status == 'DELETE_COMPLETE':
+                    return
             stack_name = body['stack_name']
             stack_status = body['stack_status']
             if stack_status == status:
