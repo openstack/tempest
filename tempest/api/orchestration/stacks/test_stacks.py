@@ -64,3 +64,4 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         # delete the stack
         resp = self.client.delete_stack(stack_identifier)
         self.assertEqual('204', resp[0]['status'])
+        self.client.wait_for_stack_status(stack_identifier, 'DELETE_COMPLETE')
