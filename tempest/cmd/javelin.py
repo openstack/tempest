@@ -308,6 +308,7 @@ def _resolve_image(image, imgtype):
 def create_images(images):
     if not images:
         return
+    LOG.info("Creating images")
     for image in images:
         client = client_for_user(image['owner'])
 
@@ -315,6 +316,7 @@ def create_images(images):
         r, body = client.images.image_list()
         names = [x['name'] for x in body]
         if image['name'] in names:
+            LOG.info("Image '%s' already exists" % image['name'])
             continue
 
         # special handling for 3 part image
@@ -372,10 +374,12 @@ def _get_flavor_by_name(client, name):
 def create_servers(servers):
     if not servers:
         return
+    LOG.info("Creating servers")
     for server in servers:
         client = client_for_user(server['owner'])
 
         if _get_server_by_name(client, server['name']):
+            LOG.info("Server '%s' already exists" % server['name'])
             continue
 
         image_id = _get_image_by_name(client, server['image'])['id']
