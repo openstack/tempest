@@ -387,6 +387,23 @@ def create_servers(servers):
         client.servers.create_server(server['name'], image_id, flavor_id)
 
 
+def destroy_servers(servers):
+    if not servers:
+        return
+    LOG.info("Destroying servers")
+    for server in servers:
+        client = client_for_user(server['owner'])
+
+        response = _get_server_by_name(client, server['name'])
+        if not response:
+            LOG.info("Server '%s' does not exist" % server['name'])
+            continue
+
+        client.servers.delete_server(response['id'])
+        client.servers.wait_for_server_termination(response['id'],
+                ignore_error=True)
+
+
 #######################
 #
 # VOLUMES
@@ -443,6 +460,23 @@ def create_resources():
     # back once we're actually executing the code
     # create_volumes(RES['volumes'])
     # attach_volumes(RES['volumes'])
+
+
+def destroy_resources():
+    LOG.info("Destroying Resources")
+    # Destroy in inverse order of create
+
+    # Future
+    # detach_volumes
+    # destroy_volumes
+
+    destroy_servers(RES['servers'])
+    LOG.warn("Destroy mode incomplete")
+    # destroy_images
+    # destroy_objects
+
+    # destroy_users
+    # destroy_tenants
 
 
 def get_options():
@@ -521,7 +555,8 @@ def main():
         checker = JavelinCheck(USERS, RES)
         checker.check()
     elif OPTS.mode == 'destroy':
-        LOG.warn("Destroy mode not yet implemented")
+        collect_users(RES['users'])
+        destroy_resources()
     else:
         LOG.error('Unknown mode %s' % OPTS.mode)
         return 1
