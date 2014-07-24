@@ -129,9 +129,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         personality = [{'path': 'rebuild.txt',
                        'contents': base64.b64encode(file_contents)}]
         password = 'rebuildPassw0rd'
+        ipv4access = '1.2.3.4'
+        ipv6access = 'fe80::100'
         resp, rebuilt_server = self.client.rebuild(self.server_id,
                                                    self.image_ref_alt,
                                                    name=new_name,
+                                                   accessIPv4=ipv4access,
+                                                   accessIPv6=ipv6access,
                                                    metadata=meta,
                                                    personality=personality,
                                                    adminPass=password)
@@ -148,6 +152,8 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         rebuilt_image_id = server['image']['id']
         self.assertTrue(self.image_ref_alt.endswith(rebuilt_image_id))
         self.assertEqual(new_name, server['name'])
+        self.assertEqual(ipv4access, server['accessIPv4'])
+        self.assertEqual(ipv6access, server['accessIPv6'])
 
         if self.run_ssh:
             # Verify that the user can authenticate with the provided password
@@ -224,6 +230,34 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
             # NOTE(mriedem): tearDown requires the server to be started.
             self.client.start(self.server_id)
 
+    def _test_resize_server_revert(self, stop=False):
+        # The server's RAM and disk space should return to its original
+        # values after a resize is reverted
+
+        previous_flavor_ref, new_flavor_ref = \
+            self._detect_server_image_flavor(self.server_id)
+
+        if stop:
+            resp = self.servers_client.stop(self.server_id)[0]
+            self.assertEqual(202, resp.status)
+            self.servers_client.wait_for_server_status(self.server_id,
+                                                       'SHUTOFF')
+
+        resp, server = self.client.resize(self.server_id, new_flavor_ref)
+        self.assertEqual(202, resp.status)
+        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
+
+        self.client.revert_resize(self.server_id)
+        expected_status = 'SHUTOFF' if stop else 'ACTIVE'
+        self.client.wait_for_server_status(self.server_id, expected_status)
+
+        resp, server = self.client.get_server(self.server_id)
+        self.assertEqual(previous_flavor_ref, server['flavor']['id'])
+
+        if stop:
+            # NOTE(mriedem): tearDown requires the server to be started.
+            self.client.start(self.server_id)
+
     @testtools.skipUnless(CONF.compute_feature_enabled.resize,
                           'Resize not available.')
     @test.attr(type='smoke')
@@ -240,21 +274,13 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
                           'Resize not available.')
     @test.attr(type='gate')
     def test_resize_server_revert(self):
-        # The server's RAM and disk space should return to its original
-        # values after a resize is reverted
+        self._test_resize_server_revert(stop=False)
 
-        previous_flavor_ref, new_flavor_ref = \
-            self._detect_server_image_flavor(self.server_id)
-
-        resp, server = self.client.resize(self.server_id, new_flavor_ref)
-        self.assertEqual(202, resp.status)
-        self.client.wait_for_server_status(self.server_id, 'VERIFY_RESIZE')
-
-        self.client.revert_resize(self.server_id)
-        self.client.wait_for_server_status(self.server_id, 'ACTIVE')
-
-        resp, server = self.client.get_server(self.server_id)
-        self.assertEqual(previous_flavor_ref, server['flavor']['id'])
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
+    @test.attr(type='gate')
+    def test_resize_server_revert_from_stopped(self):
+        self._test_resize_server_revert(stop=True)
 
     @test.attr(type='gate')
     def test_create_backup(self):

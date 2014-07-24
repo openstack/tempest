@@ -112,6 +112,17 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @test.attr(type='gate')
+    def test_list_servers_filter_by_server_marker(self):
+        # Filter the list of servers by server marker
+        params = {'marker': self.s2['id']}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertIn(self.s1['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s2['id'], map(lambda x: x['id'], servers))
+        self.assertNotIn(self.s3['id'], map(lambda x: x['id'], servers))
+
+    @test.attr(type='gate')
     def test_list_servers_filter_by_server_status(self):
         # Filter the list of servers by server status
         params = {'status': 'active'}

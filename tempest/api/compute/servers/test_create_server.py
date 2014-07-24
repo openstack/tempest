@@ -66,6 +66,60 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(self.flavor_ref, self.server['flavor']['id'])
         self.assertEqual(self.meta, self.server['metadata'])
 
+    def _verify_extended_attributes(self, server):
+        mac_addrs = []
+
+        for i in server['addresses']:
+            mac_addrs.extend(map(lambda x: x['OS-EXT-IPS-MAC:mac_addr'],
+                                 server['addresses'][i]))
+        self.assertNotEmpty(mac_addrs)
+        # self.assertIn(mac_addr, mac_addrs)
+        self.assertEqual(server['OS-DCF:diskConfig'], self.disk_config)
+        self.assertIn('OS-EXT-AZ:availability_zone', server)
+        self.assertIn('OS-EXT-SRV-ATTR:host', server)
+        self.assertIn('OS-EXT-SRV-ATTR:hypervisor_hostname', server)
+        self.assertIn('OS-EXT-SRV-ATTR:instance_name', server)
+        self.assertIn('OS-EXT-STS:power_state', server)
+        self.assertIn('OS-EXT-STS:task_state', server)
+        self.assertIn('OS-EXT-STS:vm_state', server)
+        self.assertIn('OS-EXT-STS:power_state', server)
+        self.assertIn('OS-SRV-USG:launched_at', server)
+        self.assertIn('OS-SRV-USG:terminated_at', server)
+
+    @test.attr(type='gate')
+    def test_verify_server_extended_attributes(self):
+
+        # Create a test server with extended attributes
+        name = data_utils.rand_name('server_test_ext')
+        mac_addr = "fa:16:3e:2d:ec:3c"
+        file_contents = 'Another test file.'
+        personality = [{'path': '/etc/anotest.txt',
+                       'contents': base64.b64encode(file_contents)}]
+        resp, server = self.create_test_server(name=name,
+                                               meta=self.meta,
+                                               accessIPv4=self.accessIPv4,
+                                               accessIPv6=self.accessIPv6,
+                                               personality=personality,
+                                               disk_config=self.disk_config,
+                                               mac_addr=mac_addr)
+        self.addCleanup(self.client.delete_server, server['id'])
+        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+        resp, server = self.client.get_server(server['id'])
+
+        # Verify the given extended availability zones,
+        # extended drive configs, extended status, extended usages,
+        # extended mac_addr and other extended attributes
+        self._verify_extended_attributes(server)
+
+        # Verify the extended attributes given
+        # in the detailed list
+        resp, body = self.client.list_servers_with_detail()
+        servers = body['servers']
+
+        # Select the first server with specified id
+        server = [i for i in servers if i['id'] == self.server['id']][0]
+        self._verify_extended_attributes(server)
+
     @test.attr(type='smoke')
     def test_list_servers(self):
         # The created server should be in the list of all servers
@@ -123,6 +177,54 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         resp, server_group = self.client.get_server_group(group_id)
         self.assertEqual(200, resp.status)
         self.assertIn(server['id'], server_group['members'])
+
+    def _delete_volume(self, volume_id):
+        if self.attached:
+            self.volumes_client.wait_for_volume_status(volume_id, 'available')
+
+        self.volumes_client.delete_volume(volume_id)
+        self.attached = False
+
+    @test.attr(type='gate')
+    def test_create_server_with_block_device_mapping(self):
+        # Create a test volume
+        v_name = data_utils.rand_name('volume')
+        metadata = {'Type': 'work'}
+        resp, volume = self.volumes_client.create_volume(size=1,
+                                                         display_name=v_name,
+                                                         metadata=metadata)
+        self.addCleanup(self._delete_volume, volume['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+
+        # Create a server with a block device mapping.
+        name = data_utils.rand_name('server')
+        mapping = [{
+                   "device_name": "/dev/sdb1",
+                   "source_type": "blank",
+                   "destination_type": "local",
+                   "delete_on_termination": "True",
+                   "guest_format": "swap",
+                   "boot_index": "-1"
+                   },
+                   {
+                   "device_name": "/dev/sda1",
+                   "source_type": "volume",
+                   "destination_type": "volume",
+                   "uuid": volume['id'],
+                   "boot_index": "0"
+                   }]
+        resp, server = self.create_test_server(name=name,
+                                               meta=metadata,
+                                               block_device_mapping_v2=mapping)
+        self.assertEqual(202, resp.status)
+        self.attached = True
+        self.addCleanup(self.client.delete_server, server['id'])
+        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+
+        resp, server = self.client.get_server(server['id'])
+        self.assertIn(volume['id'],
+                      map(lambda x: x['id'],
+                          server['os-extended-volumes:volumes_attached']))
 
 
 class ServersWithSpecificFlavorTestJSON(base.BaseV2ComputeAdminTest):
