@@ -16,6 +16,7 @@ import netaddr
 
 from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -25,15 +26,16 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class IsolatedCreds(object):
+class IsolatedCreds(cred_provider.CredentialProvider):
 
     def __init__(self, name, tempest_client=True, interface='json',
                  password='pass', network_resources=None):
+        super(IsolatedCreds, self).__init__(name, tempest_client, interface,
+                                            password, network_resources)
         self.network_resources = network_resources
         self.isolated_creds = {}
         self.isolated_net_resources = {}
         self.ports = []
-        self.name = name
         self.tempest_client = tempest_client
         self.interface = interface
         self.password = password
