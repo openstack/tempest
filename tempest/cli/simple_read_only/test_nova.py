@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -17,14 +15,14 @@
 
 import subprocess
 
-from oslo.config import cfg
 import testtools
 
 import tempest.cli
+from tempest import config
 from tempest.openstack.common import log as logging
+import tempest.test
 
-CONF = cfg.CONF
-
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -42,6 +40,13 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     * initially just check return codes, and later test command outputs
 
     """
+
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.service_available.nova:
+            msg = ("%s skipped as Nova is not available" % cls.__name__)
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyNovaClientTest, cls).setUpClass()
 
     def test_admin_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
@@ -73,7 +78,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_dns_domains(self):
         self.nova('dns-domains')
 
-    @testtools.skip("Test needs parameters, Bug #1157349")
+    @tempest.test.skip_because(bug="1157349")
     def test_admin_dns_list(self):
         self.nova('dns-list')
 
@@ -111,7 +116,7 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_image_list(self):
         self.nova('image-list')
 
-    @testtools.skip("Test needs parameters, Bug #1157349")
+    @tempest.test.skip_because(bug="1157349")
     def test_admin_interface_list(self):
         self.nova('interface-list')
 
@@ -136,9 +141,12 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_secgroup_list(self):
         self.nova('secgroup-list')
 
-    @testtools.skip("Test needs parameters, Bug #1157349")
+    @tempest.test.skip_because(bug="1157349")
     def test_admin_secgroup_list_rules(self):
         self.nova('secgroup-list-rules')
+
+    def test_admin_server_group_list(self):
+        self.nova('server-group-list')
 
     def test_admin_servce_list(self):
         self.nova('service-list')
@@ -149,12 +157,18 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_admin_usage_list(self):
         self.nova('usage-list')
 
+    @testtools.skipIf(not CONF.service_available.cinder,
+                      "Skipped as Cinder is not available")
     def test_admin_volume_list(self):
         self.nova('volume-list')
 
+    @testtools.skipIf(not CONF.service_available.cinder,
+                      "Skipped as Cinder is not available")
     def test_admin_volume_snapshot_list(self):
         self.nova('volume-snapshot-list')
 
+    @testtools.skipIf(not CONF.service_available.cinder,
+                      "Skipped as Cinder is not available")
     def test_admin_volume_type_list(self):
         self.nova('volume-type-list')
 
@@ -170,6 +184,10 @@ class SimpleReadOnlyNovaClientTest(tempest.cli.ClientTestBase):
     def test_agent_list(self):
         self.nova('agent-list')
         self.nova('agent-list', flags='--debug')
+
+    def test_migration_list(self):
+        self.nova('migration-list')
+        self.nova('migration-list', flags='--debug')
 
     # Optional arguments:
 

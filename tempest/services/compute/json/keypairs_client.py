@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -17,15 +15,19 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute import keypairs as common_schema
+from tempest.api_schema.compute.v2 import keypairs as schema
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class KeyPairsClientJSON(RestClient):
+class KeyPairsClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(KeyPairsClientJSON, self).__init__(config, username, password,
-                                                 auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(KeyPairsClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_keypairs(self):
         resp, body = self.get("os-keypairs")
@@ -35,11 +37,13 @@ class KeyPairsClientJSON(RestClient):
         # servers, etc. A bug?
         # For now we shall adhere to the spec, but the spec for keypairs
         # is yet to be found
+        self.validate_response(common_schema.list_keypairs, resp, body)
         return resp, body['keypairs']
 
     def get_keypair(self, key_name):
         resp, body = self.get("os-keypairs/%s" % str(key_name))
         body = json.loads(body)
+        self.validate_response(schema.get_keypair, resp, body)
         return resp, body['keypair']
 
     def create_keypair(self, name, pub_key=None):
@@ -47,10 +51,12 @@ class KeyPairsClientJSON(RestClient):
         if pub_key:
             post_body['keypair']['public_key'] = pub_key
         post_body = json.dumps(post_body)
-        resp, body = self.post("os-keypairs",
-                               headers=self.headers, body=post_body)
+        resp, body = self.post("os-keypairs", body=post_body)
         body = json.loads(body)
+        self.validate_response(schema.create_keypair, resp, body)
         return resp, body['keypair']
 
     def delete_keypair(self, key_name):
-        return self.delete("os-keypairs/%s" % str(key_name))
+        resp, body = self.delete("os-keypairs/%s" % str(key_name))
+        self.validate_response(schema.delete_keypair, resp, body)
+        return resp, body

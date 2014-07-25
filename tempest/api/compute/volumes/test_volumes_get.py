@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,33 +14,35 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common.utils import data_utils
+from tempest import config
+from tempest import test
+from testtools import matchers
+
+CONF = config.CONF
 
 
-class VolumesGetTestJSON(base.BaseComputeTest):
-
-    _interface = 'json'
+class VolumesGetTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
         super(VolumesGetTestJSON, cls).setUpClass()
         cls.client = cls.volumes_extensions_client
-        if not cls.config.service_available.cinder:
+        if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_create_get_delete(self):
         # CREATE, GET, DELETE Volume
         volume = None
-        v_name = rand_name('Volume-%s-') % self._interface
+        v_name = data_utils.rand_name('Volume-%s-') % self._interface
         metadata = {'Type': 'work'}
         # Create volume
         resp, volume = self.client.create_volume(size=1,
                                                  display_name=v_name,
                                                  metadata=metadata)
-        self.addCleanup(self._delete_volume, volume)
+        self.addCleanup(self.delete_volume, volume['id'])
         self.assertEqual(200, resp.status)
         self.assertIn('id', volume)
         self.assertIn('displayName', volume)
@@ -56,7 +56,7 @@ class VolumesGetTestJSON(base.BaseComputeTest):
         # GET Volume
         resp, fetched_volume = self.client.get_volume(volume['id'])
         self.assertEqual(200, resp.status)
-        # Verfication of details of fetched Volume
+        # Verification of details of fetched Volume
         self.assertEqual(v_name,
                          fetched_volume['displayName'],
                          'The fetched Volume is different '
@@ -65,39 +65,10 @@ class VolumesGetTestJSON(base.BaseComputeTest):
                          fetched_volume['id'],
                          'The fetched Volume is different '
                          'from the created Volume')
-        self.assertEqual(metadata,
-                         fetched_volume['metadata'],
-                         'The fetched Volume is different '
-                         'from the created Volume')
-
-    @attr(type='gate')
-    def test_volume_get_metadata_none(self):
-        # CREATE, GET empty metadata dict
-        v_name = rand_name('Volume-')
-        # Create volume
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
-                                                 metadata={})
-        self.addCleanup(self._delete_volume, volume)
-        self.assertEqual(200, resp.status)
-        self.assertIn('id', volume)
-        self.assertIn('displayName', volume)
-        # Wait for Volume status to become ACTIVE
-        self.client.wait_for_volume_status(volume['id'], 'available')
-        # GET Volume
-        resp, fetched_volume = self.client.get_volume(volume['id'])
-        self.assertEqual(200, resp.status)
-        self.assertEqual(fetched_volume['metadata'], {})
-
-    def _delete_volume(self, volume):
-        # Delete the Volume created in this method
-        try:
-            resp, _ = self.client.delete_volume(volume['id'])
-            self.assertEqual(202, resp.status)
-            # Checking if the deleted Volume still exists
-            self.client.wait_for_resource_deletion(volume['id'])
-        except KeyError:
-            return
+        self.assertThat(fetched_volume['metadata'].items(),
+                        matchers.ContainsAll(metadata.items()),
+                        'The fetched Volume metadata misses data '
+                        'from the created Volume')
 
 
 class VolumesGetTestXML(VolumesGetTestJSON):

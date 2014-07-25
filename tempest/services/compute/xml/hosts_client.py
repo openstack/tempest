@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2013 IBM Corp.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -17,16 +15,19 @@
 import urllib
 
 from lxml import etree
-from tempest.common.rest_client import RestClientXML
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.common import rest_client
+from tempest.common import xml_utils
+from tempest import config
+
+CONF = config.CONF
 
 
-class HostsClientXML(RestClientXML):
+class HostsClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(HostsClientXML, self).__init__(config, username, password,
-                                             auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(HostsClientXML, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_hosts(self, params=None):
         """Lists all hosts."""
@@ -35,15 +36,52 @@ class HostsClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
         return resp, body
 
     def show_host_detail(self, hostname):
         """Show detail information for the host."""
 
-        resp, body = self.get("os-hosts/%s" % str(hostname), self.headers)
+        resp, body = self.get("os-hosts/%s" % str(hostname))
         node = etree.fromstring(body)
-        body = [xml_to_json(x) for x in node.getchildren()]
+        body = [xml_utils.xml_to_json(node)]
+        return resp, body
+
+    def update_host(self, hostname, **kwargs):
+        """Update a host."""
+
+        request_body = xml_utils.Element("updates")
+        if kwargs:
+            for k, v in kwargs.iteritems():
+                request_body.append(xml_utils.Element(k, v))
+        resp, body = self.put("os-hosts/%s" % str(hostname),
+                              str(xml_utils.Document(request_body)))
+        node = etree.fromstring(body)
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
+        return resp, body
+
+    def startup_host(self, hostname):
+        """Startup a host."""
+
+        resp, body = self.get("os-hosts/%s/startup" % str(hostname))
+        node = etree.fromstring(body)
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
+        return resp, body
+
+    def shutdown_host(self, hostname):
+        """Shutdown a host."""
+
+        resp, body = self.get("os-hosts/%s/shutdown" % str(hostname))
+        node = etree.fromstring(body)
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
+        return resp, body
+
+    def reboot_host(self, hostname):
+        """Reboot a host."""
+
+        resp, body = self.get("os-hosts/%s/reboot" % str(hostname))
+        node = etree.fromstring(body)
+        body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
         return resp, body

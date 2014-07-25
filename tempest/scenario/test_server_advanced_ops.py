@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,9 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -33,24 +36,21 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources()
         super(TestServerAdvancedOps, cls).setUpClass()
 
-        if not cls.config.compute.resize_available:
-            msg = "Skipping test - resize not available on this host"
-            raise cls.skipException(msg)
-
-        resize_flavor = cls.config.compute.flavor_ref_alt
-
-        if resize_flavor == cls.config.compute.flavor_ref:
+        if CONF.compute.flavor_ref_alt == CONF.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise cls.skipException(msg)
 
-    @services('compute')
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize is not available.')
+    @test.services('compute')
     def test_resize_server_confirm(self):
         # We create an instance for use in this test
         instance = self.create_server()
         instance_id = instance.id
-        resize_flavor = self.config.compute.flavor_ref_alt
+        resize_flavor = CONF.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
                   instance.id, instance.flavor, resize_flavor)
         instance.resize(resize_flavor)
@@ -63,7 +63,9 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
         self.status_timeout(
             self.compute_client.servers, instance_id, 'ACTIVE')
 
-    @services('compute')
+    @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
+                          'Suspend is not available.')
+    @test.services('compute')
     def test_server_sequence_suspend_resume(self):
         # We create an instance for use in this test
         instance = self.create_server()

@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,11 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
-from tempest.test import skip_because
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest.common.utils import data_utils
+from tempest import test
+from tempest.thirdparty.boto import test as boto_test
 
 
 def compare_key_pairs(a, b):
@@ -27,47 +23,42 @@ def compare_key_pairs(a, b):
             a.fingerprint == b.fingerprint)
 
 
-class EC2KeysTest(BotoTestCase):
+class EC2KeysTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
         super(EC2KeysTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
         cls.ec = cls.ec2_error_code
 
 # TODO(afazekas): merge create, delete, get test cases
-    @attr(type='smoke')
     def test_create_ec2_keypair(self):
         # EC2 create KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertTrue(compare_key_pairs(keypair,
                         self.client.get_key_pair(key_name)))
 
-    @skip_because(bug="1072318")
-    @attr(type='smoke')
+    @test.skip_because(bug="1072318")
     def test_delete_ec2_keypair(self):
         # EC2 delete KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.client.create_key_pair(key_name)
         self.client.delete_key_pair(key_name)
-        self.assertEqual(None, self.client.get_key_pair(key_name))
+        self.assertIsNone(self.client.get_key_pair(key_name))
 
-    @attr(type='smoke')
     def test_get_ec2_keypair(self):
         # EC2 get KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertTrue(compare_key_pairs(keypair,
                         self.client.get_key_pair(key_name)))
 
-    @attr(type='smoke')
     def test_duplicate_ec2_keypair(self):
         # EC2 duplicate KeyPair
-        key_name = rand_name("keypair-")
+        key_name = data_utils.rand_name("keypair-")
         self.addResourceCleanUp(self.client.delete_key_pair, key_name)
         keypair = self.client.create_key_pair(key_name)
         self.assertBotoError(self.ec.client.InvalidKeyPair.Duplicate,

@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -17,14 +15,15 @@
 
 import os
 
-from tempest import clients
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
-from tempest.thirdparty.boto.test import BotoTestCase
-from tempest.thirdparty.boto.utils.s3 import s3_upload_dir
+from tempest.common.utils import data_utils
+from tempest import config
+from tempest.thirdparty.boto import test as boto_test
+from tempest.thirdparty.boto.utils import s3
+
+CONF = config.CONF
 
 
-class S3ImagesTest(BotoTestCase):
+class S3ImagesTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -32,28 +31,25 @@ class S3ImagesTest(BotoTestCase):
         if not cls.conclusion['A_I_IMAGES_READY']:
             raise cls.skipException("".join(("EC2 ", cls.__name__,
                                     ": requires ami/aki/ari manifest")))
-        cls.os = clients.Manager()
         cls.s3_client = cls.os.s3_client
         cls.images_client = cls.os.ec2api_client
-        config = cls.config
-        cls.materials_path = config.boto.s3_materials_path
-        cls.ami_manifest = config.boto.ami_manifest
-        cls.aki_manifest = config.boto.aki_manifest
-        cls.ari_manifest = config.boto.ari_manifest
+        cls.materials_path = CONF.boto.s3_materials_path
+        cls.ami_manifest = CONF.boto.ami_manifest
+        cls.aki_manifest = CONF.boto.aki_manifest
+        cls.ari_manifest = CONF.boto.ari_manifest
         cls.ami_path = cls.materials_path + os.sep + cls.ami_manifest
         cls.aki_path = cls.materials_path + os.sep + cls.aki_manifest
         cls.ari_path = cls.materials_path + os.sep + cls.ari_manifest
-        cls.bucket_name = rand_name("bucket-")
+        cls.bucket_name = data_utils.rand_name("bucket-")
         bucket = cls.s3_client.create_bucket(cls.bucket_name)
         cls.addResourceCleanUp(cls.destroy_bucket,
                                cls.s3_client.connection_data,
                                cls.bucket_name)
-        s3_upload_dir(bucket, cls.materials_path)
+        s3.s3_upload_dir(bucket, cls.materials_path)
 
-    @attr(type='smoke')
     def test_register_get_deregister_ami_image(self):
         # Register and deregister ami image
-        image = {"name": rand_name("ami-name-"),
+        image = {"name": data_utils.rand_name("ami-name-"),
                  "location": self.bucket_name + "/" + self.ami_manifest,
                  "type": "ami"}
         image["image_id"] = self.images_client.register_image(
@@ -76,7 +72,7 @@ class S3ImagesTest(BotoTestCase):
 
     def test_register_get_deregister_aki_image(self):
         # Register and deregister aki image
-        image = {"name": rand_name("aki-name-"),
+        image = {"name": data_utils.rand_name("aki-name-"),
                  "location": self.bucket_name + "/" + self.aki_manifest,
                  "type": "aki"}
         image["image_id"] = self.images_client.register_image(
@@ -99,7 +95,7 @@ class S3ImagesTest(BotoTestCase):
 
     def test_register_get_deregister_ari_image(self):
         # Register and deregister ari image
-        image = {"name": rand_name("ari-name-"),
+        image = {"name": data_utils.rand_name("ari-name-"),
                  "location": "/" + self.bucket_name + "/" + self.ari_manifest,
                  "type": "ari"}
         image["image_id"] = self.images_client.register_image(

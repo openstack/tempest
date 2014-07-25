@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -17,37 +15,35 @@
 
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common.utils import data_utils
+from tempest import test
 
 
-class ServicesTestJSON(base.BaseIdentityAdminTest):
+class ServicesTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_service(self):
         # Update description attribute of service
-        name = rand_name('service-')
-        type = rand_name('type--')
-        description = rand_name('description-')
-        resp, body = self.client.create_service(
-            name, type, description=description)
-        self.assertEqual('200', resp['status'])
+        name = data_utils.rand_name('service-')
+        serv_type = data_utils.rand_name('type--')
+        desc = data_utils.rand_name('description-')
+        _, body = self.service_client.create_service(name, serv_type,
+                                                     description=desc)
         # Deleting the service created in this method
-        self.addCleanup(self.client.delete_service, body['id'])
+        self.addCleanup(self.service_client.delete_service, body['id'])
 
         s_id = body['id']
         resp1_desc = body['description']
 
-        s_desc2 = rand_name('desc2-')
-        resp, body = self.service_client.update_service(
+        s_desc2 = data_utils.rand_name('desc2-')
+        _, body = self.service_client.update_service(
             s_id, description=s_desc2)
         resp2_desc = body['description']
-        self.assertEqual('200', resp['status'])
         self.assertNotEqual(resp1_desc, resp2_desc)
 
         # Get service
-        resp, body = self.client.get_service(s_id)
+        _, body = self.service_client.get_service(s_id)
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)

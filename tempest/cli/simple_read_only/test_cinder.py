@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,9 +16,12 @@
 import logging
 import re
 import subprocess
+import testtools
 
 import tempest.cli
+from tempest import config
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -32,6 +33,13 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
     their own. They only verify the structure of output if present.
     """
 
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.service_available.cinder:
+            msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyCinderClientTest, cls).setUpClass()
+
     def test_cinder_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
                           self.cinder,
@@ -42,13 +50,26 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
         self.assertTableStruct(roles, ['Name', 'Value'])
 
     def test_cinder_backup_list(self):
-        self.cinder('backup-list')
+        backup_list = self.parser.listing(self.cinder('backup-list'))
+        self.assertTableStruct(backup_list, ['ID', 'Volume ID', 'Status',
+                                             'Name', 'Size', 'Object Count',
+                                             'Container'])
 
     def test_cinder_extra_specs_list(self):
-        self.cinder('extra-specs-list')
+        extra_specs_list = self.parser.listing(self.cinder('extra-specs-list'))
+        self.assertTableStruct(extra_specs_list, ['ID', 'Name', 'extra_specs'])
 
     def test_cinder_volumes_list(self):
-        self.cinder('list')
+        list = self.parser.listing(self.cinder('list'))
+        self.assertTableStruct(list, ['ID', 'Status', 'Name', 'Size',
+                                      'Volume Type', 'Bootable',
+                                      'Attached to'])
+        self.cinder('list', params='--all-tenants 1')
+        self.cinder('list', params='--all-tenants 0')
+        self.assertRaises(subprocess.CalledProcessError,
+                          self.cinder,
+                          'list',
+                          params='--all-tenants bad')
 
     def test_cinder_quota_class_show(self):
         """This CLI can accept and string as param."""
@@ -59,48 +80,71 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
     def test_cinder_quota_defaults(self):
         """This CLI can accept and string as param."""
         roles = self.parser.listing(self.cinder('quota-defaults',
-                                                params=self.identity.
+                                                params=CONF.identity.
                                                 admin_tenant_name))
         self.assertTableStruct(roles, ['Property', 'Value'])
 
     def test_cinder_quota_show(self):
         """This CLI can accept and string as param."""
         roles = self.parser.listing(self.cinder('quota-show',
-                                                params=self.identity.
+                                                params=CONF.identity.
                                                 admin_tenant_name))
         self.assertTableStruct(roles, ['Property', 'Value'])
 
     def test_cinder_rate_limits(self):
-        self.cinder('rate-limits')
+        rate_limits = self.parser.listing(self.cinder('rate-limits'))
+        self.assertTableStruct(rate_limits, ['Verb', 'URI', 'Value', 'Remain',
+                                             'Unit', 'Next_Available'])
 
+    @testtools.skipUnless(CONF.volume_feature_enabled.snapshot,
+                          'Volume snapshot not available.')
     def test_cinder_snapshot_list(self):
-        self.cinder('snapshot-list')
+        snapshot_list = self.parser.listing(self.cinder('snapshot-list'))
+        self.assertTableStruct(snapshot_list, ['ID', 'Volume ID', 'Status',
+                                               'Name', 'Size'])
 
     def test_cinder_type_list(self):
-        self.cinder('type-list')
+        type_list = self.parser.listing(self.cinder('type-list'))
+        self.assertTableStruct(type_list, ['ID', 'Name'])
 
     def test_cinder_list_extensions(self):
-        self.cinder('list-extensions')
         roles = self.parser.listing(self.cinder('list-extensions'))
         self.assertTableStruct(roles, ['Name', 'Summary', 'Alias', 'Updated'])
 
     def test_cinder_credentials(self):
-        self.cinder('credentials')
+        credentials = self.parser.listing(self.cinder('credentials'))
+        self.assertTableStruct(credentials, ['User Credentials', 'Value'])
 
     def test_cinder_availability_zone_list(self):
-        self.cinder('availability-zone-list')
+        zone_list = self.parser.listing(self.cinder('availability-zone-list'))
+        self.assertTableStruct(zone_list, ['Name', 'Status'])
 
     def test_cinder_endpoints(self):
-        self.cinder('endpoints')
+        endpoints = self.parser.listing(self.cinder('endpoints'))
+        self.assertTableStruct(endpoints, ['nova', 'Value'])
 
     def test_cinder_service_list(self):
-        self.cinder('service-list')
+        service_list = self.parser.listing(self.cinder('service-list'))
+        self.assertTableStruct(service_list, ['Binary', 'Host', 'Zone',
+                                              'Status', 'State', 'Updated_at',
+                                              'Disabled Reason'])
 
     def test_cinder_transfer_list(self):
-        self.cinder('transfer-list')
+        transfer_list = self.parser.listing(self.cinder('transfer-list'))
+        self.assertTableStruct(transfer_list, ['ID', 'Volume ID', 'Name'])
 
     def test_cinder_bash_completion(self):
         self.cinder('bash-completion')
+
+    def test_cinder_qos_list(self):
+        qos_list = self.parser.listing(self.cinder('qos-list'))
+        self.assertTableStruct(qos_list, ['ID', 'Name', 'Consumer', 'specs'])
+
+    def test_cinder_encryption_type_list(self):
+        encrypt_list = self.parser.listing(self.cinder('encryption-type-list'))
+        self.assertTableStruct(encrypt_list, ['Volume Type ID', 'Provider',
+                                              'Cipher', 'Key Size',
+                                              'Control Location'])
 
     def test_admin_help(self):
         help_text = self.cinder('help')
@@ -120,7 +164,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
                                'quota-show', 'type-list', 'snapshot-list'))
         self.assertFalse(wanted_commands - commands)
 
-     # Optional arguments:
+    # Optional arguments:
 
     def test_cinder_version(self):
         self.cinder('', flags='--version')
@@ -132,7 +176,7 @@ class SimpleReadOnlyCinderClientTest(tempest.cli.ClientTestBase):
         self.cinder('list', flags='--retries 3')
 
     def test_cinder_region_list(self):
-        region = self.config.volume.region
+        region = CONF.volume.region
         if not region:
-            region = self.config.identity.region
+            region = CONF.identity.region
         self.cinder('list', flags='--os-region-name ' + region)

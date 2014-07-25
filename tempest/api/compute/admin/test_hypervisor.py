@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 IBM Corporation
 # All Rights Reserved.
 #
@@ -16,23 +14,19 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
-class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
+class HypervisorAdminTestJSON(base.BaseV2ComputeAdminTest):
 
     """
     Tests Hypervisors API that require admin privileges
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(HypervisorAdminTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.hypervisor_client
-        cls.non_adm_client = cls.hypervisor_client
 
     def _list_hypervisors(self):
         # List of hypervisors
@@ -40,24 +34,27 @@ class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         return hypers
 
-    @attr(type='gate')
+    def assertHypervisors(self, hypers):
+        self.assertTrue(len(hypers) > 0, "No hypervisors found: %s" % hypers)
+
+    @test.attr(type='gate')
     def test_get_hypervisor_list(self):
         # List of hypervisor and available hypervisors hostname
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_hypervisor_list_details(self):
         # Display the details of the all hypervisor
         resp, hypers = self.client.get_hypervisor_list_details()
         self.assertEqual(200, resp.status)
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_hypervisor_show_details(self):
         # Display the details of the specified hypervisor
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
         resp, details = (self.client.
                          get_hypervisor_show_details(hypers[0]['id']))
@@ -66,46 +63,71 @@ class HypervisorAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(details['hypervisor_hostname'],
                          hypers[0]['hypervisor_hostname'])
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_hypervisor_show_servers(self):
         # Show instances about the specific hypervisors
         hypers = self._list_hypervisors()
-        self.assertTrue(len(hypers) > 0)
+        self.assertHypervisors(hypers)
 
         hostname = hypers[0]['hypervisor_hostname']
         resp, hypervisors = self.client.get_hypervisor_servers(hostname)
         self.assertEqual(200, resp.status)
         self.assertTrue(len(hypervisors) > 0)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_hypervisor_stats(self):
         # Verify the stats of the all hypervisor
         resp, stats = self.client.get_hypervisor_stats()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(stats) > 0)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_hypervisor_uptime(self):
         # Verify that GET shows the specified hypervisor uptime
         hypers = self._list_hypervisors()
 
-        resp, uptime = self.client.get_hypervisor_uptime(hypers[0]['id'])
+        # Ironic will register each baremetal node as a 'hypervisor',
+        # so the hypervisor list can contain many hypervisors of type
+        # 'ironic'. If they are ALL ironic, skip this test since ironic
+        # doesn't support hypervisor uptime. Otherwise, remove them
+        # from the list of hypervisors to test.
+        ironic_only = True
+        hypers_without_ironic = []
+        for hyper in hypers:
+            resp, details = (self.client.
+                             get_hypervisor_show_details(hypers[0]['id']))
+            self.assertEqual(200, resp.status)
+            if details['hypervisor_type'] != 'ironic':
+                hypers_without_ironic.append(hyper)
+                ironic_only = False
+
+        if ironic_only:
+            raise self.skipException(
+                "Ironic does not support hypervisor uptime")
+
+        has_valid_uptime = False
+        for hyper in hypers_without_ironic:
+            # because hypervisors might be disabled, this loops looking
+            # for any good hit.
+            try:
+                resp, uptime = self.client.get_hypervisor_uptime(hyper['id'])
+                if (resp.status == 200) and (len(uptime) > 0):
+                    has_valid_uptime = True
+                    break
+            except Exception:
+                pass
+        self.assertTrue(
+            has_valid_uptime,
+            "None of the hypervisors had a valid uptime: %s" % hypers)
+
+    @test.attr(type='gate')
+    def test_search_hypervisor(self):
+        hypers = self._list_hypervisors()
+        self.assertHypervisors(hypers)
+        resp, hypers = self.client.search_hypervisor(
+            hypers[0]['hypervisor_hostname'])
         self.assertEqual(200, resp.status)
-        self.assertTrue(len(uptime) > 0)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_hypervisor_list_with_non_admin_user(self):
-        # List of hypervisor and available services with non admin user
-        self.assertRaises(
-            exceptions.Unauthorized,
-            self.non_adm_client.get_hypervisor_list)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_hypervisor_list_details_with_non_admin_user(self):
-        # List of hypervisor details and available services with non admin user
-        self.assertRaises(
-            exceptions.Unauthorized,
-            self.non_adm_client.get_hypervisor_list_details)
+        self.assertHypervisors(hypers)
 
 
 class HypervisorAdminTestXML(HypervisorAdminTestJSON):

@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -13,93 +11,78 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
+from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.services.volume.json.admin import volume_types_client
-from tempest.services.volume.json import volumes_client
-from tempest.test import attr
+from tempest import test
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
-class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
+class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(VolumeMultiBackendTest, cls).setUpClass()
-        if not cls.config.volume.multi_backend_enabled:
+        if not CONF.volume_feature_enabled.multi_backend:
             raise cls.skipException("Cinder multi-backend feature disabled")
 
-        cls.backend1_name = cls.config.volume.backend1_name
-        cls.backend2_name = cls.config.volume.backend2_name
+        cls.backend1_name = CONF.volume.backend1_name
+        cls.backend2_name = CONF.volume.backend2_name
 
-        adm_user = cls.config.identity.admin_username
-        adm_pass = cls.config.identity.admin_password
-        adm_tenant = cls.config.identity.admin_tenant_name
-        auth_url = cls.config.identity.uri
-
-        cls.volume_client = volumes_client.VolumesClientJSON(cls.config,
-                                                             adm_user,
-                                                             adm_pass,
-                                                             auth_url,
-                                                             adm_tenant)
-        cls.type_client = volume_types_client.VolumeTypesClientJSON(cls.config,
-                                                                    adm_user,
-                                                                    adm_pass,
-                                                                    auth_url,
-                                                                    adm_tenant)
-
+        cls.volume_client = cls.os_adm.volumes_client
         cls.volume_type_id_list = []
         cls.volume_id_list = []
-        try:
-            # Volume/Type creation (uses backend1_name)
-            type1_name = rand_name('Type-')
-            vol1_name = rand_name('Volume-')
-            extra_specs1 = {"volume_backend_name": cls.backend1_name}
-            resp, cls.type1 = cls.type_client.create_volume_type(
-                type1_name, extra_specs=extra_specs1)
-            cls.volume_type_id_list.append(cls.type1['id'])
 
-            resp, cls.volume1 = cls.volume_client.create_volume(
-                size=1, display_name=vol1_name, volume_type=type1_name)
-            cls.volume_id_list.append(cls.volume1['id'])
-            cls.volume_client.wait_for_volume_status(cls.volume1['id'],
+        # Volume/Type creation (uses backend1_name)
+        type1_name = data_utils.rand_name('Type-')
+        vol1_name = data_utils.rand_name('Volume-')
+        extra_specs1 = {"volume_backend_name": cls.backend1_name}
+        resp, cls.type1 = cls.client.create_volume_type(
+            type1_name, extra_specs=extra_specs1)
+        cls.volume_type_id_list.append(cls.type1['id'])
+
+        resp, cls.volume1 = cls.volume_client.create_volume(
+            size=1, display_name=vol1_name, volume_type=type1_name)
+        cls.volume_id_list.append(cls.volume1['id'])
+        cls.volume_client.wait_for_volume_status(cls.volume1['id'],
+                                                 'available')
+
+        if cls.backend1_name != cls.backend2_name:
+            # Volume/Type creation (uses backend2_name)
+            type2_name = data_utils.rand_name('Type-')
+            vol2_name = data_utils.rand_name('Volume-')
+            extra_specs2 = {"volume_backend_name": cls.backend2_name}
+            resp, cls.type2 = cls.client.create_volume_type(
+                type2_name, extra_specs=extra_specs2)
+            cls.volume_type_id_list.append(cls.type2['id'])
+
+            resp, cls.volume2 = cls.volume_client.create_volume(
+                size=1, display_name=vol2_name, volume_type=type2_name)
+            cls.volume_id_list.append(cls.volume2['id'])
+            cls.volume_client.wait_for_volume_status(cls.volume2['id'],
                                                      'available')
-
-            if cls.backend1_name != cls.backend2_name:
-                # Volume/Type creation (uses backend2_name)
-                type2_name = rand_name('Type-')
-                vol2_name = rand_name('Volume-')
-                extra_specs2 = {"volume_backend_name": cls.backend2_name}
-                resp, cls.type2 = cls.type_client.create_volume_type(
-                    type2_name, extra_specs=extra_specs2)
-                cls.volume_type_id_list.append(cls.type2['id'])
-
-                resp, cls.volume2 = cls.volume_client.create_volume(
-                    size=1, display_name=vol2_name, volume_type=type2_name)
-                cls.volume_id_list.append(cls.volume2['id'])
-                cls.volume_client.wait_for_volume_status(cls.volume2['id'],
-                                                         'available')
-        except Exception as e:
-            LOG.exception("setup failed: %s" % e)
-            cls.tearDownClass()
-            raise
 
     @classmethod
     def tearDownClass(cls):
         # volumes deletion
-        for volume_id in cls.volume_id_list:
+        volume_id_list = getattr(cls, 'volume_id_list', [])
+        for volume_id in volume_id_list:
             cls.volume_client.delete_volume(volume_id)
             cls.volume_client.wait_for_resource_deletion(volume_id)
 
         # volume types deletion
-        for volume_type_id in cls.volume_type_id_list:
-            cls.type_client.delete_volume_type(volume_type_id)
+        volume_type_id_list = getattr(cls, 'volume_type_id_list', [])
+        for volume_type_id in volume_type_id_list:
+            cls.client.delete_volume_type(volume_type_id)
 
         super(VolumeMultiBackendTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_backend_name_reporting(self):
         # this test checks if os-vol-attr:host is populated correctly after
         # the multi backend feature has been enabled
@@ -113,7 +96,7 @@ class VolumeMultiBackendTest(base.BaseVolumeAdminTest):
                self.volume1['id'])
         self.assertTrue(len(volume1_host.split("@")) > 1, msg)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_backend_name_distinction(self):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the

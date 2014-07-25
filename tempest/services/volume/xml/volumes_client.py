@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2012 IBM Corp.
 # All Rights Reserved.
 #
@@ -19,27 +17,49 @@ import time
 import urllib
 
 from lxml import etree
+from xml.sax import saxutils
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
+from tempest.common import xml_utils as common
+from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
+
+CONF = config.CONF
+
+VOLUME_NS_BASE = 'http://docs.openstack.org/volume/ext/'
+VOLUME_HOST_NS = VOLUME_NS_BASE + 'volume_host_attribute/api/v1'
+VOLUME_MIG_STATUS_NS = VOLUME_NS_BASE + 'volume_mig_status_attribute/api/v1'
+VOLUMES_TENANT_NS = VOLUME_NS_BASE + 'volume_tenant_attribute/api/v1'
 
 
-class VolumesClientXML(RestClientXML):
+class BaseVolumesClientXML(rest_client.RestClient):
     """
-    Client class to send CRUD Volume API requests to a Cinder endpoint
+    Base client class to send CRUD Volume API requests to a Cinder endpoint
     """
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumesClientXML, self).__init__(config, username, password,
-                                               auth_url, tenant_name)
-        self.service = self.config.volume.catalog_type
-        self.build_interval = self.config.compute.build_interval
-        self.build_timeout = self.config.compute.build_timeout
+    def __init__(self, auth_provider):
+        super(BaseVolumesClientXML, self).__init__(auth_provider)
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.compute.build_interval
+        self.build_timeout = CONF.compute.build_timeout
+
+    def _translate_attributes_to_json(self, volume):
+        volume_host_attr = '{' + VOLUME_HOST_NS + '}host'
+        volume_mig_stat_attr = '{' + VOLUME_MIG_STATUS_NS + '}migstat'
+        volume_mig_name_attr = '{' + VOLUME_MIG_STATUS_NS + '}name_id'
+        volume_tenant_id_attr = '{' + VOLUMES_TENANT_NS + '}tenant_id'
+        if volume_host_attr in volume:
+            volume['os-vol-host-attr:host'] = volume.pop(volume_host_attr)
+        if volume_mig_stat_attr in volume:
+            volume['os-vol-mig-status-attr:migstat'] = volume.pop(
+                volume_mig_stat_attr)
+        if volume_mig_name_attr in volume:
+            volume['os-vol-mig-status-attr:name_id'] = volume.pop(
+                volume_mig_name_attr)
+        if volume_tenant_id_attr in volume:
+            volume['os-vol-tenant-attr:tenant_id'] = volume.pop(
+                volume_tenant_id_attr)
 
     def _parse_volume(self, body):
         vol = dict((attr, body.get(attr)) for attr in body.keys())
@@ -53,7 +73,9 @@ class VolumesClientXML(RestClientXML):
                                        meta.text) for meta in
                                        child.getchildren())
             else:
-                vol[tag] = xml_to_json(child)
+                vol[tag] = common.xml_to_json(child)
+        self._translate_attributes_to_json(vol)
+        self._check_if_bootable(vol)
         return vol
 
     def get_attachment_from_volume(self, volume):
@@ -87,13 +109,11 @@ class VolumesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
-        for v in volumes:
-            v = self._check_if_bootable(v)
         return resp, volumes
 
     def list_volumes_with_detail(self, params=None):
@@ -103,27 +123,26 @@ class VolumesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
-        for v in volumes:
-            v = self._check_if_bootable(v)
         return resp, volumes
 
     def get_volume(self, volume_id):
         """Returns the details of a single volume."""
         url = "volumes/%s" % str(volume_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_volume(etree.fromstring(body))
-        body = self._check_if_bootable(body)
         return resp, body
 
-    def create_volume(self, size, **kwargs):
+    def create_volume(self, size=None, **kwargs):
         """Creates a new Volume.
 
-        :param size: Size of volume in GB. (Required)
+        :param size: Size of volume in GB.
+        :param display_name: Optional Volume Name(only for V1).
+        :param name: Optional Volume Name(only for V2).
         :param display_name: Optional Volume Name.
         :param metadata: An optional dictionary of values for metadata.
         :param volume_type: Optional Name of volume_type for the volume
@@ -132,16 +151,20 @@ class VolumesClientXML(RestClientXML):
         :param imageRef: When specified the volume is created from this
                          image
         """
+        # for bug #1293885:
+        # If no size specified, read volume size from CONF
+        if size is None:
+            size = CONF.volume.volume_size
         # NOTE(afazekas): it should use a volume namespace
-        volume = Element("volume", xmlns=XMLNS_11, size=size)
+        volume = common.Element("volume", xmlns=common.XMLNS_11, size=size)
 
         if 'metadata' in kwargs:
-            _metadata = Element('metadata')
+            _metadata = common.Element('metadata')
             volume.append(_metadata)
             for key, value in kwargs['metadata'].items():
-                meta = Element('meta')
+                meta = common.Element('meta')
                 meta.add_attr('key', key)
-                meta.append(Text(value))
+                meta.append(common.Text(value))
                 _metadata.append(meta)
             attr_to_add = kwargs.copy()
             del attr_to_add['metadata']
@@ -151,19 +174,17 @@ class VolumesClientXML(RestClientXML):
         for key, value in attr_to_add.items():
             volume.add_attr(key, value)
 
-        resp, body = self.post('volumes', str(Document(volume)),
-                               self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.post('volumes', str(common.Document(volume)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def update_volume(self, volume_id, **kwargs):
         """Updates the Specified Volume."""
-        put_body = Element("volume", xmlns=XMLNS_11, **kwargs)
+        put_body = common.Element("volume", xmlns=common.XMLNS_11, **kwargs)
 
         resp, body = self.put('volumes/%s' % volume_id,
-                              str(Document(put_body)),
-                              self.headers)
-        body = xml_to_json(etree.fromstring(body))
+                              str(common.Document(put_body)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_volume(self, volume_id):
@@ -199,31 +220,219 @@ class VolumesClientXML(RestClientXML):
 
     def attach_volume(self, volume_id, instance_uuid, mountpoint):
         """Attaches a volume to a given instance on a given mountpoint."""
-        post_body = Element("os-attach",
-                            instance_uuid=instance_uuid,
-                            mountpoint=mountpoint
-                            )
+        post_body = common.Element("os-attach",
+                                   instance_uuid=instance_uuid,
+                                   mountpoint=mountpoint
+                                   )
         url = 'volumes/%s/action' % str(volume_id)
-        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        resp, body = self.post(url, str(common.Document(post_body)))
         if body:
-            body = xml_to_json(etree.fromstring(body))
+            body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def detach_volume(self, volume_id):
         """Detaches a volume from an instance."""
-        post_body = Element("os-detach")
+        post_body = common.Element("os-detach")
         url = 'volumes/%s/action' % str(volume_id)
-        resp, body = self.post(url, str(Document(post_body)), self.headers)
+        resp, body = self.post(url, str(common.Document(post_body)))
         if body:
-            body = xml_to_json(etree.fromstring(body))
+            body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def upload_volume(self, volume_id, image_name, disk_format):
         """Uploads a volume in Glance."""
-        post_body = Element("os-volume_upload_image",
-                            image_name=image_name,
-                            disk_format=disk_format)
+        post_body = common.Element("os-volume_upload_image",
+                                   image_name=image_name,
+                                   disk_format=disk_format)
         url = 'volumes/%s/action' % str(volume_id)
-        resp, body = self.post(url, str(Document(post_body)), self.headers)
-        volume = xml_to_json(etree.fromstring(body))
+        resp, body = self.post(url, str(common.Document(post_body)))
+        volume = common.xml_to_json(etree.fromstring(body))
         return resp, volume
+
+    def extend_volume(self, volume_id, extend_size):
+        """Extend a volume."""
+        post_body = common.Element("os-extend",
+                                   new_size=extend_size)
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def reset_volume_status(self, volume_id, status):
+        """Reset the Specified Volume's Status."""
+        post_body = common.Element("os-reset_status",
+                                   status=status
+                                   )
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def volume_begin_detaching(self, volume_id):
+        """Volume Begin Detaching."""
+        post_body = common.Element("os-begin_detaching")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def volume_roll_detaching(self, volume_id):
+        """Volume Roll Detaching."""
+        post_body = common.Element("os-roll_detaching")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def reserve_volume(self, volume_id):
+        """Reserves a volume."""
+        post_body = common.Element("os-reserve")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def unreserve_volume(self, volume_id):
+        """Restore a reserved volume ."""
+        post_body = common.Element("os-unreserve")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def create_volume_transfer(self, vol_id, display_name=None):
+        """Create a volume transfer."""
+        post_body = common.Element("transfer",
+                                   volume_id=vol_id)
+        if display_name:
+            post_body.add_attr('name', display_name)
+        resp, body = self.post('os-volume-transfer',
+                               str(common.Document(post_body)))
+        volume = common.xml_to_json(etree.fromstring(body))
+        return resp, volume
+
+    def get_volume_transfer(self, transfer_id):
+        """Returns the details of a volume transfer."""
+        url = "os-volume-transfer/%s" % str(transfer_id)
+        resp, body = self.get(url)
+        volume = common.xml_to_json(etree.fromstring(body))
+        return resp, volume
+
+    def list_volume_transfers(self, params=None):
+        """List all the volume transfers created."""
+        url = 'os-volume-transfer'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        resp, body = self.get(url)
+        body = etree.fromstring(body)
+        volumes = []
+        if body is not None:
+            volumes += [self._parse_volume_transfer(vol) for vol in list(body)]
+        return resp, volumes
+
+    def _parse_volume_transfer(self, body):
+        vol = dict((attr, body.get(attr)) for attr in body.keys())
+        for child in body.getchildren():
+            tag = child.tag
+            if tag.startswith("{"):
+                tag = tag.split("}", 1)
+            vol[tag] = common.xml_to_json(child)
+        return vol
+
+    def delete_volume_transfer(self, transfer_id):
+        """Delete a volume transfer."""
+        return self.delete("os-volume-transfer/%s" % str(transfer_id))
+
+    def accept_volume_transfer(self, transfer_id, transfer_auth_key):
+        """Accept a volume transfer."""
+        post_body = common.Element("accept", auth_key=transfer_auth_key)
+        url = 'os-volume-transfer/%s/accept' % transfer_id
+        resp, body = self.post(url, str(common.Document(post_body)))
+        volume = common.xml_to_json(etree.fromstring(body))
+        return resp, volume
+
+    def update_volume_readonly(self, volume_id, readonly):
+        """Update the Specified Volume readonly."""
+        post_body = common.Element("os-update_readonly_flag",
+                                   readonly=readonly)
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def force_delete_volume(self, volume_id):
+        """Force Delete Volume."""
+        post_body = common.Element("os-force_delete")
+        url = 'volumes/%s/action' % str(volume_id)
+        resp, body = self.post(url, str(common.Document(post_body)))
+        if body:
+            body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def _metadata_body(self, meta):
+        post_body = common.Element('metadata')
+        for k, v in meta.items():
+            data = common.Element('meta', key=k)
+            # Escape value to allow for special XML chars
+            data.append(common.Text(saxutils.escape(v)))
+            post_body.append(data)
+        return post_body
+
+    def _parse_key_value(self, node):
+        """Parse <foo key='key'>value</foo> data into {'key': 'value'}."""
+        data = {}
+        for node in node.getchildren():
+            data[node.get('key')] = node.text
+        return data
+
+    def create_volume_metadata(self, volume_id, metadata):
+        """Create metadata for the volume."""
+        post_body = self._metadata_body(metadata)
+        resp, body = self.post('volumes/%s/metadata' % volume_id,
+                               str(common.Document(post_body)))
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
+
+    def get_volume_metadata(self, volume_id):
+        """Get metadata of the volume."""
+        url = "volumes/%s/metadata" % str(volume_id)
+        resp, body = self.get(url)
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
+
+    def update_volume_metadata(self, volume_id, metadata):
+        """Update metadata for the volume."""
+        put_body = self._metadata_body(metadata)
+        url = "volumes/%s/metadata" % str(volume_id)
+        resp, body = self.put(url, str(common.Document(put_body)))
+        body = self._parse_key_value(etree.fromstring(body))
+        return resp, body
+
+    def update_volume_metadata_item(self, volume_id, id, meta_item):
+        """Update metadata item for the volume."""
+        for k, v in meta_item.items():
+            put_body = common.Element('meta', key=k)
+            put_body.append(common.Text(v))
+        url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
+        resp, body = self.put(url, str(common.Document(put_body)))
+        body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def delete_volume_metadata_item(self, volume_id, id):
+        """Delete metadata item for the volume."""
+        url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
+        return self.delete(url)
+
+
+class VolumesClientXML(BaseVolumesClientXML):
+    """
+    Client class to send CRUD Volume API V1 requests to a Cinder endpoint
+    """

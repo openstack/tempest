@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,23 +13,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
-from tempest.test import attr
-from tempest.test import skip_because
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest import test
+from tempest.thirdparty.boto import test as boto_test
 
 
-class EC2NetworkTest(BotoTestCase):
+class EC2NetworkTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
         super(EC2NetworkTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
 
     # Note(afazekas): these tests for things duable without an instance
-    @skip_because(bug="1080406")
-    @attr(type='smoke')
+    @test.skip_because(bug="1080406")
     def test_disassociate_not_associated_floating_ip(self):
         # EC2 disassociate not associated floating ip
         ec2_codes = self.ec2_error_code

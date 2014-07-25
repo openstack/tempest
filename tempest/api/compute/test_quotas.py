@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,20 +14,23 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.test import attr
+from tempest.common import tempest_fixtures as fixtures
+from tempest import test
 
 
-class QuotasTestJSON(base.BaseComputeTest):
-    _interface = 'json'
+class QuotasTestJSON(base.BaseV2ComputeTest):
+
+    def setUp(self):
+        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
+        super(QuotasTestJSON, self).setUp()
 
     @classmethod
     def setUpClass(cls):
         super(QuotasTestJSON, cls).setUpClass()
         cls.client = cls.quotas_client
-        cls.admin_client = cls._get_identity_admin_client()
-        resp, tenants = cls.admin_client.list_tenants()
-        cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
-                         cls.client.tenant_name][0]
+        cls.tenant_id = cls.client.tenant_id
+        cls.user_id = cls.client.user_id
         cls.default_quota_set = set(('injected_file_content_bytes',
                                      'metadata_items', 'injected_files',
                                      'ram', 'floating_ips',
@@ -38,7 +39,7 @@ class QuotasTestJSON(base.BaseComputeTest):
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_quotas(self):
         # User can get the quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
@@ -48,7 +49,15 @@ class QuotasTestJSON(base.BaseComputeTest):
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.tenant_id)
 
-    @attr(type='smoke')
+        # get the quota set using user id
+        resp, quota_set = self.client.get_quota_set(self.tenant_id,
+                                                    self.user_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(sorted(expected_quota_set),
+                         sorted(quota_set.keys()))
+        self.assertEqual(quota_set['id'], self.tenant_id)
+
+    @test.attr(type='smoke')
     def test_get_default_quotas(self):
         # User can get the default quota set for it's tenant
         expected_quota_set = self.default_quota_set | set(['id'])
@@ -57,6 +66,16 @@ class QuotasTestJSON(base.BaseComputeTest):
         self.assertEqual(sorted(expected_quota_set),
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.tenant_id)
+
+    @test.attr(type='smoke')
+    def test_compare_tenant_quotas_with_default_quotas(self):
+        # Tenants are created with the default quota values
+        resp, defualt_quota_set = \
+            self.client.get_default_quota_set(self.tenant_id)
+        self.assertEqual(200, resp.status)
+        resp, tenant_quota_set = self.client.get_quota_set(self.tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(defualt_quota_set, tenant_quota_set)
 
 
 class QuotasTestXML(QuotasTestJSON):

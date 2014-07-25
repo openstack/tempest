@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,17 +16,19 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute.v2 import security_groups as schema
+from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
 
+CONF = config.CONF
 
-class SecurityGroupsClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(SecurityGroupsClientJSON, self).__init__(config, username,
-                                                       password, auth_url,
-                                                       tenant_name)
-        self.service = self.config.compute.catalog_type
+class SecurityGroupsClientJSON(rest_client.RestClient):
+
+    def __init__(self, auth_provider):
+        super(SecurityGroupsClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_security_groups(self, params=None):
         """List all security groups for a user."""
@@ -39,6 +39,7 @@ class SecurityGroupsClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_security_groups, resp, body)
         return resp, body['security_groups']
 
     def get_security_group(self, security_group_id):
@@ -46,6 +47,7 @@ class SecurityGroupsClientJSON(RestClient):
         url = "os-security-groups/%s" % str(security_group_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.get_security_group, resp, body)
         return resp, body['security_group']
 
     def create_security_group(self, name, description):
@@ -59,13 +61,37 @@ class SecurityGroupsClientJSON(RestClient):
             'description': description,
         }
         post_body = json.dumps({'security_group': post_body})
-        resp, body = self.post('os-security-groups', post_body, self.headers)
+        resp, body = self.post('os-security-groups', post_body)
         body = json.loads(body)
+        self.validate_response(schema.get_security_group, resp, body)
+        return resp, body['security_group']
+
+    def update_security_group(self, security_group_id, name=None,
+                              description=None):
+        """
+        Update a security group.
+        security_group_id: a security_group to update
+        name: new name of security group
+        description: new description of security group
+        """
+        post_body = {}
+        if name:
+            post_body['name'] = name
+        if description:
+            post_body['description'] = description
+        post_body = json.dumps({'security_group': post_body})
+        resp, body = self.put('os-security-groups/%s' % str(security_group_id),
+                              post_body)
+        body = json.loads(body)
+        self.validate_response(schema.update_security_group, resp, body)
         return resp, body['security_group']
 
     def delete_security_group(self, security_group_id):
         """Deletes the provided Security Group."""
-        return self.delete('os-security-groups/%s' % str(security_group_id))
+        resp, body = self.delete(
+            'os-security-groups/%s' % str(security_group_id))
+        self.validate_response(schema.delete_security_group, resp, body)
+        return resp, body
 
     def create_security_group_rule(self, parent_group_id, ip_proto, from_port,
                                    to_port, **kwargs):
@@ -89,19 +115,31 @@ class SecurityGroupsClientJSON(RestClient):
         }
         post_body = json.dumps({'security_group_rule': post_body})
         url = 'os-security-group-rules'
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.validate_response(schema.create_security_group_rule, resp, body)
         return resp, body['security_group_rule']
 
     def delete_security_group_rule(self, group_rule_id):
         """Deletes the provided Security Group rule."""
-        return self.delete('os-security-group-rules/%s' % str(group_rule_id))
+        resp, body = self.delete('os-security-group-rules/%s' %
+                                 str(group_rule_id))
+        self.validate_response(schema.delete_security_group_rule, resp, body)
+        return resp, body
 
     def list_security_group_rules(self, security_group_id):
         """List all rules for a security group."""
         resp, body = self.get('os-security-groups')
         body = json.loads(body)
+        self.validate_response(schema.list_security_groups, resp, body)
         for sg in body['security_groups']:
             if sg['id'] == security_group_id:
                 return resp, sg['rules']
         raise exceptions.NotFound('No such Security Group')
+
+    def is_resource_deleted(self, id):
+        try:
+            self.get_security_group(id)
+        except exceptions.NotFound:
+            return True
+        return False

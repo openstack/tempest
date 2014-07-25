@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
+from tempest import config
 from tempest.openstack.common import log as logging
-from tempest.test import attr
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest.thirdparty.boto import test as boto_test
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -28,16 +26,19 @@ def compare_volumes(a, b):
             a.size == b.size)
 
 
-class EC2VolumesTest(BotoTestCase):
+class EC2VolumesTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
         super(EC2VolumesTest, cls).setUpClass()
-        cls.os = clients.Manager()
-        cls.client = cls.os.ec2api_client
-        cls.zone = cls.client.get_good_zone()
 
-    @attr(type='smoke')
+        if not CONF.service_available.cinder:
+            skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
+            raise cls.skipException(skip_msg)
+
+        cls.client = cls.os.ec2api_client
+        cls.zone = CONF.boto.aws_zone
+
     def test_create_get_delete(self):
         # EC2 Create, get, delete Volume
         volume = self.client.create_volume(1, self.zone)
@@ -50,7 +51,6 @@ class EC2VolumesTest(BotoTestCase):
         self.client.delete_volume(volume.id)
         self.cancelResourceCleanUp(cuk)
 
-    @attr(type='smoke')
     def test_create_volume_from_snapshot(self):
         # EC2 Create volume from snapshot
         volume = self.client.create_volume(1, self.zone)

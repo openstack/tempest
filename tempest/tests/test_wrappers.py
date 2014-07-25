@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 IBM Corp.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -16,23 +14,27 @@
 
 import os
 import shutil
+import StringIO
 import subprocess
 import tempfile
-import testtools
+
+from tempest.tests import base
 
 DEVNULL = open(os.devnull, 'wb')
 
 
-class TestWrappers(testtools.TestCase):
+class TestWrappers(base.TestCase):
     def setUp(self):
         super(TestWrappers, self).setUp()
         # Setup test dirs
         self.directory = tempfile.mkdtemp(prefix='tempest-unit')
+        self.addCleanup(shutil.rmtree, self.directory)
         self.test_dir = os.path.join(self.directory, 'tests')
         os.mkdir(self.test_dir)
         # Setup Test files
         self.testr_conf_file = os.path.join(self.directory, '.testr.conf')
         self.setup_cfg_file = os.path.join(self.directory, 'setup.cfg')
+        self.subunit_trace = os.path.join(self.directory, 'subunit-trace.py')
         self.passing_file = os.path.join(self.test_dir, 'test_passing.py')
         self.failing_file = os.path.join(self.test_dir, 'test_failing.py')
         self.init_file = os.path.join(self.test_dir, '__init__.py')
@@ -43,55 +45,48 @@ class TestWrappers(testtools.TestCase):
         shutil.copy('setup.py', self.setup_py)
         shutil.copy('tempest/tests/files/setup.cfg', self.setup_cfg_file)
         shutil.copy('tempest/tests/files/__init__.py', self.init_file)
+        shutil.copy('tools/subunit-trace.py', self.subunit_trace)
+        # copy over the pretty_tox scripts
+        shutil.copy('tools/pretty_tox.sh',
+                    os.path.join(self.directory, 'pretty_tox.sh'))
+        shutil.copy('tools/pretty_tox_serial.sh',
+                    os.path.join(self.directory, 'pretty_tox_serial.sh'))
+
+        self.stdout = StringIO.StringIO()
+        self.stderr = StringIO.StringIO()
+        # Change directory, run wrapper and check result
+        self.addCleanup(os.chdir, os.path.abspath(os.curdir))
+        os.chdir(self.directory)
+
+    def assertRunExit(self, cmd, expected):
+        p = subprocess.Popen(
+            "bash %s" % cmd, shell=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # wait in the general case is dangerous, however the amount of
+        # data coming back on those pipes is small enough it shouldn't be
+        # a problem.
+        p.wait()
+
+        self.assertEqual(
+            p.returncode, expected,
+            "Stdout: %s; Stderr: %s" % (p.stdout, p.stderr))
 
     def test_pretty_tox(self):
-        # Copy wrapper script and requirements:
-        pretty_tox = os.path.join(self.directory, 'pretty_tox.sh')
-        shutil.copy('tools/pretty_tox.sh', pretty_tox)
-        # Change directory, run wrapper and check result
-        self.addCleanup(os.chdir, os.path.abspath(os.curdir))
-        os.chdir(self.directory)
         # Git init is required for the pbr testr command. pbr requires a git
         # version or an sdist to work. so make the test directory a git repo
         # too.
-        subprocess.call(['git', 'init'])
-        exit_code = subprocess.call('sh pretty_tox.sh tests.passing',
-                                    shell=True, stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEqual(exit_code, 0)
+        subprocess.call(['git', 'init'], stderr=DEVNULL)
+        self.assertRunExit('pretty_tox.sh tests.passing', 0)
 
     def test_pretty_tox_fails(self):
-        # Copy wrapper script and requirements:
-        pretty_tox = os.path.join(self.directory, 'pretty_tox.sh')
-        shutil.copy('tools/pretty_tox.sh', pretty_tox)
-        # Change directory, run wrapper and check result
-        self.addCleanup(os.chdir, os.path.abspath(os.curdir))
-        os.chdir(self.directory)
         # Git init is required for the pbr testr command. pbr requires a git
         # version or an sdist to work. so make the test directory a git repo
         # too.
-        subprocess.call(['git', 'init'])
-        exit_code = subprocess.call('sh pretty_tox.sh', shell=True,
-                                    stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEqual(exit_code, 1)
+        subprocess.call(['git', 'init'], stderr=DEVNULL)
+        self.assertRunExit('pretty_tox.sh', 1)
 
     def test_pretty_tox_serial(self):
-        # Copy wrapper script and requirements:
-        pretty_tox = os.path.join(self.directory, 'pretty_tox_serial.sh')
-        shutil.copy('tools/pretty_tox_serial.sh', pretty_tox)
-        # Change directory, run wrapper and check result
-        self.addCleanup(os.chdir, os.path.abspath(os.curdir))
-        os.chdir(self.directory)
-        exit_code = subprocess.call('sh pretty_tox_serial.sh tests.passing',
-                                    shell=True, stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEqual(exit_code, 0)
+        self.assertRunExit('pretty_tox_serial.sh tests.passing', 0)
 
     def test_pretty_tox_serial_fails(self):
-        # Copy wrapper script and requirements:
-        pretty_tox = os.path.join(self.directory, 'pretty_tox_serial.sh')
-        shutil.copy('tools/pretty_tox_serial.sh', pretty_tox)
-        # Change directory, run wrapper and check result
-        self.addCleanup(os.chdir, os.path.abspath(os.curdir))
-        os.chdir(self.directory)
-        exit_code = subprocess.call('sh pretty_tox_serial.sh', shell=True,
-                                    stdout=DEVNULL, stderr=DEVNULL)
-        self.assertEqual(exit_code, 1)
+        self.assertRunExit('pretty_tox_serial.sh', 1)

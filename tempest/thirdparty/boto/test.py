@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,6 +17,7 @@ import contextlib
 import logging as orig_logging
 import os
 import re
+import six
 import urlparse
 
 import boto
@@ -28,15 +27,14 @@ from boto import s3
 import keystoneclient.exceptions
 
 import tempest.clients
-from tempest.common.utils.file_utils import have_effective_read_access
-import tempest.config
+from tempest.common.utils import file_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
-from tempest.thirdparty.boto.utils.wait import re_search_wait
-from tempest.thirdparty.boto.utils.wait import state_wait
-from tempest.thirdparty.boto.utils.wait import wait_exception
+from tempest.thirdparty.boto.utils import wait
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -48,19 +46,18 @@ def decision_maker():
     id_matcher = re.compile("[A-Za-z0-9]{20,}")
 
     def all_read(*args):
-        return all(map(have_effective_read_access, args))
+        return all(map(file_utils.have_effective_read_access, args))
 
-    config = tempest.config.TempestConfig()
-    materials_path = config.boto.s3_materials_path
-    ami_path = materials_path + os.sep + config.boto.ami_manifest
-    aki_path = materials_path + os.sep + config.boto.aki_manifest
-    ari_path = materials_path + os.sep + config.boto.ari_manifest
+    materials_path = CONF.boto.s3_materials_path
+    ami_path = materials_path + os.sep + CONF.boto.ami_manifest
+    aki_path = materials_path + os.sep + CONF.boto.aki_manifest
+    ari_path = materials_path + os.sep + CONF.boto.ari_manifest
 
     A_I_IMAGES_READY = all_read(ami_path, aki_path, ari_path)
     boto_logger = logging.getLogger('boto')
     level = boto_logger.logger.level
-    boto_logger.logger.setLevel(orig_logging.CRITICAL)  # suppress logging
-                                                        # for these
+    # suppress logging for boto
+    boto_logger.logger.setLevel(orig_logging.CRITICAL)
 
     def _cred_sub_check(connection_data):
         if not id_matcher.match(connection_data["aws_access_key_id"]):
@@ -70,7 +67,7 @@ def decision_maker():
         raise Exception("Unknown (Authentication?) Error")
     openstack = tempest.clients.Manager()
     try:
-        if urlparse.urlparse(config.boto.ec2_url).hostname is None:
+        if urlparse.urlparse(CONF.boto.ec2_url).hostname is None:
             raise Exception("Failed to get hostname from the ec2_url")
         ec2client = openstack.ec2api_client
         try:
@@ -87,7 +84,7 @@ def decision_maker():
         EC2_CAN_CONNECT_ERROR = str(exc)
 
     try:
-        if urlparse.urlparse(config.boto.s3_url).hostname is None:
+        if urlparse.urlparse(CONF.boto.s3_url).hostname is None:
             raise Exception("Failed to get hostname from the s3_url")
         s3client = openstack.s3_client
         try:
@@ -111,6 +108,9 @@ class BotoExceptionMatcher(object):
     CODE_RE = '.*'  # regexp makes sense in group match
 
     def match(self, exc):
+        """:returns: Retruns with an error string if not matches,
+               returns with None when matches.
+        """
         if not isinstance(exc, exception.BotoServerError):
             return "%r not an BotoServerError instance" % exc
         LOG.info("Status: %s , error_code: %s", exc.status, exc.error_code)
@@ -122,6 +122,7 @@ class BotoExceptionMatcher(object):
             return ("Error code (%s) does not match" +
                     "the expected re pattern \"%s\"") %\
                    (exc.error_code, self.CODE_RE)
+        return None
 
 
 class ClientError(BotoExceptionMatcher):
@@ -138,7 +139,7 @@ def _add_matcher_class(error_cls, error_data, base=BotoExceptionMatcher):
         The not leaf elements does wildcard match
     """
     # in error_code just literal and '.' characters expected
-    if not isinstance(error_data, basestring):
+    if not isinstance(error_data, six.string_types):
         (error_code, status_code) = map(str, error_data)
     else:
         status_code = None
@@ -148,7 +149,7 @@ def _add_matcher_class(error_cls, error_data, base=BotoExceptionMatcher):
     num_parts = len(parts)
     max_index = num_parts - 1
     add_cls = error_cls
-    for i_part in xrange(num_parts):
+    for i_part in six.moves.xrange(num_parts):
         part = parts[i_part]
         leaf = i_part == max_index
         if not leaf:
@@ -193,11 +194,11 @@ def friendly_function_call_str(call_able, *args, **kwargs):
 class BotoTestCase(tempest.test.BaseTestCase):
     """Recommended to use as base class for boto related test."""
 
-    conclusion = decision_maker()
-
     @classmethod
     def setUpClass(cls):
         super(BotoTestCase, cls).setUpClass()
+        cls.conclusion = decision_maker()
+        cls.os = cls.get_client_manager()
         # The trash contains cleanup functions and paramaters in tuples
         # (function, *args, **kwargs)
         cls._resource_trash_bin = {}
@@ -246,22 +247,23 @@ class BotoTestCase(tempest.test.BaseTestCase):
     @classmethod
     def tearDownClass(cls):
         """Calls the callables added by addResourceCleanUp,
-        when you overwire this function dont't forget to call this too.
+        when you overwrite this function don't forget to call this too.
         """
         fail_count = 0
         trash_keys = sorted(cls._resource_trash_bin, reverse=True)
         for key in trash_keys:
             (function, pos_args, kw_args) = cls._resource_trash_bin[key]
             try:
-                LOG.debug("Cleaning up: %s" %
-                          friendly_function_call_str(function, *pos_args,
-                                                     **kw_args))
+                func_name = friendly_function_call_str(function, *pos_args,
+                                                       **kw_args)
+                LOG.debug("Cleaning up: %s" % func_name)
                 function(*pos_args, **kw_args)
-            except BaseException as exc:
+            except BaseException:
                 fail_count += 1
-                LOG.exception(exc)
+                LOG.exception("Cleanup failed %s" % func_name)
             finally:
                 del cls._resource_trash_bin[key]
+        cls.clear_isolated_creds()
         super(BotoTestCase, cls).tearDownClass()
         # NOTE(afazekas): let the super called even on exceptions
         # The real exceptions already logged, if the super throws another,
@@ -315,7 +317,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             except ValueError:
                 return "_GONE"
             except exception.EC2ResponseError as exc:
-                if colusure_matcher.match(exc):
+                if colusure_matcher.match(exc) is None:
                     return "_GONE"
                 else:
                     raise
@@ -328,7 +330,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
             final_set = set((final_set,))
         final_set |= self.gone_set
         lfunction = self.get_lfunction_gone(lfunction)
-        state = state_wait(lfunction, final_set, valid_set)
+        state = wait.state_wait(lfunction, final_set, valid_set)
         self.assertIn(state, valid_set | self.gone_set)
         return state
 
@@ -378,8 +380,8 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 return "ASSOCIATED"
             return "DISASSOCIATED"
 
-        state = state_wait(_disassociate, "DISASSOCIATED",
-                           set(("ASSOCIATED", "DISASSOCIATED")))
+        state = wait.state_wait(_disassociate, "DISASSOCIATED",
+                                set(("ASSOCIATED", "DISASSOCIATED")))
         self.assertEqual(state, "DISASSOCIATED")
 
     def assertAddressReleasedWait(self, address):
@@ -392,7 +394,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                     return "DELETED"
             return "NOTDELETED"
 
-        state = state_wait(_address_delete, "DELETED")
+        state = wait.state_wait(_address_delete, "DELETED")
         self.assertEqual(state, "DELETED")
 
     def assertReSearch(self, regexp, string):
@@ -429,12 +431,12 @@ class BotoTestCase(tempest.test.BaseTestCase):
                     try:
                         bucket.delete_key(obj.key)
                         obj.close()
-                    except BaseException as exc:
-                        LOG.exception(exc)
+                    except BaseException:
+                        LOG.exception("Failed to delete key %s " % obj.key)
                         exc_num += 1
             conn.delete_bucket(bucket)
-        except BaseException as exc:
-            LOG.exception(exc)
+        except BaseException:
+            LOG.exception("Failed to destroy bucket %s " % bucket)
             exc_num += 1
         if exc_num:
             raise exceptions.TearDownException(num=exc_num)
@@ -451,7 +453,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
                 return "_GONE"
             except exception.EC2ResponseError as exc:
                 if cls.ec2_error_code.\
-                        client.InvalidInstanceID.NotFound.match(exc):
+                        client.InvalidInstanceID.NotFound.match(exc) is None:
                     return "_GONE"
                 # NOTE(afazekas): incorrect code,
                 # but the resource must be destoreyd
@@ -463,9 +465,9 @@ class BotoTestCase(tempest.test.BaseTestCase):
         for instance in reservation.instances:
             try:
                 instance.terminate()
-                re_search_wait(_instance_state, "_GONE")
-            except BaseException as exc:
-                LOG.exception(exc)
+                wait.re_search_wait(_instance_state, "_GONE")
+            except BaseException:
+                LOG.exception("Failed to terminate instance %s " % instance)
                 exc_num += 1
         if exc_num:
             raise exceptions.TearDownException(num=exc_num)
@@ -498,17 +500,18 @@ class BotoTestCase(tempest.test.BaseTestCase):
             try:
                 if volume.status != "available":
                     volume.detach(force=True)
-            except BaseException as exc:
-                LOG.exception(exc)
+            except BaseException:
+                LOG.exception("Failed to detach volume %s" % volume)
                 # exc_num += 1 "nonlocal" not in python2
             return volume.status
 
         try:
-            re_search_wait(_volume_state, "available")  # not validates status
+            wait.re_search_wait(_volume_state, "available")
+            # not validates status
             LOG.info(_volume_state())
             volume.delete()
-        except BaseException as exc:
-            LOG.exception(exc)
+        except BaseException:
+            LOG.exception("Failed to delete volume %s" % volume)
             exc_num += 1
         if exc_num:
             raise exceptions.TearDownException(num=exc_num)
@@ -521,7 +524,7 @@ class BotoTestCase(tempest.test.BaseTestCase):
         def _update():
             snapshot.update(validate=True)
 
-        wait_exception(_update)
+        wait.wait_exception(_update)
 
 
 # you can specify tuples if you want to specify the status pattern

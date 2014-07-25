@@ -12,18 +12,21 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
+from tempest import config
 import tempest.stress.stressaction as stressaction
+
+CONF = config.CONF
 
 
 class ServerCreateDestroyTest(stressaction.StressAction):
 
     def setUp(self, **kwargs):
-        self.image = self.manager.config.compute.image_ref
-        self.flavor = self.manager.config.compute.flavor_ref
+        self.image = CONF.compute.image_ref
+        self.flavor = CONF.compute.flavor_ref
 
     def run(self):
-        name = rand_name("instance")
+        name = data_utils.rand_name("instance")
         self.logger.info("creating %s" % name)
         resp, server = self.manager.servers_client.create_server(
             name, self.image, self.flavor)

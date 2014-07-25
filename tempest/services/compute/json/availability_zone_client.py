@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation.
 # All Rights Reserved.
 #
@@ -17,23 +15,29 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute.v2 import availability_zone as schema
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class AvailabilityZoneClientJSON(RestClient):
+class AvailabilityZoneClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AvailabilityZoneClientJSON, self).__init__(config, username,
-                                                         password, auth_url,
-                                                         tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(AvailabilityZoneClientJSON, self).__init__(
+            auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def get_availability_zone_list(self):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
+        self.validate_response(schema.get_availability_zone_list, resp, body)
         return resp, body['availabilityZoneInfo']
 
     def get_availability_zone_list_detail(self):
         resp, body = self.get('os-availability-zone/detail')
         body = json.loads(body)
+        self.validate_response(schema.get_availability_zone_list_detail, resp,
+                               body)
         return resp, body['availabilityZoneInfo']

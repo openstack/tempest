@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,21 +16,28 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
+from xml.etree import ElementTree as etree
+
+CONF = config.CONF
 
 
-class ContainerClient(RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ContainerClient, self).__init__(config, username, password,
-                                              auth_url, tenant_name)
+class ContainerClient(rest_client.RestClient):
+    def __init__(self, auth_provider):
+        super(ContainerClient, self).__init__(auth_provider)
 
-        # Overwrites json-specific header encoding in RestClient
+        # Overwrites json-specific header encoding in rest_client.RestClient
         self.headers = {}
-        self.service = self.config.object_storage.catalog_type
+        self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
-    def create_container(self, container_name, metadata=None,
-                         metadata_prefix='X-Container-Meta-'):
+    def create_container(
+            self, container_name,
+            metadata=None,
+            remove_metadata=None,
+            metadata_prefix='X-Container-Meta-',
+            remove_metadata_prefix='X-Remove-Container-Meta-'):
         """
            Creates a container, with optional metadata passed in as a
            dictionary
@@ -43,6 +48,9 @@ class ContainerClient(RestClient):
         if metadata is not None:
             for key in metadata:
                 headers[metadata_prefix + key] = metadata[key]
+        if remove_metadata is not None:
+            for key in remove_metadata:
+                headers[remove_metadata_prefix + key] = remove_metadata[key]
 
         resp, body = self.put(url, body=None, headers=headers)
         return resp, body
@@ -53,8 +61,12 @@ class ContainerClient(RestClient):
         resp, body = self.delete(url)
         return resp, body
 
-    def update_container_metadata(self, container_name, metadata,
-                                  metadata_prefix='X-Container-Meta-'):
+    def update_container_metadata(
+            self, container_name,
+            metadata=None,
+            remove_metadata=None,
+            metadata_prefix='X-Container-Meta-',
+            remove_metadata_prefix='X-Remove-Container-Meta-'):
         """Updates arbitrary metadata on container."""
         url = str(container_name)
         headers = {}
@@ -62,6 +74,9 @@ class ContainerClient(RestClient):
         if metadata is not None:
             for key in metadata:
                 headers[metadata_prefix + key] = metadata[key]
+        if remove_metadata is not None:
+            for key in remove_metadata:
+                headers[remove_metadata_prefix + key] = remove_metadata[key]
 
         resp, body = self.post(url, body=None, headers=headers)
         return resp, body
@@ -74,7 +89,7 @@ class ContainerClient(RestClient):
 
         if metadata is not None:
             for item in metadata:
-                headers[metadata_prefix + item] = 'x'
+                headers[metadata_prefix + item] = metadata[item]
 
         resp, body = self.post(url, body=None, headers=headers)
         return resp, body
@@ -84,8 +99,7 @@ class ContainerClient(RestClient):
         Retrieves container metadata headers
         """
         url = str(container_name)
-        headers = {"X-Storage-Token": self.token}
-        resp, body = self.head(url, headers=headers)
+        resp, body = self.head(url)
         return resp, body
 
     def list_all_container_objects(self, container, params=None):
@@ -104,8 +118,9 @@ class ContainerClient(RestClient):
             if 'marker' in params:
                 limit = params['marker']
 
-        resp, objlist = self.list_container_contents(container,
-                                                     params={'limit': limit})
+        resp, objlist = self.list_container_contents(
+            container,
+            params={'limit': limit, 'format': 'json'})
         return objlist
         """tmp = []
         for obj in objlist:
@@ -162,10 +177,13 @@ class ContainerClient(RestClient):
         """
 
         url = str(container)
-        url += '?format=%s' % self.format
         if params:
+            url += '?'
             url += '&%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url)
-        body = json.loads(body)
+        resp, body = self.get(url, headers={})
+        if params and params.get('format') == 'json':
+            body = json.loads(body)
+        elif params and params.get('format') == 'xml':
+            body = etree.fromstring(body)
         return resp, body

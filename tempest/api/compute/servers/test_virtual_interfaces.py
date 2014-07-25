@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,28 +16,27 @@
 import netaddr
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
 from tempest import config
-from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest import test
+
+CONF = config.CONF
 
 
-class VirtualInterfacesTestJSON(base.BaseComputeTest):
-    _interface = 'json'
-
-    CONF = config.TempestConfig()
+class VirtualInterfacesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
+        # This test needs a network and a subnet
+        cls.set_network_resources(network=True, subnet=True)
         super(VirtualInterfacesTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
-        resp, server = cls.create_server(wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
 
-    @skip_because(bug="1183436",
-                  condition=CONF.service_available.neutron)
-    @attr(type='gate')
+    @test.skip_because(bug="1183436",
+                       condition=CONF.service_available.neutron)
+    @test.attr(type='gate')
+    @test.services('network')
     def test_list_virtual_interfaces(self):
         # Positive test:Should be able to GET the virtual interfaces list
         # for a given server_id
@@ -53,15 +50,6 @@ class VirtualInterfacesTestJSON(base.BaseComputeTest):
             mac_address = virt_iface['mac_address']
             self.assertTrue(netaddr.valid_mac(mac_address),
                             "Invalid mac address detected.")
-
-    @attr(type=['negative', 'gate'])
-    def test_list_virtual_interfaces_invalid_server_id(self):
-        # Negative test: Should not be able to GET virtual interfaces
-        # for an invalid server_id
-        invalid_server_id = rand_name('!@#$%^&*()')
-        self.assertRaises(exceptions.NotFound,
-                          self.client.list_virtual_interfaces,
-                          invalid_server_id)
 
 
 class VirtualInterfacesTestXML(VirtualInterfacesTestJSON):

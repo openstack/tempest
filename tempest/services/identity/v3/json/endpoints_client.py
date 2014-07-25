@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,28 +14,20 @@
 #    under the License.
 
 import json
-import urlparse
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class EndPointClientJSON(RestClient):
+class EndPointClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(EndPointClientJSON, self).__init__(config,
-                                                 username, password,
-                                                 auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+    def __init__(self, auth_provider):
+        super(EndPointClientJSON, self).__init__(auth_provider)
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(
-            urlparse.urlparse(self.base_url).path, "/v3")
-        return super(EndPointClientJSON, self).request(method, url,
-                                                       headers=headers,
-                                                       body=body)
+        self.api_version = "v3"
 
     def list_endpoints(self):
         """GET endpoints."""
@@ -46,9 +36,17 @@ class EndPointClientJSON(RestClient):
         return resp, body['endpoints']
 
     def create_endpoint(self, service_id, interface, url, **kwargs):
-        """Create endpoint."""
+        """Create endpoint.
+
+        Normally this function wouldn't allow setting values that are not
+        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
+
+        """
         region = kwargs.get('region', None)
-        enabled = kwargs.get('enabled', None)
+        if 'force_enabled' in kwargs:
+            enabled = kwargs.get('force_enabled', None)
+        else:
+            enabled = kwargs.get('enabled', None)
         post_body = {
             'service_id': service_id,
             'interface': interface,
@@ -57,13 +55,18 @@ class EndPointClientJSON(RestClient):
             'enabled': enabled
         }
         post_body = json.dumps({'endpoint': post_body})
-        resp, body = self.post('endpoints', post_body, self.headers)
+        resp, body = self.post('endpoints', post_body)
         body = json.loads(body)
         return resp, body['endpoint']
 
     def update_endpoint(self, endpoint_id, service_id=None, interface=None,
-                        url=None, region=None, enabled=None):
-        """Updates an endpoint with given parameters."""
+                        url=None, region=None, enabled=None, **kwargs):
+        """Updates an endpoint with given parameters.
+
+        Normally this function wouldn't allow setting values that are not
+        allowed for 'enabled'. Use `force_enabled` to set a non-boolean.
+
+        """
         post_body = {}
         if service_id is not None:
             post_body['service_id'] = service_id
@@ -73,11 +76,12 @@ class EndPointClientJSON(RestClient):
             post_body['url'] = url
         if region is not None:
             post_body['region'] = region
-        if enabled is not None:
+        if 'force_enabled' in kwargs:
+            post_body['enabled'] = kwargs['force_enabled']
+        elif enabled is not None:
             post_body['enabled'] = enabled
         post_body = json.dumps({'endpoint': post_body})
-        resp, body = self.patch('endpoints/%s' % endpoint_id, post_body,
-                                self.headers)
+        resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)
         body = json.loads(body)
         return resp, body['endpoint']
 

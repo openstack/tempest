@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # All Rights Reserved.
 #
@@ -19,20 +17,22 @@ import urllib
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.common import rest_client
+from tempest.common import xml_utils
+from tempest import config
+
+CONF = config.CONF
 
 
-class TenantUsagesClientXML(RestClientXML):
+class TenantUsagesClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(TenantUsagesClientXML, self).__init__(config, username,
-                                                    password, auth_url,
-                                                    tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(TenantUsagesClientXML, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):
-        json = xml_to_json(node)
+        json = xml_utils.xml_to_json(node)
         return json
 
     def list_tenant_usages(self, params=None):
@@ -40,7 +40,7 @@ class TenantUsagesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         tenant_usage = self._parse_array(etree.fromstring(body))
         return resp, tenant_usage['tenant_usage']
 
@@ -49,6 +49,6 @@ class TenantUsagesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         tenant_usage = self._parse_array(etree.fromstring(body))
         return resp, tenant_usage

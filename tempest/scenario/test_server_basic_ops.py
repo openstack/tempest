@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,12 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest.scenario import utils as test_utils
+from tempest import test
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
+
+load_tests = test_utils.load_tests_input_scenario_utils
 
 
 class TestServerBasicOps(manager.OfficialClientTest):
@@ -37,76 +40,66 @@ class TestServerBasicOps(manager.OfficialClientTest):
      * Terminate the instance
     """
 
+    def setUp(self):
+        super(TestServerBasicOps, self).setUp()
+        # Setup image and flavor the test instance
+        # Support both configured and injected values
+        if not hasattr(self, 'image_ref'):
+            self.image_ref = CONF.compute.image_ref
+        if not hasattr(self, 'flavor_ref'):
+            self.flavor_ref = CONF.compute.flavor_ref
+        self.image_utils = test_utils.ImageUtils()
+        if not self.image_utils.is_flavor_enough(self.flavor_ref,
+                                                 self.image_ref):
+            raise self.skipException(
+                '{image} does not fit in {flavor}'.format(
+                    image=self.image_ref, flavor=self.flavor_ref
+                )
+            )
+        self.run_ssh = CONF.compute.run_ssh and \
+            self.image_utils.is_sshable_image(self.image_ref)
+        self.ssh_user = self.image_utils.ssh_user(self.image_ref)
+        LOG.debug('Starting test for i:{image}, f:{flavor}. '
+                  'Run ssh: {ssh}, user: {ssh_user}'.format(
+                      image=self.image_ref, flavor=self.flavor_ref,
+                      ssh=self.run_ssh, ssh_user=self.ssh_user))
+
     def add_keypair(self):
         self.keypair = self.create_keypair()
 
-    def create_security_group(self):
-        sg_name = rand_name('secgroup-smoke')
-        sg_desc = sg_name + " description"
-        self.secgroup = self.compute_client.security_groups.create(sg_name,
-                                                                   sg_desc)
-        self.assertEqual(self.secgroup.name, sg_name)
-        self.assertEqual(self.secgroup.description, sg_desc)
-        self.set_resource('secgroup', self.secgroup)
-
-        # Add rules to the security group
-        self.create_loginable_secgroup_rule(secgroup_id=self.secgroup.id)
-
     def boot_instance(self):
+        # Create server with image and flavor from input scenario
+        security_groups = [self.security_group.name]
         create_kwargs = {
-            'key_name': self.keypair.id
+            'key_name': self.keypair.id,
+            'security_groups': security_groups
         }
-        instance = self.create_server(create_kwargs=create_kwargs)
-        self.set_resource('instance', instance)
+        self.instance = self.create_server(image=self.image_ref,
+                                           flavor=self.flavor_ref,
+                                           create_kwargs=create_kwargs)
 
-    def pause_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Pausing instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.pause()
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'PAUSED')
+    def verify_ssh(self):
+        if self.run_ssh:
+            # Obtain a floating IP
+            floating_ip = self.compute_client.floating_ips.create()
+            self.addCleanup(self.delete_wrapper, floating_ip)
+            # Attach a floating IP
+            self.instance.add_floating_ip(floating_ip)
+            # Check ssh
+            try:
+                self.get_remote_client(
+                    server_or_ip=floating_ip.ip,
+                    username=self.image_utils.ssh_user(self.image_ref),
+                    private_key=self.keypair.private_key)
+            except Exception:
+                LOG.exception('ssh to server failed')
+                self._log_console_output()
+                raise
 
-    def unpause_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Unpausing instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.unpause()
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
-
-    def suspend_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Suspending instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.suspend()
-        self.status_timeout(self.compute_client.servers,
-                            instance_id, 'SUSPENDED')
-
-    def resume_server(self):
-        instance = self.get_resource('instance')
-        instance_id = instance.id
-        LOG.debug("Resuming instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.resume()
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
-
-    def terminate_instance(self):
-        instance = self.get_resource('instance')
-        instance.delete()
-        self.remove_resource('instance')
-
-    @services('compute', 'network')
+    @test.services('compute', 'network')
     def test_server_basicops(self):
         self.add_keypair()
-        self.create_security_group()
+        self.security_group = self._create_security_group_nova()
         self.boot_instance()
-        self.pause_server()
-        self.unpause_server()
-        self.suspend_server()
-        self.resume_server()
-        self.terminate_instance()
+        self.verify_ssh()
+        self.instance.delete()

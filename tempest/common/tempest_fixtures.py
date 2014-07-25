@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
@@ -15,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.openstack.common import lockutils
+from tempest.openstack.common.fixture import lockutils
 
 
 class LockFixture(lockutils.LockFixture):

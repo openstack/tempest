@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # All Rights Reserved.
 #
@@ -16,30 +14,23 @@
 #    under the License.
 
 import datetime
-
-from tempest.api.compute import base
-from tempest import exceptions
-from tempest.test import attr
 import time
 
+from tempest.api.compute import base
+from tempest import test
 
-class TenantUsagesTestJSON(base.BaseComputeAdminTest):
 
-    _interface = 'json'
+class TenantUsagesTestJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
     def setUpClass(cls):
         super(TenantUsagesTestJSON, cls).setUpClass()
         cls.adm_client = cls.os_adm.tenant_usages_client
         cls.client = cls.os.tenant_usages_client
-        cls.identity_client = cls._get_identity_admin_client()
-
-        resp, tenants = cls.identity_client.list_tenants()
-        cls.tenant_id = [tnt['id'] for tnt in tenants if tnt['name'] ==
-                         cls.client.tenant_name][0]
+        cls.tenant_id = cls.client.tenant_id
 
         # Create a server in the demo tenant
-        resp, server = cls.create_server(wait_until='ACTIVE')
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
         time.sleep(2)
 
         now = datetime.datetime.now()
@@ -51,7 +42,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
         # Returns formatted datetime
         return at.strftime('%Y-%m-%dT%H:%M:%S.%f')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_usage_all_tenants(self):
         # Get usage for all tenants
         params = {'start': self.start,
@@ -61,7 +52,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_usage_tenant(self):
         # Get usage for a specific tenant
         params = {'start': self.start,
@@ -72,7 +63,7 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_usage_tenant_with_non_admin_user(self):
         # Get usage for a specific tenant with non admin user
         params = {'start': self.start,
@@ -82,33 +73,6 @@ class TenantUsagesTestJSON(base.BaseComputeAdminTest):
 
         self.assertEqual(200, resp.status)
         self.assertEqual(len(tenant_usage), 8)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_usage_tenant_with_empty_tenant_id(self):
-        # Get usage for a specific tenant empty
-        params = {'start': self.start,
-                  'end': self.end}
-        self.assertRaises(exceptions.NotFound,
-                          self.adm_client.get_tenant_usage,
-                          '', params)
-
-    @attr(type=['negative', 'gate'])
-    def test_get_usage_tenant_with_invalid_date(self):
-        # Get usage for tenant with invalid date
-        params = {'start': self.end,
-                  'end': self.start}
-        self.assertRaises(exceptions.BadRequest,
-                          self.adm_client.get_tenant_usage,
-                          self.tenant_id, params)
-
-    @attr(type=['negative', 'gate'])
-    def test_list_usage_all_tenants_with_non_admin_user(self):
-        # Get usage for all tenants with non admin user
-        params = {'start': self.start,
-                  'end': self.end,
-                  'detailed': int(bool(True))}
-        self.assertRaises(exceptions.Unauthorized,
-                          self.client.list_tenant_usages, params)
 
 
 class TenantUsagesTestXML(TenantUsagesTestJSON):

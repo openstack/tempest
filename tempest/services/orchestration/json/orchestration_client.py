@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
@@ -21,17 +19,19 @@ import time
 import urllib
 
 from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class OrchestrationClient(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(OrchestrationClient, self).__init__(config, username, password,
-                                                  auth_url, tenant_name)
-        self.service = self.config.orchestration.catalog_type
-        self.build_interval = self.config.orchestration.build_interval
-        self.build_timeout = self.config.orchestration.build_timeout
+    def __init__(self, auth_provider):
+        super(OrchestrationClient, self).__init__(auth_provider)
+        self.service = CONF.orchestration.catalog_type
+        self.build_interval = CONF.orchestration.build_interval
+        self.build_timeout = CONF.orchestration.build_timeout
 
     def list_stacks(self, params=None):
         """Lists all stacks for a user."""
@@ -45,28 +45,32 @@ class OrchestrationClient(rest_client.RestClient):
         return resp, body['stacks']
 
     def create_stack(self, name, disable_rollback=True, parameters={},
-                     timeout_mins=60, template=None, template_url=None):
+                     timeout_mins=60, template=None, template_url=None,
+                     environment=None, files=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
             parameters,
             timeout_mins,
             template,
-            template_url)
+            template_url,
+            environment,
+            files)
         uri = 'stacks'
         resp, body = self.post(uri, headers=headers, body=body)
         return resp, body
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
                      parameters={}, timeout_mins=60, template=None,
-                     template_url=None):
+                     template_url=None, environment=None, files=None):
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
             parameters,
             timeout_mins,
             template,
-            template_url)
+            template_url,
+            environment)
 
         uri = "stacks/%s" % stack_identifier
         resp, body = self.put(uri, headers=headers, body=body)
@@ -74,13 +78,16 @@ class OrchestrationClient(rest_client.RestClient):
 
     def _prepare_update_create(self, name, disable_rollback=True,
                                parameters={}, timeout_mins=60,
-                               template=None, template_url=None):
+                               template=None, template_url=None,
+                               environment=None, files=None):
         post_body = {
             "stack_name": name,
             "disable_rollback": disable_rollback,
             "parameters": parameters,
             "timeout_mins": timeout_mins,
-            "template": "HeatTemplateFormatVersion: '2012-12-12'\n"
+            "template": "HeatTemplateFormatVersion: '2012-12-12'\n",
+            "environment": environment,
+            "files": files
         }
         if template:
             post_body['template'] = template
@@ -90,7 +97,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         # Password must be provided on stack create so that heat
         # can perform future operations on behalf of the user
-        headers = dict(self.headers)
+        headers = self.get_headers()
         headers['X-Auth-Key'] = self.password
         headers['X-Auth-User'] = self.user
         return headers, body
@@ -101,6 +108,20 @@ class OrchestrationClient(rest_client.RestClient):
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['stack']
+
+    def suspend_stack(self, stack_identifier):
+        """Suspend a stack."""
+        url = 'stacks/%s/actions' % stack_identifier
+        body = {'suspend': None}
+        resp, body = self.post(url, json.dumps(body))
+        return resp, body
+
+    def resume_stack(self, stack_identifier):
+        """Resume a stack."""
+        url = 'stacks/%s/actions' % stack_identifier
+        body = {'resume': None}
+        resp, body = self.post(url, json.dumps(body))
+        return resp, body
 
     def list_resources(self, stack_identifier):
         """Returns the details of a single resource."""
@@ -140,7 +161,8 @@ class OrchestrationClient(rest_client.RestClient):
                 if resource_status == status:
                     return
                 if fail_regexp.search(resource_status):
-                    raise exceptions.StackBuildErrorException(
+                    raise exceptions.StackResourceBuildErrorException(
+                        resource_name=resource_name,
                         stack_identifier=stack_identifier,
                         resource_status=resource_status,
                         resource_status_reason=body['resource_status_reason'])
@@ -163,7 +185,7 @@ class OrchestrationClient(rest_client.RestClient):
             stack_name = body['stack_name']
             stack_status = body['stack_status']
             if stack_status == status:
-                return
+                return body
             if fail_regexp.search(stack_status):
                 raise exceptions.StackBuildErrorException(
                     stack_identifier=stack_identifier,
@@ -218,7 +240,7 @@ class OrchestrationClient(rest_client.RestClient):
     def _validate_template(self, post_body):
         """Returns the validation request result."""
         post_body = json.dumps(post_body)
-        resp, body = self.post('validate', post_body, self.headers)
+        resp, body = self.post('validate', post_body)
         body = json.loads(body)
         return resp, body
 
@@ -237,3 +259,140 @@ class OrchestrationClient(rest_client.RestClient):
             'parameters': parameters,
         }
         return self._validate_template(post_body)
+
+    def create_software_config(self, name=None, config=None, group=None,
+                               inputs=None, outputs=None, options=None):
+        headers, body = self._prep_software_config_create(
+            name, config, group, inputs, outputs, options)
+
+        url = 'software_configs'
+        resp, body = self.post(url, headers=headers, body=body)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_config(self, conf_id):
+        """Returns a software configuration resource."""
+        url = 'software_configs/%s' % str(conf_id)
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def delete_software_config(self, conf_id):
+        """Deletes a specific software configuration."""
+        url = 'software_configs/%s' % str(conf_id)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp)
+
+    def create_software_deploy(self, server_id=None, config_id=None,
+                               action=None, status=None,
+                               input_values=None, output_values=None,
+                               status_reason=None, signal_transport=None):
+        """Creates or updates a software deployment."""
+        headers, body = self._prep_software_deploy_update(
+            None, server_id, config_id, action, status, input_values,
+            output_values, status_reason, signal_transport)
+
+        url = 'software_deployments'
+        resp, body = self.post(url, headers=headers, body=body)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def update_software_deploy(self, deploy_id=None, server_id=None,
+                               config_id=None, action=None, status=None,
+                               input_values=None, output_values=None,
+                               status_reason=None, signal_transport=None):
+        """Creates or updates a software deployment."""
+        headers, body = self._prep_software_deploy_update(
+            deploy_id, server_id, config_id, action, status, input_values,
+            output_values, status_reason, signal_transport)
+
+        url = 'software_deployments/%s' % str(deploy_id)
+        resp, body = self.put(url, headers=headers, body=body)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_deploy_list(self):
+        """Returns a list of all deployments."""
+        url = 'software_deployments'
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_deploy(self, deploy_id):
+        """Returns a specific software deployment."""
+        url = 'software_deployments/%s' % str(deploy_id)
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def get_software_deploy_meta(self, server_id):
+        """Return a config metadata for a specific server."""
+        url = 'software_deployments/metadata/%s' % server_id
+        resp, body = self.get(url)
+        self.expected_success(200, resp)
+        body = json.loads(body)
+        return body
+
+    def delete_software_deploy(self, deploy_id):
+        """Deletes a specific software deployment."""
+        url = 'software_deployments/%s' % str(deploy_id)
+        resp, _ = self.delete(url)
+        self.expected_success(204, resp)
+
+    def _prep_software_config_create(self, name=None, conf=None, group=None,
+                                     inputs=None, outputs=None, options=None):
+        """Prepares a software configuration body."""
+        post_body = {}
+        if name is not None:
+            post_body["name"] = name
+        if conf is not None:
+            post_body["config"] = conf
+        if group is not None:
+            post_body["group"] = group
+        if inputs is not None:
+            post_body["inputs"] = inputs
+        if outputs is not None:
+            post_body["outputs"] = outputs
+        if options is not None:
+            post_body["options"] = options
+        body = json.dumps(post_body)
+
+        headers = self.get_headers()
+        return headers, body
+
+    def _prep_software_deploy_update(self, deploy_id=None, server_id=None,
+                                     config_id=None, action=None, status=None,
+                                     input_values=None, output_values=None,
+                                     status_reason=None,
+                                     signal_transport=None):
+        """Prepares a deployment create or update (if an id was given)."""
+        post_body = {}
+
+        if deploy_id is not None:
+            post_body["id"] = deploy_id
+        if server_id is not None:
+            post_body["server_id"] = server_id
+        if config_id is not None:
+            post_body["config_id"] = config_id
+        if action is not None:
+            post_body["action"] = action
+        if status is not None:
+            post_body["status"] = status
+        if input_values is not None:
+            post_body["input_values"] = input_values
+        if output_values is not None:
+            post_body["output_values"] = output_values
+        if status_reason is not None:
+            post_body["status_reason"] = status_reason
+        if signal_transport is not None:
+            post_body["signal_transport"] = signal_transport
+        body = json.dumps(post_body)
+
+        headers = self.get_headers()
+        return headers, body

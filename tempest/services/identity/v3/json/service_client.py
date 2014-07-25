@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,27 +14,20 @@
 #    under the License.
 
 import json
-from urlparse import urlparse
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class ServiceClientJSON(RestClient):
+class ServiceClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ServiceClientJSON, self).__init__(config, username, password,
-                                                auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+    def __init__(self, auth_provider):
+        super(ServiceClientJSON, self).__init__(auth_provider)
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(ServiceClientJSON, self).request(method, url,
-                                                      headers=headers,
-                                                      body=body)
+        self.api_version = "v3"
 
     def update_service(self, service_id, **kwargs):
         """Updates a service."""
@@ -50,8 +41,8 @@ class ServiceClientJSON(RestClient):
             'name': name
         }
         patch_body = json.dumps({'service': patch_body})
-        resp, body = self.patch('services/%s' % service_id,
-                                patch_body, self.headers)
+        resp, body = self.patch('services/%s' % service_id, patch_body)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['service']
 
@@ -59,5 +50,26 @@ class ServiceClientJSON(RestClient):
         """Get Service."""
         url = 'services/%s' % service_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['service']
+
+    def create_service(self, serv_type, name=None, description=None,
+                       enabled=True):
+        body_dict = {
+            "name": name,
+            'type': serv_type,
+            'enabled': enabled,
+            "description": description,
+        }
+        body = json.dumps({'service': body_dict})
+        resp, body = self.post("services", body)
+        self.expected_success(201, resp.status)
+        body = json.loads(body)
+        return resp, body["service"]
+
+    def delete_service(self, serv_id):
+        url = "services/" + serv_id
+        resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
+        return resp, body

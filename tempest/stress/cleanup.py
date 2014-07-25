@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 Quanta Research Cambridge, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +42,16 @@ def cleanup():
     for k in keypairs:
         try:
             admin_manager.keypairs_client.delete_keypair(k['name'])
+        except Exception:
+            pass
+
+    secgrp_client = admin_manager.security_groups_client
+    _, secgrp = secgrp_client.list_security_groups({"all_tenants": True})
+    secgrp_del = [grp for grp in secgrp if grp['name'] != 'default']
+    LOG.info("Cleanup::remove %s Security Group" % len(secgrp_del))
+    for g in secgrp_del:
+        try:
+            secgrp_client.delete_security_group(g['id'])
         except Exception:
             pass
 

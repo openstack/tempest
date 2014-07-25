@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation.
 # All Rights Reserved.
 #
@@ -17,22 +15,23 @@
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
+from tempest.common import xml_utils
+from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 
-class AggregatesClientXML(RestClientXML):
+class AggregatesClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AggregatesClientXML, self).__init__(config, username, password,
-                                                  auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(AggregatesClientXML, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def _format_aggregate(self, g):
-        agg = xml_to_json(g)
+        agg = xml_utils.xml_to_json(g)
         aggregate = {}
         for key, value in agg.items():
             if key == 'hosts':
@@ -50,43 +49,43 @@ class AggregatesClientXML(RestClientXML):
 
     def list_aggregates(self):
         """Get aggregate list."""
-        resp, body = self.get("os-aggregates", self.headers)
+        resp, body = self.get("os-aggregates")
         aggregates = self._parse_array(etree.fromstring(body))
         return resp, aggregates
 
     def get_aggregate(self, aggregate_id):
         """Get details of the given aggregate."""
-        resp, body = self.get("os-aggregates/%s" % str(aggregate_id),
-                              self.headers)
+        resp, body = self.get("os-aggregates/%s" % str(aggregate_id))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def create_aggregate(self, name, availability_zone=None):
         """Creates a new aggregate."""
-        post_body = Element("aggregate",
-                            name=name,
-                            availability_zone=availability_zone)
+        if availability_zone is not None:
+            post_body = xml_utils.Element("aggregate", name=name,
+                                          availability_zone=availability_zone)
+        else:
+            post_body = xml_utils.Element("aggregate", name=name)
         resp, body = self.post('os-aggregates',
-                               str(Document(post_body)),
-                               self.headers)
+                               str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def update_aggregate(self, aggregate_id, name, availability_zone=None):
         """Update a aggregate."""
-        put_body = Element("aggregate",
-                           name=name,
-                           availability_zone=availability_zone)
+        if availability_zone is not None:
+            put_body = xml_utils.Element("aggregate", name=name,
+                                         availability_zone=availability_zone)
+        else:
+            put_body = xml_utils.Element("aggregate", name=name)
         resp, body = self.put('os-aggregates/%s' % str(aggregate_id),
-                              str(Document(put_body)),
-                              self.headers)
+                              str(xml_utils.Document(put_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def delete_aggregate(self, aggregate_id):
         """Deletes the given aggregate."""
-        return self.delete("os-aggregates/%s" % str(aggregate_id),
-                           self.headers)
+        return self.delete("os-aggregates/%s" % str(aggregate_id))
 
     def is_resource_deleted(self, id):
         try:
@@ -97,18 +96,30 @@ class AggregatesClientXML(RestClientXML):
 
     def add_host(self, aggregate_id, host):
         """Adds a host to the given aggregate."""
-        post_body = Element("add_host", host=host)
+        post_body = xml_utils.Element("add_host", host=host)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)),
-                               self.headers)
+                               str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate
 
     def remove_host(self, aggregate_id, host):
         """Removes a host from the given aggregate."""
-        post_body = Element("remove_host", host=host)
+        post_body = xml_utils.Element("remove_host", host=host)
         resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
-                               str(Document(post_body)),
-                               self.headers)
+                               str(xml_utils.Document(post_body)))
+        aggregate = self._format_aggregate(etree.fromstring(body))
+        return resp, aggregate
+
+    def set_metadata(self, aggregate_id, meta):
+        """Replaces the aggregate's existing metadata with new metadata."""
+        post_body = xml_utils.Element("set_metadata")
+        metadata = xml_utils.Element("metadata")
+        post_body.append(metadata)
+        for k, v in meta.items():
+            meta = xml_utils.Element(k)
+            meta.append(xml_utils.Text(v))
+            metadata.append(meta)
+        resp, body = self.post('os-aggregates/%s/action' % aggregate_id,
+                               str(xml_utils.Document(post_body)))
         aggregate = self._format_aggregate(etree.fromstring(body))
         return resp, aggregate

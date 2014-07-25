@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,28 +13,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.volume.base import BaseVolumeTest
-from tempest.common.utils.data_utils import rand_name
-from tempest.services.volume.json.admin import volume_types_client
-from tempest.test import attr
+from tempest.api.volume import base
+from tempest.common.utils import data_utils
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
-class VolumeTypesTest(BaseVolumeTest):
+class VolumeTypesTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
-
-    @classmethod
-    def setUpClass(cls):
-        super(VolumeTypesTest, cls).setUpClass()
-        adm_user = cls.config.identity.admin_username
-        adm_pass = cls.config.identity.admin_password
-        adm_tenant = cls.config.identity.admin_tenant_name
-        auth_url = cls.config.identity.uri
-
-        cls.client = volume_types_client.VolumeTypesClientJSON(cls.config,
-                                                               adm_user,
-                                                               adm_pass,
-                                                               auth_url,
-                                                               adm_tenant)
 
     def _delete_volume(self, volume_id):
         resp, _ = self.volumes_client.delete_volume(volume_id)
@@ -47,21 +33,21 @@ class VolumeTypesTest(BaseVolumeTest):
         resp, _ = self.client.delete_volume_type(volume_type_id)
         self.assertEqual(202, resp.status)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_type_list(self):
         # List Volume types.
         resp, body = self.client.list_volume_types()
         self.assertEqual(200, resp.status)
         self.assertIsInstance(body, list)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_get_delete_volume_with_volume_type_and_extra_specs(self):
         # Create/get/delete volume with volume_type and extra spec.
         volume = {}
-        vol_name = rand_name("volume-")
-        vol_type_name = rand_name("volume-type-")
-        proto = self.config.volume.storage_protocol
-        vendor = self.config.volume.vendor_name
+        vol_name = data_utils.rand_name("volume-")
+        vol_type_name = data_utils.rand_name("volume-type-")
+        proto = CONF.volume.storage_protocol
+        vendor = CONF.volume.vendor_name
         extra_specs = {"storage_protocol": proto,
                        "vendor_name": vendor}
         body = {}
@@ -98,32 +84,15 @@ class VolumeTypesTest(BaseVolumeTest):
                          'The fetched Volume is different '
                          'from the created Volume')
 
-    @attr(type='smoke')
-    def test_volume_type_create_delete(self):
-        # Create/Delete volume type.
-        name = rand_name("volume-type-")
-        extra_specs = {"storage_protocol": "iSCSI",
-                       "vendor_name": "Open Source"}
-        resp, body = self.client.create_volume_type(
-            name,
-            extra_specs=extra_specs)
-        self.assertEqual(200, resp.status)
-        self.assertIn('id', body)
-        self.addCleanup(self._delete_volume_type, body['id'])
-        self.assertIn('name', body)
-        self.assertEqual(body['name'], name,
-                         "The created volume_type name is not equal "
-                         "to the requested name")
-        self.assertTrue(body['id'] is not None,
-                        "Field volume_type id is empty or not found.")
-
-    @attr(type='smoke')
-    def test_volume_type_create_get(self):
+    @test.attr(type='smoke')
+    def test_volume_type_create_get_delete(self):
         # Create/get volume type.
         body = {}
-        name = rand_name("volume-type-")
-        extra_specs = {"storage_protocol": "iSCSI",
-                       "vendor_name": "Open Source"}
+        name = data_utils.rand_name("volume-type-")
+        proto = CONF.volume.storage_protocol
+        vendor = CONF.volume.vendor_name
+        extra_specs = {"storage_protocol": proto,
+                       "vendor_name": vendor}
         resp, body = self.client.create_volume_type(
             name,
             extra_specs=extra_specs)
@@ -147,3 +116,51 @@ class VolumeTypesTest(BaseVolumeTest):
         self.assertEqual(extra_specs, fetched_volume_type['extra_specs'],
                          'The fetched Volume_type is different '
                          'from the created Volume_type')
+
+    @test.attr(type='smoke')
+    def test_volume_type_encryption_create_get_delete(self):
+        # Create/get/delete encryption type.
+        provider = "LuksEncryptor"
+        control_location = "front-end"
+        name = data_utils.rand_name("volume-type-")
+        resp, body = self.client.create_volume_type(name)
+        self.assertEqual(200, resp.status)
+        self.addCleanup(self._delete_volume_type, body['id'])
+
+        # Create encryption type
+        resp, encryption_type = self.client.create_encryption_type(
+            body['id'], provider=provider,
+            control_location=control_location)
+        self.assertEqual(200, resp.status)
+        self.assertIn('volume_type_id', encryption_type)
+        self.assertEqual(provider, encryption_type['provider'],
+                         "The created encryption_type provider is not equal "
+                         "to the requested provider")
+        self.assertEqual(control_location, encryption_type['control_location'],
+                         "The created encryption_type control_location is not "
+                         "equal to the requested control_location")
+
+        # Get encryption type
+        resp, fetched_encryption_type = self.client.get_encryption_type(
+            encryption_type['volume_type_id'])
+        self.assertEqual(200, resp.status)
+        self.assertEqual(provider,
+                         fetched_encryption_type['provider'],
+                         'The fetched encryption_type provider is different '
+                         'from the created encryption_type')
+        self.assertEqual(control_location,
+                         fetched_encryption_type['control_location'],
+                         'The fetched encryption_type control_location is '
+                         'different from the created encryption_type')
+
+        # Delete encryption type
+        resp, _ = self.client.delete_encryption_type(
+            encryption_type['volume_type_id'])
+        self.assertEqual(202, resp.status)
+        resource = {"id": encryption_type['volume_type_id'],
+                    "type": "encryption-type"}
+        self.client.wait_for_resource_deletion(resource)
+        resp, deleted_encryption_type = self.client.get_encryption_type(
+            encryption_type['volume_type_id'])
+        self.assertEqual(200, resp.status)
+        self.assertEmpty(deleted_encryption_type)

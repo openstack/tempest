@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2013 IBM Corp.
 # All Rights Reserved.
 #
@@ -23,20 +21,23 @@ import time
 import urllib
 
 from tempest.common import glance_http
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest.common.utils import misc as misc_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
-class ImageClientJSON(RestClient):
+class ImageClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ImageClientJSON, self).__init__(config, username, password,
-                                              auth_url, tenant_name)
-        self.service = self.config.images.catalog_type
-        self.http = self._get_http()
+    def __init__(self, auth_provider):
+        super(ImageClientJSON, self).__init__(auth_provider)
+        self.service = CONF.image.catalog_type
+        self._http = None
 
     def _image_meta_from_headers(self, headers):
         meta = {'properties': {}}
@@ -104,13 +105,9 @@ class ImageClientJSON(RestClient):
             return None
 
     def _get_http(self):
-        token, endpoint = self.keystone_auth(self.user,
-                                             self.password,
-                                             self.auth_url,
-                                             self.service,
-                                             self.tenant_name)
-        dscv = self.config.identity.disable_ssl_certificate_validation
-        return glance_http.HTTPClient(endpoint=endpoint, token=token,
+        dscv = CONF.identity.disable_ssl_certificate_validation
+        return glance_http.HTTPClient(auth_provider=self.auth_provider,
+                                      filters=self.filters,
                                       insecure=dscv)
 
     def _create_with_data(self, headers, data):
@@ -129,6 +126,13 @@ class ImageClientJSON(RestClient):
                             resp, body_iter)
         body = json.loads(''.join([c for c in body_iter]))
         return resp, body['image']
+
+    @property
+    def http(self):
+        if self._http is None:
+            if CONF.service_available.glance:
+                self._http = self._get_http()
+        return self._http
 
     def create_image(self, name, container_format, disk_format, **kwargs):
         params = {
@@ -150,11 +154,12 @@ class ImageClientJSON(RestClient):
             return self._create_with_data(headers, kwargs.get('data'))
 
         resp, body = self.post('v1/images', None, headers)
+        self.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body['image']
 
     def update_image(self, image_id, name=None, container_format=None,
-                     data=None):
+                     data=None, properties=None):
         params = {}
         headers = {}
         if name is not None:
@@ -163,6 +168,9 @@ class ImageClientJSON(RestClient):
         if container_format is not None:
             params['container_format'] = container_format
 
+        if properties is not None:
+            params['properties'] = properties
+
         headers.update(self._image_meta_to_headers(params))
 
         if data is not None:
@@ -170,12 +178,15 @@ class ImageClientJSON(RestClient):
 
         url = 'v1/images/%s' % image_id
         resp, body = self.put(url, data, headers)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['image']
 
     def delete_image(self, image_id):
         url = 'v1/images/%s' % image_id
-        self.delete(url)
+        resp, body = self.delete(url)
+        self.expected_success(200, resp.status)
+        return resp, body
 
     def image_list(self, **kwargs):
         url = 'v1/images'
@@ -184,28 +195,42 @@ class ImageClientJSON(RestClient):
             url += '?%s' % urllib.urlencode(kwargs)
 
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['images']
 
-    def image_list_detail(self, **kwargs):
+    def image_list_detail(self, properties=dict(), changes_since=None,
+                          **kwargs):
         url = 'v1/images/detail'
+
+        params = {}
+        for key, value in properties.items():
+            params['property-%s' % key] = value
+
+        kwargs.update(params)
+
+        if changes_since is not None:
+            kwargs['changes-since'] = changes_since
 
         if len(kwargs) > 0:
             url += '?%s' % urllib.urlencode(kwargs)
 
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['images']
 
     def get_image_meta(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, __ = self.head(url)
+        self.expected_success(200, resp.status)
         body = self._image_meta_from_headers(resp)
         return resp, body
 
     def get_image(self, image_id):
         url = 'v1/images/%s' % image_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def is_resource_deleted(self, id):
@@ -218,12 +243,14 @@ class ImageClientJSON(RestClient):
     def get_image_membership(self, image_id):
         url = 'v1/images/%s/members' % image_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
     def get_shared_images(self, member_id):
         url = 'v1/shared-images/%s' % member_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -232,20 +259,15 @@ class ImageClientJSON(RestClient):
         body = None
         if can_share:
             body = json.dumps({'member': {'can_share': True}})
-        resp, __ = self.put(url, body, self.headers)
+        resp, __ = self.put(url, body)
+        self.expected_success(204, resp.status)
         return resp
 
     def delete_member(self, member_id, image_id):
         url = 'v1/images/%s/members/%s' % (image_id, member_id)
         resp, __ = self.delete(url)
+        self.expected_success(204, resp.status)
         return resp
-
-    def replace_membership_list(self, image_id, member_list):
-        url = 'v1/images/%s/members' % image_id
-        body = json.dumps({'membership': member_list})
-        resp, data = self.put(url, body, self.headers)
-        data = json.loads(data)
-        return resp, data
 
     # NOTE(afazekas): just for the wait function
     def _get_image_status(self, image_id):
@@ -265,14 +287,20 @@ class ImageClientJSON(RestClient):
                 LOG.info('Value transition from "%s" to "%s"'
                          'in %d second(s).', old_value,
                          value, dtime)
-            if (value == status):
+            if value == status:
                 return value
 
+            if value == 'killed':
+                raise exceptions.ImageKilledException(image_id=image_id,
+                                                      status=status)
             if dtime > self.build_timeout:
                 message = ('Time Limit Exceeded! (%ds)'
                            'while waiting for %s, '
                            'but we got %s.' %
                            (self.build_timeout, status, value))
+                caller = misc_utils.find_test_caller()
+                if caller:
+                    message = '(%s) %s' % (caller, message)
                 raise exceptions.TimeoutException(message)
             time.sleep(self.build_interval)
             old_value = value

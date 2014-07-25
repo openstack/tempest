@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,13 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from testtools import matchers
+
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
-from tempest.test import services
+from tempest.common.utils import data_utils
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
-class VolumesGetTest(base.BaseVolumeTest):
+class VolumesGetTest(base.BaseVolumeV1Test):
     _interface = "json"
 
     @classmethod
@@ -37,7 +39,7 @@ class VolumesGetTest(base.BaseVolumeTest):
     def _is_true(self, val):
         # NOTE(jdg): Temporary conversion method to get cinder patch
         # merged.  Then we'll make this strict again and
-        #specifically check "true" or "false"
+        # specifically check "true" or "false"
         if val in ['true', 'True', True]:
             return True
         else:
@@ -46,11 +48,10 @@ class VolumesGetTest(base.BaseVolumeTest):
     def _volume_create_get_update_delete(self, **kwargs):
         # Create a volume, Get it's details and Delete the volume
         volume = {}
-        v_name = rand_name('Volume')
+        v_name = data_utils.rand_name('Volume')
         metadata = {'Type': 'Test'}
         # Create a volume
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
+        resp, volume = self.client.create_volume(display_name=v_name,
                                                  metadata=metadata,
                                                  **kwargs)
         self.assertEqual(200, resp.status)
@@ -68,16 +69,16 @@ class VolumesGetTest(base.BaseVolumeTest):
         self.assertEqual(200, resp.status)
         self.assertEqual(v_name,
                          fetched_volume['display_name'],
-                         'The fetched Volume is different '
+                         'The fetched Volume name is different '
                          'from the created Volume')
         self.assertEqual(volume['id'],
                          fetched_volume['id'],
-                         'The fetched Volume is different '
+                         'The fetched Volume id is different '
                          'from the created Volume')
-        self.assertEqual(metadata,
-                         fetched_volume['metadata'],
-                         'The fetched Volume is different '
-                         'from the created Volume')
+        self.assertThat(fetched_volume['metadata'].items(),
+                        matchers.ContainsAll(metadata.items()),
+                        'The fetched Volume metadata misses data '
+                        'from the created Volume')
 
         # NOTE(jdg): Revert back to strict true/false checking
         # after fix for bug #1227837 merges
@@ -88,7 +89,13 @@ class VolumesGetTest(base.BaseVolumeTest):
             self.assertEqual(boot_flag, False)
 
         # Update Volume
-        new_v_name = rand_name('new-Volume')
+        # Test volume update when display_name is same with original value
+        resp, update_volume = \
+            self.client.update_volume(volume['id'],
+                                      display_name=v_name)
+        self.assertEqual(200, resp.status)
+        # Test volume update when display_name is new
+        new_v_name = data_utils.rand_name('new-Volume')
         new_desc = 'This is the new description of volume'
         resp, update_volume = \
             self.client.update_volume(volume['id'],
@@ -104,7 +111,30 @@ class VolumesGetTest(base.BaseVolumeTest):
         self.assertEqual(volume['id'], updated_volume['id'])
         self.assertEqual(new_v_name, updated_volume['display_name'])
         self.assertEqual(new_desc, updated_volume['display_description'])
-        self.assertEqual(metadata, updated_volume['metadata'])
+        self.assertThat(updated_volume['metadata'].items(),
+                        matchers.ContainsAll(metadata.items()),
+                        'The fetched Volume metadata misses data '
+                        'from the created Volume')
+        # Test volume create when display_name is none and display_description
+        # contains specific characters,
+        # then test volume update if display_name is duplicated
+        new_volume = {}
+        new_v_desc = data_utils.rand_name('@#$%^* description')
+        resp, new_volume = \
+            self.client.create_volume(
+                size=1,
+                display_description=new_v_desc,
+                availability_zone=volume['availability_zone'])
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', new_volume)
+        self.addCleanup(self._delete_volume, new_volume['id'])
+        self.client.wait_for_volume_status(new_volume['id'], 'available')
+        resp, update_volume = \
+            self.client.update_volume(
+                new_volume['id'],
+                display_name=volume['display_name'],
+                display_description=volume['display_description'])
+        self.assertEqual(200, resp.status)
 
         # NOTE(jdg): Revert back to strict true/false checking
         # after fix for bug #1227837 merges
@@ -114,39 +144,18 @@ class VolumesGetTest(base.BaseVolumeTest):
         if 'imageRef' not in kwargs:
             self.assertEqual(boot_flag, False)
 
-    @attr(type='gate')
-    def test_volume_get_metadata_none(self):
-        # Create a volume without passing metadata, get details, and delete
-        volume = {}
-        v_name = rand_name('Volume-')
-        # Create a volume without metadata
-        resp, volume = self.client.create_volume(size=1,
-                                                 display_name=v_name,
-                                                 metadata={})
-        self.assertEqual(200, resp.status)
-        self.assertIn('id', volume)
-        self.addCleanup(self._delete_volume, volume['id'])
-        self.assertIn('display_name', volume)
-        self.client.wait_for_volume_status(volume['id'], 'available')
-        # GET Volume
-        resp, fetched_volume = self.client.get_volume(volume['id'])
-        self.assertEqual(200, resp.status)
-        self.assertEqual(fetched_volume['metadata'], {})
-
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_create_get_update_delete(self):
         self._volume_create_get_update_delete()
 
-    @attr(type='smoke')
-    @services('image')
+    @test.attr(type='smoke')
+    @test.services('image')
     def test_volume_create_get_update_delete_from_image(self):
-        self._volume_create_get_update_delete(imageRef=self.
-                                              config.compute.image_ref)
+        self._volume_create_get_update_delete(imageRef=CONF.compute.image_ref)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_create_get_update_delete_as_clone(self):
-        origin = self.create_volume(size=1,
-                                    display_name="Volume Origin")
+        origin = self.create_volume()
         self._volume_create_get_update_delete(source_volid=origin['id'])
 
 

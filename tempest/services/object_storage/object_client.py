@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,25 +13,38 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import httplib
+import urllib
+import urlparse
+
 from tempest.common import http
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
 
+CONF = config.CONF
 
-class ObjectClient(RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ObjectClient, self).__init__(config, username, password,
-                                           auth_url, tenant_name)
 
-        self.service = self.config.object_storage.catalog_type
+class ObjectClient(rest_client.RestClient):
+    def __init__(self, auth_provider):
+        super(ObjectClient, self).__init__(auth_provider)
 
-    def create_object(self, container, object_name, data):
+        self.service = CONF.object_storage.catalog_type
+
+    def create_object(self, container, object_name, data,
+                      params=None, metadata=None):
         """Create storage object."""
 
-        headers = dict(self.headers)
+        headers = self.get_headers()
         if not data:
             headers['content-length'] = '0'
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
         url = "%s/%s" % (str(container), str(object_name))
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
         resp, body = self.put(url, data, headers)
         return resp, body
 
@@ -41,10 +52,12 @@ class ObjectClient(RestClient):
         """Upload data to replace current storage object."""
         return self.create_object(container, object_name, data)
 
-    def delete_object(self, container, object_name):
+    def delete_object(self, container, object_name, params=None):
         """Delete storage object."""
         url = "%s/%s" % (str(container), str(object_name))
-        resp, body = self.delete(url)
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.delete(url, headers={})
         return resp, body
 
     def update_object_metadata(self, container, object_name, metadata,
@@ -66,11 +79,16 @@ class ObjectClient(RestClient):
         resp, body = self.head(url)
         return resp, body
 
-    def get_object(self, container, object_name):
+    def get_object(self, container, object_name, metadata=None):
         """Retrieve object's data."""
 
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
         url = "{0}/{1}".format(container, object_name)
-        resp, body = self.get(url)
+        resp, body = self.get(url, headers=headers)
         return resp, body
 
     def copy_object_in_same_container(self, container, src_object_name,
@@ -124,43 +142,70 @@ class ObjectClient(RestClient):
     def create_object_segments(self, container, object_name, segment, data):
         """Creates object segments."""
         url = "{0}/{1}/{2}".format(container, object_name, segment)
-        resp, body = self.put(url, data, self.headers)
+        resp, body = self.put(url, data)
         return resp, body
 
-    def get_object_using_temp_url(self, url):
-        """Retrieve object's data using temp URL."""
-        return self.get(url)
+    def put_object_with_chunk(self, container, name, contents, chunk_size):
+        """
+        Put an object with Transfer-Encoding header
+        """
+        if self.base_url is None:
+            self._set_auth()
 
-    def put_object_using_temp_url(self, url, data):
-        """Put data in an object using temp URL."""
-        return self.put(url, data, None)
+        headers = {'Transfer-Encoding': 'chunked'}
+        if self.token:
+            headers['X-Auth-Token'] = self.token
+
+        conn = put_object_connection(self.base_url, container, name, contents,
+                                     chunk_size, headers)
+
+        resp = conn.getresponse()
+        body = resp.read()
+
+        resp_headers = {}
+        for header, value in resp.getheaders():
+            resp_headers[header.lower()] = value
+
+        self._error_checker('PUT', None, headers, contents, resp, body)
+
+        return resp.status, resp.reason, resp_headers
 
 
-class ObjectClientCustomizedHeader(RestClient):
+class ObjectClientCustomizedHeader(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ObjectClientCustomizedHeader, self).__init__(config, username,
-                                                           password, auth_url,
-                                                           tenant_name)
-        # Overwrites json-specific header encoding in RestClient
-        self.service = self.config.object_storage.catalog_type
+    # TODO(andreaf) This class is now redundant, to be removed in next patch
+
+    def __init__(self, auth_provider):
+        super(ObjectClientCustomizedHeader, self).__init__(
+            auth_provider)
+        # Overwrites json-specific header encoding in rest_client.RestClient
+        self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
         """A simple HTTP request interface."""
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
         if headers is None:
             headers = {}
-        if self.base_url is None:
-            self._set_auth()
+        elif extra_headers:
+            try:
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = {}
 
-        req_url = "%s/%s" % (self.base_url, url)
-        self._log_request(method, req_url, headers, body)
+        # Authorize the request
+        req_url, req_headers, req_body = self.auth_provider.auth_request(
+            method=method, url=url, headers=headers, body=body,
+            filters=self.filters
+        )
+        # Use original method
         resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=headers, body=body)
-        self._log_response(resp, resp_body)
+                                                headers=req_headers,
+                                                body=req_body)
+        self._log_request(method, req_url, resp)
         if resp.status == 401 or resp.status == 403:
             raise exceptions.Unauthorized()
 
@@ -202,3 +247,89 @@ class ObjectClientCustomizedHeader(RestClient):
         url = "%s/%s" % (str(container), str(object_name))
         resp, body = self.delete(url, headers=headers)
         return resp, body
+
+    def create_object_continue(self, container, object_name,
+                               data, metadata=None):
+        """Create storage object."""
+        headers = {}
+        if metadata:
+            for key in metadata:
+                headers[str(key)] = metadata[key]
+
+        if not data:
+            headers['content-length'] = '0'
+
+        if self.base_url is None:
+            self._set_auth()
+        headers['X-Auth-Token'] = self.token
+
+        conn = put_object_connection(self.base_url, str(container),
+                                     str(object_name), data, None, headers)
+
+        response = conn.response_class(conn.sock,
+                                       strict=conn.strict,
+                                       method=conn._method)
+        version, status, reason = response._read_status()
+        resp = {'version': version,
+                'status': str(status),
+                'reason': reason}
+
+        return resp
+
+
+def put_object_connection(base_url, container, name, contents=None,
+                          chunk_size=65536, headers=None, query_string=None):
+    """
+    Helper function to make connection to put object with httplib
+    :param base_url: base_url of an object client
+    :param container: container name that the object is in
+    :param name: object name to put
+    :param contents: a string or a file like object to read object data
+                     from; if None, a zero-byte put will be done
+    :param chunk_size: chunk size of data to write; it defaults to 65536;
+                       used only if the the contents object has a 'read'
+                       method, eg. file-like objects, ignored otherwise
+    :param headers: additional headers to include in the request, if any
+    :param query_string: if set will be appended with '?' to generated path
+    """
+    parsed = urlparse.urlparse(base_url)
+    if parsed.scheme == 'https':
+        conn = httplib.HTTPSConnection(parsed.netloc)
+    else:
+        conn = httplib.HTTPConnection(parsed.netloc)
+    path = str(parsed.path) + "/"
+    path += "%s/%s" % (str(container), str(name))
+
+    if query_string:
+        path += '?' + query_string
+    if headers:
+        headers = dict(headers)
+    else:
+        headers = {}
+    if hasattr(contents, 'read'):
+        conn.putrequest('PUT', path)
+        for header, value in headers.iteritems():
+            conn.putheader(header, value)
+        if 'Content-Length' not in headers:
+            if 'Transfer-Encoding' not in headers:
+                conn.putheader('Transfer-Encoding', 'chunked')
+            conn.endheaders()
+            chunk = contents.read(chunk_size)
+            while chunk:
+                conn.send('%x\r\n%s\r\n' % (len(chunk), chunk))
+                chunk = contents.read(chunk_size)
+            conn.send('0\r\n\r\n')
+        else:
+            conn.endheaders()
+            left = headers['Content-Length']
+            while left > 0:
+                size = chunk_size
+                if size > left:
+                    size = left
+                chunk = contents.read(size)
+                conn.send(chunk)
+                left -= len(chunk)
+    else:
+        conn.request('PUT', path, contents, headers)
+
+    return conn

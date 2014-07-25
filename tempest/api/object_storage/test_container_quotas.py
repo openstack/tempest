@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 Cloudwatt
 # All Rights Reserved.
 #
@@ -15,25 +13,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
-from tempest.test import attr
-from tempest.test import HTTP_SUCCESS
+from tempest import test
 
+CONF = config.CONF
 QUOTA_BYTES = 10
 QUOTA_COUNT = 3
-SKIP_MSG = "Container quotas middleware not available."
 
 
 class ContainerQuotasTest(base.BaseObjectTest):
     """Attemps to test the perfect behavior of quotas in a container."""
-    container_quotas_available = \
-        config.TempestConfig().object_storage.container_quotas_available
 
     def setUp(self):
         """Creates and sets a container with quotas.
@@ -46,7 +38,7 @@ class ContainerQuotasTest(base.BaseObjectTest):
                      Maximum object count of the container.
         """
         super(ContainerQuotasTest, self).setUp()
-        self.container_name = rand_name(name="TestContainer")
+        self.container_name = data_utils.rand_name(name="TestContainer")
         self.container_client.create_container(self.container_name)
         metadata = {"quota-bytes": str(QUOTA_BYTES),
                     "quota-count": str(QUOTA_COUNT), }
@@ -58,28 +50,29 @@ class ContainerQuotasTest(base.BaseObjectTest):
         self.delete_containers([self.container_name])
         super(ContainerQuotasTest, self).tearDown()
 
-    @testtools.skipIf(not container_quotas_available, SKIP_MSG)
-    @attr(type="smoke")
+    @test.requires_ext(extension='container_quotas', service='object')
+    @test.attr(type="smoke")
     def test_upload_valid_object(self):
         """Attempts to uploads an object smaller than the bytes quota."""
-        object_name = rand_name(name="TestObject")
-        data = arbitrary_string(QUOTA_BYTES)
+        object_name = data_utils.rand_name(name="TestObject")
+        data = data_utils.arbitrary_string(QUOTA_BYTES)
 
         nbefore = self._get_bytes_used()
 
         resp, _ = self.object_client.create_object(
             self.container_name, object_name, data)
-        self.assertIn(int(resp['status']), HTTP_SUCCESS)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'PUT')
 
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore + len(data), nafter)
 
-    @testtools.skipIf(not container_quotas_available, SKIP_MSG)
-    @attr(type="smoke")
+    @test.requires_ext(extension='container_quotas', service='object')
+    @test.attr(type="smoke")
     def test_upload_large_object(self):
         """Attempts to upload an object lagger than the bytes quota."""
-        object_name = rand_name(name="TestObject")
-        data = arbitrary_string(QUOTA_BYTES + 1)
+        object_name = data_utils.rand_name(name="TestObject")
+        data = data_utils.arbitrary_string(QUOTA_BYTES + 1)
 
         nbefore = self._get_bytes_used()
 
@@ -90,12 +83,12 @@ class ContainerQuotasTest(base.BaseObjectTest):
         nafter = self._get_bytes_used()
         self.assertEqual(nbefore, nafter)
 
-    @testtools.skipIf(not container_quotas_available, SKIP_MSG)
-    @attr(type="smoke")
+    @test.requires_ext(extension='container_quotas', service='object')
+    @test.attr(type="smoke")
     def test_upload_too_many_objects(self):
         """Attempts to upload many objects that exceeds the count limit."""
         for _ in range(QUOTA_COUNT):
-            name = rand_name(name="TestObject")
+            name = data_utils.rand_name(name="TestObject")
             self.object_client.create_object(self.container_name, name, "")
 
         nbefore = self._get_object_count()

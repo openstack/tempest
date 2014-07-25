@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2012 IBM Corp.
 # All Rights Reserved.
 #
@@ -19,26 +17,25 @@ import urllib
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
+from tempest.common import xml_utils as common
+from tempest import config
 from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
+
+CONF = config.CONF
 
 
-class VolumeTypesClientXML(RestClientXML):
+class VolumeTypesClientXML(rest_client.RestClient):
     """
     Client class to send CRUD Volume Types API requests to a Cinder endpoint
     """
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumeTypesClientXML, self).__init__(config, username, password,
-                                                   auth_url, tenant_name)
-        self.service = self.config.volume.catalog_type
-        self.build_interval = self.config.compute.build_interval
-        self.build_timeout = self.config.compute.build_timeout
+    def __init__(self, auth_provider):
+        super(VolumeTypesClientXML, self).__init__(auth_provider)
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.compute.build_interval
+        self.build_timeout = CONF.compute.build_timeout
 
     def _parse_volume_type(self, body):
         vol_type = dict((attr, body.get(attr)) for attr in body.keys())
@@ -52,7 +49,7 @@ class VolumeTypesClientXML(RestClientXML):
                                                 meta.text)
                                                for meta in list(child))
             else:
-                vol_type[tag] = xml_to_json(child)
+                vol_type[tag] = common.xml_to_json(child)
             return vol_type
 
     def _parse_volume_type_extra_specs(self, body):
@@ -63,7 +60,7 @@ class VolumeTypesClientXML(RestClientXML):
             if tag.startswith("{"):
                 ns, tag = tag.split("}", 1)
             else:
-                extra_spec[tag] = xml_to_json(child)
+                extra_spec[tag] = common.xml_to_json(child)
             return extra_spec
 
     def list_volume_types(self, params=None):
@@ -72,7 +69,7 @@ class VolumeTypesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         volume_types = []
         if body is not None:
@@ -83,7 +80,7 @@ class VolumeTypesClientXML(RestClientXML):
     def get_volume_type(self, type_id):
         """Returns the details of a single volume_type."""
         url = "types/%s" % str(type_id)
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         return resp, self._parse_volume_type(body)
 
@@ -94,23 +91,22 @@ class VolumeTypesClientXML(RestClientXML):
         Following optional keyword arguments are accepted:
         extra_specs: A dictionary of values to be used as extra_specs.
         """
-        vol_type = Element("volume_type", xmlns=XMLNS_11)
+        vol_type = common.Element("volume_type", xmlns=common.XMLNS_11)
         if name:
             vol_type.add_attr('name', name)
 
         extra_specs = kwargs.get('extra_specs')
         if extra_specs:
-            _extra_specs = Element('extra_specs')
+            _extra_specs = common.Element('extra_specs')
             vol_type.append(_extra_specs)
             for key, value in extra_specs.items():
-                spec = Element('extra_spec')
+                spec = common.Element('extra_spec')
                 spec.add_attr('key', key)
-                spec.append(Text(value))
+                spec.append(common.Text(value))
                 _extra_specs.append(spec)
 
-        resp, body = self.post('types', str(Document(vol_type)),
-                               self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.post('types', str(common.Document(vol_type)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_volume_type(self, type_id):
@@ -124,7 +120,7 @@ class VolumeTypesClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         extra_specs = []
         if body is not None:
@@ -136,7 +132,7 @@ class VolumeTypesClientXML(RestClientXML):
         """Returns the details of a single volume_type extra spec."""
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = etree.fromstring(body)
         return resp, self._parse_volume_type_extra_specs(body)
 
@@ -147,22 +143,21 @@ class VolumeTypesClientXML(RestClientXML):
         extra_specs: A dictionary of values to be used as extra_specs.
         """
         url = "types/%s/extra_specs" % str(vol_type_id)
-        extra_specs = Element("extra_specs", xmlns=XMLNS_11)
+        extra_specs = common.Element("extra_specs", xmlns=common.XMLNS_11)
         if extra_spec:
             if isinstance(extra_spec, list):
                 extra_specs.append(extra_spec)
             else:
                 for key, value in extra_spec.items():
-                    spec = Element('extra_spec')
+                    spec = common.Element('extra_spec')
                     spec.add_attr('key', key)
-                    spec.append(Text(value))
+                    spec.append(common.Text(value))
                     extra_specs.append(spec)
         else:
             extra_specs = None
 
-        resp, body = self.post(url, str(Document(extra_specs)),
-                               self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.post(url, str(common.Document(extra_specs)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
@@ -181,18 +176,17 @@ class VolumeTypesClientXML(RestClientXML):
         """
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
-        extra_specs = Element("extra_specs", xmlns=XMLNS_11)
+        extra_specs = common.Element("extra_specs", xmlns=common.XMLNS_11)
 
         if extra_spec is not None:
             for key, value in extra_spec.items():
-                spec = Element('extra_spec')
+                spec = common.Element('extra_spec')
                 spec.add_attr('key', key)
-                spec.append(Text(value))
+                spec.append(common.Text(value))
                 extra_specs.append(spec)
 
-        resp, body = self.put(url, str(Document(extra_specs)),
-                              self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.put(url, str(common.Document(extra_specs)))
+        body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def is_resource_deleted(self, id):

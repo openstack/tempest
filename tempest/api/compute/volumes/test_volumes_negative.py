@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,38 +17,40 @@ import uuid
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
+from tempest import config
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
+
+CONF = config.CONF
 
 
-class VolumesNegativeTest(base.BaseComputeTest):
-    _interface = 'json'
+class VolumesNegativeTest(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
         super(VolumesNegativeTest, cls).setUpClass()
         cls.client = cls.volumes_extensions_client
-        if not cls.config.service_available.cinder:
+        if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-    @attr(type=['negative', 'gate'])
-    def test_volume_get_nonexistant_volume_id(self):
-        # Negative: Should not be able to get details of nonexistant volume
-        # Creating a nonexistant volume id
-        # Trying to GET a non existant volume
+    @test.attr(type=['negative', 'gate'])
+    def test_volume_get_nonexistent_volume_id(self):
+        # Negative: Should not be able to get details of nonexistent volume
+        # Creating a nonexistent volume id
+        # Trying to GET a non existent volume
         self.assertRaises(exceptions.NotFound, self.client.get_volume,
                           str(uuid.uuid4()))
 
-    @attr(type=['negative', 'gate'])
-    def test_volume_delete_nonexistant_volume_id(self):
-        # Negative: Should not be able to delete nonexistant Volume
-        # Creating nonexistant volume id
-        # Trying to DELETE a non existant volume
+    @test.attr(type=['negative', 'gate'])
+    def test_volume_delete_nonexistent_volume_id(self):
+        # Negative: Should not be able to delete nonexistent Volume
+        # Creating nonexistent volume id
+        # Trying to DELETE a non existent volume
         self.assertRaises(exceptions.NotFound, self.client.delete_volume,
                           str(uuid.uuid4()))
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_volume_with_invalid_size(self):
         # Negative: Should not be able to create volume with invalid size
         # in request
@@ -59,7 +59,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='#$%', display_name=v_name, metadata=metadata)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_volume_with_out_passing_size(self):
         # Negative: Should not be able to create volume without passing size
         # in request
@@ -68,7 +68,7 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='', display_name=v_name, metadata=metadata)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_create_volume_with_size_zero(self):
         # Negative: Should not be able to create volume with size zero
         v_name = data_utils.rand_name('Volume-')
@@ -76,25 +76,25 @@ class VolumesNegativeTest(base.BaseComputeTest):
         self.assertRaises(exceptions.BadRequest, self.client.create_volume,
                           size='0', display_name=v_name, metadata=metadata)
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_invalid_volume_id(self):
         # Negative: Should not be able to get volume with invalid id
         self.assertRaises(exceptions.NotFound,
                           self.client.get_volume, '#$%%&^&^')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_get_volume_without_passing_volume_id(self):
         # Negative: Should not be able to get volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.get_volume, '')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_invalid_volume_id(self):
         # Negative: Should not be able to delete volume when invalid ID is
         # passed
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_volume, '!@#$%^&*()')
 
-    @attr(type=['negative', 'gate'])
+    @test.attr(type=['negative', 'gate'])
     def test_delete_volume_without_passing_volume_id(self):
         # Negative: Should not be able to delete volume when empty ID is passed
         self.assertRaises(exceptions.NotFound, self.client.delete_volume, '')

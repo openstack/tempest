@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,30 +14,39 @@
 #    under the License.
 
 from lxml import etree
-from tempest.common.rest_client import RestClientXML
-from tempest.services.compute.xml.common import xml_to_json
+
+from tempest.common import rest_client
+from tempest.common import xml_utils
+from tempest import config
+
+CONF = config.CONF
 
 
-class ExtensionsClientXML(RestClientXML):
+class ExtensionsClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ExtensionsClientXML, self).__init__(config, username, password,
-                                                  auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(ExtensionsClientXML, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):
         array = []
         for child in node:
-            array.append(xml_to_json(child))
+            array.append(xml_utils.xml_to_json(child))
         return array
 
     def list_extensions(self):
         url = 'extensions'
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
-        return resp, {'extensions': body}
+        return resp, body
 
     def is_enabled(self, extension):
         _, extensions = self.list_extensions()
         exts = extensions['extensions']
         return any([e for e in exts if e['name'] == extension])
+
+    def get_extension(self, extension_alias):
+        resp, body = self.get('extensions/%s' % extension_alias)
+        body = xml_utils.xml_to_json(etree.fromstring(body))
+        return resp, body

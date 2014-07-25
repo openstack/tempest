@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,27 +14,20 @@
 #    under the License.
 
 import json
-from urlparse import urlparse
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class PolicyClientJSON(RestClient):
+class PolicyClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(PolicyClientJSON, self).__init__(config, username, password,
-                                               auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+    def __init__(self, auth_provider):
+        super(PolicyClientJSON, self).__init__(auth_provider)
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(PolicyClientJSON, self).request(method, url,
-                                                     headers=headers,
-                                                     body=body)
+        self.api_version = "v3"
 
     def create_policy(self, blob, type):
         """Creates a Policy."""
@@ -45,7 +36,7 @@ class PolicyClientJSON(RestClient):
             "type": type
         }
         post_body = json.dumps({'policy': post_body})
-        resp, body = self.post('policies', post_body, self.headers)
+        resp, body = self.post('policies', post_body)
         body = json.loads(body)
         return resp, body['policy']
 
@@ -71,8 +62,7 @@ class PolicyClientJSON(RestClient):
         }
         post_body = json.dumps({'policy': post_body})
         url = 'policies/%s' % policy_id
-        resp, body = self.patch(url, post_body,
-                                self.headers)
+        resp, body = self.patch(url, post_body)
         body = json.loads(body)
         return resp, body['policy']
 

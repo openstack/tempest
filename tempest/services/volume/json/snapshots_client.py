@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -16,23 +14,25 @@ import json
 import time
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
+
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
 
-class SnapshotsClientJSON(RestClient):
+class SnapshotsClientJSON(rest_client.RestClient):
     """Client class to send CRUD Volume API requests."""
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(SnapshotsClientJSON, self).__init__(config, username, password,
-                                                  auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(SnapshotsClientJSON, self).__init__(auth_provider)
 
-        self.service = self.config.volume.catalog_type
-        self.build_interval = self.config.volume.build_interval
-        self.build_timeout = self.config.volume.build_timeout
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.volume.build_interval
+        self.build_timeout = CONF.volume.build_timeout
 
     def list_snapshots(self, params=None):
         """List all the snapshot."""
@@ -44,7 +44,7 @@ class SnapshotsClientJSON(RestClient):
         body = json.loads(body)
         return resp, body['snapshots']
 
-    def list_snapshot_with_detail(self, params=None):
+    def list_snapshots_with_detail(self, params=None):
         """List the details of all snapshots."""
         url = 'snapshots/detail'
         if params:
@@ -72,15 +72,14 @@ class SnapshotsClientJSON(RestClient):
         post_body = {'volume_id': volume_id}
         post_body.update(kwargs)
         post_body = json.dumps({'snapshot': post_body})
-        resp, body = self.post('snapshots', post_body, self.headers)
+        resp, body = self.post('snapshots', post_body)
         body = json.loads(body)
         return resp, body['snapshot']
 
     def update_snapshot(self, snapshot_id, **kwargs):
         """Updates a snapshot."""
         put_body = json.dumps({'snapshot': kwargs})
-        resp, body = self.put('snapshots/%s' % snapshot_id, put_body,
-                              self.headers)
+        resp, body = self.put('snapshots/%s' % snapshot_id, put_body)
         body = json.loads(body)
         return resp, body['snapshot']
 
@@ -131,3 +130,63 @@ class SnapshotsClientJSON(RestClient):
         except exceptions.NotFound:
             return True
         return False
+
+    def reset_snapshot_status(self, snapshot_id, status):
+        """Reset the specified snapshot's status."""
+        post_body = json.dumps({'os-reset_status': {"status": status}})
+        resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body)
+        return resp, body
+
+    def update_snapshot_status(self, snapshot_id, status, progress):
+        """Update the specified snapshot's status."""
+        post_body = {
+            'status': status,
+            'progress': progress
+        }
+        post_body = json.dumps({'os-update_snapshot_status': post_body})
+        url = 'snapshots/%s/action' % str(snapshot_id)
+        resp, body = self.post(url, post_body)
+        return resp, body
+
+    def create_snapshot_metadata(self, snapshot_id, metadata):
+        """Create metadata for the snapshot."""
+        put_body = json.dumps({'metadata': metadata})
+        url = "snapshots/%s/metadata" % str(snapshot_id)
+        resp, body = self.post(url, put_body)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def get_snapshot_metadata(self, snapshot_id):
+        """Get metadata of the snapshot."""
+        url = "snapshots/%s/metadata" % str(snapshot_id)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def update_snapshot_metadata(self, snapshot_id, metadata):
+        """Update metadata for the snapshot."""
+        put_body = json.dumps({'metadata': metadata})
+        url = "snapshots/%s/metadata" % str(snapshot_id)
+        resp, body = self.put(url, put_body)
+        body = json.loads(body)
+        return resp, body['metadata']
+
+    def update_snapshot_metadata_item(self, snapshot_id, id, meta_item):
+        """Update metadata item for the snapshot."""
+        put_body = json.dumps({'meta': meta_item})
+        url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
+        resp, body = self.put(url, put_body)
+        body = json.loads(body)
+        return resp, body['meta']
+
+    def delete_snapshot_metadata_item(self, snapshot_id, id):
+        """Delete metadata item for the snapshot."""
+        url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
+        resp, body = self.delete(url)
+        return resp, body
+
+    def force_delete_snapshot(self, snapshot_id):
+        """Force Delete Snapshot."""
+        post_body = json.dumps({'os-force_delete': {}})
+        resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body)
+        return resp, body

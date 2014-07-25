@@ -16,34 +16,40 @@
 import json
 import time
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute import interfaces as common_schema
+from tempest.api_schema.compute import servers as servers_schema
+from tempest.api_schema.compute.v2 import interfaces as schema
+from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
 
+CONF = config.CONF
 
-class InterfacesClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(InterfacesClientJSON, self).__init__(config, username, password,
-                                                   auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+class InterfacesClientJSON(rest_client.RestClient):
+
+    def __init__(self, auth_provider):
+        super(InterfacesClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_interfaces(self, server):
         resp, body = self.get('servers/%s/os-interface' % server)
         body = json.loads(body)
+        self.validate_response(schema.list_interfaces, resp, body)
         return resp, body['interfaceAttachments']
 
     def create_interface(self, server, port_id=None, network_id=None,
                          fixed_ip=None):
         post_body = dict(interfaceAttachment=dict())
         if port_id:
-            post_body['port_id'] = port_id
+            post_body['interfaceAttachment']['port_id'] = port_id
         if network_id:
-            post_body['net_id'] = network_id
+            post_body['interfaceAttachment']['net_id'] = network_id
         if fixed_ip:
-            post_body['fixed_ips'] = [dict(ip_address=fixed_ip)]
+            fip = dict(ip_address=fixed_ip)
+            post_body['interfaceAttachment']['fixed_ips'] = [fip]
         post_body = json.dumps(post_body)
         resp, body = self.post('servers/%s/os-interface' % server,
-                               headers=self.headers,
                                body=post_body)
         body = json.loads(body)
         return resp, body['interfaceAttachment']
@@ -56,6 +62,7 @@ class InterfacesClientJSON(RestClient):
     def delete_interface(self, server, port_id):
         resp, body = self.delete('servers/%s/os-interface/%s' % (server,
                                                                  port_id))
+        self.validate_response(common_schema.delete_interface, resp, body)
         return resp, body
 
     def wait_for_interface_status(self, server, port_id, status):
@@ -77,4 +84,30 @@ class InterfacesClientJSON(RestClient):
                            (port_id, status, self.build_timeout))
                 raise exceptions.TimeoutException(message)
 
+        return resp, body
+
+    def add_fixed_ip(self, server_id, network_id):
+        """Add a fixed IP to input server instance."""
+        post_body = json.dumps({
+            'addFixedIp': {
+                'networkId': network_id
+            }
+        })
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        self.validate_response(servers_schema.server_actions_common_schema,
+                               resp, body)
+        return resp, body
+
+    def remove_fixed_ip(self, server_id, ip_address):
+        """Remove input fixed IP from input server instance."""
+        post_body = json.dumps({
+            'removeFixedIp': {
+                'address': ip_address
+            }
+        })
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        self.validate_response(servers_schema.server_actions_common_schema,
+                               resp, body)
         return resp, body

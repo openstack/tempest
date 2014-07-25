@@ -1,0 +1,24 @@
+{
+    "name": "list-flavors-with-detail",
+    "http-method": "GET",
+    "url": "flavors/detail",
+    "json-schema": {
+        "type": "object",
+        "properties": {
+            "minRam": {
+                "type": "integer",
+                "results": {
+                    "gen_none": 400,
+                    "gen_string": 400
+                }
+            },
+            "minDisk": {
+                "type": "integer",
+                "results": {
+                    "gen_none": 400,
+                    "gen_string": 400
+                }
+            }
+        }
+    }
+}

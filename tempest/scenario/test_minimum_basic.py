@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # All Rights Reserved.
 #
@@ -15,11 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common import debug
+from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -41,46 +41,6 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         server_id = self.server.id
         self.status_timeout(
             self.compute_client.servers, server_id, status)
-
-    def _wait_for_volume_status(self, status):
-        volume_id = self.volume.id
-        self.status_timeout(
-            self.volume_client.volumes, volume_id, status)
-
-    def _image_create(self, name, fmt, path, properties={}):
-        name = rand_name('%s-' % name)
-        image_file = open(path, 'rb')
-        self.addCleanup(image_file.close)
-        params = {
-            'name': name,
-            'container_format': fmt,
-            'disk_format': fmt,
-            'is_public': 'True',
-        }
-        params.update(properties)
-        image = self.image_client.images.create(**params)
-        self.addCleanup(self.image_client.images.delete, image)
-        self.assertEqual("queued", image.status)
-        image.update(data=image_file)
-        return image.id
-
-    def glance_image_create(self):
-        aki_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.aki_img_file
-        ari_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ari_img_file
-        ami_img_path = self.config.scenario.img_dir + "/" + \
-            self.config.scenario.ami_img_file
-        LOG.debug("paths: ami: %s, ari: %s, aki: %s"
-                  % (ami_img_path, ari_img_path, aki_img_path))
-        kernel_id = self._image_create('scenario-aki', 'aki', aki_img_path)
-        ramdisk_id = self._image_create('scenario-ari', 'ari', ari_img_path)
-        properties = {
-            'properties': {'kernel_id': kernel_id, 'ramdisk_id': ramdisk_id}
-        }
-        self.image = self._image_create('scenario-ami', 'ami',
-                                        path=ami_img_path,
-                                        properties=properties)
 
     def nova_keypair_add(self):
         self.keypair = self.create_keypair()
@@ -117,7 +77,7 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
                                       self.volume.id,
                                       '/dev/vdb')
         self.assertEqual(self.volume.id, volume.id)
-        self._wait_for_volume_status('in-use')
+        self.wait_for_volume_status('in-use')
 
     def nova_reboot(self):
         self.server.reboot()
@@ -125,13 +85,21 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
 
     def nova_floating_ip_create(self):
         self.floating_ip = self.compute_client.floating_ips.create()
-        self.addCleanup(self.floating_ip.delete)
+        self.addCleanup(self.delete_wrapper, self.floating_ip)
 
     def nova_floating_ip_add(self):
         self.server.add_floating_ip(self.floating_ip)
 
     def ssh_to_server(self):
-        self.linux_client = self.get_remote_client(self.floating_ip.ip)
+        try:
+            self.linux_client = self.get_remote_client(self.floating_ip.ip)
+        except Exception as e:
+            LOG.exception('ssh to server failed')
+            self._log_console_output()
+            # network debug is called as part of ssh init
+            if not isinstance(e, test.exceptions.SSHTimeout):
+                debug.log_net_debug()
+            raise
 
     def check_partitions(self):
         partitions = self.linux_client.get_partitions()
@@ -140,12 +108,17 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
     def nova_volume_detach(self):
         detach_volume_client = self.compute_client.volumes.delete_server_volume
         detach_volume_client(self.server.id, self.volume.id)
-        self._wait_for_volume_status('available')
+        self.wait_for_volume_status('available')
 
         volume = self.volume_client.volumes.get(self.volume.id)
         self.assertEqual('available', volume.status)
 
-    @services('compute', 'volume', 'image', 'network')
+    def create_and_add_security_group(self):
+        secgroup = self._create_security_group_nova()
+        self.server.add_security_group(secgroup.name)
+        self.addCleanup(self.server.remove_security_group, secgroup.name)
+
+    @test.services('compute', 'volume', 'image', 'network')
     def test_minimum_basic_scenario(self):
         self.glance_image_create()
         self.nova_keypair_add()
@@ -156,13 +129,13 @@ class TestMinimumBasicScenario(manager.OfficialClientTest):
         self.cinder_list()
         self.cinder_show()
         self.nova_volume_attach()
+        self.addCleanup(self.nova_volume_detach)
         self.cinder_show()
-        self.nova_reboot()
 
         self.nova_floating_ip_create()
         self.nova_floating_ip_add()
-        self.create_loginable_secgroup_rule()
+        self.create_and_add_security_group()
+        self.ssh_to_server()
+        self.nova_reboot()
         self.ssh_to_server()
         self.check_partitions()
-
-        self.nova_volume_detach()

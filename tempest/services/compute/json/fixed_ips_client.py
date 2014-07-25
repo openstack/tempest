@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 IBM Corp
 # All Rights Reserved.
 #
@@ -17,24 +15,29 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute.v2 import fixed_ips as schema
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class FixedIPsClientJSON(RestClient):
+class FixedIPsClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(FixedIPsClientJSON, self).__init__(config, username, password,
-                                                 auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(FixedIPsClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def get_fixed_ip_details(self, fixed_ip):
         url = "os-fixed-ips/%s" % (fixed_ip)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.fixed_ips, resp, body)
         return resp, body['fixed_ip']
 
     def reserve_fixed_ip(self, ip, body):
         """This reserves and unreserves fixed ips."""
         url = "os-fixed-ips/%s/action" % (ip)
-        resp, body = self.post(url, json.dumps(body), self.headers)
+        resp, body = self.post(url, json.dumps(body))
+        self.validate_response(schema.fixed_ip_action, resp, body)
         return resp, body

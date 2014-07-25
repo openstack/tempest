@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -13,24 +11,25 @@
 #    under the License.
 
 import re
+import six
 import time
 
-from tempest.common.ssh import Client
-from tempest.common import utils
-from tempest.config import TempestConfig
-from tempest.exceptions import ServerUnreachable
-from tempest.exceptions import SSHTimeout
+from tempest.common import ssh
+from tempest import config
+from tempest import exceptions
+
+CONF = config.CONF
 
 
 class RemoteClient():
 
     # NOTE(afazekas): It should always get an address instead of server
     def __init__(self, server, username, password=None, pkey=None):
-        ssh_timeout = TempestConfig().compute.ssh_timeout
-        network = TempestConfig().compute.network_for_ssh
-        ip_version = TempestConfig().compute.ip_version_for_ssh
-        ssh_channel_timeout = TempestConfig().compute.ssh_channel_timeout
-        if isinstance(server, basestring):
+        ssh_timeout = CONF.compute.ssh_timeout
+        network = CONF.compute.network_for_ssh
+        ip_version = CONF.compute.ip_version_for_ssh
+        ssh_channel_timeout = CONF.compute.ssh_channel_timeout
+        if isinstance(server, six.string_types):
             ip_address = server
         else:
             addresses = server['addresses'][network]
@@ -39,53 +38,77 @@ class RemoteClient():
                     ip_address = address['addr']
                     break
             else:
-                raise ServerUnreachable()
+                raise exceptions.ServerUnreachable()
+        self.ssh_client = ssh.Client(ip_address, username, password,
+                                     ssh_timeout, pkey=pkey,
+                                     channel_timeout=ssh_channel_timeout)
 
-        self.ssh_client = Client(ip_address, username, password, ssh_timeout,
-                                 pkey=pkey,
-                                 channel_timeout=ssh_channel_timeout)
-        if not self.ssh_client.test_connection_auth():
-            raise SSHTimeout()
+    def exec_command(self, cmd):
+        return self.ssh_client.exec_command(cmd)
 
-    def can_authenticate(self):
-        # Re-authenticate
-        return self.ssh_client.test_connection_auth()
+    def validate_authentication(self):
+        """Validate ssh connection and authentication
+           This method raises an Exception when the validation fails.
+        """
+        self.ssh_client.test_connection_auth()
 
     def hostname_equals_servername(self, expected_hostname):
         # Get host name using command "hostname"
-        actual_hostname = self.ssh_client.exec_command("hostname").rstrip()
+        actual_hostname = self.exec_command("hostname").rstrip()
         return expected_hostname == actual_hostname
 
-    def get_files(self, path):
-        # Return a list of comma separated files
-        command = "ls -m " + path
-        return self.ssh_client.exec_command(command).rstrip('\n').split(', ')
-
     def get_ram_size_in_mb(self):
-        output = self.ssh_client.exec_command('free -m | grep Mem')
+        output = self.exec_command('free -m | grep Mem')
         if output:
             return output.split()[1]
 
     def get_number_of_vcpus(self):
         command = 'cat /proc/cpuinfo | grep processor | wc -l'
-        output = self.ssh_client.exec_command(command)
+        output = self.exec_command(command)
         return int(output)
 
     def get_partitions(self):
         # Return the contents of /proc/partitions
         command = 'cat /proc/partitions'
-        output = self.ssh_client.exec_command(command)
+        output = self.exec_command(command)
         return output
 
     def get_boot_time(self):
-        cmd = 'date -d "`cut -f1 -d. /proc/uptime` seconds ago" \
-            "+%Y-%m-%d %H:%M:%S"'
-        boot_time_string = self.ssh_client.exec_command(cmd)
-        boot_time_string = boot_time_string.replace('\n', '')
-        return time.strptime(boot_time_string, utils.LAST_REBOOT_TIME_FORMAT)
+        cmd = 'cut -f1 -d. /proc/uptime'
+        boot_secs = self.exec_command(cmd)
+        boot_time = time.time() - int(boot_secs)
+        return time.localtime(boot_time)
 
     def write_to_console(self, message):
         message = re.sub("([$\\`])", "\\\\\\\\\\1", message)
         # usually to /dev/ttyS0
         cmd = 'sudo sh -c "echo \\"%s\\" >/dev/console"' % message
-        return self.ssh_client.exec_command(cmd)
+        return self.exec_command(cmd)
+
+    def ping_host(self, host):
+        cmd = 'ping -c1 -w1 %s' % host
+        return self.exec_command(cmd)
+
+    def get_mac_address(self):
+        cmd = "/sbin/ifconfig | awk '/HWaddr/ {print $5}'"
+        return self.exec_command(cmd)
+
+    def get_ip_list(self):
+        cmd = "/bin/ip address"
+        return self.exec_command(cmd)
+
+    def assign_static_ip(self, nic, addr):
+        cmd = "sudo /bin/ip addr add {ip}/{mask} dev {nic}".format(
+            ip=addr, mask=CONF.network.tenant_network_mask_bits,
+            nic=nic
+        )
+        return self.exec_command(cmd)
+
+    def turn_nic_on(self, nic):
+        cmd = "sudo /bin/ip link set {nic} up".format(nic=nic)
+        return self.exec_command(cmd)
+
+    def get_pids(self, pr_name):
+        # Get pid(s) of a process/program
+        cmd = "ps -ef | grep %s | grep -v 'grep' | awk {'print $1'}" % pr_name
+        return self.exec_command(cmd).split('\n')

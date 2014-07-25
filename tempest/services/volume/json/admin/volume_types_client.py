@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,21 +16,44 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
+from tempest import exceptions
+
+CONF = config.CONF
 
 
-class VolumeTypesClientJSON(RestClient):
+class VolumeTypesClientJSON(rest_client.RestClient):
     """
     Client class to send CRUD Volume Types API requests to a Cinder endpoint
     """
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumeTypesClientJSON, self).__init__(config, username, password,
-                                                    auth_url, tenant_name)
+    def __init__(self, auth_provider):
+        super(VolumeTypesClientJSON, self).__init__(auth_provider)
 
-        self.service = self.config.volume.catalog_type
-        self.build_interval = self.config.volume.build_interval
-        self.build_timeout = self.config.volume.build_timeout
+        self.service = CONF.volume.catalog_type
+        self.build_interval = CONF.volume.build_interval
+        self.build_timeout = CONF.volume.build_timeout
+
+    def is_resource_deleted(self, resource):
+        # to use this method self.resource must be defined to respective value
+        # Resource is a dictionary containing resource id and type
+        # Resource : {"id" : resource_id
+        #             "type": resource_type}
+        try:
+            if resource['type'] == "volume-type":
+                self.get_volume_type(resource['id'])
+            elif resource['type'] == "encryption-type":
+                resp, body = self.get_encryption_type(resource['id'])
+                assert 200 == resp.status
+                if not body:
+                    return True
+            else:
+                msg = (" resource value is either not defined or incorrect.")
+                raise exceptions.UnprocessableEntity(msg)
+        except exceptions.NotFound:
+            return True
+        return False
 
     def list_volume_types(self, params=None):
         """List all the volume_types created."""
@@ -64,7 +85,7 @@ class VolumeTypesClientJSON(RestClient):
         }
 
         post_body = json.dumps({'volume_type': post_body})
-        resp, body = self.post('types', post_body, self.headers)
+        resp, body = self.post('types', post_body)
         body = json.loads(body)
         return resp, body['volume_type']
 
@@ -98,7 +119,7 @@ class VolumeTypesClientJSON(RestClient):
         """
         url = "types/%s/extra_specs" % str(vol_type_id)
         post_body = json.dumps({'extra_specs': extra_spec})
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
         body = json.loads(body)
         return resp, body['extra_specs']
 
@@ -119,6 +140,38 @@ class VolumeTypesClientJSON(RestClient):
         url = "types/%s/extra_specs/%s" % (str(vol_type_id),
                                            str(extra_spec_name))
         put_body = json.dumps(extra_spec)
-        resp, body = self.put(url, put_body, self.headers)
+        resp, body = self.put(url, put_body)
         body = json.loads(body)
         return resp, body
+
+    def get_encryption_type(self, vol_type_id):
+        """
+        Get the volume encryption type for the specified volume type.
+        vol_type_id: Id of volume_type.
+        """
+        url = "/types/%s/encryption" % str(vol_type_id)
+        resp, body = self.get(url)
+        body = json.loads(body)
+        return resp, body
+
+    def create_encryption_type(self, vol_type_id, **kwargs):
+        """
+        Create a new encryption type for the specified volume type.
+
+        vol_type_id: Id of volume_type.
+        provider: Class providing encryption support.
+        cipher: Encryption algorithm/mode to use.
+        key_size: Size of the encryption key, in bits.
+        control_location: Notional service where encryption is performed.
+        """
+        url = "/types/%s/encryption" % str(vol_type_id)
+        post_body = {}
+        post_body.update(kwargs)
+        post_body = json.dumps({'encryption': post_body})
+        resp, body = self.post(url, post_body)
+        body = json.loads(body)
+        return resp, body['encryption']
+
+    def delete_encryption_type(self, vol_type_id):
+        """Delete the encryption type for the specified volume-type."""
+        return self.delete("/types/%s/encryption/provider" % str(vol_type_id))

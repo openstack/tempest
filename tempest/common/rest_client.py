@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # Copyright 2013 IBM Corp.
 # All Rights Reserved.
@@ -17,16 +15,22 @@
 #    under the License.
 
 import collections
-import hashlib
 import json
 from lxml import etree
 import re
+import string
 import time
 
+import jsonschema
+
 from tempest.common import http
+from tempest.common.utils import misc as misc_utils
+from tempest.common import xml_utils as common
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.services.compute.xml.common import xml_to_json
+
+CONF = config.CONF
 
 # redrive rate limited calls at most twice
 MAX_RECURSION_DEPTH = 2
@@ -37,37 +41,33 @@ HTTP_SUCCESS = (200, 201, 202, 203, 204, 205, 206)
 
 
 class RestClient(object):
+
     TYPE = "json"
+
+    # This is used by _parse_resp method
+    # Redefine it for purposes of your xml service client
+    # List should contain top-xml_tag-names of data, which is like list/array
+    # For example, in keystone it is users, roles, tenants and services
+    # All of it has children with same tag-names
+    list_tags = []
+
+    # This is used by _parse_resp method too
+    # Used for selection of dict-like xmls,
+    # like metadata for Vms in nova, and volumes in cinder
+    dict_tags = ["metadata", ]
+
     LOG = logging.getLogger(__name__)
 
-    def __init__(self, config, user, password, auth_url, tenant_name=None,
-                 auth_version='v2'):
-        self.config = config
-        self.user = user
-        self.password = password
-        self.auth_url = auth_url
-        self.tenant_name = tenant_name
-        self.auth_version = auth_version
+    def __init__(self, auth_provider):
+        self.auth_provider = auth_provider
 
+        self.endpoint_url = None
         self.service = None
-        self.token = None
-        self.base_url = None
-        self.region = {}
-        for cfgname in dir(self.config):
-            # Find all config.FOO.catalog_type and assume FOO is a service.
-            cfg = getattr(self.config, cfgname)
-            catalog_type = getattr(cfg, 'catalog_type', None)
-            if not catalog_type:
-                continue
-            service_region = getattr(cfg, 'region', None)
-            if not service_region:
-                service_region = self.config.identity.region
-            self.region[catalog_type] = service_region
-        self.endpoint_url = 'publicURL'
-        self.headers = {'Content-Type': 'application/%s' % self.TYPE,
-                        'Accept': 'application/%s' % self.TYPE}
-        self.build_interval = config.compute.build_interval
-        self.build_timeout = config.compute.build_timeout
+        # The version of the API this client implements
+        self.api_version = None
+        self._skip_path = False
+        self.build_interval = CONF.compute.build_interval
+        self.build_timeout = CONF.compute.build_timeout
         self.general_header_lc = set(('cache-control', 'connection',
                                       'date', 'pragma', 'trailer',
                                       'transfer-encoding', 'via',
@@ -76,299 +76,278 @@ class RestClient(object):
                                        'location', 'proxy-authenticate',
                                        'retry-after', 'server',
                                        'vary', 'www-authenticate'))
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
 
+    def _get_type(self):
+        return self.TYPE
+
+    def get_headers(self, accept_type=None, send_type=None):
+        if accept_type is None:
+            accept_type = self._get_type()
+        if send_type is None:
+            send_type = self._get_type()
+        return {'Content-Type': 'application/%s' % send_type,
+                'Accept': 'application/%s' % accept_type}
+
     def __str__(self):
         STRING_LIMIT = 80
-        str_format = ("config:%s, user:%s, password:%s, "
-                      "auth_url:%s, tenant_name:%s, auth_version:%s, "
-                      "service:%s, base_url:%s, region:%s, "
-                      "endpoint_url:%s, build_interval:%s, build_timeout:%s"
+        str_format = ("config:%s, service:%s, base_url:%s, "
+                      "filters: %s, build_interval:%s, build_timeout:%s"
                       "\ntoken:%s..., \nheaders:%s...")
-        return str_format % (self.config, self.user, self.password,
-                             self.auth_url, self.tenant_name,
-                             self.auth_version, self.service,
-                             self.base_url, self.region, self.endpoint_url,
-                             self.build_interval, self.build_timeout,
+        return str_format % (CONF, self.service, self.base_url,
+                             self.filters, self.build_interval,
+                             self.build_timeout,
                              str(self.token)[0:STRING_LIMIT],
-                             str(self.headers)[0:STRING_LIMIT])
+                             str(self.get_headers())[0:STRING_LIMIT])
 
-    def _set_auth(self):
+    def _get_region(self, service):
         """
-        Sets the token and base_url used in requests based on the strategy type
+        Returns the region for a specific service
         """
+        service_region = None
+        for cfgname in dir(CONF._config):
+            # Find all config.FOO.catalog_type and assume FOO is a service.
+            cfg = getattr(CONF, cfgname)
+            catalog_type = getattr(cfg, 'catalog_type', None)
+            if catalog_type == service:
+                service_region = getattr(cfg, 'region', None)
+        if not service_region:
+            service_region = CONF.identity.region
+        return service_region
 
-        if self.auth_version == 'v3':
-            auth_func = self.identity_auth_v3
-        else:
-            auth_func = self.keystone_auth
-
-        self.token, self.base_url = (
-            auth_func(self.user, self.password, self.auth_url,
-                      self.service, self.tenant_name))
-
-    def clear_auth(self):
+    def _get_endpoint_type(self, service):
         """
-        Can be called to clear the token and base_url so that the next request
-        will fetch a new token and base_url.
+        Returns the endpoint type for a specific service
         """
-
-        self.token = None
-        self.base_url = None
-
-    def get_auth(self):
-        """Returns the token of the current request or sets the token if
-        none.
-        """
-
-        if not self.token:
-            self._set_auth()
-
-        return self.token
-
-    def basic_auth(self, user, password, auth_url):
-        """
-        Provides authentication for the target API.
-        """
-
-        params = {}
-        params['headers'] = {'User-Agent': 'Test-Client', 'X-Auth-User': user,
-                             'X-Auth-Key': password}
-
-        resp, body = self.http_obj.request(auth_url, 'GET', **params)
-        try:
-            return resp['x-auth-token'], resp['x-server-management-url']
-        except Exception:
-            raise
-
-    def keystone_auth(self, user, password, auth_url, service, tenant_name):
-        """
-        Provides authentication via Keystone using v2 identity API.
-        """
-
-        # Normalize URI to ensure /tokens is in it.
-        if 'tokens' not in auth_url:
-            auth_url = auth_url.rstrip('/') + '/tokens'
-
-        creds = {
-            'auth': {
-                'passwordCredentials': {
-                    'username': user,
-                    'password': password,
-                },
-                'tenantName': tenant_name,
-            }
-        }
-
-        headers = {'Content-Type': 'application/json'}
-        body = json.dumps(creds)
-        self._log_request('POST', auth_url, headers, body)
-        resp, resp_body = self.http_obj.request(auth_url, 'POST',
-                                                headers=headers, body=body)
-        self._log_response(resp, resp_body)
-
-        if resp.status == 200:
-            try:
-                auth_data = json.loads(resp_body)['access']
-                token = auth_data['token']['id']
-            except Exception as e:
-                print("Failed to obtain token for user: %s" % e)
-                raise
-
-            mgmt_url = None
-            for ep in auth_data['serviceCatalog']:
-                if ep["type"] == service:
-                    for _ep in ep['endpoints']:
-                        if service in self.region and \
-                                _ep['region'] == self.region[service]:
-                            mgmt_url = _ep[self.endpoint_url]
-                    if not mgmt_url:
-                        mgmt_url = ep['endpoints'][0][self.endpoint_url]
-                    break
-
-            if mgmt_url is None:
-                raise exceptions.EndpointNotFound(service)
-
-            return token, mgmt_url
-
-        elif resp.status == 401:
-            raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password,
-                                                   tenant=tenant_name)
-        raise exceptions.IdentityError('Unexpected status code {0}'.format(
-            resp.status))
-
-    def identity_auth_v3(self, user, password, auth_url, service,
-                         project_name, domain_id='default'):
-        """Provides authentication using Identity API v3."""
-
-        req_url = auth_url.rstrip('/') + '/auth/tokens'
-
-        creds = {
-            "auth": {
-                "identity": {
-                    "methods": ["password"],
-                    "password": {
-                        "user": {
-                            "name": user, "password": password,
-                            "domain": {"id": domain_id}
-                        }
-                    }
-                },
-                "scope": {
-                    "project": {
-                        "domain": {"id": domain_id},
-                        "name": project_name
-                    }
-                }
-            }
-        }
-
-        headers = {'Content-Type': 'application/json'}
-        body = json.dumps(creds)
-        resp, body = self.http_obj.request(req_url, 'POST',
-                                           headers=headers, body=body)
-
-        if resp.status == 201:
-            try:
-                token = resp['x-subject-token']
-            except Exception:
-                self.LOG.exception("Failed to obtain token using V3"
-                                   " authentication (auth URL is '%s')" %
-                                   req_url)
-                raise
-
-            catalog = json.loads(body)['token']['catalog']
-
-            mgmt_url = None
-            for service_info in catalog:
-                if service_info['type'] != service:
-                    continue  # this isn't the entry for us.
-
-                endpoints = service_info['endpoints']
-
-                # Look for an endpoint in the region if configured.
-                if service in self.region:
-                    region = self.region[service]
-
-                    for ep in endpoints:
-                        if ep['region'] != region:
-                            continue
-
-                        mgmt_url = ep['url']
-                        # FIXME(blk-u): this isn't handling endpoint type
-                        # (public, internal, admin).
-                        break
-
-                if not mgmt_url:
-                    # Didn't find endpoint for region, use the first.
-
-                    ep = endpoints[0]
-                    mgmt_url = ep['url']
-                    # FIXME(blk-u): this isn't handling endpoint type
-                    # (public, internal, admin).
-
+        # If the client requests a specific endpoint type, then be it
+        if self.endpoint_url:
+            return self.endpoint_url
+        endpoint_type = None
+        for cfgname in dir(CONF._config):
+            # Find all config.FOO.catalog_type and assume FOO is a service.
+            cfg = getattr(CONF, cfgname)
+            catalog_type = getattr(cfg, 'catalog_type', None)
+            if catalog_type == service:
+                endpoint_type = getattr(cfg, 'endpoint_type', 'publicURL')
                 break
-
-            return token, mgmt_url
-
-        elif resp.status == 401:
-            raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password)
+        # Special case for compute v3 service which hasn't its own
+        # configuration group
         else:
-            self.LOG.error("Failed to obtain token using V3 authentication"
-                           " (auth URL is '%s'), the response status is %s" %
-                           (req_url, resp.status))
-            raise exceptions.AuthenticationFailure(user=user,
-                                                   password=password)
+            if service == CONF.compute.catalog_v3_type:
+                endpoint_type = CONF.compute.endpoint_type
+        return endpoint_type
 
-    def expected_success(self, expected_code, read_code):
+    @property
+    def user(self):
+        return self.auth_provider.credentials.username
+
+    @property
+    def user_id(self):
+        return self.auth_provider.credentials.user_id
+
+    @property
+    def tenant_name(self):
+        return self.auth_provider.credentials.tenant_name
+
+    @property
+    def tenant_id(self):
+        return self.auth_provider.credentials.tenant_id
+
+    @property
+    def password(self):
+        return self.auth_provider.credentials.password
+
+    @property
+    def base_url(self):
+        return self.auth_provider.base_url(filters=self.filters)
+
+    @property
+    def token(self):
+        return self.auth_provider.get_token()
+
+    @property
+    def filters(self):
+        _filters = dict(
+            service=self.service,
+            endpoint_type=self._get_endpoint_type(self.service),
+            region=self._get_region(self.service)
+        )
+        if self.api_version is not None:
+            _filters['api_version'] = self.api_version
+        if self._skip_path:
+            _filters['skip_path'] = self._skip_path
+        return _filters
+
+    def skip_path(self):
+        """
+        When set, ignore the path part of the base URL from the catalog
+        """
+        self._skip_path = True
+
+    def reset_path(self):
+        """
+        When reset, use the base URL from the catalog as-is
+        """
+        self._skip_path = False
+
+    @classmethod
+    def expected_success(cls, expected_code, read_code):
         assert_msg = ("This function only allowed to use for HTTP status"
                       "codes which explicitly defined in the RFC 2616. {0}"
                       " is not a defined Success Code!").format(expected_code)
-        assert expected_code in HTTP_SUCCESS, assert_msg
+        if isinstance(expected_code, list):
+            for code in expected_code:
+                assert code in HTTP_SUCCESS, assert_msg
+        else:
+            assert expected_code in HTTP_SUCCESS, assert_msg
 
         # NOTE(afazekas): the http status code above 400 is processed by
         # the _error_checker method
-        if read_code < 400 and read_code != expected_code:
-                pattern = """Unexpected http success status code {0},
-                             The expected status code is {1}"""
+        if read_code < 400:
+            pattern = """Unexpected http success status code {0},
+                         The expected status code is {1}"""
+            if ((not isinstance(expected_code, list) and
+                (read_code != expected_code)) or (isinstance(expected_code,
+                list) and (read_code not in expected_code))):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 
-    def post(self, url, body, headers):
-        return self.request('POST', url, headers, body)
+    def post(self, url, body, headers=None, extra_headers=False):
+        return self.request('POST', url, extra_headers, headers, body)
 
-    def get(self, url, headers=None):
-        return self.request('GET', url, headers)
+    def get(self, url, headers=None, extra_headers=False):
+        return self.request('GET', url, extra_headers, headers)
 
-    def delete(self, url, headers=None):
-        return self.request('DELETE', url, headers)
+    def delete(self, url, headers=None, body=None, extra_headers=False):
+        return self.request('DELETE', url, extra_headers, headers, body)
 
-    def patch(self, url, body, headers):
-        return self.request('PATCH', url, headers, body)
+    def patch(self, url, body, headers=None, extra_headers=False):
+        return self.request('PATCH', url, extra_headers, headers, body)
 
-    def put(self, url, body, headers):
-        return self.request('PUT', url, headers, body)
+    def put(self, url, body, headers=None, extra_headers=False):
+        return self.request('PUT', url, extra_headers, headers, body)
 
-    def head(self, url, headers=None):
-        return self.request('HEAD', url, headers)
+    def head(self, url, headers=None, extra_headers=False):
+        return self.request('HEAD', url, extra_headers, headers)
 
-    def copy(self, url, headers=None):
-        return self.request('COPY', url, headers)
+    def copy(self, url, headers=None, extra_headers=False):
+        return self.request('COPY', url, extra_headers, headers)
 
     def get_versions(self):
         resp, body = self.get('')
         body = self._parse_resp(body)
-        body = body['versions']
         versions = map(lambda x: x['id'], body)
         return resp, versions
 
-    def _log_request(self, method, req_url, headers, body):
-        self.LOG.info('Request: ' + method + ' ' + req_url)
-        if headers:
-            print_headers = headers
-            if 'X-Auth-Token' in headers and headers['X-Auth-Token']:
-                token = headers['X-Auth-Token']
-                if len(token) > 64 and TOKEN_CHARS_RE.match(token):
-                    print_headers = headers.copy()
-                    print_headers['X-Auth-Token'] = "<Token omitted>"
-            self.LOG.debug('Request Headers: ' + str(print_headers))
-        if body:
-            str_body = str(body)
-            length = len(str_body)
-            self.LOG.debug('Request Body: ' + str_body[:2048])
-            if length >= 2048:
-                self.LOG.debug("Large body (%d) md5 summary: %s", length,
-                               hashlib.md5(str_body).hexdigest())
+    def _get_request_id(self, resp):
+        for i in ('x-openstack-request-id', 'x-compute-request-id'):
+            if i in resp:
+                return resp[i]
+        return ""
 
-    def _log_response(self, resp, resp_body):
-        status = resp['status']
-        self.LOG.info("Response Status: " + status)
-        headers = resp.copy()
-        del headers['status']
-        if headers.get('x-compute-request-id'):
-            self.LOG.info("Nova request id: %s" %
-                          headers.pop('x-compute-request-id'))
-        elif headers.get('x-openstack-request-id'):
-            self.LOG.info("Glance request id %s" %
-                          headers.pop('x-openstack-request-id'))
-        if len(headers):
-            self.LOG.debug('Response Headers: ' + str(headers))
-        if resp_body:
-            str_body = str(resp_body)
-            length = len(str_body)
-            self.LOG.debug('Response Body: ' + str_body[:2048])
-            if length >= 2048:
-                self.LOG.debug("Large body (%d) md5 summary: %s", length,
-                               hashlib.md5(str_body).hexdigest())
+    def _log_request_start(self, method, req_url, req_headers={},
+                           req_body=None):
+        caller_name = misc_utils.find_test_caller()
+        trace_regex = CONF.debug.trace_requests
+        if trace_regex and re.search(trace_regex, caller_name):
+            self.LOG.debug('Starting Request (%s): %s %s' %
+                           (caller_name, method, req_url))
+
+    def _log_request(self, method, req_url, resp,
+                     secs="", req_headers={},
+                     req_body=None, resp_body=None):
+        # if we have the request id, put it in the right part of the log
+        extra = dict(request_id=self._get_request_id(resp))
+        # NOTE(sdague): while we still have 6 callers to this function
+        # we're going to just provide work around on who is actually
+        # providing timings by gracefully adding no content if they don't.
+        # Once we're down to 1 caller, clean this up.
+        caller_name = misc_utils.find_test_caller()
+        if secs:
+            secs = " %.3fs" % secs
+        self.LOG.info(
+            'Request (%s): %s %s %s%s' % (
+                caller_name,
+                resp['status'],
+                method,
+                req_url,
+                secs),
+            extra=extra)
+
+        # We intentionally duplicate the info content because in a parallel
+        # world this is important to match
+        trace_regex = CONF.debug.trace_requests
+        if trace_regex and re.search(trace_regex, caller_name):
+            if 'X-Auth-Token' in req_headers:
+                req_headers['X-Auth-Token'] = '<omitted>'
+            log_fmt = """Request (%s): %s %s %s%s
+    Request - Headers: %s
+        Body: %s
+    Response - Headers: %s
+        Body: %s"""
+
+            self.LOG.debug(
+                log_fmt % (
+                    caller_name,
+                    resp['status'],
+                    method,
+                    req_url,
+                    secs,
+                    str(req_headers),
+                    filter(lambda x: x in string.printable,
+                           str(req_body)[:2048]),
+                    str(resp),
+                    filter(lambda x: x in string.printable,
+                           str(resp_body)[:2048])),
+                extra=extra)
 
     def _parse_resp(self, body):
-        return json.loads(body)
+        if self._get_type() is "json":
+            body = json.loads(body)
 
-    def response_checker(self, method, url, headers, body, resp, resp_body):
+            # We assume, that if the first value of the deserialized body's
+            # item set is a dict or a list, that we just return the first value
+            # of deserialized body.
+            # Essentially "cutting out" the first placeholder element in a body
+            # that looks like this:
+            #
+            #  {
+            #    "users": [
+            #      ...
+            #    ]
+            #  }
+            try:
+                # Ensure there are not more than one top-level keys
+                if len(body.keys()) > 1:
+                    return body
+                # Just return the "wrapped" element
+                first_key, first_item = body.items()[0]
+                if isinstance(first_item, (dict, list)):
+                    return first_item
+            except (ValueError, IndexError):
+                pass
+            return body
+        elif self._get_type() is "xml":
+            element = etree.fromstring(body)
+            if any(s in element.tag for s in self.dict_tags):
+                # Parse dictionary-like xmls (metadata, etc)
+                dictionary = {}
+                for el in element.getchildren():
+                    dictionary[u"%s" % el.get("key")] = u"%s" % el.text
+                return dictionary
+            if any(s in element.tag for s in self.list_tags):
+                # Parse list-like xmls (users, roles, etc)
+                array = []
+                for child in element.getchildren():
+                    array.append(common.xml_to_json(child))
+                return array
+
+            # Parse one-item-like xmls (user, role, etc)
+            return common.xml_to_json(element)
+
+    def response_checker(self, method, resp, resp_body):
         if (resp.status in set((204, 205, 304)) or resp.status < 200 or
                 method.upper() == 'HEAD') and resp_body:
             raise exceptions.ResponseWithNonEmptyBody(status=resp.status)
@@ -393,31 +372,46 @@ class RestClient(object):
         # The warning is normal for SHOULD/SHOULD NOT case
 
         # Likely it will cause an error
-        if not resp_body and resp.status >= 400:
+        if method != 'HEAD' and not resp_body and resp.status >= 400:
             self.LOG.warning("status >= 400 response with empty body")
 
-    def _request(self, method, url,
-                 headers=None, body=None):
+    def _request(self, method, url, headers=None, body=None):
         """A simple HTTP request interface."""
+        # Authenticate the request with the auth provider
+        req_url, req_headers, req_body = self.auth_provider.auth_request(
+            method, url, headers, body, self.filters)
 
-        req_url = "%s/%s" % (self.base_url, url)
-        self._log_request(method, req_url, headers, body)
-        resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=headers, body=body)
-        self._log_response(resp, resp_body)
-        self.response_checker(method, url, headers, body, resp, resp_body)
+        # Do the actual request, and time it
+        start = time.time()
+        self._log_request_start(method, req_url)
+        resp, resp_body = self.http_obj.request(
+            req_url, method, headers=req_headers, body=req_body)
+        end = time.time()
+        self._log_request(method, req_url, resp, secs=(end - start),
+                          req_headers=req_headers, req_body=req_body,
+                          resp_body=resp_body)
+
+        # Verify HTTP response codes
+        self.response_checker(method, resp, resp_body)
 
         return resp, resp_body
 
-    def request(self, method, url,
-                headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
+        # if extra_headers is True
+        # default headers would be added to headers
         retry = 0
-        if (self.token is None) or (self.base_url is None):
-            self._set_auth()
 
         if headers is None:
-            headers = {}
-        headers['X-Auth-Token'] = self.token
+            # NOTE(vponomaryov): if some client do not need headers,
+            # it should explicitly pass empty dict
+            headers = self.get_headers()
+        elif extra_headers:
+            try:
+                headers = headers.copy()
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = self.get_headers()
 
         resp, resp_body = self._request(method, url,
                                         headers=headers, body=body)
@@ -458,24 +452,23 @@ class RestClient(object):
         if resp.status < 400:
             return
 
-        JSON_ENC = ['application/json; charset=UTF-8', 'application/json',
-                    'application/json; charset=utf-8']
+        JSON_ENC = ['application/json', 'application/json; charset=utf-8']
         # NOTE(mtreinish): This is for compatibility with Glance and swift
         # APIs. These are the return content types that Glance api v1
         # (and occasionally swift) are using.
-        TXT_ENC = ['text/plain', 'text/plain; charset=UTF-8',
-                   'text/html; charset=UTF-8', 'text/plain; charset=utf-8']
-        XML_ENC = ['application/xml', 'application/xml; charset=UTF-8']
+        TXT_ENC = ['text/plain', 'text/html', 'text/html; charset=utf-8',
+                   'text/plain; charset=utf-8']
+        XML_ENC = ['application/xml', 'application/xml; charset=utf-8']
 
-        if ctype in JSON_ENC or ctype in XML_ENC:
+        if ctype.lower() in JSON_ENC or ctype.lower() in XML_ENC:
             parse_resp = True
-        elif ctype in TXT_ENC:
+        elif ctype.lower() in TXT_ENC:
             parse_resp = False
         else:
-            raise exceptions.RestClientException(str(resp.status))
+            raise exceptions.InvalidContentType(str(resp.status))
 
         if resp.status == 401 or resp.status == 403:
-            raise exceptions.Unauthorized()
+            raise exceptions.Unauthorized(resp_body)
 
         if resp.status == 404:
             raise exceptions.NotFound(resp_body)
@@ -488,7 +481,7 @@ class RestClient(object):
         if resp.status == 409:
             if parse_resp:
                 resp_body = self._parse_resp(resp_body)
-            raise exceptions.Duplicate(resp_body)
+            raise exceptions.Conflict(resp_body)
 
         if resp.status == 413:
             if parse_resp:
@@ -506,34 +499,46 @@ class RestClient(object):
         if resp.status in (500, 501):
             message = resp_body
             if parse_resp:
-                resp_body = self._parse_resp(resp_body)
-                # I'm seeing both computeFault and cloudServersFault come back.
-                # Will file a bug to fix, but leave as is for now.
-                if 'cloudServersFault' in resp_body:
-                    message = resp_body['cloudServersFault']['message']
-                elif 'computeFault' in resp_body:
-                    message = resp_body['computeFault']['message']
-                elif 'error' in resp_body:  # Keystone errors
-                    message = resp_body['error']['message']
-                    raise exceptions.IdentityError(message)
-                elif 'message' in resp_body:
-                    message = resp_body['message']
+                try:
+                    resp_body = self._parse_resp(resp_body)
+                except ValueError:
+                    # If response body is a non-json string message.
+                    # Use resp_body as is and raise InvalidResponseBody
+                    # exception.
+                    raise exceptions.InvalidHTTPResponseBody(message)
+                else:
+                    if isinstance(resp_body, dict):
+                        # I'm seeing both computeFault
+                        # and cloudServersFault come back.
+                        # Will file a bug to fix, but leave as is for now.
+                        if 'cloudServersFault' in resp_body:
+                            message = resp_body['cloudServersFault']['message']
+                        elif 'computeFault' in resp_body:
+                            message = resp_body['computeFault']['message']
+                        elif 'error' in resp_body:  # Keystone errors
+                            message = resp_body['error']['message']
+                            raise exceptions.IdentityError(message)
+                        elif 'message' in resp_body:
+                            message = resp_body['message']
+                    else:
+                        message = resp_body
 
-            raise exceptions.ComputeFault(message)
+            raise exceptions.ServerFault(message)
 
         if resp.status >= 400:
-            if parse_resp:
-                resp_body = self._parse_resp(resp_body)
-            raise exceptions.RestClientException(str(resp.status))
+            raise exceptions.UnexpectedResponseCode(str(resp.status))
 
     def is_absolute_limit(self, resp, resp_body):
         if (not isinstance(resp_body, collections.Mapping) or
                 'retry-after' not in resp):
             return True
-        over_limit = resp_body.get('overLimit', None)
-        if not over_limit:
-            return True
-        return 'exceed' in over_limit.get('message', 'blabla')
+        if self._get_type() is "json":
+            over_limit = resp_body.get('overLimit', None)
+            if not over_limit:
+                return True
+            return 'exceed' in over_limit.get('message', 'blabla')
+        elif self._get_type() is "xml":
+            return 'exceed' in resp_body.get('message', 'blabla')
 
     def wait_for_resource_deletion(self, id):
         """Waits for a resource to be deleted."""
@@ -553,15 +558,64 @@ class RestClient(object):
                    % self.__class__.__name__)
         raise NotImplementedError(message)
 
+    @classmethod
+    def validate_response(cls, schema, resp, body):
+        # Only check the response if the status code is a success code
+        # TODO(cyeoh): Eventually we should be able to verify that a failure
+        # code if it exists is something that we expect. This is explicitly
+        # declared in the V3 API and so we should be able to export this in
+        # the response schema. For now we'll ignore it.
+        if resp.status in HTTP_SUCCESS:
+            cls.expected_success(schema['status_code'], resp.status)
 
-class RestClientXML(RestClient):
-    TYPE = "xml"
+            # Check the body of a response
+            body_schema = schema.get('response_body')
+            if body_schema:
+                try:
+                    jsonschema.validate(body, body_schema)
+                except jsonschema.ValidationError as ex:
+                    msg = ("HTTP response body is invalid (%s)") % ex
+                    raise exceptions.InvalidHTTPResponseBody(msg)
+            else:
+                if body:
+                    msg = ("HTTP response body should not exist (%s)") % body
+                    raise exceptions.InvalidHTTPResponseBody(msg)
 
-    def _parse_resp(self, body):
-        return xml_to_json(etree.fromstring(body))
+            # Check the header of a response
+            header_schema = schema.get('response_header')
+            if header_schema:
+                try:
+                    jsonschema.validate(resp, header_schema)
+                except jsonschema.ValidationError as ex:
+                    msg = ("HTTP response header is invalid (%s)") % ex
+                    raise exceptions.InvalidHTTPResponseHeader(msg)
 
-    def is_absolute_limit(self, resp, resp_body):
-        if (not isinstance(resp_body, collections.Mapping) or
-                'retry-after' not in resp):
-            return True
-        return 'exceed' in resp_body.get('message', 'blabla')
+
+class NegativeRestClient(RestClient):
+    """
+    Version of RestClient that does not raise exceptions.
+    """
+    def _error_checker(self, method, url,
+                       headers, body, resp, resp_body):
+        pass
+
+    def send_request(self, method, url_template, resources, body=None):
+        url = url_template % tuple(resources)
+        if method == "GET":
+            resp, body = self.get(url)
+        elif method == "POST":
+            resp, body = self.post(url, body)
+        elif method == "PUT":
+            resp, body = self.put(url, body)
+        elif method == "PATCH":
+            resp, body = self.patch(url, body)
+        elif method == "HEAD":
+            resp, body = self.head(url)
+        elif method == "DELETE":
+            resp, body = self.delete(url)
+        elif method == "COPY":
+            resp, body = self.copy(url)
+        else:
+            assert False
+
+        return resp, body

@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,8 +14,8 @@
 #    under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common.utils import data_utils
+from tempest import test
 
 
 class ContainerTest(base.BaseObjectTest):
@@ -34,6 +32,7 @@ class ContainerTest(base.BaseObjectTest):
     def assertContainer(self, container, count, byte, versioned):
         resp, _ = self.container_client.list_container_metadata(container)
         self.assertEqual(resp['status'], ('204'))
+        self.assertHeaders(resp, 'Container', 'HEAD')
         header_value = resp.get('x-container-object-count', 'Missing Header')
         self.assertEqual(header_value, count)
         header_value = resp.get('x-container-bytes-used', 'Missing Header')
@@ -41,17 +40,18 @@ class ContainerTest(base.BaseObjectTest):
         header_value = resp.get('x-versions-location', 'Missing Header')
         self.assertEqual(header_value, versioned)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_versioned_container(self):
         # create container
-        vers_container_name = rand_name(name='TestVersionContainer')
+        vers_container_name = data_utils.rand_name(name='TestVersionContainer')
         resp, body = self.container_client.create_container(
             vers_container_name)
         self.containers.append(vers_container_name)
         self.assertIn(resp['status'], ('202', '201'))
+        self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(vers_container_name, '0', '0', 'Missing Header')
 
-        base_container_name = rand_name(name='TestBaseContainer')
+        base_container_name = data_utils.rand_name(name='TestBaseContainer')
         headers = {'X-versions-Location': vers_container_name}
         resp, body = self.container_client.create_container(
             base_container_name,
@@ -59,9 +59,10 @@ class ContainerTest(base.BaseObjectTest):
             metadata_prefix='')
         self.containers.append(base_container_name)
         self.assertIn(resp['status'], ('202', '201'))
+        self.assertHeaders(resp, 'Container', 'PUT')
         self.assertContainer(base_container_name, '0', '0',
                              vers_container_name)
-        object_name = rand_name(name='TestObject')
+        object_name = data_utils.rand_name(name='TestObject')
         # create object
         resp, _ = self.object_client.create_object(base_container_name,
                                                    object_name, '1')

@@ -1,7 +1,7 @@
 Tempest Field Guide to Stress Tests
 ===================================
 
-Nova is a distributed, asynchronous system that is prone to race condition
+OpenStack is a distributed, asynchronous system that is prone to race condition
 bugs. These bugs will not be easily found during
 functional testing but will be encountered by users in large deployments in a
 way that is hard to debug. The stress test tries to cause these bugs to happen
@@ -26,12 +26,22 @@ location of the log files:
 To activate logging on your console please make sure that you activate `use_stderr`
 in tempest.conf or use the default `logging.conf.sample` file.
 
+Running default stress test set
+-------------------------------
+
+The stress test framework can automatically discover test inside the tempest
+test suite. All test flag with the `@stresstest` decorator will be executed.
+In order to use this discovery you have to be in the tempest root directory
+and execute the following:
+
+	run-tempest-stress -a -d 30
+
 Running the sample test
 -----------------------
 
-To test installation, do the following (from the tempest/stress directory):
+To test installation, do the following:
 
-	./run_stress.py -t etc/server-create-destroy-test.json -d 30
+	run-tempest-stress -t tempest/stress/etc/server-create-destroy-test.json -d 30
 
 This sample test tries to create a few VMs and kill a few VMs.
 

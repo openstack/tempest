@@ -23,11 +23,11 @@ Parameters:
     Default: '420'
   ScaleUpThreshold:
     Description: Memory percentage threshold to scale up on
-    Type: Number
+    Type: String
     Default: '70'
   ScaleDownThreshold:
     Description: Memory percentage threshold to scale down on
-    Type: Number
+    Type: String
     Default: '60'
   ConsumeMemoryLimit:
     Description: Memory percentage threshold to consume

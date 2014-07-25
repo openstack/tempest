@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,44 +14,36 @@
 #    under the License.
 
 
-from tempest.api.identity.base import DataGenerator
+from tempest.api.identity import base
 from tempest import clients
+from tempest.common import custom_matchers
 from tempest.common import isolated_creds
+from tempest import config
 from tempest import exceptions
 import tempest.test
+
+CONF = config.CONF
 
 
 class BaseObjectTest(tempest.test.BaseTestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.set_network_resources()
         super(BaseObjectTest, cls).setUpClass()
-        if not cls.config.service_available.swift:
+        if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
-        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
-        if cls.config.compute.allow_tenant_isolation:
+        cls.isolated_creds = isolated_creds.IsolatedCreds(
+            cls.__name__, network_resources=cls.network_resources)
+        if CONF.compute.allow_tenant_isolation:
             # Get isolated creds for normal user
-            creds = cls.isolated_creds.get_primary_creds()
-            username, tenant_name, password = creds
-            cls.os = clients.Manager(username=username,
-                                     password=password,
-                                     tenant_name=tenant_name)
+            cls.os = clients.Manager(cls.isolated_creds.get_primary_creds())
             # Get isolated creds for admin user
-            admin_creds = cls.isolated_creds.get_admin_creds()
-            admin_username, admin_tenant_name, admin_password = admin_creds
-            cls.os_admin = clients.Manager(username=admin_username,
-                                           password=admin_password,
-                                           tenant_name=admin_tenant_name)
+            cls.os_admin = clients.Manager(
+                cls.isolated_creds.get_admin_creds())
             # Get isolated creds for alt user
-            alt_creds = cls.isolated_creds.get_alt_creds()
-            alt_username, alt_tenant, alt_password = alt_creds
-            cls.os_alt = clients.Manager(username=alt_username,
-                                         password=alt_password,
-                                         tenant_name=alt_tenant)
-            # Add isolated users to operator role so that they can create a
-            # container in swift.
-            cls._assign_member_role()
+            cls.os_alt = clients.Manager(cls.isolated_creds.get_alt_creds())
         else:
             cls.os = clients.Manager()
             cls.os_admin = clients.AdminManager()
@@ -70,28 +60,21 @@ class BaseObjectTest(tempest.test.BaseTestCase):
         cls.container_client_alt = cls.os_alt.container_client
         cls.identity_client_alt = cls.os_alt.identity_client
 
-        cls.data = DataGenerator(cls.identity_admin_client)
+        # Make sure we get fresh auth data after assigning swift role
+        cls.object_client.auth_provider.clear_auth()
+        cls.container_client.auth_provider.clear_auth()
+        cls.account_client.auth_provider.clear_auth()
+        cls.custom_object_client.auth_provider.clear_auth()
+        cls.custom_account_client.auth_provider.clear_auth()
+        cls.object_client_alt.auth_provider.clear_auth()
+        cls.container_client_alt.auth_provider.clear_auth()
+
+        cls.data = base.DataGenerator(cls.identity_admin_client)
 
     @classmethod
     def tearDownClass(cls):
         cls.isolated_creds.clear_isolated_creds()
         super(BaseObjectTest, cls).tearDownClass()
-
-    @classmethod
-    def _assign_member_role(cls):
-        primary_user = cls.isolated_creds.get_primary_user()
-        alt_user = cls.isolated_creds.get_alt_user()
-        swift_role = cls.config.object_storage.operator_role
-        try:
-            resp, roles = cls.os_admin.identity_client.list_roles()
-            role = next(r for r in roles if r['name'] == swift_role)
-        except StopIteration:
-            msg = "No role named %s found" % swift_role
-            raise exceptions.NotFound(msg)
-        for user in [primary_user, alt_user]:
-            cls.os_admin.identity_client.assign_user_role(user['tenantId'],
-                                                          user['id'],
-                                                          role['id'])
 
     @classmethod
     def delete_containers(cls, containers, container_client=None,
@@ -100,6 +83,7 @@ class BaseObjectTest(tempest.test.BaseTestCase):
 
         The containers should be visible from the container_client given.
         Will not throw any error if the containers don't exist.
+        Will not check that object and container deletions succeed.
 
         :param containers: list of container names to remove
         :param container_client: if None, use cls.container_client, this means
@@ -116,7 +100,19 @@ class BaseObjectTest(tempest.test.BaseTestCase):
                 objlist = container_client.list_all_container_objects(cont)
                 # delete every object in the container
                 for obj in objlist:
-                    object_client.delete_object(cont, obj['name'])
+                    try:
+                        object_client.delete_object(cont, obj['name'])
+                    except exceptions.NotFound:
+                        pass
                 container_client.delete_container(cont)
             except exceptions.NotFound:
                 pass
+
+    def assertHeaders(self, resp, target, method):
+        """
+        Common method to check the existence and the format of common response
+        headers
+        """
+        self.assertThat(resp, custom_matchers.ExistsAllResponseHeaders(
+                        target, method))
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())

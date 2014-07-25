@@ -19,20 +19,14 @@ import copy
 import hashlib
 import httplib
 import json
+import OpenSSL
 import posixpath
 import re
+from six import moves
 import socket
 import StringIO
 import struct
 import urlparse
-
-
-# Python 2.5 compat fix
-if not hasattr(urlparse, 'parse_qsl'):
-    import cgi
-    urlparse.parse_qsl = cgi.parse_qsl
-
-import OpenSSL
 
 from tempest import exceptions as exc
 from tempest.openstack.common import log as logging
@@ -45,9 +39,11 @@ TOKEN_CHARS_RE = re.compile('^[-A-Za-z0-9+/=]*$')
 
 class HTTPClient(object):
 
-    def __init__(self, endpoint, **kwargs):
-        self.endpoint = endpoint
-        endpoint_parts = self.parse_endpoint(self.endpoint)
+    def __init__(self, auth_provider, filters, **kwargs):
+        self.auth_provider = auth_provider
+        self.filters = filters
+        self.endpoint = auth_provider.base_url(filters)
+        endpoint_parts = urlparse.urlparse(self.endpoint)
         self.endpoint_scheme = endpoint_parts.scheme
         self.endpoint_hostname = endpoint_parts.hostname
         self.endpoint_port = endpoint_parts.port
@@ -56,12 +52,6 @@ class HTTPClient(object):
         self.connection_class = self.get_connection_class(self.endpoint_scheme)
         self.connection_kwargs = self.get_connection_kwargs(
             self.endpoint_scheme, **kwargs)
-
-        self.auth_token = kwargs.get('token')
-
-    @staticmethod
-    def parse_endpoint(endpoint):
-        return urlparse.urlparse(endpoint)
 
     @staticmethod
     def get_connection_class(scheme):
@@ -100,15 +90,15 @@ class HTTPClient(object):
         # Copy the kwargs so we can reuse the original in case of redirects
         kwargs['headers'] = copy.deepcopy(kwargs.get('headers', {}))
         kwargs['headers'].setdefault('User-Agent', USER_AGENT)
-        if self.auth_token:
-            kwargs['headers'].setdefault('X-Auth-Token', self.auth_token)
 
         self._log_request(method, url, kwargs['headers'])
 
         conn = self.get_connection()
 
         try:
-            conn_url = posixpath.normpath('%s/%s' % (self.endpoint_path, url))
+            url_parts = urlparse.urlparse(url)
+            conn_url = posixpath.normpath(url_parts.path)
+            LOG.debug('Actual Path: {path}'.format(path=conn_url))
             if kwargs['headers'].get('Transfer-Encoding') == 'chunked':
                 conn.putrequest(method, conn_url)
                 for header, value in kwargs['headers'].items():
@@ -133,7 +123,6 @@ class HTTPClient(object):
             raise exc.TimeoutException(message)
 
         body_iter = ResponseBodyIterator(resp)
-
         # Read body into string if it isn't obviously image data
         if resp.getheader('content-type', None) != 'application/octet-stream':
             body_str = ''.join([body_chunk for body_chunk in body_iter])
@@ -171,20 +160,24 @@ class HTTPClient(object):
     def json_request(self, method, url, **kwargs):
         kwargs.setdefault('headers', {})
         kwargs['headers'].setdefault('Content-Type', 'application/json')
+        if kwargs['headers']['Content-Type'] != 'application/json':
+            msg = "Only application/json content-type is supported."
+            raise exc.InvalidContentType(msg)
 
         if 'body' in kwargs:
             kwargs['body'] = json.dumps(kwargs['body'])
 
         resp, body_iter = self._http_request(url, method, **kwargs)
 
-        if 'application/json' in resp.getheader('content-type', None):
+        if 'application/json' in resp.getheader('content-type', ''):
             body = ''.join([chunk for chunk in body_iter])
             try:
                 body = json.loads(body)
             except ValueError:
                 LOG.error('Could not decode response body as JSON')
         else:
-            body = None
+            msg = "Only json/application content-type is supported."
+            raise exc.InvalidContentType(msg)
 
         return resp, body
 
@@ -198,7 +191,13 @@ class HTTPClient(object):
                 # We use 'Transfer-Encoding: chunked' because
                 # body size may not always be known in advance.
                 kwargs['headers']['Transfer-Encoding'] = 'chunked'
-        return self._http_request(url, method, **kwargs)
+
+        # Decorate the request with auth
+        req_url, kwargs['headers'], kwargs['body'] = \
+            self.auth_provider.auth_request(
+                method=method, url=url, headers=kwargs['headers'],
+                body=kwargs.get('body', None), filters=self.filters)
+        return self._http_request(req_url, method, **kwargs)
 
 
 class OpenSSLConnectionDelegator(object):
@@ -218,6 +217,8 @@ class OpenSSLConnectionDelegator(object):
         return getattr(self.connection, name)
 
     def makefile(self, *args, **kwargs):
+        # Ensure the socket is closed when this file is closed
+        kwargs['close'] = True
         return socket._fileobject(self.connection, *args, **kwargs)
 
 
@@ -256,7 +257,7 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
 
         # Also try Subject Alternative Names for a match
         san_list = None
-        for i in xrange(x509.get_extension_count()):
+        for i in moves.xrange(x509.get_extension_count()):
             ext = x509.get_extension(i)
             if ext.get_short_name() == 'subjectAltName':
                 san_list = str(ext)
@@ -344,6 +345,15 @@ class VerifiedHTTPSConnection(httplib.HTTPSConnection):
                             struct.pack('LL', self.timeout, 0))
         self.sock = OpenSSLConnectionDelegator(self.context, sock)
         self.sock.connect((self.host, self.port))
+
+    def close(self):
+        if self.sock:
+            # Remove the reference to the socket but don't close it yet.
+            # Response close will close both socket and associated
+            # file. Closing socket too soon will cause response
+            # reads to fail with socket IO error 'Bad file descriptor'.
+            self.sock = None
+        httplib.HTTPSConnection.close(self)
 
 
 class ResponseBodyIterator(object):

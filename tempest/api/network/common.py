@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved.
 #
@@ -47,6 +45,9 @@ class DeletableResource(AttributeDict):
     def delete(self):
         raise NotImplemented()
 
+    def __hash__(self):
+        return id(self)
+
 
 class DeletableNetwork(DeletableResource):
 
@@ -56,7 +57,14 @@ class DeletableNetwork(DeletableResource):
 
 class DeletableSubnet(DeletableResource):
 
-    _router_ids = set()
+    def __init__(self, *args, **kwargs):
+        super(DeletableSubnet, self).__init__(*args, **kwargs)
+        self._router_ids = set()
+
+    def update(self, *args, **kwargs):
+        body = dict(subnet=dict(*args, **kwargs))
+        result = self.client.update_subnet(subnet=self.id, body=body)
+        super(DeletableSubnet, self).update(**result['subnet'])
 
     def add_to_router(self, router_id):
         self._router_ids.add(router_id)
@@ -84,6 +92,22 @@ class DeletableRouter(DeletableResource):
 
 class DeletableFloatingIp(DeletableResource):
 
+    def update(self, *args, **kwargs):
+        result = self.client.update_floatingip(floatingip=self.id,
+                                               body=dict(
+                                                   floatingip=dict(*args,
+                                                                   **kwargs)
+                                               ))
+        super(DeletableFloatingIp, self).update(**result['floatingip'])
+
+    def __repr__(self):
+        return '<%s addr="%s">' % (self.__class__.__name__,
+                                   self.floating_ip_address)
+
+    def __str__(self):
+        return '<"FloatingIP" addr="%s" id="%s">' % (self.floating_ip_address,
+                                                     self.id)
+
     def delete(self):
         self.client.delete_floatingip(self.id)
 
@@ -92,3 +116,36 @@ class DeletablePort(DeletableResource):
 
     def delete(self):
         self.client.delete_port(self.id)
+
+
+class DeletableSecurityGroup(DeletableResource):
+
+    def delete(self):
+        self.client.delete_security_group(self.id)
+
+
+class DeletableSecurityGroupRule(DeletableResource):
+
+    def __repr__(self):
+        return '<%s id="%s">' % (self.__class__.__name__, self.id)
+
+    def delete(self):
+        self.client.delete_security_group_rule(self.id)
+
+
+class DeletablePool(DeletableResource):
+
+    def delete(self):
+        self.client.delete_pool(self.id)
+
+
+class DeletableMember(DeletableResource):
+
+    def delete(self):
+        self.client.delete_member(self.id)
+
+
+class DeletableVip(DeletableResource):
+
+    def delete(self):
+        self.client.delete_vip(self.id)

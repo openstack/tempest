@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,19 +17,22 @@ import json
 import time
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute.v2 import volumes as schema
+from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
 
+CONF = config.CONF
 
-class VolumesExtensionsClientJSON(RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(VolumesExtensionsClientJSON, self).__init__(config, username,
-                                                          password, auth_url,
-                                                          tenant_name)
-        self.service = self.config.compute.catalog_type
-        self.build_interval = self.config.volume.build_interval
-        self.build_timeout = self.config.volume.build_timeout
+class VolumesExtensionsClientJSON(rest_client.RestClient):
+
+    def __init__(self, auth_provider):
+        super(VolumesExtensionsClientJSON, self).__init__(
+            auth_provider)
+        self.service = CONF.compute.catalog_type
+        self.build_interval = CONF.volume.build_interval
+        self.build_timeout = CONF.volume.build_timeout
 
     def list_volumes(self, params=None):
         """List all the volumes created."""
@@ -41,6 +42,7 @@ class VolumesExtensionsClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_volumes, resp, body)
         return resp, body['volumes']
 
     def list_volumes_with_detail(self, params=None):
@@ -51,6 +53,7 @@ class VolumesExtensionsClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_volumes, resp, body)
         return resp, body['volumes']
 
     def get_volume(self, volume_id):
@@ -58,6 +61,7 @@ class VolumesExtensionsClientJSON(RestClient):
         url = "os-volumes/%s" % str(volume_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.create_get_volume, resp, body)
         return resp, body['volume']
 
     def create_volume(self, size, **kwargs):
@@ -75,13 +79,16 @@ class VolumesExtensionsClientJSON(RestClient):
         }
 
         post_body = json.dumps({'volume': post_body})
-        resp, body = self.post('os-volumes', post_body, self.headers)
+        resp, body = self.post('os-volumes', post_body)
         body = json.loads(body)
+        self.validate_response(schema.create_get_volume, resp, body)
         return resp, body['volume']
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
-        return self.delete("os-volumes/%s" % str(volume_id))
+        resp, body = self.delete("os-volumes/%s" % str(volume_id))
+        self.validate_response(schema.delete_volume, resp, body)
+        return resp, body
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""

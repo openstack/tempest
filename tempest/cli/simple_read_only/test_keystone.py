@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,12 +16,11 @@
 import re
 import subprocess
 
-from oslo.config import cfg
-
 import tempest.cli
+from tempest import config
 from tempest.openstack.common import log as logging
 
-CONF = cfg.CONF
+CONF = config.CONF
 
 
 LOG = logging.getLogger(__name__)
@@ -119,6 +116,11 @@ class SimpleReadOnlyKeystoneClientTest(tempest.cli.ClientTestBase):
 
     def test_admin_bashcompletion(self):
         self.keystone('bash-completion')
+
+    def test_admin_ec2_credentials_list(self):
+        creds = self.keystone('ec2-credentials-list')
+        creds = self.parser.listing(creds)
+        self.assertTableStruct(creds, ['tenant', 'access', 'secret'])
 
     # Optional arguments:
 

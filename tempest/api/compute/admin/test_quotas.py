@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,36 +13,34 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+from testtools import matchers
+
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
-from tempest import config
-from tempest import exceptions
-from tempest.test import attr
-from tempest.test import skip_because
+from tempest.common import tempest_fixtures as fixtures
+from tempest.common.utils import data_utils
+from tempest.openstack.common import log as logging
+from tempest import test
+
+LOG = logging.getLogger(__name__)
 
 
-class QuotasAdminTestJSON(base.BaseComputeAdminTest):
-    _interface = 'json'
+class QuotasAdminTestJSON(base.BaseV2ComputeAdminTest):
+    force_tenant_isolation = True
+
+    def setUp(self):
+        # NOTE(mriedem): Avoid conflicts with os-quota-class-sets tests.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
+        super(QuotasAdminTestJSON, self).setUp()
 
     @classmethod
     def setUpClass(cls):
         super(QuotasAdminTestJSON, cls).setUpClass()
-        cls.auth_url = cls.config.identity.uri
-        cls.client = cls.os.quotas_client
         cls.adm_client = cls.os_adm.quotas_client
-        cls.identity_admin_client = cls._get_identity_admin_client()
-        cls.sg_client = cls.security_groups_client
-
-        resp, tenants = cls.identity_admin_client.list_tenants()
 
         # NOTE(afazekas): these test cases should always create and use a new
         # tenant most of them should be skipped if we can't do that
-        if cls.config.compute.allow_tenant_isolation:
-            cls.demo_tenant_id = cls.isolated_creds.get_primary_user().get(
-                'tenantId')
-        else:
-            cls.demo_tenant_id = [tnt['id'] for tnt in tenants if tnt['name']
-                                  == cls.config.identity.tenant_name][0]
+        cls.demo_tenant_id = cls.quotas_client.tenant_id
 
         cls.default_quota_set = set(('injected_file_content_bytes',
                                      'metadata_items', 'injected_files',
@@ -54,21 +50,21 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
                                      'instances', 'security_group_rules',
                                      'cores', 'security_groups'))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_default_quotas(self):
         # Admin can get the default resource quota set for a tenant
         expected_quota_set = self.default_quota_set | set(['id'])
-        resp, quota_set = self.client.get_default_quota_set(
+        resp, quota_set = self.adm_client.get_default_quota_set(
             self.demo_tenant_id)
         self.assertEqual(200, resp.status)
         self.assertEqual(sorted(expected_quota_set),
                          sorted(quota_set.keys()))
         self.assertEqual(quota_set['id'], self.demo_tenant_id)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_update_all_quota_resources_for_tenant(self):
         # Admin can update all the resource quota limits for a tenant
-        resp, default_quota_set = self.client.get_default_quota_set(
+        resp, default_quota_set = self.adm_client.get_default_quota_set(
             self.demo_tenant_id)
         new_quota_set = {'injected_file_content_bytes': 20480,
                          'metadata_items': 256, 'injected_files': 10,
@@ -89,137 +85,116 @@ class QuotasAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(new_quota_set, quota_set)
 
     # TODO(afazekas): merge these test cases
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_updated_quotas(self):
-        # Verify that GET shows the updated quota set
-        tenant_name = rand_name('cpu_quota_tenant_')
+        # Verify that GET shows the updated quota set of tenant
+        tenant_name = data_utils.rand_name('cpu_quota_tenant_')
         tenant_desc = tenant_name + '-desc'
         identity_client = self.os_adm.identity_client
         _, tenant = identity_client.create_tenant(name=tenant_name,
                                                   description=tenant_desc)
         tenant_id = tenant['id']
-        self.addCleanup(identity_client.delete_tenant,
-                        tenant_id)
+        self.addCleanup(identity_client.delete_tenant, tenant_id)
 
-        self.adm_client.update_quota_set(tenant_id,
-                                         ram='5120')
+        self.adm_client.update_quota_set(tenant_id, ram='5120')
         resp, quota_set = self.adm_client.get_quota_set(tenant_id)
         self.assertEqual(200, resp.status)
-        self.assertEqual(quota_set['ram'], 5120)
+        self.assertEqual(5120, quota_set['ram'])
 
-    # TODO(afazekas): Add dedicated tenant to the skiped quota tests
-    # it can be moved into the setUpClass as well
-    @attr(type='gate')
-    def test_create_server_when_cpu_quota_is_full(self):
-        # Disallow server creation when tenant's vcpu quota is full
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-        default_vcpu_quota = quota_set['cores']
-        vcpu_quota = 0  # Set the quota to zero to conserve resources
+        # Verify that GET shows the updated quota set of user
+        user_name = data_utils.rand_name('cpu_quota_user_')
+        password = data_utils.rand_name('password-')
+        email = user_name + '@testmail.tm'
+        _, user = identity_client.create_user(name=user_name,
+                                              password=password,
+                                              tenant_id=tenant_id,
+                                              email=email)
+        user_id = user['id']
+        self.addCleanup(identity_client.delete_user, user_id)
 
-        resp, quota_set = self.adm_client.update_quota_set(self.demo_tenant_id,
-                                                           force=True,
-                                                           cores=vcpu_quota)
+        self.adm_client.update_quota_set(tenant_id,
+                                         user_id=user_id,
+                                         ram='2048')
+        resp, quota_set = self.adm_client.get_quota_set(tenant_id,
+                                                        user_id=user_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(2048, quota_set['ram'])
 
-        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
-                        cores=default_vcpu_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_server)
+    @test.attr(type='gate')
+    def test_delete_quota(self):
+        # Admin can delete the resource quota set for a tenant
+        tenant_name = data_utils.rand_name('ram_quota_tenant_')
+        tenant_desc = tenant_name + '-desc'
+        identity_client = self.os_adm.identity_client
+        _, tenant = identity_client.create_tenant(name=tenant_name,
+                                                  description=tenant_desc)
+        tenant_id = tenant['id']
+        self.addCleanup(identity_client.delete_tenant, tenant_id)
+        resp, quota_set_default = self.adm_client.get_quota_set(tenant_id)
+        ram_default = quota_set_default['ram']
 
-    @attr(type='gate')
-    def test_create_server_when_memory_quota_is_full(self):
-        # Disallow server creation when tenant's memory quota is full
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-        default_mem_quota = quota_set['ram']
-        mem_quota = 0  # Set the quota to zero to conserve resources
+        resp, body = self.adm_client.update_quota_set(tenant_id, ram='5120')
+        self.assertEqual(200, resp.status)
 
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         force=True,
-                                         ram=mem_quota)
+        resp, body = self.adm_client.delete_quota_set(tenant_id)
+        self.assertEqual(202, resp.status)
 
-        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
-                        ram=default_mem_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_server)
-
-    @attr(type='gate')
-    def test_update_quota_normal_user(self):
-        self.assertRaises(exceptions.Unauthorized,
-                          self.client.update_quota_set,
-                          self.demo_tenant_id,
-                          ram=0)
-
-    @attr(type=['negative', 'gate'])
-    def test_create_server_when_instances_quota_is_full(self):
-        # Once instances quota limit is reached, disallow server creation
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-        default_instances_quota = quota_set['instances']
-        instances_quota = 0  # Set quota to zero to disallow server creation
-
-        self.adm_client.update_quota_set(self.demo_tenant_id,
-                                         force=True,
-                                         instances=instances_quota)
-        self.addCleanup(self.adm_client.update_quota_set, self.demo_tenant_id,
-                        instances=default_instances_quota)
-        self.assertRaises(exceptions.OverLimit, self.create_server)
-
-    @skip_because(bug="1186354",
-                  condition=config.TempestConfig().service_available.neutron)
-    @attr(type=['negative', 'gate'])
-    def test_security_groups_exceed_limit(self):
-        # Negative test: Creation Security Groups over limit should FAIL
-
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-        default_sg_quota = quota_set['security_groups']
-        sg_quota = 0  # Set the quota to zero to conserve resources
-
-        resp, quota_set =\
-            self.adm_client.update_quota_set(self.demo_tenant_id,
-                                             force=True,
-                                             security_groups=sg_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id,
-                        security_groups=default_sg_quota)
-
-        # Check we cannot create anymore
-        self.assertRaises(exceptions.OverLimit,
-                          self.sg_client.create_security_group,
-                          "sg-overlimit", "sg-desc")
-
-    @skip_because(bug="1186354",
-                  condition=config.TempestConfig().service_available.neutron)
-    @attr(type=['negative', 'gate'])
-    def test_security_groups_rules_exceed_limit(self):
-        # Negative test: Creation of Security Group Rules should FAIL
-        # when we reach limit maxSecurityGroupRules
-
-        resp, quota_set = self.client.get_quota_set(self.demo_tenant_id)
-        default_sg_rules_quota = quota_set['security_group_rules']
-        sg_rules_quota = 0  # Set the quota to zero to conserve resources
-
-        resp, quota_set =\
-            self.adm_client.update_quota_set(
-                self.demo_tenant_id,
-                force=True,
-                security_group_rules=sg_rules_quota)
-
-        self.addCleanup(self.adm_client.update_quota_set,
-                        self.demo_tenant_id,
-                        security_group_rules=default_sg_rules_quota)
-
-        s_name = rand_name('securitygroup-')
-        s_description = rand_name('description-')
-        resp, securitygroup =\
-            self.sg_client.create_security_group(s_name, s_description)
-        self.addCleanup(self.sg_client.delete_security_group,
-                        securitygroup['id'])
-
-        secgroup_id = securitygroup['id']
-        ip_protocol = 'tcp'
-
-        # Check we cannot create SG rule anymore
-        self.assertRaises(exceptions.OverLimit,
-                          self.sg_client.create_security_group_rule,
-                          secgroup_id, ip_protocol, 1025, 1025)
+        resp, quota_set_new = self.adm_client.get_quota_set(tenant_id)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(ram_default, quota_set_new['ram'])
 
 
 class QuotasAdminTestXML(QuotasAdminTestJSON):
+    _interface = 'xml'
+
+
+class QuotaClassesAdminTestJSON(base.BaseV2ComputeAdminTest):
+    """Tests the os-quota-class-sets API to update default quotas.
+    """
+
+    def setUp(self):
+        # All test cases in this class need to externally lock on doing
+        # anything with default quota values.
+        self.useFixture(fixtures.LockFixture('compute_quotas'))
+        super(QuotaClassesAdminTestJSON, self).setUp()
+
+    @classmethod
+    def setUpClass(cls):
+        super(QuotaClassesAdminTestJSON, cls).setUpClass()
+        cls.adm_client = cls.os_adm.quota_classes_client
+
+    def _restore_default_quotas(self, original_defaults):
+        LOG.debug("restoring quota class defaults")
+        resp, body = self.adm_client.update_quota_class_set(
+            'default', **original_defaults)
+        self.assertEqual(200, resp.status)
+
+    # NOTE(sdague): this test is problematic as it changes
+    # global state, and possibly needs to be part of a set of
+    # tests that get run all by themselves at the end under a
+    # 'danger' flag.
+    def test_update_default_quotas(self):
+        LOG.debug("get the current 'default' quota class values")
+        resp, body = self.adm_client.get_quota_class_set('default')
+        self.assertEqual(200, resp.status)
+        self.assertIn('id', body)
+        self.assertEqual('default', body.pop('id'))
+        # restore the defaults when the test is done
+        self.addCleanup(self._restore_default_quotas, body.copy())
+        # increment all of the values for updating the default quota class
+        for quota, default in six.iteritems(body):
+            # NOTE(sdague): we need to increment a lot, otherwise
+            # there is a real chance that we go from -1 (unlimitted)
+            # to a very small number which causes issues.
+            body[quota] = default + 100
+        LOG.debug("update limits for the default quota class set")
+        resp, update_body = self.adm_client.update_quota_class_set('default',
+                                                                   **body)
+        self.assertEqual(200, resp.status)
+        LOG.debug("assert that the response has all of the changed values")
+        self.assertThat(update_body.items(),
+                        matchers.ContainsAll(body.items()))
+
+
+class QuotaClassesAdminTestXML(QuotaClassesAdminTestJSON):
     _interface = 'xml'

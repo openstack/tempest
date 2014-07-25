@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,11 +17,10 @@ import base64
 
 from tempest.api.compute import base
 from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
-class ServerPersonalityTestJSON(base.BaseComputeTest):
-    _interface = 'json'
+class ServerPersonalityTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
@@ -31,7 +28,7 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
         cls.client = cls.servers_client
         cls.user_client = cls.limits_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_personality_files_exceed_limit(self):
         # Server creation should fail if greater than the maximum allowed
         # number of files are injected into the server.
@@ -43,10 +40,10 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
             path = 'etc/test' + str(i) + '.txt'
             personality.append({'path': path,
                                 'contents': base64.b64encode(file_contents)})
-        self.assertRaises(exceptions.OverLimit, self.create_server,
+        self.assertRaises(exceptions.OverLimit, self.create_test_server,
                           personality=personality)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_can_create_server_with_max_number_personality_files(self):
         # Server should be created successfully if maximum allowed number of
         # files is injected into the server during creation.
@@ -60,8 +57,7 @@ class ServerPersonalityTestJSON(base.BaseComputeTest):
                 'path': path,
                 'contents': base64.b64encode(file_contents),
             })
-        resp, server = self.create_server(personality=person)
-        self.addCleanup(self.client.delete_server, server['id'])
+        resp, server = self.create_test_server(personality=person)
         self.assertEqual('202', resp['status'])
 
 

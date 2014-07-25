@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -48,13 +46,21 @@ class TempestException(Exception):
         return self._error_string
 
 
+class RestClientException(TempestException,
+                          testtools.TestCase.failureException):
+    pass
+
+
+class RFCViolation(RestClientException):
+    message = "RFC Violation"
+
+
 class InvalidConfiguration(TempestException):
     message = "Invalid Configuration"
 
 
-class RestClientException(TempestException,
-                          testtools.TestCase.failureException):
-    pass
+class InvalidCredentials(TempestException):
+    message = "Invalid Credentials"
 
 
 class InvalidHttpSuccessCode(RestClientException):
@@ -81,6 +87,10 @@ class BuildErrorException(TempestException):
     message = "Server %(server_id)s failed to build and is in ERROR status"
 
 
+class ImageKilledException(TempestException):
+    message = "Image %(image_id)s 'killed' while waiting for '%(status)s'"
+
+
 class AddImageException(TempestException):
     message = "Image %(image_id)s failed to become ACTIVE in the allotted time"
 
@@ -98,9 +108,19 @@ class SnapshotBuildErrorException(TempestException):
     message = "Snapshot %(snapshot_id)s failed to build and is in ERROR status"
 
 
+class VolumeBackupException(TempestException):
+    message = "Volume backup %(backup_id)s failed and is in ERROR status"
+
+
 class StackBuildErrorException(TempestException):
     message = ("Stack %(stack_identifier)s is in %(stack_status)s status "
                "due to '%(stack_status_reason)s'")
+
+
+class StackResourceBuildErrorException(TempestException):
+    message = ("Resource %(resource_name)s in stack %(stack_identifier)s is "
+               "in %(resource_status)s status due to "
+               "'%(resource_status_reason)s'")
 
 
 class BadRequest(RestClientException):
@@ -121,16 +141,15 @@ class EndpointNotFound(TempestException):
 
 
 class RateLimitExceeded(TempestException):
-    message = ("Rate limit exceeded.\nMessage: %(message)s\n"
-               "Details: %(details)s")
+    message = "Rate limit exceeded"
 
 
 class OverLimit(TempestException):
     message = "Quota exceeded"
 
 
-class ComputeFault(TempestException):
-    message = "Got compute fault"
+class ServerFault(TempestException):
+    message = "Got server fault"
 
 
 class ImageFault(TempestException):
@@ -141,7 +160,7 @@ class IdentityError(TempestException):
     message = "Got identity error"
 
 
-class Duplicate(RestClientException):
+class Conflict(RestClientException):
     message = "An object with that identifier already exists"
 
 
@@ -160,16 +179,8 @@ class ServerUnreachable(TempestException):
     message = "The server is not reachable via the configured network"
 
 
-class SQLException(TempestException):
-    message = "SQL error: %(message)s"
-
-
 class TearDownException(TempestException):
     message = "%(num)d cleanUp operation failed"
-
-
-class RFCViolation(RestClientException):
-    message = "RFC Violation"
 
 
 class ResponseWithNonEmptyBody(RFCViolation):
@@ -180,3 +191,23 @@ class ResponseWithNonEmptyBody(RFCViolation):
 class ResponseWithEntity(RFCViolation):
     message = ("RFC Violation! Response with 205 HTTP Status Code "
                "MUST NOT have an entity")
+
+
+class InvalidHTTPResponseBody(RestClientException):
+    message = "HTTP response body is invalid json or xml"
+
+
+class InvalidHTTPResponseHeader(RestClientException):
+    message = "HTTP response header is invalid"
+
+
+class InvalidContentType(RestClientException):
+    message = "Invalid content type provided"
+
+
+class UnexpectedResponseCode(RestClientException):
+    message = "Unexpected response code received"
+
+
+class InvalidStructure(TempestException):
+    message = "Invalid structure of table with details"

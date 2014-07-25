@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # Copyright 2013 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved.
@@ -15,17 +13,23 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import collections
+
+import re
 
 from tempest.api.network import common as net_common
 from tempest.common import debug
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
 from tempest import config
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
-from tempest.test import attr
-from tempest.test import services
+from tempest import test
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
+
+Floating_IP_tuple = collections.namedtuple('Floating_IP_tuple',
+                                           ['floating_ip', 'server'])
 
 
 class TestNetworkBasicOps(manager.NetworkScenarioTest):
@@ -34,29 +38,6 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
     This smoke test suite assumes that Nova has been configured to
     boot VM's with Neutron-managed networking, and attempts to
     verify network connectivity as follows:
-
-     * For a freshly-booted VM with an IP address ("port") on a given network:
-
-       - the Tempest host can ping the IP address.  This implies, but
-         does not guarantee (see the ssh check that follows), that the
-         VM has been assigned the correct IP address and has
-         connectivity to the Tempest host.
-
-       - the Tempest host can perform key-based authentication to an
-         ssh server hosted at the IP address.  This check guarantees
-         that the IP address is associated with the target VM.
-
-       # TODO(mnewby) - Need to implement the following:
-       - the Tempest host can ssh into the VM via the IP address and
-         successfully execute the following:
-
-         - ping an external IP address, implying external connectivity.
-
-         - ping an external hostname, implying that dns is correctly
-           configured.
-
-         - ping an internal IP address, implying connectivity to another
-           VM on the same network.
 
      There are presumed to be two types of networks: tenant and
      public.  A tenant network may or may not be reachable from the
@@ -94,13 +75,11 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     """
 
-    CONF = config.TempestConfig()
-
     @classmethod
     def check_preconditions(cls):
         super(TestNetworkBasicOps, cls).check_preconditions()
-        cfg = cls.config.network
-        if not (cfg.tenant_networks_reachable or cfg.public_network_id):
+        if not (CONF.network.tenant_networks_reachable
+                or CONF.network.public_network_id):
             msg = ('Either tenant_networks_reachable must be "true", or '
                    'public_network_id must be defined.')
             cls.enabled = False
@@ -108,163 +87,279 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
 
     @classmethod
     def setUpClass(cls):
+        # Create no network resources for these tests.
+        cls.set_network_resources()
         super(TestNetworkBasicOps, cls).setUpClass()
+        for ext in ['router', 'security-group']:
+            if not test.is_extension_enabled(ext, 'network'):
+                msg = "%s extension not enabled." % ext
+                raise cls.skipException(msg)
         cls.check_preconditions()
-        # TODO(mnewby) Consider looking up entities as needed instead
-        # of storing them as collections on the class.
-        cls.keypairs = {}
-        cls.security_groups = {}
-        cls.networks = []
-        cls.subnets = []
-        cls.routers = []
-        cls.servers = []
-        cls.floating_ips = {}
 
-    def _get_router(self, tenant_id):
-        """Retrieve a router for the given tenant id.
+    def setUp(self):
+        super(TestNetworkBasicOps, self).setUp()
+        self.security_group = \
+            self._create_security_group_neutron(tenant_id=self.tenant_id)
+        self.network, self.subnet, self.router = self._create_networks()
+        self.check_networks()
+        self.servers = {}
+        name = data_utils.rand_name('server-smoke')
+        serv_dict = self._create_server(name, self.network)
+        self.servers[serv_dict['server']] = serv_dict['keypair']
+        self._check_tenant_network_connectivity()
 
-        If a public router has been configured, it will be returned.
+        self._create_and_associate_floating_ips()
 
-        If a public router has not been configured, but a public
-        network has, a tenant router will be created and returned that
-        routes traffic to the public network.
-
+    def check_networks(self):
         """
-        router_id = self.config.network.public_router_id
-        network_id = self.config.network.public_network_id
-        if router_id:
-            result = self.network_client.show_router(router_id)
-            return net_common.AttributeDict(**result['router'])
-        elif network_id:
-            router = self._create_router(tenant_id)
-            router.add_gateway(network_id)
-            return router
-        else:
-            raise Exception("Neither of 'public_router_id' or "
-                            "'public_network_id' has been defined.")
+        Checks that we see the newly created network/subnet/router via
+        checking the result of list_[networks,routers,subnets]
+        """
 
-    def _create_router(self, tenant_id, namestart='router-smoke-'):
-        name = rand_name(namestart)
-        body = dict(
-            router=dict(
-                name=name,
-                admin_state_up=True,
-                tenant_id=tenant_id,
-            ),
-        )
-        result = self.network_client.create_router(body=body)
-        router = net_common.DeletableRouter(client=self.network_client,
-                                            **result['router'])
-        self.assertEqual(router.name, name)
-        self.set_resource(name, router)
-        return router
-
-    def _create_keypairs(self):
-        self.keypairs[self.tenant_id] = self.create_keypair(
-            name=rand_name('keypair-smoke-'))
-
-    def _create_security_groups(self):
-        self.security_groups[self.tenant_id] = self._create_security_group()
-
-    def _create_networks(self):
-        network = self._create_network(self.tenant_id)
-        router = self._get_router(self.tenant_id)
-        subnet = self._create_subnet(network)
-        subnet.add_to_router(router.id)
-        self.networks.append(network)
-        self.subnets.append(subnet)
-        self.routers.append(router)
-
-    def _check_networks(self):
-        # Checks that we see the newly created network/subnet/router via
-        # checking the result of list_[networks,routers,subnets]
         seen_nets = self._list_networks()
         seen_names = [n['name'] for n in seen_nets]
         seen_ids = [n['id'] for n in seen_nets]
-        for mynet in self.networks:
-            self.assertIn(mynet.name, seen_names)
-            self.assertIn(mynet.id, seen_ids)
+        self.assertIn(self.network.name, seen_names)
+        self.assertIn(self.network.id, seen_ids)
+
         seen_subnets = self._list_subnets()
         seen_net_ids = [n['network_id'] for n in seen_subnets]
         seen_subnet_ids = [n['id'] for n in seen_subnets]
-        for mynet in self.networks:
-            self.assertIn(mynet.id, seen_net_ids)
-        for mysubnet in self.subnets:
-            self.assertIn(mysubnet.id, seen_subnet_ids)
+        self.assertIn(self.network.id, seen_net_ids)
+        self.assertIn(self.subnet.id, seen_subnet_ids)
+
         seen_routers = self._list_routers()
         seen_router_ids = [n['id'] for n in seen_routers]
         seen_router_names = [n['name'] for n in seen_routers]
-        for myrouter in self.routers:
-            self.assertIn(myrouter.name, seen_router_names)
-            self.assertIn(myrouter.id, seen_router_ids)
+        self.assertIn(self.router.name,
+                      seen_router_names)
+        self.assertIn(self.router.id,
+                      seen_router_ids)
 
     def _create_server(self, name, network):
-        tenant_id = network.tenant_id
-        keypair_name = self.keypairs[tenant_id].name
-        security_groups = [self.security_groups[tenant_id].name]
+        keypair = self.create_keypair(name='keypair-%s' % name)
+        security_groups = [self.security_group.name]
         create_kwargs = {
             'nics': [
                 {'net-id': network.id},
             ],
-            'key_name': keypair_name,
+            'key_name': keypair.name,
             'security_groups': security_groups,
         }
         server = self.create_server(name=name, create_kwargs=create_kwargs)
-        return server
-
-    def _create_servers(self):
-        for i, network in enumerate(self.networks):
-            name = rand_name('server-smoke-%d-' % i)
-            server = self._create_server(name, network)
-            self.servers.append(server)
+        return dict(server=server, keypair=keypair)
 
     def _check_tenant_network_connectivity(self):
-        if not self.config.network.tenant_networks_reachable:
-            msg = 'Tenant networks not configured to be reachable.'
+        ssh_login = CONF.compute.image_ssh_user
+        for server, key in self.servers.iteritems():
+            # call the common method in the parent class
+            super(TestNetworkBasicOps, self).\
+                _check_tenant_network_connectivity(
+                    server, ssh_login, key.private_key,
+                    servers_for_debug=self.servers.keys())
+
+    def _create_and_associate_floating_ips(self):
+        public_network_id = CONF.network.public_network_id
+        for server in self.servers.keys():
+            floating_ip = self._create_floating_ip(server, public_network_id)
+            self.floating_ip_tuple = Floating_IP_tuple(floating_ip, server)
+
+    def _check_public_network_connectivity(self, should_connect=True,
+                                           msg=None):
+        ssh_login = CONF.compute.image_ssh_user
+        floating_ip, server = self.floating_ip_tuple
+        ip_address = floating_ip.floating_ip_address
+        private_key = None
+        if should_connect:
+            private_key = self.servers[server].private_key
+        # call the common method in the parent class
+        super(TestNetworkBasicOps, self)._check_public_network_connectivity(
+            ip_address, ssh_login, private_key, should_connect, msg,
+            self.servers.keys())
+
+    def _disassociate_floating_ips(self):
+        floating_ip, server = self.floating_ip_tuple
+        self._disassociate_floating_ip(floating_ip)
+        self.floating_ip_tuple = Floating_IP_tuple(
+            floating_ip, None)
+
+    def _reassociate_floating_ips(self):
+        floating_ip, server = self.floating_ip_tuple
+        name = data_utils.rand_name('new_server-smoke-')
+        # create a new server for the floating ip
+        serv_dict = self._create_server(name, self.network)
+        self.servers[serv_dict['server']] = serv_dict['keypair']
+        self._associate_floating_ip(floating_ip, serv_dict['server'])
+        self.floating_ip_tuple = Floating_IP_tuple(
+            floating_ip, serv_dict['server'])
+
+    def _create_new_network(self):
+        self.new_net = self._create_network(self.tenant_id)
+        self.new_subnet = self._create_subnet(
+            network=self.new_net,
+            gateway_ip=None)
+
+    def _hotplug_server(self):
+        old_floating_ip, server = self.floating_ip_tuple
+        ip_address = old_floating_ip.floating_ip_address
+        private_key = self.servers[server].private_key
+        ssh_client = self.get_remote_client(ip_address,
+                                            private_key=private_key)
+        old_nic_list = self._get_server_nics(ssh_client)
+        # get a port from a list of one item
+        port_list = self._list_ports(device_id=server.id)
+        self.assertEqual(1, len(port_list))
+        old_port = port_list[0]
+        self.compute_client.servers.interface_attach(server=server,
+                                                     net_id=self.new_net.id,
+                                                     port_id=None,
+                                                     fixed_ip=None)
+        # move server to the head of the cleanup list
+        self.addCleanup(self.delete_timeout,
+                        self.compute_client.servers,
+                        server.id)
+        self.addCleanup(self.delete_wrapper, server)
+
+        def check_ports():
+            port_list = [port for port in
+                         self._list_ports(device_id=server.id)
+                         if port != old_port]
+            return len(port_list) == 1
+
+        test.call_until_true(check_ports, 60, 1)
+        new_port_list = [p for p in
+                         self._list_ports(device_id=server.id)
+                         if p != old_port]
+        self.assertEqual(1, len(new_port_list))
+        new_port = new_port_list[0]
+        new_port = net_common.DeletablePort(client=self.network_client,
+                                            **new_port)
+        new_nic_list = self._get_server_nics(ssh_client)
+        diff_list = [n for n in new_nic_list if n not in old_nic_list]
+        self.assertEqual(1, len(diff_list))
+        num, new_nic = diff_list[0]
+        ssh_client.assign_static_ip(nic=new_nic,
+                                    addr=new_port.fixed_ips[0]['ip_address'])
+        ssh_client.turn_nic_on(nic=new_nic)
+
+    def _get_server_nics(self, ssh_client):
+        reg = re.compile(r'(?P<num>\d+): (?P<nic_name>\w+):')
+        ipatxt = ssh_client.get_ip_list()
+        return reg.findall(ipatxt)
+
+    def _check_network_internal_connectivity(self, network):
+        """
+        via ssh check VM internal connectivity:
+        - ping internal gateway and DHCP port, implying in-tenant connectivity
+        pinging both, because L3 and DHCP agents might be on different nodes
+        """
+        floating_ip, server = self.floating_ip_tuple
+        # get internal ports' ips:
+        # get all network ports in the new network
+        internal_ips = (p['fixed_ips'][0]['ip_address'] for p in
+                        self._list_ports(tenant_id=server.tenant_id,
+                                         network_id=network.id)
+                        if p['device_owner'].startswith('network'))
+
+        self._check_server_connectivity(floating_ip, internal_ips)
+
+    def _check_network_external_connectivity(self):
+        """
+        ping public network default gateway to imply external connectivity
+
+        """
+        if not CONF.network.public_network_id:
+            msg = 'public network not defined.'
             LOG.info(msg)
             return
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        ssh_login = self.config.compute.image_ssh_user
-        private_key = self.keypairs[self.tenant_id].private_key
-        for server in self.servers:
-            for net_name, ip_addresses in server.networks.iteritems():
-                for ip_address in ip_addresses:
-                    self._check_vm_connectivity(ip_address, ssh_login,
-                                                private_key)
 
-    def _assign_floating_ips(self):
-        public_network_id = self.config.network.public_network_id
-        for server in self.servers:
-            floating_ip = self._create_floating_ip(server, public_network_id)
-            self.floating_ips.setdefault(server, [])
-            self.floating_ips[server].append(floating_ip)
+        subnet = self.network_client.list_subnets(
+            network_id=CONF.network.public_network_id)['subnets']
+        self.assertEqual(1, len(subnet), "Found %d subnets" % len(subnet))
 
-    def _check_public_network_connectivity(self):
-        # The target login is assumed to have been configured for
-        # key-based authentication by cloud-init.
-        ssh_login = self.config.compute.image_ssh_user
-        private_key = self.keypairs[self.tenant_id].private_key
-        try:
-            for server, floating_ips in self.floating_ips.iteritems():
-                for floating_ip in floating_ips:
-                    ip_address = floating_ip.floating_ip_address
-                    self._check_vm_connectivity(ip_address,
-                                                ssh_login,
-                                                private_key)
-        except Exception as exc:
-            LOG.exception(exc)
-            debug.log_ip_ns()
-            raise exc
+        external_ips = [subnet[0]['gateway_ip']]
+        self._check_server_connectivity(self.floating_ip_tuple.floating_ip,
+                                        external_ips)
 
-    @attr(type='smoke')
-    @services('compute', 'network')
+    def _check_server_connectivity(self, floating_ip, address_list):
+        ip_address = floating_ip.floating_ip_address
+        private_key = self.servers[self.floating_ip_tuple.server].private_key
+        ssh_source = self._ssh_to_server(ip_address, private_key)
+
+        for remote_ip in address_list:
+            try:
+                self.assertTrue(self._check_remote_connectivity(ssh_source,
+                                                                remote_ip),
+                                "Timed out waiting for %s to become "
+                                "reachable" % remote_ip)
+            except Exception:
+                LOG.exception("Unable to access {dest} via ssh to "
+                              "floating-ip {src}".format(dest=remote_ip,
+                                                         src=floating_ip))
+                debug.log_ip_ns()
+                raise
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
     def test_network_basic_ops(self):
-        self._create_keypairs()
-        self._create_security_groups()
-        self._create_networks()
-        self._check_networks()
-        self._create_servers()
-        self._assign_floating_ips()
-        self._check_public_network_connectivity()
-        self._check_tenant_network_connectivity()
+        """
+        For a freshly-booted VM with an IP address ("port") on a given
+            network:
+
+        - the Tempest host can ping the IP address.  This implies, but
+         does not guarantee (see the ssh check that follows), that the
+         VM has been assigned the correct IP address and has
+         connectivity to the Tempest host.
+
+        - the Tempest host can perform key-based authentication to an
+         ssh server hosted at the IP address.  This check guarantees
+         that the IP address is associated with the target VM.
+
+        - the Tempest host can ssh into the VM via the IP address and
+         successfully execute the following:
+
+         - ping an external IP address, implying external connectivity.
+
+         - ping an external hostname, implying that dns is correctly
+           configured.
+
+         - ping an internal IP address, implying connectivity to another
+           VM on the same network.
+
+        - detach the floating-ip from the VM and verify that it becomes
+        unreachable
+
+        - associate detached floating ip to a new VM and verify connectivity.
+        VMs are created with unique keypair so connectivity also asserts that
+        floating IP is associated with the new VM instead of the old one
+
+
+        """
+        self._check_public_network_connectivity(should_connect=True)
+        self._check_network_internal_connectivity(network=self.network)
+        self._check_network_external_connectivity()
+        self._disassociate_floating_ips()
+        self._check_public_network_connectivity(should_connect=False,
+                                                msg="after disassociate "
+                                                    "floating ip")
+        self._reassociate_floating_ips()
+        self._check_public_network_connectivity(should_connect=True,
+                                                msg="after re-associate "
+                                                    "floating ip")
+
+    @test.attr(type='smoke')
+    @test.services('compute', 'network')
+    def test_hotplug_nic(self):
+        """
+        1. create a new network, with no gateway (to prevent overwriting VM's
+            gateway)
+        2. connect VM to new network
+        3. set static ip and bring new nic up
+        4. check VM can ping new network dhcp port
+
+        """
+
+        self._check_public_network_connectivity(should_connect=True)
+        self._create_new_network()
+        self._hotplug_server()
+        self._check_network_internal_connectivity(network=self.new_net)

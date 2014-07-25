@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -15,24 +13,25 @@
 import heatclient.exc as heat_exceptions
 import time
 
+from tempest import config
 from tempest.scenario import manager
-from tempest.test import attr
-from tempest.test import call_until_true
-from tempest.test import services
+from tempest import test
+
+CONF = config.CONF
 
 
 class AutoScalingTest(manager.OrchestrationScenarioTest):
 
     def setUp(self):
         super(AutoScalingTest, self).setUp()
-        if not self.config.orchestration.image_ref:
+        if not CONF.orchestration.image_ref:
             raise self.skipException("No image available to test")
         self.client = self.orchestration_client
 
     def assign_keypair(self):
         self.stack_name = self._stack_rand_name()
-        if self.config.orchestration.keypair_name:
-            self.keypair_name = self.config.orchestration.keypair_name
+        if CONF.orchestration.keypair_name:
+            self.keypair_name = CONF.orchestration.keypair_name
         else:
             self.keypair = self.create_keypair()
             self.keypair_name = self.keypair.id
@@ -41,8 +40,8 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
         net = self._get_default_network()
         self.parameters = {
             'KeyName': self.keypair_name,
-            'InstanceType': self.config.orchestration.instance_type,
-            'ImageId': self.config.orchestration.image_ref,
+            'InstanceType': CONF.orchestration.instance_type,
+            'ImageId': CONF.orchestration.image_ref,
             'StackStart': str(time.time()),
             'Subnet': net['subnets'][0]
         }
@@ -59,18 +58,19 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
 
         # if a keypair was set, do not delete the stack on exit to allow
         # for manual post-mortums
-        if not self.config.orchestration.keypair_name:
-            self.set_resource('stack', self.stack)
+        if not CONF.orchestration.keypair_name:
+            self.addCleanup(self.client.stacks.delete, self.stack)
 
-    @attr(type='slow')
-    @services('orchestration', 'compute')
+    @test.skip_because(bug="1257575")
+    @test.attr(type='slow')
+    @test.services('orchestration', 'compute')
     def test_scale_up_then_down(self):
 
         self.assign_keypair()
         self.launch_stack()
 
         sid = self.stack_identifier
-        timeout = self.config.orchestration.build_timeout
+        timeout = CONF.orchestration.build_timeout
         interval = 10
 
         self.assertEqual('CREATE', self.stack.action)
@@ -95,8 +95,8 @@ class AutoScalingTest(manager.OrchestrationScenarioTest):
             return self.server_count
 
         def assertScale(from_servers, to_servers):
-            call_until_true(lambda: server_count() == to_servers,
-                            timeout, interval)
+            test.call_until_true(lambda: server_count() == to_servers,
+                                 timeout, interval)
             self.assertEqual(to_servers, self.server_count,
                              'Failed scaling from %d to %d servers. '
                              'Current server count: %s' % (

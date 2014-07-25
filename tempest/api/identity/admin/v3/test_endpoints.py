@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,32 +14,33 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common.utils import data_utils
+from tempest import test
 
 
-class EndPointsTestJSON(base.BaseIdentityAdminTest):
+class EndPointsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(EndPointsTestJSON, cls).setUpClass()
         cls.identity_client = cls.client
         cls.client = cls.endpoints_client
         cls.service_ids = list()
-        s_name = rand_name('service-')
-        s_type = rand_name('type--')
-        s_description = rand_name('description-')
-        resp, cls.service_data =\
-            cls.identity_client.create_service(s_name, s_type,
-                                               description=s_description)
+        s_name = data_utils.rand_name('service-')
+        s_type = data_utils.rand_name('type--')
+        s_description = data_utils.rand_name('description-')
+        _, cls.service_data =\
+            cls.service_client.create_service(s_name, s_type,
+                                              description=s_description)
         cls.service_id = cls.service_data['id']
         cls.service_ids.append(cls.service_id)
         # Create endpoints so as to use for LIST and GET test cases
         cls.setup_endpoints = list()
         for i in range(2):
-            region = rand_name('region')
-            url = rand_name('url')
+            region = data_utils.rand_name('region')
+            url = data_utils.rand_url()
             interface = 'public'
             resp, endpoint = cls.client.create_endpoint(
                 cls.service_id, interface, url, region=region, enabled=True)
@@ -52,10 +51,10 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         for e in cls.setup_endpoints:
             cls.client.delete_endpoint(e['id'])
         for s in cls.service_ids:
-            cls.identity_client.delete_service(s)
+            cls.service_client.delete_service(s)
         super(EndPointsTestJSON, cls).tearDownClass()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_endpoints(self):
         # Get a list of endpoints
         resp, fetched_endpoints = self.client.list_endpoints()
@@ -67,10 +66,10 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
                          "Failed to find endpoint %s in fetched list" %
                          ', '.join(str(e) for e in missing_endpoints))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_create_list_delete_endpoint(self):
-        region = rand_name('region')
-        url = rand_name('url')
+        region = data_utils.rand_name('region')
+        url = data_utils.rand_url()
         interface = 'public'
         resp, endpoint =\
             self.client.create_endpoint(self.service_id, interface, url,
@@ -93,42 +92,42 @@ class EndPointsTestJSON(base.BaseIdentityAdminTest):
         fetched_endpoints_id = [e['id'] for e in fetched_endpoints]
         self.assertNotIn(endpoint['id'], fetched_endpoints_id)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_update_endpoint(self):
         # Creating an endpoint so as to check update endpoint
         # with new values
-        region1 = rand_name('region')
-        url1 = rand_name('url')
+        region1 = data_utils.rand_name('region')
+        url1 = data_utils.rand_url()
         interface1 = 'public'
         resp, endpoint_for_update =\
             self.client.create_endpoint(self.service_id, interface1,
                                         url1, region=region1,
                                         enabled=True)
+        self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
         # Creating service so as update endpoint with new service ID
-        s_name = rand_name('service-')
-        s_type = rand_name('type--')
-        s_description = rand_name('description-')
-        resp, self.service2 =\
-            self.identity_client.create_service(s_name, s_type,
-                                                description=s_description)
-        self.service_ids.append(self.service2['id'])
+        s_name = data_utils.rand_name('service-')
+        s_type = data_utils.rand_name('type--')
+        s_description = data_utils.rand_name('description-')
+        _, service2 =\
+            self.service_client.create_service(s_name, s_type,
+                                               description=s_description)
+        self.service_ids.append(service2['id'])
         # Updating endpoint with new values
-        region2 = rand_name('region')
-        url2 = rand_name('url')
+        region2 = data_utils.rand_name('region')
+        url2 = data_utils.rand_url()
         interface2 = 'internal'
         resp, endpoint = \
             self.client.update_endpoint(endpoint_for_update['id'],
-                                        service_id=self.service2['id'],
+                                        service_id=service2['id'],
                                         interface=interface2, url=url2,
                                         region=region2, enabled=False)
         self.assertEqual(resp['status'], '200')
         # Asserting if the attributes of endpoint are updated
-        self.assertEqual(self.service2['id'], endpoint['service_id'])
+        self.assertEqual(service2['id'], endpoint['service_id'])
         self.assertEqual(interface2, endpoint['interface'])
         self.assertEqual(url2, endpoint['url'])
         self.assertEqual(region2, endpoint['region'])
-        self.assertEqual('False', str(endpoint['enabled']))
-        self.addCleanup(self.client.delete_endpoint, endpoint_for_update['id'])
+        self.assertEqual('false', str(endpoint['enabled']).lower())
 
 
 class EndPointsTestXML(EndPointsTestJSON):

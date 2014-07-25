@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,45 +13,29 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from urlparse import urlparse
-
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.common import rest_client
+from tempest.common import xml_utils as common
+from tempest import config
 
+CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 
-class ServiceClientXML(RestClientXML):
+class ServiceClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ServiceClientXML, self).__init__(config, username, password,
-                                               auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+    def __init__(self, auth_provider):
+        super(ServiceClientXML, self).__init__(auth_provider)
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
-
-    def _parse_array(self, node):
-        array = []
-        for child in node.getchildren():
-            array.append(xml_to_json(child))
-        return array
+        self.api_version = "v3"
 
     def _parse_body(self, body):
-        data = xml_to_json(body)
+        data = common.xml_to_json(body)
         return data
-
-    def request(self, method, url, headers=None, body=None, wait=None):
-        """Overriding the existing HTTP request in super class rest_client."""
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
-        return super(ServiceClientXML, self).request(method, url,
-                                                     headers=headers,
-                                                     body=body)
 
     def update_service(self, service_id, **kwargs):
         """Updates a service_id."""
@@ -61,21 +43,39 @@ class ServiceClientXML(RestClientXML):
         name = kwargs.get('name', body['name'])
         description = kwargs.get('description', body['description'])
         type = kwargs.get('type', body['type'])
-        update_service = Element("service",
-                                 xmlns=XMLNS,
-                                 id=service_id,
-                                 name=name,
-                                 description=description,
-                                 type=type)
+        update_service = common.Element("service",
+                                        xmlns=XMLNS,
+                                        id=service_id,
+                                        name=name,
+                                        description=description,
+                                        type=type)
         resp, body = self.patch('services/%s' % service_id,
-                                str(Document(update_service)),
-                                self.headers)
+                                str(common.Document(update_service)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def get_service(self, service_id):
         """Get Service."""
         url = 'services/%s' % service_id
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
+    def create_service(self, serv_type, name=None, description=None):
+        post_body = common.Element("service",
+                                   xmlns=XMLNS,
+                                   name=name,
+                                   description=description,
+                                   type=serv_type)
+        resp, body = self.post("services", str(common.Document(post_body)))
+        self.expected_success(201, resp.status)
+        body = self._parse_body(etree.fromstring(body))
+        return resp, body
+
+    def delete_service(self, serv_id):
+        url = "services/" + serv_id
+        resp, body = self.delete(url)
+        self.expected_success(204, resp.status)
         return resp, body

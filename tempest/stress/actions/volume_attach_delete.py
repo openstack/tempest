@@ -11,30 +11,33 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
+from tempest import config
 import tempest.stress.stressaction as stressaction
+
+CONF = config.CONF
 
 
 class VolumeAttachDeleteTest(stressaction.StressAction):
 
     def setUp(self, **kwargs):
-        self.image = self.manager.config.compute.image_ref
-        self.flavor = self.manager.config.compute.flavor_ref
+        self.image = CONF.compute.image_ref
+        self.flavor = CONF.compute.flavor_ref
 
     def run(self):
         # Step 1: create volume
-        name = rand_name("volume")
+        name = data_utils.rand_name("volume")
         self.logger.info("creating volume: %s" % name)
-        resp, volume = self.manager.volumes_client.create_volume(size=1,
-                                                                 display_name=
-                                                                 name)
+        resp, volume = self.manager.volumes_client.create_volume(
+            size=1,
+            display_name=name)
         assert(resp.status == 200)
         self.manager.volumes_client.wait_for_volume_status(volume['id'],
                                                            'available')
         self.logger.info("created volume: %s" % volume['id'])
 
         # Step 2: create vm instance
-        vm_name = rand_name("instance")
+        vm_name = data_utils.rand_name("instance")
         self.logger.info("creating vm: %s" % vm_name)
         resp, server = self.manager.servers_client.create_server(
             vm_name, self.image, self.flavor)

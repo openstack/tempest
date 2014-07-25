@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,25 +17,56 @@ import json
 import urllib
 
 from tempest.common import http
-from tempest.common.rest_client import RestClient
+from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
+from xml.etree import ElementTree as etree
+
+CONF = config.CONF
 
 
-class AccountClient(RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AccountClient, self).__init__(config, username, password,
-                                            auth_url, tenant_name)
-        self.service = self.config.object_storage.catalog_type
-        self.format = 'json'
+class AccountClient(rest_client.RestClient):
+    def __init__(self, auth_provider):
+        super(AccountClient, self).__init__(auth_provider)
+        self.service = CONF.object_storage.catalog_type
+
+    def create_account(self, data=None,
+                       params=None,
+                       metadata={},
+                       remove_metadata={},
+                       metadata_prefix='X-Account-Meta-',
+                       remove_metadata_prefix='X-Remove-Account-Meta-'):
+        """Create an account."""
+        url = ''
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+
+        headers = {}
+        for key in metadata:
+            headers[metadata_prefix + key] = metadata[key]
+        for key in remove_metadata:
+            headers[remove_metadata_prefix + key] = remove_metadata[key]
+
+        resp, body = self.put(url, data, headers)
+        return resp, body
+
+    def delete_account(self, data=None, params=None):
+        """Delete an account."""
+        url = ''
+        if params:
+            if 'bulk-delete' in params:
+                url += 'bulk-delete&'
+            url = '?%s%s' % (url, urllib.urlencode(params))
+
+        resp, body = self.delete(url, headers={}, body=data)
+        return resp, body
 
     def list_account_metadata(self):
         """
         HEAD on the storage URL
         Returns all account metadata headers
         """
-
-        headers = {"X-Storage-Token": self.token}
-        resp, body = self.head('', headers=headers)
+        resp, body = self.head('')
         return resp, body
 
     def create_account_metadata(self, metadata,
@@ -56,17 +85,35 @@ class AccountClient(RestClient):
         Deletes an account metadata entry.
         """
 
-        headers = {"X-Storage-Token": self.token}
+        headers = {}
         for item in metadata:
-            headers[metadata_prefix + item] = 'x'
+            headers[metadata_prefix + item] = metadata[item]
+        resp, body = self.post('', headers=headers, body=None)
+        return resp, body
+
+    def create_and_delete_account_metadata(
+            self,
+            create_metadata=None,
+            delete_metadata=None,
+            create_metadata_prefix='X-Account-Meta-',
+            delete_metadata_prefix='X-Remove-Account-Meta-'):
+        """
+        Creates and deletes an account metadata entry.
+        """
+        headers = {}
+        for key in create_metadata:
+            headers[create_metadata_prefix + key] = create_metadata[key]
+        for key in delete_metadata:
+            headers[delete_metadata_prefix + key] = delete_metadata[key]
+
         resp, body = self.post('', headers=headers, body=None)
         return resp, body
 
     def list_account_containers(self, params=None):
         """
         GET on the (base) storage URL
-        Given the X-Storage-URL and a valid X-Auth-Token, returns
-        a list of all containers for the account.
+        Given valid X-Auth-Token, returns a list of all containers for the
+        account.
 
         Optional Arguments:
         limit=[integer value N]
@@ -83,43 +130,60 @@ class AccountClient(RestClient):
             response.
             DEFAULT:  Python-List returned in response body
         """
+        url = '?%s' % urllib.urlencode(params) if params else ''
 
-        if params:
-            if 'format' not in params:
-                params['format'] = self.format
+        resp, body = self.get(url, headers={})
+        if params and params.get('format') == 'json':
+            body = json.loads(body)
+        elif params and params.get('format') == 'xml':
+            body = etree.fromstring(body)
         else:
-            params = {'format': self.format}
+            body = body.strip().splitlines()
+        return resp, body
 
-        url = '?' + urllib.urlencode(params)
-        resp, body = self.get(url)
+    def list_extensions(self):
+        self.skip_path()
+        try:
+            resp, body = self.get('info')
+        finally:
+            self.reset_path()
         body = json.loads(body)
         return resp, body
 
 
-class AccountClientCustomizedHeader(RestClient):
+class AccountClientCustomizedHeader(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AccountClientCustomizedHeader, self).__init__(config, username,
-                                                            password, auth_url,
-                                                            tenant_name)
-        # Overwrites json-specific header encoding in RestClient
-        self.service = self.config.object_storage.catalog_type
+    # TODO(andreaf) This class is now redundant, to be removed in next patch
+
+    def __init__(self, auth_provider):
+        super(AccountClientCustomizedHeader, self).__init__(
+            auth_provider)
+        # Overwrites json-specific header encoding in rest_client.RestClient
+        self.service = CONF.object_storage.catalog_type
         self.format = 'json'
 
-    def request(self, method, url, headers=None, body=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None):
         """A simple HTTP request interface."""
         self.http_obj = http.ClosingHttp()
         if headers is None:
             headers = {}
-        if self.base_url is None:
-            self._set_auth()
+        elif extra_headers:
+            try:
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = {}
 
-        req_url = "%s/%s" % (self.base_url, url)
-
-        self._log_request(method, req_url, headers, body)
+        # Authorize the request
+        req_url, req_headers, req_body = self.auth_provider.auth_request(
+            method=method, url=url, headers=headers, body=body,
+            filters=self.filters
+        )
+        # use original body
         resp, resp_body = self.http_obj.request(req_url, method,
-                                                headers=headers, body=body)
-        self._log_response(resp, resp_body)
+                                                headers=req_headers,
+                                                body=req_body)
+        self._log_request(method, req_url, resp)
 
         if resp.status == 401 or resp.status == 403:
             raise exceptions.Unauthorized()
@@ -129,8 +193,8 @@ class AccountClientCustomizedHeader(RestClient):
     def list_account_containers(self, params=None, metadata=None):
         """
         GET on the (base) storage URL
-        Given the X-Storage-URL and a valid X-Auth-Token, returns
-        a list of all containers for the account.
+        Given a valid X-Auth-Token, returns a list of all containers for the
+        account.
 
         Optional Arguments:
         limit=[integer value N]

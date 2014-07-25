@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2011 OpenStack Foundation.
 # Copyright 2012, Red Hat, Inc.
 #
@@ -26,7 +24,7 @@ import traceback
 
 import six
 
-from tempest.openstack.common.gettextutils import _  # noqa
+from tempest.openstack.common.gettextutils import _
 
 
 class save_and_reraise_exception(object):
@@ -44,13 +42,13 @@ class save_and_reraise_exception(object):
 
     In some cases the caller may not want to re-raise the exception, and
     for those circumstances this context provides a reraise flag that
-    can be used to suppress the exception.  For example:
+    can be used to suppress the exception.  For example::
 
-    except Exception:
-        with save_and_reraise_exception() as ctxt:
-            decide_if_need_reraise()
-            if not should_be_reraised:
-                ctxt.reraise = False
+      except Exception:
+          with save_and_reraise_exception() as ctxt:
+              decide_if_need_reraise()
+              if not should_be_reraised:
+                  ctxt.reraise = False
     """
     def __init__(self):
         self.reraise = True
@@ -79,7 +77,7 @@ def forever_retry_uncaught_exceptions(infunc):
             try:
                 return infunc(*args, **kwargs)
             except Exception as exc:
-                this_exc_message = unicode(exc)
+                this_exc_message = six.u(str(exc))
                 if this_exc_message == last_exc_message:
                     exc_count += 1
                 else:

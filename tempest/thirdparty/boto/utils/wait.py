@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,18 +17,13 @@ import re
 import time
 
 import boto.exception
-from testtools import TestCase
+import testtools
 
-import tempest.config
+from tempest import config
 from tempest.openstack.common import log as logging
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
-
-_boto_config = tempest.config.TempestConfig().boto
-
-default_timeout = _boto_config.build_timeout
-
-default_check_interval = _boto_config.build_interval
 
 
 def state_wait(lfunction, final_set=set(), valid_set=None):
@@ -50,12 +43,13 @@ def state_wait(lfunction, final_set=set(), valid_set=None):
         if valid_set is not None and status not in valid_set:
             return status
         dtime = time.time() - start_time
-        if dtime > default_timeout:
-            raise TestCase.failureException("State change timeout exceeded!"
-                                            '(%ds) While waiting'
-                                            'for %s at "%s"' %
-                                            (dtime, final_set, status))
-        time.sleep(default_check_interval)
+        if dtime > CONF.boto.build_timeout:
+            raise testtools.TestCase\
+                .failureException("State change timeout exceeded!"
+                                  '(%ds) While waiting'
+                                  'for %s at "%s"' %
+                                  (dtime, final_set, status))
+        time.sleep(CONF.boto.build_interval)
         old_status = status
         status = lfunction()
 
@@ -73,12 +67,13 @@ def re_search_wait(lfunction, regexp):
                      text)
             return result
         dtime = time.time() - start_time
-        if dtime > default_timeout:
-            raise TestCase.failureException('Pattern find timeout exceeded!'
-                                            '(%ds) While waiting for'
-                                            '"%s" pattern in "%s"' %
-                                            (dtime, regexp, text))
-        time.sleep(default_check_interval)
+        if dtime > CONF.boto.build_timeout:
+            raise testtools.TestCase\
+                .failureException('Pattern find timeout exceeded!'
+                                  '(%ds) While waiting for'
+                                  '"%s" pattern in "%s"' %
+                                  (dtime, regexp, text))
+        time.sleep(CONF.boto.build_interval)
 
 
 def wait_no_exception(lfunction, exc_class=None, exc_matcher=None):
@@ -104,10 +99,10 @@ def wait_no_exception(lfunction, exc_class=None, exc_matcher=None):
                     raise exc
         # Let the other exceptions propagate
         dtime = time.time() - start_time
-        if dtime > default_timeout:
-            raise TestCase.failureException("Wait timeout exceeded! (%ds)" %
-                                            dtime)
-        time.sleep(default_check_interval)
+        if dtime > CONF.boto.build_timeout:
+            raise testtools.TestCase\
+                .failureException("Wait timeout exceeded! (%ds)" % dtime)
+        time.sleep(CONF.boto.build_interval)
 
 
 # NOTE(afazekas): EC2/boto normally raise exception instead of empty list
@@ -122,9 +117,9 @@ def wait_exception(lfunction):
                      time.time() - start_time)
             return exc
         dtime = time.time() - start_time
-        if dtime > default_timeout:
-            raise TestCase.failureException("Wait timeout exceeded! (%ds)" %
-                                            dtime)
-        time.sleep(default_check_interval)
+        if dtime > CONF.boto.build_timeout:
+            raise testtools.TestCase\
+                .failureException("Wait timeout exceeded! (%ds)" % dtime)
+        time.sleep(CONF.boto.build_interval)
 
 # TODO(afazekas): consider strategy design pattern..

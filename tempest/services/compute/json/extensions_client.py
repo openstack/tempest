@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -17,23 +15,32 @@
 
 import json
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute.v2 import extensions as schema
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class ExtensionsClientJSON(RestClient):
+class ExtensionsClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ExtensionsClientJSON, self).__init__(config, username, password,
-                                                   auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(ExtensionsClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_extensions(self):
         url = 'extensions'
         resp, body = self.get(url)
         body = json.loads(body)
-        return resp, body
+        self.validate_response(schema.list_extensions, resp, body)
+        return resp, body['extensions']
 
     def is_enabled(self, extension):
         _, extensions = self.list_extensions()
         exts = extensions['extensions']
         return any([e for e in exts if e['name'] == extension])
+
+    def get_extension(self, extension_alias):
+        resp, body = self.get('extensions/%s' % extension_alias)
+        body = json.loads(body)
+        return resp, body['extension']

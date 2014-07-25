@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,24 +13,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest.common.utils import data_utils
+from tempest.thirdparty.boto import test as boto_test
 
 
-class EC2SecurityGroupTest(BotoTestCase):
+class EC2SecurityGroupTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
         super(EC2SecurityGroupTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.ec2api_client
 
-    @attr(type='smoke')
     def test_create_authorize_security_group(self):
         # EC2 Create, authorize/revoke security group
-        group_name = rand_name("securty_group-")
+        group_name = data_utils.rand_name("securty_group-")
         group_description = group_name + " security group description "
         group = self.client.create_security_group(group_name,
                                                   group_description)

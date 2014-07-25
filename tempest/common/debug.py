@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -19,23 +17,36 @@ from tempest import config
 
 from tempest.openstack.common import log as logging
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
-tables = ['filter', 'nat', 'mangle']
+TABLES = ['filter', 'nat', 'mangle']
 
 
 def log_ip_ns():
-    if not config.TempestConfig().debug.enable:
+    if not CONF.debug.enable:
         return
     LOG.info("Host Addr:\n" + commands.ip_addr_raw())
     LOG.info("Host Route:\n" + commands.ip_route_raw())
-    for table in ['filter', 'nat', 'mangle']:
+    for table in TABLES:
         LOG.info('Host %s table:\n%s', table, commands.iptables_raw(table))
     ns_list = commands.ip_ns_list()
     LOG.info("Host ns list" + str(ns_list))
     for ns in ns_list:
         LOG.info("ns(%s) Addr:\n%s", ns, commands.ip_ns_addr(ns))
         LOG.info("ns(%s) Route:\n%s", ns, commands.ip_ns_route(ns))
-        for table in ['filter', 'nat', 'mangle']:
+        for table in TABLES:
             LOG.info('ns(%s) table(%s):\n%s', ns, table,
                      commands.iptables_ns(ns, table))
+
+
+def log_ovs_db():
+    if not CONF.debug.enable or not CONF.service_available.neutron:
+        return
+    db_dump = commands.ovs_db_dump()
+    LOG.info("OVS DB:\n" + db_dump)
+
+
+def log_net_debug():
+    log_ip_ns()
+    log_ovs_db()

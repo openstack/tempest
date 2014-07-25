@@ -1,46 +1,40 @@
 [loggers]
-keys=root,tempest,tempest_stress
+keys=root,tempest_stress
 
 [handlers]
-keys=file,syslog,devel
+keys=file,devel,syslog
 
 [formatters]
-keys=default,tests
+keys=simple,tests
 
 [logger_root]
-level=NOTSET
-handlers=syslog
-
-[logger_tempest]
 level=DEBUG
 handlers=file
-qualname=tempest
 
 [logger_tempest_stress]
-level=INFO
+level=DEBUG
 handlers=file,devel
 qualname=tempest.stress
 
 [handler_file]
 class=FileHandler
 level=DEBUG
+args=('tempest.log', 'w+')
 formatter=tests
-args=('tempest.log', 'w')
 
 [handler_syslog]
 class=handlers.SysLogHandler
 level=ERROR
-formatter = default
 args = ('/dev/log', handlers.SysLogHandler.LOG_USER)
 
 [handler_devel]
 class=StreamHandler
 level=DEBUG
-formatter=default
 args=(sys.stdout,)
-
-[formatter_default]
-format=%(name)s: %(levelname)s: %(message)s
+formatter=simple
 
 [formatter_tests]
-class = tempest.common.log.TestsFormatter
+class = tempest.openstack.common.log.ContextFormatter
+
+[formatter_simple]
+format=%(asctime)s.%(msecs)03d %(process)d %(levelname)s: %(message)s

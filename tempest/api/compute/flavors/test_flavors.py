@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,19 +14,21 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
-class FlavorsTestJSON(base.BaseComputeTest):
-    _interface = 'json'
+class FlavorsV3Test(base.BaseComputeTest):
+
+    _api_version = 3
+    _min_disk = 'min_disk'
+    _min_ram = 'min_ram'
 
     @classmethod
     def setUpClass(cls):
-        super(FlavorsTestJSON, cls).setUpClass()
+        super(FlavorsV3Test, cls).setUpClass()
         cls.client = cls.flavors_client
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_flavors(self):
         # List of all flavors should contain the expected flavor
         resp, flavors = self.client.list_flavors()
@@ -37,123 +37,102 @@ class FlavorsTestJSON(base.BaseComputeTest):
                              'name': flavor['name']}
         self.assertIn(flavor_min_detail, flavors)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_flavors_with_detail(self):
         # Detailed list of all flavors should contain the expected flavor
         resp, flavors = self.client.list_flavors_with_detail()
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
         self.assertIn(flavor, flavors)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_get_flavor(self):
         # The expected flavor details should be returned
         resp, flavor = self.client.get_flavor_details(self.flavor_ref)
-        self.assertEqual(self.flavor_ref, int(flavor['id']))
+        self.assertEqual(self.flavor_ref, flavor['id'])
 
-    @attr(type=['negative', 'gate'])
-    def test_get_non_existant_flavor(self):
-        # flavor details are not returned for non-existent flavors
-        self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
-                          999)
-
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_limit_results(self):
         # Only the expected number of flavors should be returned
         params = {'limit': 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertEqual(1, len(flavors))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_limit_results(self):
         # Only the expected number of flavors (detailed) should be returned
         params = {'limit': 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertEqual(1, len(flavors))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_using_marker(self):
         # The list of flavors should start from the provided marker
-        resp, flavors = self.client.list_flavors()
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
         params = {'marker': flavor_id}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
                          'The list of flavors did not start after the marker.')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_using_marker(self):
         # The list of flavors should start from the provided marker
-        resp, flavors = self.client.list_flavors_with_detail()
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
         params = {'marker': flavor_id}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]),
                          'The list of flavors did not start after the marker.')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_filter_by_min_disk(self):
         # The detailed list of flavors should be filtered by disk space
-        resp, flavors = self.client.list_flavors_with_detail()
-        flavors = sorted(flavors, key=lambda k: k['disk'])
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
-        params = {'minDisk': flavors[0]['disk'] + 1}
+        params = {self._min_disk: flavor['disk'] + 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_detailed_filter_by_min_ram(self):
         # The detailed list of flavors should be filtered by RAM
-        resp, flavors = self.client.list_flavors_with_detail()
-        flavors = sorted(flavors, key=lambda k: k['ram'])
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
-        params = {'minRam': flavors[0]['ram'] + 1}
+        params = {self._min_ram: flavor['ram'] + 1}
         resp, flavors = self.client.list_flavors_with_detail(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_filter_by_min_disk(self):
         # The list of flavors should be filtered by disk space
-        resp, flavors = self.client.list_flavors_with_detail()
-        flavors = sorted(flavors, key=lambda k: k['disk'])
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
-        params = {'minDisk': flavors[0]['disk'] + 1}
+        params = {self._min_disk: flavor['disk'] + 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_list_flavors_filter_by_min_ram(self):
         # The list of flavors should be filtered by RAM
-        resp, flavors = self.client.list_flavors_with_detail()
-        flavors = sorted(flavors, key=lambda k: k['ram'])
-        flavor_id = flavors[0]['id']
+        resp, flavor = self.client.get_flavor_details(self.flavor_ref)
+        flavor_id = flavor['id']
 
-        params = {'minRam': flavors[0]['ram'] + 1}
+        params = {self._min_ram: flavor['ram'] + 1}
         resp, flavors = self.client.list_flavors(params)
         self.assertFalse(any([i for i in flavors if i['id'] == flavor_id]))
 
-    @attr(type=['negative', 'gate'])
-    def test_invalid_minRam_filter(self):
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.list_flavors_with_detail,
-                          {'minRam': 'invalid'})
 
-    @attr(type=['negative', 'gate'])
-    def test_invalid_minDisk_filter(self):
-        self.assertRaises(exceptions.BadRequest,
-                          self.client.list_flavors_with_detail,
-                          {'minDisk': 'invalid'})
+class FlavorsV2TestJSON(FlavorsV3Test):
 
-    @attr(type=['negative', 'gate'])
-    def test_get_flavor_details_for_invalid_flavor_id(self):
-        # Ensure 404 returned for non-existent flavor ID
-        self.assertRaises(exceptions.NotFound, self.client.get_flavor_details,
-                          9999)
+    _api_version = 2
+    _min_disk = 'minDisk'
+    _min_ram = 'minRam'
 
 
-class FlavorsTestXML(FlavorsTestJSON):
+class FlavorsV2TestXML(FlavorsV2TestJSON):
     _interface = 'xml'

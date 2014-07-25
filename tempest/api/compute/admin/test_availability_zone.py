@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # All Rights Reserved.
 #
@@ -16,32 +14,28 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
-class AvailabilityZoneAdminTestJSON(base.BaseComputeAdminTest):
-
+class AZAdminV3Test(base.BaseComputeAdminTest):
     """
-    Tests Availability Zone API List that require admin privileges
+    Tests Availability Zone API List
     """
-
-    _interface = 'json'
+    _api_version = 3
 
     @classmethod
     def setUpClass(cls):
-        super(AvailabilityZoneAdminTestJSON, cls).setUpClass()
-        cls.client = cls.os_adm.availability_zone_client
-        cls.non_adm_client = cls.availability_zone_client
+        super(AZAdminV3Test, cls).setUpClass()
+        cls.client = cls.availability_zone_admin_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_availability_zone_list(self):
         # List of availability zone
         resp, availability_zone = self.client.get_availability_zone_list()
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_get_availability_zone_list_detail(self):
         # List of availability zones and available services
         resp, availability_zone = \
@@ -49,22 +43,10 @@ class AvailabilityZoneAdminTestJSON(base.BaseComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertTrue(len(availability_zone) > 0)
 
-    @attr(type='gate')
-    def test_get_availability_zone_list_with_non_admin_user(self):
-        # List of availability zone with non-administrator user
-        resp, availability_zone = \
-            self.non_adm_client.get_availability_zone_list()
-        self.assertEqual(200, resp.status)
-        self.assertTrue(len(availability_zone) > 0)
 
-    @attr(type=['negative', 'gate'])
-    def test_get_availability_zone_list_detail_with_non_admin_user(self):
-        # List of availability zones and available services with
-        # non-administrator user
-        self.assertRaises(
-            exceptions.Unauthorized,
-            self.non_adm_client.get_availability_zone_list_detail)
+class AZAdminV2TestJSON(AZAdminV3Test):
+    _api_version = 2
 
 
-class AvailabilityZoneAdminTestXML(AvailabilityZoneAdminTestJSON):
+class AZAdminV2TestXML(AZAdminV2TestJSON):
     _interface = 'xml'

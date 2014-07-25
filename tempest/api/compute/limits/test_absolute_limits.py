@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,20 +14,17 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
-from tempest.test import attr
+from tempest import test
 
 
-class AbsoluteLimitsTestJSON(base.BaseComputeTest):
-    _interface = 'json'
+class AbsoluteLimitsTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
         super(AbsoluteLimitsTestJSON, cls).setUpClass()
         cls.client = cls.limits_client
-        cls.server_client = cls.servers_client
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_absLimits_get(self):
         # To check if all limits are present in the response
         resp, absolute_limits = self.client.get_absolute_limits()
@@ -48,25 +43,6 @@ class AbsoluteLimitsTestJSON(base.BaseComputeTest):
         self.assertEqual(0, len(missing_elements),
                          "Failed to find element %s in absolute limits list"
                          % ', '.join(ele for ele in missing_elements))
-
-    @attr(type=['negative', 'gate'])
-    def test_max_image_meta_exceed_limit(self):
-        # We should not create vm with image meta over maxImageMeta limit
-        # Get max limit value
-        max_meta = self.client.get_specific_absolute_limit('maxImageMeta')
-
-        # Create server should fail, since we are passing > metadata Limit!
-        max_meta_data = int(max_meta) + 1
-
-        meta_data = {}
-        for xx in range(max_meta_data):
-            meta_data[str(xx)] = str(xx)
-
-        self.assertRaises(exceptions.OverLimit,
-                          self.server_client.create_server,
-                          name='test', meta=meta_data,
-                          flavor_ref=self.flavor_ref,
-                          image_ref=self.image_ref)
 
 
 class AbsoluteLimitsTestXML(AbsoluteLimitsTestJSON):

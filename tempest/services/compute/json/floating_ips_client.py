@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,15 +16,18 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute.v2 import floating_ips as schema
+from tempest.common import rest_client
+from tempest import config
 from tempest import exceptions
 
+CONF = config.CONF
 
-class FloatingIPsClientJSON(RestClient):
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(FloatingIPsClientJSON, self).__init__(config, username, password,
-                                                    auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+
+class FloatingIPsClientJSON(rest_client.RestClient):
+    def __init__(self, auth_provider):
+        super(FloatingIPsClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_floating_ips(self, params=None):
         """Returns a list of all floating IPs filtered by any parameters."""
@@ -36,6 +37,7 @@ class FloatingIPsClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_floating_ips, resp, body)
         return resp, body['floating_ips']
 
     def get_floating_ip_details(self, floating_ip_id):
@@ -45,6 +47,7 @@ class FloatingIPsClientJSON(RestClient):
         body = json.loads(body)
         if resp.status == 404:
             raise exceptions.NotFound(body)
+        self.validate_response(schema.floating_ip, resp, body)
         return resp, body['floating_ip']
 
     def create_floating_ip(self, pool_name=None):
@@ -52,14 +55,16 @@ class FloatingIPsClientJSON(RestClient):
         url = 'os-floating-ips'
         post_body = {'pool': pool_name}
         post_body = json.dumps(post_body)
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.validate_response(schema.floating_ip, resp, body)
         return resp, body['floating_ip']
 
     def delete_floating_ip(self, floating_ip_id):
         """Deletes the provided floating IP from the project."""
         url = "os-floating-ips/%s" % str(floating_ip_id)
         resp, body = self.delete(url)
+        self.validate_response(schema.add_remove_floating_ip, resp, body)
         return resp, body
 
     def associate_floating_ip_to_server(self, floating_ip, server_id):
@@ -72,7 +77,8 @@ class FloatingIPsClientJSON(RestClient):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
+        self.validate_response(schema.add_remove_floating_ip, resp, body)
         return resp, body
 
     def disassociate_floating_ip_from_server(self, floating_ip, server_id):
@@ -85,7 +91,8 @@ class FloatingIPsClientJSON(RestClient):
         }
 
         post_body = json.dumps(post_body)
-        resp, body = self.post(url, post_body, self.headers)
+        resp, body = self.post(url, post_body)
+        self.validate_response(schema.add_remove_floating_ip, resp, body)
         return resp, body
 
     def is_resource_deleted(self, id):
@@ -103,4 +110,33 @@ class FloatingIPsClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.floating_ip_pools, resp, body)
         return resp, body['floating_ip_pools']
+
+    def create_floating_ips_bulk(self, ip_range, pool, interface):
+        """Allocate floating IPs in bulk."""
+        post_body = {
+            'ip_range': ip_range,
+            'pool': pool,
+            'interface': interface
+        }
+        post_body = json.dumps({'floating_ips_bulk_create': post_body})
+        resp, body = self.post('os-floating-ips-bulk', post_body)
+        body = json.loads(body)
+        self.validate_response(schema.create_floating_ips_bulk, resp, body)
+        return resp, body['floating_ips_bulk_create']
+
+    def list_floating_ips_bulk(self):
+        """Returns a list of all floating IPs bulk."""
+        resp, body = self.get('os-floating-ips-bulk')
+        body = json.loads(body)
+        self.validate_response(schema.list_floating_ips_bulk, resp, body)
+        return resp, body['floating_ip_info']
+
+    def delete_floating_ips_bulk(self, ip_range):
+        """Deletes the provided floating IPs bulk."""
+        post_body = json.dumps({'ip_range': ip_range})
+        resp, body = self.put('os-floating-ips-bulk/delete', post_body)
+        body = json.loads(body)
+        self.validate_response(schema.delete_floating_ips_bulk, resp, body)
+        return resp, body['floating_ips_bulk_delete']

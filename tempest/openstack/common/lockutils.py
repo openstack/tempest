@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2011 OpenStack Foundation.
 # All Rights Reserved.
 #
@@ -20,15 +18,18 @@ import contextlib
 import errno
 import functools
 import os
+import shutil
+import subprocess
+import sys
+import tempfile
 import threading
 import time
 import weakref
 
-import fixtures
 from oslo.config import cfg
 
 from tempest.openstack.common import fileutils
-from tempest.openstack.common.gettextutils import _  # noqa
+from tempest.openstack.common.gettextutils import _
 from tempest.openstack.common import local
 from tempest.openstack.common import log as logging
 
@@ -40,6 +41,7 @@ util_opts = [
     cfg.BoolOpt('disable_process_locking', default=False,
                 help='Whether to disable inter-process locks'),
     cfg.StrOpt('lock_path',
+               default=os.environ.get("TEMPEST_LOCK_PATH"),
                help=('Directory to use for lock files.'))
 ]
 
@@ -132,6 +134,7 @@ else:
     InterProcessLock = _PosixLock
 
 _semaphores = weakref.WeakValueDictionary()
+_semaphores_lock = threading.Lock()
 
 
 @contextlib.contextmanager
@@ -143,26 +146,23 @@ def lock(name, lock_file_prefix=None, external=False, lock_path=None):
     True, in which case, it'll yield an InterProcessLock instance.
 
     :param lock_file_prefix: The lock_file_prefix argument is used to provide
-    lock files on disk with a meaningful prefix.
+      lock files on disk with a meaningful prefix.
 
     :param external: The external keyword argument denotes whether this lock
-    should work across multiple processes. This means that if two different
-    workers both run a a method decorated with @synchronized('mylock',
-    external=True), only one of them will execute at a time.
+      should work across multiple processes. This means that if two different
+      workers both run a a method decorated with @synchronized('mylock',
+      external=True), only one of them will execute at a time.
 
     :param lock_path: The lock_path keyword argument is used to specify a
-    special location for external lock files to live. If nothing is set, then
-    CONF.lock_path is used as a default.
+      special location for external lock files to live. If nothing is set, then
+      CONF.lock_path is used as a default.
     """
-    # NOTE(soren): If we ever go natively threaded, this will be racy.
-    #              See http://stackoverflow.com/questions/5390569/dyn
-    #              amically-allocating-and-destroying-mutexes
-    sem = _semaphores.get(name, threading.Semaphore())
-    if name not in _semaphores:
-        # this check is not racy - we're already holding ref locally
-        # so GC won't remove the item and there was no IO switch
-        # (only valid in greenthreads)
-        _semaphores[name] = sem
+    with _semaphores_lock:
+        try:
+            sem = _semaphores[name]
+        except KeyError:
+            sem = threading.Semaphore()
+            _semaphores[name] = sem
 
     with sem:
         LOG.debug(_('Got semaphore "%(lock)s"'), {'lock': name})
@@ -242,13 +242,14 @@ def synchronized(name, lock_file_prefix=None, external=False, lock_path=None):
     def wrap(f):
         @functools.wraps(f)
         def inner(*args, **kwargs):
-            with lock(name, lock_file_prefix, external, lock_path):
-                LOG.debug(_('Got semaphore / lock "%(function)s"'),
+            try:
+                with lock(name, lock_file_prefix, external, lock_path):
+                    LOG.debug(_('Got semaphore / lock "%(function)s"'),
+                              {'function': f.__name__})
+                    return f(*args, **kwargs)
+            finally:
+                LOG.debug(_('Semaphore / lock released "%(function)s"'),
                           {'function': f.__name__})
-                return f(*args, **kwargs)
-
-            LOG.debug(_('Semaphore / lock released "%(function)s"'),
-                      {'function': f.__name__})
         return inner
     return wrap
 
@@ -278,34 +279,25 @@ def synchronized_with_prefix(lock_file_prefix):
     return functools.partial(synchronized, lock_file_prefix=lock_file_prefix)
 
 
-class LockFixture(fixtures.Fixture):
-    """External locking fixture.
+def main(argv):
+    """Create a dir for locks and pass it to command from arguments
 
-    This fixture is basically an alternative to the synchronized decorator with
-    the external flag so that tearDowns and addCleanups will be included in
-    the lock context for locking between tests. The fixture is recommended to
-    be the first line in a test method, like so::
+    If you run this:
+    python -m openstack.common.lockutils python setup.py testr <etc>
 
-        def test_method(self):
-            self.useFixture(LockFixture)
-                ...
-
-    or the first line in setUp if all the test methods in the class are
-    required to be serialized. Something like::
-
-        class TestCase(testtools.testcase):
-            def setUp(self):
-                self.useFixture(LockFixture)
-                super(TestCase, self).setUp()
-                    ...
-
-    This is because addCleanups are put on a LIFO queue that gets run after the
-    test method exits. (either by completing or raising an exception)
+    a temporary directory will be created for all your locks and passed to all
+    your tests in an environment variable. The temporary dir will be deleted
+    afterwards and the return value will be preserved.
     """
-    def __init__(self, name, lock_file_prefix=None):
-        self.mgr = lock(name, lock_file_prefix, True)
 
-    def setUp(self):
-        super(LockFixture, self).setUp()
-        self.addCleanup(self.mgr.__exit__, None, None, None)
-        self.mgr.__enter__()
+    lock_dir = tempfile.mkdtemp()
+    os.environ["TEMPEST_LOCK_PATH"] = lock_dir
+    try:
+        ret_val = subprocess.call(argv[1:])
+    finally:
+        shutil.rmtree(lock_dir, ignore_errors=True)
+    return ret_val
+
+
+if __name__ == '__main__':
+    sys.exit(main(sys.argv))

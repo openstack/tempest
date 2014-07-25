@@ -1,0 +1,19 @@
+heat_template_version: 2013-05-23
+description: A minimal HOT test template
+parameters:
+  instance_image:
+    description: Glance image name
+    type: string
+  instance_type:
+    description: Nova instance type
+    type: string
+    default: m1.small
+    constraints:
+        - allowed_values: [m1.small, m1.medium, m1.large]
+          description: instance_type must be one of m1.small, m1.medium or m1.large
+resources:
+    instance:
+        type: OS::Nova::Server
+        properties:
+            image: { get_param: instance_image }
+            flavor: { get_param: instance_type }

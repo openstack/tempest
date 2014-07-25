@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,6 +17,7 @@
 
 import re
 
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 
@@ -39,7 +38,7 @@ def details_multiple(output_lines, with_label=False):
     for table_ in tables_:
         if 'Property' not in table_['headers'] \
            or 'Value' not in table_['headers']:
-            raise Exception('Invalid structure of table with details')
+            raise exceptions.InvalidStructure()
         item = {}
         for value in table_['values']:
             item[value[0]] = value[1]

@@ -15,25 +15,26 @@
 # under the License.
 
 from tempest.api.object_storage import base
-from tempest.common.utils.data_utils import arbitrary_string
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common import custom_matchers
+from tempest.common.utils import data_utils
+from tempest import test
 
 
 class StaticWebTest(base.BaseObjectTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(StaticWebTest, cls).setUpClass()
-        cls.container_name = rand_name(name="TestContainer")
+        cls.container_name = data_utils.rand_name(name="TestContainer")
 
         # This header should be posted on the container before every test
         cls.headers_public_read_acl = {'Read': '.r:*'}
 
         # Create test container and create one object in it
         cls.container_client.create_container(cls.container_name)
-        cls.object_name = rand_name(name="TestObject")
-        cls.object_data = arbitrary_string()
+        cls.object_name = data_utils.rand_name(name="TestObject")
+        cls.object_data = data_utils.arbitrary_string()
         cls.object_client.create_object(cls.container_name,
                                         cls.object_name,
                                         cls.object_data)
@@ -45,22 +46,32 @@ class StaticWebTest(base.BaseObjectTest):
 
     @classmethod
     def tearDownClass(cls):
-        cls.delete_containers([cls.container_name])
+        if hasattr(cls, "container_name"):
+            cls.delete_containers([cls.container_name])
         cls.data.teardown_all()
         super(StaticWebTest, cls).tearDownClass()
 
-    @attr('gate')
+    @test.requires_ext(extension='staticweb', service='object')
+    @test.attr('gate')
     def test_web_index(self):
         headers = {'web-index': self.object_name}
 
         self.container_client.update_container_metadata(
             self.container_name, metadata=headers)
 
+        # Maintain original headers, no auth added
+        self.custom_account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
+
         # test GET on http://account_url/container_name
         # we should retrieve the self.object_name file
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        # This request is equivalent to GET object
+        self.assertHeaders(resp, 'Object', 'GET')
         self.assertEqual(body, self.object_data)
 
         # clean up before exiting
@@ -71,7 +82,8 @@ class StaticWebTest(base.BaseObjectTest):
             self.container_name)
         self.assertNotIn('x-container-meta-web-index', body)
 
-    @attr('gate')
+    @test.requires_ext(extension='staticweb', service='object')
+    @test.attr('gate')
     def test_web_listing(self):
         headers = {'web-listings': 'true'}
 
@@ -82,7 +94,16 @@ class StaticWebTest(base.BaseObjectTest):
         # we should retrieve a listing of objects
         resp, body = self.custom_account_client.request("GET",
                                                         self.container_name)
-        self.assertEqual(resp['status'], '200')
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        # The target of the request is not any Swift resource. Therefore, the
+        # existence of response header is checked without a custom matcher.
+        self.assertIn('content-length', resp)
+        self.assertIn('content-type', resp)
+        self.assertIn('x-trans-id', resp)
+        self.assertIn('date', resp)
+        # Check only the format of common headers with custom matcher
+        self.assertThat(resp, custom_matchers.AreAllWellFormatted())
+
         self.assertIn(self.object_name, body)
 
         # clean up before exiting
@@ -92,3 +113,55 @@ class StaticWebTest(base.BaseObjectTest):
         _, body = self.container_client.list_container_metadata(
             self.container_name)
         self.assertNotIn('x-container-meta-web-listings', body)
+
+    @test.requires_ext(extension='staticweb', service='object')
+    @test.attr('gate')
+    def test_web_listing_css(self):
+        headers = {'web-listings': 'true',
+                   'web-listings-css': 'listings.css'}
+
+        self.container_client.update_container_metadata(
+            self.container_name, metadata=headers)
+
+        # Maintain original headers, no auth added
+        self.custom_account_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
+
+        # test GET on http://account_url/container_name
+        # we should retrieve a listing of objects
+        resp, body = self.custom_account_client.request("GET",
+                                                        self.container_name)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertIn(self.object_name, body)
+        css = '<link rel="stylesheet" type="text/css" href="listings.css" />'
+        self.assertIn(css, body)
+
+    @test.requires_ext(extension='staticweb', service='object')
+    @test.attr('gate')
+    def test_web_error(self):
+        headers = {'web-listings': 'true',
+                   'web-error': self.object_name}
+
+        self.container_client.update_container_metadata(
+            self.container_name, metadata=headers)
+
+        # Create object to return when requested object not found
+        object_name_404 = "404" + self.object_name
+        object_data_404 = data_utils.arbitrary_string()
+        self.object_client.create_object(self.container_name,
+                                         object_name_404,
+                                         object_data_404)
+
+        # Do not set auth in HTTP headers for next request
+        self.custom_object_client.auth_provider.set_alt_auth_data(
+            request_part='headers',
+            auth_data=None
+        )
+
+        # Request non-existing object
+        resp, body = self.custom_object_client.get_object(self.container_name,
+                                                          "notexisting")
+        self.assertEqual(resp['status'], '404')
+        self.assertEqual(body, object_data_404)

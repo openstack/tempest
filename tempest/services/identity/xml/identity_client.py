@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2012 IBM Corp.
 # All Rights Reserved.
 #
@@ -14,58 +12,31 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from tempest.common import xml_utils as xml
+from tempest import config
+from tempest.services.identity.json import identity_client
 
-import json
-
-from lxml import etree
-
-from tempest.common import http
-from tempest.common.rest_client import RestClientXML
-from tempest import exceptions
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
-
+CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v2.0"
 
 
-class IdentityClientXML(RestClientXML):
-
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(IdentityClientXML, self).__init__(config, username, password,
-                                                auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
-        self.endpoint_url = 'adminURL'
-
-    def _parse_array(self, node):
-        array = []
-        for child in node.getchildren():
-            array.append(xml_to_json(child))
-        return array
-
-    def _parse_body(self, body):
-        data = xml_to_json(body)
-        return data
-
-    def has_admin_extensions(self):
-        """
-        Returns True if the KSADM Admin Extensions are supported
-        False otherwise
-        """
-        if hasattr(self, '_has_admin_extensions'):
-            return self._has_admin_extensions
-        resp, body = self.list_roles()
-        self._has_admin_extensions = ('status' in resp and resp.status != 503)
-        return self._has_admin_extensions
+class IdentityClientXML(identity_client.IdentityClientJSON):
+    TYPE = "xml"
 
     def create_role(self, name):
         """Create a role."""
-        create_role = Element("role", xmlns=XMLNS, name=name)
-        resp, body = self.post('OS-KSADM/roles', str(Document(create_role)),
-                               self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
+        create_role = xml.Element("role", xmlns=XMLNS, name=name)
+        resp, body = self.post('OS-KSADM/roles',
+                               str(xml.Document(create_role)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
+
+    def get_role(self, role_id):
+        """Get a role by its id."""
+        resp, body = self.get('OS-KSADM/roles/%s' % role_id)
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
     def create_tenant(self, name, **kwargs):
         """
@@ -75,240 +46,125 @@ class IdentityClientXML(RestClientXML):
         enabled <true|false>: Initial tenant status (default is true)
         """
         en = kwargs.get('enabled', 'true')
-        create_tenant = Element("tenant",
-                                xmlns=XMLNS,
-                                name=name,
-                                description=kwargs.get('description', ''),
-                                enabled=str(en).lower())
-        resp, body = self.post('tenants', str(Document(create_tenant)),
-                               self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
-
-    def delete_role(self, role_id):
-        """Delete a role."""
-        resp, body = self.delete('OS-KSADM/roles/%s' % str(role_id),
-                                 self.headers)
-        return resp, body
-
-    def list_user_roles(self, tenant_id, user_id):
-        """Returns a list of roles assigned to a user for a tenant."""
-        url = '/tenants/%s/users/%s/roles' % (tenant_id, user_id)
-        resp, body = self.get(url, self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        return resp, body
-
-    def assign_user_role(self, tenant_id, user_id, role_id):
-        """Add roles to a user on a tenant."""
-        resp, body = self.put('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
-                              (tenant_id, user_id, role_id), '', self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
-
-    def remove_user_role(self, tenant_id, user_id, role_id):
-        """Removes a role assignment for a user on a tenant."""
-        return self.delete('/tenants/%s/users/%s/roles/OS-KSADM/%s' %
-                           (tenant_id, user_id, role_id), self.headers)
-
-    def delete_tenant(self, tenant_id):
-        """Delete a tenant."""
-        resp, body = self.delete('tenants/%s' % str(tenant_id), self.headers)
-        return resp, body
-
-    def get_tenant(self, tenant_id):
-        """Get tenant details."""
-        resp, body = self.get('tenants/%s' % str(tenant_id), self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
-
-    def list_roles(self):
-        """Returns roles."""
-        resp, body = self.get('OS-KSADM/roles', self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        return resp, body
+        create_tenant = xml.Element("tenant",
+                                    xmlns=XMLNS,
+                                    name=name,
+                                    description=kwargs.get('description', ''),
+                                    enabled=str(en).lower())
+        resp, body = self.post('tenants', str(xml.Document(create_tenant)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
     def list_tenants(self):
         """Returns tenants."""
-        resp, body = self.get('tenants', self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        return resp, body
-
-    def get_tenant_by_name(self, tenant_name):
-        resp, tenants = self.list_tenants()
-        for tenant in tenants:
-            if tenant['name'] == tenant_name:
-                return tenant
-        raise exceptions.NotFound('No such tenant')
+        resp, body = self.get('tenants')
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
     def update_tenant(self, tenant_id, **kwargs):
         """Updates a tenant."""
-        resp, body = self.get_tenant(tenant_id)
+        _, body = self.get_tenant(tenant_id)
         name = kwargs.get('name', body['name'])
         desc = kwargs.get('description', body['description'])
         en = kwargs.get('enabled', body['enabled'])
-        update_tenant = Element("tenant",
-                                xmlns=XMLNS,
-                                id=tenant_id,
-                                name=name,
-                                description=desc,
-                                enabled=str(en).lower())
+        update_tenant = xml.Element("tenant",
+                                    xmlns=XMLNS,
+                                    id=tenant_id,
+                                    name=name,
+                                    description=desc,
+                                    enabled=str(en).lower())
 
         resp, body = self.post('tenants/%s' % tenant_id,
-                               str(Document(update_tenant)),
-                               self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
+                               str(xml.Document(update_tenant)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
     def create_user(self, name, password, tenant_id, email, **kwargs):
         """Create a user."""
-        create_user = Element("user",
-                              xmlns=XMLNS,
-                              name=name,
-                              password=password,
-                              tenantId=tenant_id,
-                              email=email)
+        create_user = xml.Element("user",
+                                  xmlns=XMLNS,
+                                  name=name,
+                                  password=password,
+                                  email=email)
+        if tenant_id:
+            create_user.add_attr('tenantId', tenant_id)
         if 'enabled' in kwargs:
             create_user.add_attr('enabled', str(kwargs['enabled']).lower())
 
-        resp, body = self.post('users', str(Document(create_user)),
-                               self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
+        resp, body = self.post('users', str(xml.Document(create_user)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
     def update_user(self, user_id, **kwargs):
         """Updates a user."""
         if 'enabled' in kwargs:
             kwargs['enabled'] = str(kwargs['enabled']).lower()
-        update_user = Element("user", xmlns=XMLNS, **kwargs)
+        update_user = xml.Element("user", xmlns=XMLNS, **kwargs)
 
         resp, body = self.put('users/%s' % user_id,
-                              str(Document(update_user)),
-                              self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
-
-    def get_user(self, user_id):
-        """GET a user."""
-        resp, body = self.get("users/%s" % user_id, self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
-
-    def delete_user(self, user_id):
-        """Delete a user."""
-        resp, body = self.delete("users/%s" % user_id, self.headers)
-        return resp, body
-
-    def get_users(self):
-        """Get the list of users."""
-        resp, body = self.get("users", self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        return resp, body
+                              str(xml.Document(update_user)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
     def enable_disable_user(self, user_id, enabled):
         """Enables or disables a user."""
-        enable_user = Element("user", enabled=str(enabled).lower())
+        enable_user = xml.Element("user", enabled=str(enabled).lower())
         resp, body = self.put('users/%s/enabled' % user_id,
-                              str(Document(enable_user)), self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        return resp, body
+                              str(xml.Document(enable_user)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
-    def delete_token(self, token_id):
-        """Delete a token."""
-        resp, body = self.delete("tokens/%s" % token_id, self.headers)
-        return resp, body
-
-    def list_users_for_tenant(self, tenant_id):
-        """List users for a Tenant."""
-        resp, body = self.get('/tenants/%s/users' % tenant_id, self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        return resp, body
-
-    def get_user_by_username(self, tenant_id, username):
-        resp, users = self.list_users_for_tenant(tenant_id)
-        for user in users:
-            if user['name'] == username:
-                return user
-        raise exceptions.NotFound('No such user')
-
-    def create_service(self, name, type, **kwargs):
+    def create_service(self, name, service_type, **kwargs):
         """Create a service."""
         OS_KSADM = "http://docs.openstack.org/identity/api/ext/OS-KSADM/v1.0"
-        create_service = Element("service",
-                                 xmlns=OS_KSADM,
-                                 name=name,
-                                 type=type,
-                                 description=kwargs.get('description'))
+        create_service = xml.Element("service",
+                                     xmlns=OS_KSADM,
+                                     name=name,
+                                     type=service_type,
+                                     description=kwargs.get('description'))
         resp, body = self.post('OS-KSADM/services',
-                               str(Document(create_service)),
-                               self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
+                               str(xml.Document(create_service)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
-    def list_services(self):
-        """Returns services."""
-        resp, body = self.get('OS-KSADM/services', self.headers)
-        body = self._parse_array(etree.fromstring(body))
-        return resp, body
+    def update_user_password(self, user_id, new_pass):
+        """Update User Password."""
+        put_body = xml.Element("user",
+                               id=user_id,
+                               password=new_pass)
+        resp, body = self.put('users/%s/OS-KSADM/password' % user_id,
+                              str(xml.Document(put_body)))
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
-    def get_service(self, service_id):
-        """Get Service."""
-        url = '/OS-KSADM/services/%s' % service_id
-        resp, body = self.get(url, self.headers)
-        body = self._parse_body(etree.fromstring(body))
-        return resp, body
-
-    def delete_service(self, service_id):
-        """Delete Service."""
-        url = '/OS-KSADM/services/%s' % service_id
-        return self.delete(url, self.headers)
+    def list_extensions(self):
+        """List all the extensions."""
+        resp, body = self.get('/extensions')
+        self.expected_success(200, resp.status)
+        return resp, self._parse_resp(body)
 
 
-class TokenClientXML(RestClientXML):
+class TokenClientXML(identity_client.TokenClientJSON):
+    TYPE = "xml"
 
-    def __init__(self, config):
-        auth_url = config.identity.uri
-
-        # TODO(jaypipes) Why is this all repeated code in here?
-        # Normalize URI to ensure /tokens is in it.
-        if 'tokens' not in auth_url:
-            auth_url = auth_url.rstrip('/') + '/tokens'
-
-        self.auth_url = auth_url
-        self.config = config
-
-    def auth(self, user, password, tenant):
-        passwordCreds = Element("passwordCredentials",
-                                username=user,
-                                password=password)
-        auth = Element("auth", tenantName=tenant)
+    def auth(self, user, password, tenant=None):
+        passwordCreds = xml.Element('passwordCredentials',
+                                    username=user,
+                                    password=password)
+        auth_kwargs = {}
+        if tenant:
+            auth_kwargs['tenantName'] = tenant
+        auth = xml.Element('auth', **auth_kwargs)
         auth.append(passwordCreds)
-        headers = {'Content-Type': 'application/xml'}
-        resp, body = self.post(self.auth_url, headers=headers,
-                               body=str(Document(auth)))
-        return resp, body
+        resp, body = self.post(self.auth_url, body=str(xml.Document(auth)))
+        return resp, body['access']
 
-    def request(self, method, url, headers=None, body=None):
-        """A simple HTTP request interface."""
-        dscv = self.config.identity.disable_ssl_certificate_validation
-        self.http_obj = http.ClosingHttp(
-            disable_ssl_certificate_validation=dscv)
-        if headers is None:
-            headers = {}
-        self._log_request(method, url, headers, body)
-        resp, resp_body = self.http_obj.request(url, method,
-                                                headers=headers, body=body)
-        self._log_response(resp, resp_body)
-
-        if resp.status in (401, 403):
-            resp_body = json.loads(resp_body)
-            raise exceptions.Unauthorized(resp_body['error']['message'])
-
-        return resp, resp_body
-
-    def get_token(self, user, password, tenant):
-        resp, body = self.auth(user, password, tenant)
-        if resp['status'] != '202':
-            body = json.loads(body)
-            access = body['access']
-            token = access['token']
-            return token['id']
+    def auth_token(self, token_id, tenant=None):
+        tokenCreds = xml.Element('token', id=token_id)
+        auth_kwargs = {}
+        if tenant:
+            auth_kwargs['tenantName'] = tenant
+        auth = xml.Element('auth', **auth_kwargs)
+        auth.append(tokenCreds)
+        resp, body = self.post(self.auth_url, body=str(xml.Document(auth)))
+        return resp, body['access']

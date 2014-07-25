@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -18,9 +16,11 @@
 import subprocess
 
 import tempest.cli
+from tempest import config
 from tempest.openstack.common import log as logging
 
 
+CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -35,6 +35,17 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
     * initially just check return codes, and later test command outputs
 
     """
+
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.service_available.nova:
+            msg = ("%s skipped as Nova is not available" % cls.__name__)
+            raise cls.skipException(msg)
+        if not CONF.cli.has_manage:
+            msg = ("%s skipped as *-manage commands not available"
+                   % cls.__name__)
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyNovaManageTest, cls).setUpClass()
 
     def test_admin_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
@@ -55,11 +66,11 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
                          self.nova_manage('', '--version', merge_stderr=True))
 
     def test_debug_flag(self):
-        self.assertNotEqual("", self.nova_manage('instance_type list',
+        self.assertNotEqual("", self.nova_manage('flavor list',
                             '--debug'))
 
     def test_verbose_flag(self):
-        self.assertNotEqual("", self.nova_manage('instance_type list',
+        self.assertNotEqual("", self.nova_manage('flavor list',
                             '--verbose'))
 
     # test actions
@@ -68,8 +79,6 @@ class SimpleReadOnlyNovaManageTest(tempest.cli.ClientTestBase):
 
     def test_flavor_list(self):
         self.assertNotEqual("", self.nova_manage('flavor list'))
-        self.assertEqual(self.nova_manage('instance_type list'),
-                         self.nova_manage('flavor list'))
 
     def test_db_archive_deleted_rows(self):
         # make sure command doesn't error out

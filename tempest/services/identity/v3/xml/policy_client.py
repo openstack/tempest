@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,69 +13,73 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from urlparse import urlparse
-
 from lxml import etree
 
 from tempest.common import http
-from tempest.common.rest_client import RestClientXML
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.common import rest_client
+from tempest.common import xml_utils as common
+from tempest import config
+
+CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v3"
 
 
-class PolicyClientXML(RestClientXML):
+class PolicyClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(PolicyClientXML, self).__init__(config, username, password,
-                                              auth_url, tenant_name)
-        self.service = self.config.identity.catalog_type
+    def __init__(self, auth_provider):
+        super(PolicyClientXML, self).__init__(auth_provider)
+        self.service = CONF.identity.catalog_type
         self.endpoint_url = 'adminURL'
+        self.api_version = "v3"
 
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
             tag_list = child.tag.split('}', 1)
             if tag_list[1] == "policy":
-                array.append(xml_to_json(child))
+                array.append(common.xml_to_json(child))
         return array
 
     def _parse_body(self, body):
-        json = xml_to_json(body)
+        json = common.xml_to_json(body)
         return json
 
-    def request(self, method, url, headers=None, body=None, wait=None):
+    def request(self, method, url, extra_headers=False, headers=None,
+                body=None, wait=None):
         """Overriding the existing HTTP request in super class RestClient."""
-        dscv = self.config.identity.disable_ssl_certificate_validation
+        if extra_headers:
+            try:
+                headers.update(self.get_headers())
+            except (ValueError, TypeError):
+                headers = self.get_headers()
+        dscv = CONF.identity.disable_ssl_certificate_validation
         self.http_obj = http.ClosingHttp(
             disable_ssl_certificate_validation=dscv)
-        self._set_auth()
-        self.base_url = self.base_url.replace(urlparse(self.base_url).path,
-                                              "/v3")
         return super(PolicyClientXML, self).request(method, url,
+                                                    extra_headers,
                                                     headers=headers,
                                                     body=body)
 
     def create_policy(self, blob, type):
         """Creates a Policy."""
-        create_policy = Element("policy", xmlns=XMLNS, blob=blob, type=type)
-        resp, body = self.post('policies', str(Document(create_policy)),
-                               self.headers)
+        create_policy = common.Element("policy", xmlns=XMLNS,
+                                       blob=blob, type=type)
+        resp, body = self.post('policies', str(common.Document(create_policy)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def list_policies(self):
         """Lists the policies."""
-        resp, body = self.get('policies', self.headers)
+        resp, body = self.get('policies')
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_policy(self, policy_id):
         """Lists out the given policy."""
         url = 'policies/%s' % policy_id
-        resp, body = self.get(url, self.headers)
+        resp, body = self.get(url)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -85,10 +87,9 @@ class PolicyClientXML(RestClientXML):
         """Updates a policy."""
         resp, body = self.get_policy(policy_id)
         type = kwargs.get('type')
-        update_policy = Element("policy", xmlns=XMLNS, type=type)
+        update_policy = common.Element("policy", xmlns=XMLNS, type=type)
         url = 'policies/%s' % policy_id
-        resp, body = self.patch(url, str(Document(update_policy)),
-                                self.headers)
+        resp, body = self.patch(url, str(common.Document(update_policy)))
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 

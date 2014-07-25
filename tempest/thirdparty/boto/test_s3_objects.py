@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,25 +17,21 @@ import contextlib
 
 import boto.s3.key
 
-from tempest import clients
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
-from tempest.thirdparty.boto.test import BotoTestCase
+from tempest.common.utils import data_utils
+from tempest.thirdparty.boto import test as boto_test
 
 
-class S3BucketsTest(BotoTestCase):
+class S3BucketsTest(boto_test.BotoTestCase):
 
     @classmethod
     def setUpClass(cls):
         super(S3BucketsTest, cls).setUpClass()
-        cls.os = clients.Manager()
         cls.client = cls.os.s3_client
 
-    @attr(type='smoke')
     def test_create_get_delete_object(self):
         # S3 Create, get and delete object
-        bucket_name = rand_name("s3bucket-")
-        object_name = rand_name("s3object-")
+        bucket_name = data_utils.rand_name("s3bucket-")
+        object_name = data_utils.rand_name("s3object-")
         content = 'x' * 42
         bucket = self.client.create_bucket(bucket_name)
         self.addResourceCleanUp(self.destroy_bucket,

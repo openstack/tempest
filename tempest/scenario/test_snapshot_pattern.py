@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # All Rights Reserved.
 #
@@ -15,8 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import config
+from tempest.openstack.common import log
 from tempest.scenario import manager
-from tempest.test import services
+from tempest import test
+
+CONF = config.CONF
+
+LOG = log.getLogger(__name__)
 
 
 class TestSnapshotPattern(manager.OfficialClientTest):
@@ -31,8 +35,10 @@ class TestSnapshotPattern(manager.OfficialClientTest):
     """
 
     def _boot_image(self, image_id):
+        security_groups = [self.security_group.name]
         create_kwargs = {
-            'key_name': self.keypair.name
+            'key_name': self.keypair.name,
+            'security_groups': security_groups
         }
         return self.create_server(image=image_id, create_kwargs=create_kwargs)
 
@@ -40,8 +46,12 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         self.keypair = self.create_keypair()
 
     def _ssh_to_server(self, server_or_ip):
-        linux_client = self.get_remote_client(server_or_ip)
-        return linux_client.ssh_client
+        try:
+            return self.get_remote_client(server_or_ip)
+        except Exception:
+            LOG.exception('Initializing SSH connection failed')
+            self._log_console_output()
+            raise
 
     def _write_timestamp(self, server_or_ip):
         ssh_client = self._ssh_to_server(server_or_ip)
@@ -55,21 +65,21 @@ class TestSnapshotPattern(manager.OfficialClientTest):
 
     def _create_floating_ip(self):
         floating_ip = self.compute_client.floating_ips.create()
-        self.addCleanup(floating_ip.delete)
+        self.addCleanup(self.delete_wrapper, floating_ip)
         return floating_ip
 
     def _set_floating_ip_to_server(self, server, floating_ip):
         server.add_floating_ip(floating_ip)
 
-    @services('compute', 'network', 'image')
+    @test.services('compute', 'network', 'image')
     def test_snapshot_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self.create_loginable_secgroup_rule()
+        self.security_group = self._create_security_group_nova()
 
         # boot a instance and create a timestamp file in it
-        server = self._boot_image(self.config.compute.image_ref)
-        if self.config.compute.use_floatingip_for_ssh:
+        server = self._boot_image(CONF.compute.image_ref)
+        if CONF.compute.use_floatingip_for_ssh:
             fip_for_server = self._create_floating_ip()
             self._set_floating_ip_to_server(server, fip_for_server)
             self._write_timestamp(fip_for_server.ip)
@@ -83,7 +93,7 @@ class TestSnapshotPattern(manager.OfficialClientTest):
         server_from_snapshot = self._boot_image(snapshot_image.id)
 
         # check the existence of the timestamp file in the second instance
-        if self.config.compute.use_floatingip_for_ssh:
+        if CONF.compute.use_floatingip_for_ssh:
             fip_for_snapshot = self._create_floating_ip()
             self._set_floating_ip_to_server(server_from_snapshot,
                                             fip_for_snapshot)

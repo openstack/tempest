@@ -1,0 +1,70 @@
+heat_template_version: '2013-05-23'
+description: |
+  Template which creates single EC2 instance
+parameters:
+  KeyName:
+    type: string
+  InstanceType:
+    type: string
+  ImageId:
+    type: string
+  SubNetCidr:
+    type: string
+  ExternalNetworkId:
+    type: string
+  DNSServers:
+    type: comma_delimited_list
+  timeout:
+    type: number
+resources:
+  Network:
+    type: OS::Neutron::Net
+    properties:
+      name: NewNetwork
+  Subnet:
+    type: OS::Neutron::Subnet
+    properties:
+      network_id: {Ref: Network}
+      name: NewSubnet
+      ip_version: 4
+      cidr: { get_param: SubNetCidr }
+      dns_nameservers: { get_param: DNSServers }
+  Router:
+    type: OS::Neutron::Router
+    properties:
+      name: NewRouter
+      admin_state_up: true
+      external_gateway_info:
+        network: {get_param: ExternalNetworkId}
+  RouterInterface:
+    type: OS::Neutron::RouterInterface
+    properties:
+      router_id: {get_resource: Router}
+      subnet_id: {get_resource: Subnet}
+  Server:
+    type: OS::Nova::Server
+    metadata:
+      Name: SmokeServerNeutron
+    properties:
+      image: {get_param: ImageId}
+      flavor: {get_param: InstanceType}
+      key_name: {get_param: KeyName}
+      networks:
+      - network: {get_resource: Network}
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash -v
+
+            while ! /opt/aws/bin/cfn-signal -e 0 -r "SmokeServerNeutron created" \
+            'wait_handle' ; do sleep 3; done
+          params:
+            wait_handle: {get_resource: WaitHandleNeutron}
+  WaitHandleNeutron:
+    type: AWS::CloudFormation::WaitConditionHandle
+  WaitCondition:
+    type: AWS::CloudFormation::WaitCondition
+    depends_on: Server
+    properties:
+      Handle: {get_resource: WaitHandleNeutron}
+      Timeout: {get_param: timeout}

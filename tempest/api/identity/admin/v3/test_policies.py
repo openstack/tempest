@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,25 +14,25 @@
 #    under the License.
 
 from tempest.api.identity import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common.utils import data_utils
+from tempest import test
 
 
-class PoliciesTestJSON(base.BaseIdentityAdminTest):
+class PoliciesTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
 
     def _delete_policy(self, policy_id):
         resp, _ = self.policy_client.delete_policy(policy_id)
         self.assertEqual(204, resp.status)
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_list_policies(self):
         # Test to list policies
         policy_ids = list()
         fetched_ids = list()
         for _ in range(3):
-            blob = rand_name('BlobName-')
-            policy_type = rand_name('PolicyType-')
+            blob = data_utils.rand_name('BlobName-')
+            policy_type = data_utils.rand_name('PolicyType-')
             resp, policy = self.policy_client.create_policy(blob,
                                                             policy_type)
             # Delete the Policy at the end of this method
@@ -48,11 +46,11 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
         missing_pols = [p for p in policy_ids if p not in fetched_ids]
         self.assertEqual(0, len(missing_pols))
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_create_update_delete_policy(self):
         # Test to update policy
-        blob = rand_name('BlobName-')
-        policy_type = rand_name('PolicyType-')
+        blob = data_utils.rand_name('BlobName-')
+        policy_type = data_utils.rand_name('PolicyType-')
         resp, policy = self.policy_client.create_policy(blob, policy_type)
         self.addCleanup(self._delete_policy, policy['id'])
         self.assertIn('id', policy)
@@ -64,7 +62,7 @@ class PoliciesTestJSON(base.BaseIdentityAdminTest):
         resp, fetched_policy = self.policy_client.get_policy(policy['id'])
         self.assertEqual(resp['status'], '200')
         # Update policy
-        update_type = rand_name('UpdatedPolicyType-')
+        update_type = data_utils.rand_name('UpdatedPolicyType-')
         resp, data = self.policy_client.update_policy(
             policy['id'], type=update_type)
         self.assertIn('type', data)

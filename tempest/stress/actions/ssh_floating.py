@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 #    Licensed under the Apache License, Version 2.0 (the "License");
 #    you may not use this file except in compliance with the License.
 #    You may obtain a copy of the License at
@@ -15,9 +13,12 @@
 import socket
 import subprocess
 
-from tempest.common.utils.data_utils import rand_name
+from tempest.common.utils import data_utils
+from tempest import config
 import tempest.stress.stressaction as stressaction
 import tempest.test
+
+CONF = config.CONF
 
 
 class FloatingStress(stressaction.StressAction):
@@ -31,8 +32,6 @@ class FloatingStress(stressaction.StressAction):
                                 stderr=subprocess.PIPE)
         proc.wait()
         success = proc.returncode == 0
-        self.logger.info("%s(%s): %s", self.server_id, self.floating['ip'],
-                         "pong!" if success else "no pong :(")
         return success
 
     def tcp_connect_scan(self, addr, port):
@@ -57,18 +56,24 @@ class FloatingStress(stressaction.StressAction):
             raise RuntimeError("Cannot connect to the ssh port.")
 
     def check_icmp_echo(self):
+        self.logger.info("%s(%s): Pinging..",
+                         self.server_id, self.floating['ip'])
+
         def func():
             return self.ping_ip_address(self.floating['ip'])
         if not tempest.test.call_until_true(func, self.check_timeout,
                                             self.check_interval):
-            raise RuntimeError("Cannot ping the machine.")
+            raise RuntimeError("%s(%s): Cannot ping the machine.",
+                               self.server_id, self.floating['ip'])
+        self.logger.info("%s(%s): pong :)",
+                         self.server_id, self.floating['ip'])
 
     def _create_vm(self):
-        self.name = name = rand_name("instance")
+        self.name = name = data_utils.rand_name("instance")
         servers_client = self.manager.servers_client
         self.logger.info("creating %s" % name)
         vm_args = self.vm_extra_args.copy()
-        vm_args['security_groups'] = [{'name': self.sec_grp}]
+        vm_args['security_groups'] = [self.sec_grp]
         resp, server = servers_client.create_server(name, self.image,
                                                     self.flavor,
                                                     **vm_args)
@@ -87,18 +92,17 @@ class FloatingStress(stressaction.StressAction):
 
     def _create_sec_group(self):
         sec_grp_cli = self.manager.security_groups_client
-        s_name = rand_name('sec_grp-')
-        s_description = rand_name('desc-')
-        _, _sec_grp = sec_grp_cli.create_security_group(s_name,
-                                                        s_description)
-        self.sec_grp = _sec_grp['id']
+        s_name = data_utils.rand_name('sec_grp-')
+        s_description = data_utils.rand_name('desc-')
+        _, self.sec_grp = sec_grp_cli.create_security_group(s_name,
+                                                            s_description)
         create_rule = sec_grp_cli.create_security_group_rule
-        create_rule(self.sec_grp, 'tcp', 22, 22)
-        create_rule(self.sec_grp, 'icmp', -1, -1)
+        create_rule(self.sec_grp['id'], 'tcp', 22, 22)
+        create_rule(self.sec_grp['id'], 'icmp', -1, -1)
 
     def _destroy_sec_grp(self):
         sec_grp_cli = self.manager.security_groups_client
-        sec_grp_cli.delete_security_group(self.sec_grp)
+        sec_grp_cli.delete_security_group(self.sec_grp['id'])
 
     def _create_floating_ip(self):
         floating_cli = self.manager.floating_ips_client
@@ -111,8 +115,8 @@ class FloatingStress(stressaction.StressAction):
         self.logger.info("Deleted Floating IP %s", str(self.floating['ip']))
 
     def setUp(self, **kwargs):
-        self.image = self.manager.config.compute.image_ref
-        self.flavor = self.manager.config.compute.flavor_ref
+        self.image = CONF.compute.image_ref
+        self.flavor = CONF.compute.flavor_ref
         self.vm_extra_args = kwargs.get('vm_extra_args', {})
         self.wait_after_vm_create = kwargs.get('wait_after_vm_create',
                                                True)
@@ -170,6 +174,8 @@ class FloatingStress(stressaction.StressAction):
             self._create_vm()
         if self.reboot:
             self.manager.servers_client.reboot(self.server_id, 'HARD')
+            self.manager.servers_client.wait_for_server_status(self.server_id,
+                                                               'ACTIVE')
 
         self.run_core()
 

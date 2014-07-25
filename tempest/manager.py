@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,8 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import tempest.config
+from tempest import auth
+from tempest import config
 from tempest import exceptions
+
+CONF = config.CONF
 
 
 class Manager(object):
@@ -28,15 +29,40 @@ class Manager(object):
     and a client object for a test case to use in performing actions.
     """
 
-    def __init__(self):
-        self.config = tempest.config.TempestConfig()
+    def __init__(self, credentials=None):
+        """
+        We allow overriding of the credentials used within the various
+        client classes managed by the Manager object. Left as None, the
+        standard username/password/tenant_name[/domain_name] is used.
+
+        :param credentials: Override of the credentials
+        """
+        self.auth_version = CONF.identity.auth_version
+        if credentials is None:
+            self.credentials = auth.get_default_credentials('user')
+        else:
+            self.credentials = credentials
+        # Check if passed or default credentials are valid
+        if not self.credentials.is_valid():
+            raise exceptions.InvalidCredentials()
+        # Creates an auth provider for the credentials
+        self.auth_provider = self.get_auth_provider(self.credentials)
+        # FIXME(andreaf) unused
         self.client_attr_names = []
 
-    # we do this everywhere, have it be part of the super class
-    def _validate_credentials(self, username, password, tenant_name):
-        if None in (username, password, tenant_name):
-            msg = ("Missing required credentials. "
-                   "username: %(u)s, password: %(p)s, "
-                   "tenant_name: %(t)s" %
-                   {'u': username, 'p': password, 't': tenant_name})
-            raise exceptions.InvalidConfiguration(msg)
+    @classmethod
+    def get_auth_provider_class(cls, auth_version):
+        if auth_version == 'v2':
+            return auth.KeystoneV2AuthProvider
+        else:
+            return auth.KeystoneV3AuthProvider
+
+    def get_auth_provider(self, credentials):
+        if credentials is None:
+            raise exceptions.InvalidCredentials(
+                'Credentials must be specified')
+        auth_provider_class = self.get_auth_provider_class(self.auth_version)
+        return auth_provider_class(
+            client_type=getattr(self, 'client_type', None),
+            interface=getattr(self, 'interface', None),
+            credentials=credentials)

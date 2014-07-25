@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -15,105 +13,97 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from six import moves
+
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest.test import attr
+from tempest import test
 
 
-class TenantsTestJSON(base.BaseIdentityAdminTest):
+class TenantsTestJSON(base.BaseIdentityV2AdminTest):
     _interface = 'json'
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_list_delete(self):
         # Create several tenants and delete them
         tenants = []
-        for _ in xrange(3):
+        for _ in moves.xrange(3):
             tenant_name = data_utils.rand_name(name='tenant-new')
-            resp, tenant = self.client.create_tenant(tenant_name)
-            self.assertEqual(200, resp.status)
+            _, tenant = self.client.create_tenant(tenant_name)
             self.data.tenants.append(tenant)
             tenants.append(tenant)
         tenant_ids = map(lambda x: x['id'], tenants)
-        resp, body = self.client.list_tenants()
-        self.assertTrue(resp['status'].startswith('2'))
-        found = [tenant for tenant in body if tenant['id'] in tenant_ids]
+        _, body = self.client.list_tenants()
+        found = [t for t in body if t['id'] in tenant_ids]
         self.assertEqual(len(found), len(tenants), 'Tenants not created')
 
         for tenant in tenants:
-            resp, body = self.client.delete_tenant(tenant['id'])
-            self.assertTrue(resp['status'].startswith('2'))
+            self.client.delete_tenant(tenant['id'])
             self.data.tenants.remove(tenant)
 
-        resp, body = self.client.list_tenants()
+        _, body = self.client.list_tenants()
         found = [tenant for tenant in body if tenant['id'] in tenant_ids]
         self.assertFalse(any(found), 'Tenants failed to delete')
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_create_with_description(self):
         # Create tenant with a description
         tenant_name = data_utils.rand_name(name='tenant-')
         tenant_desc = data_utils.rand_name(name='desc-')
-        resp, body = self.client.create_tenant(tenant_name,
-                                               description=tenant_desc)
+        _, body = self.client.create_tenant(tenant_name,
+                                            description=tenant_desc)
         tenant = body
         self.data.tenants.append(tenant)
-        st1 = resp['status']
         tenant_id = body['id']
         desc1 = body['description']
-        self.assertTrue(st1.startswith('2'))
         self.assertEqual(desc1, tenant_desc, 'Description should have '
                          'been sent in response for create')
-        resp, body = self.client.get_tenant(tenant_id)
+        _, body = self.client.get_tenant(tenant_id)
         desc2 = body['description']
         self.assertEqual(desc2, tenant_desc, 'Description does not appear'
                          'to be set')
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_create_enabled(self):
         # Create a tenant that is enabled
         tenant_name = data_utils.rand_name(name='tenant-')
-        resp, body = self.client.create_tenant(tenant_name, enabled=True)
+        _, body = self.client.create_tenant(tenant_name, enabled=True)
         tenant = body
         self.data.tenants.append(tenant)
         tenant_id = body['id']
-        st1 = resp['status']
         en1 = body['enabled']
-        self.assertTrue(st1.startswith('2'))
         self.assertTrue(en1, 'Enable should be True in response')
-        resp, body = self.client.get_tenant(tenant_id)
+        _, body = self.client.get_tenant(tenant_id)
         en2 = body['enabled']
         self.assertTrue(en2, 'Enable should be True in lookup')
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_create_not_enabled(self):
         # Create a tenant that is not enabled
         tenant_name = data_utils.rand_name(name='tenant-')
-        resp, body = self.client.create_tenant(tenant_name, enabled=False)
+        _, body = self.client.create_tenant(tenant_name, enabled=False)
         tenant = body
         self.data.tenants.append(tenant)
         tenant_id = body['id']
-        st1 = resp['status']
         en1 = body['enabled']
-        self.assertTrue(st1.startswith('2'))
         self.assertEqual('false', str(en1).lower(),
                          'Enable should be False in response')
-        resp, body = self.client.get_tenant(tenant_id)
+        _, body = self.client.get_tenant(tenant_id)
         en2 = body['enabled']
         self.assertEqual('false', str(en2).lower(),
                          'Enable should be False in lookup')
         self.client.delete_tenant(tenant_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_update_name(self):
         # Update name attribute of a tenant
         t_name1 = data_utils.rand_name(name='tenant-')
-        resp, body = self.client.create_tenant(t_name1)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.create_tenant(t_name1)
         tenant = body
         self.data.tenants.append(tenant)
 
@@ -121,13 +111,11 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         resp1_name = body['name']
 
         t_name2 = data_utils.rand_name(name='tenant2-')
-        resp, body = self.client.update_tenant(t_id, name=t_name2)
-        st2 = resp['status']
+        _, body = self.client.update_tenant(t_id, name=t_name2)
         resp2_name = body['name']
-        self.assertTrue(st2.startswith('2'))
         self.assertNotEqual(resp1_name, resp2_name)
 
-        resp, body = self.client.get_tenant(t_id)
+        _, body = self.client.get_tenant(t_id)
         resp3_name = body['name']
 
         self.assertNotEqual(resp1_name, resp3_name)
@@ -137,13 +125,12 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_update_desc(self):
         # Update description attribute of a tenant
         t_name = data_utils.rand_name(name='tenant-')
         t_desc = data_utils.rand_name(name='desc-')
-        resp, body = self.client.create_tenant(t_name, description=t_desc)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.create_tenant(t_name, description=t_desc)
         tenant = body
         self.data.tenants.append(tenant)
 
@@ -151,13 +138,11 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         resp1_desc = body['description']
 
         t_desc2 = data_utils.rand_name(name='desc2-')
-        resp, body = self.client.update_tenant(t_id, description=t_desc2)
-        st2 = resp['status']
+        _, body = self.client.update_tenant(t_id, description=t_desc2)
         resp2_desc = body['description']
-        self.assertTrue(st2.startswith('2'))
         self.assertNotEqual(resp1_desc, resp2_desc)
 
-        resp, body = self.client.get_tenant(t_id)
+        _, body = self.client.get_tenant(t_id)
         resp3_desc = body['description']
 
         self.assertNotEqual(resp1_desc, resp3_desc)
@@ -167,13 +152,12 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         self.client.delete_tenant(t_id)
         self.data.tenants.remove(tenant)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_tenant_update_enable(self):
         # Update the enabled attribute of a tenant
         t_name = data_utils.rand_name(name='tenant-')
         t_en = False
-        resp, body = self.client.create_tenant(t_name, enabled=t_en)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.create_tenant(t_name, enabled=t_en)
         tenant = body
         self.data.tenants.append(tenant)
 
@@ -181,13 +165,11 @@ class TenantsTestJSON(base.BaseIdentityAdminTest):
         resp1_en = body['enabled']
 
         t_en2 = True
-        resp, body = self.client.update_tenant(t_id, enabled=t_en2)
-        st2 = resp['status']
+        _, body = self.client.update_tenant(t_id, enabled=t_en2)
         resp2_en = body['enabled']
-        self.assertTrue(st2.startswith('2'))
         self.assertNotEqual(resp1_en, resp2_en)
 
-        resp, body = self.client.get_tenant(t_id)
+        _, body = self.client.get_tenant(t_id)
         resp3_en = body['enabled']
 
         self.assertNotEqual(resp1_en, resp3_en)

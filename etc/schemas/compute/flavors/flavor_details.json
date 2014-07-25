@@ -1,0 +1,8 @@
+{
+    "name": "get-flavor-details",
+    "http-method": "GET",
+    "url": "flavors/%s",
+    "resources": [
+        {"name": "flavor", "expected_result": 404}
+    ]
+}

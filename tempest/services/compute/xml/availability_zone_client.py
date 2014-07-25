@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # All Rights Reserved.
 #
@@ -17,27 +15,30 @@
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
-from tempest.services.compute.xml.common import xml_to_json
+from tempest.common import rest_client
+from tempest.common import xml_utils
+from tempest import config
+
+CONF = config.CONF
 
 
-class AvailabilityZoneClientXML(RestClientXML):
+class AvailabilityZoneClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(AvailabilityZoneClientXML, self).__init__(config, username,
-                                                        password, auth_url,
-                                                        tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(AvailabilityZoneClientXML, self).__init__(
+            auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def _parse_array(self, node):
-        return [xml_to_json(x) for x in node]
+        return [xml_utils.xml_to_json(x) for x in node]
 
     def get_availability_zone_list(self):
-        resp, body = self.get('os-availability-zone', self.headers)
+        resp, body = self.get('os-availability-zone')
         availability_zone = self._parse_array(etree.fromstring(body))
         return resp, availability_zone
 
     def get_availability_zone_list_detail(self):
-        resp, body = self.get('os-availability-zone/detail', self.headers)
+        resp, body = self.get('os-availability-zone/detail')
         availability_zone = self._parse_array(etree.fromstring(body))
         return resp, availability_zone

@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,11 +14,14 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common.utils import data_utils
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
-class VolumesTestJSON(base.BaseComputeTest):
+class VolumesTestJSON(base.BaseV2ComputeTest):
 
     """
     This test creates a number of 1G volumes. To run successfully,
@@ -30,22 +31,19 @@ class VolumesTestJSON(base.BaseComputeTest):
     VOLUME_BACKING_FILE_SIZE is atleast 4G in your localrc
     """
 
-    _interface = 'json'
-
     @classmethod
     def setUpClass(cls):
         super(VolumesTestJSON, cls).setUpClass()
         cls.client = cls.volumes_extensions_client
-        if not cls.config.service_available.cinder:
+        if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
         # Create 3 Volumes
         cls.volume_list = []
         cls.volume_id_list = []
         for i in range(3):
-            v_name = rand_name('volume-%s')
+            v_name = data_utils.rand_name('volume-%s' % cls._interface)
             metadata = {'Type': 'work'}
-            v_name += cls._interface
             try:
                 resp, volume = cls.client.create_volume(size=1,
                                                         display_name=v_name,
@@ -62,7 +60,7 @@ class VolumesTestJSON(base.BaseComputeTest):
                     # too small. So, here, we clean up whatever we did manage
                     # to create and raise a SkipTest
                     for volume in cls.volume_list:
-                        cls.client.delete_volume(volume)
+                        cls.delete_volume(volume['id'])
                     msg = ("Failed to create ALL necessary volumes to run "
                            "test. This typically means that the backing file "
                            "size of the nova-volumes group is too small to "
@@ -74,11 +72,10 @@ class VolumesTestJSON(base.BaseComputeTest):
     def tearDownClass(cls):
         # Delete the created Volumes
         for volume in cls.volume_list:
-            resp, _ = cls.client.delete_volume(volume['id'])
-            cls.client.wait_for_resource_deletion(volume['id'])
+            cls.delete_volume(volume['id'])
         super(VolumesTestJSON, cls).tearDownClass()
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list(self):
         # Should return the list of Volumes
         # Fetch all Volumes
@@ -94,7 +91,7 @@ class VolumesTestJSON(base.BaseComputeTest):
                          ', '.join(m_vol['displayName']
                                    for m_vol in missing_volumes))
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_list_with_details(self):
         # Should return the list of Volumes with details
         # Fetch all Volumes
@@ -109,6 +106,65 @@ class VolumesTestJSON(base.BaseComputeTest):
                          "Failed to find volume %s in fetched list" %
                          ', '.join(m_vol['displayName']
                                    for m_vol in missing_volumes))
+
+    @test.attr(type='gate')
+    def test_volume_list_param_limit(self):
+        # Return the list of volumes based on limit set
+        params = {'limit': 2}
+        resp, fetched_vol_list = self.client.list_volumes(params=params)
+        self.assertEqual(200, resp.status)
+
+        self.assertEqual(len(fetched_vol_list), params['limit'],
+                         "Failed to list volumes by limit set")
+
+    @test.attr(type='gate')
+    def test_volume_list_with_detail_param_limit(self):
+        # Return the list of volumes with details based on limit set.
+        params = {'limit': 2}
+        resp, fetched_vol_list = \
+            self.client.list_volumes_with_detail(params=params)
+        self.assertEqual(200, resp.status)
+
+        self.assertEqual(len(fetched_vol_list), params['limit'],
+                         "Failed to list volume details by limit set")
+
+    @test.attr(type='gate')
+    def test_volume_list_param_offset_and_limit(self):
+        # Return the list of volumes based on offset and limit set.
+        # get all volumes list
+        response, all_vol_list = self.client.list_volumes()
+        params = {'offset': 1, 'limit': 1}
+        resp, fetched_vol_list = self.client.list_volumes(params=params)
+        self.assertEqual(200, resp.status)
+
+        # Validating length of the fetched volumes
+        self.assertEqual(len(fetched_vol_list), params['limit'],
+                         "Failed to list volumes by offset and limit")
+        # Validating offset of fetched volume
+        for index, volume in enumerate(fetched_vol_list):
+            self.assertEqual(volume['id'],
+                             all_vol_list[index + params['offset']]['id'],
+                             "Failed to list volumes by offset and limit")
+
+    @test.attr(type='gate')
+    def test_volume_list_with_detail_param_offset_and_limit(self):
+        # Return the list of volumes details based on offset and limit set.
+        # get all volumes list
+        response, all_vol_list = self.client.list_volumes_with_detail()
+        params = {'offset': 1, 'limit': 1}
+        resp, fetched_vol_list = \
+            self.client.list_volumes_with_detail(params=params)
+        self.assertEqual(200, resp.status)
+
+        # Validating length of the fetched volumes
+        self.assertEqual(len(fetched_vol_list), params['limit'],
+                         "Failed to list volume details by offset and limit")
+        # Validating offset of fetched volume
+        for index, volume in enumerate(fetched_vol_list):
+            self.assertEqual(volume['id'],
+                             all_vol_list[index + params['offset']]['id'],
+                             "Failed to list volume details by "
+                             "offset and limit")
 
 
 class VolumesTestXML(VolumesTestJSON):

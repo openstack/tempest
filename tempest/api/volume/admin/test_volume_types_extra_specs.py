@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,17 +14,17 @@
 #    under the License.
 
 from tempest.api.volume import base
-from tempest.common.utils.data_utils import rand_name
-from tempest.test import attr
+from tempest.common.utils import data_utils
+from tempest import test
 
 
-class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
+class VolumeTypesExtraSpecsTest(base.BaseVolumeV1AdminTest):
     _interface = "json"
 
     @classmethod
     def setUpClass(cls):
         super(VolumeTypesExtraSpecsTest, cls).setUpClass()
-        vol_type_name = rand_name('Volume-type-')
+        vol_type_name = data_utils.rand_name('Volume-type-')
         resp, cls.volume_type = cls.client.create_volume_type(vol_type_name)
 
     @classmethod
@@ -34,7 +32,7 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
         cls.client.delete_volume_type(cls.volume_type['id'])
         super(VolumeTypesExtraSpecsTest, cls).tearDownClass()
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_type_extra_specs_list(self):
         # List Volume types extra specs.
         extra_specs = {"spec1": "val1"}
@@ -47,10 +45,9 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
             self.volume_type['id'])
         self.assertEqual(200, resp.status)
         self.assertIsInstance(body, dict)
-        self.assertTrue('spec1' in body, "Incorrect volume type extra"
-                        " spec returned")
+        self.assertIn('spec1', body)
 
-    @attr(type='gate')
+    @test.attr(type='gate')
     def test_volume_type_extra_specs_update(self):
         # Update volume type extra specs
         extra_specs = {"spec2": "val1"}
@@ -66,12 +63,11 @@ class VolumeTypesExtraSpecsTest(base.BaseVolumeAdminTest):
             extra_spec.keys()[0],
             extra_spec)
         self.assertEqual(200, resp.status)
-        self.assertTrue('spec2' in body,
-                        "Volume type extra spec incorrectly updated")
+        self.assertIn('spec2', body)
         self.assertEqual(extra_spec['spec2'], body['spec2'],
                          "Volume type extra spec incorrectly updated")
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
     def test_volume_type_extra_spec_create_get_delete(self):
         # Create/Get/Delete volume type extra spec.
         extra_specs = {"spec3": "val1"}

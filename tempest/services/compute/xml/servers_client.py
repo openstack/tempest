@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-#
 # Copyright 2012 IBM Corp.
 # Copyright 2013 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved.
@@ -21,16 +19,14 @@ import urllib
 
 from lxml import etree
 
-from tempest.common.rest_client import RestClientXML
+from tempest.common import rest_client
 from tempest.common import waiters
+from tempest.common import xml_utils
+from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-from tempest.services.compute.xml.common import Document
-from tempest.services.compute.xml.common import Element
-from tempest.services.compute.xml.common import Text
-from tempest.services.compute.xml.common import xml_to_json
-from tempest.services.compute.xml.common import XMLNS_11
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -60,12 +56,13 @@ def _translate_ip_xml_json(ip):
 
 def _translate_network_xml_to_json(network):
     return [_translate_ip_xml_json(ip.attrib)
-            for ip in network.findall('{%s}ip' % XMLNS_11)]
+            for ip in network.findall('{%s}ip' % xml_utils.XMLNS_11)]
 
 
 def _translate_addresses_xml_to_json(xml_addresses):
     return dict((network.attrib['id'], _translate_network_xml_to_json(network))
-                for network in xml_addresses.findall('{%s}network' % XMLNS_11))
+                for network in xml_addresses.findall('{%s}network' %
+                                                     xml_utils.XMLNS_11))
 
 
 def _translate_server_xml_to_json(xml_dom):
@@ -97,16 +94,16 @@ def _translate_server_xml_to_json(xml_dom):
                                         'version': 6}],
                    'foo_novanetwork': [{'addr': '192.168.0.4', 'version': 4}]}}
     """
-    nsmap = {'api': XMLNS_11}
+    nsmap = {'api': xml_utils.XMLNS_11}
     addresses = xml_dom.xpath('/api:server/api:addresses', namespaces=nsmap)
     if addresses:
         if len(addresses) > 1:
             raise ValueError('Expected only single `addresses` element.')
         json_addresses = _translate_addresses_xml_to_json(addresses[0])
-        json = xml_to_json(xml_dom)
+        json = xml_utils.xml_to_json(xml_dom)
         json['addresses'] = json_addresses
     else:
-        json = xml_to_json(xml_dom)
+        json = xml_utils.xml_to_json(xml_dom)
     diskConfig = ('{http://docs.openstack.org'
                   '/compute/ext/disk_config/api/v1.1}diskConfig')
     terminated_at = ('{http://docs.openstack.org/'
@@ -122,6 +119,10 @@ def _translate_server_xml_to_json(xml_dom):
                 '/compute/ext/extended_status/api/v1.1}vm_state')
     task_state = ('{http://docs.openstack.org'
                   '/compute/ext/extended_status/api/v1.1}task_state')
+    if 'tenantId' in json:
+        json['tenant_id'] = json.pop('tenantId')
+    if 'userId' in json:
+        json['user_id'] = json.pop('userId')
     if diskConfig in json:
         json['OS-DCF:diskConfig'] = json.pop(diskConfig)
     if terminated_at in json:
@@ -139,14 +140,12 @@ def _translate_server_xml_to_json(xml_dom):
     return json
 
 
-class ServersClientXML(RestClientXML):
+class ServersClientXML(rest_client.RestClient):
+    TYPE = "xml"
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None,
-                 auth_version='v2'):
-        super(ServersClientXML, self).__init__(config, username, password,
-                                               auth_url, tenant_name,
-                                               auth_version=auth_version)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(ServersClientXML, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def _parse_key_value(self, node):
         """Parse <foo key='key'>value</foo> data into {'key': 'value'}."""
@@ -159,7 +158,7 @@ class ServersClientXML(RestClientXML):
         del json['link']
         json['links'] = []
         for linknode in node.findall('{http://www.w3.org/2005/Atom}link'):
-            json['links'].append(xml_to_json(linknode))
+            json['links'].append(xml_utils.xml_to_json(linknode))
 
     def _parse_server(self, body):
         json = _translate_server_xml_to_json(body)
@@ -167,7 +166,7 @@ class ServersClientXML(RestClientXML):
         if 'metadata' in json and json['metadata']:
             # NOTE(danms): if there was metadata, we need to re-parse
             # that as a special type
-            metadata_tag = body.find('{%s}metadata' % XMLNS_11)
+            metadata_tag = body.find('{%s}metadata' % xml_utils.XMLNS_11)
             json["metadata"] = self._parse_key_value(metadata_tag)
         if 'link' in json:
             self._parse_links(body, json)
@@ -189,9 +188,13 @@ class ServersClientXML(RestClientXML):
 
     def get_server(self, server_id):
         """Returns the details of an existing server."""
-        resp, body = self.get("servers/%s" % str(server_id), self.headers)
+        resp, body = self.get("servers/%s" % str(server_id))
         server = self._parse_server(etree.fromstring(body))
         return resp, server
+
+    def migrate_server(self, server_id, **kwargs):
+        """Migrates the given server ."""
+        return self.action(server_id, 'migrate', None, **kwargs)
 
     def lock_server(self, server_id, **kwargs):
         """Locks the given server."""
@@ -217,6 +220,18 @@ class ServersClientXML(RestClientXML):
         """Un-pauses the provided server."""
         return self.action(server_id, 'unpause', None, **kwargs)
 
+    def shelve_server(self, server_id, **kwargs):
+        """Shelves the provided server."""
+        return self.action(server_id, 'shelve', None, **kwargs)
+
+    def unshelve_server(self, server_id, **kwargs):
+        """Un-shelves the provided server."""
+        return self.action(server_id, 'unshelve', None, **kwargs)
+
+    def shelve_offload_server(self, server_id, **kwargs):
+        """Shelve-offload the provided server."""
+        return self.action(server_id, 'shelveOffload', None, **kwargs)
+
     def reset_state(self, server_id, state='error'):
         """Resets the state of a server to active/error."""
         return self.action(server_id, 'os-resetState', None, state=state)
@@ -228,7 +243,13 @@ class ServersClientXML(RestClientXML):
     def _parse_array(self, node):
         array = []
         for child in node.getchildren():
-            array.append(xml_to_json(child))
+            array.append(xml_utils.xml_to_json(child))
+        return array
+
+    def _parse_server_array(self, node):
+        array = []
+        for child in node.getchildren():
+            array.append(self._parse_server(child))
         return array
 
     def list_servers(self, params=None):
@@ -236,8 +257,8 @@ class ServersClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
-        servers = self._parse_array(etree.fromstring(body))
+        resp, body = self.get(url)
+        servers = self._parse_server_array(etree.fromstring(body))
         return resp, {"servers": servers}
 
     def list_servers_with_detail(self, params=None):
@@ -245,14 +266,14 @@ class ServersClientXML(RestClientXML):
         if params:
             url += '?%s' % urllib.urlencode(params)
 
-        resp, body = self.get(url, self.headers)
-        servers = self._parse_array(etree.fromstring(body))
+        resp, body = self.get(url)
+        servers = self._parse_server_array(etree.fromstring(body))
         return resp, {"servers": servers}
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
-                      accessIPv6=None):
-        doc = Document()
-        server = Element("server")
+                      accessIPv6=None, disk_config=None):
+        doc = xml_utils.Document()
+        server = xml_utils.Element("server")
         doc.append(server)
 
         if name is not None:
@@ -261,17 +282,20 @@ class ServersClientXML(RestClientXML):
             server.add_attr("accessIPv4", accessIPv4)
         if accessIPv6 is not None:
             server.add_attr("accessIPv6", accessIPv6)
+        if disk_config is not None:
+            server.add_attr('xmlns:OS-DCF', "http://docs.openstack.org/"
+                            "compute/ext/disk_config/api/v1.1")
+            server.add_attr("OS-DCF:diskConfig", disk_config)
         if meta is not None:
-            metadata = Element("metadata")
+            metadata = xml_utils.Element("metadata")
             server.append(metadata)
             for k, v in meta:
-                meta = Element("meta", key=k)
-                meta.append(Text(v))
+                meta = xml_utils.Element("meta", key=k)
+                meta.append(xml_utils.Text(v))
                 metadata.append(meta)
 
-        resp, body = self.put('servers/%s' % str(server_id),
-                              str(doc), self.headers)
-        return resp, xml_to_json(etree.fromstring(body))
+        resp, body = self.put('servers/%s' % str(server_id), str(doc))
+        return resp, xml_utils.xml_to_json(etree.fromstring(body))
 
     def create_server(self, name, image_ref, flavor_ref, **kwargs):
         """
@@ -294,16 +318,18 @@ class ServersClientXML(RestClientXML):
         min_count: Count of minimum number of instances to launch.
         max_count: Count of maximum number of instances to launch.
         disk_config: Determines if user or admin controls disk configuration.
+        block_device_mapping: Block device mapping for the server.
         """
-        server = Element("server",
-                         xmlns=XMLNS_11,
-                         imageRef=image_ref,
-                         flavorRef=flavor_ref,
-                         name=name)
+        server = xml_utils.Element("server",
+                                   xmlns=xml_utils.XMLNS_11,
+                                   imageRef=image_ref,
+                                   flavorRef=flavor_ref,
+                                   name=name)
 
         for attr in ["adminPass", "accessIPv4", "accessIPv6", "key_name",
                      "user_data", "availability_zone", "min_count",
-                     "max_count", "return_reservation_id"]:
+                     "max_count", "return_reservation_id",
+                     "block_device_mapping"]:
             if attr in kwargs:
                 server.add_attr(attr, kwargs[attr])
 
@@ -313,43 +339,55 @@ class ServersClientXML(RestClientXML):
             server.add_attr('OS-DCF:diskConfig', kwargs['disk_config'])
 
         if 'security_groups' in kwargs:
-            secgroups = Element("security_groups")
+            secgroups = xml_utils.Element("security_groups")
             server.append(secgroups)
             for secgroup in kwargs['security_groups']:
-                s = Element("security_group", name=secgroup['name'])
+                s = xml_utils.Element("security_group", name=secgroup['name'])
                 secgroups.append(s)
 
         if 'networks' in kwargs:
-            networks = Element("networks")
+            networks = xml_utils.Element("networks")
             server.append(networks)
             for network in kwargs['networks']:
-                s = Element("network", uuid=network['uuid'],
-                            fixed_ip=network['fixed_ip'])
+                s = xml_utils.Element("network", uuid=network['uuid'],
+                                      fixed_ip=network['fixed_ip'])
                 networks.append(s)
 
         if 'meta' in kwargs:
-            metadata = Element("metadata")
+            metadata = xml_utils.Element("metadata")
             server.append(metadata)
             for k, v in kwargs['meta'].items():
-                meta = Element("meta", key=k)
-                meta.append(Text(v))
+                meta = xml_utils.Element("meta", key=k)
+                meta.append(xml_utils.Text(v))
                 metadata.append(meta)
 
         if 'personality' in kwargs:
-            personality = Element('personality')
+            personality = xml_utils.Element('personality')
             server.append(personality)
             for k in kwargs['personality']:
-                temp = Element('file', path=k['path'])
-                temp.append(Text(k['contents']))
+                temp = xml_utils.Element('file', path=k['path'])
+                temp.append(xml_utils.Text(k['contents']))
                 personality.append(temp)
 
-        resp, body = self.post('servers', str(Document(server)), self.headers)
+        if 'sched_hints' in kwargs:
+            sched_hints = kwargs.get('sched_hints')
+            hints = xml_utils.Element("os:scheduler_hints")
+            hints.add_attr('xmlns:os', xml_utils.XMLNS_11)
+            for attr in sched_hints:
+                p1 = xml_utils.Element(attr)
+                p1.append(sched_hints[attr])
+                hints.append(p1)
+            server.append(hints)
+        resp, body = self.post('servers', str(xml_utils.Document(server)))
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
-    def wait_for_server_status(self, server_id, status):
+    def wait_for_server_status(self, server_id, status, extra_timeout=0,
+                               raise_on_error=True):
         """Waits for a server to reach a given status."""
-        return waiters.wait_for_server_status(self, server_id, status)
+        return waiters.wait_for_server_status(self, server_id, status,
+                                              extra_timeout=extra_timeout,
+                                              raise_on_error=raise_on_error)
 
     def wait_for_server_termination(self, server_id, ignore_error=False):
         """Waits for server to reach termination."""
@@ -362,7 +400,7 @@ class ServersClientXML(RestClientXML):
 
             server_status = body['status']
             if server_status == 'ERROR' and not ignore_error:
-                raise exceptions.BuildErrorException
+                raise exceptions.BuildErrorException(server_id=server_id)
 
             if int(time.time()) - start_time >= self.build_timeout:
                 raise exceptions.TimeoutException
@@ -378,7 +416,7 @@ class ServersClientXML(RestClientXML):
 
     def list_addresses(self, server_id):
         """Lists all addresses for a server."""
-        resp, body = self.get("servers/%s/ips" % str(server_id), self.headers)
+        resp, body = self.get("servers/%s/ips" % str(server_id))
 
         networks = {}
         xml_list = etree.fromstring(body)
@@ -391,25 +429,43 @@ class ServersClientXML(RestClientXML):
     def list_addresses_by_network(self, server_id, network_id):
         """Lists all addresses of a specific network type for a server."""
         resp, body = self.get("servers/%s/ips/%s" % (str(server_id),
-                                                     network_id),
-                              self.headers)
+                                                     network_id))
         network = self._parse_network(etree.fromstring(body))
 
         return resp, network
 
     def action(self, server_id, action_name, response_key, **kwargs):
         if 'xmlns' not in kwargs:
-            kwargs['xmlns'] = XMLNS_11
-        doc = Document((Element(action_name, **kwargs)))
-        resp, body = self.post("servers/%s/action" % server_id,
-                               str(doc), self.headers)
+            kwargs['xmlns'] = xml_utils.XMLNS_11
+        doc = xml_utils.Document((xml_utils.Element(action_name, **kwargs)))
+        resp, body = self.post("servers/%s/action" % server_id, str(doc))
         if response_key is not None:
-            body = xml_to_json(etree.fromstring(body))
+            body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def create_backup(self, server_id, backup_type, rotation, name):
+        """Backup a server instance."""
+        return self.action(server_id, "createBackup", None,
+                           backup_type=backup_type,
+                           rotation=rotation,
+                           name=name)
 
     def change_password(self, server_id, password):
         return self.action(server_id, "changePassword", None,
                            adminPass=password)
+
+    def get_password(self, server_id):
+        resp, body = self.get("servers/%s/os-server-password" % str(server_id))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
+        return resp, body
+
+    def delete_password(self, server_id):
+        """
+        Removes the encrypted server password from the metadata server
+        Note that this does not actually change the instance server
+        password.
+        """
+        return self.delete("servers/%s/os-server-password" % str(server_id))
 
     def reboot(self, server_id, reboot_type):
         return self.action(server_id, "reboot", None, type=reboot_type)
@@ -423,24 +479,23 @@ class ServersClientXML(RestClientXML):
                                      "compute/ext/disk_config/api/v1.1"
             kwargs['xmlns:atom'] = "http://www.w3.org/2005/Atom"
         if 'xmlns' not in kwargs:
-            kwargs['xmlns'] = XMLNS_11
+            kwargs['xmlns'] = xml_utils.XMLNS_11
 
         attrs = kwargs.copy()
         if 'metadata' in attrs:
             del attrs['metadata']
-        rebuild = Element("rebuild",
-                          **attrs)
+        rebuild = xml_utils.Element("rebuild", **attrs)
 
         if 'metadata' in kwargs:
-            metadata = Element("metadata")
+            metadata = xml_utils.Element("metadata")
             rebuild.append(metadata)
             for k, v in kwargs['metadata'].items():
-                meta = Element("meta", key=k)
-                meta.append(Text(v))
+                meta = xml_utils.Element("meta", key=k)
+                meta.append(xml_utils.Text(v))
                 metadata.append(meta)
 
         resp, body = self.post('servers/%s/action' % server_id,
-                               str(Document(rebuild)), self.headers)
+                               str(xml_utils.Document(rebuild)))
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
@@ -478,63 +533,60 @@ class ServersClientXML(RestClientXML):
     def live_migrate_server(self, server_id, dest_host, use_block_migration):
         """This should be called with administrator privileges ."""
 
-        req_body = Element("os-migrateLive",
-                           xmlns=XMLNS_11,
-                           disk_over_commit=False,
-                           block_migration=use_block_migration,
-                           host=dest_host)
+        req_body = xml_utils.Element("os-migrateLive",
+                                     xmlns=xml_utils.XMLNS_11,
+                                     disk_over_commit=False,
+                                     block_migration=use_block_migration,
+                                     host=dest_host)
 
         resp, body = self.post("servers/%s/action" % str(server_id),
-                               str(Document(req_body)), self.headers)
+                               str(xml_utils.Document(req_body)))
         return resp, body
 
     def list_server_metadata(self, server_id):
-        resp, body = self.get("servers/%s/metadata" % str(server_id),
-                              self.headers)
+        resp, body = self.get("servers/%s/metadata" % str(server_id))
         body = self._parse_key_value(etree.fromstring(body))
         return resp, body
 
     def set_server_metadata(self, server_id, meta, no_metadata_field=False):
-        doc = Document()
+        doc = xml_utils.Document()
         if not no_metadata_field:
-            metadata = Element("metadata")
+            metadata = xml_utils.Element("metadata")
             doc.append(metadata)
             for k, v in meta.items():
-                meta_element = Element("meta", key=k)
-                meta_element.append(Text(v))
+                meta_element = xml_utils.Element("meta", key=k)
+                meta_element.append(xml_utils.Text(v))
                 metadata.append(meta_element)
-        resp, body = self.put('servers/%s/metadata' % str(server_id),
-                              str(doc), self.headers)
-        return resp, xml_to_json(etree.fromstring(body))
+        resp, body = self.put('servers/%s/metadata' % str(server_id), str(doc))
+        return resp, xml_utils.xml_to_json(etree.fromstring(body))
 
     def update_server_metadata(self, server_id, meta):
-        doc = Document()
-        metadata = Element("metadata")
+        doc = xml_utils.Document()
+        metadata = xml_utils.Element("metadata")
         doc.append(metadata)
         for k, v in meta.items():
-            meta_element = Element("meta", key=k)
-            meta_element.append(Text(v))
+            meta_element = xml_utils.Element("meta", key=k)
+            meta_element.append(xml_utils.Text(v))
             metadata.append(meta_element)
         resp, body = self.post("/servers/%s/metadata" % str(server_id),
-                               str(doc), headers=self.headers)
-        body = xml_to_json(etree.fromstring(body))
+                               str(doc))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def get_server_metadata_item(self, server_id, key):
-        resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key),
-                              headers=self.headers)
+        resp, body = self.get("servers/%s/metadata/%s" % (str(server_id), key))
         return resp, dict([(etree.fromstring(body).attrib['key'],
-                            xml_to_json(etree.fromstring(body)))])
+                            xml_utils.xml_to_json(etree.fromstring(body)))])
 
     def set_server_metadata_item(self, server_id, key, meta):
-        doc = Document()
+        doc = xml_utils.Document()
         for k, v in meta.items():
-            meta_element = Element("meta", key=k)
-            meta_element.append(Text(v))
+            meta_element = xml_utils.Element("meta", key=k)
+            meta_element.append(xml_utils.Text(v))
             doc.append(meta_element)
         resp, body = self.put('servers/%s/metadata/%s' % (str(server_id), key),
-                              str(doc), self.headers)
-        return resp, xml_to_json(etree.fromstring(body))
+                              str(doc))
+        return resp, xml_utils.xml_to_json(etree.fromstring(body))
 
     def delete_server_metadata_item(self, server_id, key):
         resp, body = self.delete("servers/%s/metadata/%s" %
@@ -542,31 +594,32 @@ class ServersClientXML(RestClientXML):
         return resp, body
 
     def get_console_output(self, server_id, length):
+        kwargs = {'length': length} if length else {}
         return self.action(server_id, 'os-getConsoleOutput', 'output',
-                           length=length)
+                           **kwargs)
 
     def list_virtual_interfaces(self, server_id):
         """
         List the virtual interfaces used in an instance.
         """
         resp, body = self.get('/'.join(['servers', server_id,
-                              'os-virtual-interfaces']), self.headers)
+                              'os-virtual-interfaces']))
         virt_int = self._parse_xml_virtual_interfaces(etree.fromstring(body))
         return resp, virt_int
 
-    def rescue_server(self, server_id, adminPass=None):
+    def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', None, adminPass=adminPass)
+        return self.action(server_id, 'rescue', None, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
         return self.action(server_id, 'unrescue', None)
 
     def attach_volume(self, server_id, volume_id, device='/dev/vdz'):
-        post_body = Element("volumeAttachment", volumeId=volume_id,
-                            device=device)
+        post_body = xml_utils.Element("volumeAttachment", volumeId=volume_id,
+                                      device=device)
         resp, body = self.post('servers/%s/os-volume_attachments' % server_id,
-                               str(Document(post_body)), self.headers)
+                               str(xml_utils.Document(post_body)))
         return resp, body
 
     def detach_volume(self, server_id, volume_id):
@@ -578,21 +631,40 @@ class ServersClientXML(RestClientXML):
 
     def get_server_diagnostics(self, server_id):
         """Get the usage data for a server."""
-        resp, body = self.get("servers/%s/diagnostics" % server_id,
-                              self.headers)
-        body = xml_to_json(etree.fromstring(body))
+        resp, body = self.get("servers/%s/diagnostics" % server_id)
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def list_instance_actions(self, server_id):
         """List the provided server action."""
-        resp, body = self.get("servers/%s/os-instance-actions" % server_id,
-                              self.headers)
+        resp, body = self.get("servers/%s/os-instance-actions" % server_id)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def get_instance_action(self, server_id, request_id):
         """Returns the action details of the provided server."""
         resp, body = self.get("servers/%s/os-instance-actions/%s" %
-                              (server_id, request_id), self.headers)
-        body = xml_to_json(etree.fromstring(body))
+                              (server_id, request_id))
+        body = xml_utils.xml_to_json(etree.fromstring(body))
         return resp, body
+
+    def force_delete_server(self, server_id, **kwargs):
+        """Force delete a server."""
+        return self.action(server_id, 'forceDelete', None, **kwargs)
+
+    def restore_soft_deleted_server(self, server_id, **kwargs):
+        """Restore a soft-deleted server."""
+        return self.action(server_id, 'restore', None, **kwargs)
+
+    def reset_network(self, server_id, **kwargs):
+        """Resets the Network of a server"""
+        return self.action(server_id, 'resetNetwork', None, **kwargs)
+
+    def inject_network_info(self, server_id, **kwargs):
+        """Inject the Network Info into server"""
+        return self.action(server_id, 'injectNetworkInfo', None, **kwargs)
+
+    def get_vnc_console(self, server_id, console_type):
+        """Get URL of VNC console."""
+        return self.action(server_id, "os-getVNCConsole",
+                           "console", type=console_type)

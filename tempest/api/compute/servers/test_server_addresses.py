@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -16,34 +14,27 @@
 #    under the License.
 
 from tempest.api.compute import base
-from tempest import exceptions
-from tempest.test import attr
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
-class ServerAddressesTest(base.BaseComputeTest):
-    _interface = 'json'
+class ServerAddressesTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
     def setUpClass(cls):
-        super(ServerAddressesTest, cls).setUpClass()
+        # This test module might use a network and a subnet
+        cls.set_network_resources(network=True, subnet=True)
+        super(ServerAddressesTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 
-        resp, cls.server = cls.create_server(wait_until='ACTIVE')
+        resp, cls.server = cls.create_test_server(wait_until='ACTIVE')
 
-    @attr(type=['negative', 'gate'])
-    def test_list_server_addresses_invalid_server_id(self):
-        # List addresses request should fail if server id not in system
-        self.assertRaises(exceptions.NotFound, self.client.list_addresses,
-                          '999')
-
-    @attr(type=['negative', 'gate'])
-    def test_list_server_addresses_by_network_neg(self):
-        # List addresses by network should fail if network name not valid
-        self.assertRaises(exceptions.NotFound,
-                          self.client.list_addresses_by_network,
-                          self.server['id'], 'invalid')
-
-    @attr(type='smoke')
+    @test.skip_because(bug="1210483",
+                       condition=CONF.service_available.neutron)
+    @test.attr(type='smoke')
+    @test.services('network')
     def test_list_server_addresses(self):
         # All public and private addresses for
         # a server should be returned
@@ -60,7 +51,8 @@ class ServerAddressesTest(base.BaseComputeTest):
                 self.assertTrue(address['addr'])
                 self.assertTrue(address['version'])
 
-    @attr(type='smoke')
+    @test.attr(type='smoke')
+    @test.services('network')
     def test_list_server_addresses_by_network(self):
         # Providing a network type should filter
         # the addresses return by that type
@@ -80,5 +72,5 @@ class ServerAddressesTest(base.BaseComputeTest):
                 self.assertTrue(any([a for a in addr if a == address]))
 
 
-class ServerAddressesTestXML(ServerAddressesTest):
+class ServerAddressesTestXML(ServerAddressesTestJSON):
     _interface = 'xml'

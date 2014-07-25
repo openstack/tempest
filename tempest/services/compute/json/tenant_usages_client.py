@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # All Rights Reserved.
 #
@@ -18,15 +16,18 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute.v2 import tenant_usages as schema
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class TenantUsagesClientJSON(RestClient):
+class TenantUsagesClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(TenantUsagesClientJSON, self).__init__(
-            config, username, password, auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(TenantUsagesClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_tenant_usages(self, params=None):
         url = 'os-simple-tenant-usage'
@@ -35,6 +36,7 @@ class TenantUsagesClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_tenant, resp, body)
         return resp, body['tenant_usages'][0]
 
     def get_tenant_usage(self, tenant_id, params=None):
@@ -44,4 +46,5 @@ class TenantUsagesClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.get_tenant, resp, body)
         return resp, body['tenant_usage']

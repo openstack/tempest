@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 OpenStack Foundation
 # All Rights Reserved.
 #
@@ -19,8 +17,10 @@ import re
 import subprocess
 
 import tempest.cli
+from tempest import config
 from tempest.openstack.common import log as logging
 
+CONF = config.CONF
 
 LOG = logging.getLogger(__name__)
 
@@ -33,6 +33,13 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
     their own. They only verify the structure of output if present.
     """
 
+    @classmethod
+    def setUpClass(cls):
+        if not CONF.service_available.glance:
+            msg = ("%s skipped as Glance is not available" % cls.__name__)
+            raise cls.skipException(msg)
+        super(SimpleReadOnlyGlanceClientTest, cls).setUpClass()
+
     def test_glance_fake_action(self):
         self.assertRaises(subprocess.CalledProcessError,
                           self.glance,
@@ -44,6 +51,14 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
         self.assertTableStruct(endpoints, [
             'ID', 'Name', 'Disk Format', 'Container Format',
             'Size', 'Status'])
+
+    def test_glance_member_list(self):
+        tenant_name = '--tenant-id %s' % CONF.identity.admin_tenant_name
+        out = self.glance('member-list',
+                          params=tenant_name)
+        endpoints = self.parser.listing(out)
+        self.assertTableStruct(endpoints,
+                               ['Image ID', 'Member ID', 'Can Share'])
 
     def test_glance_help(self):
         help_text = self.glance('help')
@@ -64,3 +79,14 @@ class SimpleReadOnlyGlanceClientTest(tempest.cli.ClientTestBase):
                                'member-add', 'member-create', 'member-delete',
                                'member-list'))
         self.assertFalse(wanted_commands - commands)
+
+    # Optional arguments:
+
+    def test_glance_version(self):
+        self.glance('', flags='--version')
+
+    def test_glance_debug_list(self):
+        self.glance('image-list', flags='--debug')
+
+    def test_glance_timeout(self):
+        self.glance('image-list', flags='--timeout %d' % CONF.cli.timeout)

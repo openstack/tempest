@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2013 NEC Corporation
 # Copyright 2013 IBM Corp.
 # All Rights Reserved.
@@ -19,15 +17,18 @@
 import json
 import urllib
 
-from tempest.common.rest_client import RestClient
+from tempest.api_schema.compute import services as schema
+from tempest.common import rest_client
+from tempest import config
+
+CONF = config.CONF
 
 
-class ServicesClientJSON(RestClient):
+class ServicesClientJSON(rest_client.RestClient):
 
-    def __init__(self, config, username, password, auth_url, tenant_name=None):
-        super(ServicesClientJSON, self).__init__(config, username, password,
-                                                 auth_url, tenant_name)
-        self.service = self.config.compute.catalog_type
+    def __init__(self, auth_provider):
+        super(ServicesClientJSON, self).__init__(auth_provider)
+        self.service = CONF.compute.catalog_type
 
     def list_services(self, params=None):
         url = 'os-services'
@@ -36,6 +37,7 @@ class ServicesClientJSON(RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.validate_response(schema.list_services, resp, body)
         return resp, body['services']
 
     def enable_service(self, host_name, binary):
@@ -45,8 +47,9 @@ class ServicesClientJSON(RestClient):
         binary: Service binary
         """
         post_body = json.dumps({'binary': binary, 'host': host_name})
-        resp, body = self.put('os-services/enable', post_body, self.headers)
+        resp, body = self.put('os-services/enable', post_body)
         body = json.loads(body)
+        self.validate_response(schema.enable_service, resp, body)
         return resp, body['service']
 
     def disable_service(self, host_name, binary):
@@ -56,6 +59,6 @@ class ServicesClientJSON(RestClient):
         binary: Service binary
         """
         post_body = json.dumps({'binary': binary, 'host': host_name})
-        resp, body = self.put('os-services/disable', post_body, self.headers)
+        resp, body = self.put('os-services/disable', post_body)
         body = json.loads(body)
         return resp, body['service']
