@@ -119,6 +119,12 @@ def _translate_server_xml_to_json(xml_dom):
                 '/compute/ext/extended_status/api/v1.1}vm_state')
     task_state = ('{http://docs.openstack.org'
                   '/compute/ext/extended_status/api/v1.1}task_state')
+    hypervisor_hostname = ('{http://docs.openstack.org'
+                           '/compute/ext/extended_status/api/v1.1}hypervisor_hostname')
+    instance_name = ('{http://docs.openstack.org'
+                     '/compute/ext/extended_status/api/v1.1}instance_name')
+    host = ('{http://docs.openstack.org'
+            '/compute/ext/extended_status/api/v1.1}host')
     if 'tenantId' in json:
         json['tenant_id'] = json.pop('tenantId')
     if 'userId' in json:
@@ -137,6 +143,12 @@ def _translate_server_xml_to_json(xml_dom):
         json['OS-EXT-STS:vm_state'] = json.pop(vm_state)
     if task_state in json:
         json['OS-EXT-STS:task_state'] = json.pop(task_state)
+    if hypervisor_hostname in json:
+        json['OS-EXT-SRV-ATTR:hypervisor_hostname'] = json.pop(hypervisor_hostname)
+    if instance_name in json:
+        json['OS-EXT-SRV-ATTR:instance_name'] = json.pop(instance_name)
+    if host in json:
+        json['OS-EXT-SRV-ATTR:host'] = json.pop(host)
     return json
 
 
@@ -319,6 +331,8 @@ class ServersClientXML(rest_client.RestClient):
         max_count: Count of maximum number of instances to launch.
         disk_config: Determines if user or admin controls disk configuration.
         block_device_mapping: Block device mapping for the server.
+        block_device_mapping_v2: Block device mapping with api v2 for the server.
+        mac_addr(extended attribute): The MAC address for the server.
         """
         server = xml_utils.Element("server",
                                    xmlns=xml_utils.XMLNS_11,
@@ -332,6 +346,23 @@ class ServersClientXML(rest_client.RestClient):
                      "block_device_mapping"]:
             if attr in kwargs:
                 server.add_attr(attr, kwargs[attr])
+
+        if 'block_device_mapping_v2' in kwargs:
+            block_device_mapping = xml_utils.Element("block_device_mapping_v2")
+            server.append(block_device_mapping)
+            for mapping in kwargs['block_device_mapping_v2']:
+                s = xml_utils.Element("mapping")
+                for attr in ["device_name", "source_type", "destination_type",
+                             "delete_on_termination", "guest_format", "uuid",
+                             "boot_index"]:
+                    if attr in mapping:
+                        s.add_attr(attr, mapping[attr])
+                block_device_mapping.append(s)
+
+        if 'mac_addr' in kwargs:
+            server.add_attr('xmlns:OS-EXT-IPS-MAC', "http://docs.openstack.org/"
+                            "compute/ext/extended_ips_mac/api/v1.1")
+            server.add_attr('OS-EXT-IPS-MAC:mac_addr', kwargs['mac_addr'])
 
         if 'disk_config' in kwargs:
             server.add_attr('xmlns:OS-DCF', "http://docs.openstack.org/"
