@@ -239,6 +239,9 @@
 # Valid secondary flavor to be used in tests. (string value)
 #flavor_ref_alt=2
 
+# Default valid network id to be used in tests for creating an instance. (string value)
+#default_network_id=
+
 # User name used to authenticate to an instance. (string
 # value)
 #image_ssh_user=root

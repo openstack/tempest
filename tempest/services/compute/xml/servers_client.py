@@ -345,6 +345,8 @@ class ServersClientXML(rest_client.RestClient):
                 s = xml_utils.Element("security_group", name=secgroup['name'])
                 secgroups.append(s)
 
+        default_network = CONF.compute.default_network_id
+
         if 'networks' in kwargs:
             networks = xml_utils.Element("networks")
             server.append(networks)
@@ -352,6 +354,11 @@ class ServersClientXML(rest_client.RestClient):
                 s = xml_utils.Element("network", uuid=network['uuid'],
                                       fixed_ip=network['fixed_ip'])
                 networks.append(s)
+        elif default_network != '':
+            networks = xml_utils.Element("networks")
+            server.append(networks)
+            s = xml_utils.Element("network", uuid=default_network)
+            networks.append(s)
 
         if 'meta' in kwargs:
             metadata = xml_utils.Element("metadata")

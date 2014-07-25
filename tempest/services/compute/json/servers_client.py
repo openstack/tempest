@@ -67,6 +67,12 @@ class ServersClientJSON(rest_client.RestClient):
             'flavorRef': flavor_ref
         }
 
+        default_network = CONF.compute.default_network_id
+        if default_network != '':
+            post_body['networks'] = [{
+                "uuid": default_network
+            }]
+
         for option in ['personality', 'adminPass', 'key_name',
                        'security_groups', 'networks', 'user_data',
                        'availability_zone', 'accessIPv4', 'accessIPv6',
