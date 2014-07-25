@@ -244,9 +244,13 @@ class JavelinCheck(unittest.TestCase):
             r, found = client.servers.get_server(found['id'])
             # get the ipv4 address
             addr = found['addresses']['private'][0]['addr']
-            self.assertEqual(os.system("ping -c 1 " + addr), 0,
-                             "Server %s is not pingable at %s" % (
-                                 server['name'], addr))
+            for count in range(60):
+                return_code = os.system("ping -c1 " + addr)
+                if return_code is 0:
+                    break
+            self.assertNotEqual(count, 59,
+                               "Server %s is not pingable at %s" % (
+                               server['name'], addr))
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
