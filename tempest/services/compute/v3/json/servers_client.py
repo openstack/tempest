@@ -450,8 +450,16 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', 'admin_password',
-                           None, **kwargs)
+        post_body = json.dumps({'rescue': kwargs})
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        if CONF.compute_feature_enabled.enable_instance_password:
+            rescue_schema = schema.rescue_server_with_admin_pass
+        else:
+            rescue_schema = schema.rescue_server
+        body = json.loads(body)
+        self.validate_response(rescue_schema, resp, body)
+        return resp, body
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""
