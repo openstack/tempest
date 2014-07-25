@@ -32,6 +32,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @test.attr(type="gate")
     @testtools.skipIf(not CONF.service_available.nova,
                       "Nova is not available.")
+    @test.skip_because(bug="1336755")
     def test_check_nova_notification(self):
 
         resp, body = self.create_server()
