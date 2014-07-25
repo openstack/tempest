@@ -384,7 +384,10 @@ def create_servers(servers):
 
         image_id = _get_image_by_name(client, server['image'])['id']
         flavor_id = _get_flavor_by_name(client, server['flavor'])['id']
-        client.servers.create_server(server['name'], image_id, flavor_id)
+        resp, body = client.servers.create_server(server['name'], image_id,
+                                                 flavor_id)
+        server_id = body['id']
+        client.servers.wait_for_server_status(server_id, 'ACTIVE')
 
 
 def destroy_servers(servers):
