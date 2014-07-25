@@ -1,3 +1,5 @@
+.. _stress_field_guide:
+
 Tempest Field Guide to Stress Tests
 ===================================
 
