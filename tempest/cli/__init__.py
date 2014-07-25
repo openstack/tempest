@@ -19,6 +19,7 @@ import subprocess
 
 import tempest.cli.output_parser
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -130,10 +131,10 @@ class ClientTestBase(tempest.test.BaseTestCase):
             cmd, stdout=stdout, stderr=stderr)
         result, result_err = proc.communicate()
         if not fail_ok and proc.returncode != 0:
-            raise CommandFailed(proc.returncode,
-                                cmd,
-                                result,
-                                result_err)
+            raise exceptions.CommandFailed(proc.returncode,
+                                           cmd,
+                                           result,
+                                           result_err)
         return result
 
     def assertTableStruct(self, items, field_names):
@@ -146,17 +147,3 @@ class ClientTestBase(tempest.test.BaseTestCase):
         self.assertTrue(lines[0].startswith(beginning),
                         msg=('Beginning of first line has invalid content: %s'
                              % lines[:3]))
-
-
-class CommandFailed(Exception):
-    def __init__(self, returncode, cmd, output, stderr):
-        super(CommandFailed, self).__init__()
-        self.returncode = returncode
-        self.cmd = cmd
-        self.stdout = output
-        self.stderr = stderr
-
-    def __str__(self):
-        return ("Command '%s' returned non-zero exit status %d.\n"
-        "stdout:\n%s\n"
-        "stderr:\n%s" % (self.cmd, self.returncode, self.stdout, self.stderr))
