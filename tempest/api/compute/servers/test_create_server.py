@@ -104,12 +104,12 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                                mac_addr=mac_addr)
         self.addCleanup(self.client.delete_server, server['id'])
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
-        resp, server = self.client.get_server(server['id'])
+        resp, body = self.client.get_server(server['id'])
 
         # Verify the given extended availability zones,
         # extended drive configs, extended status, extended usages,
         # extended mac_addr and other extended attributes
-        self._verify_extended_attributes(server)
+        self._verify_extended_attributes(body)
 
         # Verify the extended attributes given
         # in the detailed list
@@ -117,7 +117,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         servers = body['servers']
 
         # Select the first server with specified id
-        server = [i for i in servers if i['id'] == self.server['id']][0]
+        server = [i for i in servers if i['id'] == server['id']][0]
         self._verify_extended_attributes(server)
 
     @test.attr(type='smoke')
