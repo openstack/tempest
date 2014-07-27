@@ -127,6 +127,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.client.migrate_server,
                           str(uuid.uuid4()))
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.resize,
+                          'Resize not available.')
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
     @test.attr(type=['negative', 'gate'])
