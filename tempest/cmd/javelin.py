@@ -557,6 +557,9 @@ def main():
 
     if OPTS.mode == 'create':
         create_resources()
+        # Make sure the resources we just created actually work
+        checker = JavelinCheck(USERS, RES)
+        checker.check()
     elif OPTS.mode == 'check':
         collect_users(RES['users'])
         checker = JavelinCheck(USERS, RES)
