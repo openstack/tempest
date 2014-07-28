@@ -86,7 +86,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Verifying deletion
         _, images = self.client.image_list()
-        self.assertNotIn(image_id, images)
+        images_id = [item['id'] for item in images]
+        self.assertNotIn(image_id, images_id)
 
     @test.attr(type='gate')
     def test_update_image(self):
