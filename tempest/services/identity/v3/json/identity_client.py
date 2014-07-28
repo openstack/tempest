@@ -77,6 +77,17 @@ class IdentityV3ClientJSON(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['user']
 
+    def update_user_password(self, user_id, password, original_password):
+        """Updates a user password."""
+        update_user = {
+            'password': password,
+            'original_password': original_password
+        }
+        update_user = json.dumps({'user': update_user})
+        resp, _ = self.post('users/%s/password' % user_id, update_user)
+        self.expected_success(204, resp.status)
+        return resp
+
     def list_user_projects(self, user_id):
         """Lists the projects on which a user has roles assigned."""
         resp, body = self.get('users/%s/projects' % user_id)

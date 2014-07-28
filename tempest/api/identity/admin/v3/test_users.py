@@ -65,6 +65,28 @@ class UsersV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertEqual('false', str(new_user_get['enabled']).lower())
 
     @test.attr(type='gate')
+    def test_update_user_password(self):
+        # Creating User to check password updation
+        u_name = data_utils.rand_name('user')
+        original_password = data_utils.rand_name('pass')
+        _, user = self.client.create_user(
+            u_name, password=original_password)
+        # Delete the User at the end all test methods
+        self.addCleanup(self.client.delete_user, user['id'])
+        # Update user with new password
+        new_password = data_utils.rand_name('pass1')
+        self.client.update_user_password(user['id'], new_password,
+                                         original_password)
+        resp, body = self.token.auth(user['id'], new_password)
+        self.assertEqual(201, resp.status)
+        subject_token = resp['x-subject-token']
+        # Perform GET Token to verify and confirm password is updated
+        _, token_details = self.client.get_token(subject_token)
+        self.assertEqual(resp['x-subject-token'], subject_token)
+        self.assertEqual(token_details['user']['id'], user['id'])
+        self.assertEqual(token_details['user']['name'], u_name)
+
+    @test.attr(type='gate')
     def test_list_user_projects(self):
         # List the projects that a user has access upon
         assigned_project_ids = list()
