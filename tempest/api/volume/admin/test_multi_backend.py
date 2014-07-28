@@ -36,42 +36,55 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
 
         cls.volume_client = cls.os_adm.volumes_client
         cls.volume_type_id_list = []
-        cls.volume_id_list = []
+        cls.volume_id_list_with_prefix = []
+        cls.volume_id_list_without_prefix = []
 
-        # Volume/Type creation (uses backend1_name)
-        type1_name = data_utils.rand_name('Type-')
-        vol1_name = data_utils.rand_name('Volume-')
-        extra_specs1 = {"volume_backend_name": cls.backend1_name}
-        resp, cls.type1 = cls.client.create_volume_type(
-            type1_name, extra_specs=extra_specs1)
-        cls.volume_type_id_list.append(cls.type1['id'])
-
-        resp, cls.volume1 = cls.volume_client.create_volume(
-            size=1, display_name=vol1_name, volume_type=type1_name)
-        cls.volume_id_list.append(cls.volume1['id'])
-        cls.volume_client.wait_for_volume_status(cls.volume1['id'],
-                                                 'available')
+        # Volume/Type creation (uses volume_backend_name)
+        cls._create_type_and_volume(cls.backend1_name, False)
+        # Volume/Type creation (uses capabilities:volume_backend_name)
+        cls._create_type_and_volume(cls.backend1_name, True)
 
         if cls.backend1_name != cls.backend2_name:
             # Volume/Type creation (uses backend2_name)
-            type2_name = data_utils.rand_name('Type-')
-            vol2_name = data_utils.rand_name('Volume-')
-            extra_specs2 = {"volume_backend_name": cls.backend2_name}
-            resp, cls.type2 = cls.client.create_volume_type(
-                type2_name, extra_specs=extra_specs2)
-            cls.volume_type_id_list.append(cls.type2['id'])
+            cls._create_type_and_volume(cls.backend2_name, False)
+            # Volume/Type creation (uses capabilities:volume_backend_name)
+            cls._create_type_and_volume(cls.backend2_name, True)
 
-            resp, cls.volume2 = cls.volume_client.create_volume(
-                size=1, display_name=vol2_name, volume_type=type2_name)
-            cls.volume_id_list.append(cls.volume2['id'])
-            cls.volume_client.wait_for_volume_status(cls.volume2['id'],
-                                                     'available')
+    @classmethod
+    def _create_type_and_volume(self, backend_name_key, with_prefix):
+        # Volume/Type creation
+        type_name = data_utils.rand_name('Type')
+        vol_name = data_utils.rand_name('Volume')
+        spec_key_with_prefix = "capabilities:volume_backend_name"
+        spec_key_without_prefix = "volume_backend_name"
+        if with_prefix:
+            extra_specs = {spec_key_with_prefix: backend_name_key}
+        else:
+            extra_specs = {spec_key_without_prefix: backend_name_key}
+        resp, self.type = self.client.create_volume_type(
+            type_name, extra_specs=extra_specs)
+        self.volume_type_id_list.append(self.type['id'])
+
+        resp, self.volume = self.volume_client.create_volume(
+            size=1, display_name=vol_name, volume_type=type_name)
+        self.volume_client.wait_for_volume_status(
+            self.volume['id'], 'available')
+        if with_prefix:
+            self.volume_id_list_with_prefix.append(self.volume['id'])
+        else:
+            self.volume_id_list_without_prefix.append(
+                self.volume['id'])
 
     @classmethod
     def tearDownClass(cls):
         # volumes deletion
-        volume_id_list = getattr(cls, 'volume_id_list', [])
-        for volume_id in volume_id_list:
+        vid_prefix = getattr(cls, 'volume_id_list_with_prefix', [])
+        for volume_id in vid_prefix:
+            cls.volume_client.delete_volume(volume_id)
+            cls.volume_client.wait_for_resource_deletion(volume_id)
+
+        vid_no_pre = getattr(cls, 'volume_id_list_without_prefix', [])
+        for volume_id in vid_no_pre:
             cls.volume_client.delete_volume(volume_id)
             cls.volume_client.wait_for_resource_deletion(volume_id)
 
@@ -84,32 +97,57 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
 
     @test.attr(type='smoke')
     def test_backend_name_reporting(self):
+        # get volume id which created by type without prefix
+        volume_id = self.volume_id_list_without_prefix[0]
+        self._test_backend_name_reporting_by_volume_id(volume_id)
+
+    @test.attr(type='smoke')
+    def test_backend_name_reporting_with_prefix(self):
+        # get volume id which created by type with prefix
+        volume_id = self.volume_id_list_with_prefix[0]
+        self._test_backend_name_reporting_by_volume_id(volume_id)
+
+    @test.attr(type='gate')
+    def test_backend_name_distinction(self):
+        if self.backend1_name == self.backend2_name:
+            raise self.skipException("backends configured with same name")
+        # get volume id which created by type without prefix
+        volume1_id = self.volume_id_list_without_prefix[0]
+        volume2_id = self.volume_id_list_without_prefix[1]
+        self._test_backend_name_distinction(volume1_id, volume2_id)
+
+    @test.attr(type='gate')
+    def test_backend_name_distinction_with_prefix(self):
+        if self.backend1_name == self.backend2_name:
+            raise self.skipException("backends configured with same name")
+        # get volume id which created by type without prefix
+        volume1_id = self.volume_id_list_with_prefix[0]
+        volume2_id = self.volume_id_list_with_prefix[1]
+        self._test_backend_name_distinction(volume1_id, volume2_id)
+
+    def _test_backend_name_reporting_by_volume_id(self, volume_id):
         # this test checks if os-vol-attr:host is populated correctly after
         # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        resp, volume = self.volume_client.get_volume(self.volume1['id'])
+        resp, volume = self.volume_client.get_volume(volume_id)
         self.assertEqual(200, resp.status)
 
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
-               self.volume1['id'])
+               volume_id)
         self.assertTrue(len(volume1_host.split("@")) > 1, msg)
 
-    @test.attr(type='gate')
-    def test_backend_name_distinction(self):
+    def _test_backend_name_distinction(self, volume1_id, volume2_id):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the
         # volume backend distinction is not working properly)
-        if self.backend1_name == self.backend2_name:
-            raise self.skipException("backends configured with same name")
-
-        resp, volume = self.volume_client.get_volume(self.volume1['id'])
+        resp, volume = self.volume_client.get_volume(volume1_id)
         volume1_host = volume['os-vol-host-attr:host']
 
-        resp, volume = self.volume_client.get_volume(self.volume2['id'])
+        resp, volume = self.volume_client.get_volume(volume2_id)
         volume2_host = volume['os-vol-host-attr:host']
 
         msg = ("volumes %s and %s were created in the same backend" %
-               (self.volume1['id'], self.volume2['id']))
+               (volume1_id, volume2_id))
         self.assertNotEqual(volume1_host, volume2_host, msg)
