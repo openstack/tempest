@@ -20,10 +20,9 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
     def _list_all_plugin_names(self):
         """Returns all enabled plugin names.
 
-        It ensures response status and main plugins availability.
+        It ensures main plugins availability.
         """
-        resp, plugins = self.client.list_plugins()
-        self.assertEqual(200, resp.status)
+        _, plugins = self.client.list_plugins()
         plugins_names = [plugin['name'] for plugin in plugins]
         self.assertIn('vanilla', plugins_names)
         self.assertIn('hdp', plugins_names)
@@ -37,14 +36,12 @@ class PluginsTest(dp_base.BaseDataProcessingTest):
     @test.attr(type='smoke')
     def test_plugin_get(self):
         for plugin_name in self._list_all_plugin_names():
-            resp, plugin = self.client.get_plugin(plugin_name)
-            self.assertEqual(200, resp.status)
+            _, plugin = self.client.get_plugin(plugin_name)
             self.assertEqual(plugin_name, plugin['name'])
 
             for plugin_version in plugin['versions']:
-                resp, detailed_plugin = self.client.get_plugin(plugin_name,
-                                                               plugin_version)
-                self.assertEqual(200, resp.status)
+                _, detailed_plugin = self.client.get_plugin(plugin_name,
+                                                            plugin_version)
                 self.assertEqual(plugin_name, detailed_plugin['name'])
 
                 # check that required image tags contains name and version

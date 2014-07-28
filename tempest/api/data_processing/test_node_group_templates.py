@@ -43,7 +43,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
     def _create_node_group_template(self, template_name=None):
         """Creates Node Group Template with optional name specified.
 
-        It creates template and ensures response status and template name.
+        It creates template, ensures template name and response body.
         Returns id and name of created template.
         """
         if not template_name:
@@ -51,15 +51,14 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
             template_name = data_utils.rand_name('sahara-ng-template')
 
         # create node group template
-        resp, body = self.create_node_group_template(
-            template_name, **self.node_group_template)
+        resp_body = self.create_node_group_template(template_name,
+                                                    **self.node_group_template)
 
         # ensure that template created successfully
-        self.assertEqual(202, resp.status)
-        self.assertEqual(template_name, body['name'])
-        self.assertDictContainsSubset(self.node_group_template, body)
+        self.assertEqual(template_name, resp_body['name'])
+        self.assertDictContainsSubset(self.node_group_template, resp_body)
 
-        return body['id'], template_name
+        return resp_body['id'], template_name
 
     @test.attr(type='smoke')
     def test_node_group_template_create(self):
@@ -70,8 +69,7 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         template_info = self._create_node_group_template()
 
         # check for node group template in list
-        resp, templates = self.client.list_node_group_templates()
-        self.assertEqual(200, resp.status)
+        _, templates = self.client.list_node_group_templates()
         templates_info = [(template['id'], template['name'])
                           for template in templates]
         self.assertIn(template_info, templates_info)
@@ -81,15 +79,13 @@ class NodeGroupTemplateTest(dp_base.BaseDataProcessingTest):
         template_id, template_name = self._create_node_group_template()
 
         # check node group template fetch by id
-        resp, template = self.client.get_node_group_template(template_id)
-        self.assertEqual(200, resp.status)
+        _, template = self.client.get_node_group_template(template_id)
         self.assertEqual(template_name, template['name'])
         self.assertDictContainsSubset(self.node_group_template, template)
 
     @test.attr(type='smoke')
     def test_node_group_template_delete(self):
-        template_id = self._create_node_group_template()[0]
+        template_id, _ = self._create_node_group_template()
 
         # delete the node group template by id
-        resp = self.client.delete_node_group_template(template_id)[0]
-        self.assertEqual(204, resp.status)
+        self.client.delete_node_group_template(template_id)
