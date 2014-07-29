@@ -79,6 +79,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.floating_ips_client = cls.manager.floating_ips_client
         # Glance image client v1
         cls.image_client = cls.manager.image_client
+        # Compute image client
+        cls.images_client = cls.manager.images_client
         cls.keypairs_client = cls.manager.keypairs_client
         cls.networks_client = cls.admin_manager.networks_client
         # Nova security groups client
@@ -386,6 +388,29 @@ class ScenarioTest(tempest.test.BaseTestCase):
             LOG.debug('Console output for %s', server['id'])
             LOG.debug(self.servers_client.get_console_output(server['id'],
                                                              length=None))
+
+    def create_server_snapshot(self, server, name=None):
+        # Glance client
+        _image_client = self.image_client
+        # Compute client
+        _images_client = self.images_client
+        if name is None:
+            name = data_utils.rand_name('scenario-snapshot-')
+        LOG.debug("Creating a snapshot image for server: %s", server['name'])
+        resp, image = _images_client.create_image(server['id'], name)
+        image_id = resp['location'].split('images/')[1]
+        _image_client.wait_for_image_status(image_id, 'active')
+        self.addCleanup_with_wait(
+            waiter_callable=_image_client.wait_for_resource_deletion,
+            thing_id=image_id, thing_id_param='id',
+            cleanup_callable=self.delete_wrapper,
+            cleanup_args=[_image_client.delete_image, image_id])
+        _, snapshot_image = _image_client.get_image_meta(image_id)
+        image_name = snapshot_image['name']
+        self.assertEqual(name, image_name)
+        LOG.debug("Created snapshot image %s for server %s",
+                  image_name, server['name'])
+        return snapshot_image
 
 
 class OfficialClientTest(tempest.test.BaseTestCase):
