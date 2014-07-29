@@ -198,8 +198,15 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         # Create a server with a block device mapping.
         name = data_utils.rand_name('server')
+        device_base = CONF.compute.volume_device_name
+        # Use the same driver as volume_device_name specified in config
+        while str.isdigit(device_base[-1:]):
+            device_base = device_base[:-1]
+        device_name1 = "/dev/" + device_base[:-1] + "a"
+        device_name2 = "/dev/" + device_base[:-1] + "b"
+
         mapping = [{
-                   "device_name": "/dev/sdb1",
+                   "device_name": device_name2,
                    "source_type": "blank",
                    "destination_type": "local",
                    "delete_on_termination": "True",
@@ -207,7 +214,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                    "boot_index": "-1"
                    },
                    {
-                   "device_name": "/dev/sda1",
+                   "device_name": device_name1,
                    "source_type": "volume",
                    "destination_type": "volume",
                    "uuid": volume['id'],
