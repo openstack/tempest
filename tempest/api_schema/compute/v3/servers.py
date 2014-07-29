@@ -28,7 +28,6 @@ create_server = {
                     'id': {'type': 'string'},
                     'os-security-groups:security_groups': {'type': 'array'},
                     'links': parameter_types.links,
-                    'admin_password': {'type': 'string'},
                     'os-access-ips:access_ip_v4': parameter_types.access_ip_v4,
                     'os-access-ips:access_ip_v6': parameter_types.access_ip_v6
                 },
@@ -36,12 +35,18 @@ create_server = {
                 # and some environments return a response without these
                 # attributes. So they are not 'required'.
                 'required': ['id', 'os-security-groups:security_groups',
-                             'links', 'admin_password']
+                             'links']
             }
         },
         'required': ['server']
     }
 }
+
+create_server_with_admin_pass = copy.deepcopy(create_server)
+create_server_with_admin_pass['response_body']['properties']['server'][
+    'properties'].update({'admin_password': {'type': 'string'}})
+create_server_with_admin_pass['response_body']['properties']['server'][
+    'required'].append('admin_password')
 
 addresses_v3 = copy.deepcopy(parameter_types.addresses)
 addresses_v3['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][

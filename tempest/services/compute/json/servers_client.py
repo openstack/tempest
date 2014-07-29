@@ -93,7 +93,11 @@ class ServersClientJSON(rest_client.RestClient):
         # with return reservation id set True
         if 'reservation_id' in body:
             return resp, body
-        self.validate_response(schema.create_server, resp, body)
+        if CONF.compute_feature_enabled.enable_instance_password:
+            create_schema = schema.create_server_with_admin_pass
+        else:
+            create_schema = schema.create_server
+        self.validate_response(create_schema, resp, body)
         return resp, body['server']
 
     def update_server(self, server_id, name=None, meta=None, accessIPv4=None,
