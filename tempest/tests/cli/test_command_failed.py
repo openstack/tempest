@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import cli
+from tempest import exceptions
 from tempest.tests import base
 
 
@@ -22,8 +22,8 @@ class TestOutputParser(base.TestCase):
         stdout = "output"
         stderr = "error"
         try:
-            raise cli.CommandFailed(returncode, cmd, stdout, stderr)
-        except cli.CommandFailed as e:
+            raise exceptions.CommandFailed(returncode, cmd, stdout, stderr)
+        except exceptions.CommandFailed as e:
             self.assertIn(str(returncode), str(e))
             self.assertIn(cmd, str(e))
             self.assertIn(stdout, str(e))

@@ -17,6 +17,7 @@ import re
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 CONF = config.CONF
@@ -34,7 +35,7 @@ class SimpleReadOnlyKeystoneClientTest(cli.ClientTestBase):
     """
 
     def test_admin_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.keystone,
                           'this-does-not-exist')
 

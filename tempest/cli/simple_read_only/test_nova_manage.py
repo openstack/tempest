@@ -15,6 +15,7 @@
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 
@@ -46,7 +47,7 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
         super(SimpleReadOnlyNovaManageTest, cls).setUpClass()
 
     def test_admin_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.nova_manage,
                           'this-does-nova-exist')
 
