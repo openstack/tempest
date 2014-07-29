@@ -1,3 +1,5 @@
+.. _unit_tests.rst:
+
 Tempest Field Guide to Unit tests
 =================================
 

@@ -23,9 +23,8 @@ Each of these directories contains different types of tests. What
 belongs in each directory, the rules and examples for good tests, are
 documented in a README.rst file in the directory.
 
-
-api
----
+:ref:`api_field_guide`
+----------------------
 
 API tests are validation tests for the OpenStack API. They should not
 use the existing python clients for OpenStack, but should instead use
@@ -39,8 +38,8 @@ projects themselves, possibly as functional tests in their unit test
 frameworks.
 
 
-cli
----
+:ref:`cli_field_guide`
+----------------------
 
 CLI tests use the openstack CLI to interact with the OpenStack
 cloud. CLI testing in unit tests is somewhat difficult because unlike
@@ -49,8 +48,8 @@ instantiate. Tempest seems like a logical place for this, as it
 prereqs having a running OpenStack cloud.
 
 
-scenario
---------
+:ref:`scenario_field_guide`
+---------------------------
 
 Scenario tests are complex "through path" tests for OpenStack
 functionality. They are typically a series of steps where complicated
@@ -59,16 +58,16 @@ state requiring multiple services is set up exercised, and torn down.
 Scenario tests can and should use the OpenStack python clients.
 
 
-stress
-------
+:ref:`stress_field_guide`
+-------------------------
 
 Stress tests are designed to stress an OpenStack environment by running a high
 workload against it and seeing what breaks. The stress test framework runs
 several test jobs in parallel and can run any existing test in Tempest as a
 stress job.
 
-thirdparty
-----------
+:ref:`third_party_field_guide`
+-----------------------------
 
 Many openstack components include 3rdparty API support. It is
 completely legitimate for Tempest to include tests of 3rdparty APIs,

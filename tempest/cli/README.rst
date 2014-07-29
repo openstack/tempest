@@ -1,3 +1,5 @@
+.. _cli_field_guide:
+
 Tempest Field Guide to CLI tests
 ================================
 
