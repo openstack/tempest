@@ -73,3 +73,11 @@ Many openstack components include 3rdparty API support. It is
 completely legitimate for Tempest to include tests of 3rdparty APIs,
 but those should be kept separate from the normal OpenStack
 validation.
+
+:ref:`unit_tests_field_guide`
+-----------------------------
+
+Unit tests are the self checks for Tempest. They provide functional
+verification and regression checking for the internal components of tempest.
+They should be used to just verify that the individual pieces of tempest are
+working as expected.
