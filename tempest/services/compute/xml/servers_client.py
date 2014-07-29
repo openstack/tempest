@@ -95,7 +95,7 @@ def _translate_server_xml_to_json(xml_dom):
                    'foo_novanetwork': [{'addr': '192.168.0.4', 'version': 4}]}}
     """
     nsmap = {'api': xml_utils.XMLNS_11}
-    addresses = xml_dom.xpath('/api:server/api:addresses', namespaces=nsmap)
+    addresses = xml_dom.xpath('api:addresses', namespaces=nsmap)
     if addresses:
         if len(addresses) > 1:
             raise ValueError('Expected only single `addresses` element.')
