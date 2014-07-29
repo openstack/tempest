@@ -268,12 +268,14 @@ ComputeFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled compute extensions with a special '
                      'entry all which indicates every extension is enabled. '
-                     'Each extension should be specified with alias name'),
+                     'Each extension should be specified with alias name. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.ListOpt('api_v3_extensions',
                 default=['all'],
                 help='A list of enabled v3 extensions with a special entry all'
                      ' which indicates every extension is enabled. '
-                     'Each extension should be specified with alias name'),
+                     'Each extension should be specified with alias name. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
@@ -441,7 +443,8 @@ NetworkFeaturesGroup = [
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled network extensions with a special '
-                     'entry all which indicates every extension is enabled'),
+                     'entry all which indicates every extension is enabled. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('ipv6_subnet_attributes',
                 default=False,
                 help="Allow the execution of IPv6 subnet tests that use "
@@ -546,7 +549,8 @@ VolumeFeaturesGroup = [
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled volume extensions with a special '
-                     'entry all which indicates every extension is enabled'),
+                     'entry all which indicates every extension is enabled. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('api_v1',
                 default=True,
                 help="Is the v1 volume API enabled"),
