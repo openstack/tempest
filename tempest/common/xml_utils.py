@@ -148,6 +148,10 @@ def xml_to_json(node, plurals=None):
                     tag = key + ":" + tag
         if plurals is not None and tag in plurals:
                 json[tag] = parse_array(child, plurals)
+        elif tag == 'volume_attached':
+            if 'os-extended-volumes:volumes_attached' not in json:
+                json['os-extended-volumes:volumes_attached'] = []
+            json['os-extended-volumes:volumes_attached'].append(xml_to_json(child, plurals))
         else:
             json[tag] = xml_to_json(child, plurals)
     return json
