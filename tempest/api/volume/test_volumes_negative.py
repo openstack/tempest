@@ -21,14 +21,15 @@ from tempest import exceptions
 from tempest import test
 
 
-class VolumesNegativeTest(base.BaseVolumeV1Test):
-    _interface = 'json'
+class VolumesV2NegativeTest(base.BaseVolumeTest):
 
     @classmethod
     @test.safe_setup
     def setUpClass(cls):
-        super(VolumesNegativeTest, cls).setUpClass()
+        super(VolumesV2NegativeTest, cls).setUpClass()
         cls.client = cls.volumes_client
+
+        cls.name_field = cls.special_fields['name_field']
 
         # Create a test shared instance and volume for attach/detach tests
         cls.volume = cls.create_volume()
@@ -237,7 +238,7 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
     @test.attr(type=['negative', 'gate'])
     def test_list_volumes_with_nonexistent_name(self):
         v_name = data_utils.rand_name('Volume-')
-        params = {'display_name': v_name}
+        params = {self.name_field: v_name}
         resp, fetched_volume = self.client.list_volumes(params)
         self.assertEqual(200, resp.status)
         self.assertEqual(0, len(fetched_volume))
@@ -245,7 +246,7 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
     @test.attr(type=['negative', 'gate'])
     def test_list_volumes_detail_with_nonexistent_name(self):
         v_name = data_utils.rand_name('Volume-')
-        params = {'display_name': v_name}
+        params = {self.name_field: v_name}
         resp, fetched_volume = self.client.list_volumes_with_detail(params)
         self.assertEqual(200, resp.status)
         self.assertEqual(0, len(fetched_volume))
@@ -265,5 +266,14 @@ class VolumesNegativeTest(base.BaseVolumeV1Test):
         self.assertEqual(0, len(fetched_volume))
 
 
-class VolumesNegativeTestXML(VolumesNegativeTest):
+class VolumesV2NegativeTestXML(VolumesV2NegativeTest):
+    _interface = 'xml'
+
+
+class VolumesV1NegativeTest(VolumesV2NegativeTest):
+    _api_version = 1
+    _name = 'display_name'
+
+
+class VolumesV1NegativeTestXML(VolumesV1NegativeTest):
     _interface = 'xml'
