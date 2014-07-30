@@ -56,7 +56,8 @@ class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        cls.delete_volume(cls.volume['id'])
+        if hasattr(cls, 'volume'):
+            cls.delete_volume(cls.volume['id'])
         super(ServerRescueNegativeV3Test, cls).tearDownClass()
 
     def _detach(self, server_id, volume_id):
