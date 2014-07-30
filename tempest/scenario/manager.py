@@ -113,6 +113,11 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.ceilometer_client = cls.manager.ceilometer_client
 
     @classmethod
+    def tearDownClass(cls):
+        cls.isolated_creds.clear_isolated_creds()
+        super(OfficialClientTest, cls).tearDownClass()
+
+    @classmethod
     def _get_credentials(cls, get_creds, ctype):
         if CONF.compute.allow_tenant_isolation:
             creds = get_creds()
