@@ -42,6 +42,29 @@ class ImagesTestJSON(base.BaseV2ComputeTest):
         resp, body = self.client.delete_image(image['id'])
         self.assertEqual('204', resp['status'])
 
+    @test.attr(type='gate')
+    def test_verify_image_ext_attrs(self):
+        image_name = data_utils.rand_name('test-image')
+        metadata = {'auto_disk_config': 'True'}
+
+        resp, server = self.create_test_server(wait_until='ACTIVE')
+        self.addCleanup(self.servers_client.delete_server, server['id'])
+        resp, _ = self.client.create_image(server['id'],
+                                           name=image_name,
+                                           meta=metadata)
+        image_id = data_utils.parse_image_id(resp['location'])
+        self.addCleanup(self.client.delete_image, image_id)
+        self.client.wait_for_image_status(image_id, 'ACTIVE')
+
+        resp, image = self.client.get_image(image_id)
+        self.assertEqual('AUTO', image['OS-DCF:diskConfig'])
+        self.assertIn('OS-EXT-IMG-SIZE:size', image)
+
+        resp, images = self.client.list_images_with_detail()
+        image = [i for i in images if i['id'] == image_id][0]
+        self.assertEqual('AUTO', image['OS-DCF:diskConfig'])
+        self.assertIn('OS-EXT-IMG-SIZE:size', image)
+
 
 class ImagesTestXML(ImagesTestJSON):
     _interface = 'xml'

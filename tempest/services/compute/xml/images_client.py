@@ -55,6 +55,18 @@ class ImagesClientXML(rest_client.RestClient):
         if 'server' in data:
             tag = node.find('{%s}server' % xml_utils.XMLNS_11)
             data['server'] = self._parse_server(tag)
+
+        # parse extended attributes
+        diskConfig = ('{http://docs.openstack.org'
+                      '/compute/ext/disk_config/api/v1.1}diskConfig')
+        image_size = ('{http://docs.openstack.org'
+                      '/compute/ext/image_size/api/v1.1}size')
+
+        if diskConfig in data:
+            data['OS-DCF:diskConfig'] = data.pop(diskConfig)
+        if image_size in data:
+            data['OS-EXT-IMG-SIZE:size'] = data.pop(image_size)
+
         return data
 
     def _parse_links(self, node, data):
