@@ -281,3 +281,14 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update({'adminPass': {'type': 'string'}})
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'required'].append('adminPass')
+
+rescue_server = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'adminPass': {'type': 'string'}
+        },
+        'required': ['adminPass']
+    }
+}

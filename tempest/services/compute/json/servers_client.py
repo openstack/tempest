@@ -455,7 +455,8 @@ class ServersClientJSON(rest_client.RestClient):
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', 'adminPass', None, **kwargs)
+        return self.action(server_id, 'rescue', 'adminPass',
+                           schema.rescue_server, **kwargs)
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""

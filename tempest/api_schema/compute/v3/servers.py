@@ -190,3 +190,18 @@ rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'properties'].update({'admin_password': {'type': 'string'}})
 rebuild_server_with_admin_pass['response_body']['properties']['server'][
     'required'].append('admin_password')
+
+rescue_server_with_admin_pass = {
+    'status_code': [202],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'admin_password': {'type': 'string'}
+        },
+        'required': ['admin_password']
+    }
+}
+
+rescue_server = copy.deepcopy(rescue_server_with_admin_pass)
+del rescue_server['response_body']['properties']
+del rescue_server['response_body']['required']
