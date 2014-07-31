@@ -270,3 +270,14 @@ list_servers_detail['response_body']['properties']['servers']['items'][
 # without these attributes. So they are not 'required'.
 list_servers_detail['response_body']['properties']['servers']['items'][
     'required'].append('hostId')
+
+rebuild_server = copy.deepcopy(update_server)
+rebuild_server['status_code'] = [202]
+del rebuild_server['response_body']['properties']['server'][
+    'properties']['OS-DCF:diskConfig']
+
+rebuild_server_with_admin_pass = copy.deepcopy(rebuild_server)
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'properties'].update({'adminPass': {'type': 'string'}})
+rebuild_server_with_admin_pass['response_body']['properties']['server'][
+    'required'].append('adminPass')

@@ -316,7 +316,12 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('rescue',
                 default=True,
                 help='Does the test environment support instance rescue '
-                     'mode?')
+                     'mode?'),
+    cfg.BoolOpt('enable_instance_password',
+                default=True,
+                help='Enables returning of the instance password by the '
+                     'relevant server API calls such as create, rebuild '
+                     'or rescue.')
 ]
 
 

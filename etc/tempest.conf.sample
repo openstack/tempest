@@ -443,6 +443,11 @@
 # (boolean value)
 #rescue=true
 
+# Enables returning of the instance password by the relevant
+# server API calls such as create, rebuild or rescue. (boolean
+# value)
+#enable_instance_password=true
+
 
 [dashboard]
 
