@@ -32,6 +32,7 @@ LOG = logging.getLogger(__name__)
 class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ListImageFiltersTestJSON, cls).setUpClass()
         if not CONF.service_available.glance:
@@ -69,33 +70,28 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             return
 
         # Create instances and snapshots via nova
-        try:
-            resp, cls.server1 = cls.create_test_server()
-            resp, cls.server2 = cls.create_test_server(wait_until='ACTIVE')
-            # NOTE(sdague) this is faster than doing the sync wait_util on both
-            cls.servers_client.wait_for_server_status(cls.server1['id'],
-                                                      'ACTIVE')
+        resp, cls.server1 = cls.create_test_server()
+        resp, cls.server2 = cls.create_test_server(wait_until='ACTIVE')
+        # NOTE(sdague) this is faster than doing the sync wait_util on both
+        cls.servers_client.wait_for_server_status(cls.server1['id'],
+                                                  'ACTIVE')
 
-            # Create images to be used in the filter tests
-            resp, cls.snapshot1 = cls.create_image_from_server(
-                cls.server1['id'], wait_until='ACTIVE')
-            cls.snapshot1_id = cls.snapshot1['id']
+        # Create images to be used in the filter tests
+        resp, cls.snapshot1 = cls.create_image_from_server(
+            cls.server1['id'], wait_until='ACTIVE')
+        cls.snapshot1_id = cls.snapshot1['id']
 
-            # Servers have a hidden property for when they are being imaged
-            # Performing back-to-back create image calls on a single
-            # server will sometimes cause failures
-            resp, cls.snapshot3 = cls.create_image_from_server(
-                cls.server2['id'], wait_until='ACTIVE')
-            cls.snapshot3_id = cls.snapshot3['id']
+        # Servers have a hidden property for when they are being imaged
+        # Performing back-to-back create image calls on a single
+        # server will sometimes cause failures
+        resp, cls.snapshot3 = cls.create_image_from_server(
+            cls.server2['id'], wait_until='ACTIVE')
+        cls.snapshot3_id = cls.snapshot3['id']
 
-            # Wait for the server to be active after the image upload
-            resp, cls.snapshot2 = cls.create_image_from_server(
-                cls.server1['id'], wait_until='ACTIVE')
-            cls.snapshot2_id = cls.snapshot2['id']
-        except Exception:
-            LOG.exception('setUpClass failed')
-            cls.tearDownClass()
-            raise
+        # Wait for the server to be active after the image upload
+        resp, cls.snapshot2 = cls.create_image_from_server(
+            cls.server1['id'], wait_until='ACTIVE')
+        cls.snapshot2_id = cls.snapshot2['id']
 
     @test.attr(type='gate')
     def test_list_images_filter_by_status(self):
