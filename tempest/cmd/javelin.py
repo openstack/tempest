@@ -219,7 +219,7 @@ class JavelinCheck(unittest.TestCase):
 
     def check_objects(self):
         """Check that the objects created are still there."""
-        if 'objects' not in self.res:
+        if not self.res.get('objects'):
             return
         LOG.info("checking objects")
         for obj in self.res['objects']:
@@ -231,7 +231,7 @@ class JavelinCheck(unittest.TestCase):
 
     def check_servers(self):
         """Check that the servers are still up and running."""
-        if 'servers' not in self.res:
+        if not self.res.get('servers'):
             return
         LOG.info("checking servers")
         for server in self.res['servers']:
@@ -254,7 +254,7 @@ class JavelinCheck(unittest.TestCase):
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
-        if 'volumes' not in self.res:
+        if not self.res.get('volumes'):
             return
         LOG.info("checking volumes")
         for volume in self.res['volumes']:
