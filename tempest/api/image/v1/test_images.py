@@ -44,7 +44,7 @@ class CreateRegisterImagesTest(base.BaseV1ImageTest):
             self.assertEqual(val, body.get('properties')[key])
 
         # Now try uploading an image file
-        image_file = StringIO.StringIO(('*' * 1024))
+        image_file = StringIO.StringIO(data_utils.random_bytes())
         _, body = self.client.update_image(image_id, data=image_file)
         self.assertIn('size', body)
         self.assertEqual(1024, body.get('size'))
@@ -157,7 +157,7 @@ class ListImagesTest(base.BaseV1ImageTest):
         image. Note that the size of the new image is a random number between
         1024 and 4096
         """
-        image_file = StringIO.StringIO('*' * size)
+        image_file = StringIO.StringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         _, image = cls.create_image(name=name,
                                     container_format=container_format,
@@ -338,10 +338,9 @@ class UpdateImageMetaTest(base.BaseV1ImageTest):
                                disk_format, size):
         """
         Create a new standard image and return the ID of the newly-registered
-        image. Note that the size of the new image is a random number between
-        1024 and 4096
+        image.
         """
-        image_file = StringIO.StringIO('*' * size)
+        image_file = StringIO.StringIO(data_utils.random_bytes(size))
         name = 'New Standard Image %s' % name
         _, image = cls.create_image(name=name,
                                     container_format=container_format,
