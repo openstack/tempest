@@ -177,6 +177,16 @@ class ListImagesTest(base.BaseV2ImageTest):
             self.assertIn(image, image_list)
 
     @test.attr(type='gate')
+    def test_list_images_param_name(self):
+        # Test to get all images with name
+        image_id = self.created_images[1]
+        # Get image metadata
+        _, image = self.client.get_image(image_id)
+
+        params = {"name": image['name']}
+        self._list_by_param_value_and_assert(params)
+
+    @test.attr(type='gate')
     def test_list_images_param_container_format(self):
         # Test to get all images with container_format='bare'
         params = {"container_format": "bare"}
@@ -235,6 +245,27 @@ class ListImagesTest(base.BaseV2ImageTest):
 
         self.assertEqual(len(images_list), params['limit'],
                          "Failed to get images by limit")
+
+    @test.attr(type='gate')
+    def test_list_images_param_owner(self):
+        # Test to get images by owner
+        params = {"owner": self.client.tenant_id}
+        self._list_by_param_value_and_assert(params)
+
+    @test.attr(type='gate')
+    def test_list_images_param_tag(self):
+        # Test to get images by tag
+        image_id = self.created_images[1]
+        # Creating image tag and verify it.
+        tag = data_utils.rand_name('tag-')
+        self.client.add_image_tag(image_id, tag)
+
+        params = {"tag": tag}
+        _, images_list = self.client.image_list(params=params)
+        image_tags_list = map(lambda x: x['tags'], images_list)
+
+        for image_tags in image_tags_list:
+            self.assertIn(tag, image_tags)
 
     @test.attr(type='gate')
     def test_get_image_schema(self):
