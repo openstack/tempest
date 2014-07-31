@@ -13,10 +13,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
 import copy
 import datetime
 import exceptions
 import re
+import six
 import urlparse
 
 from tempest import config
@@ -31,6 +33,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
+@six.add_metaclass(abc.ABCMeta)
 class AuthProvider(object):
     """
     Provide authentication
@@ -70,18 +73,21 @@ class AuthProvider(object):
                    interface=self.interface, cache=self.cache
                )
 
+    @abc.abstractmethod
     def _decorate_request(self, filters, method, url, headers=None, body=None,
                           auth_data=None):
         """
         Decorate request with authentication data
         """
-        raise NotImplementedError
+        return
 
+    @abc.abstractmethod
     def _get_auth(self):
-        raise NotImplementedError
+        return
 
+    @abc.abstractmethod
     def _fill_credentials(self, auth_data_body):
-        raise NotImplementedError
+        return
 
     def fill_credentials(self):
         """
@@ -130,8 +136,9 @@ class AuthProvider(object):
         self.cache = None
         self.credentials.reset()
 
+    @abc.abstractmethod
     def is_expired(self, auth_data):
-        raise NotImplementedError
+        return
 
     def auth_request(self, method, url, headers=None, body=None, filters=None):
         """
@@ -188,11 +195,12 @@ class AuthProvider(object):
         self.alt_part = request_part
         self.alt_auth_data = auth_data
 
+    @abc.abstractmethod
     def base_url(self, filters, auth_data=None):
         """
         Extracts the base_url based on provided filters
         """
-        raise NotImplementedError
+        return
 
 
 class KeystoneAuthProvider(AuthProvider):
@@ -225,11 +233,13 @@ class KeystoneAuthProvider(AuthProvider):
         # no change to method or body
         return str(_url), _headers, body
 
+    @abc.abstractmethod
     def _auth_client(self):
-        raise NotImplementedError
+        return
 
+    @abc.abstractmethod
     def _auth_params(self):
-        raise NotImplementedError
+        return
 
     def _get_auth(self):
         # Bypasses the cache
