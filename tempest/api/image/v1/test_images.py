@@ -211,6 +211,59 @@ class ListImagesTest(base.BaseV1ImageTest):
         self.assertFalse(self.size42_set <= result_set)
 
     @test.attr(type='gate')
+    def test_index_name(self):
+        _, images_list = self.client.image_list(
+            name='New Remote Image dup')
+        result_set = set(map(lambda x: x['id'], images_list))
+        for image in images_list:
+            self.assertEqual(image['name'], 'New Remote Image dup')
+        self.assertTrue(self.dup_set <= result_set)
+        self.assertFalse(self.created_set - self.dup_set <= result_set)
+
+    @test.attr(type='gate')
+    def test_index_no_params_detail(self):
+        _, images_list = self.client.image_list_detail()
+        image_list = map(lambda x: x['id'], images_list)
+        for image_id in self.created_images:
+            self.assertIn(image_id, image_list)
+
+    @test.attr(type='gate')
+    def test_index_disk_format_detail(self):
+        _, images_list = self.client.image_list_detail(disk_format='ami')
+        for image in images_list:
+            self.assertEqual(image['disk_format'], 'ami')
+        result_set = set(map(lambda x: x['id'], images_list))
+        self.assertTrue(self.ami_set <= result_set)
+        self.assertFalse(self.created_set - self.ami_set <= result_set)
+
+    @test.attr(type='gate')
+    def test_index_container_format_detail(self):
+        _, images_list = self.client.image_list_detail(container_format='bare')
+        for image in images_list:
+            self.assertEqual(image['container_format'], 'bare')
+        result_set = set(map(lambda x: x['id'], images_list))
+        self.assertTrue(self.bare_set <= result_set)
+        self.assertFalse(self.created_set - self.bare_set <= result_set)
+
+    @test.attr(type='gate')
+    def test_index_max_size_detail(self):
+        _, images_list = self.client.image_list_detail(size_max=42)
+        for image in images_list:
+            self.assertTrue(image['size'] <= 42)
+        result_set = set(map(lambda x: x['id'], images_list))
+        self.assertTrue(self.size42_set <= result_set)
+        self.assertFalse(self.created_set - self.size42_set <= result_set)
+
+    @test.attr(type='gate')
+    def test_index_min_size_detail(self):
+        _, images_list = self.client.image_list_detail(size_min=142)
+        for image in images_list:
+            self.assertTrue(image['size'] >= 142)
+        result_set = set(map(lambda x: x['id'], images_list))
+        self.assertTrue(self.size142_set <= result_set)
+        self.assertFalse(self.size42_set <= result_set)
+
+    @test.attr(type='gate')
     def test_index_status_active_detail(self):
         _, images_list = self.client.image_list_detail(status='active',
                                                        sort_key='size',
@@ -223,7 +276,7 @@ class ListImagesTest(base.BaseV1ImageTest):
             self.assertEqual(image['status'], 'active')
 
     @test.attr(type='gate')
-    def test_index_name(self):
+    def test_index_name_detail(self):
         _, images_list = self.client.image_list_detail(
             name='New Remote Image dup')
         result_set = set(map(lambda x: x['id'], images_list))
@@ -231,6 +284,17 @@ class ListImagesTest(base.BaseV1ImageTest):
             self.assertEqual(image['name'], 'New Remote Image dup')
         self.assertTrue(self.dup_set <= result_set)
         self.assertFalse(self.created_set - self.dup_set <= result_set)
+
+    @test.attr(type='gate')
+    def test_index_by_change_since_detail(self):
+        _, image = self.client.get_image_meta(self.created_images[0])
+        self.assertEqual(self.created_images[0], image['id'])
+        _, images = self.client.image_list_detail(
+            changes_since=image['updated_at'])
+
+        result_set = set(map(lambda x: x['id'], images))
+        self.assertIn(self.created_images[-1], result_set)
+        self.assertNotIn(self.created_images[0], result_set)
 
 
 class ListSnapshotImagesTest(base.BaseV1ImageTest):
