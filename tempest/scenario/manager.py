@@ -87,6 +87,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.security_groups_client = cls.manager.security_groups_client
         cls.servers_client = cls.manager.servers_client
         cls.volumes_client = cls.manager.volumes_client
+        cls.snapshots_client = cls.manager.snapshots_client
 
     @classmethod
     def _get_credentials(cls, get_creds, ctype):
