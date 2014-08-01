@@ -240,6 +240,13 @@ class ImageClientJSON(rest_client.RestClient):
             return True
         return False
 
+    def set_image_membership(self, image_id, membership=None):
+        url = 'v1/images/%s/members' % image_id
+        body = json.dumps(membership)
+        resp, __ = self.put(url, body)
+        self.expected_success(204, resp.status)
+        return resp
+
     def get_image_membership(self, image_id):
         url = 'v1/images/%s/members' % image_id
         resp, body = self.get(url)

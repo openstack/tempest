@@ -50,3 +50,24 @@ class ImageMembersTest(base.BaseV1ImageMembersTest):
         _, body = self.client.get_image_membership(image_id)
         members = body['members']
         self.assertEqual(0, len(members), str(members))
+
+    @test.attr(type='gate')
+    def test_set_membership(self):
+        image_id = self._create_image()
+
+        membership = {
+            "memberships": [{
+                            "can_share": True,
+                            "member_id": self.client.tenant_id
+                            },
+                            {
+                            "can_share": False,
+                            "member_id": self.alt_tenant_id
+                            }]
+            }
+        self.client.set_image_membership(image_id, membership)
+
+        _, body = self.client.get_image_membership(image_id)
+        members = body
+        members['memberships'] = body.pop('members')
+        self.assertEqual(membership, members, str(body))
