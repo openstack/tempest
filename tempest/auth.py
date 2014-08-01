@@ -331,7 +331,7 @@ class KeystoneV2AuthProvider(KeystoneAuthProvider):
             if noversion_path != "":
                 path += "/" + noversion_path
             _base_url = _base_url.replace(parts.path, path)
-        if filters.get('skip_path', None) is not None:
+        if filters.get('skip_path', None) is not None and parts.path != '':
             _base_url = _base_url.replace(parts.path, "/")
 
         return _base_url
