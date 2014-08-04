@@ -408,20 +408,45 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
     @test.attr(type='smoke')
     def test_create_delete_subnet_with_v6_attributes(self):
         name = data_utils.rand_name('network-')
-        _, body = self.client.create_network(name=name)
-        network = body['network']
-        net_id = network['id']
-        subnet = self.create_subnet(network,
-                                    gateway='fe80::1',
-                                    ipv6_ra_mode='slaac',
-                                    ipv6_address_mode='slaac')
-        # Verifies Subnet GW in IPv6
-        self.assertEqual(subnet['gateway_ip'], 'fe80::1')
-        self.assertEqual(subnet['ipv6_ra_mode'], 'slaac')
-        self.assertEqual(subnet['ipv6_address_mode'], 'slaac')
-        # Delete network and subnet
-        self.client.delete_network(net_id)
-        self.subnets.pop()
+        # from https://www.dropbox.com/s/9bojvv9vywsz8sd/IPv6%20Two%20Modes%20v3.0.pdf
+        ipv6_valid_modes_combinations = [('slaac', 'slaac'),
+                                         ('dhcpv6-stateful', 'dhcpv6-stateful'),
+                                         ('dhcpv6-stateless', 'dhcpv6-stateless'),
+                                         ('dhcpv6-stateless', None),
+                                         ('dhcpv6-stateful', None),
+                                         ('slaac', None),
+                                         (None, 'slaac'),
+                                         (None, 'dhcpv6-stateless'),
+                                         (None, 'dhcpv6-stateful'),
+                                         (None, None)
+                                        ]
+        for ra_mode, address_mode in ipv6_valid_modes_combinations:
+            resp, body = self.client.create_network(name=name)
+            self.assertEqual('201', resp['status'])
+            network = body['network']
+            net_id = network['id']
+            if ra_mode and address_mode:
+                subnet = self.create_subnet(network, gateway='fe80::1',
+                                            ipv6_ra_mode=ra_mode,
+                                            ipv6_address_mode=address_mode)
+            elif ra_mode:
+                subnet = self.create_subnet(network, gateway='fe80::1',
+                                            ipv6_ra_mode=ra_mode)
+            elif address_mode:
+                subnet = self.create_subnet(network, gateway='fe80::1',
+                                            ipv6_address_mode=address_mode)
+            else:
+                subnet = self.create_subnet(network, gateway='fe80::1')
+
+
+            # Verifies Subnet GW in IPv6
+            self.assertEqual(subnet['gateway_ip'], 'fe80::1')
+            self.assertEqual(subnet['ipv6_ra_mode'], ra_mode)
+            self.assertEqual(subnet['ipv6_address_mode'], address_mode)
+            # Delete network and subnet
+            resp, body = self.client.delete_network(net_id)
+            self.assertEqual('204', resp['status'])
+            self.subnets.pop()
 
 
 class NetworksIpV6TestXML(NetworksIpV6TestJSON):
