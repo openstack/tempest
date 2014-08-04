@@ -69,10 +69,24 @@ class ExistsAllResponseHeaders(object):
             elif self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
-        elif self.method == 'PUT' or self.method == 'COPY':
+                if 'last-modified' not in actual:
+                    return NonExistentHeader('last-modified')
+        elif self.method == 'PUT':
             if self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
+                if 'last-modified' not in actual:
+                    return NonExistentHeader('last-modified')
+        elif self.method == 'COPY':
+            if self.target == 'Object':
+                if 'etag' not in actual:
+                    return NonExistentHeader('etag')
+                if 'last-modified' not in actual:
+                    return NonExistentHeader('last-modified')
+                if 'x-copied-from' not in actual:
+                    return NonExistentHeader('x-copied-from')
+                if 'x-copied-from-last-modified' not in actual:
+                    return NonExistentHeader('x-copied-from-last-modified')
 
         return None
 
@@ -122,10 +136,16 @@ class AreAllWellFormatted(object):
                 return InvalidFormat(key, value)
             elif key == 'content-type' and not value:
                 return InvalidFormat(key, value)
+            elif key == 'x-copied-from' and not re.match("\S+/\S+", value):
+                return InvalidFormat(key, value)
+            elif key == 'x-copied-from-last-modified' and not value:
+                return InvalidFormat(key, value)
             elif key == 'x-trans-id' and \
                 not re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*", value):
                 return InvalidFormat(key, value)
             elif key == 'date' and not value:
+                return InvalidFormat(key, value)
+            elif key == 'last-modified' and not value:
                 return InvalidFormat(key, value)
             elif key == 'accept-ranges' and not value == 'bytes':
                 return InvalidFormat(key, value)
