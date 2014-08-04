@@ -197,9 +197,12 @@ class IdentityV3ClientXML(rest_client.RestClient):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
-    def list_projects(self):
+    def list_projects(self, params=None):
         """Get the list of projects."""
-        resp, body = self.get("projects")
+        url = 'projects'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = self._parse_projects(etree.fromstring(body))
         return resp, body
