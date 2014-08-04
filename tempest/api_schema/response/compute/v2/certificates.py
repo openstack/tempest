@@ -12,13 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api_schema.compute import agents
+import copy
 
-create_agent = {
-    'status_code': [201],
-    'response_body': agents.common_create_agent
-}
+from tempest.api_schema.response.compute import certificates
 
-delete_agent = {
-    'status_code': [204]
-}
+create_certificate = copy.deepcopy(certificates._common_schema)

@@ -13,7 +13,7 @@
 #    under the License.
 
 import copy
-from tempest.api_schema.compute import hypervisors
+from tempest.api_schema.response.compute import hypervisors
 
 hypervisors_servers = copy.deepcopy(hypervisors.common_hypervisors_detail)
 

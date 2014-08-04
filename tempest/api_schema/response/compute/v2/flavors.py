@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.api_schema.compute import flavors
+from tempest.api_schema.response.compute import flavors
 
 list_flavors_details = copy.deepcopy(flavors.common_flavor_list_details)
 

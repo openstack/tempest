@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.api_schema.compute import parameter_types
+from tempest.api_schema.response.compute import parameter_types
 
 get_password = {
     'status_code': [200],

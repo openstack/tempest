@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.api_schema.compute import quotas
+from tempest.api_schema.response.compute import quotas
 
 quota_set = copy.deepcopy(quotas.common_quota_set)
 quota_set['response_body']['properties']['quota_set']['properties'][

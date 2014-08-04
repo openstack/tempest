@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.api_schema.compute import hosts
+from tempest.api_schema.response.compute import hosts
 
 startup_host = {
     'status_code': [200],

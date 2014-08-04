@@ -16,7 +16,7 @@
 import json
 import urllib
 
-from tempest.api_schema.compute.v2 import floating_ips as schema
+from tempest.api_schema.response.compute.v2 import floating_ips as schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions

@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api_schema.compute import parameter_types
+from tempest.api_schema.response.compute import parameter_types
 
 common_image_schema = {
     'type': 'object',

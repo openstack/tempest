@@ -14,29 +14,12 @@
 
 import copy
 
-from tempest.api_schema.compute import hosts
+from tempest.api_schema.response.compute import aggregates
 
-
-startup_host = {
-    'status_code': [200],
-    'response_body': hosts.common_start_up_body
+delete_aggregate = {
+    'status_code': [200]
 }
 
-# The 'power_action' attribute of 'shutdown_host' API is 'shutdown'
-shutdown_host = copy.deepcopy(startup_host)
-
-shutdown_host['response_body']['properties']['power_action'] = {
-    'enum': ['shutdown']
-}
-
-# The 'power_action' attribute of 'reboot_host' API is 'reboot'
-reboot_host = copy.deepcopy(startup_host)
-
-reboot_host['response_body']['properties']['power_action'] = {
-    'enum': ['reboot']
-}
-
-update_host = {
-    'status_code': [200],
-    'response_body': hosts.update_host_common
-}
+create_aggregate = copy.deepcopy(aggregates.common_create_aggregate)
+# V2 API's response status_code is 200
+create_aggregate['status_code'] = [200]
