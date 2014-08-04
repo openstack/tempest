@@ -89,12 +89,7 @@ def safe_setup(f):
     return decorator
 
 
-def services(*args, **kwargs):
-    """A decorator used to set an attr for each service used in a test case
-
-    This decorator applies a testtools attr for each service that gets
-    exercised by a test case.
-    """
+def get_service_list():
     service_list = {
         'compute': CONF.service_available.nova,
         'image': CONF.service_available.glance,
@@ -110,16 +105,29 @@ def services(*args, **kwargs):
         'ceilometer': CONF.service_available.ceilometer,
         'data_processing': CONF.service_available.sahara
     }
+    return service_list
 
+
+def services(*args, **kwargs):
+    """A decorator used to set an attr for each service used in a test case
+
+    This decorator applies a testtools attr for each service that gets
+    exercised by a test case.
+    """
     def decorator(f):
+        services = ['compute', 'image', 'baremetal', 'volume', 'orchestration',
+                    'network', 'identity', 'object_storage', 'dashboard',
+                    'ceilometer', 'data_processing']
         for service in args:
-            if service not in service_list:
-                raise exceptions.InvalidServiceTag('%s is not a valid service'
-                                                   % service)
+            if service not in services:
+                raise exceptions.InvalidServiceTag('%s is not a valid '
+                                                   'service' % service)
         attr(type=list(args))(f)
 
         @functools.wraps(f)
         def wrapper(self, *func_args, **func_kwargs):
+            service_list = get_service_list()
+
             for service in args:
                 if not service_list[service]:
                     msg = 'Skipped because the %s service is not available' % (
