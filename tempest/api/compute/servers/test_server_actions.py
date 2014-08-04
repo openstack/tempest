@@ -257,6 +257,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(previous_flavor_ref, server['flavor']['id'])
 
     @test.attr(type='gate')
+    @test.services('image')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
         # create the first and the second backup
