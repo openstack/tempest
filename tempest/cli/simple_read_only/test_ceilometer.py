@@ -39,15 +39,19 @@ class SimpleReadOnlyCeilometerClientTest(cli.ClientTestBase):
             raise cls.skipException(msg)
         super(SimpleReadOnlyCeilometerClientTest, cls).setUpClass()
 
+    @test.services('telemetry')
     def test_ceilometer_meter_list(self):
         self.ceilometer('meter-list')
 
     @test.attr(type='slow')
+    @test.services('telemetry')
     def test_ceilometer_resource_list(self):
         self.ceilometer('resource-list')
 
+    @test.services('telemetry')
     def test_ceilometermeter_alarm_list(self):
         self.ceilometer('alarm-list')
 
+    @test.services('telemetry')
     def test_ceilometer_version(self):
         self.ceilometer('', flags='--version')
