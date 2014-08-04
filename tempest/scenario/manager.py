@@ -39,6 +39,7 @@ from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log
 from tempest.openstack.common import timeutils
+from tempest.services.network import resources as net_resources
 import tempest.test
 
 CONF = config.CONF
@@ -88,6 +89,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.servers_client = cls.manager.servers_client
         cls.volumes_client = cls.manager.volumes_client
         cls.snapshots_client = cls.manager.snapshots_client
+        cls.interface_client = cls.manager.interfaces_client
+        # Neutron network client
+        cls.network_client = cls.manager.network_client
 
     @classmethod
     def _get_credentials(cls, get_creds, ctype):
@@ -121,16 +125,17 @@ class ScenarioTest(tempest.test.BaseTestCase):
         # not at the end of the class
         self.addCleanup(self._wait_for_cleanups)
 
-    def delete_wrapper(self, delete_thing, thing_id):
+    def delete_wrapper(self, delete_thing, *args, **kwargs):
         """Ignores NotFound exceptions for delete operations.
 
-        @param delete_thing: delete method of a resource
-        @param thing_id: id of the resource to be deleted
+        @param delete_thing: delete method of a resource. method will be
+            executed as delete_thing(*args, **kwargs)
+
         """
         try:
             # Tempest clients return dicts, so there is no common delete
             # method available. Using a callable instead
-            delete_thing(thing_id)
+            delete_thing(*args, **kwargs)
         except exceptions.NotFound:
             # If the resource is already missing, mission accomplished.
             pass
@@ -262,7 +267,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
         _, volume = self.volumes_client.get_volume(volume['id'])
         return volume
 
-    def _create_loginable_secgroup_rule_nova(self, secgroup_id=None):
+    def _create_loginable_secgroup_rule(self, secgroup_id=None):
         _client = self.security_groups_client
         if secgroup_id is None:
             _, sgs = _client.list_security_groups()
@@ -300,7 +305,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
             rules.append(sg_rule)
         return rules
 
-    def _create_security_group_nova(self):
+    def _create_security_group(self):
         # Create security group
         sg_name = data_utils.rand_name(self.__class__.__name__)
         sg_desc = sg_name + " description"
@@ -313,7 +318,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
                         secgroup['id'])
 
         # Add rules to the security group
-        self._create_loginable_secgroup_rule_nova(secgroup['id'])
+        self._create_loginable_secgroup_rule(secgroup['id'])
 
         return secgroup
 
@@ -415,6 +420,474 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("Created snapshot image %s for server %s",
                   image_name, server['name'])
         return snapshot_image
+
+
+# TODO(yfried): change this class name to NetworkScenarioTest once client
+# migration is complete
+class NeutronScenarioTest(ScenarioTest):
+    """Base class for network scenario tests.
+    This class provide helpers for network scenario tests, using the neutron
+    API. Helpers from ancestor which use the nova network API are overridden
+    with the neutron API.
+
+    This Class also enforces using Neutron instead of novanetwork.
+    Subclassed tests will be skipped if Neutron is not enabled
+
+    """
+
+    @classmethod
+    def check_preconditions(cls):
+        if CONF.service_available.neutron:
+            cls.enabled = True
+            # verify that neutron_available is telling the truth
+            try:
+                cls.network_client.list_networks()
+            except exc.EndpointNotFound:
+                cls.enabled = False
+                raise
+        else:
+            cls.enabled = False
+            msg = 'Neutron not available'
+            raise cls.skipException(msg)
+
+    @classmethod
+    def setUpClass(cls):
+        super(NeutronScenarioTest, cls).setUpClass()
+        cls.tenant_id = cls.manager.identity_client.tenant_id
+        cls.check_preconditions()
+
+    def _create_network(self, tenant_id, namestart='network-smoke-'):
+        name = data_utils.rand_name(namestart)
+        _, result = self.network_client.create_network(name=name,
+                                                       tenant_id=tenant_id)
+        network = net_resources.DeletableNetwork(client=self.network_client,
+                                                 **result['network'])
+        self.assertEqual(network.name, name)
+        self.addCleanup(self.delete_wrapper, network.delete)
+        return network
+
+    def _list_networks(self, *args, **kwargs):
+        """List networks using admin creds """
+        return self._admin_lister('networks')(*args, **kwargs)
+
+    def _list_subnets(self, *args, **kwargs):
+        """List subnets using admin creds """
+        return self._admin_lister('subnets')(*args, **kwargs)
+
+    def _list_routers(self, *args, **kwargs):
+        """List routers using admin creds """
+        return self._admin_lister('routers')(*args, **kwargs)
+
+    def _list_ports(self, *args, **kwargs):
+        """List ports using admin creds """
+        return self._admin_lister('ports')(*args, **kwargs)
+
+    def _admin_lister(self, resource_type):
+        def temp(*args, **kwargs):
+            temp_method = self.admin_manager.network_client.__getattr__(
+                'list_%s' % resource_type)
+            _, resource_list = temp_method(*args, **kwargs)
+            return resource_list[resource_type]
+        return temp
+
+    def _create_subnet(self, network, namestart='subnet-smoke-', **kwargs):
+        """
+        Create a subnet for the given network within the cidr block
+        configured for tenant networks.
+        """
+
+        def cidr_in_use(cidr, tenant_id):
+            """
+            :return True if subnet with cidr already exist in tenant
+                False else
+            """
+            cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
+            return len(cidr_in_use) != 0
+
+        tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+        result = None
+        # Repeatedly attempt subnet creation with sequential cidr
+        # blocks until an unallocated block is found.
+        for subnet_cidr in tenant_cidr.subnet(
+                CONF.network.tenant_network_mask_bits):
+            str_cidr = str(subnet_cidr)
+            if cidr_in_use(str_cidr, tenant_id=network.tenant_id):
+                continue
+
+            subnet = dict(
+                name=data_utils.rand_name(namestart),
+                ip_version=4,
+                network_id=network.id,
+                tenant_id=network.tenant_id,
+                cidr=str_cidr,
+                **kwargs
+            )
+            try:
+                _, result = self.network_client.create_subnet(**subnet)
+                break
+            except exc.NeutronClientException as e:
+                is_overlapping_cidr = 'overlaps with another subnet' in str(e)
+                if not is_overlapping_cidr:
+                    raise
+        self.assertIsNotNone(result, 'Unable to allocate tenant network')
+        subnet = net_resources.DeletableSubnet(client=self.network_client,
+                                               **result['subnet'])
+        self.assertEqual(subnet.cidr, str_cidr)
+        self.addCleanup(self.delete_wrapper, subnet.delete)
+        return subnet
+
+    def _create_port(self, network, namestart='port-quotatest'):
+        name = data_utils.rand_name(namestart)
+        _, result = self.network_client.create_port(
+            name=name,
+            network_id=network.id,
+            tenant_id=network.tenant_id)
+        self.assertIsNotNone(result, 'Unable to allocate port')
+        port = net_resources.DeletablePort(client=self.network_client,
+                                           **result['port'])
+        self.addCleanup(self.delete_wrapper, port.delete)
+        return port
+
+    def _get_server_port_id(self, server, ip_addr=None):
+        ports = self._list_ports(device_id=server['id'],
+                                 fixed_ip=ip_addr)
+        self.assertEqual(len(ports), 1,
+                         "Unable to determine which port to target.")
+        return ports[0]['id']
+
+    def _create_floating_ip(self, thing, external_network_id, port_id=None):
+        if not port_id:
+            port_id = self._get_server_port_id(thing)
+        _, result = self.network_client.create_floatingip(
+            floating_network_id=external_network_id,
+            port_id=port_id,
+            tenant_id=thing['tenant_id']
+        )
+        floating_ip = net_resources.DeletableFloatingIp(
+            client=self.network_client,
+            **result['floatingip'])
+        self.addCleanup(self.delete_wrapper, floating_ip.delete)
+        return floating_ip
+
+    def _associate_floating_ip(self, floating_ip, server):
+        port_id = self._get_server_port_id(server)
+        floating_ip.update(port_id=port_id)
+        self.assertEqual(port_id, floating_ip.port_id)
+        return floating_ip
+
+    def _disassociate_floating_ip(self, floating_ip):
+        """
+        :param floating_ip: type DeletableFloatingIp
+        """
+        floating_ip.update(port_id=None)
+        self.assertIsNone(floating_ip.port_id)
+        return floating_ip
+
+    def _ping_ip_address(self, ip_address, should_succeed=True):
+        cmd = ['ping', '-c1', '-w1', ip_address]
+
+        def ping():
+            proc = subprocess.Popen(cmd,
+                                    stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE)
+            proc.wait()
+            return (proc.returncode == 0) == should_succeed
+
+        return tempest.test.call_until_true(
+            ping, CONF.compute.ping_timeout, 1)
+
+    def _check_vm_connectivity(self, ip_address,
+                               username=None,
+                               private_key=None,
+                               should_connect=True):
+        """
+        :param ip_address: server to test against
+        :param username: server's ssh username
+        :param private_key: server's ssh private key to be used
+        :param should_connect: True/False indicates positive/negative test
+            positive - attempt ping and ssh
+            negative - attempt ping and fail if succeed
+
+        :raises: AssertError if the result of the connectivity check does
+            not match the value of the should_connect param
+        """
+        if should_connect:
+            msg = "Timed out waiting for %s to become reachable" % ip_address
+        else:
+            msg = "ip address %s is reachable" % ip_address
+        self.assertTrue(self._ping_ip_address(ip_address,
+                                              should_succeed=should_connect),
+                        msg=msg)
+        if should_connect:
+            # no need to check ssh for negative connectivity
+            self.get_remote_client(ip_address, username, private_key)
+
+    def _check_public_network_connectivity(self, ip_address, username,
+                                           private_key, should_connect=True,
+                                           msg=None, servers=None):
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        LOG.debug('checking network connections to IP %s with user: %s' %
+                  (ip_address, username))
+        try:
+            self._check_vm_connectivity(ip_address,
+                                        username,
+                                        private_key,
+                                        should_connect=should_connect)
+        except Exception as e:
+            ex_msg = 'Public network connectivity check failed'
+            if msg:
+                ex_msg += ": " + msg
+            LOG.exception(ex_msg)
+            self._log_console_output(servers)
+            # network debug is called as part of ssh init
+            if not isinstance(e, exceptions.SSHTimeout):
+                debug.log_net_debug()
+            raise
+
+    def _check_tenant_network_connectivity(self, server,
+                                           username,
+                                           private_key,
+                                           should_connect=True,
+                                           servers_for_debug=None):
+        if not CONF.network.tenant_networks_reachable:
+            msg = 'Tenant networks not configured to be reachable.'
+            LOG.info(msg)
+            return
+        # The target login is assumed to have been configured for
+        # key-based authentication by cloud-init.
+        try:
+            for net_name, ip_addresses in server['networks'].iteritems():
+                for ip_address in ip_addresses:
+                    self._check_vm_connectivity(ip_address,
+                                                username,
+                                                private_key,
+                                                should_connect=should_connect)
+        except Exception as e:
+            LOG.exception('Tenant network connectivity check failed')
+            self._log_console_output(servers_for_debug)
+            # network debug is called as part of ssh init
+            if not isinstance(e, exceptions.SSHTimeout):
+                debug.log_net_debug()
+            raise
+
+    def _check_remote_connectivity(self, source, dest, should_succeed=True):
+        """
+        check ping server via source ssh connection
+
+        :param source: RemoteClient: an ssh connection from which to ping
+        :param dest: and IP to ping against
+        :param should_succeed: boolean should ping succeed or not
+        :returns: boolean -- should_succeed == ping
+        :returns: ping is false if ping failed
+        """
+        def ping_remote():
+            try:
+                source.ping_host(dest)
+            except exceptions.SSHExecCommandFailed:
+                LOG.warn('Failed to ping IP: %s via a ssh connection from: %s.'
+                         % (dest, source.ssh_client.host))
+                return not should_succeed
+            return should_succeed
+
+        return tempest.test.call_until_true(ping_remote,
+                                            CONF.compute.ping_timeout,
+                                            1)
+
+    def _create_security_group(self, tenant_id, client=None,
+                               namestart='secgroup-smoke'):
+        if client is None:
+            client = self.network_client
+        secgroup = self._create_empty_security_group(namestart=namestart,
+                                                     client=client,
+                                                     tenant_id=tenant_id)
+
+        # Add rules to the security group
+        rules = self._create_loginable_secgroup_rule(secgroup=secgroup)
+        for rule in rules:
+            self.assertEqual(tenant_id, rule.tenant_id)
+            self.assertEqual(secgroup.id, rule.security_group_id)
+        return secgroup
+
+    def _create_empty_security_group(self, tenant_id, client=None,
+                                     namestart='secgroup-smoke'):
+        """Create a security group without rules.
+
+        Default rules will be created:
+         - IPv4 egress to any
+         - IPv6 egress to any
+
+        :param tenant_id: secgroup will be created in this tenant
+        :returns: DeletableSecurityGroup -- containing the secgroup created
+        """
+        if client is None:
+            client = self.network_client
+        sg_name = data_utils.rand_name(namestart)
+        sg_desc = sg_name + " description"
+        sg_dict = dict(name=sg_name,
+                       description=sg_desc)
+        sg_dict['tenant_id'] = tenant_id
+        _, result = client.create_security_group(**sg_dict)
+        secgroup = net_resources.DeletableSecurityGroup(
+            client=client,
+            **result['security_group']
+        )
+        self.assertEqual(secgroup.name, sg_name)
+        self.assertEqual(tenant_id, secgroup.tenant_id)
+        self.assertEqual(secgroup.description, sg_desc)
+        self.addCleanup(self.delete_wrapper, secgroup.delete)
+        return secgroup
+
+    def _default_security_group(self, tenant_id, client=None):
+        """Get default secgroup for given tenant_id.
+
+        :returns: DeletableSecurityGroup -- default secgroup for given tenant
+        """
+        if client is None:
+            client = self.network_client
+        sgs = [
+            sg for sg in client.list_security_groups().values()[0]
+            if sg['tenant_id'] == tenant_id and sg['name'] == 'default'
+        ]
+        msg = "No default security group for tenant %s." % (tenant_id)
+        self.assertTrue(len(sgs) > 0, msg)
+        if len(sgs) > 1:
+            msg = "Found %d default security groups" % len(sgs)
+            raise exc.NeutronClientNoUniqueMatch(msg=msg)
+        return net_resources.DeletableSecurityGroup(client=client,
+                                                    **sgs[0])
+
+    def _create_security_group_rule(self, client=None, secgroup=None,
+                                    tenant_id=None, **kwargs):
+        """Create a rule from a dictionary of rule parameters.
+
+        Create a rule in a secgroup. if secgroup not defined will search for
+        default secgroup in tenant_id.
+
+        :param secgroup: type DeletableSecurityGroup.
+        :param secgroup_id: search for secgroup by id
+            default -- choose default secgroup for given tenant_id
+        :param tenant_id: if secgroup not passed -- the tenant in which to
+            search for default secgroup
+        :param kwargs: a dictionary containing rule parameters:
+            for example, to allow incoming ssh:
+            rule = {
+                    direction: 'ingress'
+                    protocol:'tcp',
+                    port_range_min: 22,
+                    port_range_max: 22
+                    }
+        """
+        if client is None:
+            client = self.network_client
+        if secgroup is None:
+            secgroup = self._default_security_group(tenant_id)
+
+        ruleset = dict(security_group_id=secgroup.id,
+                       tenant_id=secgroup.tenant_id)
+        ruleset.update(kwargs)
+
+        _, sg_rule = client.create_security_group_rule(**ruleset)
+        sg_rule = net_resources.DeletableSecurityGroupRule(
+            client=client,
+            **sg_rule['security_group_rule']
+        )
+        self.addCleanup(self.delete_wrapper, sg_rule.delete)
+        self.assertEqual(secgroup.tenant_id, sg_rule.tenant_id)
+        self.assertEqual(secgroup.id, sg_rule.security_group_id)
+
+        return sg_rule
+
+    def _create_loginable_secgroup_rule(self, client=None, secgroup=None):
+        """These rules are intended to permit inbound ssh and icmp
+        traffic from all sources, so no group_id is provided.
+        Setting a group_id would only permit traffic from ports
+        belonging to the same security group.
+        """
+
+        if client is None:
+            client = self.network_client
+        rules = []
+        rulesets = [
+            dict(
+                # ssh
+                protocol='tcp',
+                port_range_min=22,
+                port_range_max=22,
+            ),
+            dict(
+                # ping
+                protocol='icmp',
+            )
+        ]
+        for ruleset in rulesets:
+            for r_direction in ['ingress', 'egress']:
+                ruleset['direction'] = r_direction
+                try:
+                    sg_rule = self._create_security_group_rule(
+                        client=client, secgroup=secgroup, **ruleset)
+                except exceptions.Conflict as ex:
+                    # if rule already exist - skip rule and continue
+                    msg = 'Security group rule already exists'
+                    if msg not in ex._error_string:
+                        raise ex
+                else:
+                    self.assertEqual(r_direction, sg_rule.direction)
+                    rules.append(sg_rule)
+
+        return rules
+
+    def _ssh_to_server(self, server, private_key):
+        ssh_login = CONF.compute.image_ssh_user
+        return self.get_remote_client(server,
+                                      username=ssh_login,
+                                      private_key=private_key)
+
+    def _get_router(self, tenant_id):
+        """Retrieve a router for the given tenant id.
+
+        If a public router has been configured, it will be returned.
+
+        If a public router has not been configured, but a public
+        network has, a tenant router will be created and returned that
+        routes traffic to the public network.
+        """
+        router_id = CONF.network.public_router_id
+        network_id = CONF.network.public_network_id
+        if router_id:
+            result = self.network_client.show_router(router_id)
+            return net_resources.AttributeDict(**result['router'])
+        elif network_id:
+            router = self._create_router(tenant_id)
+            router.set_gateway(network_id)
+            return router
+        else:
+            raise Exception("Neither of 'public_router_id' or "
+                            "'public_network_id' has been defined.")
+
+    def _create_router(self, tenant_id, namestart='router-smoke-'):
+        name = data_utils.rand_name(namestart)
+        _, result = self.network_client.create_router(name=name,
+                                                      admin_state_up=True,
+                                                      tenant_id=tenant_id, )
+        router = net_resources.DeletableRouter(client=self.network_client,
+                                               **result['router'])
+        self.assertEqual(router.name, name)
+        self.addCleanup(self.delete_wrapper, router.delete)
+        return router
+
+    def _create_networks(self, tenant_id=None):
+        """Create a network with a subnet connected to a router.
+
+        :returns: network, subnet, router
+        """
+        if tenant_id is None:
+            tenant_id = self.tenant_id
+        network = self._create_network(tenant_id)
+        router = self._get_router(tenant_id)
+        subnet = self._create_subnet(network)
+        subnet.add_to_router(router.id)
+        return network, subnet, router
 
 
 class OfficialClientTest(tempest.test.BaseTestCase):

@@ -82,7 +82,7 @@ class TestSnapshotPattern(manager.ScenarioTest):
     def test_snapshot_pattern(self):
         # prepare for booting a instance
         self._add_keypair()
-        self.security_group = self._create_security_group_nova()
+        self.security_group = self._create_security_group()
 
         # boot a instance and create a timestamp file in it
         server = self._boot_image(CONF.compute.image_ref)

@@ -124,7 +124,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertEqual('available', volume['status'])
 
     def create_and_add_security_group(self):
-        secgroup = self._create_security_group_nova()
+        secgroup = self._create_security_group()
         self.servers_client.add_security_group(self.server['id'],
                                                secgroup['name'])
         self.addCleanup(self.servers_client.remove_security_group,
