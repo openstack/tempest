@@ -28,20 +28,23 @@ create_server = {
                     'id': {'type': 'string'},
                     'security_groups': {'type': 'array'},
                     'links': parameter_types.links,
-                    'adminPass': {'type': 'string'},
                     'OS-DCF:diskConfig': {'type': 'string'}
                 },
                 # NOTE: OS-DCF:diskConfig is API extension, and some
                 # environments return a response without the attribute.
                 # So it is not 'required'.
-                # NOTE: adminPass is not required because it can be deactivated
-                # with nova API flag enable_instance_password=False
                 'required': ['id', 'security_groups', 'links']
             }
         },
         'required': ['server']
     }
 }
+
+create_server_with_admin_pass = copy.deepcopy(create_server)
+create_server_with_admin_pass['response_body']['properties']['server'][
+    'properties'].update({'adminPass': {'type': 'string'}})
+create_server_with_admin_pass['response_body']['properties']['server'][
+    'required'].append('adminPass')
 
 update_server = copy.deepcopy(servers.base_update_get_server)
 update_server['response_body']['properties']['server']['properties'].update({
