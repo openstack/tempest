@@ -212,6 +212,20 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         resp, images = self.client.list_images_with_detail(params)
         self.assertTrue(any([i for i in images if i['id'] == self.image1_id]))
 
+    @test.attr(type='gate')
+    def test_list_images_with_detail_filter_by_marker(self):
+        # Detailed list of images should be filtered by marker
+        params = {'marker': self.snapshot1_id}
+        resp, images = self.client.list_images_with_detail(params)
+        image_list = map(lambda x: x['id'], images)
+
+        self.assertIn(self.image1_id, image_list)
+        self.assertIn(self.image2_id, image_list)
+        self.assertIn(self.image3_id, image_list)
+        self.assertNotIn(self.snapshot1_id, image_list)
+        self.assertNotIn(self.snapshot2_id, image_list)
+        self.assertNotIn(self.snapshot3_id, image_list)
+
 
 class ListImageFiltersTestXML(ListImageFiltersTestJSON):
     _interface = 'xml'
