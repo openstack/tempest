@@ -32,7 +32,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                  password='pass', network_resources=None):
         super(IsolatedCreds, self).__init__(name, tempest_client, interface,
                                             password, network_resources)
-        self.network_resources = network_resources
+        self.ip_version = network_resources.pop('ip_version')
+        self.network_resources = network_resources if len(network_resources) else None
         self.isolated_creds = {}
         self.isolated_net_resources = {}
         self.ports = []
@@ -235,11 +236,15 @@ class IsolatedCreds(cred_provider.CredentialProvider):
     def _create_subnet(self, subnet_name, tenant_id, network_id):
         if not self.tempest_client:
             body = {'subnet': {'name': subnet_name, 'tenant_id': tenant_id,
-                               'network_id': network_id, 'ip_version': 4}}
+                               'network_id': network_id, 'ip_version': self.ip_version}}
             if self.network_resources:
                 body['enable_dhcp'] = self.network_resources['dhcp']
-        base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
-        mask_bits = CONF.network.tenant_network_mask_bits
+        if self.ip_version == 6:
+            base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
+            mask_bits = CONF.network.tenant_network_v6_mask_bits
+        else:
+            base_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
+            mask_bits = CONF.network.tenant_network_mask_bits
         for subnet_cidr in base_cidr.subnet(mask_bits):
             try:
                 if self.tempest_client:
@@ -250,14 +255,14 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                                 name=subnet_name,
                                 tenant_id=tenant_id,
                                 enable_dhcp=self.network_resources['dhcp'],
-                                ip_version=4)
+                                ip_version=self.ip_version)
                     else:
                         resp, resp_body = self.network_admin_client.\
                             create_subnet(network_id=network_id,
                                           cidr=str(subnet_cidr),
                                           name=subnet_name,
                                           tenant_id=tenant_id,
-                                          ip_version=4)
+                                          ip_version=self.ip_version)
                 else:
                     body['subnet']['cidr'] = str(subnet_cidr)
                     resp_body = self.network_admin_client.create_subnet(body)
