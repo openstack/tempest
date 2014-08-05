@@ -439,6 +439,24 @@ class ScenarioTest(tempest.test.BaseTestCase):
                   image_name, server['name'])
         return snapshot_image
 
+    def nova_volume_attach(self):
+        # TODO(andreaf) Device should be here CONF.compute.volume_device_name
+        _, volume_attachment = self.servers_client.attach_volume(
+            self.server['id'], self.volume['id'], '/dev/vdb')
+        volume = volume_attachment['volumeAttachment']
+        self.assertEqual(self.volume['id'], volume['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
+        # Refresh the volume after the attachment
+        _, self.volume = self.volumes_client.get_volume(volume['id'])
+
+    def nova_volume_detach(self):
+        self.servers_client.detach_volume(self.server['id'], self.volume['id'])
+        self.volumes_client.wait_for_volume_status(self.volume['id'],
+                                                   'available')
+
+        _, volume = self.volumes_client.get_volume(self.volume['id'])
+        self.assertEqual('available', volume['status'])
+
 
 # TODO(yfried): change this class name to NetworkScenarioTest once client
 # migration is complete
@@ -1587,7 +1605,7 @@ class BaremetalScenarioTest(OfficialClientTest):
             timeout=CONF.baremetal.unprovision_timeout)
 
 
-class EncryptionScenarioTest(OfficialClientTest):
+class EncryptionScenarioTest(ScenarioTest):
     """
     Base class for encryption scenario tests
     """
@@ -1595,11 +1613,7 @@ class EncryptionScenarioTest(OfficialClientTest):
     @classmethod
     def setUpClass(cls):
         super(EncryptionScenarioTest, cls).setUpClass()
-
-        # use admin credentials to create encrypted volume types
-        admin_creds = cls.admin_credentials()
-        manager = clients.OfficialClientManager(credentials=admin_creds)
-        cls.admin_volume_client = manager.volume_client
+        cls.admin_volume_types_client = cls.admin_manager.volume_types_client
 
     def _wait_for_volume_status(self, status):
         self.status_timeout(
@@ -1607,53 +1621,35 @@ class EncryptionScenarioTest(OfficialClientTest):
 
     def nova_boot(self):
         self.keypair = self.create_keypair()
-        create_kwargs = {'key_name': self.keypair.name}
-        self.server = self.create_server(self.compute_client,
-                                         image=self.image,
+        create_kwargs = {'key_name': self.keypair['name']}
+        self.server = self.create_server(image=self.image,
                                          create_kwargs=create_kwargs)
 
     def create_volume_type(self, client=None, name=None):
         if not client:
-            client = self.admin_volume_client
+            client = self.admin_volume_types_client
         if not name:
             name = 'generic'
         randomized_name = data_utils.rand_name('scenario-type-' + name + '-')
         LOG.debug("Creating a volume type: %s", randomized_name)
-        volume_type = client.volume_types.create(randomized_name)
-        self.addCleanup(client.volume_types.delete, volume_type.id)
-        return volume_type
+        _, body = client.create_volume_type(
+            randomized_name)
+        self.assertIn('id', body)
+        self.addCleanup(client.delete_volume_type, body['id'])
+        return body
 
     def create_encryption_type(self, client=None, type_id=None, provider=None,
                                key_size=None, cipher=None,
                                control_location=None):
         if not client:
-            client = self.admin_volume_client
+            client = self.admin_volume_types_client
         if not type_id:
             volume_type = self.create_volume_type()
-            type_id = volume_type.id
+            type_id = volume_type['id']
         LOG.debug("Creating an encryption type for volume type: %s", type_id)
-        client.volume_encryption_types.create(type_id,
-                                              {'provider': provider,
-                                               'key_size': key_size,
-                                               'cipher': cipher,
-                                               'control_location':
-                                               control_location})
-
-    def nova_volume_attach(self):
-        attach_volume_client = self.compute_client.volumes.create_server_volume
-        volume = attach_volume_client(self.server.id,
-                                      self.volume.id,
-                                      '/dev/vdb')
-        self.assertEqual(self.volume.id, volume.id)
-        self._wait_for_volume_status('in-use')
-
-    def nova_volume_detach(self):
-        detach_volume_client = self.compute_client.volumes.delete_server_volume
-        detach_volume_client(self.server.id, self.volume.id)
-        self._wait_for_volume_status('available')
-
-        volume = self.volume_client.volumes.get(self.volume.id)
-        self.assertEqual('available', volume.status)
+        client.create_encryption_type(
+            type_id, provider=provider, key_size=key_size, cipher=cipher,
+            control_location=control_location)
 
 
 class NetworkScenarioTest(OfficialClientTest):
