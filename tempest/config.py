@@ -20,6 +20,7 @@ import os
 
 from oslo.config import cfg
 
+from tempest.openstack.common import lockutils
 from tempest.openstack.common import log as logging
 
 
@@ -1027,44 +1028,60 @@ NegativeGroup = [
                help="Test generator class for all negative tests"),
 ]
 
+_opts = [
+    (auth_group, AuthGroup),
+    (compute_group, ComputeGroup),
+    (compute_features_group, ComputeFeaturesGroup),
+    (identity_group, IdentityGroup),
+    (identity_feature_group, IdentityFeatureGroup),
+    (image_group, ImageGroup),
+    (image_feature_group, ImageFeaturesGroup),
+    (network_group, NetworkGroup),
+    (network_feature_group, NetworkFeaturesGroup),
+    (messaging_group, MessagingGroup),
+    (volume_group, VolumeGroup),
+    (volume_feature_group, VolumeFeaturesGroup),
+    (object_storage_group, ObjectStoreGroup),
+    (object_storage_feature_group, ObjectStoreFeaturesGroup),
+    (database_group, DatabaseGroup),
+    (orchestration_group, OrchestrationGroup),
+    (telemetry_group, TelemetryGroup),
+    (dashboard_group, DashboardGroup),
+    (data_processing_group, DataProcessingGroup),
+    (boto_group, BotoGroup),
+    (compute_admin_group, ComputeAdminGroup),
+    (stress_group, StressGroup),
+    (scenario_group, ScenarioGroup),
+    (service_available_group, ServiceAvailableGroup),
+    (debug_group, DebugGroup),
+    (baremetal_group, BaremetalGroup),
+    (input_scenario_group, InputScenarioGroup),
+    (cli_group, CLIGroup),
+    (negative_group, NegativeGroup)
+]
+
 
 def register_opts():
-    register_opt_group(cfg.CONF, auth_group, AuthGroup)
-    register_opt_group(cfg.CONF, compute_group, ComputeGroup)
-    register_opt_group(cfg.CONF, compute_features_group,
-                       ComputeFeaturesGroup)
-    register_opt_group(cfg.CONF, identity_group, IdentityGroup)
-    register_opt_group(cfg.CONF, identity_feature_group,
-                       IdentityFeatureGroup)
-    register_opt_group(cfg.CONF, image_group, ImageGroup)
-    register_opt_group(cfg.CONF, image_feature_group, ImageFeaturesGroup)
-    register_opt_group(cfg.CONF, network_group, NetworkGroup)
-    register_opt_group(cfg.CONF, network_feature_group,
-                       NetworkFeaturesGroup)
-    register_opt_group(cfg.CONF, messaging_group, MessagingGroup)
-    register_opt_group(cfg.CONF, volume_group, VolumeGroup)
-    register_opt_group(cfg.CONF, volume_feature_group,
-                       VolumeFeaturesGroup)
-    register_opt_group(cfg.CONF, object_storage_group, ObjectStoreGroup)
-    register_opt_group(cfg.CONF, object_storage_feature_group,
-                       ObjectStoreFeaturesGroup)
-    register_opt_group(cfg.CONF, database_group, DatabaseGroup)
-    register_opt_group(cfg.CONF, orchestration_group, OrchestrationGroup)
-    register_opt_group(cfg.CONF, telemetry_group, TelemetryGroup)
-    register_opt_group(cfg.CONF, dashboard_group, DashboardGroup)
-    register_opt_group(cfg.CONF, data_processing_group,
-                       DataProcessingGroup)
-    register_opt_group(cfg.CONF, boto_group, BotoGroup)
-    register_opt_group(cfg.CONF, compute_admin_group, ComputeAdminGroup)
-    register_opt_group(cfg.CONF, stress_group, StressGroup)
-    register_opt_group(cfg.CONF, scenario_group, ScenarioGroup)
-    register_opt_group(cfg.CONF, service_available_group,
-                       ServiceAvailableGroup)
-    register_opt_group(cfg.CONF, debug_group, DebugGroup)
-    register_opt_group(cfg.CONF, baremetal_group, BaremetalGroup)
-    register_opt_group(cfg.CONF, input_scenario_group, InputScenarioGroup)
-    register_opt_group(cfg.CONF, cli_group, CLIGroup)
-    register_opt_group(cfg.CONF, negative_group, NegativeGroup)
+    for g, o in _opts:
+        register_opt_group(cfg.CONF, g, o)
+
+
+def list_opts():
+    """Return a list of oslo.config options available.
+
+    The purpose of this is to allow tools like the Oslo sample config file
+    generator to discover the options exposed to users.
+    """
+    optlist = [(g.name, o) for g, o in _opts]
+
+    # NOTE(jgrimm): Can be removed once oslo-incubator/oslo changes happen.
+    optlist.append((None, lockutils.util_opts))
+    optlist.append((None, logging.common_cli_opts))
+    optlist.append((None, logging.logging_cli_opts))
+    optlist.append((None, logging.generic_log_opts))
+    optlist.append((None, logging.log_opts))
+
+    return optlist
 
 
 # this should never be called outside of this class
