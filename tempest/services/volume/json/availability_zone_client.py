@@ -21,10 +21,10 @@ from tempest import config
 CONF = config.CONF
 
 
-class VolumeAvailabilityZoneClientJSON(rest_client.RestClient):
+class BaseVolumeAvailabilityZoneClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
-        super(VolumeAvailabilityZoneClientJSON, self).__init__(
+        super(BaseVolumeAvailabilityZoneClientJSON, self).__init__(
             auth_provider)
         self.service = CONF.volume.catalog_type
 
@@ -32,3 +32,9 @@ class VolumeAvailabilityZoneClientJSON(rest_client.RestClient):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
         return resp, body['availabilityZoneInfo']
+
+
+class VolumeAvailabilityZoneClientJSON(BaseVolumeAvailabilityZoneClientJSON):
+    """
+    Volume V1 availability zone client.
+    """

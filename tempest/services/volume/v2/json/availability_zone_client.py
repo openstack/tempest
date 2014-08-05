@@ -1,4 +1,4 @@
-# Copyright 2012 OpenStack Foundation
+# Copyright 2014 IBM Corp.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,28 +13,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import json
-
-from tempest.common import rest_client
-from tempest import config
-
-CONF = config.CONF
+from tempest.services.volume.json import availability_zone_client
 
 
-class BaseExtensionsClientJSON(rest_client.RestClient):
+class VolumeV2AvailabilityZoneClientJSON(
+        availability_zone_client.BaseVolumeAvailabilityZoneClientJSON):
 
     def __init__(self, auth_provider):
-        super(BaseExtensionsClientJSON, self).__init__(auth_provider)
-        self.service = CONF.volume.catalog_type
+        super(VolumeV2AvailabilityZoneClientJSON, self).__init__(
+            auth_provider)
 
-    def list_extensions(self):
-        url = 'extensions'
-        resp, body = self.get(url)
-        body = json.loads(body)
-        return resp, body['extensions']
-
-
-class ExtensionsClientJSON(BaseExtensionsClientJSON):
-    """
-    Volume V1 extensions client.
-    """
+        self.api_version = "v2"
