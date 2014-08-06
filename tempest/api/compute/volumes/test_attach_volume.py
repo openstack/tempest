@@ -127,14 +127,17 @@ class AttachVolumeTestJSON(base.BaseV2ComputeTest):
 
         device_path = '/dev/%s' % self.device
 
-        resp, attachments = self.servers_client.list_volume_attachment(self.server['id'])
+        resp, attachments = self.servers_client.list_volume_attachment(
+            self.server['id'])
 
-        self.assertIn(self.server['id'], map(lambda x: x['serverId'], attachments))
-        self.assertIn(self.volume['id'], map(lambda x: x['volumeId'], attachments))
+        self.assertIn(self.server['id'], map(lambda x: x['serverId'],
+                                             attachments))
+        self.assertIn(self.volume['id'], map(lambda x: x['volumeId'],
+                                             attachments))
         self.assertIn(device_path, map(lambda x: x['device'], attachments))
 
-        resp, attachment = self.servers_client.get_volume_attachment(self.server['id'],
-                                                                     self.volume['id'])
+        resp, attachment = self.servers_client.get_volume_attachment(
+            self.server['id'], self.volume['id'])
 
         self.assertEqual(self.server['id'], attachment['serverId'])
         self.assertEqual(self.volume['id'], attachment['volumeId'])

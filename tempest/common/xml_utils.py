@@ -151,7 +151,8 @@ def xml_to_json(node, plurals=None):
         elif tag == 'volume_attached':
             if 'os-extended-volumes:volumes_attached' not in json:
                 json['os-extended-volumes:volumes_attached'] = []
-            json['os-extended-volumes:volumes_attached'].append(xml_to_json(child, plurals))
+            json['os-extended-volumes:volumes_attached'].append(
+                xml_to_json(child, plurals))
         else:
             json[tag] = xml_to_json(child, plurals)
     return json

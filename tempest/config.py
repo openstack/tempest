@@ -151,7 +151,8 @@ ComputeGroup = [
                help='Valid secondary flavor to be used in tests.'),
     cfg.StrOpt('default_network_id',
                default="",
-               help="Default valid network id to be used in tests for creating an instance."),
+               help="Default valid network id to be used in tests for "
+                    "creating an instance."),
     cfg.StrOpt('image_ssh_user',
                default="root",
                help="User name used to authenticate to an instance."),

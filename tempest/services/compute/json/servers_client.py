@@ -58,7 +58,8 @@ class ServersClientJSON(rest_client.RestClient):
         disk_config: Determines if user or admin controls disk configuration.
         return_reservation_id: Enable/Disable the return of reservation id
         block_device_mapping: Block device mapping for the server.
-        block_device_mapping_v2: Block device mapping with api v2 for the server.
+        block_device_mapping_v2: Block device mapping with api v2
+        for the server.
         mac_addr(extended attribute): The MAC address for the server.
         """
         post_body = {
@@ -78,7 +79,8 @@ class ServersClientJSON(rest_client.RestClient):
                        'availability_zone', 'accessIPv4', 'accessIPv6',
                        'min_count', 'max_count', ('metadata', 'meta'),
                        ('OS-DCF:diskConfig', 'disk_config'),
-                       'return_reservation_id', 'block_device_mapping', 'block_device_mapping_v2',
+                       'return_reservation_id', 'block_device_mapping',
+                       'block_device_mapping_v2',
                        ('OS-EXT-IPS-MAC:mac_addr', 'mac_addr')]:
             if isinstance(option, tuple):
                 post_param = option[0]
@@ -381,7 +383,9 @@ class ServersClientJSON(rest_client.RestClient):
         return resp, body['volumeAttachments']
 
     def get_volume_attachment(self, server_id, volume_id):
-        """Shows details for the specified attachment from a server instance."""
+        """Shows details for the specified attachment from a
+           server instance.
+        """
         resp, body = self.get('servers/%s/os-volume_attachments/%s' %
                               (server_id, volume_id))
         body = json.loads(body)

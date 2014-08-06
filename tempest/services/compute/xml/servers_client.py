@@ -120,7 +120,8 @@ def _translate_server_xml_to_json(xml_dom):
     task_state = ('{http://docs.openstack.org'
                   '/compute/ext/extended_status/api/v1.1}task_state')
     hypervisor_hostname = ('{http://docs.openstack.org'
-                           '/compute/ext/extended_status/api/v1.1}hypervisor_hostname')
+                           '/compute/ext/extended_status/api/v1.1}'
+                           'hypervisor_hostname')
     instance_name = ('{http://docs.openstack.org'
                      '/compute/ext/extended_status/api/v1.1}instance_name')
     host = ('{http://docs.openstack.org'
@@ -144,7 +145,8 @@ def _translate_server_xml_to_json(xml_dom):
     if task_state in json:
         json['OS-EXT-STS:task_state'] = json.pop(task_state)
     if hypervisor_hostname in json:
-        json['OS-EXT-SRV-ATTR:hypervisor_hostname'] = json.pop(hypervisor_hostname)
+        json['OS-EXT-SRV-ATTR:hypervisor_hostname'] = json.pop(
+            hypervisor_hostname)
     if instance_name in json:
         json['OS-EXT-SRV-ATTR:instance_name'] = json.pop(instance_name)
     if host in json:
@@ -331,7 +333,8 @@ class ServersClientXML(rest_client.RestClient):
         max_count: Count of maximum number of instances to launch.
         disk_config: Determines if user or admin controls disk configuration.
         block_device_mapping: Block device mapping for the server.
-        block_device_mapping_v2: Block device mapping with api v2 for the server.
+        block_device_mapping_v2: Block device mapping with api v2 for
+        the server.
         mac_addr(extended attribute): The MAC address for the server.
         """
         server = xml_utils.Element("server",
@@ -360,7 +363,8 @@ class ServersClientXML(rest_client.RestClient):
                 block_device_mapping.append(s)
 
         if 'mac_addr' in kwargs:
-            server.add_attr('xmlns:OS-EXT-IPS-MAC', "http://docs.openstack.org/"
+            server.add_attr('xmlns:OS-EXT-IPS-MAC',
+                            "http://docs.openstack.org/"
                             "compute/ext/extended_ips_mac/api/v1.1")
             server.add_attr('OS-EXT-IPS-MAC:mac_addr', kwargs['mac_addr'])
 
