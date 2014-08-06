@@ -55,7 +55,7 @@ class SecurityGroupDefaultRulesTest(base.BaseV2ComputeAdminTest):
     @test.attr(type='smoke')
     def test_create_delete_security_group_default_rules(self):
         # Create and delete Security Group default rule
-        ip_protocols = {'tcp', 'udp', 'icmp'}
+        ip_protocols = ['tcp', 'udp', 'icmp']
         for ip_protocol in ip_protocols:
             rule = self._create_security_group_default_rules(ip_protocol)
             # Delete Security Group default rule
