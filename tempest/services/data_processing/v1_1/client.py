@@ -258,3 +258,38 @@ class DataProcessingClient(rest_client.RestClient):
 
         uri = 'job-binaries/%s/data' % job_binary_id
         return self._request_and_check_resp(self.get, uri, 200)
+
+    def list_jobs(self):
+        """List all jobs for a user."""
+
+        uri = 'jobs'
+        return self._request_check_and_parse_resp(self.get, uri, 200, 'jobs')
+
+    def get_job(self, job_id):
+        """Returns the details of a single job."""
+
+        uri = 'jobs/%s' % job_id
+        return self._request_check_and_parse_resp(self.get, uri, 200, 'job')
+
+    def create_job(self, name, job_type, mains, libs=None, **kwargs):
+        """Creates job with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object.
+        """
+        uri = 'jobs'
+        body = kwargs.copy()
+        body.update({
+            'name': name,
+            'type': job_type,
+            'mains': mains,
+            'libs': libs or list(),
+        })
+        return self._request_check_and_parse_resp(self.post, uri, 202,
+                                                  'job', body=json.dumps(body))
+
+    def delete_job(self, job_id):
+        """Deletes the specified job by id."""
+
+        uri = 'jobs/%s' % job_id
+        return self._request_and_check_resp(self.delete, uri, 204)
