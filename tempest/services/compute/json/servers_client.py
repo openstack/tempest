@@ -97,7 +97,10 @@ class ServersClientJSON(rest_client.RestClient):
             hints = {'os:scheduler_hints': kwargs.get('sched_hints')}
             post_body = dict(post_body.items() + hints.items())
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers', post_body)
+        if 'volumes_boot' in kwargs and kwargs.get('volumes_boot') is True:
+            resp, body = self.post('os-volumes_boot', post_body)
+        else:
+            resp, body = self.post('servers', post_body)
 
         body = json.loads(body)
         # NOTE(maurosr): this deals with the case of multiple server create

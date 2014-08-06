@@ -345,12 +345,23 @@ class ServersClientXML(rest_client.RestClient):
 
         for attr in ["adminPass", "accessIPv4", "accessIPv6", "key_name",
                      "user_data", "availability_zone", "min_count",
-                     "max_count", "return_reservation_id",
-                     "block_device_mapping"]:
+                     "max_count", "return_reservation_id"]:
             if attr in kwargs:
                 server.add_attr(attr, kwargs[attr])
 
-        if 'block_device_mapping_v2' in kwargs:
+        if 'block_device_mapping' in kwargs:
+            block_device_mapping = xml_utils.Element("block_device_mapping")
+            server.append(block_device_mapping)
+            for mapping in kwargs['block_device_mapping']:
+                s = xml_utils.Element("mapping")
+                for attr in ["volume_id", "snapshot_id", "device_name",
+                             "virtual", "virtual_name", "volume_size",
+                             "delete_on_termination", "no_device"]:
+                    if attr in mapping:
+                        s.add_attr(attr, mapping[attr])
+                block_device_mapping.append(s)
+
+        elif 'block_device_mapping_v2' in kwargs:
             block_device_mapping = xml_utils.Element("block_device_mapping_v2")
             server.append(block_device_mapping)
             for mapping in kwargs['block_device_mapping_v2']:
@@ -420,7 +431,11 @@ class ServersClientXML(rest_client.RestClient):
                 p1.append(sched_hints[attr])
                 hints.append(p1)
             server.append(hints)
-        resp, body = self.post('servers', str(xml_utils.Document(server)))
+        if 'volumes_boot' in kwargs and kwargs['volumes_boot'] is True:
+            resp, body = self.post('os-volumes_boot',
+                                   str(xml_utils.Document(server)))
+        else:
+            resp, body = self.post('servers', str(xml_utils.Document(server)))
         server = self._parse_server(etree.fromstring(body))
         return resp, server
 
