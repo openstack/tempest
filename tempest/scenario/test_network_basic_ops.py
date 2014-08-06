@@ -203,7 +203,7 @@ class TestNetworkBasicOps(manager.NeutronScenarioTest):
             floating_ip, server)
 
     def _create_new_network(self):
-        self.new_net = self._create_network(self.tenant_id)
+        self.new_net = self._create_network(tenant_id=self.tenant_id)
         self.new_subnet = self._create_subnet(
             network=self.new_net,
             gateway_ip=None)
