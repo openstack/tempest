@@ -51,7 +51,6 @@ class ServersAdminV3Test(base.BaseV3ComputeAdminTest):
         self.assertEqual('200', resp['status'])
         self.assertEqual([], servers)
 
-    @test.skip_because(bug='1265416')
     @test.attr(type='gate')
     def test_list_servers_by_admin_with_all_tenants(self):
         # Listing servers by admin user with all tenants parameter
