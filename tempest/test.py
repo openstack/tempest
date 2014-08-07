@@ -399,16 +399,21 @@ class NegativeAutoTest(BaseTestCase):
         cls.admin_client = os_admin.negative_client
 
     @staticmethod
-    def load_schema(file):
+    def load_schema(file_or_dict):
         """
-        Loads a schema from a file on a specified location.
+        Loads a schema from a file_or_dict on a specified location.
 
-        :param file: the file name
+        :param file_or_dict: just a dict or filename
         """
+        # NOTE(mkoderer): we will get rid of this function when all test are
+        # ported to dicts
+        if isinstance(file_or_dict, dict):
+            return file_or_dict
+
         # NOTE(mkoderer): must be extended for xml support
         fn = os.path.join(
             os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
-            "etc", "schemas", file)
+            "etc", "schemas", file_or_dict)
         LOG.debug("Open schema file: %s" % (fn))
         return json.load(open(fn))
 
@@ -425,17 +430,21 @@ class NegativeAutoTest(BaseTestCase):
             standard_tests, module, loader = args
         for test in testtools.iterate_tests(standard_tests):
             schema_file = getattr(test, '_schema_file', None)
+            schema = getattr(test, '_schema', None)
             if schema_file is not None:
                 setattr(test, 'scenarios',
                         NegativeAutoTest.generate_scenario(schema_file))
+            elif schema is not None:
+                setattr(test, 'scenarios',
+                        NegativeAutoTest.generate_scenario(schema))
         return testscenarios.load_tests_apply_scenarios(*args)
 
     @staticmethod
-    def generate_scenario(description_file):
+    def generate_scenario(description):
         """
         Generates the test scenario list for a given description.
 
-        :param description: A dictionary with the following entries:
+        :param description: A file or dictionary with the following entries:
             name (required) name for the api
             http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
             url (required) the url to be appended to the catalog url with '%s'
@@ -451,7 +460,7 @@ class NegativeAutoTest(BaseTestCase):
                 the data is used to generate query strings appended to the url,
                 otherwise for the body of the http call.
         """
-        description = NegativeAutoTest.load_schema(description_file)
+        description = NegativeAutoTest.load_schema(description)
         LOG.debug(description)
         generator = importutils.import_class(
             CONF.negative.test_generator)()
@@ -481,13 +490,14 @@ class NegativeAutoTest(BaseTestCase):
         LOG.debug(scenario_list)
         return scenario_list
 
-    def execute(self, description_file):
+    def execute(self, description):
         """
         Execute a http call on an api that are expected to
         result in client errors. First it uses invalid resources that are part
         of the url, and then invalid data for queries and http request bodies.
 
-        :param description: A dictionary with the following entries:
+        :param description: A json file or dictionary with the following
+        entries:
             name (required) name for the api
             http-method (required) one of HEAD,GET,PUT,POST,PATCH,DELETE
             url (required) the url to be appended to the catalog url with '%s'
@@ -504,7 +514,7 @@ class NegativeAutoTest(BaseTestCase):
                 otherwise for the body of the http call.
 
         """
-        description = NegativeAutoTest.load_schema(description_file)
+        description = NegativeAutoTest.load_schema(description)
         LOG.info("Executing %s" % description["name"])
         LOG.debug(description)
         method = description["http-method"]
@@ -594,7 +604,10 @@ def SimpleNegativeAutoTest(klass):
     """
     @attr(type=['negative', 'gate'])
     def generic_test(self):
-        self.execute(self._schema_file)
+        if hasattr(self, '_schema_file'):
+            self.execute(self._schema_file)
+        if hasattr(self, '_schema'):
+            self.execute(self._schema)
 
     cn = klass.__name__
     cn = cn.replace('JSON', '')

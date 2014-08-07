@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
+
 import mock
 
 from tempest import config
@@ -70,3 +72,13 @@ class TestNegativeAutoTest(base.TestCase):
         self._check_prop_entries(scenarios, "prop_minRam")
         self._check_prop_entries(scenarios, "prop_minDisk")
         self._check_resource_entries(scenarios, "inv_res")
+
+    def test_load_schema(self):
+        json_schema = json.dumps(self.fake_input_desc)
+        with mock.patch('tempest.test.open',
+                        mock.mock_open(read_data=json_schema),
+                        create=True):
+            return_file = test.NegativeAutoTest.load_schema('filename')
+            self.assertEqual(return_file, self.fake_input_desc)
+        return_dict = test.NegativeAutoTest.load_schema(self.fake_input_desc)
+        self.assertEqual(return_file, return_dict)
