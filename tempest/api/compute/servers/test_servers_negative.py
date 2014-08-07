@@ -404,13 +404,6 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           nonexistent_server)
 
     @test.attr(type=['negative', 'gate'])
-    def test_force_delete_server_invalid_state(self):
-        # we can only force-delete a server in 'soft-delete' state
-        self.assertRaises(exceptions.Conflict,
-                          self.client.force_delete_server,
-                          self.server_id)
-
-    @test.attr(type=['negative', 'gate'])
     def test_restore_nonexistent_server_id(self):
         # restore-delete a non existent server
         nonexistent_server = data_utils.rand_uuid()
