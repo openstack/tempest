@@ -198,6 +198,7 @@ from tempest.services.volume.xml.backups_client import BackupsClientXML
 from tempest.services.volume.xml.extensions_client import \
     ExtensionsClientXML as VolumeExtensionClientXML
 from tempest.services.volume.xml.snapshots_client import SnapshotsClientXML
+from tempest.services.volume.v2.xml.snapshots_client import SnapshotsV2ClientXML
 from tempest.services.volume.xml.volumes_client import VolumesClientXML
 
 CONF = config.CONF
@@ -235,6 +236,7 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.backups_client = BackupsClientXML(self.auth_provider)
             self.snapshots_client = SnapshotsClientXML(self.auth_provider)
+            self.snapshots_v2_client = SnapshotsV2ClientXML(self.auth_provider)
             self.volumes_client = VolumesClientXML(self.auth_provider)
             self.volumes_v2_client = VolumesV2ClientXML(self.auth_provider)
             self.volume_types_client = VolumeTypesClientXML(
