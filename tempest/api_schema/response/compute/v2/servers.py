@@ -14,8 +14,8 @@
 
 import copy
 
-from tempest.api_schema.compute import parameter_types
-from tempest.api_schema.compute import servers
+from tempest.api_schema.response.compute import parameter_types
+from tempest.api_schema.response.compute import servers
 
 create_server = {
     'status_code': [202],

@@ -15,7 +15,7 @@
 
 import copy
 
-from tempest.api_schema.compute.v2 import quotas
+from tempest.api_schema.response.compute.v2 import quotas
 
 # NOTE(mriedem): os-quota-class-sets responses are the same as os-quota-sets
 # except for the key in the response body is quota_class_set instead of

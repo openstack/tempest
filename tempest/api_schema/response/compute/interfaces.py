@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api_schema.compute import parameter_types
+from tempest.api_schema.response.compute import parameter_types
 
 delete_interface = {
     'status_code': [202]

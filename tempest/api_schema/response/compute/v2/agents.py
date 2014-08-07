@@ -12,18 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api_schema.compute import interfaces as common_schema
+from tempest.api_schema.response.compute import agents
 
-list_interfaces = {
+create_agent = {
     'status_code': [200],
-    'response_body': {
-        'type': 'object',
-        'properties': {
-            'interfaceAttachments': {
-                'type': 'array',
-                'items': common_schema.interface_common_info
-            }
-        },
-        'required': ['interfaceAttachments']
-    }
+    'response_body': agents.common_create_agent
+}
+
+delete_agent = {
+    'status_code': [200]
 }

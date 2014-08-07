@@ -12,9 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import copy
+from tempest.api_schema.response.compute import interfaces as common_schema
 
-from tempest.api_schema.compute import certificates
-
-create_certificate = copy.deepcopy(certificates._common_schema)
-create_certificate['status_code'] = [201]
+list_interfaces = {
+    'status_code': [200],
+    'response_body': {
+        'type': 'object',
+        'properties': {
+            'interfaceAttachments': {
+                'type': 'array',
+                'items': common_schema.interface_common_info
+            }
+        },
+        'required': ['interfaceAttachments']
+    }
+}

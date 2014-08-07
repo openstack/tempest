@@ -14,7 +14,7 @@
 
 import copy
 
-from tempest.api_schema.compute import availability_zone as common
+from tempest.api_schema.response.compute import availability_zone as common
 
 
 base = {

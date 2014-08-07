@@ -16,7 +16,7 @@
 import json
 import urllib
 
-from tempest.api_schema.queuing.v1 import queues as queues_schema
+from tempest.api_schema.response.queuing.v1 import queues as queues_schema
 from tempest.common import rest_client
 from tempest.common.utils import data_utils
 from tempest import config

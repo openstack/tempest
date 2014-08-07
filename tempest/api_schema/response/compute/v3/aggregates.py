@@ -14,12 +14,16 @@
 
 import copy
 
-from tempest.api_schema.compute import aggregates
+from tempest.api_schema.response.compute import aggregates
 
 delete_aggregate = {
-    'status_code': [200]
+    'status_code': [204]
 }
 
 create_aggregate = copy.deepcopy(aggregates.common_create_aggregate)
-# V2 API's response status_code is 200
-create_aggregate['status_code'] = [200]
+# V3 API's response status_code is 201
+create_aggregate['status_code'] = [201]
+
+aggregate_add_remove_host = copy.deepcopy(aggregates.aggregate_add_remove_host)
+# V3 API's response status_code is 202
+aggregate_add_remove_host['status_code'] = [202]
