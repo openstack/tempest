@@ -131,6 +131,10 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
                    'public_network_id must be defined.')
             cls.enabled = False
             raise cls.skipException(msg)
+        if CONF.baremetal.driver_enabled:
+            msg = ('Not currently supported by baremetal.')
+            cls.enabled = False
+            raise cls.skipException(msg)
 
     @classmethod
     def setUpClass(cls):
@@ -272,7 +276,7 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         self.floating_ips.setdefault(server, floating_ip)
 
     def _create_tenant_network(self, tenant):
-        network, subnet, router = self._create_networks(tenant.creds.tenant_id)
+        network, subnet, router = self.create_networks(tenant.creds.tenant_id)
         tenant.set_network(network, subnet, router)
 
     def _set_compute_context(self, tenant):

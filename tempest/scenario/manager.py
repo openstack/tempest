@@ -555,6 +555,10 @@ class NeutronScenarioTest(ScenarioTest):
                          "Unable to determine which port to target.")
         return ports[0]['id']
 
+    def _get_network_by_name(self, network_name):
+        net = self._list_networks(name=network_name)
+        return net_common.AttributeDict(net[0])
+
     def _create_floating_ip(self, thing, external_network_id, port_id=None):
         if not port_id:
             port_id = self._get_server_port_id(thing)
@@ -876,17 +880,31 @@ class NeutronScenarioTest(ScenarioTest):
         self.addCleanup(self.delete_wrapper, router.delete)
         return router
 
-    def _create_networks(self, tenant_id=None):
+    def create_networks(self, tenant_id=None):
         """Create a network with a subnet connected to a router.
+
+        The baremetal driver is a special case since all nodes are
+        on the same shared network.
 
         :returns: network, subnet, router
         """
-        if tenant_id is None:
-            tenant_id = self.tenant_id
-        network = self._create_network(tenant_id)
-        router = self._get_router(tenant_id)
-        subnet = self._create_subnet(network)
-        subnet.add_to_router(router.id)
+        if CONF.baremetal.driver_enabled:
+            # NOTE(Shrews): This exception is for environments where tenant
+            # credential isolation is available, but network separation is
+            # not (the current baremetal case). Likely can be removed when
+            # test account mgmt is reworked:
+            # https://blueprints.launchpad.net/tempest/+spec/test-accounts
+            network = self._get_network_by_name(
+                CONF.compute.fixed_network_name)
+            router = None
+            subnet = None
+        else:
+            if tenant_id is None:
+                tenant_id = self.tenant_id
+            network = self._create_network(tenant_id)
+            router = self._get_router(tenant_id)
+            subnet = self._create_subnet(network)
+            subnet.add_to_router(router.id)
         return network, subnet, router
 
 
@@ -1747,6 +1765,10 @@ class NetworkScenarioTest(OfficialClientTest):
                          "Unable to determine which port to target.")
         return ports[0]['id']
 
+    def _get_network_by_name(self, network_name):
+        net = self._list_networks(name=network_name)
+        return net_common.AttributeDict(net[0])
+
     def _create_floating_ip(self, thing, external_network_id, port_id=None):
         if not port_id:
             port_id = self._get_server_port_id(thing)
@@ -2144,17 +2166,31 @@ class NetworkScenarioTest(OfficialClientTest):
         self.addCleanup(self.delete_wrapper, router)
         return router
 
-    def _create_networks(self, tenant_id=None):
+    def create_networks(self, tenant_id=None):
         """Create a network with a subnet connected to a router.
+
+        The baremetal driver is a special case since all nodes are
+        on the same shared network.
 
         :returns: network, subnet, router
         """
-        if tenant_id is None:
-            tenant_id = self.tenant_id
-        network = self._create_network(tenant_id)
-        router = self._get_router(tenant_id)
-        subnet = self._create_subnet(network)
-        subnet.add_to_router(router.id)
+        if CONF.baremetal.driver_enabled:
+            # NOTE(Shrews): This exception is for environments where tenant
+            # credential isolation is available, but network separation is
+            # not (the current baremetal case). Likely can be removed when
+            # test account mgmt is reworked:
+            # https://blueprints.launchpad.net/tempest/+spec/test-accounts
+            network = self._get_network_by_name(
+                CONF.compute.fixed_network_name)
+            router = None
+            subnet = None
+        else:
+            if tenant_id is None:
+                tenant_id = self.tenant_id
+            network = self._create_network(tenant_id)
+            router = self._get_router(tenant_id)
+            subnet = self._create_subnet(network)
+            subnet.add_to_router(router.id)
         return network, subnet, router
 
 
