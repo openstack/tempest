@@ -271,7 +271,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         url = 'software_configs'
         resp, body = self.post(url, headers=headers, body=body)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -279,7 +279,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns a software configuration resource."""
         url = 'software_configs/%s' % str(conf_id)
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -287,7 +287,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Deletes a specific software configuration."""
         url = 'software_configs/%s' % str(conf_id)
         resp, _ = self.delete(url)
-        self.expected_success(204, resp)
+        self.expected_success(204, resp.status)
 
     def create_software_deploy(self, server_id=None, config_id=None,
                                action=None, status=None,
@@ -300,7 +300,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         url = 'software_deployments'
         resp, body = self.post(url, headers=headers, body=body)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -315,7 +315,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         url = 'software_deployments/%s' % str(deploy_id)
         resp, body = self.put(url, headers=headers, body=body)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -323,7 +323,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns a list of all deployments."""
         url = 'software_deployments'
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -331,7 +331,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns a specific software deployment."""
         url = 'software_deployments/%s' % str(deploy_id)
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -339,7 +339,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Return a config metadata for a specific server."""
         url = 'software_deployments/metadata/%s' % server_id
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -347,7 +347,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Deletes a specific software deployment."""
         url = 'software_deployments/%s' % str(deploy_id)
         resp, _ = self.delete(url)
-        self.expected_success(204, resp)
+        self.expected_success(204, resp.status)
 
     def _prep_software_config_create(self, name=None, conf=None, group=None,
                                      inputs=None, outputs=None, options=None):
