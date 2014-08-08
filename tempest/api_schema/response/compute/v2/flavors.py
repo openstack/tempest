@@ -18,7 +18,7 @@ from tempest.api_schema.response.compute import flavors
 
 list_flavors_details = copy.deepcopy(flavors.common_flavor_list_details)
 
-# 'swap' attributes comes as integre value but if it is empty it comes as "".
+# 'swap' attributes comes as integer value but if it is empty it comes as "".
 # So defining type of as string and integer.
 list_flavors_details['response_body']['properties']['flavors']['items'][
     'properties']['swap'] = {'type': ['string', 'integer']}
@@ -38,7 +38,7 @@ unset_flavor_extra_specs = {
 
 create_get_flavor_details = copy.deepcopy(flavors.common_flavor_details)
 
-# 'swap' attributes comes as integre value but if it is empty it comes as "".
+# 'swap' attributes comes as integer value but if it is empty it comes as "".
 # So defining type of as string and integer.
 create_get_flavor_details['response_body']['properties']['flavor'][
     'properties']['swap'] = {'type': ['string', 'integer']}
