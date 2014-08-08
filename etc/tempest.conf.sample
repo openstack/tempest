@@ -452,6 +452,10 @@
 # value)
 #enable_instance_password=true
 
+# Does the test environment support dynamic network interface
+# attachment? (boolean value)
+#interface_attach=true
+
 
 [dashboard]
 
