@@ -12,7 +12,7 @@
 
 import six
 
-from tempest.api.baremetal import base
+from tempest.api.baremetal.admin import base
 from tempest import exceptions as exc
 from tempest import test
 

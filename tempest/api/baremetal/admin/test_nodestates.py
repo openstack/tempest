@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.baremetal import base
+from tempest.api.baremetal.admin import base
 from tempest import exceptions
 from tempest.openstack.common import timeutils
 from tempest import test
