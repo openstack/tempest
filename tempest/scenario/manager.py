@@ -914,7 +914,6 @@ class OfficialClientTest(tempest.test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(OfficialClientTest, cls).setUpClass()
-        cls.network_resources.setdefault('ip_version', cls._ip_version)
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             cls.__name__, tempest_client=False,
             network_resources=cls.network_resources)
