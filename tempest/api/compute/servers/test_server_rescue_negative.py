@@ -34,7 +34,7 @@ class ServerRescueNegativeTestJSON(base.BaseV2ComputeTest):
 
         cls.set_network_resources(network=True, subnet=True, router=True)
         super(ServerRescueNegativeTestJSON, cls).setUpClass()
-        cls.device = 'vdf'
+        cls.device = CONF.compute.volume_device_name
 
         # Create a volume and wait for it to become ready for attach
         resp, cls.volume = cls.volumes_extensions_client.create_volume(
