@@ -16,9 +16,9 @@
 import json
 import time
 
-from tempest.api_schema.compute import interfaces as common_schema
-from tempest.api_schema.compute import servers as servers_schema
-from tempest.api_schema.compute.v2 import interfaces as schema
+from tempest.api_schema.response.compute import interfaces as common_schema
+from tempest.api_schema.response.compute import servers as servers_schema
+from tempest.api_schema.response.compute.v2 import interfaces as schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions

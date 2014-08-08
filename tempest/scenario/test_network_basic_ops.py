@@ -14,8 +14,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import collections
-
 import re
+import testtools
 
 from tempest.api.network import common as net_common
 from tempest.common import debug
@@ -347,6 +347,8 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
                                                 msg="after re-associate "
                                                     "floating ip")
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.interface_attach,
+                          'NIC hotplug not available')
     @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_hotplug_nic(self):

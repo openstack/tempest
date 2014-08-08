@@ -17,7 +17,7 @@ import cStringIO as StringIO
 import hashlib
 import random
 import re
-from six import moves
+import six
 import time
 import zlib
 
@@ -54,14 +54,35 @@ class ObjectTest(base.BaseObjectTest):
         object_name = data_utils.rand_name(name='LObject')
         data = data_utils.arbitrary_string()
         segments = 10
-        data_segments = [data + str(i) for i in moves.xrange(segments)]
+        data_segments = [data + str(i) for i in six.moves.xrange(segments)]
         # uploading segments
-        for i in moves.xrange(segments):
+        for i in six.moves.xrange(segments):
             resp, _ = self.object_client.create_object_segments(
                 self.container_name, object_name, i, data_segments[i])
             self.assertEqual(resp['status'], '201')
 
         return object_name, data_segments
+
+    def _copy_object_2d(self, src_object_name, metadata=None):
+        dst_object_name = data_utils.rand_name(name='TestObject')
+        resp, _ = self.object_client.copy_object_2d_way(self.container_name,
+                                                        src_object_name,
+                                                        dst_object_name,
+                                                        metadata=metadata)
+        return dst_object_name, resp
+
+    def _check_copied_obj(self, dst_object_name, src_body,
+                          in_meta=None, not_in_meta=None):
+        resp, dest_body = self.object_client.get_object(self.container_name,
+                                                        dst_object_name)
+
+        self.assertEqual(src_body, dest_body)
+        if in_meta:
+            for meta_key in in_meta:
+                self.assertIn('x-object-meta-' + meta_key, resp)
+        if not_in_meta:
+            for meta_key in not_in_meta:
+                self.assertNotIn('x-object-meta-' + meta_key, resp)
 
     @test.attr(type='gate')
     def test_create_object(self):
@@ -765,10 +786,7 @@ class ObjectTest(base.BaseObjectTest):
         # change the content type of an existing object
 
         # create object
-        object_name = data_utils.rand_name(name='TestObject')
-        data = data_utils.arbitrary_string()
-        self.object_client.create_object(self.container_name,
-                                         object_name, data)
+        object_name, data = self._create_object()
         # get the old content type
         resp_tmp, _ = self.object_client.list_object_metadata(
             self.container_name, object_name)
@@ -805,20 +823,12 @@ class ObjectTest(base.BaseObjectTest):
                                                         dst_object_name)
         self.assertEqual(resp['status'], '201')
         self.assertHeaders(resp, 'Object', 'COPY')
-
-        self.assertIn('last-modified', resp)
-        self.assertIn('x-copied-from', resp)
-        self.assertIn('x-copied-from-last-modified', resp)
-        self.assertNotEqual(len(resp['last-modified']), 0)
         self.assertEqual(
             resp['x-copied-from'],
             self.container_name + "/" + src_object_name)
-        self.assertNotEqual(len(resp['x-copied-from-last-modified']), 0)
 
         # check data
-        resp, body = self.object_client.get_object(self.container_name,
-                                                   dst_object_name)
-        self.assertEqual(body, src_data)
+        self._check_copied_obj(dst_object_name, src_data)
 
     @test.attr(type='smoke')
     def test_copy_object_across_containers(self):
@@ -862,15 +872,82 @@ class ObjectTest(base.BaseObjectTest):
         self.assertIn(actual_meta_key, resp)
         self.assertEqual(resp[actual_meta_key], meta_value)
 
+    @test.attr(type='smoke')
+    def test_copy_object_with_x_fresh_metadata(self):
+        # create source object
+        metadata = {'x-object-meta-src': 'src_value'}
+        src_object_name, data = self._create_object(metadata)
+
+        # copy source object with x_fresh_metadata header
+        metadata = {'X-Fresh-Metadata': 'true'}
+        dst_object_name, resp = self._copy_object_2d(src_object_name,
+                                                     metadata)
+
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'COPY')
+
+        self.assertNotIn('x-object-meta-src', resp)
+        self.assertEqual(resp['x-copied-from'],
+                         self.container_name + "/" + src_object_name)
+
+        # check that destination object does NOT have any object-meta
+        self._check_copied_obj(dst_object_name, data, not_in_meta=["src"])
+
+    @test.attr(type='smoke')
+    def test_copy_object_with_x_object_metakey(self):
+        # create source object
+        metadata = {'x-object-meta-src': 'src_value'}
+        src_obj_name, data = self._create_object(metadata)
+
+        # copy source object to destination with x-object-meta-key
+        metadata = {'x-object-meta-test': ''}
+        dst_obj_name, resp = self._copy_object_2d(src_obj_name, metadata)
+
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'COPY')
+
+        expected = {'x-object-meta-test': '',
+                    'x-object-meta-src': 'src_value',
+                    'x-copied-from': self.container_name + "/" + src_obj_name}
+        for key, value in six.iteritems(expected):
+            self.assertIn(key, resp)
+            self.assertEqual(value, resp[key])
+
+        # check destination object
+        self._check_copied_obj(dst_obj_name, data, in_meta=["test", "src"])
+
+    @test.attr(type='smoke')
+    def test_copy_object_with_x_object_meta(self):
+        # create source object
+        metadata = {'x-object-meta-src': 'src_value'}
+        src_obj_name, data = self._create_object(metadata)
+
+        # copy source object to destination with object metadata
+        metadata = {'x-object-meta-test': 'value'}
+        dst_obj_name, resp = self._copy_object_2d(src_obj_name, metadata)
+
+        self.assertEqual(resp['status'], '201')
+        self.assertHeaders(resp, 'Object', 'COPY')
+
+        expected = {'x-object-meta-test': 'value',
+                    'x-object-meta-src': 'src_value',
+                    'x-copied-from': self.container_name + "/" + src_obj_name}
+        for key, value in six.iteritems(expected):
+            self.assertIn(key, resp)
+            self.assertEqual(value, resp[key])
+
+        # check destination object
+        self._check_copied_obj(dst_obj_name, data, in_meta=["test", "src"])
+
     @test.attr(type='gate')
     def test_object_upload_in_segments(self):
         # create object
         object_name = data_utils.rand_name(name='LObject')
         data = data_utils.arbitrary_string()
         segments = 10
-        data_segments = [data + str(i) for i in moves.xrange(segments)]
+        data_segments = [data + str(i) for i in six.moves.xrange(segments)]
         # uploading segments
-        for i in moves.xrange(segments):
+        for i in six.moves.xrange(segments):
             resp, _ = self.object_client.create_object_segments(
                 self.container_name, object_name, i, data_segments[i])
             self.assertEqual(resp['status'], '201')

@@ -309,6 +309,14 @@ def _resolve_image(image, imgtype):
     return name, fname
 
 
+def _get_image_by_name(client, name):
+    r, body = client.images.image_list()
+    for image in body:
+        if name == image['name']:
+            return image
+    return None
+
+
 def create_images(images):
     if not images:
         return
@@ -317,9 +325,7 @@ def create_images(images):
         client = client_for_user(image['owner'])
 
         # only upload a new image if the name isn't there
-        r, body = client.images.image_list()
-        names = [x['name'] for x in body]
-        if image['name'] in names:
+        if _get_image_by_name(client, image['name']):
             LOG.info("Image '%s' already exists" % image['name'])
             continue
 
@@ -345,6 +351,20 @@ def create_images(images):
         client.images.store_image(image_id, open(fname, 'r'))
 
 
+def destroy_images(images):
+    if not images:
+        return
+    LOG.info("Destroying images")
+    for image in images:
+        client = client_for_user(image['owner'])
+
+        response = _get_image_by_name(client, image['name'])
+        if not response:
+            LOG.info("Image '%s' does not exists" % image['name'])
+            continue
+        client.images.delete_image(response['id'])
+
+
 #######################
 #
 # SERVERS
@@ -356,14 +376,6 @@ def _get_server_by_name(client, name):
     for server in body['servers']:
         if name == server['name']:
             return server
-    return None
-
-
-def _get_image_by_name(client, name):
-    r, body = client.images.image_list()
-    for image in body:
-        if name == image['name']:
-            return image
     return None
 
 
@@ -478,12 +490,13 @@ def destroy_resources():
     # destroy_volumes
 
     destroy_servers(RES['servers'])
-    LOG.warn("Destroy mode incomplete")
-    # destroy_images
+    destroy_images(RES['images'])
     # destroy_objects
 
     # destroy_users
     # destroy_tenants
+
+    LOG.warn("Destroy mode incomplete")
 
 
 def get_options():

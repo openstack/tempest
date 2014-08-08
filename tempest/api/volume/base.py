@@ -71,6 +71,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 msg = "Volume API v2 is disabled"
                 raise cls.skipException(msg)
             cls.volumes_client = cls.os.volumes_v2_client
+            cls.volumes_extension_client = cls.os.volumes_v2_extension_client
+            cls.availability_zone_client = (
+                cls.os.volume_v2_availability_zone_client)
             # Special fields and resp code for cinder v2
             cls.special_fields = {'name_field': 'name',
                                   'descrip_field': 'description',

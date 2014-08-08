@@ -394,6 +394,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
     @test.attr(type='gate')
     def test_shelve_unshelve_server(self):
         resp, server = self.client.shelve_server(self.server_id)

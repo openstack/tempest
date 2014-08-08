@@ -336,7 +336,8 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             # Maintained until tests are ported
             LOG.info("Acquired isolated creds:\n credentials: %s"
                      % credentials)
-            if CONF.service_available.neutron:
+            if (CONF.service_available.neutron and
+                not CONF.baremetal.driver_enabled):
                 network, subnet, router = self._create_network_resources(
                     credentials.tenant_id)
                 self.isolated_net_resources[credential_type] = (

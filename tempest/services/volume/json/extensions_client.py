@@ -21,10 +21,10 @@ from tempest import config
 CONF = config.CONF
 
 
-class ExtensionsClientJSON(rest_client.RestClient):
+class BaseExtensionsClientJSON(rest_client.RestClient):
 
     def __init__(self, auth_provider):
-        super(ExtensionsClientJSON, self).__init__(auth_provider)
+        super(BaseExtensionsClientJSON, self).__init__(auth_provider)
         self.service = CONF.volume.catalog_type
 
     def list_extensions(self):
@@ -32,3 +32,9 @@ class ExtensionsClientJSON(rest_client.RestClient):
         resp, body = self.get(url)
         body = json.loads(body)
         return resp, body['extensions']
+
+
+class ExtensionsClientJSON(BaseExtensionsClientJSON):
+    """
+    Volume V1 extensions client.
+    """
