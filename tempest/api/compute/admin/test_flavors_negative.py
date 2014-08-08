@@ -16,6 +16,7 @@
 import uuid
 
 from tempest.api.compute import base
+from tempest.api_schema.request.compute.v2 import flavors
 from tempest.common.utils import data_utils
 from tempest import exceptions
 from tempest import test
@@ -106,4 +107,4 @@ class FlavorCreateNegativeTestJSON(base.BaseV2ComputeAdminTest,
                                    test.NegativeAutoTest):
     _interface = 'json'
     _service = 'compute'
-    _schema_file = 'compute/admin/flavor_create.json'
+    _schema = flavors.flavor_create

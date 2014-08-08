@@ -19,6 +19,8 @@ flavors_details = copy.deepcopy(flavors.common_flavor_details)
 
 flavor_list = copy.deepcopy(flavors.common_flavor_list)
 
+flavor_create = copy.deepcopy(flavors.common_admin_flavor_create)
+
 flavor_list["json-schema"]["properties"] = {
     "minRam": {
         "type": "integer",
