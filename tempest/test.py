@@ -359,7 +359,7 @@ class BaseTestCase(BaseDeps):
 
     @classmethod
     def set_network_resources(self, network=False, router=False, subnet=False,
-                              dhcp=False):
+                              dhcp=False, ip_version=4):
         """Specify which network resources should be created
 
         @param network
@@ -376,7 +376,8 @@ class BaseTestCase(BaseDeps):
                 'network': network,
                 'router': router,
                 'subnet': subnet,
-                'dhcp': dhcp}
+                'dhcp': dhcp,
+                'ip_version': ip_version}
 
     def assertEmpty(self, list, msg=None):
         self.assertTrue(len(list) == 0, msg)
