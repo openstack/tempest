@@ -29,13 +29,15 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
                          'dhcp': False}
 
     def test_large_prefix(self):
+        import netaddr
+
         net = self ._create_network(tenant_id=self.tenant_id,
                                     namestart='net-125')
         for bits in [125, 126]:
             sub = self._create_subnet(network=net, namestart='subnet-125',
-                                      net_bits=bits)
-            start = int(sub.allocation_pools[0]['start'].split('::')[-1], 16)
-            end = int(sub.allocation_pools[0]['end'].split('::')[-1], 16)
-            n_addresses = end - start + 1
+                                      net_max_bits=bits)
+            start = netaddr.IPAddress(sub.allocation_pools[0]['start'])
+            end = netaddr.IPAddress(sub.allocation_pools[0]['end'])
+            n_addresses = end.value - start.value + 1
             self.assertEqual(expected=pow(2, 128 - bits)-3,
                              observed=n_addresses)
