@@ -86,3 +86,23 @@ class TestNodes(base.BaseBaremetalTest):
         core_interfaces = ['power', 'deploy']
         for interface in core_interfaces:
             self.assertIn(interface, body)
+
+    @test.attr(type='smoke')
+    def test_set_node_boot_device(self):
+        body = self.client.set_node_boot_device(self.node['uuid'], 'pxe')
+        # No content
+        self.assertEqual('', body)
+
+    @test.attr(type='smoke')
+    def test_get_node_boot_device(self):
+        body = self.client.get_node_boot_device(self.node['uuid'])
+        self.assertIn('boot_device', body)
+        self.assertIn('persistent', body)
+        self.assertTrue(isinstance(body['boot_device'], six.string_types))
+        self.assertTrue(isinstance(body['persistent'], bool))
+
+    @test.attr(type='smoke')
+    def test_get_node_supported_boot_devices(self):
+        body = self.client.get_node_supported_boot_devices(self.node['uuid'])
+        self.assertIn('supported_boot_devices', body)
+        self.assertTrue(isinstance(body['supported_boot_devices'], list))

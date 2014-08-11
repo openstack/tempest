@@ -264,3 +264,47 @@ class BaremetalClientV1(base.BaremetalClient):
                                                    postf='validate')
 
         return self._show_request('nodes', node_uuid, uri=uri)
+
+    @base.handle_errors
+    def set_node_boot_device(self, node_uuid, boot_device, persistent=False):
+        """
+        Set the boot device of the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+        :param boot_device: The boot device name.
+        :param persistent: Boolean value. True if the boot device will
+                           persist to all future boots, False if not.
+                           Default: False.
+
+        """
+        request = {'boot_device': boot_device, 'persistent': persistent}
+        resp, body = self._put_request('nodes/%s/management/boot_device' %
+                                       node_uuid, request)
+        self.expected_success(204, resp.status)
+        return body
+
+    @base.handle_errors
+    def get_node_boot_device(self, node_uuid):
+        """
+        Get the current boot device of the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+
+        """
+        path = 'nodes/%s/management/boot_device' % node_uuid
+        resp, body = self._list_request(path)
+        self.expected_success(200, resp.status)
+        return body
+
+    @base.handle_errors
+    def get_node_supported_boot_devices(self, node_uuid):
+        """
+        Get the supported boot devices of the specified node.
+
+        :param node_uuid: The unique identifier of the node.
+
+        """
+        path = 'nodes/%s/management/boot_device/supported' % node_uuid
+        resp, body = self._list_request(path)
+        self.expected_success(200, resp.status)
+        return body
