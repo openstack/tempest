@@ -150,7 +150,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         return network
 
     @classmethod
-    def create_subnet(cls, network, gateway=None, cidr=None, mask_bits=None,
+    def create_subnet(cls, network, gateway='', cidr=None, mask_bits=None,
                       **kwargs):
         """Wrapper utility that returns a test subnet."""
         # The cidr and mask_bits depend on the ip version.
@@ -163,14 +163,18 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
             mask_bits = mask_bits or CONF.network.tenant_network_v6_mask_bits
         # Find a cidr that is not in use yet and create a subnet with it
         for subnet_cidr in cidr.subnet(mask_bits):
-            if not gateway:
-                gateway = str(netaddr.IPAddress(subnet_cidr) + 1)
+            if gateway is None:
+                gateway_ip = None
+            elif not gateway:
+                gateway_ip = str(netaddr.IPAddress(subnet_cidr) + 1)
+            else:
+                gateway_ip = gateway
             try:
                 resp, body = cls.client.create_subnet(
                     network_id=network['id'],
                     cidr=str(subnet_cidr),
                     ip_version=cls._ip_version,
-                    gateway_ip=gateway,
+                    gateway_ip=gateway_ip,
                     **kwargs)
                 break
             except exceptions.BadRequest as e:
