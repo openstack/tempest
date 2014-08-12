@@ -834,7 +834,8 @@ class NetworkScenarioTest(OfficialClientTest):
         ports = self._list_ports(tenant_id=tenant_id)
         return len(ports)
 
-    def _create_subnet(self, network, namestart='subnet-smoke-', **kwargs):
+    def _create_subnet(self, network, namestart='subnet-smoke-',
+                       net_max_bits=0, **kwargs):
         """
         Create a subnet for the given network within the cidr block
         configured for tenant networks.
@@ -854,6 +855,8 @@ class NetworkScenarioTest(OfficialClientTest):
         else:
             tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_cidr)
             network_prefix = CONF.network.tenant_network_mask_bits
+        if net_max_bits:
+            network_prefix = net_max_bits
         result = None
         # Repeatedly attempt subnet creation with sequential cidr
         # blocks until an unallocated block is found.
