@@ -85,6 +85,7 @@ class SimpleReadOnlyHeatClientTest(tempest.cli.ClientTestBase):
     def test_heat_help(self):
         self.heat('help')
 
+    @tempest.cli.min_client_version(client='heat', version='0.2.7')
     def test_heat_bash_completion(self):
         self.heat('bash-completion')
 
