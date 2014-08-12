@@ -85,8 +85,11 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                 pass
 
         for stack_identifier in cls.stacks:
-            cls.client.wait_for_stack_status(
-                stack_identifier, 'DELETE_COMPLETE')
+            try:
+                cls.client.wait_for_stack_status(
+                    stack_identifier, 'DELETE_COMPLETE')
+            except exceptions.NotFound:
+                pass
 
     @classmethod
     def _create_keypair(cls, name_start='keypair-heat-'):
