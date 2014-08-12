@@ -450,20 +450,11 @@ class NetworksIpV6TestJSON(NetworksTestJSON):
             self.assertEqual('201', resp['status'])
             network = body['network']
             net_id = network['id']
-            if ra_mode and address_mode:
-                subnet = self.create_subnet(network, gateway='fe80::1',
-                                            ipv6_ra_mode=ra_mode,
-                                            ipv6_address_mode=address_mode)
-            elif ra_mode:
-                subnet = self.create_subnet(network, gateway='fe80::1',
-                                            ipv6_ra_mode=ra_mode)
-            elif address_mode:
-                subnet = self.create_subnet(network, gateway='fe80::1',
-                                            ipv6_address_mode=address_mode)
-            else:
-                subnet = self.create_subnet(network, gateway='fe80::1')
-
-
+            kwargs = {'gateway': 'fe80::1',
+                      'ipv6_ra_mode': ra_mode,
+                      'ipv6_address_mode': address_mode}
+            kwargs = {k: v for k,v in kwargs.items() if v}
+            subnet = self.create_subnet(network, **kwargs)
             # Verifies Subnet GW in IPv6
             self.assertEqual(subnet['gateway_ip'], 'fe80::1')
             self.assertEqual(subnet['ipv6_ra_mode'], ra_mode)
