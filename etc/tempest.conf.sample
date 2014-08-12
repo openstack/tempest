@@ -105,6 +105,17 @@
 #syslog_log_facility=LOG_USER
 
 
+[auth]
+
+#
+# Options defined in tempest.config
+#
+
+# Path to the yaml file that contains the list of credentials
+# to use for running tests (string value)
+#test_accounts_file=etc/accounts.yaml
+
+
 [baremetal]
 
 #

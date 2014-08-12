@@ -29,6 +29,18 @@ def register_opt_group(conf, opt_group, options):
         conf.register_opt(opt, group=opt_group.name)
 
 
+auth_group = cfg.OptGroup(name='auth',
+                          title="Options for authentication and credentials")
+
+
+AuthGroup = [
+    cfg.StrOpt('test_accounts_file',
+               default='etc/accounts.yaml',
+               help="Path to the yaml file that contains the list of "
+                    "credentials to use for running tests"),
+]
+
+
 identity_group = cfg.OptGroup(name='identity',
                               title="Keystone Configuration Options")
 
@@ -1012,6 +1024,7 @@ NegativeGroup = [
 
 
 def register_opts():
+    register_opt_group(cfg.CONF, auth_group, AuthGroup)
     register_opt_group(cfg.CONF, compute_group, ComputeGroup)
     register_opt_group(cfg.CONF, compute_features_group,
                        ComputeFeaturesGroup)
@@ -1060,6 +1073,7 @@ class TempestConfigPrivate(object):
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
     def _set_attrs(self):
+        self.auth = cfg.CONF.auth
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity

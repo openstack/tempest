@@ -1,0 +1,7 @@
+- username: 'user_1'
+  tenant_name: 'test_tenant_1'
+  password: 'test_password'
+
+- username: 'user_2'
+  tenant_name: 'test_tenant_2'
+  password: 'test_password'
