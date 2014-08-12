@@ -886,12 +886,13 @@ class NetworkScenarioTest(OfficialClientTest):
         self.addCleanup(self.delete_wrapper, subnet)
         return subnet
 
-    def _create_port(self, network, namestart='port-quotatest-'):
+    def _create_port(self, network, namestart='port-quotatest-', **kwargs):
         name = data_utils.rand_name(namestart)
         body = dict(
             port=dict(name=name,
                       network_id=network.id,
                       tenant_id=network.tenant_id))
+        body['port'].update(kwargs)
         result = self.network_client.create_port(body=body)
         self.assertIsNotNone(result, 'Unable to allocate port')
         port = net_common.DeletablePort(client=self.network_client,
