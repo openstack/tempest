@@ -373,31 +373,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
             LOG.warn('network with name: %s not found for delete' %
                      network_name)
 
-    def _cleanup_ports(self, network_id):
-        # TODO(mlavalle) This method will be removed once patch
-        # https://review.openstack.org/#/c/46563/ merges in Neutron
-        if not self.ports:
-            if self.tempest_client:
-                resp, resp_body = self.network_admin_client.list_ports()
-            else:
-                resp_body = self.network_admin_client.list_ports()
-            self.ports = resp_body['ports']
-        ports_to_delete = [
-            port
-            for port in self.ports
-            if (port['network_id'] == network_id and
-                port['device_owner'] != 'network:router_interface' and
-                port['device_owner'] != 'network:dhcp')
-        ]
-        for port in ports_to_delete:
-            try:
-                LOG.info('Cleaning up port id %s, name %s' %
-                         (port['id'], port['name']))
-                self.network_admin_client.delete_port(port['id'])
-            except exceptions.NotFound:
-                LOG.warn('Port id: %s, name %s not found for clean-up' %
-                         (port['id'], port['name']))
-
     def _clear_isolated_net_resources(self):
         net_client = self.network_admin_client
         for cred in self.isolated_net_resources:
@@ -418,11 +393,6 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                     LOG.warn('router with name: %s not found for delete' %
                              router['name'])
                 self._clear_isolated_router(router['id'], router['name'])
-            if (not self.network_resources or
-                self.network_resources.get('network')):
-                # TODO(mlavalle) This method call will be removed once patch
-                # https://review.openstack.org/#/c/46563/ merges in Neutron
-                self._cleanup_ports(network['id'])
             if (not self.network_resources or
                 self.network_resources.get('subnet')):
                 self._clear_isolated_subnet(subnet['id'], subnet['name'])
