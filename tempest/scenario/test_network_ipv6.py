@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest.scenario import manager
-#from test_network_basic_ops import TestNetworkBasicOps
+from tempest import test
 
 
 class TestNetworkIPv6(manager.NetworkScenarioTest):
@@ -28,6 +28,7 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
     network_resources = {'network': False, 'router': False, 'subnet': False,
                          'dhcp': False}
 
+    @test.services('network')
     def test_large_prefix(self):
         import netaddr
 
