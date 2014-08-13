@@ -312,7 +312,7 @@ class BulkNetworkOpsTestJSON(base.BaseNetworkTest):
         # Creates 2 networks in one request
         network_names = [data_utils.rand_name('network-'),
                          data_utils.rand_name('network-')]
-        resp, body = self.client.create_bulk_network(2, network_names)
+        resp, body = self.client.create_bulk_network(network_names)
         created_networks = body['networks']
         self.assertEqual('201', resp['status'])
         self.addCleanup(self._delete_networks, created_networks)
