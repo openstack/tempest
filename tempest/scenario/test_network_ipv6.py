@@ -33,9 +33,10 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
         import netaddr
 
         net = self ._create_network(tenant_id=self.tenant_id,
-                                    namestart='net-125')
+                                    namestart='net-125-126')
         for bits in [125, 126]:
-            sub = self._create_subnet(network=net, namestart='subnet-125',
+            sub = self._create_subnet(network=net,
+                                      namestart='subnet-{0}'.format(bits),
                                       net_max_bits=bits)
             start = netaddr.IPAddress(sub.allocation_pools[0]['start'])
             end = netaddr.IPAddress(sub.allocation_pools[0]['end'])
