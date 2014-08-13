@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
+
+import six
+
 
 class AttributeDict(dict):
 
@@ -27,6 +31,7 @@ class AttributeDict(dict):
         return super(AttributeDict, self).__getattribute__(name)
 
 
+@six.add_metaclass(abc.ABCMeta)
 class DeletableResource(AttributeDict):
 
     """
@@ -42,8 +47,9 @@ class DeletableResource(AttributeDict):
         return '<%s id="%s" name="%s">' % (self.__class__.__name__,
                                            self.id, self.name)
 
+    @abc.abstractmethod
     def delete(self):
-        raise NotImplemented()
+        return
 
     def __hash__(self):
         return id(self)
