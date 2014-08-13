@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import functools
+
 import jsonschema
 
 from tempest.openstack.common import log as logging
@@ -39,6 +41,7 @@ def simple_generator(fn):
     """
     Decorator for simple generators that return one value
     """
+    @functools.wraps(fn)
     def wrapped(self, schema):
         result = fn(self, schema)
         if result is not None:
