@@ -37,6 +37,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         cls.set_network_resources()
         super(BaseComputeTest, cls).setUpClass()
+        if getattr(cls, '_interface', None) == 'xml' and cls._api_version == 2:
+            if not CONF.compute_feature_enabled.xml_api_v2:
+                raise cls.skipException('XML API is not enabled')
 
         # TODO(andreaf) WE should care also for the alt_manager here
         # but only once client lazy load in the manager is done
