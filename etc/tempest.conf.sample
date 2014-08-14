@@ -419,6 +419,10 @@
 # password? (boolean value)
 #change_password=false
 
+# Does the test environment support obtaining instance serial
+# console output? (boolean value)
+#console_output=true
+
 # Does the test environment support resizing? (boolean value)
 #resize=false
 
