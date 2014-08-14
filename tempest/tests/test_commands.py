@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 import subprocess
+
+import mock
 
 from tempest.common import commands
 from tempest.tests import base

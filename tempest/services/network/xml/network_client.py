@@ -10,8 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from lxml import etree
 import xml.etree.ElementTree as ET
+
+from lxml import etree
 
 from tempest.common import rest_client
 from tempest.common import xml_utils as common

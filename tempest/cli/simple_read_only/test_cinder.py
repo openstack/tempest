@@ -15,6 +15,7 @@
 
 import logging
 import re
+
 import testtools
 
 from tempest import cli

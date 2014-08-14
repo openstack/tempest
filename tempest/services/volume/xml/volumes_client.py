@@ -15,9 +15,9 @@
 
 import time
 import urllib
+from xml.sax import saxutils
 
 from lxml import etree
-from xml.sax import saxutils
 
 from tempest.common import rest_client
 from tempest.common import xml_utils as common

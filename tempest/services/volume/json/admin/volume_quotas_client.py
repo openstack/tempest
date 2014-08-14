@@ -16,10 +16,9 @@
 
 import urllib
 
-from tempest.openstack.common import jsonutils
-
 from tempest.common import rest_client
 from tempest import config
+from tempest.openstack.common import jsonutils
 
 CONF = config.CONF
 

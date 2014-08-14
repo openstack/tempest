@@ -19,14 +19,16 @@ import copy
 import hashlib
 import httplib
 import json
-import OpenSSL
 import posixpath
 import re
-from six import moves
 import socket
 import StringIO
 import struct
 import urlparse
+
+
+import OpenSSL
+from six import moves
 
 from tempest import exceptions as exc
 from tempest.openstack.common import log as logging

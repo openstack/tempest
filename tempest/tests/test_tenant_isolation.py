@@ -335,9 +335,11 @@ class TestTenantIsolation(base.TestCase):
         remove_router_interface_mock = self.patch(
             'tempest.services.network.json.network_client.NetworkClientJSON.'
             'remove_router_interface_with_subnet_id')
+        return_values = ({'status': 200}, {'ports': []})
         port_list_mock = mock.patch.object(iso_creds.network_admin_client,
-                                           'list_ports', return_value=(
-                                           {'status': 200}, {'ports': []}))
+                                           'list_ports',
+                                           return_value=return_values)
+
         port_list_mock.start()
         iso_creds.clear_isolated_creds()
         # Verify remove router interface calls

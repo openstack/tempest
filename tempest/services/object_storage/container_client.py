@@ -15,10 +15,10 @@
 
 import json
 import urllib
+from xml.etree import ElementTree as etree
 
 from tempest.common import rest_client
 from tempest import config
-from xml.etree import ElementTree as etree
 
 CONF = config.CONF
 

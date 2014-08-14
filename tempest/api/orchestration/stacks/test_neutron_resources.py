@@ -12,6 +12,7 @@
 
 
 import logging
+
 import netaddr
 
 from tempest.api.orchestration import base
