@@ -173,6 +173,17 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
                                'router-show', 'agent-update', 'help'))
         self.assertFalse(wanted_commands - commands)
 
+    @test.attr(type='smoke')
+    @test.requires_ext(extension='l3_agent_scheduler', service='network')
+    def test_neutron_l3_agent_list_hosting_router(self):
+        router_list = self.parser.listing(self.neutron('router-list'))
+        for router in router_list:
+            l3_list = self.parser.listing(self.neutron
+                                          ('l3-agent-list-hosting-router',
+                                           params=router['id']))
+            self.assertTableStruct(l3_list, ['id', 'host',
+                                             'admin_state_up', 'alive'])
+
     # Optional arguments:
 
     @test.attr(type='smoke')
