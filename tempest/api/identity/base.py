@@ -18,9 +18,12 @@ from tempest import auth
 from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
+from tempest.openstack.common import log as logging
 import tempest.test
 
 CONF = config.CONF
+LOG = logging.getLogger(__name__)
 
 
 class BaseIdentityAdminTest(tempest.test.BaseTestCase):
@@ -195,19 +198,36 @@ class DataGenerator(object):
                 description=self.test_description)
             self.domains.append(self.domain)
 
+        @staticmethod
+        def _try_wrapper(func, item, **kwargs):
+            try:
+                if kwargs:
+                    func(item['id'], kwargs)
+                else:
+                    func(item['id'])
+            except exceptions.NotFound:
+                pass
+            except Exception:
+                LOG.exception("Unexpected exception occurred in %s deletion."
+                              " But ignored here." % item['id'])
+
         def teardown_all(self):
+            # NOTE(masayukig): v3 client doesn't have v2 method.
+            # (e.g. delete_tenant) So we need to check resources existence
+            # before using client methods.
             for user in self.users:
-                self.client.delete_user(user['id'])
+                self._try_wrapper(self.client.delete_user, user)
             for tenant in self.tenants:
-                self.client.delete_tenant(tenant['id'])
+                self._try_wrapper(self.client.delete_tenant, tenant)
             for role in self.roles:
-                self.client.delete_role(role['id'])
+                self._try_wrapper(self.client.delete_role, role)
             for v3_user in self.v3_users:
-                self.client.delete_user(v3_user['id'])
+                self._try_wrapper(self.client.delete_user, v3_user)
             for v3_project in self.projects:
-                self.client.delete_project(v3_project['id'])
+                self._try_wrapper(self.client.delete_project, v3_project)
             for v3_role in self.v3_roles:
-                self.client.delete_role(v3_role['id'])
+                self._try_wrapper(self.client.delete_role, v3_role)
             for domain in self.domains:
-                self.client.update_domain(domain['id'], enabled=False)
-                self.client.delete_domain(domain['id'])
+                self._try_wrapper(self.client.update_domain, domain,
+                                  enabled=False)
+                self._try_wrapper(self.client.delete_domain, domain)
