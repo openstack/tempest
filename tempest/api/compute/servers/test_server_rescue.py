@@ -54,7 +54,6 @@ class ServerRescueTestJSON(base.BaseV2ComputeTest):
 
         # Server for positive tests
         resp, server = cls.create_test_server(wait_until='BUILD')
-        resp, resc_server = cls.create_test_server(wait_until='ACTIVE')
         cls.server_id = server['id']
         cls.password = server['adminPass']
         cls.servers_client.wait_for_server_status(cls.server_id, 'ACTIVE')
