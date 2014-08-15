@@ -209,8 +209,9 @@ class RestClient(object):
             pattern = """Unexpected http success status code {0},
                          The expected status code is {1}"""
             if ((not isinstance(expected_code, list) and
-                (read_code != expected_code)) or (isinstance(expected_code,
-                list) and (read_code not in expected_code))):
+                 (read_code != expected_code)) or
+                (isinstance(expected_code, list) and
+                 (read_code not in expected_code))):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 

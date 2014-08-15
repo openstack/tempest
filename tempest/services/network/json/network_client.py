@@ -110,7 +110,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
 
     def add_router_interface_with_subnet_id(self, router_id, subnet_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
-              router_id)
+                                                      router_id)
         update_body = {"subnet_id": subnet_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
@@ -119,7 +119,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
 
     def add_router_interface_with_port_id(self, router_id, port_id):
         uri = '%s/routers/%s/add_router_interface' % (self.uri_prefix,
-              router_id)
+                                                      router_id)
         update_body = {"port_id": port_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
@@ -128,7 +128,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
 
     def remove_router_interface_with_subnet_id(self, router_id, subnet_id):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
-              router_id)
+                                                         router_id)
         update_body = {"subnet_id": subnet_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
@@ -137,7 +137,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
 
     def remove_router_interface_with_port_id(self, router_id, port_id):
         uri = '%s/routers/%s/remove_router_interface' % (self.uri_prefix,
-              router_id)
+                                                         router_id)
         update_body = {"port_id": port_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
