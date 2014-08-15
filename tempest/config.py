@@ -1079,6 +1079,10 @@ class TempestConfigPrivate(object):
 
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
+    def __getattr__(self, attr):
+        # Handles config options from the default group
+        return getattr(cfg.CONF, attr)
+
     def _set_attrs(self):
         self.auth = cfg.CONF.auth
         self.compute = cfg.CONF.compute
