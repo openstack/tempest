@@ -355,6 +355,22 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
         return secgroup
 
+    def rebuild_server(self, server, client=None, image=None,
+                       preserve_ephemeral=False, wait=True,
+                       rebuild_kwargs=None):
+        if client is None:
+            client = self.compute_client
+        if image is None:
+            image = CONF.compute.image_ref
+        rebuild_kwargs = rebuild_kwargs or {}
+
+        LOG.debug("Rebuilding server (name: %s, image: %s, preserve eph: %s)",
+                  server.name, image, preserve_ephemeral)
+        server.rebuild(image, preserve_ephemeral=preserve_ephemeral,
+                       **rebuild_kwargs)
+        if wait:
+            self.status_timeout(client.servers, server.id, 'ACTIVE')
+
     def create_server(self, client=None, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,
                       create_kwargs={}):
