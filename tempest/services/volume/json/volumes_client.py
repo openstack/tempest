@@ -202,6 +202,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         """Reset the Specified Volume's Status."""
         post_body = json.dumps({'os-reset_status': {"status": status}})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def volume_begin_detaching(self, volume_id):
@@ -226,6 +227,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'transfer': post_body})
         resp, body = self.post('os-volume-transfer', post_body)
         body = json.loads(body)
+        self.expected_success(202, resp.status)
         return resp, body['transfer']
 
     def get_volume_transfer(self, transfer_id):
@@ -233,6 +235,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         url = "os-volume-transfer/%s" % str(transfer_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['transfer']
 
     def list_volume_transfers(self, params=None):
@@ -242,11 +245,15 @@ class BaseVolumesClientJSON(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['transfers']
 
     def delete_volume_transfer(self, transfer_id):
         """Delete a volume transfer."""
-        return self.delete("os-volume-transfer/%s" % str(transfer_id))
+        resp, body = self.delete("os-volume-transfer/%s" % str(transfer_id))
+        body = json.loads(body)
+        self.expected_success(202, resp.status)
+        return resp, body
 
     def accept_volume_transfer(self, transfer_id, transfer_auth_key):
         """Accept a volume transfer."""
@@ -257,6 +264,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'accept': post_body})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.expected_success(202, resp.status)
         return resp, body['transfer']
 
     def update_volume_readonly(self, volume_id, readonly):
@@ -274,6 +282,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         """Force Delete Volume."""
         post_body = json.dumps({'os-force_delete': {}})
         resp, body = self.post('volumes/%s/action' % volume_id, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def create_volume_metadata(self, volume_id, metadata):

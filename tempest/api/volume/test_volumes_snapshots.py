@@ -47,11 +47,11 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         and validates result.
         """
         if with_detail:
-            resp, fetched_snap_list = \
+            _, fetched_snap_list = \
                 self.snapshots_client.\
                 list_snapshots_with_detail(params=params)
         else:
-            resp, fetched_snap_list = \
+            _, fetched_snap_list = \
                 self.snapshots_client.list_snapshots(params=params)
 
         self.assertEqual(200, resp.status)
@@ -74,9 +74,8 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         self.addCleanup(self.servers_client.delete_server, server['id'])
         self.servers_client.wait_for_server_status(server['id'], 'ACTIVE')
         mountpoint = '/dev/%s' % CONF.compute.volume_device_name
-        resp, body = self.volumes_client.attach_volume(
+        _, body = self.volumes_client.attach_volume(
             self.volume_origin['id'], server['id'], mountpoint)
-        self.assertEqual(202, resp.status)
         self.volumes_client.wait_for_volume_status(self.volume_origin['id'],
                                                    'in-use')
         self.addCleanup(self._detach, self.volume_origin['id'])
@@ -85,7 +84,6 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                                         force=True)
         # Delete the snapshot
         self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.assertEqual(202, resp.status)
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
         self.snapshots.remove(snapshot)
 
@@ -97,40 +95,35 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
                                         display_name=s_name)
 
         # Get the snap and check for some of its details
-        resp, snap_get = self.snapshots_client.get_snapshot(snapshot['id'])
-        self.assertEqual(200, resp.status)
+        _, snap_get = self.snapshots_client.get_snapshot(snapshot['id'])
         self.assertEqual(self.volume_origin['id'],
                          snap_get['volume_id'],
                          "Referred volume origin mismatch")
 
         # Compare also with the output from the list action
         tracking_data = (snapshot['id'], snapshot['display_name'])
-        resp, snaps_list = self.snapshots_client.list_snapshots()
-        self.assertEqual(200, resp.status)
+        _, snaps_list = self.snapshots_client.list_snapshots()
         snaps_data = [(f['id'], f['display_name']) for f in snaps_list]
         self.assertIn(tracking_data, snaps_data)
 
         # Updates snapshot with new values
         new_s_name = data_utils.rand_name('new-snap')
         new_desc = 'This is the new description of snapshot.'
-        resp, update_snapshot = \
+        _, update_snapshot = \
             self.snapshots_client.update_snapshot(snapshot['id'],
                                                   display_name=new_s_name,
                                                   display_description=new_desc)
         # Assert response body for update_snapshot method
-        self.assertEqual(200, resp.status)
         self.assertEqual(new_s_name, update_snapshot['display_name'])
         self.assertEqual(new_desc, update_snapshot['display_description'])
         # Assert response body for get_snapshot method
-        resp, updated_snapshot = \
+        _, updated_snapshot = \
             self.snapshots_client.get_snapshot(snapshot['id'])
-        self.assertEqual(200, resp.status)
         self.assertEqual(new_s_name, updated_snapshot['display_name'])
         self.assertEqual(new_desc, updated_snapshot['display_description'])
 
         # Delete the snapshot
         self.snapshots_client.delete_snapshot(snapshot['id'])
-        self.assertEqual(200, resp.status)
         self.snapshots_client.wait_for_resource_deletion(snapshot['id'])
         self.snapshots.remove(snapshot)
 
@@ -180,10 +173,9 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         # create a snap based volume, check resp code and deletes it
         snapshot = self.create_snapshot(self.volume_origin['id'])
         # NOTE(gfidente): size is required also when passing snapshot_id
-        resp, volume = self.volumes_client.create_volume(
+        _, volume = self.volumes_client.create_volume(
             size=1,
             snapshot_id=snapshot['id'])
-        self.assertEqual(200, resp.status)
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
         self.volumes_client.delete_volume(volume['id'])
         self.volumes_client.wait_for_resource_deletion(volume['id'])

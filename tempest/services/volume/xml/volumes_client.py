@@ -279,6 +279,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def volume_begin_detaching(self, volume_id):
@@ -396,6 +397,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def _metadata_body(self, meta):
