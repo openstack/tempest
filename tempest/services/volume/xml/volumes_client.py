@@ -114,6 +114,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
+        self.expected_success(200, resp.status)
         return resp, volumes
 
     def list_volumes_with_detail(self, params=None):
@@ -128,6 +129,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume(vol) for vol in list(body)]
+        self.expected_success(200, resp.status)
         return resp, volumes
 
     def get_volume(self, volume_id):
@@ -135,6 +137,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         url = "volumes/%s" % str(volume_id)
         resp, body = self.get(url)
         body = self._parse_volume(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def create_volume(self, size=None, **kwargs):
@@ -189,7 +192,8 @@ class BaseVolumesClientXML(rest_client.RestClient):
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
-        return self.delete("volumes/%s" % str(volume_id))
+        resp, body = self.delete("volumes/%s" % str(volume_id))
+        self.expected_success(200, resp.status)
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""

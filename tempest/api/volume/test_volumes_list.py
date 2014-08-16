@@ -67,7 +67,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         cls.metadata = {'Type': 'work'}
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
-            resp, volume = cls.client.get_volume(volume['id'])
+            _, volume = cls.client.get_volume(volume['id'])
             cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
 
@@ -75,7 +75,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     def tearDownClass(cls):
         # Delete the created volumes
         for volid in cls.volume_id_list:
-            resp, _ = cls.client.delete_volume(volid)
+            cls.client.delete_volume(volid)
             cls.client.wait_for_resource_deletion(volid)
         super(VolumesV2ListTestJSON, cls).tearDownClass()
 
@@ -85,12 +85,11 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         and validates result.
         """
         if with_detail:
-            resp, fetched_vol_list = \
-                self.client.list_volumes_with_detail(params=params)
+            _, fetched_vol_list = \
+            self.client.list_volumes_with_detail(params=params)
         else:
-            resp, fetched_vol_list = self.client.list_volumes(params=params)
+            _, fetched_vol_list = self.client.list_volumes(params=params)
 
-        self.assertEqual(200, resp.status)
         # Validating params of fetched volumes
         # In v2, only list detail view includes items in params.
         # In v1, list view and list detail view are same. So the
@@ -113,8 +112,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     def test_volume_list(self):
         # Get a list of Volumes
         # Fetch all volumes
-        resp, fetched_list = self.client.list_volumes()
-        self.assertEqual(200, resp.status)
+        _, fetched_list = self.client.list_volumes()
         self.assertVolumesIn(fetched_list, self.volume_list,
                              fields=self.VOLUME_FIELDS)
 
@@ -122,16 +120,14 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     def test_volume_list_with_details(self):
         # Get a list of Volumes with details
         # Fetch all Volumes
-        resp, fetched_list = self.client.list_volumes_with_detail()
-        self.assertEqual(200, resp.status)
+        _, fetched_list = self.client.list_volumes_with_detail()
         self.assertVolumesIn(fetched_list, self.volume_list)
 
     @test.attr(type='gate')
     def test_volume_list_by_name(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {self.name: volume[self.name]}
-        resp, fetched_vol = self.client.list_volumes(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_vol = self.client.list_volumes(params)
         self.assertEqual(1, len(fetched_vol), str(fetched_vol))
         self.assertEqual(fetched_vol[0][self.name],
                          volume[self.name])
@@ -140,8 +136,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     def test_volume_list_details_by_name(self):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         params = {self.name: volume[self.name]}
-        resp, fetched_vol = self.client.list_volumes_with_detail(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_vol = self.client.list_volumes_with_detail(params)
         self.assertEqual(1, len(fetched_vol), str(fetched_vol))
         self.assertEqual(fetched_vol[0][self.name],
                          volume[self.name])
@@ -149,8 +144,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     @test.attr(type='gate')
     def test_volumes_list_by_status(self):
         params = {'status': 'available'}
-        resp, fetched_list = self.client.list_volumes(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_list = self.client.list_volumes(params)
         self._list_by_param_value_and_assert(params)
         self.assertVolumesIn(fetched_list, self.volume_list,
                              fields=self.VOLUME_FIELDS)
@@ -158,8 +152,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     @test.attr(type='gate')
     def test_volumes_list_details_by_status(self):
         params = {'status': 'available'}
-        resp, fetched_list = self.client.list_volumes_with_detail(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_list = self.client.list_volumes_with_detail(params)
         for volume in fetched_list:
             self.assertEqual('available', volume['status'])
         self.assertVolumesIn(fetched_list, self.volume_list)
@@ -169,8 +162,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
         params = {'availability_zone': zone}
-        resp, fetched_list = self.client.list_volumes(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_list = self.client.list_volumes(params)
         self._list_by_param_value_and_assert(params)
         self.assertVolumesIn(fetched_list, self.volume_list,
                              fields=self.VOLUME_FIELDS)
@@ -180,8 +172,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         volume = self.volume_list[data_utils.rand_int_id(0, 2)]
         zone = volume['availability_zone']
         params = {'availability_zone': zone}
-        resp, fetched_list = self.client.list_volumes_with_detail(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_list = self.client.list_volumes_with_detail(params)
         for volume in fetched_list:
             self.assertEqual(zone, volume['availability_zone'])
         self.assertVolumesIn(fetched_list, self.volume_list)

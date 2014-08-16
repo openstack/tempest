@@ -48,6 +48,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['volumes']
 
     def list_volumes_with_detail(self, params=None):
@@ -58,6 +59,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['volumes']
 
     def get_volume(self, volume_id):
@@ -65,6 +67,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         url = "volumes/%s" % str(volume_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['volume']
 
     def create_volume(self, size=None, **kwargs):
@@ -99,7 +102,8 @@ class BaseVolumesClientJSON(rest_client.RestClient):
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
-        return self.delete("volumes/%s" % str(volume_id))
+        resp, body = self.delete("volumes/%s" % str(volume_id))
+        self.expected_success(200, resp.status)
 
     def upload_volume(self, volume_id, image_name, disk_format):
         """Uploads a volume in Glance."""
