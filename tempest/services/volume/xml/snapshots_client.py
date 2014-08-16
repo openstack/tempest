@@ -188,6 +188,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         resp, body = self.post('snapshots/%s/metadata' % snapshot_id,
                                str(common.Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def get_snapshot_metadata(self, snapshot_id):
@@ -195,6 +196,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.get(url)
         body = self._parse_key_value(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def update_snapshot_metadata(self, snapshot_id, metadata):
@@ -203,6 +205,7 @@ class SnapshotsClientXML(rest_client.RestClient):
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.put(url, str(common.Document(put_body)))
         body = self._parse_key_value(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def update_snapshot_metadata_item(self, snapshot_id, id, meta_item):
@@ -213,12 +216,16 @@ class SnapshotsClientXML(rest_client.RestClient):
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
         resp, body = self.put(url, str(common.Document(put_body)))
         body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def delete_snapshot_metadata_item(self, snapshot_id, id):
         """Delete metadata item for the snapshot."""
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
-        return self.delete(url)
+        resp, body = self.delete(url)
+        body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
+        return resp, body
 
     def force_delete_snapshot(self, snapshot_id):
         """Force Delete Snapshot."""

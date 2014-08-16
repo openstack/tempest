@@ -399,6 +399,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post('volumes/%s/metadata' % volume_id,
                                str(common.Document(post_body)))
         body = self._parse_key_value(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def get_volume_metadata(self, volume_id):
@@ -406,6 +407,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         url = "volumes/%s/metadata" % str(volume_id)
         resp, body = self.get(url)
         body = self._parse_key_value(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def update_volume_metadata(self, volume_id, metadata):
@@ -414,6 +416,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         url = "volumes/%s/metadata" % str(volume_id)
         resp, body = self.put(url, str(common.Document(put_body)))
         body = self._parse_key_value(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def update_volume_metadata_item(self, volume_id, id, meta_item):
@@ -423,13 +426,17 @@ class BaseVolumesClientXML(rest_client.RestClient):
             put_body.append(common.Text(v))
         url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
         resp, body = self.put(url, str(common.Document(put_body)))
+        self.expected_success(200, resp.status)
         body = common.xml_to_json(etree.fromstring(body))
         return resp, body
 
     def delete_volume_metadata_item(self, volume_id, id):
         """Delete metadata item for the volume."""
         url = "volumes/%s/metadata/%s" % (str(volume_id), str(id))
-        return self.delete(url)
+        resp, body = self.delete(url)
+        self.expected_success(200, resp.status)
+        body = common.xml_to_json(etree.fromstring(body))
+        return resp, body
 
 
 class VolumesClientXML(BaseVolumesClientXML):
