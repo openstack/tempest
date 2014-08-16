@@ -54,7 +54,6 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
             _, fetched_snap_list = \
                 self.snapshots_client.list_snapshots(params=params)
 
-        self.assertEqual(200, resp.status)
         # Validating params of fetched snapshots
         for snap in fetched_snap_list:
             for key in params:
@@ -170,7 +169,7 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
     @test.attr(type='gate')
     def test_volume_from_snapshot(self):
         # Create a temporary snap using wrapper method from base, then
-        # create a snap based volume, check resp code and deletes it
+        # create a snap based volume and deletes it
         snapshot = self.create_snapshot(self.volume_origin['id'])
         # NOTE(gfidente): size is required also when passing snapshot_id
         _, volume = self.volumes_client.create_volume(

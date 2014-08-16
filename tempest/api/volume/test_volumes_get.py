@@ -32,7 +32,6 @@ class VolumesV2GetTest(base.BaseVolumeTest):
 
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
-        cls.create_resp = cls.special_fields['create_resp']
 
     def _delete_volume(self, volume_id):
         self.client.delete_volume(volume_id)

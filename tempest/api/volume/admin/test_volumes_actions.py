@@ -77,7 +77,7 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
     @test.attr(type='gate')
     def test_volume_reset_status(self):
         # test volume reset status : available->error->available
-        resp, body = self._reset_volume_status(self.volume['id'], 'error')
+        _, body = self._reset_volume_status(self.volume['id'], 'error')
         _, volume_get = self.admin_volume_client.get_volume(
             self.volume['id'])
         self.assertEqual('error', volume_get['status'])
