@@ -63,8 +63,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 cls.os.volume_availability_zone_client)
             # Special fields and resp code for cinder v1
             cls.special_fields = {'name_field': 'display_name',
-                                  'descrip_field': 'display_description',
-                                  'create_resp': 200}
+                                  'descrip_field': 'display_description'}
 
         elif cls._api_version == 2:
             if not CONF.volume_feature_enabled.api_v2:
@@ -76,8 +75,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 cls.os.volume_v2_availability_zone_client)
             # Special fields and resp code for cinder v2
             cls.special_fields = {'name_field': 'name',
-                                  'descrip_field': 'description',
-                                  'create_resp': 202}
+                                  'descrip_field': 'description'}
 
         else:
             msg = ("Invalid Cinder API version (%s)" % cls._api_version)
@@ -96,11 +94,9 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         name = data_utils.rand_name('Volume')
 
         name_field = cls.special_fields['name_field']
-        expect_status = cls.special_fields['create_resp']
 
         kwargs[name_field] = name
-        resp, volume = cls.volumes_client.create_volume(size, **kwargs)
-        assert expect_status == resp.status
+        _, volume = cls.volumes_client.create_volume(size, **kwargs)
 
         cls.volumes.append(volume)
         cls.volumes_client.wait_for_volume_status(volume['id'], 'available')

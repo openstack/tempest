@@ -30,6 +30,7 @@ class VolumesV2ClientXML(volumes_client.BaseVolumesClientXML):
         super(VolumesV2ClientXML, self).__init__(auth_provider)
 
         self.api_version = "v2"
+        self.create_resp = 200
 
     def _parse_volume(self, body):
         vol = dict((attr, body.get(attr)) for attr in body.keys())
