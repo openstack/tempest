@@ -61,11 +61,11 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
             extra_specs = {spec_key_with_prefix: backend_name_key}
         else:
             extra_specs = {spec_key_without_prefix: backend_name_key}
-        resp, self.type = self.client.create_volume_type(
+        _, self.type = self.client.create_volume_type(
             type_name, extra_specs=extra_specs)
         self.volume_type_id_list.append(self.type['id'])
 
-        resp, self.volume = self.volume_client.create_volume(
+        _, self.volume = self.volume_client.create_volume(
             size=1, display_name=vol_name, volume_type=type_name)
         self.volume_client.wait_for_volume_status(
             self.volume['id'], 'available')
@@ -130,8 +130,7 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
         # the multi backend feature has been enabled
         # if multi-backend is enabled: os-vol-attr:host should be like:
         # host@backend_name
-        resp, volume = self.volume_client.get_volume(volume_id)
-        self.assertEqual(200, resp.status)
+        _, volume = self.volume_client.get_volume(volume_id)
 
         volume1_host = volume['os-vol-host-attr:host']
         msg = ("multi-backend reporting incorrect values for volume %s" %
@@ -142,10 +141,10 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
         # this test checks that the two volumes created at setUp don't
         # belong to the same backend (if they are, than the
         # volume backend distinction is not working properly)
-        resp, volume = self.volume_client.get_volume(volume1_id)
+        _, volume = self.volume_client.get_volume(volume1_id)
         volume1_host = volume['os-vol-host-attr:host']
 
-        resp, volume = self.volume_client.get_volume(volume2_id)
+        _, volume = self.volume_client.get_volume(volume2_id)
         volume2_host = volume['os-vol-host-attr:host']
 
         msg = ("volumes %s and %s were created in the same backend" %

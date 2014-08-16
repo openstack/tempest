@@ -22,8 +22,7 @@ class VolumeHostsAdminTestsJSON(base.BaseVolumeV1AdminTest):
 
     @test.attr(type='gate')
     def test_list_hosts(self):
-        resp, hosts = self.hosts_client.list_hosts()
-        self.assertEqual(200, resp.status)
+        _, hosts = self.hosts_client.list_hosts()
         self.assertTrue(len(hosts) >= 2, "No. of hosts are < 2,"
                         "response of list hosts is: % s" % hosts)
 

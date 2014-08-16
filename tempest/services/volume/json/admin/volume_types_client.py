@@ -63,6 +63,7 @@ class VolumeTypesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['volume_types']
 
     def get_volume_type(self, volume_id):
@@ -70,6 +71,7 @@ class VolumeTypesClientJSON(rest_client.RestClient):
         url = "types/%s" % str(volume_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['volume_type']
 
     def create_volume_type(self, name, **kwargs):
@@ -87,11 +89,13 @@ class VolumeTypesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'volume_type': post_body})
         resp, body = self.post('types', post_body)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['volume_type']
 
     def delete_volume_type(self, volume_id):
         """Deletes the Specified Volume_type."""
-        return self.delete("types/%s" % str(volume_id))
+        resp, body = self.delete("types/%s" % str(volume_id))
+        self.expected_success(202, resp.status)
 
     def list_volume_types_extra_specs(self, vol_type_id, params=None):
         """List all the volume_types extra specs created."""
@@ -101,6 +105,7 @@ class VolumeTypesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['extra_specs']
 
     def get_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
@@ -109,6 +114,7 @@ class VolumeTypesClientJSON(rest_client.RestClient):
                                            str(extra_spec_name))
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def create_volume_type_extra_specs(self, vol_type_id, extra_spec):
@@ -121,12 +127,14 @@ class VolumeTypesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'extra_specs': extra_spec})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['extra_specs']
 
     def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
         """Deletes the Specified Volume_type extra spec."""
-        return self.delete("types/%s/extra_specs/%s" % ((str(vol_id)),
-                                                        str(extra_spec_name)))
+        resp, body = self.delete("types/%s/extra_specs/%s" % (
+            (str(vol_id)), str(extra_spec_name)))
+        self.expected_success(202, resp.status)
 
     def update_volume_type_extra_specs(self, vol_type_id, extra_spec_name,
                                        extra_spec):
@@ -142,6 +150,7 @@ class VolumeTypesClientJSON(rest_client.RestClient):
         put_body = json.dumps(extra_spec)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def get_encryption_type(self, vol_type_id):
@@ -152,6 +161,7 @@ class VolumeTypesClientJSON(rest_client.RestClient):
         url = "/types/%s/encryption" % str(vol_type_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body
 
     def create_encryption_type(self, vol_type_id, **kwargs):
@@ -170,8 +180,10 @@ class VolumeTypesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'encryption': post_body})
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['encryption']
 
     def delete_encryption_type(self, vol_type_id):
         """Delete the encryption type for the specified volume-type."""
-        return self.delete("/types/%s/encryption/provider" % str(vol_type_id))
+        resp, body = self.delete("/types/%s/encryption/provider" % str(vol_type_id))
+        self.expected_success(202, resp.status)
