@@ -86,7 +86,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         """
         if with_detail:
             _, fetched_vol_list = \
-            self.client.list_volumes_with_detail(params=params)
+                self.client.list_volumes_with_detail(params=params)
         else:
             _, fetched_vol_list = self.client.list_volumes(params=params)
 

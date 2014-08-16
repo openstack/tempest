@@ -106,7 +106,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
     def create_snapshot(cls, volume_id=1, **kwargs):
         """Wrapper utility that returns a test snapshot."""
         _, snapshot = cls.snapshots_client.create_snapshot(volume_id,
-                                                              **kwargs)
+                                                           **kwargs)
         cls.snapshots.append(snapshot)
         cls.snapshots_client.wait_for_snapshot_status(snapshot['id'],
                                                       'available')

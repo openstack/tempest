@@ -74,7 +74,7 @@ class VolumesV2TransfersTest(base.BaseVolumeTest):
 
         # Accept a volume transfer by alt_tenant
         _, body = self.alt_client.accept_volume_transfer(transfer_id,
-                                                            auth_key)
+                                                         auth_key)
         self.alt_client.wait_for_volume_status(volume['id'], 'available')
 
     def test_create_list_delete_volume_transfer(self):

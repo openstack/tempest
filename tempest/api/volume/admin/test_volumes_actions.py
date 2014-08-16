@@ -60,7 +60,7 @@ class VolumesActionsTest(base.BaseVolumeV1AdminTest):
         # Create a temp volume for force delete tests
         vol_name = utils.rand_name('Volume')
         _, temp_volume = self.client.create_volume(size=1,
-                                                      display_name=vol_name)
+                                                   display_name=vol_name)
         self.client.wait_for_volume_status(temp_volume['id'], 'available')
 
         return temp_volume

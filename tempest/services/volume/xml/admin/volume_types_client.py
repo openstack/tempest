@@ -114,7 +114,7 @@ class VolumeTypesClientXML(rest_client.RestClient):
 
     def delete_volume_type(self, type_id):
         """Deletes the Specified Volume_type."""
-        resp, body = return self.delete("types/%s" % str(type_id))
+        resp, body = self.delete("types/%s" % str(type_id))
         body = common.xml_to_json(etree.fromstring(body))
         self.expected_success(202, resp.status)
         return resp, body

@@ -153,7 +153,7 @@ class SnapshotsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'os-update_snapshot_status': post_body})
         url = 'snapshots/%s/action' % str(snapshot_id)
         resp, body = self.post(url, post_body)
-        self.assertEqual(202, resp.status) 
+        self.assertEqual(202, resp.status)
         return resp, body
 
     def create_snapshot_metadata(self, snapshot_id, metadata):
@@ -162,7 +162,7 @@ class SnapshotsClientJSON(rest_client.RestClient):
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.post(url, put_body)
         body = json.loads(body)
-        self.assertEqual(200, resp.status) 
+        self.assertEqual(200, resp.status)
         return resp, body['metadata']
 
     def get_snapshot_metadata(self, snapshot_id):
@@ -170,7 +170,7 @@ class SnapshotsClientJSON(rest_client.RestClient):
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.get(url)
         body = json.loads(body)
-        self.assertEqual(200, resp.status) 
+        self.assertEqual(200, resp.status)
         return resp, body['metadata']
 
     def update_snapshot_metadata(self, snapshot_id, metadata):
@@ -179,7 +179,7 @@ class SnapshotsClientJSON(rest_client.RestClient):
         url = "snapshots/%s/metadata" % str(snapshot_id)
         resp, body = self.put(url, put_body)
         body = json.loads(body)
-        self.assertEqual(200, resp.status) 
+        self.assertEqual(200, resp.status)
         return resp, body['metadata']
 
     def update_snapshot_metadata_item(self, snapshot_id, id, meta_item):
@@ -188,19 +188,19 @@ class SnapshotsClientJSON(rest_client.RestClient):
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
         resp, body = self.put(url, put_body)
         body = json.loads(body)
-        self.assertEqual(200, resp.status) 
+        self.assertEqual(200, resp.status)
         return resp, body['meta']
 
     def delete_snapshot_metadata_item(self, snapshot_id, id):
         """Delete metadata item for the snapshot."""
         url = "snapshots/%s/metadata/%s" % (str(snapshot_id), str(id))
         resp, body = self.delete(url)
-        self.assertEqual(200, resp.status) 
+        self.assertEqual(200, resp.status)
         return resp, body
 
     def force_delete_snapshot(self, snapshot_id):
         """Force Delete Snapshot."""
         post_body = json.dumps({'os-force_delete': {}})
         resp, body = self.post('snapshots/%s/action' % snapshot_id, post_body)
-        self.assertEqual(202, resp.status) 
+        self.assertEqual(202, resp.status)
         return resp, body

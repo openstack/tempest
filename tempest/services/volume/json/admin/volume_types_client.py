@@ -185,5 +185,6 @@ class VolumeTypesClientJSON(rest_client.RestClient):
 
     def delete_encryption_type(self, vol_type_id):
         """Delete the encryption type for the specified volume-type."""
-        resp, body = self.delete("/types/%s/encryption/provider" % str(vol_type_id))
+        resp, body = self.delete(
+            "/types/%s/encryption/provider" % str(vol_type_id))
         self.expected_success(202, resp.status)
