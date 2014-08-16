@@ -75,6 +75,7 @@ class VolumeTypesClientXML(rest_client.RestClient):
         if body is not None:
             volume_types += [self._parse_volume_type(vol)
                              for vol in list(body)]
+        self.expected_success(200, resp.status)
         return resp, volume_types
 
     def get_volume_type(self, type_id):
@@ -82,6 +83,7 @@ class VolumeTypesClientXML(rest_client.RestClient):
         url = "types/%s" % str(type_id)
         resp, body = self.get(url)
         body = etree.fromstring(body)
+        self.expected_success(200, resp.status)
         return resp, self._parse_volume_type(body)
 
     def create_volume_type(self, name, **kwargs):
@@ -107,11 +109,15 @@ class VolumeTypesClientXML(rest_client.RestClient):
 
         resp, body = self.post('types', str(common.Document(vol_type)))
         body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def delete_volume_type(self, type_id):
         """Deletes the Specified Volume_type."""
-        return self.delete("types/%s" % str(type_id))
+        resp, body = self.delete("types/%s" % str(type_id))
+        body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
+        return resp, body
 
     def list_volume_types_extra_specs(self, vol_type_id, params=None):
         """List all the volume_types extra specs created."""
@@ -126,6 +132,7 @@ class VolumeTypesClientXML(rest_client.RestClient):
         if body is not None:
             extra_specs += [self._parse_volume_type_extra_specs(spec)
                             for spec in list(body)]
+        self.expected_success(200, resp.status)
         return resp, extra_specs
 
     def get_volume_type_extra_specs(self, vol_type_id, extra_spec_name):
@@ -134,6 +141,7 @@ class VolumeTypesClientXML(rest_client.RestClient):
                                            str(extra_spec_name))
         resp, body = self.get(url)
         body = etree.fromstring(body)
+        self.expected_success(200, resp.status)
         return resp, self._parse_volume_type_extra_specs(body)
 
     def create_volume_type_extra_specs(self, vol_type_id, extra_spec):
@@ -158,12 +166,14 @@ class VolumeTypesClientXML(rest_client.RestClient):
 
         resp, body = self.post(url, str(common.Document(extra_specs)))
         body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def delete_volume_type_extra_specs(self, vol_id, extra_spec_name):
         """Deletes the Specified Volume_type extra spec."""
-        return self.delete("types/%s/extra_specs/%s" % ((str(vol_id)),
-                                                        str(extra_spec_name)))
+        resp, body = self.delete("types/%s/extra_specs/%s" % (
+            (str(vol_id)), str(extra_spec_name)))
+        self.expected_success(202, resp.status)
 
     def update_volume_type_extra_specs(self, vol_type_id, extra_spec_name,
                                        extra_spec):
@@ -187,6 +197,7 @@ class VolumeTypesClientXML(rest_client.RestClient):
 
         resp, body = self.put(url, str(common.Document(extra_specs)))
         body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def is_resource_deleted(self, id):

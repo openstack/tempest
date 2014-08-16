@@ -28,21 +28,19 @@ class VolumesServicesTestJSON(base.BaseVolumeV1AdminTest):
     def setUpClass(cls):
         super(VolumesServicesTestJSON, cls).setUpClass()
         cls.client = cls.os_adm.volume_services_client
-        resp, cls.services = cls.client.list_services()
+        _, cls.services = cls.client.list_services()
         cls.host_name = cls.services[0]['host']
         cls.binary_name = cls.services[0]['binary']
 
     @test.attr(type='gate')
     def test_list_services(self):
-        resp, services = self.client.list_services()
-        self.assertEqual(200, resp.status)
+        _, services = self.client.list_services()
         self.assertNotEqual(0, len(services))
 
     @test.attr(type='gate')
     def test_get_service_by_service_binary_name(self):
         params = {'binary': self.binary_name}
-        resp, services = self.client.list_services(params)
-        self.assertEqual(200, resp.status)
+        _, services = self.client.list_services(params)
         self.assertNotEqual(0, len(services))
         for service in services:
             self.assertEqual(self.binary_name, service['binary'])
@@ -53,7 +51,7 @@ class VolumesServicesTestJSON(base.BaseVolumeV1AdminTest):
                             service['host'] == self.host_name]
         params = {'host': self.host_name}
 
-        resp, services = self.client.list_services(params)
+        _, services = self.client.list_services(params)
 
         # we could have a periodic job checkin between the 2 service
         # lookups, so only compare binary lists.
@@ -67,8 +65,7 @@ class VolumesServicesTestJSON(base.BaseVolumeV1AdminTest):
     def test_get_service_by_service_and_host_name(self):
         params = {'host': self.host_name, 'binary': self.binary_name}
 
-        resp, services = self.client.list_services(params)
-        self.assertEqual(200, resp.status)
+        _, services = self.client.list_services(params)
         self.assertEqual(1, len(services))
         self.assertEqual(self.host_name, services[0]['host'])
         self.assertEqual(self.binary_name, services[0]['binary'])

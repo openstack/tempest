@@ -225,44 +225,38 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
     @test.attr(type=['negative', 'gate'])
     def test_reserve_volume_with_negative_volume_status(self):
         # Mark volume as reserved.
-        resp, body = self.client.reserve_volume(self.volume['id'])
-        self.assertEqual(202, resp.status)
+        _, body = self.client.reserve_volume(self.volume['id'])
         # Mark volume which is marked as reserved before
         self.assertRaises(exceptions.BadRequest,
                           self.client.reserve_volume,
                           self.volume['id'])
         # Unmark volume as reserved.
-        resp, body = self.client.unreserve_volume(self.volume['id'])
-        self.assertEqual(202, resp.status)
+        _, body = self.client.unreserve_volume(self.volume['id'])
 
     @test.attr(type=['negative', 'gate'])
     def test_list_volumes_with_nonexistent_name(self):
         v_name = data_utils.rand_name('Volume-')
         params = {self.name_field: v_name}
-        resp, fetched_volume = self.client.list_volumes(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_volume = self.client.list_volumes(params)
         self.assertEqual(0, len(fetched_volume))
 
     @test.attr(type=['negative', 'gate'])
     def test_list_volumes_detail_with_nonexistent_name(self):
         v_name = data_utils.rand_name('Volume-')
         params = {self.name_field: v_name}
-        resp, fetched_volume = self.client.list_volumes_with_detail(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_volume = self.client.list_volumes_with_detail(params)
         self.assertEqual(0, len(fetched_volume))
 
     @test.attr(type=['negative', 'gate'])
     def test_list_volumes_with_invalid_status(self):
         params = {'status': 'null'}
-        resp, fetched_volume = self.client.list_volumes(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_volume = self.client.list_volumes(params)
         self.assertEqual(0, len(fetched_volume))
 
     @test.attr(type=['negative', 'gate'])
     def test_list_volumes_detail_with_invalid_status(self):
         params = {'status': 'null'}
-        resp, fetched_volume = self.client.list_volumes_with_detail(params)
-        self.assertEqual(200, resp.status)
+        _, fetched_volume = self.client.list_volumes_with_detail(params)
         self.assertEqual(0, len(fetched_volume))
 
 

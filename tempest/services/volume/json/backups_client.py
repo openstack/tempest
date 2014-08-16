@@ -47,6 +47,7 @@ class BackupsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'backup': post_body})
         resp, body = self.post('backups', post_body)
         body = json.loads(body)
+        self.expected_success(202, resp.status)
         return resp, body['backup']
 
     def restore_backup(self, backup_id, volume_id=None):
@@ -55,11 +56,13 @@ class BackupsClientJSON(rest_client.RestClient):
         post_body = json.dumps({'restore': post_body})
         resp, body = self.post('backups/%s/restore' % (backup_id), post_body)
         body = json.loads(body)
+        self.expected_success(202, resp.status)
         return resp, body['restore']
 
     def delete_backup(self, backup_id):
         """Delete a backup of volume."""
         resp, body = self.delete('backups/%s' % (str(backup_id)))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def get_backup(self, backup_id):
@@ -67,6 +70,7 @@ class BackupsClientJSON(rest_client.RestClient):
         url = "backups/%s" % str(backup_id)
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['backup']
 
     def list_backups_with_detail(self):
@@ -74,6 +78,7 @@ class BackupsClientJSON(rest_client.RestClient):
         url = "backups/detail"
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['backups']
 
     def wait_for_backup_status(self, backup_id, status):

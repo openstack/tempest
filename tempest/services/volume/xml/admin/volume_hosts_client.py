@@ -69,5 +69,6 @@ class VolumeHostsClientXML(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = self._parse_array(etree.fromstring(body))
         return resp, body

@@ -35,4 +35,5 @@ class VolumesServicesClientJSON(rest_client.RestClient):
 
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['services']

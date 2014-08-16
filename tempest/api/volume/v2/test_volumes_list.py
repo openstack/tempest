@@ -42,7 +42,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
         cls.metadata = {'Type': 'work'}
         for i in range(3):
             volume = cls.create_volume(metadata=cls.metadata)
-            resp, volume = cls.client.get_volume(volume['id'])
+            _, volume = cls.client.get_volume(volume['id'])
             cls.volume_list.append(volume)
             cls.volume_id_list.append(volume['id'])
 
@@ -50,7 +50,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
     def tearDownClass(cls):
         # Delete the created volumes
         for volid in cls.volume_id_list:
-            resp, _ = cls.client.delete_volume(volid)
+            cls.client.delete_volume(volid)
             cls.client.wait_for_resource_deletion(volid)
         super(VolumesV2ListTestJSON, cls).tearDownClass()
 
@@ -66,8 +66,7 @@ class VolumesV2ListTestJSON(base.BaseVolumeTest):
                       'sort_dir': sort_dir,
                       'sort_key': sort_key
                       }
-            resp, fetched_volume = self.client.list_volumes_with_detail(params)
-            self.assertEqual(200, resp.status)
+            _, fetched_volume = self.client.list_volumes_with_detail(params)
             self.assertEqual(limit, len(fetched_volume),
                              "The count of volumes is %s, expected:%s " %
                              (len(fetched_volume), limit))
