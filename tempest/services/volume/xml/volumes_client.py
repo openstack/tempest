@@ -43,6 +43,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.compute.build_interval
         self.build_timeout = CONF.compute.build_timeout
+        self.create_resp = 200
 
     def _translate_attributes_to_json(self, volume):
         volume_host_attr = '{' + VOLUME_HOST_NS + '}host'
@@ -179,6 +180,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
 
         resp, body = self.post('volumes', str(common.Document(volume)))
         body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(self.create_resp, resp.status)
         return resp, body
 
     def update_volume(self, volume_id, **kwargs):
@@ -188,12 +190,13 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.put('volumes/%s' % volume_id,
                               str(common.Document(put_body)))
         body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
         resp, body = self.delete("volumes/%s" % str(volume_id))
-        self.expected_success(200, resp.status)
+        self.expected_success(202, resp.status)
 
     def wait_for_volume_status(self, volume_id, status):
         """Waits for a Volume to reach a given status."""
@@ -232,6 +235,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def detach_volume(self, volume_id):
@@ -241,6 +245,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def upload_volume(self, volume_id, image_name, disk_format):
@@ -251,6 +256,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         url = 'volumes/%s/action' % str(volume_id)
         resp, body = self.post(url, str(common.Document(post_body)))
         volume = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, volume
 
     def extend_volume(self, volume_id, extend_size):
@@ -261,6 +267,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def reset_volume_status(self, volume_id, status):
@@ -299,6 +306,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def unreserve_volume(self, volume_id):
@@ -308,6 +316,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def create_volume_transfer(self, vol_id, display_name=None):
@@ -319,6 +328,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post('os-volume-transfer',
                                str(common.Document(post_body)))
         volume = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, volume
 
     def get_volume_transfer(self, transfer_id):
@@ -326,6 +336,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         url = "os-volume-transfer/%s" % str(transfer_id)
         resp, body = self.get(url)
         volume = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, volume
 
     def list_volume_transfers(self, params=None):
@@ -339,6 +350,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         volumes = []
         if body is not None:
             volumes += [self._parse_volume_transfer(vol) for vol in list(body)]
+        self.expected_success(200, resp.status)
         return resp, volumes
 
     def _parse_volume_transfer(self, body):
@@ -352,7 +364,10 @@ class BaseVolumesClientXML(rest_client.RestClient):
 
     def delete_volume_transfer(self, transfer_id):
         """Delete a volume transfer."""
-        return self.delete("os-volume-transfer/%s" % str(transfer_id))
+        resp, body = self.delete("os-volume-transfer/%s" % str(transfer_id))
+        body = etree.fromstring(body)
+        self.expected_success(202, resp.status)
+        return resp, body
 
     def accept_volume_transfer(self, transfer_id, transfer_auth_key):
         """Accept a volume transfer."""
@@ -360,6 +375,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         url = 'os-volume-transfer/%s/accept' % transfer_id
         resp, body = self.post(url, str(common.Document(post_body)))
         volume = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, volume
 
     def update_volume_readonly(self, volume_id, readonly):
@@ -370,6 +386,7 @@ class BaseVolumesClientXML(rest_client.RestClient):
         resp, body = self.post(url, str(common.Document(post_body)))
         if body:
             body = common.xml_to_json(etree.fromstring(body))
+        self.expected_success(202, resp.status)
         return resp, body
 
     def force_delete_volume(self, volume_id):

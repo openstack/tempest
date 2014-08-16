@@ -35,6 +35,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         self.service = CONF.volume.catalog_type
         self.build_interval = CONF.volume.build_interval
         self.build_timeout = CONF.volume.build_timeout
+        self.create_resp = 200
 
     def get_attachment_from_volume(self, volume):
         """Return the element 'attachment' from input volumes."""
@@ -91,6 +92,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'volume': post_body})
         resp, body = self.post('volumes', post_body)
         body = json.loads(body)
+        self.expected_success(self.create_resp, resp.status)
         return resp, body['volume']
 
     def update_volume(self, volume_id, **kwargs):
@@ -98,12 +100,13 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         put_body = json.dumps({'volume': kwargs})
         resp, body = self.put('volumes/%s' % volume_id, put_body)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['volume']
 
     def delete_volume(self, volume_id):
         """Deletes the Specified Volume."""
         resp, body = self.delete("volumes/%s" % str(volume_id))
-        self.expected_success(200, resp.status)
+        self.expected_success(202, resp.status)
 
     def upload_volume(self, volume_id, image_name, disk_format):
         """Uploads a volume in Glance."""
@@ -115,6 +118,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
         body = json.loads(body)
+        self.expected_success(202, resp.status)
         return resp, body['os-volume_upload_image']
 
     def attach_volume(self, volume_id, instance_uuid, mountpoint):
@@ -126,6 +130,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'os-attach': post_body})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def detach_volume(self, volume_id):
@@ -134,6 +139,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'os-detach': post_body})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def reserve_volume(self, volume_id):
@@ -142,6 +148,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'os-reserve': post_body})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def unreserve_volume(self, volume_id):
@@ -150,6 +157,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'os-unreserve': post_body})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def wait_for_volume_status(self, volume_id, status):
@@ -187,6 +195,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'os-extend': post_body})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def reset_volume_status(self, volume_id, status):
@@ -258,6 +267,7 @@ class BaseVolumesClientJSON(rest_client.RestClient):
         post_body = json.dumps({'os-update_readonly_flag': post_body})
         url = 'volumes/%s/action' % (volume_id)
         resp, body = self.post(url, post_body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def force_delete_volume(self, volume_id):
