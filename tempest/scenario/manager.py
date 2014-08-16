@@ -355,19 +355,22 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return image['id']
 
     def glance_image_create(self):
-        qcow2_img_path = (CONF.scenario.img_dir + "/" +
-                          CONF.scenario.qcow2_img_file)
+        img_path = CONF.scenario.img_dir + "/" + CONF.scenario.img_file
         aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
         ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
         ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
-        LOG.debug("paths: img: %s, ami: %s, ari: %s, aki: %s"
-                  % (qcow2_img_path, ami_img_path, ari_img_path, aki_img_path))
+        img_container_format = CONF.scenario.img_container_format
+        img_disk_format = CONF.scenario.img_disk_format
+        LOG.debug("paths: img: %s, container_fomat: %s, disk_format: %s, "
+                  "ami: %s, ari: %s, aki: %s" %
+                  (img_path, img_container_format, img_disk_format,
+                   ami_img_path, ari_img_path, aki_img_path))
         try:
             self.image = self._image_create('scenario-img',
-                                            'bare',
-                                            qcow2_img_path,
+                                            img_container_format,
+                                            img_path,
                                             properties={'disk_format':
-                                                        'qcow2'})
+                                                        img_disk_format})
         except IOError:
             LOG.debug("A qcow2 image was not found. Try to get a uec image.")
             kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
@@ -872,19 +875,22 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return image.id
 
     def glance_image_create(self):
-        qcow2_img_path = (CONF.scenario.img_dir + "/" +
-                          CONF.scenario.qcow2_img_file)
+        img_path = CONF.scenario.img_dir + "/" + CONF.scenario.img_file
         aki_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.aki_img_file
         ari_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ari_img_file
         ami_img_path = CONF.scenario.img_dir + "/" + CONF.scenario.ami_img_file
-        LOG.debug("paths: img: %s, ami: %s, ari: %s, aki: %s"
-                  % (qcow2_img_path, ami_img_path, ari_img_path, aki_img_path))
+        img_container_format = CONF.scenario.img_container_format
+        img_disk_format = CONF.scenario.img_disk_format
+        LOG.debug("paths: img: %s, container_fomat: %s, disk_format: %s, "
+                  "ami: %s, ari: %s, aki: %s" %
+                  (img_path, img_container_format, img_disk_format,
+                   ami_img_path, ari_img_path, aki_img_path))
         try:
             self.image = self._image_create('scenario-img',
-                                            'bare',
-                                            qcow2_img_path,
+                                            img_container_format,
+                                            img_path,
                                             properties={'disk_format':
-                                                        'qcow2'})
+                                                        img_disk_format})
         except IOError:
             LOG.debug("A qcow2 image was not found. Try to get a uec image.")
             kernel = self._image_create('scenario-aki', 'aki', aki_img_path)
