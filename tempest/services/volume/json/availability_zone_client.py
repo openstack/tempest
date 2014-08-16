@@ -31,6 +31,7 @@ class BaseVolumeAvailabilityZoneClientJSON(rest_client.RestClient):
     def get_availability_zone_list(self):
         resp, body = self.get('os-availability-zone')
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['availabilityZoneInfo']
 
 

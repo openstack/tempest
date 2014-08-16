@@ -79,8 +79,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
 
     def _cleanup_volume(self, volume_id):
         """Cleanup the volume direct with cinder."""
-        resp = self.volumes_client.delete_volume(volume_id)
-        self.assertEqual(202, resp[0].status)
+        self.volumes_client.delete_volume(volume_id)
         self.volumes_client.wait_for_resource_deletion(volume_id)
 
     @test.attr(type='gate')

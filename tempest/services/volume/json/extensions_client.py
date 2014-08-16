@@ -31,6 +31,7 @@ class BaseExtensionsClientJSON(rest_client.RestClient):
         url = 'extensions'
         resp, body = self.get(url)
         body = json.loads(body)
+        self.expected_success(200, resp.status)
         return resp, body['extensions']
 
 

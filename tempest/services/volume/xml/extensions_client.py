@@ -39,6 +39,7 @@ class BaseExtensionsClientXML(rest_client.RestClient):
         url = 'extensions'
         resp, body = self.get(url)
         body = self._parse_array(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
 

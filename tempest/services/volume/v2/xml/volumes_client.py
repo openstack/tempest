@@ -30,6 +30,7 @@ class VolumesV2ClientXML(volumes_client.BaseVolumesClientXML):
         super(VolumesV2ClientXML, self).__init__(auth_provider)
 
         self.api_version = "v2"
+        self.create_resp = 202
 
     def _parse_volume(self, body):
         vol = dict((attr, body.get(attr)) for attr in body.keys())
@@ -61,6 +62,7 @@ class VolumesV2ClientXML(volumes_client.BaseVolumesClientXML):
             volumes += [self._parse_volume(vol) for vol in list(body)]
         for v in volumes:
             v = self._check_if_bootable(v)
+        self.expected_success(200, resp.status)
         return resp, volumes
 
     def get_volume(self, volume_id):
@@ -69,4 +71,5 @@ class VolumesV2ClientXML(volumes_client.BaseVolumesClientXML):
         resp, body = self.get(url)
         body = self._parse_volume(etree.fromstring(body))
         body = self._check_if_bootable(body)
+        self.expected_success(200, resp.status)
         return resp, body

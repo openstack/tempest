@@ -32,11 +32,9 @@ class VolumesV2GetTest(base.BaseVolumeTest):
 
         cls.name_field = cls.special_fields['name_field']
         cls.descrip_field = cls.special_fields['descrip_field']
-        cls.create_resp = cls.special_fields['create_resp']
 
     def _delete_volume(self, volume_id):
-        resp, _ = self.client.delete_volume(volume_id)
-        self.assertEqual(202, resp.status)
+        self.client.delete_volume(volume_id)
         self.client.wait_for_resource_deletion(volume_id)
 
     def _is_true(self, val):
@@ -56,8 +54,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         # Create a volume
         kwargs[self.name_field] = v_name
         kwargs['metadata'] = metadata
-        resp, volume = self.client.create_volume(**kwargs)
-        self.assertEqual(self.create_resp, resp.status)
+        _, volume = self.client.create_volume(**kwargs)
         self.assertIn('id', volume)
         self.addCleanup(self._delete_volume, volume['id'])
         self.client.wait_for_volume_status(volume['id'], 'available')
@@ -68,8 +65,7 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         self.assertTrue(volume['id'] is not None,
                         "Field volume id is empty or not found.")
         # Get Volume information
-        resp, fetched_volume = self.client.get_volume(volume['id'])
-        self.assertEqual(200, resp.status)
+        _, fetched_volume = self.client.get_volume(volume['id'])
         self.assertEqual(v_name,
                          fetched_volume[self.name_field],
                          'The fetched Volume name is different '
@@ -94,21 +90,18 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         # Update Volume
         # Test volume update when display_name is same with original value
         params = {self.name_field: v_name}
-        resp, update_volume = self.client.update_volume(volume['id'], **params)
-        self.assertEqual(200, resp.status)
+        _, update_volume = self.client.update_volume(volume['id'], **params)
         # Test volume update when display_name is new
         new_v_name = data_utils.rand_name('new-Volume')
         new_desc = 'This is the new description of volume'
         params = {self.name_field: new_v_name,
                   self.descrip_field: new_desc}
-        resp, update_volume = self.client.update_volume(volume['id'], **params)
+        _, update_volume = self.client.update_volume(volume['id'], **params)
         # Assert response body for update_volume method
-        self.assertEqual(200, resp.status)
         self.assertEqual(new_v_name, update_volume[self.name_field])
         self.assertEqual(new_desc, update_volume[self.descrip_field])
         # Assert response body for get_volume method
-        resp, updated_volume = self.client.get_volume(volume['id'])
-        self.assertEqual(200, resp.status)
+        _, updated_volume = self.client.get_volume(volume['id'])
         self.assertEqual(volume['id'], updated_volume['id'])
         self.assertEqual(new_v_name, updated_volume[self.name_field])
         self.assertEqual(new_desc, updated_volume[self.descrip_field])
@@ -123,17 +116,15 @@ class VolumesV2GetTest(base.BaseVolumeTest):
         new_v_desc = data_utils.rand_name('@#$%^* description')
         params = {self.descrip_field: new_v_desc,
                   'availability_zone': volume['availability_zone']}
-        resp, new_volume = self.client.create_volume(size=1, **params)
-        self.assertEqual(self.create_resp, resp.status)
+        _, new_volume = self.client.create_volume(size=1, **params)
         self.assertIn('id', new_volume)
         self.addCleanup(self._delete_volume, new_volume['id'])
         self.client.wait_for_volume_status(new_volume['id'], 'available')
 
         params = {self.name_field: volume[self.name_field],
                   self.descrip_field: volume[self.descrip_field]}
-        resp, update_volume = self.client.update_volume(new_volume['id'],
-                                                        **params)
-        self.assertEqual(200, resp.status)
+        _, update_volume = self.client.update_volume(new_volume['id'],
+                                                     **params)
 
         # NOTE(jdg): Revert back to strict true/false checking
         # after fix for bug #1227837 merges

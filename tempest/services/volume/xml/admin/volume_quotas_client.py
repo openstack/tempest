@@ -48,6 +48,7 @@ class VolumeQuotasClientXML(volume_quotas_client.VolumeQuotasClientJSON):
         """List the quota set for a tenant."""
 
         resp, body = self.get_quota_set(tenant_id, params={'usage': True})
+        self.expected_success(200, resp.status)
         return resp, self._format_quota(body)
 
     def update_quota_set(self, tenant_id, gigabytes=None, volumes=None,
@@ -68,8 +69,10 @@ class VolumeQuotasClientXML(volume_quotas_client.VolumeQuotasClientJSON):
         resp, body = self.put('os-quota-sets/%s' % tenant_id,
                               str(xml.Document(element)))
         body = xml.xml_to_json(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, self._format_quota(body)
 
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set."""
-        return self.delete('os-quota-sets/%s' % tenant_id)
+        resp, body = self.delete('os-quota-sets/%s' % tenant_id)
+        self.expected_success(200, resp.status)
