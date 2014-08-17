@@ -76,9 +76,9 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
         self.assertEqual(self.volume, volume)
 
     def nova_volume_attach(self):
-        # TODO(andreaf) Device should be here CONF.compute.volume_device_name
+        volume_device_path = '/dev/' + CONF.compute.volume_device_name
         _, volume_attachment = self.servers_client.attach_volume(
-            self.server['id'], self.volume['id'], '/dev/vdb')
+            self.server['id'], self.volume['id'], volume_device_path)
         volume = volume_attachment['volumeAttachment']
         self.assertEqual(self.volume['id'], volume['id'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'in-use')
@@ -113,7 +113,7 @@ class TestMinimumBasicScenario(manager.ScenarioTest):
     def check_partitions(self):
         # NOTE(andreaf) The device name may be different on different guest OS
         partitions = self.linux_client.get_partitions()
-        self.assertEqual(1, partitions.count('vdb'))
+        self.assertEqual(1, partitions.count(CONF.compute.volume_device_name))
 
     def nova_volume_detach(self):
         self.servers_client.detach_volume(self.server['id'], self.volume['id'])
