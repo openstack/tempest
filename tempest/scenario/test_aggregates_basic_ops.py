@@ -23,7 +23,7 @@ from tempest import test
 LOG = logging.getLogger(__name__)
 
 
-class TestAggregatesBasicOps(manager.OfficialClientTest):
+class TestAggregatesBasicOps(manager.ScenarioTest):
     """
     Creates an aggregate within an availability zone
     Adds a host to the aggregate
@@ -33,74 +33,67 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
     Deletes aggregate
     """
     @classmethod
+    def setUpClass(cls):
+        super(TestAggregatesBasicOps, cls).setUpClass()
+        cls.aggregates_client = cls.manager.aggregates_client
+        cls.hosts_client = cls.manager.hosts_client
+
+    @classmethod
     def credentials(cls):
         return cls.admin_credentials()
 
     def _create_aggregate(self, **kwargs):
-        aggregate = self.compute_client.aggregates.create(**kwargs)
+        _, aggregate = self.aggregates_client.create_aggregate(**kwargs)
+        self.addCleanup(self._delete_aggregate, aggregate)
         aggregate_name = kwargs['name']
         availability_zone = kwargs['availability_zone']
-        self.assertEqual(aggregate.name, aggregate_name)
-        self.assertEqual(aggregate.availability_zone, availability_zone)
-        self.addCleanup(self._delete_aggregate, aggregate)
-        LOG.debug("Aggregate %s created." % (aggregate.name))
+        self.assertEqual(aggregate['name'], aggregate_name)
+        self.assertEqual(aggregate['availability_zone'], availability_zone)
         return aggregate
 
     def _delete_aggregate(self, aggregate):
-        self.compute_client.aggregates.delete(aggregate.id)
-        LOG.debug("Aggregate %s deleted. " % (aggregate.name))
+        self.aggregates_client.delete_aggregate(aggregate['id'])
 
     def _get_host_name(self):
-        hosts = self.compute_client.hosts.list()
+        _, hosts = self.hosts_client.list_hosts()
         self.assertTrue(len(hosts) >= 1)
-        computes = [x for x in hosts if x.service == 'compute']
-        return computes[0].host_name
+        computes = [x for x in hosts if x['service'] == 'compute']
+        return computes[0]['host_name']
 
-    def _add_host(self, aggregate_name, host):
-        aggregate = self.compute_client.aggregates.add_host(aggregate_name,
-                                                            host)
-        self.addCleanup(self._remove_host, aggregate, host)
-        self.assertIn(host, aggregate.hosts)
-        LOG.debug("Host %s added to Aggregate %s." % (host, aggregate.name))
+    def _add_host(self, aggregate_id, host):
+        _, aggregate = self.aggregates_client.add_host(aggregate_id, host)
+        self.addCleanup(self._remove_host, aggregate['id'], host)
+        self.assertIn(host, aggregate['hosts'])
 
-    def _remove_host(self, aggregate_name, host):
-        aggregate = self.compute_client.aggregates.remove_host(aggregate_name,
-                                                               host)
-        self.assertNotIn(host, aggregate.hosts)
-        LOG.debug("Host %s removed to Aggregate %s." % (host, aggregate.name))
+    def _remove_host(self, aggregate_id, host):
+        _, aggregate = self.aggregates_client.remove_host(aggregate_id, host)
+        self.assertNotIn(host, aggregate['hosts'])
 
     def _check_aggregate_details(self, aggregate, aggregate_name, azone,
                                  hosts, metadata):
-        aggregate = self.compute_client.aggregates.get(aggregate.id)
-        self.assertEqual(aggregate_name, aggregate.name)
-        self.assertEqual(azone, aggregate.availability_zone)
-        self.assertEqual(aggregate.hosts, hosts)
+        _, aggregate = self.aggregates_client.get_aggregate(aggregate['id'])
+        self.assertEqual(aggregate_name, aggregate['name'])
+        self.assertEqual(azone, aggregate['availability_zone'])
+        self.assertEqual(hosts, aggregate['hosts'])
         for meta_key in metadata.keys():
-            self.assertIn(meta_key, aggregate.metadata)
-            self.assertEqual(metadata[meta_key], aggregate.metadata[meta_key])
-        LOG.debug("Aggregate %s details match." % aggregate.name)
+            self.assertIn(meta_key, aggregate['metadata'])
+            self.assertEqual(metadata[meta_key],
+                             aggregate['metadata'][meta_key])
 
     def _set_aggregate_metadata(self, aggregate, meta):
-        aggregate = self.compute_client.aggregates.set_metadata(aggregate.id,
-                                                                meta)
+        _, aggregate = self.aggregates_client.set_metadata(aggregate['id'],
+                                                           meta)
 
         for key, value in meta.items():
-            self.assertEqual(meta[key], aggregate.metadata[key])
-        LOG.debug("Aggregate %s metadata updated successfully." %
-                  aggregate.name)
+            self.assertEqual(meta[key], aggregate['metadata'][key])
 
     def _update_aggregate(self, aggregate, aggregate_name,
                           availability_zone):
-        values = {}
-        if aggregate_name:
-            values.update({'name': aggregate_name})
-        if availability_zone:
-            values.update({'availability_zone': availability_zone})
-        if values.keys():
-            aggregate = self.compute_client.aggregates.update(aggregate.id,
-                                                              values)
-            for key, values in values.items():
-                self.assertEqual(getattr(aggregate, key), values)
+        _, aggregate = self.aggregates_client.update_aggregate(
+            aggregate['id'], name=aggregate_name,
+            availability_zone=availability_zone)
+        self.assertEqual(aggregate['name'], aggregate_name)
+        self.assertEqual(aggregate['availability_zone'], availability_zone)
         return aggregate
 
     @test.services('compute')
@@ -115,16 +108,17 @@ class TestAggregatesBasicOps(manager.OfficialClientTest):
         self._set_aggregate_metadata(aggregate, metadata)
 
         host = self._get_host_name()
-        self._add_host(aggregate, host)
+        self._add_host(aggregate['id'], host)
         self._check_aggregate_details(aggregate, aggregate_name, az, [host],
                                       metadata)
 
         aggregate_name = data_utils.rand_name('renamed-aggregate-scenario')
-        aggregate = self._update_aggregate(aggregate, aggregate_name, None)
+        # Updating the name alone. The az must be specified again otherwise
+        # the tempest client would send None in the put body
+        aggregate = self._update_aggregate(aggregate, aggregate_name, az)
 
-        additional_metadata = {'foo': 'bar'}
-        self._set_aggregate_metadata(aggregate, additional_metadata)
+        new_metadata = {'foo': 'bar'}
+        self._set_aggregate_metadata(aggregate, new_metadata)
 
-        metadata.update(additional_metadata)
-        self._check_aggregate_details(aggregate, aggregate.name, az, [host],
-                                      metadata)
+        self._check_aggregate_details(aggregate, aggregate['name'], az,
+                                      [host], new_metadata)
