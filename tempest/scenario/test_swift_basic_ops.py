@@ -25,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestSwiftBasicOps(manager.OfficialClientTest):
+class TestSwiftBasicOps(manager.ScenarioTest):
     """
     Test swift with the follow operations:
      * get swift stat.
@@ -46,34 +46,37 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
             skip_msg = ("%s skipped as swift is not available" %
                         cls.__name__)
             raise cls.skipException(skip_msg)
+        # Clients for Swift
+        cls.account_client = cls.manager.account_client
+        cls.container_client = cls.manager.container_client
+        cls.object_client = cls.manager.object_client
 
     def _get_swift_stat(self):
         """get swift status for our user account."""
-        self.object_storage_client.get_account()
+        self.account_client.list_account_containers()
         LOG.debug('Swift status information obtained successfully')
 
     def _create_container(self, container_name=None):
         name = container_name or data_utils.rand_name(
             'swift-scenario-container')
-        self.object_storage_client.put_container(name)
+        self.container_client.create_container(name)
         # look for the container to assure it is created
         self._list_and_check_container_objects(name)
         LOG.debug('Container %s created' % (name))
         return name
 
     def _delete_container(self, container_name):
-        self.object_storage_client.delete_container(container_name)
+        self.container_client.delete_container(container_name)
         LOG.debug('Container %s deleted' % (container_name))
 
     def _upload_object_to_container(self, container_name, obj_name=None):
         obj_name = obj_name or data_utils.rand_name('swift-scenario-object')
-        self.object_storage_client.put_object(container_name, obj_name,
-                                              data_utils.rand_name('obj_data'),
-                                              content_type='text/plain')
+        self.object_client.create_object(container_name, obj_name,
+                                         data_utils.arbitrary_string())
         return obj_name
 
     def _delete_object(self, container_name, filename):
-        self.object_storage_client.delete_object(container_name, filename)
+        self.object_client.delete_object(container_name, filename)
         self._list_and_check_container_objects(container_name,
                                                not_present_obj=[filename])
 
@@ -83,10 +86,8 @@ class TestSwiftBasicOps(manager.OfficialClientTest):
         List objects for a given container and assert which are present and
         which are not.
         """
-        meta, response = self.object_storage_client.get_container(
+        _, object_list = self.container_client.list_container_contents(
             container_name)
-        # create a list with file name only
-        object_list = [obj['name'] for obj in response]
         if present_obj:
             for obj in present_obj:
                 self.assertIn(obj, object_list)
