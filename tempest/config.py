@@ -911,9 +911,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('trove',
                 default=False,
                 help="Whether or not Trove is expected to be available"),
-    cfg.BoolOpt('marconi',
+    cfg.BoolOpt('zaqar',
                 default=False,
-                help="Whether or not Marconi is expected to be available"),
+                help="Whether or not Zaqar is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",

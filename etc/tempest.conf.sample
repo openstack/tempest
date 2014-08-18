@@ -999,9 +999,9 @@
 # value)
 #trove=false
 
-# Whether or not Marconi is expected to be available (boolean
+# Whether or not Zaqar is expected to be available (boolean
 # value)
-#marconi=false
+#zaqar=false
 
 
 [stress]
