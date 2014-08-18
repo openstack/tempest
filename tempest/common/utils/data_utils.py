@@ -14,6 +14,7 @@
 #    under the License.
 
 import itertools
+import netaddr
 import random
 import uuid
 
@@ -79,3 +80,22 @@ def random_bytes(size=1024):
     """
     return ''.join([chr(random.randint(0, 255))
                     for i in range(size)])
+
+
+def get_ipv6_addr_by_EUI64(cidr, mac):
+    # Check if the prefix is IPv4 address
+    is_ipv4 = netaddr.valid_ipv4(cidr)
+    if is_ipv4:
+        msg = "Unable to generate IP address by EUI64 for IPv4 prefix"
+        raise TypeError(msg)
+    try:
+        eui64 = int(netaddr.EUI(mac).eui64())
+        prefix = netaddr.IPNetwork(cidr)
+        return netaddr.IPAddress(prefix.first + eui64 ^ (1 << 57))
+    except (ValueError, netaddr.AddrFormatError):
+        raise TypeError('Bad prefix or mac format for generating IPv6 '
+                          'address by EUI-64: %(prefix)s, %(mac)s:')
+                        % {'prefix': cidr, 'mac': mac}
+    except TypeError:
+        raise TypeError('Bad prefix type for generate IPv6 address by '
+                          'EUI-64: %s') % cidr
