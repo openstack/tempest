@@ -156,6 +156,20 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         self._list_by_param_values_and_assert(params)
 
     @test.attr(type='gate')
+    def test_snapshots_list_with_detail(self):
+        # Create a snapshot
+        display_name = data_utils.rand_name('snap')
+        snapshot = self.create_snapshot(self.volume_origin['id'],
+                                        display_name=display_name)
+
+        # Compare also with the output from the list action
+        tracking_data = (snapshot['id'], snapshot['display_name'])
+        resp, snaps_list = self.snapshots_client.list_snapshots_with_detail()
+        self.assertEqual(200, resp.status)
+        snaps_data = [(f['id'], f['display_name']) for f in snaps_list]
+        self.assertIn(tracking_data, snaps_data)
+
+    @test.attr(type='gate')
     def test_snapshots_list_details_with_params(self):
         """list snapshot details with params."""
         # Create a snapshot
@@ -189,6 +203,8 @@ class VolumesSnapshotTest(base.BaseVolumeV1Test):
         self.volumes_client.wait_for_resource_deletion(volume['id'])
         self.clear_snapshots()
 
+class VolumesSnapshotV2Test(VolumesSnapshotTest):
+    _api_version = 2
 
 class VolumesSnapshotTestXML(VolumesSnapshotTest):
     _interface = "xml"

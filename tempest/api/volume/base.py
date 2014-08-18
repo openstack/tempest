@@ -67,6 +67,7 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
                 msg = "Volume API v2 is disabled"
                 raise cls.skipException(msg)
             cls.volumes_client = cls.os.volumes_v2_client
+            cls.snapshots_client = cls.os.snapshots_v2_client
 
         else:
             msg = ("Invalid Cinder API version (%s)" % cls._api_version)
@@ -100,7 +101,10 @@ class BaseVolumeTest(tempest.test.BaseTestCase):
         """Wrapper utility that returns a test snapshot."""
         resp, snapshot = cls.snapshots_client.create_snapshot(volume_id,
                                                               **kwargs)
-        assert 200 == resp.status
+        if cls._api_version == 1:
+            assert 200 == resp.status
+        elif cls._api_version == 2:
+            assert 202 == resp.status
         cls.snapshots.append(snapshot)
         cls.snapshots_client.wait_for_snapshot_status(snapshot['id'],
                                                       'available')
