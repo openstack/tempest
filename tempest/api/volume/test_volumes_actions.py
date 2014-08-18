@@ -40,6 +40,10 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         # Create a test shared volume for attach/detach tests
         cls.volume = cls.create_volume()
 
+    def _delete_image_with_wait(self, image_id):
+        self.image_client.delete_image(image_id)
+        self.image_client.wait_for_resource_deletion(image_id)
+
     @classmethod
     def tearDownClass(cls):
         # Delete the test instance
@@ -101,21 +105,10 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
                                                image_name,
                                                CONF.volume.disk_format)
         image_id = body["image_id"]
-        self.addCleanup(self.image_client.delete_image, image_id)
+        self.addCleanup(self._delete_image_with_wait, image_id)
         self.assertEqual(202, resp.status)
         self.image_client.wait_for_image_status(image_id, 'active')
         self.client.wait_for_volume_status(self.volume['id'], 'available')
-
-    @test.attr(type='gate')
-    def test_volume_extend(self):
-        # Extend Volume Test.
-        extend_size = int(self.volume['size']) + 1
-        resp, body = self.client.extend_volume(self.volume['id'], extend_size)
-        self.assertEqual(202, resp.status)
-        self.client.wait_for_volume_status(self.volume['id'], 'available')
-        resp, volume = self.client.get_volume(self.volume['id'])
-        self.assertEqual(200, resp.status)
-        self.assertEqual(int(volume['size']), extend_size)
 
     @test.attr(type='gate')
     def test_reserve_unreserve_volume(self):
