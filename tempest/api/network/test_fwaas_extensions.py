@@ -84,7 +84,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
             m = 'Timed out waiting for firewall %s to become ACTIVE.' % fw_id
             raise exceptions.TimeoutException(m)
 
-    @test.attr(type='smoke')
     def test_list_firewall_rules(self):
         # List firewall rules
         resp, fw_rules = self.client.list_firewall_rules()
@@ -103,7 +102,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
                         m['ip_version'],
                         m['enabled']) for m in fw_rules])
 
-    @test.attr(type='smoke')
     def test_create_update_delete_firewall_rule(self):
         # Create firewall rule
         resp, body = self.client.create_firewall_rule(
@@ -127,7 +125,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         self.assertNotIn(fw_rule_id,
                          [m['id'] for m in fw_rules['firewall_rules']])
 
-    @test.attr(type='smoke')
     def test_show_firewall_rule(self):
         # show a created firewall rule
         resp, fw_rule = self.client.show_firewall_rule(self.fw_rule['id'])
@@ -135,7 +132,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         for key, value in fw_rule['firewall_rule'].iteritems():
             self.assertEqual(self.fw_rule[key], value)
 
-    @test.attr(type='smoke')
     def test_list_firewall_policies(self):
         resp, fw_policies = self.client.list_firewall_policies()
         self.assertEqual('200', resp['status'])
@@ -147,7 +143,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
                         m['name'],
                         m['firewall_rules']) for m in fw_policies])
 
-    @test.attr(type='smoke')
     def test_create_update_delete_firewall_policy(self):
         # Create firewall policy
         resp, body = self.client.create_firewall_policy(
@@ -173,7 +168,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         fw_policies = fw_policies['firewall_policies']
         self.assertNotIn(fw_policy_id, [m['id'] for m in fw_policies])
 
-    @test.attr(type='smoke')
     def test_show_firewall_policy(self):
         # show a created firewall policy
         resp, fw_policy = self.client.show_firewall_policy(
@@ -183,7 +177,6 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         for key, value in fw_policy.iteritems():
             self.assertEqual(self.fw_policy[key], value)
 
-    @test.attr(type='smoke')
     def test_create_show_delete_firewall(self):
         # Create tenant network resources required for an ACTIVE firewall
         network = self.create_network()
