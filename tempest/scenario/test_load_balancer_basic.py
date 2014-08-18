@@ -288,7 +288,6 @@ class TestLoadBalancerBasic(manager.NetworkScenarioTest):
             self.assertEqual(expected,
                              set(resp))
 
-    @test.attr(type='smoke')
     @test.services('compute', 'network')
     def test_load_balancer_basic(self):
         self._create_server('server1')
