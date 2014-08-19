@@ -31,7 +31,7 @@ service_resource_prefix_map = {
     'ipsecpolicies': 'vpn',
     'vpnservices': 'vpn',
     'ikepolicies': 'vpn',
-    'ipsecpolicies': 'vpn',
+    'ipsec_site_connections': 'vpn',
     'metering_labels': 'metering',
     'metering_label_rules': 'metering',
     'firewall_rules': 'fw',
@@ -50,7 +50,6 @@ resource_plural_map = {
     'security_group_rules': 'security_group_rules',
     'ipsecpolicy': 'ipsecpolicies',
     'ikepolicy': 'ikepolicies',
-    'ipsecpolicy': 'ipsecpolicies',
     'quotas': 'quotas',
     'firewall_policy': 'firewall_policies'
 }
@@ -220,3 +219,15 @@ class NetworkClientBase(object):
         except exceptions.NotFound:
             return True
         return False
+
+    def wait_for_resource_status(self, resource_type, id, status):
+        """Waits for a resource to be deleted."""
+        start_time = int(time.time())
+        while True:
+            method = 'show_' + resource_type
+            res = getattr(self, method)(id)
+            if res[0]['status'] == status:
+                return
+            if int(time.time()) - start_time >= self.build_timeout:
+                raise exceptions.TimeoutException
+            time.sleep(self.build_interval)

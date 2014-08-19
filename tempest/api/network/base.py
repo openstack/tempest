@@ -82,10 +82,15 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         cls.fw_rules = []
         cls.fw_policies = []
         cls.ipsecpolicies = []
+        cls.ipsec_site_connections = []
 
     @classmethod
     def tearDownClass(cls):
         if CONF.service_available.neutron:
+            # Clean up ipsec site connections
+            for ipsec_site_connection in cls.ipsec_site_connections:
+                cls.client.delete_ipsec_site_connection(
+                    ipsec_site_connection['id'])
             # Clean up ipsec policies
             for ipsecpolicy in cls.ipsecpolicies:
                 cls.client.delete_ipsecpolicy(ipsecpolicy['id'])
@@ -357,6 +362,14 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
         ipsecpolicy = body['ipsecpolicy']
         cls.ipsecpolicies.append(ipsecpolicy)
         return ipsecpolicy
+
+    @classmethod
+    def create_ipsec_site_connection(cls, post_body):
+        """Wrapper utility that returns a test ipsec site connection."""
+        _, body = cls.client.create_ipsec_site_connection(**post_body)
+        ipsec_site_connection = body['ipsec_site_connection']
+        cls.ipsec_site_connections.append(ipsec_site_connection)
+        return ipsec_site_connection
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):
