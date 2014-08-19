@@ -24,8 +24,8 @@ class TestNodeStates(base.BaseBaremetalTest):
     @classmethod
     def setUpClass(cls):
         super(TestNodeStates, cls).setUpClass()
-        resp, cls.chassis = cls.create_chassis()
-        resp, cls.node = cls.create_node(cls.chassis['uuid'])
+        _, cls.chassis = cls.create_chassis()
+        _, cls.node = cls.create_node(cls.chassis['uuid'])
 
     def _validate_power_state(self, node_uuid, power_state):
         # Validate that power state is set within timeout
@@ -34,8 +34,7 @@ class TestNodeStates(base.BaseBaremetalTest):
         start = timeutils.utcnow()
         while timeutils.delta_seconds(
                 start, timeutils.utcnow()) < self.power_timeout:
-            resp, node = self.client.show_node(node_uuid)
-            self.assertEqual(200, resp.status)
+            _, node = self.client.show_node(node_uuid)
             if node['power_state'] == power_state:
                 return
         message = ('Failed to set power state within '
@@ -44,20 +43,16 @@ class TestNodeStates(base.BaseBaremetalTest):
 
     @test.attr(type='smoke')
     def test_list_nodestates(self):
-        resp, nodestates = self.client.list_nodestates(self.node['uuid'])
-        self.assertEqual('200', resp['status'])
+        _, nodestates = self.client.list_nodestates(self.node['uuid'])
         for key in nodestates:
             self.assertEqual(nodestates[key], self.node[key])
 
     @test.attr(type='smoke')
     def test_set_node_power_state(self):
-        resp, node = self.create_node(self.chassis['uuid'])
-        self.assertEqual('201', resp['status'])
+        _, node = self.create_node(self.chassis['uuid'])
         states = ["power on", "rebooting", "power off"]
         for state in states:
             # Set power state
-            resp, _ = self.client.set_node_power_state(node['uuid'],
-                                                       state)
-            self.assertEqual('202', resp['status'])
+            self.client.set_node_power_state(node['uuid'], state)
             # Check power state after state is set
             self._validate_power_state(node['uuid'], state)
