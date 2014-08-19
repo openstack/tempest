@@ -474,6 +474,10 @@
 # attachment? (boolean value)
 #interface_attach=true
 
+# Does the test environment support creating snapshot images
+# of running instances? (boolean value)
+#snapshot=true
+
 
 [dashboard]
 

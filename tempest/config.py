@@ -347,7 +347,11 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('interface_attach',
                 default=True,
                 help='Does the test environment support dynamic network '
-                     'interface attachment?')
+                     'interface attachment?'),
+    cfg.BoolOpt('snapshot',
+                default=True,
+                help='Does the test environment support creating snapshot '
+                     'images of running instances?')
 ]
 
 

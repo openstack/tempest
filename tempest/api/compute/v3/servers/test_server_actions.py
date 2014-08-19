@@ -250,6 +250,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(previous_flavor_ref, server['flavor']['id'])
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting not available, backup not possible.')
     @test.attr(type='gate')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
