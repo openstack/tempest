@@ -36,6 +36,7 @@ class BaseVolumeAvailabilityZoneClientXML(rest_client.RestClient):
     def get_availability_zone_list(self):
         resp, body = self.get('os-availability-zone')
         availability_zone = self._parse_array(etree.fromstring(body))
+        self.expected_success(200, resp.status)
         return resp, availability_zone
 
 

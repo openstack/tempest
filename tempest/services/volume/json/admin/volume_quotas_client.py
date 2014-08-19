@@ -42,6 +42,7 @@ class VolumeQuotasClientJSON(rest_client.RestClient):
 
         url = 'os-quota-sets/%s/defaults' % tenant_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def get_quota_set(self, tenant_id, params=None):
@@ -52,12 +53,14 @@ class VolumeQuotasClientJSON(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def get_quota_usage(self, tenant_id):
         """List the quota set for a tenant."""
 
         resp, body = self.get_quota_set(tenant_id, params={'usage': True})
+        self.expected_success(200, resp.status)
         return resp, body
 
     def update_quota_set(self, tenant_id, gigabytes=None, volumes=None,
@@ -75,8 +78,10 @@ class VolumeQuotasClientJSON(rest_client.RestClient):
 
         post_body = jsonutils.dumps({'quota_set': post_body})
         resp, body = self.put('os-quota-sets/%s' % tenant_id, post_body)
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
 
     def delete_quota_set(self, tenant_id):
         """Delete the tenant's quota set."""
-        return self.delete('os-quota-sets/%s' % tenant_id)
+        resp, body = self.delete('os-quota-sets/%s' % tenant_id)
+        self.expected_success(200, resp.status)

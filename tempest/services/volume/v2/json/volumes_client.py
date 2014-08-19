@@ -25,3 +25,4 @@ class VolumesV2ClientJSON(volumes_client.BaseVolumesClientJSON):
         super(VolumesV2ClientJSON, self).__init__(auth_provider)
 
         self.api_version = "v2"
+        self.create_resp = 202

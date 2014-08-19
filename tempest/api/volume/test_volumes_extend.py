@@ -33,11 +33,9 @@ class VolumesV2ExtendTest(base.BaseVolumeTest):
         # Extend Volume Test.
         self.volume = self.create_volume()
         extend_size = int(self.volume['size']) + 1
-        resp, body = self.client.extend_volume(self.volume['id'], extend_size)
-        self.assertEqual(202, resp.status)
+        _, body = self.client.extend_volume(self.volume['id'], extend_size)
         self.client.wait_for_volume_status(self.volume['id'], 'available')
-        resp, volume = self.client.get_volume(self.volume['id'])
-        self.assertEqual(200, resp.status)
+        _, volume = self.client.get_volume(self.volume['id'])
         self.assertEqual(int(volume['size']), extend_size)
 
 
