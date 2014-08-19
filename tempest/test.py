@@ -224,6 +224,23 @@ atexit.register(validate_tearDownClass)
 
 class BaseTestCase(testtools.testcase.WithAttributes,
                    testtools.TestCase):
+    """The test base class defines Tempest framework for class level fixtures.
+    `setUpClass` and `tearDownClass` are defined here and cannot be overwritten
+    by subclasses (enforced via hacking rule T105).
+
+    Set-up is split in a series of steps (setup stages), which can be
+    overwritten by test classes. Set-up stages are:
+    - skip_checks
+    - setup_credentials
+    - setup_clients
+    - resource_setup
+
+    Tear-down is also split in a series of steps (teardown stages), which are
+    stacked for execution only if the corresponding setup stage had been
+    reached during the setup phase. Tear-down stages are:
+    - clear_isolated_creds (defined in the base test class)
+    - resource_cleanup
+    """
 
     setUpClassCalled = False
     _service = None
@@ -242,31 +259,28 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         if hasattr(super(BaseTestCase, cls), 'setUpClass'):
             super(BaseTestCase, cls).setUpClass()
         cls.setUpClassCalled = True
-        # No test resource is allocated until here
+        # Stack of (name, callable) to be invoked in reverse order at teardown
+        cls.teardowns = []
+        # All the configuration checks that may generate a skip
+        cls.skip_checks()
         try:
-            # TODO(andreaf) Split-up resource_setup in stages:
-            # skip checks, pre-hook, credentials, clients, resources, post-hook
+            # Allocation of all required credentials and client managers
+            cls.teardowns.append(('credentials', cls.clear_isolated_creds))
+            cls.setup_credentials()
+            # Shortcuts to clients
+            cls.setup_clients()
+            # Additional class-wide test resources
+            cls.teardowns.append(('resources', cls.resource_cleanup))
             cls.resource_setup()
         except Exception:
             etype, value, trace = sys.exc_info()
-            LOG.info("%s in resource setup. Invoking tearDownClass." % etype)
-            # Catch any exception in tearDown so we can re-raise the original
-            # exception at the end
+            LOG.info("%s in %s.setUpClass. Invoking tearDownClass." % (
+                cls.__name__, etype))
+            cls.tearDownClass()
             try:
-                cls.tearDownClass()
-            except Exception as te:
-                tetype, _, _ = sys.exc_info()
-                # TODO(gmann): Till we split-up resource_setup &
-                # resource_cleanup in more structural way, log
-                # AttributeError as info instead of exception.
-                if tetype is AttributeError:
-                    LOG.info("tearDownClass failed: %s" % te)
-                else:
-                    LOG.exception("tearDownClass failed: %s" % te)
-            try:
-                raise etype(value), None, trace
+                raise etype, value, trace
             finally:
-                del trace  # for avoiding circular refs
+                del trace  # to avoid circular refs
 
     @classmethod
     def tearDownClass(cls):
@@ -274,21 +288,78 @@ class BaseTestCase(testtools.testcase.WithAttributes,
         # It should never be overridden by descendants
         if hasattr(super(BaseTestCase, cls), 'tearDownClass'):
             super(BaseTestCase, cls).tearDownClass()
-        try:
-            cls.resource_cleanup()
-        finally:
-            cls.clear_isolated_creds()
+        # Save any existing exception, we always want to re-raise the original
+        # exception only
+        etype, value, trace = sys.exc_info()
+        # If there was no exception during setup we shall re-raise the first
+        # exception in teardown
+        re_raise = (etype is None)
+        while cls.teardowns:
+            name, teardown = cls.teardowns.pop()
+            # Catch any exception in tearDown so we can re-raise the original
+            # exception at the end
+            try:
+                teardown()
+            except Exception as te:
+                sys_exec_info = sys.exc_info()
+                tetype = sys_exec_info[0]
+                # TODO(andreaf): Till we have the ability to cleanup only
+                # resources that were successfully setup in resource_cleanup,
+                # log AttributeError as info instead of exception.
+                if tetype is AttributeError and name == 'resources':
+                    LOG.info("tearDownClass of %s failed: %s" % (name, te))
+                else:
+                    LOG.exception("teardown of %s failed: %s" % (name, te))
+                if not etype:
+                    etype, value, trace = sys_exec_info
+        # If exceptions were raised during teardown, an not before, re-raise
+        # the first one
+        if re_raise and etype is not None:
+            try:
+                raise etype, value, trace
+            finally:
+                del trace  # to avoid circular refs
 
     @classmethod
     def resource_setup(cls):
-        """Class level setup steps for test cases.
-        Recommended order: skip checks, credentials, clients, resources.
+        """Class level resource setup for test cases.
         """
         pass
 
     @classmethod
     def resource_cleanup(cls):
-        """Class level resource cleanup for test cases. """
+        """Class level resource cleanup for test cases.
+        Resource cleanup must be able to handle the case of partially setup
+        resources, in case a failure during `resource_setup` should happen.
+        """
+        pass
+
+    @classmethod
+    def skip_checks(cls):
+        """Class level skip checks. Subclasses verify in here all
+        conditions that might prevent the execution of the entire test class.
+        Checks implemented here may not make use API calls, and should rely on
+        configuration alone.
+        In general skip checks that require an API call are discouraged.
+        If one is really needed it may be implemented either in the
+        resource_setup or at test level.
+        """
+        pass
+
+    @classmethod
+    def setup_credentials(cls):
+        """Allocate credentials and the client managers from them."""
+        # TODO(andreaf) There is a fair amount of code that could me moved from
+        # base / test classes in here. Ideally tests should be able to only
+        # specify a list of (additional) credentials the need to use.
+        pass
+
+    @classmethod
+    def setup_clients(cls):
+        """Create links to the clients into the test object."""
+        # TODO(andreaf) There is a fair amount of code that could me moved from
+        # base / test classes in here. Ideally tests should be able to only
+        # specify which client is `client` and nothing else.
         pass
 
     def setUp(self):

@@ -11,7 +11,7 @@ Tempest Specific Commandments
 - [T102] Cannot import OpenStack python clients in tempest/api &
          tempest/scenario tests
 - [T104] Scenario tests require a services decorator
-- [T105] Unit tests cannot use setUpClass
+- [T105] Tests cannot use setUpClass/tearDownClass
 - [T106] vim configuration should not be kept in source files.
 - [N322] Method's default argument shouldn't be mutable
 
@@ -107,6 +107,46 @@ indirectly through another service) that differs from the parent directory
 name. For example, any test that make an api call to a service other than nova
 in tempest.api.compute would require a service tag for those services, however
 they do not need to be tagged as compute.
+
+Test fixtures and resources
+---------------------------
+Test level resources should be cleaned-up after the test execution. Clean-up
+is best scheduled using `addCleanup` which ensures that the resource cleanup
+code is always invoked, and in reverse order with respect to the creation
+order.
+
+Test class level resources should be defined in the `resource_setup` method of
+the test class, except for any credential obtained from the credentials
+provider, which should be set-up in the `setup_credentials` method.
+
+The test base class `BaseTestCase` defines Tempest framework for class level
+fixtures. `setUpClass` and `tearDownClass` are defined here and cannot be
+overwritten by subclasses (enforced via hacking rule T105).
+
+Set-up is split in a series of steps (setup stages), which can be overwritten
+by test classes. Set-up stages are:
+- `skip_checks`
+- `setup_credentials`
+- `setup_clients`
+- `resource_setup`
+
+Tear-down is also split in a series of steps (teardown stages), which are
+stacked for execution only if the corresponding setup stage had been
+reached during the setup phase. Tear-down stages are:
+- `clear_isolated_creds` (defined in the base test class)
+- `resource_cleanup`
+
+Skipping Tests
+--------------
+Skipping tests should be based on configuration only. If that is not possible,
+it is likely that either a configuration flag is missing, or the test should
+fail rather than be skipped.
+Using discovery for skipping tests is generally discouraged.
+
+When running a test that requires a certain "feature" in the target
+cloud, if that feature is missing we should fail, because either the test
+configuration is invalid, or the cloud is broken and the expected "feature" is
+not there even if the cloud was configured with it.
 
 Negative Tests
 --------------
