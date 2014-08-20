@@ -104,12 +104,12 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                                                mac_addr=mac_addr)
         self.addCleanup(self.client.delete_server, server['id'])
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
-        resp, server = self.client.get_server(server['id'])
+        resp, body = self.client.get_server(server['id'])
 
         # Verify the given extended availability zones,
         # extended drive configs, extended status, extended usages,
         # extended mac_addr and other extended attributes
-        self._verify_extended_attributes(server)
+        self._verify_extended_attributes(body)
 
         # Verify the extended attributes given
         # in the detailed list
@@ -117,7 +117,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         servers = body['servers']
 
         # Select the first server with specified id
-        server = [i for i in servers if i['id'] == self.server['id']][0]
+        server = [i for i in servers if i['id'] == server['id']][0]
         self._verify_extended_attributes(server)
 
     @test.attr(type='smoke')
@@ -198,8 +198,15 @@ class ServersTestJSON(base.BaseV2ComputeTest):
 
         # Create a server with a block device mapping.
         name = data_utils.rand_name('server')
+        device_base = CONF.compute.volume_device_name
+        # Use the same driver as volume_device_name specified in config
+        while str.isdigit(device_base[-1:]):
+            device_base = device_base[:-1]
+        device_name1 = "/dev/" + device_base[:-1] + "a"
+        device_name2 = "/dev/" + device_base[:-1] + "b"
+
         mapping = [{
-                   "device_name": "/dev/sdb1",
+                   "device_name": device_name2,
                    "source_type": "blank",
                    "destination_type": "local",
                    "delete_on_termination": "True",
@@ -207,7 +214,7 @@ class ServersTestJSON(base.BaseV2ComputeTest):
                    "boot_index": "-1"
                    },
                    {
-                   "device_name": "/dev/sda1",
+                   "device_name": device_name1,
                    "source_type": "volume",
                    "destination_type": "volume",
                    "uuid": volume['id'],
@@ -219,6 +226,44 @@ class ServersTestJSON(base.BaseV2ComputeTest):
         self.assertEqual(202, resp.status)
         self.attached = True
         self.addCleanup(self.client.delete_server, server['id'])
+        self.client.wait_for_server_status(server['id'], 'ACTIVE')
+
+        resp, server = self.client.get_server(server['id'])
+        self.assertIn(volume['id'],
+                      map(lambda x: x['id'],
+                          server['os-extended-volumes:volumes_attached']))
+
+    @test.attr(type='gate')
+    def test_create_server_with_boot_volume(self):
+        # Create a test volume
+        v_name = data_utils.rand_name('volume')
+        resp, volume = self.volumes_client.create_volume(size=1,
+                                                         display_name=v_name)
+        self.addCleanup(self._delete_volume, volume['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+
+        # Create servers that boots from a volume.
+        name = data_utils.rand_name('server')
+        device_base = CONF.compute.volume_device_name
+        # Use the same driver as volume_device_name specified in config
+        while str.isdigit(device_base[-1:]):
+            device_base = device_base[:-1]
+        device_name = "/dev/" + device_base[:-1] + "b"
+
+        mapping = [{
+                   "virtual_name": "root",
+                   "device_name": device_name,
+                   "volume_id": volume['id'],
+                   "delete_on_termination": "False",
+                   }]
+        resp, server = self.create_test_server(name=name,
+                                               min_count=1,
+                                               max_count=1,
+                                               block_device_mapping=mapping,
+                                               volumes_boot=True)
+        self.addCleanup(self.client.delete_server, server['id'])
+        self.assertEqual(202, resp.status)
+        self.attached = True
         self.client.wait_for_server_status(server['id'], 'ACTIVE')
 
         resp, server = self.client.get_server(server['id'])

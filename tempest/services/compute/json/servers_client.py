@@ -58,7 +58,8 @@ class ServersClientJSON(rest_client.RestClient):
         disk_config: Determines if user or admin controls disk configuration.
         return_reservation_id: Enable/Disable the return of reservation id
         block_device_mapping: Block device mapping for the server.
-        block_device_mapping_v2: Block device mapping with api v2 for the server.
+        block_device_mapping_v2: Block device mapping with api v2
+        for the server.
         mac_addr(extended attribute): The MAC address for the server.
         """
         post_body = {
@@ -67,12 +68,19 @@ class ServersClientJSON(rest_client.RestClient):
             'flavorRef': flavor_ref
         }
 
+        default_network = CONF.compute.default_network_id
+        if default_network != '':
+            post_body['networks'] = [{
+                "uuid": default_network
+            }]
+
         for option in ['personality', 'adminPass', 'key_name',
                        'security_groups', 'networks', 'user_data',
                        'availability_zone', 'accessIPv4', 'accessIPv6',
                        'min_count', 'max_count', ('metadata', 'meta'),
                        ('OS-DCF:diskConfig', 'disk_config'),
-                       'return_reservation_id', 'block_device_mapping', 'block_device_mapping_v2',
+                       'return_reservation_id', 'block_device_mapping',
+                       'block_device_mapping_v2',
                        ('OS-EXT-IPS-MAC:mac_addr', 'mac_addr')]:
             if isinstance(option, tuple):
                 post_param = option[0]
@@ -89,7 +97,10 @@ class ServersClientJSON(rest_client.RestClient):
             hints = {'os:scheduler_hints': kwargs.get('sched_hints')}
             post_body = dict(post_body.items() + hints.items())
         post_body = json.dumps(post_body)
-        resp, body = self.post('servers', post_body)
+        if 'volumes_boot' in kwargs and kwargs.get('volumes_boot') is True:
+            resp, body = self.post('os-volumes_boot', post_body)
+        else:
+            resp, body = self.post('servers', post_body)
 
         body = json.loads(body)
         # NOTE(maurosr): this deals with the case of multiple server create
@@ -367,6 +378,23 @@ class ServersClientJSON(rest_client.RestClient):
                                  (server_id, volume_id))
         self.validate_response(schema.detach_volume, resp, body)
         return resp, body
+
+    def list_volume_attachment(self, server_id):
+        """List all attachments from a server instance."""
+        resp, body = self.get('servers/%s/os-volume_attachments' % server_id)
+        body = json.loads(body)
+        self.validate_response(schema.list_volume_attachment, resp, body)
+        return resp, body['volumeAttachments']
+
+    def get_volume_attachment(self, server_id, volume_id):
+        """Shows details for the specified attachment from a
+           server instance.
+        """
+        resp, body = self.get('servers/%s/os-volume_attachments/%s' %
+                              (server_id, volume_id))
+        body = json.loads(body)
+        self.validate_response(schema.get_volume_attachment, resp, body)
+        return resp, body['volumeAttachment']
 
     def add_security_group(self, server_id, name):
         """Adds a security group to the server."""
