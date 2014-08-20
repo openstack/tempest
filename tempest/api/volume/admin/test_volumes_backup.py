@@ -34,9 +34,13 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
         if not CONF.volume_feature_enabled.backup:
             raise cls.skipException("Cinder backup feature disabled")
 
-        cls.volumes_adm_client = cls.os_adm.volumes_client
-        cls.backups_adm_client = cls.os_adm.backups_client
-        cls.volume = cls.create_volume()
+        if cls._api_version == 1:
+            cls.volumes_adm_client = cls.os_adm.volumes_client
+            cls.backups_adm_client = cls.os_adm.backups_client
+        elif cls._api_version == 2:
+            cls.volumes_adm_client = cls.os_adm.volumes_v2_client
+            cls.backups_adm_client = cls.os_adm.backups_v2_client
+            cls.volume = cls.create_volume()
 
     @test.attr(type='smoke')
     def test_volume_backup_create_get_detailed_list_restore_delete(self):
@@ -77,3 +81,6 @@ class VolumesBackupsTest(base.BaseVolumeV1AdminTest):
                                                        'available')
         self.volumes_adm_client.wait_for_volume_status(restore['volume_id'],
                                                        'available')
+
+class VolumesV2BackupsTest(VolumesBackupsTest):
+    _api_version = 2
