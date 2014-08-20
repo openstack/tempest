@@ -29,6 +29,7 @@ class BaseTelemetryTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         if not CONF.service_available.ceilometer:
             raise cls.skipException("Ceilometer support is required")
+        cls.set_network_resources()
         super(BaseTelemetryTest, cls).setUpClass()
         os = cls.get_client_manager()
         cls.telemetry_client = os.telemetry_client
