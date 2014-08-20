@@ -293,3 +293,28 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         resp, body = self.post(uri, body)
         body = json.loads(body)
         return resp, body
+
+    def insert_firewall_rule_in_policy(self, policy_id,
+                                       rule_id, insert_after=None,
+                                       insert_before=None):
+        uri = '%s/fw/firewall_policies/%s/insert_rule' % (self.uri_prefix,
+                                                          policy_id)
+        put_body = {'firewall_rule_id': rule_id}
+        if insert_after is not None:
+            put_body['insert_after'] = insert_after
+        if insert_before is not None:
+            put_body['insert_before'] = insert_before
+
+        body = json.dumps(put_body)
+        resp, body = self.put(uri, body)
+        body = json.loads(body)
+        return resp, body
+
+    def remove_firewall_rule_from_policy(self, policy_id, rule_id):
+        uri = '%s/fw/firewall_policies/%s/remove_rule' % (self.uri_prefix,
+                                                          policy_id)
+        put_body = {'firewall_rule_id': rule_id}
+        body = json.dumps(put_body)
+        resp, body = self.put(uri, body)
+        body = json.loads(body)
+        return resp, body

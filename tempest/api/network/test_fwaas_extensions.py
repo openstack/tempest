@@ -184,6 +184,45 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
             self.assertEqual(self.fw_policy[key], value)
 
     @test.attr(type='smoke')
+    def test_insert_remove_firewall_rule_in_policy(self):
+        # Create firewall policy
+        policy = self.create_firewall_policy()
+        # Create three firewall rules for the test
+        rule1 = self.create_firewall_rule("allow", "tcp")
+        rule2 = self.create_firewall_rule("deny", "icmp")
+        rule3 = self.create_firewall_rule("allow", "udp")
+
+        # Insert firewall rules in the policy
+        resp, _ = self.client.insert_firewall_rule_in_policy(
+            policy['id'], rule1['id'])
+        self.assertEqual('200', resp['status'])
+        resp, _ = self.client.insert_firewall_rule_in_policy(
+            policy['id'], rule2['id'], insert_after=rule1['id'])
+        self.assertEqual('200', resp['status'])
+        resp, policy = self.client.insert_firewall_rule_in_policy(
+            policy['id'], rule3['id'], insert_after=rule1['id'],
+            insert_before=rule2['id'])
+        self.assertEqual('200', resp['status'])
+
+        self.assertEqual([rule1['id'], rule3['id'], rule2['id']],
+                         policy['firewall_rules'])
+
+        # Remove firewall rules from the policy
+        resp, policy = self.client.remove_firewall_rule_from_policy(
+            policy['id'], rule3['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertEqual([rule1['id'], rule2['id']],
+                         policy['firewall_rules'])
+
+        resp, _ = self.client.remove_firewall_rule_from_policy(
+            policy['id'], rule1['id'])
+        self.assertEqual('200', resp['status'])
+        resp, policy = self.client.remove_firewall_rule_from_policy(
+            policy['id'], rule2['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertEmpty(policy['firewall_rules'])
+
+    @test.attr(type='smoke')
     def test_create_show_delete_firewall(self):
         # Create tenant network resources required for an ACTIVE firewall
         network = self.create_network()

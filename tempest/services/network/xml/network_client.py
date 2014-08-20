@@ -258,6 +258,30 @@ class NetworkClientXML(client_base.NetworkClientBase):
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
+    def insert_firewall_rule_in_policy(self, policy_id,
+                                       rule_id, insert_after=None,
+                                       insert_before=None):
+        uri = '%s/fw/firewall_policies/%s/insert_rule' % (self.uri_prefix,
+                                                          policy_id)
+        # TODO(oubeichen) fix xml request format
+        put_body = common.Element("firewall_rule_id", rule_id)
+        put_body = common.Document(put_body)
+        if insert_after is not None:
+            put_body.append(common.Element("insert_after", insert_after))
+        if insert_before is not None:
+            put_body.append(common.Element("insert_before", insert_before))
+        resp, body = self.put(uri, str(put_body))
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
+    def remove_firewall_rule_from_policy(self, policy_id, rule_id):
+        uri = '%s/fw/firewall_policies/%s/remove_rule' % (self.uri_prefix,
+                                                          policy_id)
+        put_body = common.Element("firewall_rule_id", rule_id)
+        resp, body = self.put(uri, str(common.Document(put_body)))
+        body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        return resp, body
+
 
 def _root_tag_fetcher_and_xml_to_json_parse(xml_returned_body):
     body = ET.fromstring(xml_returned_body)
