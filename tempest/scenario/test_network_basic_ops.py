@@ -22,6 +22,7 @@ from tempest.api.network import common as net_common
 from tempest.common import debug
 from tempest.common.utils import data_utils
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest.scenario import manager
 from tempest import test
@@ -222,23 +223,31 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self.addCleanup(self.delete_wrapper, server)
 
         def check_ports():
-            port_list = [port for port in
-                         self._list_ports(device_id=server.id)
-                         if port != old_port]
-            return len(port_list) == 1
+            self.new_port_list = [port for port in
+                                  self._list_ports(device_id=server.id)
+                                  if port != old_port]
+            return len(self.new_port_list) == 1
 
-        test.call_until_true(check_ports, 60, 1)
-        new_port_list = [p for p in
-                         self._list_ports(device_id=server.id)
-                         if p != old_port]
-        self.assertEqual(1, len(new_port_list))
-        new_port = new_port_list[0]
+        if not test.call_until_true(check_ports, CONF.network.build_timeout,
+                                    CONF.network.build_interval):
+            raise exceptions.TimeoutException("No new port attached to the "
+                                              "server in time (%s sec) !"
+                                              % CONF.network.build_timeout)
         new_port = net_common.DeletablePort(client=self.network_client,
-                                            **new_port)
-        new_nic_list = self._get_server_nics(ssh_client)
-        diff_list = [n for n in new_nic_list if n not in old_nic_list]
-        self.assertEqual(1, len(diff_list))
-        num, new_nic = diff_list[0]
+                                            **self.new_port_list[0])
+
+        def check_new_nic():
+            new_nic_list = self._get_server_nics(ssh_client)
+            self.diff_list = [n for n in new_nic_list if n not in old_nic_list]
+            return len(self.diff_list) == 1
+
+        if not test.call_until_true(check_new_nic, CONF.network.build_timeout,
+                                    CONF.network.build_interval):
+            raise exceptions.TimeoutException("Interface not visible on the "
+                                              "guest after %s sec"
+                                              % CONF.network.build_timeout)
+
+        num, new_nic = self.diff_list[0]
         ssh_client.assign_static_ip(nic=new_nic,
                                     addr=new_port.fixed_ips[0]['ip_address'])
         ssh_client.turn_nic_on(nic=new_nic)
