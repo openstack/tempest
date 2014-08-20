@@ -35,4 +35,5 @@ class DatabaseVersionsClientJSON(rest_client.RestClient):
             url += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         return resp, self._parse_resp(body)
