@@ -94,8 +94,8 @@ def get_ipv6_addr_by_EUI64(cidr, mac):
         return netaddr.IPAddress(prefix.first + eui64 ^ (1 << 57))
     except (ValueError, netaddr.AddrFormatError):
         raise TypeError('Bad prefix or mac format for generating IPv6 '
-                          'address by EUI-64: %(prefix)s, %(mac)s:')
-                        % {'prefix': cidr, 'mac': mac}
+                          'address by EUI-64: %(prefix)s, %(mac)s:'
+                            % {'prefix': cidr, 'mac': mac})
     except TypeError:
         raise TypeError('Bad prefix type for generate IPv6 address by '
-                          'EUI-64: %s') % cidr
+                          'EUI-64: %s' % cidr)
