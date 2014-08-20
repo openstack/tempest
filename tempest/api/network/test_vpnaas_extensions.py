@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import netaddr
+
 from tempest.api.network import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -54,6 +56,21 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         cls.ipsecpolicy = cls.create_ipsecpolicy(
             data_utils.rand_name("ipsec-policy-"))
 
+        cidr = CONF.network.tenant_network_cidr
+        net = netaddr.IPNetwork(cidr)
+        ip = str(netaddr.IPAddress(net.first + 1))
+        ipsec_site_conn_body = {
+            'name': data_utils.rand_name('ipsec-site-conn'),
+            'psk': 'secret',
+            'ipsecpolicy_id': cls.ipsecpolicy['id'],
+            'ikepolicy_id': cls.ikepolicy['id'],
+            'vpnservice_id': cls.vpnservice['id'],
+            'peer_cidrs': [cidr],
+            'peer_address': ip,
+            'peer_id': ip}
+        cls.ipsec_site_connection = cls.create_ipsec_site_connection(
+            ipsec_site_conn_body)
+
     def _delete_ike_policy(self, ike_policy_id):
         # Deletes a ike policy and verifies if it is deleted or not
         ike_list = list()
@@ -74,6 +91,14 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         # Deletes an ike policy if it exists
         try:
             self.client.delete_ipsecpolicy(ipsec_policy_id)
+
+        except exceptions.NotFound:
+            pass
+
+    def _delete_ipsec_site_connection(self, ipsec_site_connection_id):
+        # Deletes an ipsec policy if it exists
+        try:
+            self.client.delete_ipsec_site_connection(ipsec_site_connection_id)
 
         except exceptions.NotFound:
             pass
@@ -322,6 +347,68 @@ class VPNaaSTestJSON(base.BaseAdminNetworkTest):
         self.assertEqual('200', resp['status'])
         ipsecpolicy = body['ipsecpolicy']
         self._assertExpected(self.ipsecpolicy, ipsecpolicy)
+
+    @test.attr(type='smoke')
+    def test_list_ipsec_site_connections(self):
+        # Verify the ipsec site connection exists in the list of all ipsec site
+        # connections
+        resp, body = self.client.list_ipsec_site_connections()
+        self.assertEqual('200', resp['status'])
+        ipsec_site_connections = body['ipsec_site_connections']
+        self.assertIn(self.ipsec_site_connection['id'],
+                      [i['id'] for i in ipsec_site_connections])
+
+    @test.skip_because(bug="1331502")
+    @test.attr(type='smoke')
+    def test_create_update_delete_ipsec_site_connection(self):
+        # Creates an ipsec site connection
+        cidr = CONF.network.tenant_network_cidr
+        net = netaddr.IPNetwork(cidr)
+        ip = str(netaddr.IPAddress(net.first + 1))
+        ipsec_site_conn_body = {
+            'name': data_utils.rand_name('ipsec-site-conn'),
+            'psk': 'secret',
+            'ipsecpolicy_id': self.ipsecpolicy['id'],
+            'ikepolicy_id': self.ikepolicy['id'],
+            'vpnservice_id': self.vpnservice['id'],
+            'peer_cidrs': [cidr],
+            'peer_address': ip,
+            'peer_id': ip}
+        resp, resp_body = self.client.create_ipsec_site_connection(
+            **ipsec_site_conn_body)
+        self.assertEqual('201', resp['status'])
+        ipsec_site_connection = resp_body['ipsec_site_connection']
+        self.addCleanup(self._delete_ipsec_site_connection,
+                        ipsec_site_connection['id'])
+        self._assertExpected(ipsec_site_conn_body, ipsec_site_connection)
+        # Verification of ipsec site connection update
+        self.client.wait_for_resource_status('ipsec_site_connection',
+                                             ipsec_site_connection['id'],
+                                             'ACTIVE')
+        new_ipsec = {'name': data_utils.rand_name("New-ipsec-site-connection"),
+                     'mtu': 2000}
+        resp, body = self.client.update_ipsec_site_connection(
+            ipsec_site_connection['id'],
+            **new_ipsec)
+        self.assertEqual('200', resp['status'])
+        updated_ipsec_site_connection = body['ipsec_site_connection']
+        self._assertExpected(new_ipsec, updated_ipsec_site_connection)
+        # Verification of ipsec site connection delete
+        resp, _ = self.client.delete_ipsec_site_connection(
+            ipsec_site_connection['id'])
+        self.assertEqual('204', resp['status'])
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_ipsec_site_connection,
+                          ipsec_site_connection['id'])
+
+    @test.attr(type='smoke')
+    def test_show_ipsec_site_connection(self):
+        # Verifies the details of an ipsec site connection
+        resp, body = self.client.show_ipsec_site_connection(
+            self.ipsec_site_connection['id'])
+        self.assertEqual('200', resp['status'])
+        ipsec_site_connection = body['ipsec_site_connection']
+        self._assertExpected(self.ipsec_site_connection, ipsec_site_connection)
 
 
 class VPNaaSTestXML(VPNaaSTestJSON):

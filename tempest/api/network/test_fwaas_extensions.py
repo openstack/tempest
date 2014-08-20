@@ -72,16 +72,17 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
         self.client.wait_for_resource_deletion('firewall', fw_id)
 
-    def _wait_for_active(self, fw_id):
+    def _wait_for_status(self, fw_id, status):
         def _wait():
             resp, firewall = self.client.show_firewall(fw_id)
             self.assertEqual('200', resp['status'])
             firewall = firewall['firewall']
-            return firewall['status'] == 'ACTIVE'
+            return firewall['status'] == status
 
         if not test.call_until_true(_wait, CONF.network.build_timeout,
                                     CONF.network.build_interval):
-            m = 'Timed out waiting for firewall %s to become ACTIVE.' % fw_id
+            m = 'Timed out waiting for firewall %s to become %s.' % (fw_id,
+                                                                     status)
             raise exceptions.TimeoutException(m)
 
     @test.attr(type='smoke')
@@ -184,7 +185,46 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
             self.assertEqual(self.fw_policy[key], value)
 
     @test.attr(type='smoke')
-    def test_create_show_delete_firewall(self):
+    def test_insert_remove_firewall_rule_in_policy(self):
+        # Create firewall policy
+        policy = self.create_firewall_policy()
+        # Create three firewall rules for the test
+        rule1 = self.create_firewall_rule("allow", "tcp")
+        rule2 = self.create_firewall_rule("deny", "icmp")
+        rule3 = self.create_firewall_rule("allow", "udp")
+
+        # Insert firewall rules in the policy
+        resp, _ = self.client.insert_firewall_rule_in_policy(
+            policy['id'], rule1['id'])
+        self.assertEqual('200', resp['status'])
+        resp, _ = self.client.insert_firewall_rule_in_policy(
+            policy['id'], rule2['id'], insert_after=rule1['id'])
+        self.assertEqual('200', resp['status'])
+        resp, policy = self.client.insert_firewall_rule_in_policy(
+            policy['id'], rule3['id'], insert_after=rule1['id'],
+            insert_before=rule2['id'])
+        self.assertEqual('200', resp['status'])
+
+        self.assertEqual([rule1['id'], rule3['id'], rule2['id']],
+                         policy['firewall_rules'])
+
+        # Remove firewall rules from the policy
+        resp, policy = self.client.remove_firewall_rule_from_policy(
+            policy['id'], rule3['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertEqual([rule1['id'], rule2['id']],
+                         policy['firewall_rules'])
+
+        resp, _ = self.client.remove_firewall_rule_from_policy(
+            policy['id'], rule1['id'])
+        self.assertEqual('200', resp['status'])
+        resp, policy = self.client.remove_firewall_rule_from_policy(
+            policy['id'], rule2['id'])
+        self.assertEqual('200', resp['status'])
+        self.assertEmpty(policy['firewall_rules'])
+
+    @test.attr(type='smoke')
+    def test_create_show_update_delete_firewall(self):
         # Create tenant network resources required for an ACTIVE firewall
         network = self.create_network()
         subnet = self.create_subnet(network)
@@ -203,7 +243,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         firewall_id = created_firewall['id']
         self.addCleanup(self._try_delete_firewall, firewall_id)
 
-        self._wait_for_active(firewall_id)
+        self._wait_for_status(firewall_id, 'ACTIVE')
 
         # show a created firewall
         resp, firewall = self.client.show_firewall(firewall_id)
@@ -214,6 +254,13 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
             if key == 'status':
                 continue
             self.assertEqual(created_firewall[key], value)
+
+        # update a created firewall
+        resp, firewall = self.client.update_firewall(firewall_id,
+                                                     admin_state_up=False)
+        firewall = firewall['firewall']
+        self.assertFalse(firewall['admin_state_up'])
+        self._wait_for_status(firewall_id, 'DOWN')
 
         # list firewall
         resp, firewalls = self.client.list_firewalls()
