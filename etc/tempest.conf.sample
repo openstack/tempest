@@ -105,6 +105,17 @@
 #syslog_log_facility=LOG_USER
 
 
+[auth]
+
+#
+# Options defined in tempest.config
+#
+
+# Path to the yaml file that contains the list of credentials
+# to use for running tests (string value)
+#test_accounts_file=etc/accounts.yaml
+
+
 [baremetal]
 
 #
@@ -389,28 +400,41 @@
 # If false, skip all nova v3 tests. (boolean value)
 #api_v3=false
 
+# If false skip all v2 api tests with xml (boolean value)
+#xml_api_v2=true
+
 # If false, skip disk config tests (boolean value)
 #disk_config=true
 
 # A list of enabled compute extensions with a special entry
 # all which indicates every extension is enabled. Each
-# extension should be specified with alias name (list value)
+# extension should be specified with alias name. Empty list
+# indicates all extensions are disabled (list value)
 #api_extensions=all
 
 # A list of enabled v3 extensions with a special entry all
 # which indicates every extension is enabled. Each extension
-# should be specified with alias name (list value)
+# should be specified with alias name. Empty list indicates
+# all extensions are disabled (list value)
 #api_v3_extensions=all
 
 # Does the test environment support changing the admin
 # password? (boolean value)
 #change_password=false
 
+# Does the test environment support obtaining instance serial
+# console output? (boolean value)
+#console_output=true
+
 # Does the test environment support resizing? (boolean value)
 #resize=false
 
 # Does the test environment support pausing? (boolean value)
 #pause=true
+
+# Does the test environment support shelving/unshelving?
+# (boolean value)
+#shelve=true
 
 # Does the test environment support suspend/resume? (boolean
 # value)
@@ -443,6 +467,19 @@
 # Does the test environment support instance rescue mode?
 # (boolean value)
 #rescue=true
+
+# Enables returning of the instance password by the relevant
+# server API calls such as create, rebuild or rescue. (boolean
+# value)
+#enable_instance_password=true
+
+# Does the test environment support dynamic network interface
+# attachment? (boolean value)
+#interface_attach=true
+
+# Does the test environment support creating snapshot images
+# of running instances? (boolean value)
+#snapshot=true
 
 
 [dashboard]
@@ -753,7 +790,8 @@
 #ipv6=true
 
 # A list of enabled network extensions with a special entry
-# all which indicates every extension is enabled (list value)
+# all which indicates every extension is enabled. Empty list
+# indicates all extensions are disabled (list value)
 #api_extensions=all
 
 # Allow the execution of IPv6 subnet tests that use the
@@ -1108,7 +1146,8 @@
 #snapshot=true
 
 # A list of enabled volume extensions with a special entry all
-# which indicates every extension is enabled (list value)
+# which indicates every extension is enabled. Empty list
+# indicates all extensions are disabled (list value)
 #api_extensions=all
 
 # Is the v1 volume API enabled (boolean value)

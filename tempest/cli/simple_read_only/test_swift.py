@@ -17,6 +17,7 @@ import re
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 
@@ -37,7 +38,7 @@ class SimpleReadOnlySwiftClientTest(cli.ClientTestBase):
         super(SimpleReadOnlySwiftClientTest, cls).setUpClass()
 
     def test_swift_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.swift,
                           'this-does-not-exist')
 

@@ -32,6 +32,7 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
     @test.attr(type="gate")
     @testtools.skipIf(not CONF.service_available.nova,
                       "Nova is not available.")
+    @test.skip_because(bug="1336755")
     def test_check_nova_notification(self):
 
         resp, body = self.create_server()
@@ -40,6 +41,38 @@ class TelemetryNotificationAPITestJSON(base.BaseTelemetryTest):
         query = ('resource', 'eq', body['id'])
 
         for metric in self.nova_notifications:
+            self.await_samples(metric, query)
+
+    @test.attr(type="smoke")
+    @test.services("image")
+    @testtools.skipIf(not CONF.image_feature_enabled.api_v1,
+                      "Glance api v1 is disabled")
+    @test.skip_because(bug='1351627')
+    def test_check_glance_v1_notifications(self):
+        _, body = self.create_image(self.image_client)
+        self.image_client.update_image(body['id'], data='data')
+
+        query = 'resource', 'eq', body['id']
+
+        self.image_client.delete_image(body['id'])
+
+        for metric in self.glance_notifications:
+            self.await_samples(metric, query)
+
+    @test.attr(type="smoke")
+    @test.services("image")
+    @testtools.skipIf(not CONF.image_feature_enabled.api_v2,
+                      "Glance api v2 is disabled")
+    @test.skip_because(bug='1351627')
+    def test_check_glance_v2_notifications(self):
+        _, body = self.create_image(self.image_client_v2)
+
+        self.image_client_v2.store_image(body['id'], "file")
+        self.image_client_v2.get_image_file(body['id'])
+
+        query = 'resource', 'eq', body['id']
+
+        for metric in self.glance_v2_notifications:
             self.await_samples(metric, query)
 
 

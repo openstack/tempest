@@ -85,8 +85,8 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         # Update allowed address pair attribute of port
         allowed_address_pairs = [{'ip_address': self.ip_address,
                                   'mac_address': self.mac_address}]
-        resp, body = self.client.update_port(port_id,
-                          allowed_address_pairs=allowed_address_pairs)
+        resp, body = self.client.update_port(
+            port_id, allowed_address_pairs=allowed_address_pairs)
         self.assertEqual('200', resp['status'])
         newport = body['port']
         self._confirm_allowed_address_pair(newport, self.ip_address)

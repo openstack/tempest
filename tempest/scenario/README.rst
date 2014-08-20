@@ -1,3 +1,5 @@
+.. _scenario_field_guide:
+
 Tempest Field Guide to Scenario tests
 =====================================
 

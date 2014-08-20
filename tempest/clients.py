@@ -50,8 +50,11 @@ from tempest.services.compute.json.keypairs_client import KeyPairsClientJSON
 from tempest.services.compute.json.limits_client import LimitsClientJSON
 from tempest.services.compute.json.migrations_client import \
     MigrationsClientJSON
+from tempest.services.compute.json.networks_client import NetworksClientJSON
 from tempest.services.compute.json.quotas_client import QuotaClassesClientJSON
 from tempest.services.compute.json.quotas_client import QuotasClientJSON
+from tempest.services.compute.json.security_group_default_rules_client import \
+    SecurityGroupDefaultRulesClientJSON
 from tempest.services.compute.json.security_groups_client import \
     SecurityGroupsClientJSON
 from tempest.services.compute.json.servers_client import ServersClientJSON
@@ -179,7 +182,15 @@ from tempest.services.volume.json.extensions_client import \
     ExtensionsClientJSON as VolumeExtensionClientJSON
 from tempest.services.volume.json.snapshots_client import SnapshotsClientJSON
 from tempest.services.volume.json.volumes_client import VolumesClientJSON
+from tempest.services.volume.v2.json.availability_zone_client import \
+    VolumeV2AvailabilityZoneClientJSON
+from tempest.services.volume.v2.json.extensions_client import \
+    ExtensionsV2ClientJSON as VolumeV2ExtensionClientJSON
 from tempest.services.volume.v2.json.volumes_client import VolumesV2ClientJSON
+from tempest.services.volume.v2.xml.availability_zone_client import \
+    VolumeV2AvailabilityZoneClientXML
+from tempest.services.volume.v2.xml.extensions_client import \
+    ExtensionsV2ClientXML as VolumeV2ExtensionClientXML
 from tempest.services.volume.v2.xml.volumes_client import VolumesV2ClientXML
 from tempest.services.volume.v2.json.backups_client import BackupsV2ClientJSON
 from tempest.services.volume.v2.json.snapshots_client import SnapshotsV2ClientJSON
@@ -273,6 +284,8 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.volumes_extension_client = VolumeExtensionClientXML(
                 self.auth_provider)
+            self.volumes_v2_extension_client = VolumeV2ExtensionClientXML(
+                self.auth_provider)
             if CONF.service_available.ceilometer:
                 self.telemetry_client = TelemetryClientXML(
                     self.auth_provider)
@@ -280,6 +293,8 @@ class Manager(manager.Manager):
             self.token_v3_client = V3TokenClientXML()
             self.volume_availability_zone_client = \
                 VolumeAvailabilityZoneClientXML(self.auth_provider)
+            self.volume_v2_availability_zone_client = \
+                VolumeV2AvailabilityZoneClientXML(self.auth_provider)
 
         elif self.interface == 'json':
             self.certificates_client = CertificatesClientJSON(
@@ -369,6 +384,8 @@ class Manager(manager.Manager):
                 self.auth_provider)
             self.volumes_extension_client = VolumeExtensionClientJSON(
                 self.auth_provider)
+            self.volumes_v2_extension_client = VolumeV2ExtensionClientJSON(
+                self.auth_provider)
             self.hosts_v3_client = HostsV3ClientJSON(self.auth_provider)
             self.database_flavors_client = DatabaseFlavorsClientJSON(
                 self.auth_provider)
@@ -385,6 +402,8 @@ class Manager(manager.Manager):
             self.negative_client.service = service
             self.volume_availability_zone_client = \
                 VolumeAvailabilityZoneClientJSON(self.auth_provider)
+            self.volume_v2_availability_zone_client = \
+                VolumeV2AvailabilityZoneClientJSON(self.auth_provider)
 
         else:
             msg = "Unsupported interface type `%s'" % interface
@@ -415,6 +434,9 @@ class Manager(manager.Manager):
         self.data_processing_client = DataProcessingClient(
             self.auth_provider)
         self.migrations_client = MigrationsClientJSON(self.auth_provider)
+        self.security_group_default_rules_client = (
+            SecurityGroupDefaultRulesClientJSON(self.auth_provider))
+        self.networks_client = NetworksClientJSON(self.auth_provider)
 
 
 class AltManager(Manager):

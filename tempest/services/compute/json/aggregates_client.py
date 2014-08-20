@@ -15,8 +15,8 @@
 
 import json
 
-from tempest.api_schema.compute import aggregates as schema
-from tempest.api_schema.compute.v2 import aggregates as v2_schema
+from tempest.api_schema.response.compute import aggregates as schema
+from tempest.api_schema.response.compute.v2 import aggregates as v2_schema
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions

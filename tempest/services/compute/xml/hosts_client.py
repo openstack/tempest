@@ -15,6 +15,7 @@
 import urllib
 
 from lxml import etree
+
 from tempest.common import rest_client
 from tempest.common import xml_utils
 from tempest import config

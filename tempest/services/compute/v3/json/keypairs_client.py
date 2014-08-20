@@ -15,8 +15,8 @@
 
 import json
 
-from tempest.api_schema.compute import keypairs as common_schema
-from tempest.api_schema.compute.v3 import keypairs as schema
+from tempest.api_schema.response.compute import keypairs as common_schema
+from tempest.api_schema.response.compute.v3 import keypairs as schema
 from tempest.common import rest_client
 from tempest import config
 

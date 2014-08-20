@@ -111,7 +111,9 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                         security_groups=default_sg_quota)
 
         # Check we cannot create anymore
-        self.assertRaises(exceptions.OverLimit,
+        # A 403 Forbidden or 413 Overlimit (old behaviour) exception
+        # will be raised when out of quota
+        self.assertRaises((exceptions.Unauthorized, exceptions.OverLimit),
                           self.sg_client.create_security_group,
                           "sg-overlimit", "sg-desc")
 
@@ -147,7 +149,9 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
         ip_protocol = 'tcp'
 
         # Check we cannot create SG rule anymore
-        self.assertRaises(exceptions.OverLimit,
+        # A 403 Forbidden or 413 Overlimit (old behaviour) exception
+        # will be raised when out of quota
+        self.assertRaises((exceptions.OverLimit, exceptions.Unauthorized),
                           self.sg_client.create_security_group_rule,
                           secgroup_id, ip_protocol, 1025, 1025)
 

@@ -16,10 +16,11 @@
 
 import cStringIO
 import select
-import six
 import socket
 import time
 import warnings
+
+import six
 
 from tempest import exceptions
 from tempest.openstack.common import log as logging

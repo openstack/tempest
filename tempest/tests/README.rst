@@ -1,3 +1,5 @@
+.. _unit_tests_field_guide:
+
 Tempest Field Guide to Unit tests
 =================================
 

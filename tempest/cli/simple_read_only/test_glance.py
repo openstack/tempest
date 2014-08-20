@@ -17,6 +17,7 @@ import re
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 
 CONF = config.CONF
@@ -40,7 +41,7 @@ class SimpleReadOnlyGlanceClientTest(cli.ClientTestBase):
         super(SimpleReadOnlyGlanceClientTest, cls).setUpClass()
 
     def test_glance_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.glance,
                           'this-does-not-exist')
 
@@ -76,7 +77,7 @@ class SimpleReadOnlyGlanceClientTest(cli.ClientTestBase):
         wanted_commands = set(('image-create', 'image-delete', 'help',
                                'image-download', 'image-show', 'image-update',
                                'member-create', 'member-delete',
-                               'member-list'))
+                               'member-list', 'image-list'))
         self.assertFalse(wanted_commands - commands)
 
     # Optional arguments:

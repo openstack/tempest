@@ -425,6 +425,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           self.client.restore_soft_deleted_server,
                           self.server_id)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_shelve_non_existent_server(self):
         # shelve a non existent server
@@ -432,6 +434,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.shelve_server,
                           nonexistent_server)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_shelve_shelved_server(self):
         # shelve a shelved server.
@@ -460,6 +464,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
 
         self.client.unshelve_server(self.server_id)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_unshelve_non_existent_server(self):
         # unshelve a non existent server
@@ -467,6 +473,8 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound, self.client.unshelve_server,
                           nonexistent_server)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
     @test.attr(type=['negative', 'gate'])
     def test_unshelve_server_invalid_state(self):
         # unshelve an active server.

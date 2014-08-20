@@ -15,10 +15,12 @@
 
 import logging
 import re
+
 import testtools
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -40,7 +42,7 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
         super(SimpleReadOnlyCinderClientTest, cls).setUpClass()
 
     def test_cinder_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.cinder,
                           'this-does-not-exist')
 
@@ -65,7 +67,7 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
                                       'Attached to'])
         self.cinder('list', params='--all-tenants 1')
         self.cinder('list', params='--all-tenants 0')
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.cinder,
                           'list',
                           params='--all-tenants bad')

@@ -290,8 +290,8 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         health_monitor = body['health_monitor']
         # Verification of health_monitor update
         resp, body = (self.client.update_health_monitor
-                     (health_monitor['id'],
-                      admin_state_up=False))
+                      (health_monitor['id'],
+                       admin_state_up=False))
         self.assertEqual('200', resp['status'])
         updated_health_monitor = body['health_monitor']
         self.assertFalse(updated_health_monitor['admin_state_up'])
@@ -323,10 +323,10 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.addCleanup(self.client.delete_health_monitor,
                         health_monitor['id'])
         resp, body = (self.client.update_health_monitor
-                     (health_monitor['id'],
-                      http_method="POST",
-                      url_path="/home/user",
-                      expected_codes="290"))
+                      (health_monitor['id'],
+                       http_method="POST",
+                       url_path="/home/user",
+                       expected_codes="290"))
         self.assertEqual('200', resp['status'])
         updated_health_monitor = body['health_monitor']
         self.assertEqual("POST", updated_health_monitor['http_method'])
@@ -348,7 +348,7 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
     def test_associate_disassociate_health_monitor_with_pool(self):
         # Verify that a health monitor can be associated with a pool
         resp, body = (self.client.associate_health_monitor_with_pool
-                     (self.health_monitor['id'], self.pool['id']))
+                      (self.health_monitor['id'], self.pool['id']))
         self.assertEqual('201', resp['status'])
         resp, body = self.client.show_health_monitor(
             self.health_monitor['id'])
@@ -360,7 +360,7 @@ class LoadBalancerTestJSON(base.BaseNetworkTest):
         self.assertIn(health_monitor['id'], pool['health_monitors'])
         # Verify that a health monitor can be disassociated from a pool
         resp, body = (self.client.disassociate_health_monitor_with_pool
-                     (self.health_monitor['id'], self.pool['id']))
+                      (self.health_monitor['id'], self.pool['id']))
         self.assertEqual('204', resp['status'])
         resp, body = self.client.show_pool(self.pool['id'])
         pool = body['pool']

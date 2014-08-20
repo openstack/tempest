@@ -40,8 +40,8 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
 
         name = data_utils.rand_name('sahara-internal-job-binary')
         cls.job_binary_data = 'Some script may be data'
-        job_binary_internal = cls.create_job_binary_internal(
-            name, cls.job_binary_data)[1]
+        job_binary_internal = (
+            cls.create_job_binary_internal(name, cls.job_binary_data))
         cls.internal_db_job_binary = {
             'url': 'internal-db://%s' % job_binary_internal['id'],
             'description': 'Test job binary',
@@ -50,26 +50,25 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
     def _create_job_binary(self, binary_body, binary_name=None):
         """Creates Job Binary with optional name specified.
 
-        It creates a link to data (jar, pig files, etc.) and ensures response
-        status, job binary name and response body. Returns id and name of
-        created job binary. Data may not exist when using Swift
-        as data storage. In other cases data must exist in storage.
+        It creates a link to data (jar, pig files, etc.), ensures job binary
+        name and response body. Returns id and name of created job binary.
+        Data may not exist when using Swift as data storage.
+        In other cases data must exist in storage.
         """
         if not binary_name:
             # generate random name if it's not specified
             binary_name = data_utils.rand_name('sahara-job-binary')
 
         # create job binary
-        resp, body = self.create_job_binary(binary_name, **binary_body)
+        resp_body = self.create_job_binary(binary_name, **binary_body)
 
         # ensure that binary created successfully
-        self.assertEqual(202, resp.status)
-        self.assertEqual(binary_name, body['name'])
+        self.assertEqual(binary_name, resp_body['name'])
         if 'swift' in binary_body['url']:
             binary_body = self.swift_job_binary
-        self.assertDictContainsSubset(binary_body, body)
+        self.assertDictContainsSubset(binary_body, resp_body)
 
-        return body['id'], binary_name
+        return resp_body['id'], binary_name
 
     @test.attr(type='smoke')
     def test_swift_job_binary_create(self):
@@ -80,30 +79,27 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         binary_info = self._create_job_binary(self.swift_job_binary_with_extra)
 
         # check for job binary in list
-        resp, binaries = self.client.list_job_binaries()
-        self.assertEqual(200, resp.status)
+        _, binaries = self.client.list_job_binaries()
         binaries_info = [(binary['id'], binary['name']) for binary in binaries]
         self.assertIn(binary_info, binaries_info)
 
     @test.attr(type='smoke')
     def test_swift_job_binary_get(self):
-        binary_id, binary_name = self._create_job_binary(
-            self.swift_job_binary_with_extra)
+        binary_id, binary_name = (
+            self._create_job_binary(self.swift_job_binary_with_extra))
 
         # check job binary fetch by id
-        resp, binary = self.client.get_job_binary(binary_id)
-        self.assertEqual(200, resp.status)
+        _, binary = self.client.get_job_binary(binary_id)
         self.assertEqual(binary_name, binary['name'])
         self.assertDictContainsSubset(self.swift_job_binary, binary)
 
     @test.attr(type='smoke')
     def test_swift_job_binary_delete(self):
-        binary_id = self._create_job_binary(
-            self.swift_job_binary_with_extra)[0]
+        binary_id, _ = (
+            self._create_job_binary(self.swift_job_binary_with_extra))
 
         # delete the job binary by id
-        resp = self.client.delete_job_binary(binary_id)[0]
-        self.assertEqual(204, resp.status)
+        self.client.delete_job_binary(binary_id)
 
     @test.attr(type='smoke')
     def test_internal_db_job_binary_create(self):
@@ -114,35 +110,31 @@ class JobBinaryTest(dp_base.BaseDataProcessingTest):
         binary_info = self._create_job_binary(self.internal_db_job_binary)
 
         # check for job binary in list
-        resp, binaries = self.client.list_job_binaries()
-        self.assertEqual(200, resp.status)
+        _, binaries = self.client.list_job_binaries()
         binaries_info = [(binary['id'], binary['name']) for binary in binaries]
         self.assertIn(binary_info, binaries_info)
 
     @test.attr(type='smoke')
     def test_internal_db_job_binary_get(self):
-        binary_id, binary_name = self._create_job_binary(
-            self.internal_db_job_binary)
+        binary_id, binary_name = (
+            self._create_job_binary(self.internal_db_job_binary))
 
         # check job binary fetch by id
-        resp, binary = self.client.get_job_binary(binary_id)
-        self.assertEqual(200, resp.status)
+        _, binary = self.client.get_job_binary(binary_id)
         self.assertEqual(binary_name, binary['name'])
         self.assertDictContainsSubset(self.internal_db_job_binary, binary)
 
     @test.attr(type='smoke')
     def test_internal_db_job_binary_delete(self):
-        binary_id = self._create_job_binary(self.internal_db_job_binary)[0]
+        binary_id, _ = self._create_job_binary(self.internal_db_job_binary)
 
         # delete the job binary by id
-        resp = self.client.delete_job_binary(binary_id)[0]
-        self.assertEqual(204, resp.status)
+        self.client.delete_job_binary(binary_id)
 
     @test.attr(type='smoke')
     def test_job_binary_get_data(self):
-        binary_id = self._create_job_binary(self.internal_db_job_binary)[0]
+        binary_id, _ = self._create_job_binary(self.internal_db_job_binary)
 
         # get data of job binary by id
-        resp, data = self.client.get_job_binary_data(binary_id)
-        self.assertEqual(200, resp.status)
+        _, data = self.client.get_job_binary_data(binary_id)
         self.assertEqual(data, self.job_binary_data)

@@ -65,7 +65,10 @@ outputs:
 
         # random_string.yaml specifies a length of 10
         random_value = self.get_stack_output(stack_identifier, 'random_value')
-        self.assertEqual(10, len(random_value))
+        random_string_template = self.load_template('random_string')
+        expected_length = random_string_template['parameters'][
+            'random_length']['default']
+        self.assertEqual(expected_length, len(random_value))
 
     @test.attr(type='gate')
     def test_files_provider_resource(self):
@@ -90,4 +93,7 @@ outputs:
 
         # random_string.yaml specifies a length of 10
         random_value = self.get_stack_output(stack_identifier, 'random_value')
-        self.assertEqual(10, len(random_value))
+        random_string_template = self.load_template('random_string')
+        expected_length = random_string_template['parameters'][
+            'random_length']['default']
+        self.assertEqual(expected_length, len(random_value))

@@ -16,11 +16,11 @@
 import json
 import urllib
 
-from tempest.api_schema.compute import flavors as common_schema
-from tempest.api_schema.compute import flavors_access as schema_access
-from tempest.api_schema.compute import flavors_extra_specs \
+from tempest.api_schema.response.compute import flavors as common_schema
+from tempest.api_schema.response.compute import flavors_access as schema_access
+from tempest.api_schema.response.compute import flavors_extra_specs \
     as schema_extra_specs
-from tempest.api_schema.compute.v3 import flavors as v3schema
+from tempest.api_schema.response.compute.v3 import flavors as v3schema
 from tempest.common import rest_client
 from tempest import config
 

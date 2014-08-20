@@ -11,8 +11,9 @@
 #    under the License.
 
 import re
-import six
 import time
+
+import six
 
 from tempest.common import ssh
 from tempest import config

@@ -14,9 +14,9 @@
 #    under the License.
 
 import logging
+import urlparse
 
 import testtools
-import urlparse
 
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
@@ -250,6 +250,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         resp, server = self.client.get_server(self.server_id)
         self.assertEqual(previous_flavor_ref, server['flavor']['id'])
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting not available, backup not possible.')
     @test.attr(type='gate')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
@@ -339,6 +341,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         lines = len(output.split('\n'))
         self.assertEqual(lines, 10)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
+                          'Console output not supported.')
     @test.attr(type='gate')
     def test_get_console_output(self):
         # Positive test:Should be able to GET the console output
@@ -355,6 +359,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
 
         self.wait_for(self._get_output)
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.console_output,
+                          'Console output not supported.')
     @test.attr(type='gate')
     def test_get_console_output_server_id_in_shutoff_status(self):
         # Positive test:Should be able to GET the console output
@@ -394,6 +400,8 @@ class ServerActionsV3Test(base.BaseV3ComputeTest):
         self.assertEqual(202, resp.status)
         self.client.wait_for_server_status(self.server_id, 'ACTIVE')
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.shelve,
+                          'Shelve is not available.')
     @test.attr(type='gate')
     def test_shelve_unshelve_server(self):
         resp, server = self.client.shelve_server(self.server_id)

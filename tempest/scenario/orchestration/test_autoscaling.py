@@ -10,8 +10,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import heatclient.exc as heat_exceptions
 import time
+
+import heatclient.exc as heat_exceptions
 
 from tempest import config
 from tempest.scenario import manager

@@ -16,6 +16,7 @@
 import time
 
 from cinderclient import exceptions as cinder_exceptions
+import testtools
 
 from tempest.common.utils import data_utils
 from tempest import config
@@ -150,6 +151,8 @@ class TestStampPattern(manager.OfficialClientTest):
         self.assertEqual(self.timestamp, got_timestamp)
 
     @tempest.test.skip_because(bug="1205344")
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     @tempest.test.services('compute', 'network', 'volume', 'image')
     def test_stamp_pattern(self):
         # prepare for booting a instance

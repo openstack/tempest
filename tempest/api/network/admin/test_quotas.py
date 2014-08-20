@@ -46,8 +46,7 @@ class QuotasTest(base.BaseAdminNetworkTest):
             raise cls.skipException(msg)
         cls.identity_admin_client = cls.os_adm.identity_client
 
-    @test.attr(type='gate')
-    def test_quotas(self):
+    def _check_quotas(self, new_quotas):
         # Add a tenant to conduct the test
         test_tenant = data_utils.rand_name('test_tenant_')
         test_description = data_utils.rand_name('desc_')
@@ -56,14 +55,15 @@ class QuotasTest(base.BaseAdminNetworkTest):
             description=test_description)
         tenant_id = tenant['id']
         self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)
+
         # Change quotas for tenant
-        new_quotas = {'network': 0, 'security_group': 0}
         resp, quota_set = self.admin_client.update_quotas(tenant_id,
                                                           **new_quotas)
         self.assertEqual('200', resp['status'])
         self.addCleanup(self.admin_client.reset_quotas, tenant_id)
-        self.assertEqual(0, quota_set['network'])
-        self.assertEqual(0, quota_set['security_group'])
+        for key, value in new_quotas.iteritems():
+            self.assertEqual(value, quota_set[key])
+
         # Confirm our tenant is listed among tenants with non default quotas
         resp, non_default_quotas = self.admin_client.list_quotas()
         self.assertEqual('200', resp['status'])
@@ -72,12 +72,14 @@ class QuotasTest(base.BaseAdminNetworkTest):
             if qs['tenant_id'] == tenant_id:
                 found = True
         self.assertTrue(found)
-        # Confirm from APi quotas were changed as requested for tenant
+
+        # Confirm from API quotas were changed as requested for tenant
         resp, quota_set = self.admin_client.show_quotas(tenant_id)
         quota_set = quota_set['quota']
         self.assertEqual('200', resp['status'])
-        self.assertEqual(0, quota_set['network'])
-        self.assertEqual(0, quota_set['security_group'])
+        for key, value in new_quotas.iteritems():
+            self.assertEqual(value, quota_set[key])
+
         # Reset quotas to default and confirm
         resp, body = self.admin_client.reset_quotas(tenant_id)
         self.assertEqual('204', resp['status'])
@@ -85,50 +87,15 @@ class QuotasTest(base.BaseAdminNetworkTest):
         self.assertEqual('200', resp['status'])
         for q in non_default_quotas['quotas']:
             self.assertNotEqual(tenant_id, q['tenant_id'])
+
+    @test.attr(type='gate')
+    def test_quotas(self):
+        new_quotas = {'network': 0, 'security_group': 0}
+        self._check_quotas(new_quotas)
 
     @test.requires_ext(extension='lbaas', service='network')
     @test.attr(type='gate')
     def test_lbaas_quotas(self):
-        # Add a tenant to conduct the test
-        test_tenant = data_utils.rand_name('test_tenant_')
-        test_description = data_utils.rand_name('desc_')
-        _, tenant = self.identity_admin_client.create_tenant(
-            name=test_tenant,
-            description=test_description)
-        tenant_id = tenant['id']
-        self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)
-        # Change lbaas quotas for tenant
         new_quotas = {'vip': 1, 'pool': 2,
                       'member': 3, 'health_monitor': 4}
-
-        resp, quota_set = self.admin_client.update_quotas(tenant_id,
-                                                          **new_quotas)
-        self.assertEqual('200', resp['status'])
-        self.addCleanup(self.admin_client.reset_quotas, tenant_id)
-        self.assertEqual(1, quota_set['vip'])
-        self.assertEqual(2, quota_set['pool'])
-        self.assertEqual(3, quota_set['member'])
-        self.assertEqual(4, quota_set['health_monitor'])
-        # Confirm our tenant is listed among tenants with non default quotas
-        resp, non_default_quotas = self.admin_client.list_quotas()
-        self.assertEqual('200', resp['status'])
-        found = False
-        for qs in non_default_quotas['quotas']:
-            if qs['tenant_id'] == tenant_id:
-                found = True
-        self.assertTrue(found)
-        # Confirm from APi quotas were changed as requested for tenant
-        resp, quota_set = self.admin_client.show_quotas(tenant_id)
-        quota_set = quota_set['quota']
-        self.assertEqual('200', resp['status'])
-        self.assertEqual(1, quota_set['vip'])
-        self.assertEqual(2, quota_set['pool'])
-        self.assertEqual(3, quota_set['member'])
-        self.assertEqual(4, quota_set['health_monitor'])
-        # Reset quotas to default and confirm
-        resp, body = self.admin_client.reset_quotas(tenant_id)
-        self.assertEqual('204', resp['status'])
-        resp, non_default_quotas = self.admin_client.list_quotas()
-        self.assertEqual('200', resp['status'])
-        for q in non_default_quotas['quotas']:
-            self.assertNotEqual(tenant_id, q['tenant_id'])
+        self._check_quotas(new_quotas)

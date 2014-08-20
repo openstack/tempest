@@ -13,6 +13,9 @@
 #    under the License.
 
 import re
+from unittest import util
+
+from testtools import helpers
 
 
 class ExistsAllResponseHeaders(object):
@@ -69,10 +72,24 @@ class ExistsAllResponseHeaders(object):
             elif self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
-        elif self.method == 'PUT' or self.method == 'COPY':
+                if 'last-modified' not in actual:
+                    return NonExistentHeader('last-modified')
+        elif self.method == 'PUT':
             if self.target == 'Object':
                 if 'etag' not in actual:
                     return NonExistentHeader('etag')
+                if 'last-modified' not in actual:
+                    return NonExistentHeader('last-modified')
+        elif self.method == 'COPY':
+            if self.target == 'Object':
+                if 'etag' not in actual:
+                    return NonExistentHeader('etag')
+                if 'last-modified' not in actual:
+                    return NonExistentHeader('last-modified')
+                if 'x-copied-from' not in actual:
+                    return NonExistentHeader('x-copied-from')
+                if 'x-copied-from-last-modified' not in actual:
+                    return NonExistentHeader('x-copied-from-last-modified')
 
         return None
 
@@ -122,10 +139,16 @@ class AreAllWellFormatted(object):
                 return InvalidFormat(key, value)
             elif key == 'content-type' and not value:
                 return InvalidFormat(key, value)
+            elif key == 'x-copied-from' and not re.match("\S+/\S+", value):
+                return InvalidFormat(key, value)
+            elif key == 'x-copied-from-last-modified' and not value:
+                return InvalidFormat(key, value)
             elif key == 'x-trans-id' and \
                 not re.match("^tx[0-9a-f]{21}-[0-9a-f]{10}.*", value):
                 return InvalidFormat(key, value)
             elif key == 'date' and not value:
+                return InvalidFormat(key, value)
+            elif key == 'last-modified' and not value:
                 return InvalidFormat(key, value)
             elif key == 'accept-ranges' and not value == 'bytes':
                 return InvalidFormat(key, value)
@@ -149,6 +172,57 @@ class InvalidFormat(object):
 
     def describe(self):
         return "InvalidFormat (%s, %s)" % (self.key, self.value)
+
+    def get_details(self):
+        return {}
+
+
+class MatchesDictExceptForKeys(object):
+    """Matches two dictionaries. Verifies all items are equals except for those
+    identified by a list of keys.
+    """
+
+    def __init__(self, expected, excluded_keys=None):
+        self.expected = expected
+        self.excluded_keys = excluded_keys if excluded_keys is not None else []
+
+    def match(self, actual):
+        filtered_expected = helpers.dict_subtract(self.expected,
+                                                  self.excluded_keys)
+        filtered_actual = helpers.dict_subtract(actual,
+                                                self.excluded_keys)
+        if filtered_actual != filtered_expected:
+            return DictMismatch(filtered_expected, filtered_actual)
+
+
+class DictMismatch(object):
+    """Mismatch between two dicts describes deltas"""
+
+    def __init__(self, expected, actual):
+        self.expected = expected
+        self.actual = actual
+        self.intersect = set(self.expected) & set(self.actual)
+        self.symmetric_diff = set(self.expected) ^ set(self.actual)
+
+    def describe(self):
+        msg = ""
+        if self.symmetric_diff:
+            only_expected = helpers.dict_subtract(self.expected, self.actual)
+            only_actual = helpers.dict_subtract(self.actual, self.expected)
+            if only_expected:
+                msg += "Only in expected:\n  %s\n" % \
+                       util.safe_repr(only_expected)
+            if only_actual:
+                msg += "Only in actual:\n  %s\n" % \
+                       util.safe_repr(only_actual)
+        diff_set = set(o for o in self.intersect if
+                       self.expected[o] != self.actual[o])
+        if diff_set:
+            msg += "Differences:\n"
+        for o in diff_set:
+            msg += "  %s: expected %s, actual %s\n" % (
+                o, self.expected[o], self.actual[o])
+        return msg
 
     def get_details(self):
         return {}

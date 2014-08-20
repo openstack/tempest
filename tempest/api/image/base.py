@@ -100,7 +100,7 @@ class BaseV1ImageMembersTest(BaseV1ImageTest):
         cls.alt_tenant_id = cls.alt_img_cli.tenant_id
 
     def _create_image(self):
-        image_file = StringIO.StringIO('*' * 1024)
+        image_file = StringIO.StringIO(data_utils.random_bytes())
         resp, image = self.create_image(container_format='bare',
                                         disk_format='raw',
                                         is_public=False,

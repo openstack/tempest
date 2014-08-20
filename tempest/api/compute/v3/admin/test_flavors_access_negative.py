@@ -55,7 +55,6 @@ class FlavorsAccessNegativeV3Test(base.BaseV3ComputeAdminTest):
                           self.client.list_flavor_access,
                           new_flavor_id)
 
-    @test.skip_because(bug='1265416')
     @test.attr(type=['negative', 'gate'])
     def test_flavor_non_admin_add(self):
         # Test to add flavor access as a user without admin privileges.
@@ -72,7 +71,6 @@ class FlavorsAccessNegativeV3Test(base.BaseV3ComputeAdminTest):
                           new_flavor['id'],
                           self.tenant_id)
 
-    @test.skip_because(bug='1265416')
     @test.attr(type=['negative', 'gate'])
     def test_flavor_non_admin_remove(self):
         # Test to remove flavor access as a user without admin privileges.
@@ -93,7 +91,6 @@ class FlavorsAccessNegativeV3Test(base.BaseV3ComputeAdminTest):
                           new_flavor['id'],
                           self.tenant_id)
 
-    @test.skip_because(bug='1265416')
     @test.attr(type=['negative', 'gate'])
     def test_add_flavor_access_duplicate(self):
         # Create a new flavor.
@@ -118,7 +115,6 @@ class FlavorsAccessNegativeV3Test(base.BaseV3ComputeAdminTest):
                           new_flavor['id'],
                           self.tenant_id)
 
-    @test.skip_because(bug='1265416')
     @test.attr(type=['negative', 'gate'])
     def test_remove_flavor_access_not_found(self):
         # Create a new flavor.

@@ -24,7 +24,7 @@ from tempest import test
 CONF = config.CONF
 
 
-class TestDashboardBasicOps(manager.OfficialClientTest):
+class TestDashboardBasicOps(manager.ScenarioTest):
 
     """
     This is a basic scenario test:

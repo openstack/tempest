@@ -29,23 +29,22 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
     def _create_job_binary_internal(self, binary_name=None):
         """Creates Job Binary Internal with optional name specified.
 
-        It puts data into Sahara database and ensures response status and
-        job binary internal name. Returns id and name of created job binary
-        internal.
+        It puts data into Sahara database and ensures job binary internal name.
+        Returns id and name of created job binary internal.
         """
         if not binary_name:
             # generate random name if it's not specified
             binary_name = data_utils.rand_name('sahara-job-binary-internal')
 
         # create job binary internal
-        resp, body = self.create_job_binary_internal(
-            binary_name, self.job_binary_internal_data)
+        resp_body = (
+            self.create_job_binary_internal(binary_name,
+                                            self.job_binary_internal_data))
 
         # ensure that job binary internal created successfully
-        self.assertEqual(202, resp.status)
-        self.assertEqual(binary_name, body['name'])
+        self.assertEqual(binary_name, resp_body['name'])
 
-        return body['id'], binary_name
+        return resp_body['id'], binary_name
 
     @test.attr(type='smoke')
     def test_job_binary_internal_create(self):
@@ -56,8 +55,7 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
         binary_info = self._create_job_binary_internal()
 
         # check for job binary internal in list
-        resp, binaries = self.client.list_job_binary_internals()
-        self.assertEqual(200, resp.status)
+        _, binaries = self.client.list_job_binary_internals()
         binaries_info = [(binary['id'], binary['name']) for binary in binaries]
         self.assertIn(binary_info, binaries_info)
 
@@ -66,23 +64,20 @@ class JobBinaryInternalTest(dp_base.BaseDataProcessingTest):
         binary_id, binary_name = self._create_job_binary_internal()
 
         # check job binary internal fetch by id
-        resp, binary = self.client.get_job_binary_internal(binary_id)
-        self.assertEqual(200, resp.status)
+        _, binary = self.client.get_job_binary_internal(binary_id)
         self.assertEqual(binary_name, binary['name'])
 
     @test.attr(type='smoke')
     def test_job_binary_internal_delete(self):
-        binary_id = self._create_job_binary_internal()[0]
+        binary_id, _ = self._create_job_binary_internal()
 
         # delete the job binary internal by id
-        resp = self.client.delete_job_binary_internal(binary_id)[0]
-        self.assertEqual(204, resp.status)
+        self.client.delete_job_binary_internal(binary_id)
 
     @test.attr(type='smoke')
     def test_job_binary_internal_get_data(self):
-        binary_id = self._create_job_binary_internal()[0]
+        binary_id, _ = self._create_job_binary_internal()
 
         # get data of job binary internal by id
-        resp, data = self.client.get_job_binary_internal_data(binary_id)
-        self.assertEqual(200, resp.status)
+        _, data = self.client.get_job_binary_internal_data(binary_id)
         self.assertEqual(data, self.job_binary_internal_data)

@@ -1,3 +1,5 @@
+.. _third_party_field_guide:
+
 Tempest Field Guide to Third Party API tests
 ============================================
 

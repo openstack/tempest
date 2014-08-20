@@ -29,6 +29,8 @@ class AttachInterfacesV3Test(base.BaseV3ComputeTest):
     def setUpClass(cls):
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron is required")
+        if not CONF.compute_feature_enabled.interface_attach:
+            raise cls.skipException("Interface attachment is not available.")
         # This test class requires network and subnet
         cls.set_network_resources(network=True, subnet=True)
         super(AttachInterfacesV3Test, cls).setUpClass()

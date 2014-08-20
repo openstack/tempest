@@ -85,57 +85,58 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Clean up ipsec policies
-        for ipsecpolicy in cls.ipsecpolicies:
-            cls.client.delete_ipsecpolicy(ipsecpolicy['id'])
-        # Clean up firewall policies
-        for fw_policy in cls.fw_policies:
-            cls.client.delete_firewall_policy(fw_policy['id'])
-        # Clean up firewall rules
-        for fw_rule in cls.fw_rules:
-            cls.client.delete_firewall_rule(fw_rule['id'])
-        # Clean up ike policies
-        for ikepolicy in cls.ikepolicies:
-            cls.client.delete_ikepolicy(ikepolicy['id'])
-        # Clean up vpn services
-        for vpnservice in cls.vpnservices:
-            cls.client.delete_vpnservice(vpnservice['id'])
-        # Clean up floating IPs
-        for floating_ip in cls.floating_ips:
-            cls.client.delete_floatingip(floating_ip['id'])
-        # Clean up routers
-        for router in cls.routers:
-            cls.delete_router(router)
+        if CONF.service_available.neutron:
+            # Clean up ipsec policies
+            for ipsecpolicy in cls.ipsecpolicies:
+                cls.client.delete_ipsecpolicy(ipsecpolicy['id'])
+            # Clean up firewall policies
+            for fw_policy in cls.fw_policies:
+                cls.client.delete_firewall_policy(fw_policy['id'])
+            # Clean up firewall rules
+            for fw_rule in cls.fw_rules:
+                cls.client.delete_firewall_rule(fw_rule['id'])
+            # Clean up ike policies
+            for ikepolicy in cls.ikepolicies:
+                cls.client.delete_ikepolicy(ikepolicy['id'])
+            # Clean up vpn services
+            for vpnservice in cls.vpnservices:
+                cls.client.delete_vpnservice(vpnservice['id'])
+            # Clean up floating IPs
+            for floating_ip in cls.floating_ips:
+                cls.client.delete_floatingip(floating_ip['id'])
+            # Clean up routers
+            for router in cls.routers:
+                cls.delete_router(router)
 
-        # Clean up health monitors
-        for health_monitor in cls.health_monitors:
-            cls.client.delete_health_monitor(health_monitor['id'])
-        # Clean up members
-        for member in cls.members:
-            cls.client.delete_member(member['id'])
-        # Clean up vips
-        for vip in cls.vips:
-            cls.client.delete_vip(vip['id'])
-        # Clean up pools
-        for pool in cls.pools:
-            cls.client.delete_pool(pool['id'])
-        # Clean up metering label rules
-        for metering_label_rule in cls.metering_label_rules:
-            cls.admin_client.delete_metering_label_rule(
-                metering_label_rule['id'])
-        # Clean up metering labels
-        for metering_label in cls.metering_labels:
-            cls.admin_client.delete_metering_label(metering_label['id'])
-        # Clean up ports
-        for port in cls.ports:
-            cls.client.delete_port(port['id'])
-        # Clean up subnets
-        for subnet in cls.subnets:
-            cls.client.delete_subnet(subnet['id'])
-        # Clean up networks
-        for network in cls.networks:
-            cls.client.delete_network(network['id'])
-        cls.clear_isolated_creds()
+            # Clean up health monitors
+            for health_monitor in cls.health_monitors:
+                cls.client.delete_health_monitor(health_monitor['id'])
+            # Clean up members
+            for member in cls.members:
+                cls.client.delete_member(member['id'])
+            # Clean up vips
+            for vip in cls.vips:
+                cls.client.delete_vip(vip['id'])
+            # Clean up pools
+            for pool in cls.pools:
+                cls.client.delete_pool(pool['id'])
+            # Clean up metering label rules
+            for metering_label_rule in cls.metering_label_rules:
+                cls.admin_client.delete_metering_label_rule(
+                    metering_label_rule['id'])
+            # Clean up metering labels
+            for metering_label in cls.metering_labels:
+                cls.admin_client.delete_metering_label(metering_label['id'])
+            # Clean up ports
+            for port in cls.ports:
+                cls.client.delete_port(port['id'])
+            # Clean up subnets
+            for subnet in cls.subnets:
+                cls.client.delete_subnet(subnet['id'])
+            # Clean up networks
+            for network in cls.networks:
+                cls.client.delete_network(network['id'])
+            cls.clear_isolated_creds()
         super(BaseNetworkTest, cls).tearDownClass()
 
     @classmethod

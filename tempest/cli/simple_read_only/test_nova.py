@@ -17,6 +17,7 @@ import testtools
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -47,7 +48,7 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
         super(SimpleReadOnlyNovaClientTest, cls).setUpClass()
 
     def test_admin_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.nova,
                           'this-does-nova-exist')
 
@@ -84,11 +85,11 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
         self.nova('endpoints')
 
     def test_admin_flavor_acces_list(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.nova,
                           'flavor-access-list')
         # Failed to get access list for public flavor type
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.nova,
                           'flavor-access-list',
                           params='--flavor m1.tiny')
@@ -125,7 +126,7 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
         self.nova('list')
         self.nova('list', params='--all-tenants 1')
         self.nova('list', params='--all-tenants 0')
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.nova,
                           'list',
                           params='--all-tenants bad')
@@ -143,6 +144,7 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
     def test_admin_secgroup_list_rules(self):
         self.nova('secgroup-list-rules')
 
+    @tempest.cli.min_client_version(client='nova', version='2.18')
     def test_admin_server_group_list(self):
         self.nova('server-group-list')
 

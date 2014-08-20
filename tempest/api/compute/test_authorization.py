@@ -62,9 +62,9 @@ class AuthorizationTestJSON(base.BaseV2ComputeTest):
 
         name = data_utils.rand_name('image')
         resp, body = cls.glance_client.create_image(name=name,
-                                                   container_format='bare',
-                                                   disk_format='raw',
-                                                   is_public=False)
+                                                    container_format='bare',
+                                                    disk_format='raw',
+                                                    is_public=False)
         image_id = body['id']
         image_file = StringIO.StringIO(('*' * 1024))
         resp, body = cls.glance_client.update_image(image_id, data=image_file)

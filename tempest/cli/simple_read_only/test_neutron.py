@@ -17,6 +17,7 @@ import re
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 from tempest.openstack.common import log as logging
 from tempest import test
 
@@ -42,7 +43,7 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
 
     @test.attr(type='smoke')
     def test_neutron_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.neutron,
                           'this-does-not-exist')
 
@@ -88,7 +89,7 @@ class SimpleReadOnlyNeutronClientTest(cli.ClientTestBase):
     def _test_neutron_lbaas_command(self, command):
         try:
             self.neutron(command)
-        except cli.CommandFailed as e:
+        except exceptions.CommandFailed as e:
             if '404 Not Found' not in e.stderr:
                 self.fail('%s: Unexpected failure.' % command)
 

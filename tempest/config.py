@@ -29,6 +29,18 @@ def register_opt_group(conf, opt_group, options):
         conf.register_opt(opt, group=opt_group.name)
 
 
+auth_group = cfg.OptGroup(name='auth',
+                          title="Options for authentication and credentials")
+
+
+AuthGroup = [
+    cfg.StrOpt('test_accounts_file',
+               default='etc/accounts.yaml',
+               help="Path to the yaml file that contains the list of "
+                    "credentials to use for running tests"),
+]
+
+
 identity_group = cfg.OptGroup(name='identity',
                               title="Keystone Configuration Options")
 
@@ -265,6 +277,9 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('api_v3',
                 default=False,
                 help="If false, skip all nova v3 tests."),
+    cfg.BoolOpt('xml_api_v2',
+                default=True,
+                help="If false skip all v2 api tests with xml"),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
@@ -272,22 +287,31 @@ ComputeFeaturesGroup = [
                 default=['all'],
                 help='A list of enabled compute extensions with a special '
                      'entry all which indicates every extension is enabled. '
-                     'Each extension should be specified with alias name'),
+                     'Each extension should be specified with alias name. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.ListOpt('api_v3_extensions',
                 default=['all'],
                 help='A list of enabled v3 extensions with a special entry all'
                      ' which indicates every extension is enabled. '
-                     'Each extension should be specified with alias name'),
+                     'Each extension should be specified with alias name. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('change_password',
                 default=False,
                 help="Does the test environment support changing the admin "
                      "password?"),
+    cfg.BoolOpt('console_output',
+                default=True,
+                help="Does the test environment support obtaining instance "
+                     "serial console output?"),
     cfg.BoolOpt('resize',
                 default=False,
                 help="Does the test environment support resizing?"),
     cfg.BoolOpt('pause',
                 default=True,
                 help="Does the test environment support pausing?"),
+    cfg.BoolOpt('shelve',
+                default=True,
+                help="Does the test environment support shelving/unshelving?"),
     cfg.BoolOpt('suspend',
                 default=True,
                 help="Does the test environment support suspend/resume?"),
@@ -318,7 +342,20 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('rescue',
                 default=True,
                 help='Does the test environment support instance rescue '
-                     'mode?')
+                     'mode?'),
+    cfg.BoolOpt('enable_instance_password',
+                default=True,
+                help='Enables returning of the instance password by the '
+                     'relevant server API calls such as create, rebuild '
+                     'or rescue.'),
+    cfg.BoolOpt('interface_attach',
+                default=True,
+                help='Does the test environment support dynamic network '
+                     'interface attachment?'),
+    cfg.BoolOpt('snapshot',
+                default=True,
+                help='Does the test environment support creating snapshot '
+                     'images of running instances?')
 ]
 
 
@@ -445,7 +482,8 @@ NetworkFeaturesGroup = [
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled network extensions with a special '
-                     'entry all which indicates every extension is enabled'),
+                     'entry all which indicates every extension is enabled. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('ipv6_subnet_attributes',
                 default=False,
                 help="Allow the execution of IPv6 subnet tests that use "
@@ -550,7 +588,8 @@ VolumeFeaturesGroup = [
     cfg.ListOpt('api_extensions',
                 default=['all'],
                 help='A list of enabled volume extensions with a special '
-                     'entry all which indicates every extension is enabled'),
+                     'entry all which indicates every extension is enabled. '
+                     'Empty list indicates all extensions are disabled'),
     cfg.BoolOpt('api_v1',
                 default=True,
                 help="Is the v1 volume API enabled"),
@@ -1000,6 +1039,7 @@ NegativeGroup = [
 
 
 def register_opts():
+    register_opt_group(cfg.CONF, auth_group, AuthGroup)
     register_opt_group(cfg.CONF, compute_group, ComputeGroup)
     register_opt_group(cfg.CONF, compute_features_group,
                        ComputeFeaturesGroup)
@@ -1048,6 +1088,7 @@ class TempestConfigPrivate(object):
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
     def _set_attrs(self):
+        self.auth = cfg.CONF.auth
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity

@@ -269,7 +269,7 @@ def check_service_availability(os, update):
                 if getattr(CONF.service_available, codename_match[cfgname]):
                     print('Endpoint type %s not found either disable service '
                           '%s or fix the catalog_type in the config file' % (
-                          catalog_type, codename_match[cfgname]))
+                              catalog_type, codename_match[cfgname]))
                     if update:
                         change_option(codename_match[cfgname],
                                       'service_available', False)
@@ -278,7 +278,7 @@ def check_service_availability(os, update):
                                codename_match[cfgname]):
                     print('Endpoint type %s is available, service %s should be'
                           ' set as available in the config file.' % (
-                          catalog_type, codename_match[cfgname]))
+                              catalog_type, codename_match[cfgname]))
                     if update:
                         change_option(codename_match[cfgname],
                                       'service_available', True)

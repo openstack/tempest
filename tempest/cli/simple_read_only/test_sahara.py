@@ -17,6 +17,7 @@ import re
 
 from tempest import cli
 from tempest import config
+from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -41,7 +42,7 @@ class SimpleReadOnlySaharaClientTest(cli.ClientTestBase):
 
     @test.attr(type='negative')
     def test_sahara_fake_action(self):
-        self.assertRaises(cli.CommandFailed,
+        self.assertRaises(exceptions.CommandFailed,
                           self.sahara,
                           'this-does-not-exist')
 

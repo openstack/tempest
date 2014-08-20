@@ -44,19 +44,15 @@ class SnapshotMetadataTest(base.BaseVolumeV1Test):
                     "key3": "value3"}
         expected = {"key2": "value2",
                     "key3": "value3"}
-        resp, body = self.client.create_snapshot_metadata(self.snapshot_id,
-                                                          metadata)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.create_snapshot_metadata(self.snapshot_id,
+                                                       metadata)
         # Get the metadata of the snapshot
-        resp, body = self.client.get_snapshot_metadata(self.snapshot_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_snapshot_metadata(self.snapshot_id)
         self.assertEqual(metadata, body)
         # Delete one item metadata of the snapshot
-        resp, body = self.client.delete_snapshot_metadata_item(
-            self.snapshot_id,
-            "key1")
-        self.assertEqual(200, resp.status)
-        resp, body = self.client.get_snapshot_metadata(self.snapshot_id)
+        self.client.delete_snapshot_metadata_item(
+            self.snapshot_id, "key1")
+        _, body = self.client.get_snapshot_metadata(self.snapshot_id)
         self.assertEqual(expected, body)
 
     @test.attr(type='gate')
@@ -68,21 +64,16 @@ class SnapshotMetadataTest(base.BaseVolumeV1Test):
         update = {"key3": "value3_update",
                   "key4": "value4"}
         # Create metadata for the snapshot
-        resp, body = self.client.create_snapshot_metadata(self.snapshot_id,
-                                                          metadata)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.create_snapshot_metadata(self.snapshot_id,
+                                                       metadata)
         # Get the metadata of the snapshot
-        resp, body = self.client.get_snapshot_metadata(self.snapshot_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_snapshot_metadata(self.snapshot_id)
         self.assertEqual(metadata, body)
         # Update metadata item
-        resp, body = self.client.update_snapshot_metadata(
-            self.snapshot_id,
-            update)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.update_snapshot_metadata(
+            self.snapshot_id, update)
         # Get the metadata of the snapshot
-        resp, body = self.client.get_snapshot_metadata(self.snapshot_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_snapshot_metadata(self.snapshot_id)
         self.assertEqual(update, body)
 
     @test.attr(type='gate')
@@ -96,21 +87,16 @@ class SnapshotMetadataTest(base.BaseVolumeV1Test):
                   "key2": "value2",
                   "key3": "value3_update"}
         # Create metadata for the snapshot
-        resp, body = self.client.create_snapshot_metadata(self.snapshot_id,
-                                                          metadata)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.create_snapshot_metadata(self.snapshot_id,
+                                                       metadata)
         # Get the metadata of the snapshot
-        resp, body = self.client.get_snapshot_metadata(self.snapshot_id)
+        _, body = self.client.get_snapshot_metadata(self.snapshot_id)
         self.assertEqual(metadata, body)
         # Update metadata item
-        resp, body = self.client.update_snapshot_metadata_item(
-            self.snapshot_id,
-            "key3",
-            update_item)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.update_snapshot_metadata_item(
+            self.snapshot_id, "key3", update_item)
         # Get the metadata of the snapshot
-        resp, body = self.client.get_snapshot_metadata(self.snapshot_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.get_snapshot_metadata(self.snapshot_id)
         self.assertEqual(expect, body)
 
 

@@ -19,8 +19,8 @@ import json
 import time
 import urllib
 
-from tempest.api_schema.compute import servers as common_schema
-from tempest.api_schema.compute.v3 import servers as schema
+from tempest.api_schema.response.compute import servers as common_schema
+from tempest.api_schema.response.compute.v3 import servers as schema
 from tempest.common import rest_client
 from tempest.common import waiters
 from tempest import config
@@ -96,7 +96,11 @@ class ServersV3ClientJSON(rest_client.RestClient):
         # with return reservation id set True
         if 'servers_reservation' in body:
             return resp, body['servers_reservation']
-        self.validate_response(schema.create_server, resp, body)
+        if CONF.compute_feature_enabled.enable_instance_password:
+            create_schema = schema.create_server_with_admin_pass
+        else:
+            create_schema = schema.create_server
+        self.validate_response(create_schema, resp, body)
         return resp, body['server']
 
     def update_server(self, server_id, name=None, meta=None, access_ip_v4=None,
@@ -272,7 +276,12 @@ class ServersV3ClientJSON(rest_client.RestClient):
         if 'disk_config' in kwargs:
             kwargs['os-disk-config:disk_config'] = kwargs['disk_config']
             del kwargs['disk_config']
-        return self.action(server_id, 'rebuild', 'server', None, **kwargs)
+        if CONF.compute_feature_enabled.enable_instance_password:
+            rebuild_schema = schema.rebuild_server_with_admin_pass
+        else:
+            rebuild_schema = schema.rebuild_server
+        return self.action(server_id, 'rebuild', 'server',
+                           rebuild_schema, **kwargs)
 
     def resize(self, server_id, flavor_ref, **kwargs):
         """Changes the flavor of a server."""
@@ -445,8 +454,16 @@ class ServersV3ClientJSON(rest_client.RestClient):
 
     def rescue_server(self, server_id, **kwargs):
         """Rescue the provided server."""
-        return self.action(server_id, 'rescue', 'admin_password',
-                           None, **kwargs)
+        post_body = json.dumps({'rescue': kwargs})
+        resp, body = self.post('servers/%s/action' % str(server_id),
+                               post_body)
+        if CONF.compute_feature_enabled.enable_instance_password:
+            rescue_schema = schema.rescue_server_with_admin_pass
+        else:
+            rescue_schema = schema.rescue_server
+        body = json.loads(body)
+        self.validate_response(rescue_schema, resp, body)
+        return resp, body
 
     def unrescue_server(self, server_id):
         """Unrescue the provided server."""

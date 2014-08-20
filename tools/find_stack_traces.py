@@ -16,12 +16,13 @@
 #    under the License.
 
 import gzip
+import pprint
 import re
 import StringIO
 import sys
 import urllib2
 
-import pprint
+
 pp = pprint.PrettyPrinter()
 
 NOVA_TIMESTAMP = r"\d\d\d\d-\d\d-\d\d \d\d:\d\d:\d\d\.\d\d\d"

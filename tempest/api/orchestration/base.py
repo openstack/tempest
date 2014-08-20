@@ -11,6 +11,7 @@
 #    under the License.
 
 import os.path
+
 import yaml
 
 from tempest import clients
@@ -85,11 +86,8 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                 pass
 
         for stack_identifier in cls.stacks:
-            try:
-                cls.client.wait_for_stack_status(
-                    stack_identifier, 'DELETE_COMPLETE')
-            except exceptions.NotFound:
-                pass
+            cls.client.wait_for_stack_status(
+                stack_identifier, 'DELETE_COMPLETE')
 
     @classmethod
     def _create_keypair(cls, name_start='keypair-heat-'):

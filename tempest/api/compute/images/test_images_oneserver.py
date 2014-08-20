@@ -54,6 +54,11 @@ class ImagesOneServerTestJSON(base.BaseV2ComputeTest):
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
+        if not CONF.compute_feature_enabled.snapshot:
+            skip_msg = ("%s skipped as instance snapshotting is not supported"
+                        % cls.__name__)
+            raise cls.skipException(skip_msg)
+
         try:
             resp, server = cls.create_test_server(wait_until='ACTIVE')
             cls.server_id = server['id']

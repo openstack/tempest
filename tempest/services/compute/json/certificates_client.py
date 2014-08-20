@@ -15,8 +15,8 @@
 
 import json
 
-from tempest.api_schema.compute import certificates as schema
-from tempest.api_schema.compute.v2 import certificates as v2schema
+from tempest.api_schema.response.compute import certificates as schema
+from tempest.api_schema.response.compute.v2 import certificates as v2schema
 from tempest.common import rest_client
 from tempest import config
 

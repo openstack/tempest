@@ -49,8 +49,11 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
 
     def test_created_resources(self):
         """Created stack should be in the list of existing stacks."""
-        resources = [('SwiftContainer', 'OS::Swift::Container'),
-                     ('SwiftContainerWebsite', 'OS::Swift::Container')]
+        swift_basic_template = self.load_template('swift_basic')
+        resources = [('SwiftContainer', swift_basic_template['resources'][
+                      'SwiftContainer']['type']),
+                     ('SwiftContainerWebsite', swift_basic_template[
+                      'resources']['SwiftContainerWebsite']['type'])]
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name)
             self.assertIsInstance(resource, dict)
@@ -84,10 +87,9 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
             self.assertIn(h, headers)
 
     def test_metadata(self):
-        metadatas = {
-            "web-index": "index.html",
-            "web-error": "error.html"
-        }
+        swift_basic_template = self.load_template('swift_basic')
+        metadatas = swift_basic_template['resources']['SwiftContainerWebsite'][
+            'properties']['X-Container-Meta']
         swcont_website = self.test_resources.get(
             'SwiftContainerWebsite')['physical_resource_id']
         headers, _ = self.container_client.list_container_metadata(

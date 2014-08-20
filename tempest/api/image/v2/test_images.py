@@ -52,7 +52,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         self.assertEqual('queued', body['status'])
 
         # Now try uploading an image file
-        file_content = '*' * 1024
+        file_content = data_utils.random_bytes()
         image_file = StringIO.StringIO(file_content)
         self.client.store_image(image_id, image_file)
 
@@ -86,7 +86,8 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
 
         # Verifying deletion
         _, images = self.client.image_list()
-        self.assertNotIn(image_id, images)
+        images_id = [item['id'] for item in images]
+        self.assertNotIn(image_id, images_id)
 
     @test.attr(type='gate')
     def test_update_image(self):
@@ -103,8 +104,7 @@ class BasicOperationsImagesTest(base.BaseV2ImageTest):
         image_id = body['id']
 
         # Now try uploading an image file
-        file_content = '*' * 1024
-        image_file = StringIO.StringIO(file_content)
+        image_file = StringIO.StringIO(data_utils.random_bytes())
         self.client.store_image(image_id, image_file)
 
         # Update Image
@@ -145,7 +145,8 @@ class ListImagesTest(base.BaseV2ImageTest):
         image. Note that the size of the new image is a random number between
         1024 and 4096
         """
-        image_file = StringIO.StringIO('*' * random.randint(1024, 4096))
+        size = random.randint(1024, 4096)
+        image_file = StringIO.StringIO(data_utils.random_bytes(size))
         name = data_utils.rand_name('image-')
         _, body = cls.create_image(name=name,
                                    container_format=container_format,

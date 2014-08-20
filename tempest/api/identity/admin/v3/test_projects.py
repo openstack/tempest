@@ -13,34 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from six import moves
-
 from tempest.api.identity import base
 from tempest.common.utils import data_utils
-from tempest import exceptions
 from tempest import test
 
 
 class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
     _interface = 'json'
-
-    def _delete_project(self, project_id):
-        self.client.delete_project(project_id)
-        self.assertRaises(
-            exceptions.NotFound, self.client.get_project, project_id)
-
-    @test.attr(type='gate')
-    def test_project_list_delete(self):
-        # Create several projects and delete them
-        for _ in moves.xrange(3):
-            _, project = self.client.create_project(
-                data_utils.rand_name('project-new'))
-            self.addCleanup(self._delete_project, project['id'])
-
-        _, list_projects = self.client.list_projects()
-
-        _, get_project = self.client.get_project(project['id'])
-        self.assertIn(get_project, list_projects)
 
     @test.attr(type='gate')
     def test_project_create_with_description(self):
@@ -58,6 +37,21 @@ class ProjectsTestJSON(base.BaseIdentityV3AdminTest):
         desc2 = body['description']
         self.assertEqual(desc2, project_desc, 'Description does not appear'
                          'to be set')
+
+    @test.attr(type='gate')
+    def test_project_create_with_domain(self):
+        # Create project with a domain
+        self.data.setup_test_domain()
+        project_name = data_utils.rand_name('project')
+        resp, project = self.client.create_project(
+            project_name, domain_id=self.data.domain['id'])
+        self.data.projects.append(project)
+        project_id = project['id']
+        self.assertEqual(project_name, project['name'])
+        self.assertEqual(self.data.domain['id'], project['domain_id'])
+        _, body = self.client.get_project(project_id)
+        self.assertEqual(project_name, body['name'])
+        self.assertEqual(self.data.domain['id'], body['domain_id'])
 
     @test.attr(type='gate')
     def test_project_create_enabled(self):

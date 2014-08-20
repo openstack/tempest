@@ -139,6 +139,17 @@ class IdentityV3ClientXML(rest_client.RestClient):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
+    def update_user_password(self, user_id, password, original_password):
+        """Updates a user password."""
+        update_user = common.Element("user",
+                                     xmlns=XMLNS,
+                                     password=password,
+                                     original_password=original_password)
+        resp, _ = self.post('users/%s/password' % user_id,
+                            str(common.Document(update_user)))
+        self.expected_success(204, resp.status)
+        return resp
+
     def list_user_projects(self, user_id):
         """Lists the projects on which a user has roles assigned."""
         resp, body = self.get('users/%s/projects' % user_id)
@@ -186,9 +197,12 @@ class IdentityV3ClientXML(rest_client.RestClient):
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
-    def list_projects(self):
+    def list_projects(self, params=None):
         """Get the list of projects."""
-        resp, body = self.get("projects")
+        url = 'projects'
+        if params:
+            url += '?%s' % urllib.urlencode(params)
+        resp, body = self.get(url)
         self.expected_success(200, resp.status)
         body = self._parse_projects(etree.fromstring(body))
         return resp, body

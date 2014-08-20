@@ -48,6 +48,7 @@ class TokensV3TestJSON(base.BaseIdentityV3AdminTest):
         self.assertRaises(exceptions.NotFound, self.client.get_token,
                           subject_token)
 
+    @test.skip_because(bug="1351026")
     @test.attr(type='gate')
     def test_rescope_token(self):
         """Rescope a token.

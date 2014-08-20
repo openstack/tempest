@@ -17,7 +17,7 @@
 import json
 import urllib
 
-from tempest.api_schema.compute import services as schema
+from tempest.api_schema.response.compute import services as schema
 from tempest.common import rest_client
 from tempest import config
 

@@ -40,6 +40,7 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         cls._data_sources = []
         cls._job_binary_internals = []
         cls._job_binaries = []
+        cls._jobs = []
 
     @classmethod
     def tearDownClass(cls):
@@ -47,12 +48,13 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
                               cls.client.delete_cluster_template)
         cls.cleanup_resources(getattr(cls, '_node_group_templates', []),
                               cls.client.delete_node_group_template)
-        cls.cleanup_resources(getattr(cls, '_data_sources', []),
-                              cls.client.delete_data_source)
-        cls.cleanup_resources(getattr(cls, '_job_binary_internals', []),
-                              cls.client.delete_job_binary_internal)
+        cls.cleanup_resources(getattr(cls, '_jobs', []), cls.client.delete_job)
         cls.cleanup_resources(getattr(cls, '_job_binaries', []),
                               cls.client.delete_job_binary)
+        cls.cleanup_resources(getattr(cls, '_job_binary_internals', []),
+                              cls.client.delete_job_binary_internal)
+        cls.cleanup_resources(getattr(cls, '_data_sources', []),
+                              cls.client.delete_data_source)
         cls.clear_isolated_creds()
         super(BaseDataProcessingTest, cls).tearDownClass()
 
@@ -75,16 +77,16 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         object. All resources created in this method will be automatically
         removed in tearDownClass method.
         """
-        resp, body = cls.client.create_node_group_template(name, plugin_name,
-                                                           hadoop_version,
-                                                           node_processes,
-                                                           flavor_id,
-                                                           node_configs,
-                                                           **kwargs)
+        _, resp_body = cls.client.create_node_group_template(name, plugin_name,
+                                                             hadoop_version,
+                                                             node_processes,
+                                                             flavor_id,
+                                                             node_configs,
+                                                             **kwargs)
         # store id of created node group template
-        cls._node_group_templates.append(body['id'])
+        cls._node_group_templates.append(resp_body['id'])
 
-        return resp, body
+        return resp_body
 
     @classmethod
     def create_cluster_template(cls, name, plugin_name, hadoop_version,
@@ -95,15 +97,15 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         object. All resources created in this method will be automatically
         removed in tearDownClass method.
         """
-        resp, body = cls.client.create_cluster_template(name, plugin_name,
-                                                        hadoop_version,
-                                                        node_groups,
-                                                        cluster_configs,
-                                                        **kwargs)
+        _, resp_body = cls.client.create_cluster_template(name, plugin_name,
+                                                          hadoop_version,
+                                                          node_groups,
+                                                          cluster_configs,
+                                                          **kwargs)
         # store id of created cluster template
-        cls._cluster_templates.append(body['id'])
+        cls._cluster_templates.append(resp_body['id'])
 
-        return resp, body
+        return resp_body
 
     @classmethod
     def create_data_source(cls, name, type, url, **kwargs):
@@ -113,11 +115,11 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         object. All resources created in this method will be automatically
         removed in tearDownClass method.
         """
-        resp, body = cls.client.create_data_source(name, type, url, **kwargs)
+        _, resp_body = cls.client.create_data_source(name, type, url, **kwargs)
         # store id of created data source
-        cls._data_sources.append(body['id'])
+        cls._data_sources.append(resp_body['id'])
 
-        return resp, body
+        return resp_body
 
     @classmethod
     def create_job_binary_internal(cls, name, data):
@@ -126,12 +128,13 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         It returns created object. All resources created in this method will
         be automatically removed in tearDownClass method.
         """
-        resp, body = cls.client.create_job_binary_internal(name, data)
+        _, resp_body = cls.client.create_job_binary_internal(name, data)
         # store id of created job binary internal
-        cls._job_binary_internals.append(body['id'])
+        cls._job_binary_internals.append(resp_body['id'])
 
-        return resp, body
+        return resp_body
 
+    @classmethod
     def create_job_binary(cls, name, url, extra=None, **kwargs):
         """Creates watched job binary with specified params.
 
@@ -139,8 +142,23 @@ class BaseDataProcessingTest(tempest.test.BaseTestCase):
         object. All resources created in this method will be automatically
         removed in tearDownClass method.
         """
-        resp, body = cls.client.create_job_binary(name, url, extra, **kwargs)
+        _, resp_body = cls.client.create_job_binary(name, url, extra, **kwargs)
         # store id of created job binary
-        cls._job_binaries.append(body['id'])
+        cls._job_binaries.append(resp_body['id'])
 
-        return resp, body
+        return resp_body
+
+    @classmethod
+    def create_job(cls, name, job_type, mains, libs=None, **kwargs):
+        """Creates watched job with specified params.
+
+        It supports passing additional params using kwargs and returns created
+        object. All resources created in this method will be automatically
+        removed in tearDownClass method.
+        """
+        _, resp_body = cls.client.create_job(name,
+                                             job_type, mains, libs, **kwargs)
+        # store id of created job
+        cls._jobs.append(resp_body['id'])
+
+        return resp_body

@@ -14,7 +14,6 @@
 
 from tempest.common import commands
 from tempest import config
-
 from tempest.openstack.common import log as logging
 
 CONF = config.CONF

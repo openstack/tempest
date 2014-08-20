@@ -17,7 +17,6 @@
 import logging
 import os
 import re
-import six
 import subprocess
 import time
 
@@ -27,6 +26,7 @@ from heatclient import exc as heat_exceptions
 import netaddr
 from neutronclient.common import exceptions as exc
 from novaclient import exceptions as nova_exceptions
+import six
 
 from tempest.api.network import common as net_common
 from tempest import auth
@@ -78,6 +78,11 @@ class ScenarioTest(tempest.test.BaseTestCase):
         return cls._get_credentials(cls.isolated_creds.get_primary_creds,
                                     'user')
 
+    @classmethod
+    def admin_credentials(cls):
+        return cls._get_credentials(cls.isolated_creds.get_admin_creds,
+                                    'identity_admin')
+
 
 class OfficialClientTest(tempest.test.BaseTestCase):
     """
@@ -111,6 +116,11 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         cls.orchestration_client = cls.manager.orchestration_client
         cls.data_processing_client = cls.manager.data_processing_client
         cls.ceilometer_client = cls.manager.ceilometer_client
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.isolated_creds.clear_isolated_creds()
+        super(OfficialClientTest, cls).tearDownClass()
 
     @classmethod
     def _get_credentials(cls, get_creds, ctype):
@@ -350,6 +360,22 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
         return secgroup
 
+    def rebuild_server(self, server, client=None, image=None,
+                       preserve_ephemeral=False, wait=True,
+                       rebuild_kwargs=None):
+        if client is None:
+            client = self.compute_client
+        if image is None:
+            image = CONF.compute.image_ref
+        rebuild_kwargs = rebuild_kwargs or {}
+
+        LOG.debug("Rebuilding server (name: %s, image: %s, preserve eph: %s)",
+                  server.name, image, preserve_ephemeral)
+        server.rebuild(image, preserve_ephemeral=preserve_ephemeral,
+                       **rebuild_kwargs)
+        if wait:
+            self.status_timeout(client.servers, server.id, 'ACTIVE')
+
     def create_server(self, client=None, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,
                       create_kwargs={}):
@@ -485,6 +511,9 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         return linux_client
 
     def _log_console_output(self, servers=None):
+        if not CONF.compute_feature_enabled.console_output:
+            LOG.debug('Console output not supported, cannot log')
+            return
         if not servers:
             servers = self.compute_client.servers.list()
         for server in servers:
@@ -1080,7 +1109,8 @@ class NetworkScenarioTest(OfficialClientTest):
             try:
                 source.ping_host(dest)
             except exceptions.SSHExecCommandFailed:
-                LOG.exception('Failed to ping host via ssh connection')
+                LOG.warn('Failed to ping IP: %s via a ssh connection from: %s.'
+                         % (dest, source.ssh_client.host))
                 return not should_succeed
             return should_succeed
 

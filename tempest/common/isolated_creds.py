@@ -16,6 +16,7 @@ import netaddr
 
 from tempest import auth
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
@@ -25,15 +26,16 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class IsolatedCreds(object):
+class IsolatedCreds(cred_provider.CredentialProvider):
 
     def __init__(self, name, tempest_client=True, interface='json',
                  password='pass', network_resources=None):
+        super(IsolatedCreds, self).__init__(name, tempest_client, interface,
+                                            password, network_resources)
         self.network_resources = network_resources
         self.isolated_creds = {}
         self.isolated_net_resources = {}
         self.ports = []
-        self.name = name
         self.tempest_client = tempest_client
         self.interface = interface
         self.password = password
@@ -328,7 +330,8 @@ class IsolatedCreds(object):
             # Maintained until tests are ported
             LOG.info("Acquired isolated creds:\n credentials: %s"
                      % credentials)
-            if CONF.service_available.neutron:
+            if (CONF.service_available.neutron and
+                not CONF.baremetal.driver_enabled):
                 network, subnet, router = self._create_network_resources(
                     credentials.tenant_id)
                 self.isolated_net_resources[credential_type] = (
@@ -370,31 +373,6 @@ class IsolatedCreds(object):
             LOG.warn('network with name: %s not found for delete' %
                      network_name)
 
-    def _cleanup_ports(self, network_id):
-        # TODO(mlavalle) This method will be removed once patch
-        # https://review.openstack.org/#/c/46563/ merges in Neutron
-        if not self.ports:
-            if self.tempest_client:
-                resp, resp_body = self.network_admin_client.list_ports()
-            else:
-                resp_body = self.network_admin_client.list_ports()
-            self.ports = resp_body['ports']
-        ports_to_delete = [
-            port
-            for port in self.ports
-            if (port['network_id'] == network_id and
-                port['device_owner'] != 'network:router_interface' and
-                port['device_owner'] != 'network:dhcp')
-        ]
-        for port in ports_to_delete:
-            try:
-                LOG.info('Cleaning up port id %s, name %s' %
-                         (port['id'], port['name']))
-                self.network_admin_client.delete_port(port['id'])
-            except exceptions.NotFound:
-                LOG.warn('Port id: %s, name %s not found for clean-up' %
-                         (port['id'], port['name']))
-
     def _clear_isolated_net_resources(self):
         net_client = self.network_admin_client
         for cred in self.isolated_net_resources:
@@ -415,11 +393,6 @@ class IsolatedCreds(object):
                     LOG.warn('router with name: %s not found for delete' %
                              router['name'])
                 self._clear_isolated_router(router['id'], router['name'])
-            if (not self.network_resources or
-                self.network_resources.get('network')):
-                # TODO(mlavalle) This method call will be removed once patch
-                # https://review.openstack.org/#/c/46563/ merges in Neutron
-                self._cleanup_ports(network['id'])
             if (not self.network_resources or
                 self.network_resources.get('subnet')):
                 self._clear_isolated_subnet(subnet['id'], subnet['name'])

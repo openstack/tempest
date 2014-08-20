@@ -59,12 +59,24 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
     obviously don't test not implemented method or the ones which strongly
     depends on them.
     """
-    _auth_provider_class = auth.AuthProvider
 
-    def test_check_credentials_class(self):
-        self.assertRaises(NotImplementedError,
-                          self.auth_provider.check_credentials,
-                          auth.Credentials())
+    class FakeAuthProviderImpl(auth.AuthProvider):
+        def _decorate_request():
+            pass
+
+        def _fill_credentials():
+            pass
+
+        def _get_auth():
+            pass
+
+        def base_url():
+            pass
+
+        def is_expired():
+            pass
+
+    _auth_provider_class = FakeAuthProviderImpl
 
     def test_check_credentials_bad_type(self):
         self.assertFalse(self.auth_provider.check_credentials([]))
@@ -73,16 +85,6 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
         # Dict credentials are only supported for backward compatibility
         auth_provider = self._auth(credentials={})
         self.assertIsInstance(auth_provider.credentials, auth.Credentials)
-
-    def test_instantiate_with_bad_credentials_type(self):
-        """
-        Assure that credentials with bad type fail with TypeError
-        """
-        self.assertRaises(TypeError, self._auth, [])
-
-    def test_auth_data_property(self):
-        self.assertRaises(NotImplementedError, getattr, self.auth_provider,
-                          'auth_data')
 
     def test_auth_data_property_when_cache_exists(self):
         self.auth_provider.cache = 'foo'
@@ -110,9 +112,10 @@ class TestBaseAuthProvider(BaseAuthTestsSetUp):
         self.assertIsNone(self.auth_provider.alt_part)
         self.assertIsNone(self.auth_provider.alt_auth_data)
 
-    def test_fill_credentials(self):
-        self.assertRaises(NotImplementedError,
-                          self.auth_provider.fill_credentials)
+    def test_auth_class(self):
+        self.assertRaises(TypeError,
+                          auth.AuthProvider,
+                          fake_credentials.FakeCredentials)
 
 
 class TestKeystoneV2AuthProvider(BaseAuthTestsSetUp):

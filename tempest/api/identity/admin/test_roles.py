@@ -49,7 +49,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
     def test_list_roles(self):
-        # Return a list of all roles
+        """Return a list of all roles."""
         _, body = self.client.list_roles()
         found = [role for role in body if role in self.data.roles]
         self.assertTrue(any(found))
@@ -57,7 +57,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
     def test_role_create_delete(self):
-        # Role should be created, verified, and deleted
+        """Role should be created, verified, and deleted."""
         role_name = data_utils.rand_name(name='role-test-')
         _, body = self.client.create_role(role_name)
         self.assertEqual(role_name, body['name'])
@@ -74,7 +74,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
     def test_get_role_by_id(self):
-        # Get a role by its id
+        """Get a role by its id."""
         self.data.setup_test_role()
         role_id = self.data.role['id']
         role_name = self.data.role['name']
@@ -84,7 +84,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
     def test_assign_user_role(self):
-        # Assign a role to a user on a tenant
+        """Assign a role to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         _, roles = self.client.list_user_roles(tenant['id'], user['id'])
@@ -92,7 +92,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
     def test_remove_user_role(self):
-        # Remove a role assigned to a user on a tenant
+        """Remove a role assigned to a user on a tenant."""
         (user, tenant, role) = self._get_role_params()
         _, user_role = self.client.assign_user_role(tenant['id'],
                                                     user['id'], role['id'])
@@ -101,7 +101,7 @@ class RolesTestJSON(base.BaseIdentityV2AdminTest):
 
     @test.attr(type='gate')
     def test_list_user_roles(self):
-        # List roles assigned to a user on tenant
+        """List roles assigned to a user on tenant."""
         (user, tenant, role) = self._get_role_params()
         self.client.assign_user_role(tenant['id'], user['id'], role['id'])
         _, roles = self.client.list_user_roles(tenant['id'], user['id'])
