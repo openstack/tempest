@@ -107,7 +107,7 @@ def services(*args, **kwargs):
         'identity': True,
         'object_storage': CONF.service_available.swift,
         'dashboard': CONF.service_available.horizon,
-        'ceilometer': CONF.service_available.ceilometer,
+        'telemetry': CONF.service_available.ceilometer,
         'data_processing': CONF.service_available.sahara
     }
 
