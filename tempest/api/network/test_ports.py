@@ -220,6 +220,22 @@ class PortsTestJSON(base.BaseNetworkTest):
         self.assertEqual(free_mac_address,
                          show_port['mac_address'])
 
+    @test.attr(type='smoke')
+    def test_create_port_with_no_securitygroups(self):
+        port = self.create_port(self.create_network(), security_groups=[])
+        self.assertIsNotNone(port['security_groups'])
+        self.assertEmpty(port['security_groups'])
+
+    @test.attr(type='smoke')
+    def test_update_port_with_no_securitygroups(self):
+        port = self.create_port(self.create_network())
+        # Verify that port is created with default security group
+        self.assertIsNotNone(port['security_groups'])
+        self.assertNotEmpty(port['security_groups'])
+        updated_port = self.update_port(port, security_groups=[])
+        self.assertIsNotNone(updated_port['security_groups'])
+        self.assertEmpty(updated_port['security_groups'])
+
 
 class PortsAdminExtendedAttrsTestJSON(base.BaseAdminNetworkTest):
     _interface = 'json'
