@@ -323,11 +323,25 @@ class OfficialClientTest(tempest.test.BaseTestCase):
                 'cidr': '0.0.0.0/0',
             },
             {
+                # ssh6
+                'ip_protocol': 'tcp',
+                'from_port': 22,
+                'to_port': 22,
+                'cidr': '::/0',
+            },
+            {
                 # ping
                 'ip_protocol': 'icmp',
                 'from_port': -1,
                 'to_port': -1,
                 'cidr': '0.0.0.0/0',
+            },
+            {
+                # ping6
+                'ip_protocol': 'icmp',
+                'from_port': -1,
+                'to_port': -1,
+                'cidr': '::/0',
             }
         ]
         rules = list()
