@@ -14,6 +14,7 @@
 #    under the License.
 
 import collections
+import copy
 
 XMLNS_11 = "http://docs.openstack.org/compute/api/v1.1"
 XMLNS_V3 = "http://docs.openstack.org/compute/api/v1.1"
@@ -78,16 +79,19 @@ class Element(object):
 
 class Document(Element):
     def __init__(self, *args, **kwargs):
-        if 'version' not in kwargs:
-            kwargs['version'] = '1.0'
-        if 'encoding' not in kwargs:
-            kwargs['encoding'] = 'UTF-8'
         Element.__init__(self, '?xml', *args, **kwargs)
 
     def __str__(self):
-        args = " ".join(['%s="%s"' %
-                        (k, v if v is not None else "")
-                        for k, v in self._attrs.items()])
+        attrs = copy.copy(self._attrs)
+        # pop the required standard attrs out and render in required
+        # order.
+        vers = attrs.pop('version', '1.0')
+        enc = attrs.pop('encoding', 'UTF-8')
+        args = 'version="%s" encoding="%s"' % (vers, enc)
+        if attrs:
+            args = " ".join([args] + ['%s="%s"' %
+                            (k, v if v is not None else "")
+                            for k, v in attrs.items()])
         string = '<?xml %s?>\n' % args
         for element in self._elements:
             string += str(element)
