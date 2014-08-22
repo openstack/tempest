@@ -63,9 +63,8 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
 
     def test_created_containers(self):
         params = {'format': 'json'}
-        resp, container_list = \
+        _, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEqual('200', resp['status'])
         self.assertEqual(2, len(container_list))
         for cont in container_list:
             self.assertTrue(cont['name'].startswith(self.stack_name))

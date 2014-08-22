@@ -28,8 +28,7 @@ class StacksTestJSON(base.BaseOrchestrationTest):
 
     @test.attr(type='smoke')
     def test_stack_list_responds(self):
-        resp, stacks = self.client.list_stacks()
-        self.assertEqual('200', resp['status'])
+        _, stacks = self.client.list_stacks()
         self.assertIsInstance(stacks, list)
 
     @test.attr(type='smoke')
@@ -45,23 +44,22 @@ class StacksTestJSON(base.BaseOrchestrationTest):
         self.client.wait_for_stack_status(stack_identifier, 'CREATE_COMPLETE')
 
         # check for stack in list
-        resp, stacks = self.client.list_stacks()
+        _, stacks = self.client.list_stacks()
         list_ids = list([stack['id'] for stack in stacks])
         self.assertIn(stack_id, list_ids)
 
         # fetch the stack
-        resp, stack = self.client.get_stack(stack_identifier)
+        _, stack = self.client.get_stack(stack_identifier)
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by name
-        resp, stack = self.client.get_stack(stack_name)
+        _, stack = self.client.get_stack(stack_name)
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # fetch the stack by id
-        resp, stack = self.client.get_stack(stack_id)
+        _, stack = self.client.get_stack(stack_id)
         self.assertEqual('CREATE_COMPLETE', stack['stack_status'])
 
         # delete the stack
-        resp = self.client.delete_stack(stack_identifier)
-        self.assertEqual('204', resp[0]['status'])
+        self.client.delete_stack(stack_identifier)
         self.client.wait_for_stack_status(stack_identifier, 'DELETE_COMPLETE')

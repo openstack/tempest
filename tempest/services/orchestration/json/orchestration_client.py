@@ -41,6 +41,7 @@ class OrchestrationClient(rest_client.RestClient):
             uri += '?%s' % urllib.urlencode(params)
 
         resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['stacks']
 
@@ -58,6 +59,7 @@ class OrchestrationClient(rest_client.RestClient):
             files)
         uri = 'stacks'
         resp, body = self.post(uri, headers=headers, body=body)
+        self.expected_success(201, resp.status)
         return resp, body
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
@@ -74,6 +76,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         uri = "stacks/%s" % stack_identifier
         resp, body = self.put(uri, headers=headers, body=body)
+        self.expected_success(202, resp.status)
         return resp, body
 
     def _prepare_update_create(self, name, disable_rollback=True,
@@ -106,6 +109,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns the details of a single stack."""
         url = "stacks/%s" % stack_identifier
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['stack']
 
@@ -114,6 +118,7 @@ class OrchestrationClient(rest_client.RestClient):
         url = 'stacks/%s/actions' % stack_identifier
         body = {'suspend': None}
         resp, body = self.post(url, json.dumps(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def resume_stack(self, stack_identifier):
@@ -121,12 +126,14 @@ class OrchestrationClient(rest_client.RestClient):
         url = 'stacks/%s/actions' % stack_identifier
         body = {'resume': None}
         resp, body = self.post(url, json.dumps(body))
+        self.expected_success(200, resp.status)
         return resp, body
 
     def list_resources(self, stack_identifier):
         """Returns the details of a single resource."""
         url = "stacks/%s/resources" % stack_identifier
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['resources']
 
@@ -134,12 +141,15 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns the details of a single resource."""
         url = "stacks/%s/resources/%s" % (stack_identifier, resource_name)
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['resource']
 
     def delete_stack(self, stack_identifier):
         """Deletes the specified Stack."""
-        return self.delete("stacks/%s" % str(stack_identifier))
+        resp, _ = self.delete("stacks/%s" % str(stack_identifier))
+        self.expected_success(204, resp.status)
+        return resp
 
     def wait_for_resource_status(self, stack_identifier, resource_name,
                                  status, failure_pattern='^.*_FAILED$'):
@@ -208,6 +218,7 @@ class OrchestrationClient(rest_client.RestClient):
         url = ('stacks/{stack_identifier}/resources/{resource_name}'
                '/metadata'.format(**locals()))
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['metadata']
 
@@ -215,6 +226,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns list of all events for a stack."""
         url = 'stacks/{stack_identifier}/events'.format(**locals())
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['events']
 
@@ -223,6 +235,7 @@ class OrchestrationClient(rest_client.RestClient):
         url = ('stacks/{stack_identifier}/resources/{resource_name}'
                '/events'.format(**locals()))
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['events']
 
@@ -231,6 +244,7 @@ class OrchestrationClient(rest_client.RestClient):
         url = ('stacks/{stack_identifier}/resources/{resource_name}/events'
                '/{event_id}'.format(**locals()))
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['event']
 
@@ -238,6 +252,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns the template for the stack."""
         url = ('stacks/{stack_identifier}/template'.format(**locals()))
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -245,6 +260,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns the validation request result."""
         post_body = json.dumps(post_body)
         resp, body = self.post('validate', post_body)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -271,7 +287,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         url = 'software_configs'
         resp, body = self.post(url, headers=headers, body=body)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -279,7 +295,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns a software configuration resource."""
         url = 'software_configs/%s' % str(conf_id)
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -287,7 +303,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Deletes a specific software configuration."""
         url = 'software_configs/%s' % str(conf_id)
         resp, _ = self.delete(url)
-        self.expected_success(204, resp)
+        self.expected_success(204, resp.status)
 
     def create_software_deploy(self, server_id=None, config_id=None,
                                action=None, status=None,
@@ -300,7 +316,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         url = 'software_deployments'
         resp, body = self.post(url, headers=headers, body=body)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -315,7 +331,7 @@ class OrchestrationClient(rest_client.RestClient):
 
         url = 'software_deployments/%s' % str(deploy_id)
         resp, body = self.put(url, headers=headers, body=body)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -323,7 +339,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns a list of all deployments."""
         url = 'software_deployments'
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -331,7 +347,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Returns a specific software deployment."""
         url = 'software_deployments/%s' % str(deploy_id)
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -339,7 +355,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Return a config metadata for a specific server."""
         url = 'software_deployments/metadata/%s' % server_id
         resp, body = self.get(url)
-        self.expected_success(200, resp)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return body
 
@@ -347,7 +363,7 @@ class OrchestrationClient(rest_client.RestClient):
         """Deletes a specific software deployment."""
         url = 'software_deployments/%s' % str(deploy_id)
         resp, _ = self.delete(url)
-        self.expected_success(204, resp)
+        self.expected_success(204, resp.status)
 
     def _prep_software_config_create(self, name=None, conf=None, group=None,
                                      inputs=None, outputs=None, options=None):
