@@ -259,6 +259,7 @@ class ServerActionsTestJSON(base.BaseV2ComputeTest):
     @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
                           'Snapshotting not available, backup not possible.')
     @test.attr(type='gate')
+    @test.services('image')
     def test_create_backup(self):
         # Positive test:create backup successfully and rotate backups correctly
         # create the first and the second backup
