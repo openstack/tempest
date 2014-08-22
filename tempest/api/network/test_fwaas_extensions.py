@@ -72,16 +72,19 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
         self.client.wait_for_resource_deletion('firewall', fw_id)
 
-    def _wait_for_active(self, fw_id):
+    def _wait_until_ready(self, fw_id):
+        target_states = ('ACTIVE', 'CREATED')
+
         def _wait():
             resp, firewall = self.client.show_firewall(fw_id)
             self.assertEqual('200', resp['status'])
             firewall = firewall['firewall']
-            return firewall['status'] == 'ACTIVE'
+            return firewall['status'] in target_states
 
         if not test.call_until_true(_wait, CONF.network.build_timeout,
                                     CONF.network.build_interval):
-            m = 'Timed out waiting for firewall %s to become ACTIVE.' % fw_id
+            m = ("Timed out waiting for firewall %s to reach %s state(s)" %
+                 (fw_id, target_states))
             raise exceptions.TimeoutException(m)
 
     @test.attr(type='smoke')
@@ -203,7 +206,8 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         firewall_id = created_firewall['id']
         self.addCleanup(self._try_delete_firewall, firewall_id)
 
-        self._wait_for_active(firewall_id)
+        # Wait for the firewall resource to become ready
+        self._wait_until_ready(firewall_id)
 
         # show a created firewall
         resp, firewall = self.client.show_firewall(firewall_id)
