@@ -798,7 +798,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             ip = server_or_ip
         else:
             network_name_for_ssh = CONF.compute.network_for_ssh
-            ip = server_or_ip['networks'][network_name_for_ssh][0]
+            ip = server_or_ip.networks[network_name_for_ssh][0]
         if username is None:
             username = CONF.scenario.ssh_user
         if private_key is None:
