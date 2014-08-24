@@ -78,6 +78,7 @@ iniset $TEMPEST_CONFIG compute image_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-c
 iniset $TEMPEST_CONFIG compute image_ref_alt $image_uuid_alt
 iniset $TEMPEST_CONFIG compute image_alt_ssh_user ${DEFAULT_INSTANCE_USER:-cirros}
 iniset $TEMPEST_CONFIG compute image_alt_ssh_password ${DEFAULT_INSTANCE_PASSWORD:-cubswin:)}
+iniset $TEMPEST_CONFIG compute allow_tenant_isolation ${TENANT_ISOLATION:-false}
 iniset $TEMPEST_CONFIG network public_network_id "$public_network_id"
 
 # Disable IPv6 tests
