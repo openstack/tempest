@@ -14,8 +14,8 @@
 #    under the License.
 
 import random
-
 from six import moves
+import testtools
 
 from tempest.api.object_storage import base
 from tempest import clients
@@ -148,6 +148,9 @@ class AccountTest(base.BaseObjectTest):
         self.assertEqual(container_list.find(".//bytes").tag, 'bytes')
 
     @test.attr(type='smoke')
+    @testtools.skipIf(
+        not CONF.object_storage_feature_enabled.discoverability,
+        'Discoverability function is disabled')
     def test_list_extensions(self):
         resp, extensions = self.account_client.list_extensions()
 
