@@ -174,10 +174,8 @@ class NetworkClientBase(object):
         raise AttributeError(name)
 
     # Common methods that are hard to automate
-    def create_bulk_network(self, count, names):
-        network_list = list()
-        for i in range(count):
-            network_list.append({'name': names[i]})
+    def create_bulk_network(self, names):
+        network_list = [{'name': name} for name in names]
         post_data = {'networks': network_list}
         body = self.serialize_list(post_data, "networks", "network")
         uri = self.get_uri("networks")
