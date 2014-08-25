@@ -55,6 +55,7 @@ class DatabaseFlavorsTest(base.BaseDatabaseTest):
                 self.assertNotIn(name, db_flavor)
 
     @test.attr(type='smoke')
+    @test.services('compute')
     def test_compare_db_flavors_with_os(self):
         resp, db_flavors = self.client.list_db_flavors()
         self.assertEqual(200, resp.status)
