@@ -75,6 +75,7 @@ class NetworksTestJSON(base.BaseNetworkTest):
         self.assertEqual('201', resp['status'])
         network = body['network']
         net_id = network['id']
+        self.assertEqual('ACTIVE', network['status'])
         # Verify network update
         new_name = "New_network"
         resp, body = self.client.update_network(net_id, name=new_name)
