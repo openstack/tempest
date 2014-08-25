@@ -66,9 +66,9 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
         params = {'format': 'json'}
         _, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEqual(2, len(container_list))
-        for cont in container_list:
-            self.assertTrue(cont['name'].startswith(self.stack_name))
+        created_containers = [cont for cont in container_list
+                              if cont['name'].startswith(self.stack_name)]
+        self.assertEqual(2, len(created_containers))
 
     @test.services('object_storage')
     def test_acl(self):
