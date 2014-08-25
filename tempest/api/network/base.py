@@ -365,6 +365,7 @@ class BaseNetworkTest(tempest.test.BaseTestCase):
 
 
 class BaseAdminNetworkTest(BaseNetworkTest):
+    _interface = 'json'
 
     @classmethod
     def setUpClass(cls):
