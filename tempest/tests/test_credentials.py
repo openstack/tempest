@@ -128,12 +128,22 @@ class KeystoneV2CredentialsTests(CredentialsTests):
         creds = self._get_credentials()
         self.assertTrue(creds.is_valid())
 
-    def test_is_not_valid(self):
+    def _test_is_not_valid(self, ignore_key):
         creds = self._get_credentials()
         for attr in self.attributes.keys():
+            if attr == ignore_key:
+                continue
+            temp_attr = getattr(creds, attr)
             delattr(creds, attr)
             self.assertFalse(creds.is_valid(),
                              "Credentials should be invalid without %s" % attr)
+            setattr(creds, attr, temp_attr)
+
+    def test_is_not_valid(self):
+        # NOTE(mtreinish): A KeystoneV2 credential object is valid without
+        # a tenant_name. So skip that check. See tempest.auth for the valid
+        # credential requirements
+        self._test_is_not_valid('tenant_name')
 
     def test_default(self):
         self.useFixture(fixtures.LockFixture('auth_version'))
@@ -204,6 +214,12 @@ class KeystoneV3CredentialsTests(KeystoneV2CredentialsTests):
                 else:
                     config_value = 'fake_' + attr
                 self.assertEqual(getattr(creds, attr), config_value)
+
+    def test_is_not_valid(self):
+        # NOTE(mtreinish) For a Keystone V3 credential object a project name
+        # is not required to be valid, so we skip that check. See tempest.auth
+        # for the valid credential requirements
+        self._test_is_not_valid('project_name')
 
     def test_synced_attributes(self):
         attributes = self.attributes
