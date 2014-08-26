@@ -59,8 +59,6 @@ class ObjectTempUrlTest(base.BaseObjectTest):
 
         cls.delete_containers(cls.containers)
 
-        # delete the user setup created
-        cls.data.teardown_all()
         super(ObjectTempUrlTest, cls).tearDownClass()
 
     def setUp(self):

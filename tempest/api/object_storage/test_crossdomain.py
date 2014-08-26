@@ -15,7 +15,6 @@
 # under the License.
 
 from tempest.api.object_storage import base
-from tempest import clients
 from tempest.common import custom_matchers
 from tempest import test
 
@@ -25,11 +24,6 @@ class CrossdomainTest(base.BaseObjectTest):
     @classmethod
     def setUpClass(cls):
         super(CrossdomainTest, cls).setUpClass()
-        # creates a test user. The test user will set its base_url to the Swift
-        # endpoint and test the healthcheck feature.
-        cls.data.setup_test_user()
-
-        cls.os_test_user = clients.Manager(cls.data.test_credentials)
 
         cls.xml_start = '<?xml version="1.0"?>\n' \
                         '<!DOCTYPE cross-domain-policy SYSTEM ' \
@@ -38,29 +32,16 @@ class CrossdomainTest(base.BaseObjectTest):
 
         cls.xml_end = "</cross-domain-policy>"
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.data.teardown_all()
-        super(CrossdomainTest, cls).tearDownClass()
-
     def setUp(self):
         super(CrossdomainTest, self).setUp()
 
-        client = self.os_test_user.account_client
         # Turning http://.../v1/foobar into http://.../
-        client.skip_path()
-
-    def tearDown(self):
-        # clear the base_url for subsequent requests
-        self.os_test_user.account_client.reset_path()
-
-        super(CrossdomainTest, self).tearDown()
+        self.account_client.skip_path()
 
     @test.attr('gate')
     @test.requires_ext(extension='crossdomain', service='object')
     def test_get_crossdomain_policy(self):
-        resp, body = self.os_test_user.account_client.get("crossdomain.xml",
-                                                          {})
+        resp, body = self.account_client.get("crossdomain.xml", {})
 
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertTrue(body.startswith(self.xml_start) and

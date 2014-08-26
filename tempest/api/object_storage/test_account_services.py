@@ -22,7 +22,6 @@ from tempest import clients
 from tempest.common import custom_matchers
 from tempest.common.utils import data_utils
 from tempest import config
-from tempest import exceptions
 from tempest import test
 
 CONF = config.CONF
@@ -45,7 +44,6 @@ class AccountTest(base.BaseObjectTest):
     @classmethod
     def tearDownClass(cls):
         cls.delete_containers(cls.containers)
-        cls.data.teardown_all()
         super(AccountTest, cls).tearDownClass()
 
     @test.attr(type='smoke')
@@ -66,35 +64,7 @@ class AccountTest(base.BaseObjectTest):
         # the base user of this instance.
         self.data.setup_test_user()
 
-        os_test_user = clients.Manager(
-            self.data.test_credentials)
-
-        # Retrieve the id of an operator role of object storage
-        test_role_id = None
-        swift_role = CONF.object_storage.operator_role
-        try:
-            _, roles = self.os_admin.identity_client.list_roles()
-            test_role_id = next(r['id'] for r in roles if r['name']
-                                == swift_role)
-        except StopIteration:
-            msg = "%s role found" % swift_role
-            raise exceptions.NotFound(msg)
-
-        # Retrieve the test_user id
-        _, users = self.os_admin.identity_client.get_users()
-        test_user_id = next(usr['id'] for usr in users if usr['name']
-                            == self.data.test_user)
-
-        # Retrieve the test_tenant id
-        _, tenants = self.os_admin.identity_client.list_tenants()
-        test_tenant_id = next(tnt['id'] for tnt in tenants if tnt['name']
-                              == self.data.test_tenant)
-
-        # Assign the newly created user the appropriate operator role
-        self.os_admin.identity_client.assign_user_role(
-            test_tenant_id,
-            test_user_id,
-            test_role_id)
+        os_test_user = clients.Manager(self.data.test_credentials)
 
         resp, container_list = \
             os_test_user.account_client.list_account_containers()
