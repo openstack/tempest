@@ -365,3 +365,7 @@ class TestNetworkBasicOps(manager.NetworkScenarioTest):
         self._create_new_network()
         self._hotplug_server()
         self._check_network_internal_connectivity(network=self.new_net)
+
+
+class TestNetwork6BasicOps(TestNetworkBasicOps):
+    _ip_version = 6
