@@ -33,8 +33,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
 
     def _cinder_verify(self, volume_id, template):
         self.assertIsNotNone(volume_id)
-        resp, volume = self.volumes_client.get_volume(volume_id)
-        self.assertEqual(200, resp.status)
+        _, volume = self.volumes_client.get_volume(volume_id)
         self.assertEqual('available', volume.get('status'))
         self.assertEqual(template['resources']['volume']['properties'][
             'size'], volume.get('size'))

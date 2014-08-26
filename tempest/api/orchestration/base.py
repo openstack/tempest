@@ -51,7 +51,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     @classmethod
     def _get_default_network(cls):
-        __, networks = cls.network_client.list_networks()
+        _, networks = cls.network_client.list_networks()
         for net in networks['networks']:
             if net['name'] == CONF.compute.fixed_network_name:
                 return net
@@ -95,7 +95,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     @classmethod
     def _create_keypair(cls, name_start='keypair-heat-'):
         kp_name = data_utils.rand_name(name_start)
-        __, body = cls.keypairs_client.create_keypair(kp_name)
+        _, body = cls.keypairs_client.create_keypair(kp_name)
         cls.keypairs.append(kp_name)
         return body
 
@@ -111,9 +111,9 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
     def _create_image(cls, name_start='image-heat-', container_format='bare',
                       disk_format='iso'):
         image_name = data_utils.rand_name(name_start)
-        __, body = cls.images_v2_client.create_image(image_name,
-                                                     container_format,
-                                                     disk_format)
+        _, body = cls.images_v2_client.create_image(image_name,
+                                                    container_format,
+                                                    disk_format)
         image_id = body['id']
         cls.images.append(image_id)
         return body
@@ -162,8 +162,7 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
 
     def list_resources(self, stack_identifier):
         """Get a dict mapping of resource names to types."""
-        resp, resources = self.client.list_resources(stack_identifier)
-        self.assertEqual('200', resp['status'])
+        _, resources = self.client.list_resources(stack_identifier)
         self.assertIsInstance(resources, list)
         for res in resources:
             self.assert_fields_in_dict(res, 'logical_resource_id',
@@ -174,6 +173,5 @@ class BaseOrchestrationTest(tempest.test.BaseTestCase):
                     for r in resources)
 
     def get_stack_output(self, stack_identifier, output_key):
-        resp, body = self.client.get_stack(stack_identifier)
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.get_stack(stack_identifier)
         return self.stack_output(body, output_key)

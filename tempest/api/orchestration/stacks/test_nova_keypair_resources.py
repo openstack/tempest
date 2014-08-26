@@ -70,8 +70,7 @@ class NovaKeyPairResourcesYAMLTest(base.BaseOrchestrationTest):
 
     @test.attr(type='gate')
     def test_stack_keypairs_output(self):
-        resp, stack = self.client.get_stack(self.stack_name)
-        self.assertEqual('200', resp['status'])
+        _, stack = self.client.get_stack(self.stack_name)
         self.assertIsInstance(stack, dict)
 
         output_map = {}
