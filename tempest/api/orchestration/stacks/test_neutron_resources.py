@@ -99,6 +99,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_network(self):
         """Verifies created network."""
         network_id = self.test_resources.get('Network')['physical_resource_id']
@@ -109,6 +110,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual('NewNetwork', network['name'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_subnet(self):
         """Verifies created subnet."""
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
@@ -124,6 +126,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(str(self.subnet_cidr), subnet['cidr'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_router(self):
         """Verifies created router."""
         router_id = self.test_resources.get('Router')['physical_resource_id']
@@ -135,6 +138,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(True, router['admin_state_up'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_router_interface(self):
         """Verifies created router interface."""
         router_id = self.test_resources.get('Router')['physical_resource_id']
@@ -157,6 +161,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                          router_interface_ip)
 
     @test.attr(type='slow')
+    @test.services('compute', 'network')
     def test_created_server(self):
         """Verifies created sever."""
         server_id = self.test_resources.get('Server')['physical_resource_id']
