@@ -134,6 +134,7 @@ class PortsTestJSON(base.BaseNetworkTest):
         for port in ports:
             self.assertEqual(sorted(fields), sorted(port.keys()))
 
+    @test.skip_because(bug="1364166")
     @test.attr(type='smoke')
     def test_update_port_with_second_ip(self):
         # Create a network with two subnets
