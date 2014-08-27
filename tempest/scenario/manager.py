@@ -955,7 +955,8 @@ class NetworkScenarioTest(OfficialClientTest):
         return floating_ip
 
     def _ping_ip_address(self, ip_address, should_succeed=True):
-        cmd = ['ping', '-c1', '-w1', ip_address]
+        ping_cmd = 'ping' if self._ip_version == 4 else 'ping6'
+        cmd = [ping_cmd, '-c1', '-w1', ip_address]
 
         def ping():
             proc = subprocess.Popen(cmd,
