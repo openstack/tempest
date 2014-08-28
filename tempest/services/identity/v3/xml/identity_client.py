@@ -590,6 +590,7 @@ class V3TokenClientXML(rest_client.RestClient):
             auth.append(scope)
 
         resp, body = self.post(self.auth_url, body=str(common.Document(auth)))
+        self.expected_success(201, resp.status)
         return resp, body
 
     def request(self, method, url, extra_headers=False, headers=None,
