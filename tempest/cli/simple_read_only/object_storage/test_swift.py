@@ -15,9 +15,10 @@
 
 import re
 
+from tempest_lib import exceptions
+
 from tempest import cli
 from tempest import config
-from tempest import exceptions
 
 CONF = config.CONF
 
@@ -36,6 +37,10 @@ class SimpleReadOnlySwiftClientTest(cli.ClientTestBase):
             msg = ("%s skipped as Swift is not available" % cls.__name__)
             raise cls.skipException(msg)
         super(SimpleReadOnlySwiftClientTest, cls).resource_setup()
+
+    def swift(self, *args, **kwargs):
+        return self.clients.swift(
+            *args, endpoint_type=CONF.object_storage.endpoint_type, **kwargs)
 
     def test_swift_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,

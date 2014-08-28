@@ -13,11 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest_lib import exceptions
 import testtools
 
 from tempest import cli
 from tempest import config
-from tempest import exceptions
 from tempest.openstack.common import log as logging
 import tempest.test
 
@@ -46,6 +46,11 @@ class SimpleReadOnlyNovaClientTest(cli.ClientTestBase):
             msg = ("%s skipped as Nova is not available" % cls.__name__)
             raise cls.skipException(msg)
         super(SimpleReadOnlyNovaClientTest, cls).resource_setup()
+
+    def nova(self, *args, **kwargs):
+        return self.clients.nova(*args,
+                                 endpoint_type=CONF.compute.endpoint_type,
+                                 **kwargs)
 
     def test_admin_fake_action(self):
         self.assertRaises(exceptions.CommandFailed,
