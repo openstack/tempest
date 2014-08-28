@@ -100,6 +100,13 @@ class FlavorsAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
                           self.user_client.delete_flavor,
                           self.flavor_ref_alt)
 
+    @test.attr(type=['negative', 'gate'])
+    def test_list_flavor_details_with_invalid_filter(self):
+        param = {'is_public': 'null'}
+        self.assertRaises(exceptions.BadRequest,
+                          self.client.list_flavors_with_detail,
+                          param)
+
 
 @test.SimpleNegativeAutoTest
 class FlavorCreateNegativeTestJSON(base.BaseV2ComputeAdminTest,

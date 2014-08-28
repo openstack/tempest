@@ -62,6 +62,51 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
                           name='')
 
     @test.attr(type=['negative', 'gate'])
+    def test_server_with_invalid_block_device_mapping(self):
+        block_device_mapping_v2 =  [{'device_name': 'null'}]
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_test_server,
+                          block_device_mapping_v2=block_device_mapping_v2)
+
+    @test.attr(type=['negative', 'gate'])
+    def test_create_server_with_extended_attr(self):
+        mac_addr =  "fa:16:sj:eh"
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_test_server,
+                          image_id=-1,
+                          mac_addr = mac_addr)
+        config_drive = ' '
+        disk_config = "null"
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_test_server,
+                          disk_config = disk_config)
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_test_server,
+                          config_drive = config_drive)
+
+    @test.attr(type=['negative', 'gate'])
+    def test_create_server_with_boot_volume(self):
+        v_name = data_utils.rand_name('volume')
+        resp, volume =self.volumes_client.create_volume(size=1,display_name=v_name)
+        self.addCleanup(self.volumes_client.delete_volume, volume['id'])
+        self.volumes_client.wait_for_volume_status(volume['id'], 'available')
+
+        name = data_utils.rand_name('server')
+        device_base = CONF.compute.volume_device_name
+        while str.isdigit(device_base[-1:]):
+            device_base = device_base[:-1]
+        device_name = "/dev/" + device_base[:-1] + "b"
+        mapping = [{
+                    "virtual_name":"root",
+                    "device_name": device_name,
+                    "volume_id" : volume['id']}]
+        self.assertRaises(exceptions.BadRequest,
+                          self.create_test_server,
+                          name = '',
+                          block_device_mapping = mapping,
+                          volumes_boot = True)
+
+    @test.attr(type=['negative', 'gate'])
     def test_personality_file_contents_not_encoded(self):
         # Use an unencoded file when creating a server with personality
 
@@ -318,6 +363,13 @@ class ServersNegativeTestJSON(base.BaseV2ComputeTest):
         # Stop a non existent server
         nonexistent_server = data_utils.rand_uuid()
         self.assertRaises(exceptions.NotFound, self.servers_client.stop,
+                          nonexistent_server)
+
+    @test.attr(type=['negative', 'gate'])
+    def test_start_non_existent_server(self):
+        # Start a non existent server
+        nonexistent_server = data_utils.rand_uuid()
+        self.assertRaises(exceptions.NotFound, self.servers_client.start,
                           nonexistent_server)
 
     @testtools.skipUnless(CONF.compute_feature_enabled.pause,

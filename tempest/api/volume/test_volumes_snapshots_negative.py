@@ -47,6 +47,47 @@ class VolumesSnapshotNegativeTest(base.BaseVolumeV1Test):
                           self.snapshots_client.create_snapshot,
                           None, display_name=s_name)
 
+    @test.attr(type=['negative', 'gate'])
+    def test_get_snapshot_with_nonexistent_snapshot_id(self):
+        # Should not be able to get snapshot with nonexistent snapshot id.
+        self.assertRaises(exceptions.NotFound,
+                          self.snapshots_client.get_snapshot,
+                          str(uuid.uuid4()))
+
+    @test.attr(type=['negative', 'gate'])
+    def test_delete_snapshot_with_nonexistent_snapshot_id(self):
+        # Should not be able to delete snapshot with nonexistent snapshot id.
+        self.assertRaises(exceptions.NotFound,
+                          self.snapshots_client.delete_snapshot,
+                          str(uuid.uuid4()))
+
+    @test.attr(type=['negative', 'gate'])
+    def test_update_snapshot_with_nonexistent_snapshot_id(self):
+        # Should not be able to update snapshot with nonexistent snapshot id.
+        self.assertRaises(exceptions.NotFound,
+                          self.snapshots_client.update_snapshot,
+                          str(uuid.uuid4()))
+
+    @test.attr(type=['negative', 'gate'])
+    def test_list_snapshot_with_nonexistent_name(self):
+        snap_name = data_utils.rand_name('snap-')
+        params = {'display_name': snap_name}
+        resp, fetched_snap = self.snapshots_client.list_snapshots(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(fetched_snap))
+
+    @test.attr(type=['negative', 'gate'])
+    def test_list_snapshot_detail_with_nonexistent_name(self):
+        snap_name = data_utils.rand_name('snap-')
+        params = {'display_name': snap_name}
+        resp, fetched_snap = self.snapshots_client.list_snapshots_with_detail(params)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(fetched_snap))
+
+
+class VolumesSnapshotV2NegativeTest(VolumesSnapshotNegativeTest):
+    _api_version= 2
+
 
 class VolumesSnapshotNegativeTestXML(VolumesSnapshotNegativeTest):
     _interface = "xml"
