@@ -13,7 +13,6 @@
 #    under the License.
 
 import netaddr
-import os
 
 from tempest import auth
 from tempest import clients
@@ -21,7 +20,6 @@ from tempest.common.utils import data_utils
 from tempest import config
 from tempest import exceptions
 from tempest.openstack.common import log as logging
-import time
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
@@ -65,10 +63,6 @@ class IsolatedCreds(object):
             tenant = self.identity_admin_client.tenants.create(
                 name,
                 description=description)
-        if os.environ.get('CONTRAIL_TEST_ENVIRONMENT') == '1':
-            # Need to sleep for 5 secs for Contrail API Server to
-            # sync
-            time.sleep(5)
         return tenant
 
     def _get_tenant_by_name(self, name):
