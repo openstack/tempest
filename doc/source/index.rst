@@ -9,6 +9,7 @@ Contents:
 
    overview
    HACKING
+   REVIEWING
 
 ------------
 Field Guides
