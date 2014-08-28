@@ -70,7 +70,7 @@ def safe_setup(f):
     """A decorator used to wrap the setUpClass for cleaning up resources
        when setUpClass failed.
     """
-
+    @functools.wraps(f)
     def decorator(cls):
             try:
                 f(cls)
