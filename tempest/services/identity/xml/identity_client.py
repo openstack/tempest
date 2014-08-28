@@ -16,7 +16,6 @@ from tempest.common import xml_utils as xml
 from tempest import config
 from tempest.services.identity.json import identity_client
 
-import os
 
 CONF = config.CONF
 
@@ -52,10 +51,6 @@ class IdentityClientXML(identity_client.IdentityClientJSON):
                                     description=kwargs.get('description', ''),
                                     enabled=str(en).lower())
         resp, body = self.post('tenants', str(xml.Document(create_tenant)))
-        if os.environ.get('CONTRAIL_TEST_ENVIRONMENT') == '1':
-            # Need to sleep for 5 secs for Contrail API Server to
-            # sync
-            time.sleep(5)
         return resp, self._parse_resp(body)
 
     def list_tenants(self):

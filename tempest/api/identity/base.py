@@ -19,7 +19,6 @@ from tempest import clients
 from tempest.common.utils import data_utils
 from tempest import config
 import tempest.test
-import os
 
 CONF = config.CONF
 
