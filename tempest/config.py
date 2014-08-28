@@ -1020,7 +1020,12 @@ ScenarioGroup = [
                choices=["udhcpc", "dhclient", ""],
                help='DHCP client used by images to renew DCHP lease. '
                     'If left empty, update operation will be skipped. '
-                    'Supported clients: "udhcpc", "dhclient"')
+                    'Supported clients: "udhcpc", "dhclient"'),
+    cfg.StrOpt('protocol',
+               default='icmp',
+               choices=('icmp', 'tcp', 'udp'),
+               help='The protocol used in security groups tests to check '
+                    'connectivity.'),
 ]
 
 
