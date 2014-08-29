@@ -60,6 +60,7 @@ class OrchestrationClient(rest_client.RestClient):
         uri = 'stacks'
         resp, body = self.post(uri, headers=headers, body=body)
         self.expected_success(201, resp.status)
+        body = json.loads(body)
         return resp, body
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
