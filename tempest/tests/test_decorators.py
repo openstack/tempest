@@ -237,7 +237,7 @@ class TestRequiresExtDecorator(BaseDecoratorsTest):
 class TestSimpleNegativeDecorator(BaseDecoratorsTest):
     @test.SimpleNegativeAutoTest
     class FakeNegativeJSONTest(test.NegativeAutoTest):
-        _schema_file = 'fake/schemas/file.json'
+        _schema = {}
 
     def test_testfunc_exist(self):
         self.assertIn("test_fake_negative", dir(self.FakeNegativeJSONTest))
@@ -247,4 +247,4 @@ class TestSimpleNegativeDecorator(BaseDecoratorsTest):
         obj = self.FakeNegativeJSONTest("test_fake_negative")
         self.assertIn("test_fake_negative", dir(obj))
         obj.test_fake_negative()
-        mock.assert_called_once_with(self.FakeNegativeJSONTest._schema_file)
+        mock.assert_called_once_with(self.FakeNegativeJSONTest._schema)

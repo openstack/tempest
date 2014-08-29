@@ -13,6 +13,7 @@
 #    under the License.
 
 import netaddr
+from neutronclient.common import exceptions as n_exc
 
 from tempest import auth
 from tempest import clients
@@ -162,9 +163,11 @@ class IsolatedCreds(cred_provider.CredentialProvider):
         email = data_utils.rand_name(root) + suffix + "@example.com"
         user = self._create_user(username, self.password,
                                  tenant, email)
-        # NOTE(andrey-mp): user needs this role to create containers in swift
-        swift_operator_role = CONF.object_storage.operator_role
-        self._assign_user_role(tenant, user, swift_operator_role)
+        if CONF.service_available.swift:
+            # NOTE(andrey-mp): user needs this role to create containers
+            # in swift
+            swift_operator_role = CONF.object_storage.operator_role
+            self._assign_user_role(tenant, user, swift_operator_role)
         if admin:
             self._assign_user_role(tenant, user, CONF.identity.admin_role)
         return self._get_credentials(user, tenant)
@@ -261,7 +264,7 @@ class IsolatedCreds(cred_provider.CredentialProvider):
                     body['subnet']['cidr'] = str(subnet_cidr)
                     resp_body = self.network_admin_client.create_subnet(body)
                 break
-            except exceptions.BadRequest as e:
+            except (n_exc.BadRequest, exceptions.BadRequest) as e:
                 if 'overlaps with another subnet' not in str(e):
                     raise
         else:

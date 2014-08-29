@@ -13,27 +13,6 @@
 
 import copy
 
-from tempest.api_schema.request.compute import flavors
+from tempest.api_schema.request.compute import servers
 
-flavors_details = copy.deepcopy(flavors.common_flavor_details)
-
-flavor_list = copy.deepcopy(flavors.common_flavor_list)
-
-flavor_create = copy.deepcopy(flavors.common_admin_flavor_create)
-
-flavor_list["json-schema"]["properties"] = {
-    "minRam": {
-        "type": "integer",
-        "results": {
-            "gen_none": 400,
-            "gen_string": 400
-        }
-    },
-    "minDisk": {
-        "type": "integer",
-        "results": {
-            "gen_none": 400,
-            "gen_string": 400
-        }
-    }
-}
+get_console_output = copy.deepcopy(servers.common_get_console_output)

@@ -36,21 +36,18 @@ class FloatingIPAdminTestJSON(base.BaseAdminNetworkTest):
     @test.attr(type='smoke')
     def test_list_floating_ips_from_admin_and_nonadmin(self):
         # Create floating ip from admin user
-        resp, floating_ip_admin = self.admin_client.create_floatingip(
+        _, floating_ip_admin = self.admin_client.create_floatingip(
             floating_network_id=self.ext_net_id)
-        self.assertEqual('201', resp['status'])
         self.addCleanup(self.admin_client.delete_floatingip,
                         floating_ip_admin['floatingip']['id'])
         # Create floating ip from alt user
-        resp, body = self.alt_client.create_floatingip(
+        _, body = self.alt_client.create_floatingip(
             floating_network_id=self.ext_net_id)
-        self.assertEqual('201', resp['status'])
         floating_ip_alt = body['floatingip']
         self.addCleanup(self.alt_client.delete_floatingip,
                         floating_ip_alt['id'])
         # List floating ips from admin
-        resp, body = self.admin_client.list_floatingips()
-        self.assertEqual('200', resp['status'])
+        _, body = self.admin_client.list_floatingips()
         floating_ip_ids_admin = [f['id'] for f in body['floatingips']]
         # Check that admin sees all floating ips
         self.assertIn(self.floating_ip['id'], floating_ip_ids_admin)

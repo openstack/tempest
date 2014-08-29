@@ -11,29 +11,26 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 
-import copy
-
-from tempest.api_schema.request.compute import flavors
-
-flavors_details = copy.deepcopy(flavors.common_flavor_details)
-
-flavor_list = copy.deepcopy(flavors.common_flavor_list)
-
-flavor_create = copy.deepcopy(flavors.common_admin_flavor_create)
-
-flavor_list["json-schema"]["properties"] = {
-    "minRam": {
-        "type": "integer",
-        "results": {
-            "gen_none": 400,
-            "gen_string": 400
-        }
-    },
-    "minDisk": {
-        "type": "integer",
-        "results": {
-            "gen_none": 400,
-            "gen_string": 400
-        }
+common_get_console_output = {
+    "name": "get-console-output",
+    "http-method": "POST",
+    "url": "servers/%s/action",
+    "resources": [
+        {"name": "server", "expected_result": 404}
+    ],
+    "json-schema": {
+        "type": "object",
+        "properties": {
+            "os-getConsoleOutput": {
+                "type": "object",
+                "properties": {
+                    "length": {
+                        "type": ["integer", "string"],
+                        "minimum": 0
+                    }
+                }
+            }
+        },
+        "additionalProperties": False
     }
 }

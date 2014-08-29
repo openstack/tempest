@@ -33,8 +33,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
 
     def _cinder_verify(self, volume_id, template):
         self.assertIsNotNone(volume_id)
-        resp, volume = self.volumes_client.get_volume(volume_id)
-        self.assertEqual(200, resp.status)
+        _, volume = self.volumes_client.get_volume(volume_id)
         self.assertEqual('available', volume.get('status'))
         self.assertEqual(template['resources']['volume']['properties'][
             'size'], volume.get('size'))
@@ -55,6 +54,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
             'name'], self.get_stack_output(stack_identifier, 'display_name'))
 
     @test.attr(type='gate')
+    @test.services('volume')
     def test_cinder_volume_create_delete(self):
         """Create and delete a volume via OS::Cinder::Volume."""
         stack_name = data_utils.rand_name('heat')
@@ -83,6 +83,7 @@ class CinderResourcesTest(base.BaseOrchestrationTest):
         self.volumes_client.wait_for_resource_deletion(volume_id)
 
     @test.attr(type='gate')
+    @test.services('volume')
     def test_cinder_volume_create_delete_retain(self):
         """Ensure the 'Retain' deletion policy is respected."""
         stack_name = data_utils.rand_name('heat')

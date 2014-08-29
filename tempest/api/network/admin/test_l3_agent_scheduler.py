@@ -52,9 +52,7 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_list_routers_on_l3_agent(self):
-        resp, body = self.admin_client.list_routers_on_l3_agent(
-            self.agent['id'])
-        self.assertEqual('200', resp['status'])
+        _, body = self.admin_client.list_routers_on_l3_agent(self.agent['id'])
 
     @test.attr(type='smoke')
     def test_add_list_remove_router_on_l3_agent(self):
@@ -62,21 +60,20 @@ class L3AgentSchedulerTestJSON(base.BaseAdminNetworkTest):
         name = data_utils.rand_name('router1-')
         resp, router = self.client.create_router(name)
         self.addCleanup(self.client.delete_router, router['router']['id'])
-        resp, body = self.admin_client.add_router_to_l3_agent(
-            self.agent['id'], router['router']['id'])
-        self.assertEqual('201', resp['status'])
-        resp, body = self.admin_client.list_l3_agents_hosting_router(
+        _, body = self.admin_client.add_router_to_l3_agent(
+            self.agent['id'],
             router['router']['id'])
-        self.assertEqual('200', resp['status'])
+        _, body = self.admin_client.list_l3_agents_hosting_router(
+            router['router']['id'])
         for agent in body['agents']:
             l3_agent_ids.append(agent['id'])
             self.assertIn('agent_type', agent)
             self.assertEqual('L3 agent', agent['agent_type'])
         self.assertIn(self.agent['id'], l3_agent_ids)
         del l3_agent_ids[:]
-        resp, body = self.admin_client.remove_router_from_l3_agent(
-            self.agent['id'], router['router']['id'])
-        self.assertEqual('204', resp['status'])
+        _, body = self.admin_client.remove_router_from_l3_agent(
+            self.agent['id'],
+            router['router']['id'])
         # NOTE(afazekas): The deletion not asserted, because neutron
         # is not forbidden to reschedule the router to the same agent
 

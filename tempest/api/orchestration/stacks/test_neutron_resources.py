@@ -71,11 +71,11 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                 # attempt to log the server console to help with debugging
                 # the cause of the server not signalling the waitcondition
                 # to heat.
-                resp, body = cls.client.get_resource(cls.stack_identifier,
-                                                     'Server')
+                _, body = cls.client.get_resource(cls.stack_identifier,
+                                                  'Server')
                 server_id = body['physical_resource_id']
                 LOG.debug('Console output for %s', server_id)
-                resp, output = cls.servers_client.get_console_output(
+                _, output = cls.servers_client.get_console_output(
                     server_id, None)
                 LOG.debug(output)
             raise e
@@ -99,22 +99,22 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_network(self):
         """Verifies created network."""
         network_id = self.test_resources.get('Network')['physical_resource_id']
-        resp, body = self.network_client.show_network(network_id)
-        self.assertEqual('200', resp['status'])
+        _, body = self.network_client.show_network(network_id)
         network = body['network']
         self.assertIsInstance(network, dict)
         self.assertEqual(network_id, network['id'])
         self.assertEqual('NewNetwork', network['name'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_subnet(self):
         """Verifies created subnet."""
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        resp, body = self.network_client.show_subnet(subnet_id)
-        self.assertEqual('200', resp['status'])
+        _, body = self.network_client.show_subnet(subnet_id)
         subnet = body['subnet']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         self.assertEqual(subnet_id, subnet['id'])
@@ -126,11 +126,11 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(str(self.subnet_cidr), subnet['cidr'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_router(self):
         """Verifies created router."""
         router_id = self.test_resources.get('Router')['physical_resource_id']
-        resp, body = self.network_client.show_router(router_id)
-        self.assertEqual('200', resp['status'])
+        _, body = self.network_client.show_router(router_id)
         router = body['router']
         self.assertEqual('NewRouter', router['name'])
         self.assertEqual(self.external_network_id,
@@ -138,13 +138,13 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         self.assertEqual(True, router['admin_state_up'])
 
     @test.attr(type='slow')
+    @test.services('network')
     def test_created_router_interface(self):
         """Verifies created router interface."""
         router_id = self.test_resources.get('Router')['physical_resource_id']
         network_id = self.test_resources.get('Network')['physical_resource_id']
         subnet_id = self.test_resources.get('Subnet')['physical_resource_id']
-        resp, body = self.network_client.list_ports()
-        self.assertEqual('200', resp['status'])
+        _, body = self.network_client.list_ports()
         ports = body['ports']
         router_ports = filter(lambda port: port['device_id'] ==
                               router_id, ports)
@@ -161,11 +161,11 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
                          router_interface_ip)
 
     @test.attr(type='slow')
+    @test.services('compute', 'network')
     def test_created_server(self):
         """Verifies created sever."""
         server_id = self.test_resources.get('Server')['physical_resource_id']
-        resp, server = self.servers_client.get_server(server_id)
-        self.assertEqual('200', resp['status'])
+        _, server = self.servers_client.get_server(server_id)
         self.assertEqual(self.keypair_name, server['key_name'])
         self.assertEqual('ACTIVE', server['status'])
         network = server['addresses']['NewNetwork'][0]

@@ -30,3 +30,24 @@ common_flavor_list = {
         }
     }
 }
+
+common_admin_flavor_create = {
+    "name": "flavor-create",
+    "http-method": "POST",
+    "admin_client": True,
+    "url": "flavors",
+    "default_result_code": 400,
+    "json-schema": {
+        "type": "object",
+        "properties": {
+            "name": {"type": "string"},
+            "ram": {"type": "integer", "minimum": 1},
+            "vcpus": {"type": "integer", "minimum": 1},
+            "disk": {"type": "integer"},
+            "id": {"type": "integer"},
+            "swap": {"type": "integer"},
+            "rxtx_factor": {"type": "integer"},
+            "OS-FLV-EXT-DATA:ephemeral": {"type": "integer"}
+        }
+    }
+}

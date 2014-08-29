@@ -33,8 +33,7 @@ class SecGroupTest(base.BaseSecGroupTest):
     @test.attr(type='smoke')
     def test_list_security_groups(self):
         # Verify the that security group belonging to tenant exist in list
-        resp, body = self.client.list_security_groups()
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.list_security_groups()
         security_groups = body['security_groups']
         found = None
         for n in security_groups:
@@ -48,8 +47,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         group_create_body, name = self._create_security_group()
 
         # List security groups and verify if created group is there in response
-        resp, list_body = self.client.list_security_groups()
-        self.assertEqual('200', resp['status'])
+        _, list_body = self.client.list_security_groups()
         secgroup_list = list()
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])
@@ -57,12 +55,11 @@ class SecGroupTest(base.BaseSecGroupTest):
         # Update the security group
         new_name = data_utils.rand_name('security-')
         new_description = data_utils.rand_name('security-description')
-        resp, update_body = self.client.update_security_group(
+        _, update_body = self.client.update_security_group(
             group_create_body['security_group']['id'],
             name=new_name,
             description=new_description)
         # Verify if security group is updated
-        self.assertEqual('200', resp['status'])
         self.assertEqual(update_body['security_group']['name'], new_name)
         self.assertEqual(update_body['security_group']['description'],
                          new_description)
@@ -80,18 +77,16 @@ class SecGroupTest(base.BaseSecGroupTest):
         # Create rules for each protocol
         protocols = ['tcp', 'udp', 'icmp']
         for protocol in protocols:
-            resp, rule_create_body = self.client.create_security_group_rule(
+            _, rule_create_body = self.client.create_security_group_rule(
                 security_group_id=group_create_body['security_group']['id'],
                 protocol=protocol,
                 direction='ingress'
             )
-            self.assertEqual('201', resp['status'])
 
             # Show details of the created security rule
-            resp, show_rule_body = self.client.show_security_group_rule(
+            _, show_rule_body = self.client.show_security_group_rule(
                 rule_create_body['security_group_rule']['id']
             )
-            self.assertEqual('200', resp['status'])
             create_dict = rule_create_body['security_group_rule']
             for key, value in six.iteritems(create_dict):
                 self.assertEqual(value,
@@ -99,8 +94,7 @@ class SecGroupTest(base.BaseSecGroupTest):
                                  "%s does not match." % key)
 
             # List rules and verify created rule is in response
-            resp, rule_list_body = self.client.list_security_group_rules()
-            self.assertEqual('200', resp['status'])
+            _, rule_list_body = self.client.list_security_group_rules()
             rule_list = [rule['id']
                          for rule in rule_list_body['security_group_rules']]
             self.assertIn(rule_create_body['security_group_rule']['id'],
@@ -117,7 +111,7 @@ class SecGroupTest(base.BaseSecGroupTest):
         protocol = 'tcp'
         port_range_min = 77
         port_range_max = 77
-        resp, rule_create_body = self.client.create_security_group_rule(
+        _, rule_create_body = self.client.create_security_group_rule(
             security_group_id=group_create_body['security_group']['id'],
             direction=direction,
             protocol=protocol,
@@ -125,7 +119,6 @@ class SecGroupTest(base.BaseSecGroupTest):
             port_range_max=port_range_max
         )
 
-        self.assertEqual('201', resp['status'])
         sec_group_rule = rule_create_body['security_group_rule']
 
         self.assertEqual(sec_group_rule['direction'], direction)

@@ -74,8 +74,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
 
     def _wait_for_status(self, fw_id, status):
         def _wait():
-            resp, firewall = self.client.show_firewall(fw_id)
-            self.assertEqual('200', resp['status'])
+            _, firewall = self.client.show_firewall(fw_id)
             firewall = firewall['firewall']
             return firewall['status'] == status
 
@@ -88,8 +87,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_list_firewall_rules(self):
         # List firewall rules
-        resp, fw_rules = self.client.list_firewall_rules()
-        self.assertEqual('200', resp['status'])
+        _, fw_rules = self.client.list_firewall_rules()
         fw_rules = fw_rules['firewall_rules']
         self.assertIn((self.fw_rule['id'],
                        self.fw_rule['name'],
@@ -107,22 +105,19 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_create_update_delete_firewall_rule(self):
         # Create firewall rule
-        resp, body = self.client.create_firewall_rule(
+        _, body = self.client.create_firewall_rule(
             name=data_utils.rand_name("fw-rule"),
             action="allow",
             protocol="tcp")
-        self.assertEqual('201', resp['status'])
         fw_rule_id = body['firewall_rule']['id']
 
         # Update firewall rule
-        resp, body = self.client.update_firewall_rule(fw_rule_id,
-                                                      shared=True)
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.update_firewall_rule(fw_rule_id,
+                                                   shared=True)
         self.assertTrue(body["firewall_rule"]['shared'])
 
         # Delete firewall rule
-        resp, _ = self.client.delete_firewall_rule(fw_rule_id)
-        self.assertEqual('204', resp['status'])
+        self.client.delete_firewall_rule(fw_rule_id)
         # Confirm deletion
         resp, fw_rules = self.client.list_firewall_rules()
         self.assertNotIn(fw_rule_id,
@@ -131,15 +126,13 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_show_firewall_rule(self):
         # show a created firewall rule
-        resp, fw_rule = self.client.show_firewall_rule(self.fw_rule['id'])
-        self.assertEqual('200', resp['status'])
+        _, fw_rule = self.client.show_firewall_rule(self.fw_rule['id'])
         for key, value in fw_rule['firewall_rule'].iteritems():
             self.assertEqual(self.fw_rule[key], value)
 
     @test.attr(type='smoke')
     def test_list_firewall_policies(self):
-        resp, fw_policies = self.client.list_firewall_policies()
-        self.assertEqual('200', resp['status'])
+        _, fw_policies = self.client.list_firewall_policies()
         fw_policies = fw_policies['firewall_policies']
         self.assertIn((self.fw_policy['id'],
                        self.fw_policy['name'],
@@ -151,24 +144,21 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_create_update_delete_firewall_policy(self):
         # Create firewall policy
-        resp, body = self.client.create_firewall_policy(
+        _, body = self.client.create_firewall_policy(
             name=data_utils.rand_name("fw-policy"))
-        self.assertEqual('201', resp['status'])
         fw_policy_id = body['firewall_policy']['id']
         self.addCleanup(self._try_delete_policy, fw_policy_id)
 
         # Update firewall policy
-        resp, body = self.client.update_firewall_policy(fw_policy_id,
-                                                        shared=True,
-                                                        name="updated_policy")
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.update_firewall_policy(fw_policy_id,
+                                                     shared=True,
+                                                     name="updated_policy")
         updated_fw_policy = body["firewall_policy"]
         self.assertTrue(updated_fw_policy['shared'])
         self.assertEqual("updated_policy", updated_fw_policy['name'])
 
         # Delete firewall policy
-        resp, _ = self.client.delete_firewall_policy(fw_policy_id)
-        self.assertEqual('204', resp['status'])
+        self.client.delete_firewall_policy(fw_policy_id)
         # Confirm deletion
         resp, fw_policies = self.client.list_firewall_policies()
         fw_policies = fw_policies['firewall_policies']
@@ -177,9 +167,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_show_firewall_policy(self):
         # show a created firewall policy
-        resp, fw_policy = self.client.show_firewall_policy(
-            self.fw_policy['id'])
-        self.assertEqual('200', resp['status'])
+        _, fw_policy = self.client.show_firewall_policy(self.fw_policy['id'])
         fw_policy = fw_policy['firewall_policy']
         for key, value in fw_policy.iteritems():
             self.assertEqual(self.fw_policy[key], value)
@@ -235,10 +223,9 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
             router['id'], subnet['id'])
 
         # Create firewall
-        resp, body = self.client.create_firewall(
+        _, body = self.client.create_firewall(
             name=data_utils.rand_name("firewall"),
             firewall_policy_id=self.fw_policy['id'])
-        self.assertEqual('201', resp['status'])
         created_firewall = body['firewall']
         firewall_id = created_firewall['id']
         self.addCleanup(self._try_delete_firewall, firewall_id)
@@ -246,8 +233,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         self._wait_for_status(firewall_id, 'ACTIVE')
 
         # show a created firewall
-        resp, firewall = self.client.show_firewall(firewall_id)
-        self.assertEqual('200', resp['status'])
+        _, firewall = self.client.show_firewall(firewall_id)
         firewall = firewall['firewall']
 
         for key, value in firewall.iteritems():
@@ -263,8 +249,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
         self._wait_for_status(firewall_id, 'DOWN')
 
         # list firewall
-        resp, firewalls = self.client.list_firewalls()
-        self.assertEqual('200', resp['status'])
+        _, firewalls = self.client.list_firewalls()
         firewalls = firewalls['firewalls']
         self.assertIn((created_firewall['id'],
                        created_firewall['name'],
@@ -274,8 +259,7 @@ class FWaaSExtensionTestJSON(base.BaseNetworkTest):
                         m['firewall_policy_id']) for m in firewalls])
 
         # Delete firewall
-        resp, _ = self.client.delete_firewall(firewall_id)
-        self.assertEqual('204', resp['status'])
+        self.client.delete_firewall(firewall_id)
 
 
 class FWaaSExtensionTestXML(FWaaSExtensionTestJSON):

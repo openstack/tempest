@@ -70,7 +70,7 @@ def safe_setup(f):
     """A decorator used to wrap the setUpClass for cleaning up resources
        when setUpClass failed.
     """
-
+    @functools.wraps(f)
     def decorator(cls):
             try:
                 f(cls)
@@ -107,7 +107,7 @@ def services(*args, **kwargs):
         'identity': True,
         'object_storage': CONF.service_available.swift,
         'dashboard': CONF.service_available.horizon,
-        'ceilometer': CONF.service_available.ceilometer,
+        'telemetry': CONF.service_available.ceilometer,
         'data_processing': CONF.service_available.sahara
     }
 
@@ -399,25 +399,6 @@ class NegativeAutoTest(BaseTestCase):
         cls.admin_client = os_admin.negative_client
 
     @staticmethod
-    def load_schema(file_or_dict):
-        """
-        Loads a schema from a file_or_dict on a specified location.
-
-        :param file_or_dict: just a dict or filename
-        """
-        # NOTE(mkoderer): we will get rid of this function when all test are
-        # ported to dicts
-        if isinstance(file_or_dict, dict):
-            return file_or_dict
-
-        # NOTE(mkoderer): must be extended for xml support
-        fn = os.path.join(
-            os.path.abspath(os.path.dirname(os.path.dirname(__file__))),
-            "etc", "schemas", file_or_dict)
-        LOG.debug("Open schema file: %s" % (fn))
-        return json.load(open(fn))
-
-    @staticmethod
     def load_tests(*args):
         """
         Wrapper for testscenarios to set the mandatory scenarios variable
@@ -460,7 +441,6 @@ class NegativeAutoTest(BaseTestCase):
                 the data is used to generate query strings appended to the url,
                 otherwise for the body of the http call.
         """
-        description = NegativeAutoTest.load_schema(description)
         LOG.debug(description)
         generator = importutils.import_class(
             CONF.negative.test_generator)()
@@ -514,7 +494,6 @@ class NegativeAutoTest(BaseTestCase):
                 otherwise for the body of the http call.
 
         """
-        description = NegativeAutoTest.load_schema(description)
         LOG.info("Executing %s" % description["name"])
         LOG.debug(description)
         method = description["http-method"]
@@ -604,8 +583,6 @@ def SimpleNegativeAutoTest(klass):
     """
     @attr(type=['negative', 'gate'])
     def generic_test(self):
-        if hasattr(self, '_schema_file'):
-            self.execute(self._schema_file)
         if hasattr(self, '_schema'):
             self.execute(self._schema)
 

@@ -26,32 +26,27 @@ class BaseSecGroupTest(base.BaseNetworkTest):
     def _create_security_group(self):
         # Create a security group
         name = data_utils.rand_name('secgroup-')
-        resp, group_create_body = self.client.create_security_group(name=name)
-        self.assertEqual('201', resp['status'])
+        _, group_create_body = self.client.create_security_group(name=name)
         self.addCleanup(self._delete_security_group,
                         group_create_body['security_group']['id'])
         self.assertEqual(group_create_body['security_group']['name'], name)
         return group_create_body, name
 
     def _delete_security_group(self, secgroup_id):
-        resp, _ = self.client.delete_security_group(secgroup_id)
-        self.assertEqual(204, resp.status)
+        self.client.delete_security_group(secgroup_id)
         # Asserting that the security group is not found in the list
         # after deletion
-        resp, list_body = self.client.list_security_groups()
-        self.assertEqual('200', resp['status'])
+        _, list_body = self.client.list_security_groups()
         secgroup_list = list()
         for secgroup in list_body['security_groups']:
             secgroup_list.append(secgroup['id'])
         self.assertNotIn(secgroup_id, secgroup_list)
 
     def _delete_security_group_rule(self, rule_id):
-        resp, _ = self.client.delete_security_group_rule(rule_id)
-        self.assertEqual(204, resp.status)
+        self.client.delete_security_group_rule(rule_id)
         # Asserting that the security group is not found in the list
         # after deletion
-        resp, list_body = self.client.list_security_group_rules()
-        self.assertEqual('200', resp['status'])
+        _, list_body = self.client.list_security_group_rules()
         rules_list = list()
         for rule in list_body['security_group_rules']:
             rules_list.append(rule['id'])

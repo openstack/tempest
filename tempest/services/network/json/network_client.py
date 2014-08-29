@@ -54,12 +54,14 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.dumps(put_body)
         uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
         resp, body = self.put(uri, body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['quota']
 
     def reset_quotas(self, tenant_id):
         uri = '%s/quotas/%s' % (self.uri_prefix, tenant_id)
         resp, body = self.delete(uri)
+        self.rest_client.expected_success(204, resp.status)
         return resp, body
 
     def create_router(self, name, admin_state_up=True, **kwargs):
@@ -69,12 +71,14 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.dumps(post_body)
         uri = '%s/routers' % (self.uri_prefix)
         resp, body = self.post(uri, body)
+        self.rest_client.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body
 
     def _update_router(self, router_id, set_enable_snat, **kwargs):
         uri = '%s/routers/%s' % (self.uri_prefix, router_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         update_body = {}
         update_body['name'] = kwargs.get('name', body['router']['name'])
@@ -88,6 +92,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         update_body = dict(router=update_body)
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -114,6 +119,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         update_body = {"subnet_id": subnet_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -123,6 +129,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         update_body = {"port_id": port_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -132,6 +139,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         update_body = {"subnet_id": subnet_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -141,6 +149,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         update_body = {"port_id": port_id}
         update_body = json.dumps(update_body)
         resp, body = self.put(uri, update_body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -155,6 +164,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         uri = '%s/lb/pools/%s/health_monitors' % (self.uri_prefix,
                                                   pool_id)
         resp, body = self.post(uri, body)
+        self.rest_client.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -163,11 +173,13 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         uri = '%s/lb/pools/%s/health_monitors/%s' % (self.uri_prefix, pool_id,
                                                      health_monitor_id)
         resp, body = self.delete(uri)
+        self.rest_client.expected_success(204, resp.status)
         return resp, body
 
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -180,12 +192,14 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         agent = {"agent": agent_info}
         body = json.dumps(agent)
         resp, body = self.put(uri, body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
     def list_pools_hosted_by_one_lbaas_agent(self, agent_id):
         uri = '%s/agents/%s/loadbalancer-pools' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -193,18 +207,21 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         uri = ('%s/lb/pools/%s/loadbalancer-agent' %
                (self.uri_prefix, pool_id))
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
     def list_routers_on_l3_agent(self, agent_id):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
     def list_l3_agents_hosting_router(self, router_id):
         uri = '%s/routers/%s/l3-agents' % (self.uri_prefix, router_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -213,6 +230,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         post_body = {"router_id": router_id}
         body = json.dumps(post_body)
         resp, body = self.post(uri, body)
+        self.rest_client.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -220,17 +238,20 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         uri = '%s/agents/%s/l3-routers/%s' % (
             self.uri_prefix, agent_id, router_id)
         resp, body = self.delete(uri)
+        self.rest_client.expected_success(204, resp.status)
         return resp, body
 
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
     def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -238,6 +259,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         uri = '%s/agents/%s/dhcp-networks/%s' % (self.uri_prefix, agent_id,
                                                  network_id)
         resp, body = self.delete(uri)
+        self.rest_client.expected_success(204, resp.status)
         return resp, body
 
     def create_ikepolicy(self, name, **kwargs):
@@ -251,6 +273,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.dumps(post_body)
         uri = '%s/vpn/ikepolicies' % (self.uri_prefix)
         resp, body = self.post(uri, body)
+        self.rest_client.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -264,6 +287,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         }
         body = json.dumps(put_body)
         resp, body = self.put(uri, body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -277,12 +301,14 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         }
         body = json.dumps(put_body)
         resp, body = self.put(uri, body)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
     def list_lb_pool_stats(self, pool_id):
         uri = '%s/lb/pools/%s/stats' % (self.uri_prefix, pool_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body
 
@@ -291,6 +317,7 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         body = json.dumps(post_body)
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
         resp, body = self.post(uri, body)
+        self.rest_client.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body
 

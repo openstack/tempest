@@ -40,11 +40,10 @@ resources:
 
     def update_stack(self, stack_identifier, template):
         stack_name = stack_identifier.split('/')[0]
-        resp = self.client.update_stack(
+        self.client.update_stack(
             stack_identifier=stack_identifier,
             name=stack_name,
             template=template)
-        self.assertEqual('202', resp[0]['status'])
         self.client.wait_for_stack_status(stack_identifier, 'UPDATE_COMPLETE')
 
     @test.attr(type='gate')

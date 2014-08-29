@@ -103,17 +103,21 @@ class NetworkClientXML(client_base.NetworkClientBase):
         post_body.append(p1)
         resp, body = self.post(uri, str(common.Document(post_body)))
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
+        self.rest_client.expected_success(201, resp.status)
         return resp, body
 
     def disassociate_health_monitor_with_pool(self, health_monitor_id,
                                               pool_id):
         uri = '%s/lb/pools/%s/health_monitors/%s' % (self.uri_prefix, pool_id,
                                                      health_monitor_id)
-        return self.delete(uri)
+        resp, body = self.delete(uri)
+        self.rest_client.expected_success(204, resp.status)
+        return resp, body
 
     def show_extension_details(self, ext_alias):
         uri = '%s/extensions/%s' % (self.uri_prefix, str(ext_alias))
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -123,6 +127,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
         router.append(common.Element("name", name))
         common.deep_dict_to_xml(router, kwargs)
         resp, body = self.post(uri, str(common.Document(router)))
+        self.rest_client.expected_success(201, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -132,6 +137,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
         for element, content in kwargs.iteritems():
             router.append(common.Element(element, content))
         resp, body = self.put(uri, str(common.Document(router)))
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -140,6 +146,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
                                                       router_id)
         subnet = common.Element("subnet_id", subnet_id)
         resp, body = self.put(uri, str(common.Document(subnet)))
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -148,6 +155,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
                                                       router_id)
         port = common.Element("port_id", port_id)
         resp, body = self.put(uri, str(common.Document(port)))
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -156,6 +164,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
                                                          router_id)
         subnet = common.Element("subnet_id", subnet_id)
         resp, body = self.put(uri, str(common.Document(subnet)))
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -164,12 +173,14 @@ class NetworkClientXML(client_base.NetworkClientBase):
                                                          router_id)
         port = common.Element("port_id", port_id)
         resp, body = self.put(uri, str(common.Document(port)))
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def list_router_interfaces(self, uuid):
         uri = '%s/ports?device_id=%s' % (self.uri_prefix, uuid)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         ports = common.parse_array(etree.fromstring(body), self.PLURALS)
         ports = {"ports": ports}
         return resp, ports
@@ -181,12 +192,14 @@ class NetworkClientXML(client_base.NetworkClientBase):
             p = common.Element(key, value)
             agent.append(p)
         resp, body = self.put(uri, str(common.Document(agent)))
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def list_pools_hosted_by_one_lbaas_agent(self, agent_id):
         uri = '%s/agents/%s/loadbalancer-pools' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         pools = common.parse_array(etree.fromstring(body))
         body = {'pools': pools}
         return resp, body
@@ -195,12 +208,14 @@ class NetworkClientXML(client_base.NetworkClientBase):
         uri = ('%s/lb/pools/%s/loadbalancer-agent' %
                (self.uri_prefix, pool_id))
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
     def list_routers_on_l3_agent(self, agent_id):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         routers = common.parse_array(etree.fromstring(body))
         body = {'routers': routers}
         return resp, body
@@ -208,6 +223,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def list_l3_agents_hosting_router(self, router_id):
         uri = '%s/routers/%s/l3-agents' % (self.uri_prefix, router_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         agents = common.parse_array(etree.fromstring(body))
         body = {'agents': agents}
         return resp, body
@@ -216,6 +232,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
         uri = '%s/agents/%s/l3-routers' % (self.uri_prefix, agent_id)
         router = (common.Element("router_id", router_id))
         resp, body = self.post(uri, str(common.Document(router)))
+        self.rest_client.expected_success(201, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -223,11 +240,13 @@ class NetworkClientXML(client_base.NetworkClientBase):
         uri = '%s/agents/%s/l3-routers/%s' % (
             self.uri_prefix, agent_id, router_id)
         resp, body = self.delete(uri)
+        self.rest_client.expected_success(204, resp.status)
         return resp, body
 
     def list_dhcp_agent_hosting_network(self, network_id):
         uri = '%s/networks/%s/dhcp-agents' % (self.uri_prefix, network_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         agents = common.parse_array(etree.fromstring(body))
         body = {'agents': agents}
         return resp, body
@@ -235,6 +254,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
     def list_networks_hosted_by_one_dhcp_agent(self, agent_id):
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         networks = common.parse_array(etree.fromstring(body))
         body = {'networks': networks}
         return resp, body
@@ -243,11 +263,13 @@ class NetworkClientXML(client_base.NetworkClientBase):
         uri = '%s/agents/%s/dhcp-networks/%s' % (self.uri_prefix, agent_id,
                                                  network_id)
         resp, body = self.delete(uri)
+        self.rest_client.expected_success(204, resp.status)
         return resp, body
 
     def list_lb_pool_stats(self, pool_id):
         uri = '%s/lb/pools/%s/stats' % (self.uri_prefix, pool_id)
         resp, body = self.get(uri)
+        self.rest_client.expected_success(200, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 
@@ -255,6 +277,7 @@ class NetworkClientXML(client_base.NetworkClientBase):
         uri = '%s/agents/%s/dhcp-networks' % (self.uri_prefix, agent_id)
         network = common.Element("network_id", network_id)
         resp, body = self.post(uri, str(common.Document(network)))
+        self.rest_client.expected_success(201, resp.status)
         body = _root_tag_fetcher_and_xml_to_json_parse(body)
         return resp, body
 

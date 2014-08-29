@@ -94,6 +94,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.skip_because(bug="1186354",
                        condition=CONF.service_available.neutron)
     @test.attr(type='gate')
+    @test.services('network')
     def test_security_groups_exceed_limit(self):
         # Negative test: Creation Security Groups over limit should FAIL
 
@@ -120,6 +121,7 @@ class QuotasAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     @test.skip_because(bug="1186354",
                        condition=CONF.service_available.neutron)
     @test.attr(type=['negative', 'gate'])
+    @test.services('network')
     def test_security_groups_rules_exceed_limit(self):
         # Negative test: Creation of Security Group Rules should FAIL
         # when we reach limit maxSecurityGroupRules
