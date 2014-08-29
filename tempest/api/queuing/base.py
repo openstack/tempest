@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 class BaseQueuingTest(test.BaseTestCase):
 
     """
-    Base class for the Queuing tests that use the Tempest Marconi REST client
+    Base class for the Queuing tests that use the Tempest Zaqar REST client
 
     It is assumed that the following option is defined in the
     [service_available] section of etc/tempest.conf
@@ -37,8 +37,8 @@ class BaseQueuingTest(test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(BaseQueuingTest, cls).setUpClass()
-        if not CONF.service_available.marconi:
-            raise cls.skipException("Marconi support is required")
+        if not CONF.service_available.zaqar:
+            raise cls.skipException("Zaqar support is required")
         os = cls.get_client_manager()
         cls.queuing_cfg = CONF.queuing
         cls.client = os.queuing_client
