@@ -1,4 +1,4 @@
-# Copyright 2013 IBM Corporation
+# Copyright 2014 Fujitsu Corporation
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -28,7 +28,7 @@ class ServerPasswordNegativeTestJSON(base.BaseV2ComputeTest):
         super(ServerPasswordNegativeTestJSON, cls).setUpClass()
         cls.client = cls.servers_client
 
-    @test.attr(type='gate')
+    @test.attr(type=['negative', 'gate'])
     def test_get_server_password_with_nonexistent_server(self):
         nonexistent_server = data_utils.rand_uuid()
         self.assertRaises(exceptions.NotFound,
