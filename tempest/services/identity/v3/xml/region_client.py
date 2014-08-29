@@ -79,6 +79,7 @@ class RegionClientXML(rest_client.RestClient):
         else:
             resp, body = self.post('regions',
                                    str(common.Document(create_region)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -95,6 +96,7 @@ class RegionClientXML(rest_client.RestClient):
 
         resp, body = self.patch('regions/%s' % str(region_id),
                                 str(common.Document(update_region)))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -102,6 +104,7 @@ class RegionClientXML(rest_client.RestClient):
         """Get Region."""
         url = 'regions/%s' % region_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -111,10 +114,12 @@ class RegionClientXML(rest_client.RestClient):
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
     def delete_region(self, region_id):
         """Delete region."""
         resp, body = self.delete('regions/%s' % region_id)
+        self.expected_success(204, resp.status)
         return resp, body

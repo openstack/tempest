@@ -32,6 +32,7 @@ class EndPointClientJSON(rest_client.RestClient):
     def list_endpoints(self):
         """GET endpoints."""
         resp, body = self.get('endpoints')
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['endpoints']
 
@@ -56,6 +57,7 @@ class EndPointClientJSON(rest_client.RestClient):
         }
         post_body = json.dumps({'endpoint': post_body})
         resp, body = self.post('endpoints', post_body)
+        self.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body['endpoint']
 
@@ -82,10 +84,12 @@ class EndPointClientJSON(rest_client.RestClient):
             post_body['enabled'] = enabled
         post_body = json.dumps({'endpoint': post_body})
         resp, body = self.patch('endpoints/%s' % endpoint_id, post_body)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['endpoint']
 
     def delete_endpoint(self, endpoint_id):
         """Delete endpoint."""
         resp_header, resp_body = self.delete('endpoints/%s' % endpoint_id)
+        self.expected_success(204, resp_header.status)
         return resp_header, resp_body
