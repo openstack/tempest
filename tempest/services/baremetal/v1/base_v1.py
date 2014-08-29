@@ -308,3 +308,33 @@ class BaremetalClientV1(base.BaremetalClient):
         resp, body = self._list_request(path)
         self.expected_success(200, resp.status)
         return body
+
+    @base.handle_errors
+    def get_console(self, node_uuid):
+        """
+        Get connection information about the console.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+
+        """
+
+        resp, body = self._show_request('nodes/states/console', node_uuid)
+        self.expected_success(200, resp.status)
+        return resp, body
+
+    @base.handle_errors
+    def set_console_mode(self, node_uuid, enabled):
+        """
+        Start and stop the node console.
+
+        :param node_uuid: Unique identifier of the node in UUID format.
+        :param enabled: Boolean value; whether to enable or disable the
+                        console.
+
+        """
+
+        enabled = {'enabled': enabled}
+        resp, body = self._put_request('nodes/%s/states/console' % node_uuid,
+                                       enabled)
+        self.expected_success(202, resp.status)
+        return resp, body
