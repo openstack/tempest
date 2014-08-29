@@ -121,8 +121,12 @@ class SimpleReadOnlyCinderClientTest(cli.ClientTestBase):
         self.assertTableStruct(zone_list, ['Name', 'Status'])
 
     def test_cinder_endpoints(self):
-        endpoints = self.parser.listing(self.cinder('endpoints'))
-        self.assertTableStruct(endpoints, ['nova', 'Value'])
+        out = self.cinder('endpoints')
+        tables = self.parser.tables(out)
+        for table in tables:
+            headers = table['headers']
+            self.assertTrue(2 >= len(headers))
+            self.assertEqual('Value', headers[1])
 
     def test_cinder_service_list(self):
         service_list = self.parser.listing(self.cinder('service-list'))
