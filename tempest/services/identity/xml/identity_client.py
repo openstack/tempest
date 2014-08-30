@@ -16,6 +16,7 @@ from tempest.common import xml_utils as xml
 from tempest import config
 from tempest.services.identity.json import identity_client
 
+
 CONF = config.CONF
 
 XMLNS = "http://docs.openstack.org/identity/api/v2.0"
