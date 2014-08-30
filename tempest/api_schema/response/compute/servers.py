@@ -54,14 +54,15 @@ common_show_server = {
         'id': {'type': 'string'},
         'name': {'type': 'string'},
         'status': {'type': 'string'},
-        'image': {
-            'type': 'object',
-            'properties': {
-                'id': {'type': 'string'},
-                'links': parameter_types.links
-            },
-            'required': ['id', 'links']
-        },
+        'image': {'oneOf': [
+            {'type': 'object',
+                'properties': {
+                    'id': {'type': 'string'},
+                    'links': parameter_types.links
+                },
+                'required': ['id', 'links']},
+            {'type': ['string', 'null']}
+        ]},
         'flavor': {
             'type': 'object',
             'properties': {
