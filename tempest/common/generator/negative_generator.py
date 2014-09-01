@@ -47,65 +47,32 @@ class NegativeTestGenerator(base.BasicGeneratorSet):
         if min_length > 0:
             return "x" * (min_length - 1)
 
-    @base.generator_type("string")
+    @base.generator_type("string", needed_property="maxLength")
     @base.simple_generator
     def gen_str_max_length(self, schema):
         max_length = schema.get("maxLength", -1)
-        if max_length > -1:
-            return "x" * (max_length + 1)
+        return "x" * (max_length + 1)
 
-    @base.generator_type("integer")
+    @base.generator_type("integer", needed_property="minimum")
     @base.simple_generator
     def gen_int_min(self, schema):
-        if "minimum" in schema:
-            minimum = schema["minimum"]
-            if "exclusiveMinimum" not in schema:
-                minimum -= 1
-            return minimum
+        minimum = schema["minimum"]
+        if "exclusiveMinimum" not in schema:
+            minimum -= 1
+        return minimum
 
-    @base.generator_type("integer")
+    @base.generator_type("integer", needed_property="maximum")
     @base.simple_generator
     def gen_int_max(self, schema):
-        if "maximum" in schema:
-            maximum = schema["maximum"]
-            if "exclusiveMaximum" not in schema:
-                maximum += 1
-            return maximum
+        maximum = schema["maximum"]
+        if "exclusiveMaximum" not in schema:
+            maximum += 1
+        return maximum
 
-    @base.generator_type("object")
-    def gen_obj_remove_attr(self, schema):
-        invalids = []
-        valid_schema = valid.ValidTestGenerator().generate_valid(schema)
-        required = schema.get("required", [])
-        for r in required:
-            new_valid = copy.deepcopy(valid_schema)
-            del new_valid[r]
-            invalids.append(("gen_obj_remove_attr", new_valid, None))
-        return invalids
-
-    @base.generator_type("object")
+    @base.generator_type("object", needed_property="additionalProperties")
     @base.simple_generator
     def gen_obj_add_attr(self, schema):
         valid_schema = valid.ValidTestGenerator().generate_valid(schema)
-        if not schema.get("additionalProperties", True):
-            new_valid = copy.deepcopy(valid_schema)
-            new_valid["$$$$$$$$$$"] = "xxx"
-            return new_valid
-
-    @base.generator_type("object")
-    def gen_inv_prop_obj(self, schema):
-        LOG.debug("generate_invalid_object: %s" % schema)
-        valid_schema = valid.ValidTestGenerator().generate_valid(schema)
-        invalids = []
-        properties = schema["properties"]
-
-        for k, v in properties.iteritems():
-            for invalid in self.generate(v):
-                LOG.debug(v)
-                new_valid = copy.deepcopy(valid_schema)
-                new_valid[k] = invalid[1]
-                name = "prop_%s_%s" % (k, invalid[0])
-                invalids.append((name, new_valid, invalid[2]))
-
-        LOG.debug("generate_invalid_object return: %s" % invalids)
-        return invalids
+        new_valid = copy.deepcopy(valid_schema)
+        new_valid["$$$$$$$$$$"] = "xxx"
+        return new_valid

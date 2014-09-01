@@ -510,13 +510,9 @@ class NegativeAutoTest(BaseTestCase):
                                              "expected_result": expected_result
                                              }))
         if schema is not None:
-            for name, schema, expected_result in generator.generate(schema):
-                if (expected_result is None and
-                    "default_result_code" in description):
-                    expected_result = description["default_result_code"]
-                scenario_list.append((name,
-                                      {"schema": schema,
-                                       "expected_result": expected_result}))
+            for scenario in generator.generate_scenarios(schema):
+                scenario_list.append((scenario['_negtest_name'],
+                                      scenario))
         LOG.debug(scenario_list)
         return scenario_list
 
@@ -546,8 +542,14 @@ class NegativeAutoTest(BaseTestCase):
         """
         LOG.info("Executing %s" % description["name"])
         LOG.debug(description)
+        generator = importutils.import_class(
+            CONF.negative.test_generator)()
+        schema = description.get("json-schema", None)
         method = description["http-method"]
         url = description["url"]
+        expected_result = None
+        if "default_result_code" in description:
+            expected_result = description["default_result_code"]
 
         resources = [self.get_resource(r) for
                      r in description.get("resources", [])]
@@ -557,13 +559,19 @@ class NegativeAutoTest(BaseTestCase):
             # entry (see get_resource).
             # We just send a valid json-schema with it
             valid_schema = None
-            schema = description.get("json-schema", None)
             if schema:
                 valid_schema = \
                     valid.ValidTestGenerator().generate_valid(schema)
             new_url, body = self._http_arguments(valid_schema, url, method)
-        elif hasattr(self, "schema"):
-            new_url, body = self._http_arguments(self.schema, url, method)
+        elif hasattr(self, "_negtest_name"):
+            schema_under_test = \
+                valid.ValidTestGenerator().generate_valid(schema)
+            local_expected_result = \
+                generator.generate_payload(self, schema_under_test)
+            if local_expected_result is not None:
+                expected_result = local_expected_result
+            new_url, body = \
+                self._http_arguments(schema_under_test, url, method)
         else:
             raise Exception("testscenarios are not active. Please make sure "
                             "that your test runner supports the load_tests "
@@ -575,7 +583,7 @@ class NegativeAutoTest(BaseTestCase):
             client = self.client
         resp, resp_body = client.send_request(method, new_url,
                                               resources, body=body)
-        self._check_negative_response(resp.status, resp_body)
+        self._check_negative_response(expected_result, resp.status, resp_body)
 
     def _http_arguments(self, json_dict, url, method):
         LOG.debug("dict: %s url: %s method: %s" % (json_dict, url, method))
@@ -586,8 +594,7 @@ class NegativeAutoTest(BaseTestCase):
         else:
             return url, json.dumps(json_dict)
 
-    def _check_negative_response(self, result, body):
-        expected_result = getattr(self, "expected_result", None)
+    def _check_negative_response(self, expected_result, result, body):
         self.assertTrue(result >= 400 and result < 500 and result != 413,
                         "Expected client error, got %s:%s" %
                         (result, body))

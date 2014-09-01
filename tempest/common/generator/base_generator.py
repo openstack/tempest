@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
 import functools
 
 import jsonschema
@@ -30,9 +31,11 @@ def _check_for_expected_result(name, schema):
     return expected_result
 
 
-def generator_type(*args):
+def generator_type(*args, **kwargs):
     def wrapper(func):
         func.types = args
+        for key in kwargs:
+            setattr(func, key, kwargs[key])
         return func
     return wrapper
 
@@ -106,37 +109,71 @@ class BasicGeneratorSet(object):
             jsonschema.Draft4Validator.check_schema(schema['json-schema'])
         jsonschema.validate(schema, self.schema)
 
-    def generate(self, schema):
+    def generate_scenarios(self, schema, path=None):
         """
-        Generate an json dictionary based on a schema.
-        Only one value is mis-generated for each dictionary created.
+        Generates the scenario (all possible test cases) out of the given
+        schema.
 
-        Any generator must return a list of tuples or a single tuple.
-        The values of this tuple are:
-          result[0]: Name of the test
-          result[1]: json schema for the test
-          result[2]: expected result of the test (can be None)
+        :param schema: a dict style schema (see ``BasicGeneratorSet.schema``)
+        :param path: the schema path if the given schema is a subschema
         """
-        LOG.debug("generate_invalid: %s" % schema)
-        schema_type = schema["type"]
-        if isinstance(schema_type, list):
+        schema_type = schema['type']
+        scenarios = []
+
+        if schema_type == 'object':
+            properties = schema["properties"]
+            for attribute, definition in properties.iteritems():
+                current_path = copy.copy(path)
+                if path is not None:
+                    current_path.append(attribute)
+                else:
+                    current_path = [attribute]
+                scenarios.extend(
+                    self.generate_scenarios(definition, current_path))
+        elif isinstance(schema_type, list):
             if "integer" in schema_type:
                 schema_type = "integer"
             else:
                 raise Exception("non-integer list types not supported")
-        result = []
-        if schema_type not in self.types_dict:
-            raise TypeError("generator (%s) doesn't support type: %s"
-                            % (self.__class__.__name__, schema_type))
         for generator in self.types_dict[schema_type]:
-            ret = generator(schema)
-            if ret is not None:
-                if isinstance(ret, list):
-                    result.extend(ret)
-                elif isinstance(ret, tuple):
-                    result.append(ret)
-                else:
-                    raise Exception("generator (%s) returns invalid result: %s"
-                                    % (generator, ret))
-        LOG.debug("result: %s" % result)
-        return result
+            if hasattr(generator, "needed_property"):
+                prop = generator.needed_property
+                if (prop not in schema or
+                    schema[prop] is None or
+                    schema[prop] is False):
+                    continue
+
+            name = generator.__name__
+            if path is not None:
+                name = "%s_%s" % ("_".join(path), name)
+            scenarios.append({
+                "_negtest_name": name,
+                "_negtest_generator": generator,
+                "_negtest_schema": schema,
+                "_negtest_path": path})
+        return scenarios
+
+    def generate_payload(self, test, schema):
+        """
+        Generates one jsonschema out of the given test. It's mandatory to use
+        generate_scenarios before to register all needed variables to the test.
+
+        :param test: A test object (scenario) with all _negtest variables on it
+        :param schema: schema for the test
+        """
+        generator = test._negtest_generator
+        ret = generator(test._negtest_schema)
+        path = copy.copy(test._negtest_path)
+        expected_result = None
+
+        if ret is not None:
+            generator_result = generator(test._negtest_schema)
+            invalid_snippet = generator_result[1]
+            expected_result = generator_result[2]
+            element = path.pop()
+            if len(path) > 0:
+                schema_snip = reduce(dict.get, path, schema)
+                schema_snip[element] = invalid_snippet
+            else:
+                schema[element] = invalid_snippet
+        return expected_result
