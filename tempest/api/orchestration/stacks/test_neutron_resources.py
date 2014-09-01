@@ -38,6 +38,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         os = clients.Manager()
         if not CONF.service_available.neutron:
             raise cls.skipException("Neutron support is required")
+        cls.neutron_basic_template = cls.load_template('neutron_basic')
         cls.network_client = os.network_client
         cls.stack_name = data_utils.rand_name('heat')
         template = cls.read_template('neutron_basic')
@@ -87,10 +88,14 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
     @test.attr(type='slow')
     def test_created_resources(self):
         """Verifies created neutron resources."""
-        resources = [('Network', 'OS::Neutron::Net'),
-                     ('Subnet', 'OS::Neutron::Subnet'),
-                     ('RouterInterface', 'OS::Neutron::RouterInterface'),
-                     ('Server', 'OS::Nova::Server')]
+        resources = [('Network', self.neutron_basic_template['resources'][
+                      'Network']['type']),
+                     ('Subnet', self.neutron_basic_template['resources'][
+                      'Subnet']['type']),
+                     ('RouterInterface', self.neutron_basic_template[
+                      'resources']['RouterInterface']['type']),
+                     ('Server', self.neutron_basic_template['resources'][
+                      'Server']['type'])]
         for resource_name, resource_type in resources:
             resource = self.test_resources.get(resource_name, None)
             self.assertIsInstance(resource, dict)
@@ -107,7 +112,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         network = body['network']
         self.assertIsInstance(network, dict)
         self.assertEqual(network_id, network['id'])
-        self.assertEqual('NewNetwork', network['name'])
+        self.assertEqual(self.neutron_basic_template['resources'][
+            'Network']['properties']['name'], network['name'])
 
     @test.attr(type='slow')
     @test.services('network')
@@ -119,10 +125,12 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         network_id = self.test_resources.get('Network')['physical_resource_id']
         self.assertEqual(subnet_id, subnet['id'])
         self.assertEqual(network_id, subnet['network_id'])
-        self.assertEqual('NewSubnet', subnet['name'])
+        self.assertEqual(self.neutron_basic_template['resources'][
+            'Subnet']['properties']['name'], subnet['name'])
         self.assertEqual(sorted(CONF.network.dns_servers),
                          sorted(subnet['dns_nameservers']))
-        self.assertEqual(4, subnet['ip_version'])
+        self.assertEqual(self.neutron_basic_template['resources'][
+            'Subnet']['properties']['ip_version'], subnet['ip_version'])
         self.assertEqual(str(self.subnet_cidr), subnet['cidr'])
 
     @test.attr(type='slow')
@@ -132,7 +140,8 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         router_id = self.test_resources.get('Router')['physical_resource_id']
         _, body = self.network_client.show_router(router_id)
         router = body['router']
-        self.assertEqual('NewRouter', router['name'])
+        self.assertEqual(self.neutron_basic_template['resources'][
+            'Router']['properties']['name'], router['name'])
         self.assertEqual(self.external_network_id,
                          router['external_gateway_info']['network_id'])
         self.assertEqual(True, router['admin_state_up'])
@@ -168,6 +177,7 @@ class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
         _, server = self.servers_client.get_server(server_id)
         self.assertEqual(self.keypair_name, server['key_name'])
         self.assertEqual('ACTIVE', server['status'])
-        network = server['addresses']['NewNetwork'][0]
+        network = server['addresses'][self.neutron_basic_template['resources'][
+                                      'Network']['properties']['name']][0]
         self.assertEqual(4, network['version'])
         self.assertIn(netaddr.IPAddress(network['addr']), self.subnet_cidr)
