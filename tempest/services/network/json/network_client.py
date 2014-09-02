@@ -85,8 +85,14 @@ class NetworkClientJSON(network_client_base.NetworkClientBase):
         update_body['admin_state_up'] = kwargs.get(
             'admin_state_up', body['router']['admin_state_up'])
         cur_gw_info = body['router']['external_gateway_info']
-        if cur_gw_info and not set_enable_snat:
-            cur_gw_info.pop('enable_snat', None)
+        if cur_gw_info:
+            # TODO(kevinbenton): setting the external gateway info is not
+            # allowed for a regular tenant. If the ability to update is also
+            # merged, a test case for this will need to be added similar to
+            # the SNAT case.
+            cur_gw_info.pop('external_fixed_ips', None)
+            if not set_enable_snat:
+                cur_gw_info.pop('enable_snat', None)
         update_body['external_gateway_info'] = kwargs.get(
             'external_gateway_info', body['router']['external_gateway_info'])
         update_body = dict(router=update_body)
