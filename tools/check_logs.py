@@ -79,7 +79,6 @@ def process_files(file_specs, url_specs, whitelists):
 
 def scan_content(name, content, regexp, whitelist):
     had_errors = False
-    print_log_name = True
     for line in content:
         if not line.startswith("Stderr:") and regexp.match(line):
             whitelisted = False
@@ -90,13 +89,8 @@ def scan_content(name, content, regexp, whitelist):
                     whitelisted = True
                     break
             if not whitelisted or dump_all_errors:
-                if print_log_name:
-                    print("\nLog File Has Errors: %s" % name)
-                    print_log_name = False
                 if not whitelisted:
                     had_errors = True
-                    print("*** Not Whitelisted ***"),
-                print(line.rstrip())
     return had_errors
 
 
@@ -150,17 +144,21 @@ def main(opts):
             whitelists = loaded
     logs_with_errors = process_files(files_to_process, urls_to_process,
                                      whitelists)
-    if logs_with_errors:
-        print("Logs have errors")
-    if is_grenade:
-        print("Currently not failing grenade runs with errors")
-        return 0
+
     failed = False
-    for log in logs_with_errors:
-        if log not in allowed_dirty:
-            print("Log: %s not allowed to have ERRORS or TRACES" % log)
-            failed = True
+    if logs_with_errors:
+        log_files = set(logs_with_errors)
+        for log in log_files:
+            msg = '%s log file has errors' % log
+            if log not in allowed_dirty:
+                msg += ' and is not allowed to have them'
+                failed = True
+            print(msg)
+        print("\nPlease check the respective log files to see the errors")
     if failed:
+        if is_grenade:
+            print("Currently not failing grenade runs with errors")
+            return 0
         return 1
     print("ok")
     return 0
