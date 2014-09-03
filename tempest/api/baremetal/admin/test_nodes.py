@@ -12,7 +12,7 @@
 
 import six
 
-from tempest.api.baremetal import base
+from tempest.api.baremetal.admin import base
 from tempest import exceptions as exc
 from tempest import test
 
@@ -40,30 +40,25 @@ class TestNodes(base.BaseBaremetalTest):
                   'storage': '10240',
                   'memory': '1024'}
 
-        resp, body = self.create_node(self.chassis['uuid'], **params)
-        self.assertEqual('201', resp['status'])
+        _, body = self.create_node(self.chassis['uuid'], **params)
         self._assertExpected(params, body['properties'])
 
     @test.attr(type='smoke')
     def test_delete_node(self):
-        resp, node = self.create_node(self.chassis['uuid'])
-        self.assertEqual('201', resp['status'])
+        _, node = self.create_node(self.chassis['uuid'])
 
-        resp = self.delete_node(node['uuid'])
+        self.delete_node(node['uuid'])
 
-        self.assertEqual(resp['status'], '204')
         self.assertRaises(exc.NotFound, self.client.show_node, node['uuid'])
 
     @test.attr(type='smoke')
     def test_show_node(self):
-        resp, loaded_node = self.client.show_node(self.node['uuid'])
-        self.assertEqual('200', resp['status'])
+        _, loaded_node = self.client.show_node(self.node['uuid'])
         self._assertExpected(self.node, loaded_node)
 
     @test.attr(type='smoke')
     def test_list_nodes(self):
-        resp, body = self.client.list_nodes()
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.list_nodes()
         self.assertIn(self.node['uuid'],
                       [i['uuid'] for i in body['nodes']])
 
@@ -74,24 +69,40 @@ class TestNodes(base.BaseBaremetalTest):
                  'storage': '10',
                  'memory': '128'}
 
-        resp, node = self.create_node(self.chassis['uuid'], **props)
-        self.assertEqual('201', resp['status'])
+        _, node = self.create_node(self.chassis['uuid'], **props)
 
         new_p = {'cpu_arch': 'x86',
                  'cpu_num': '1',
                  'storage': '10000',
                  'memory': '12300'}
 
-        resp, body = self.client.update_node(node['uuid'], properties=new_p)
-        self.assertEqual('200', resp['status'])
-        resp, node = self.client.show_node(node['uuid'])
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.update_node(node['uuid'], properties=new_p)
+        _, node = self.client.show_node(node['uuid'])
         self._assertExpected(new_p, node['properties'])
 
     @test.attr(type='smoke')
     def test_validate_driver_interface(self):
-        resp, body = self.client.validate_driver_interface(self.node['uuid'])
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.validate_driver_interface(self.node['uuid'])
         core_interfaces = ['power', 'deploy']
         for interface in core_interfaces:
             self.assertIn(interface, body)
+
+    @test.attr(type='smoke')
+    def test_set_node_boot_device(self):
+        body = self.client.set_node_boot_device(self.node['uuid'], 'pxe')
+        # No content
+        self.assertEqual('', body)
+
+    @test.attr(type='smoke')
+    def test_get_node_boot_device(self):
+        body = self.client.get_node_boot_device(self.node['uuid'])
+        self.assertIn('boot_device', body)
+        self.assertIn('persistent', body)
+        self.assertTrue(isinstance(body['boot_device'], six.string_types))
+        self.assertTrue(isinstance(body['persistent'], bool))
+
+    @test.attr(type='smoke')
+    def test_get_node_supported_boot_devices(self):
+        body = self.client.get_node_supported_boot_devices(self.node['uuid'])
+        self.assertIn('supported_boot_devices', body)
+        self.assertTrue(isinstance(body['supported_boot_devices'], list))

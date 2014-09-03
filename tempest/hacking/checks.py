@@ -20,13 +20,14 @@ import pep8
 
 PYTHON_CLIENTS = ['cinder', 'glance', 'keystone', 'nova', 'swift', 'neutron',
                   'trove', 'ironic', 'savanna', 'heat', 'ceilometer',
-                  'marconi', 'sahara']
+                  'zaqar', 'sahara']
 
 PYTHON_CLIENT_RE = re.compile('import (%s)client' % '|'.join(PYTHON_CLIENTS))
 TEST_DEFINITION = re.compile(r'^\s*def test.*')
 SETUPCLASS_DEFINITION = re.compile(r'^\s*def setUpClass')
 SCENARIO_DECORATOR = re.compile(r'\s*@.*services\((.*)\)')
 VI_HEADER_RE = re.compile(r"^#\s+vim?:.+")
+mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 
 
 def import_no_clients_in_api(physical_line, filename):
@@ -119,6 +120,16 @@ def no_official_client_manager_in_api_tests(physical_line, filename):
                     'tests')
 
 
+def no_mutable_default_args(logical_line):
+    """Check that mutable object isn't used as default argument
+
+    N322: Method's default argument shouldn't be mutable
+    """
+    msg = "N322: Method's default argument shouldn't be mutable!"
+    if mutable_default_args.match(logical_line):
+        yield (0, msg)
+
+
 def factory(register):
     register(import_no_clients_in_api)
     register(scenario_tests_need_service_tags)
@@ -126,3 +137,4 @@ def factory(register):
     register(no_vi_headers)
     register(service_tags_not_in_module_path)
     register(no_official_client_manager_in_api_tests)
+    register(no_mutable_default_args)

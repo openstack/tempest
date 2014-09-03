@@ -57,16 +57,14 @@ class QuotasTest(base.BaseAdminNetworkTest):
         self.addCleanup(self.identity_admin_client.delete_tenant, tenant_id)
 
         # Change quotas for tenant
-        resp, quota_set = self.admin_client.update_quotas(tenant_id,
-                                                          **new_quotas)
-        self.assertEqual('200', resp['status'])
+        _, quota_set = self.admin_client.update_quotas(tenant_id,
+                                                       **new_quotas)
         self.addCleanup(self.admin_client.reset_quotas, tenant_id)
         for key, value in new_quotas.iteritems():
             self.assertEqual(value, quota_set[key])
 
         # Confirm our tenant is listed among tenants with non default quotas
-        resp, non_default_quotas = self.admin_client.list_quotas()
-        self.assertEqual('200', resp['status'])
+        _, non_default_quotas = self.admin_client.list_quotas()
         found = False
         for qs in non_default_quotas['quotas']:
             if qs['tenant_id'] == tenant_id:
@@ -74,17 +72,14 @@ class QuotasTest(base.BaseAdminNetworkTest):
         self.assertTrue(found)
 
         # Confirm from API quotas were changed as requested for tenant
-        resp, quota_set = self.admin_client.show_quotas(tenant_id)
+        _, quota_set = self.admin_client.show_quotas(tenant_id)
         quota_set = quota_set['quota']
-        self.assertEqual('200', resp['status'])
         for key, value in new_quotas.iteritems():
             self.assertEqual(value, quota_set[key])
 
         # Reset quotas to default and confirm
-        resp, body = self.admin_client.reset_quotas(tenant_id)
-        self.assertEqual('204', resp['status'])
-        resp, non_default_quotas = self.admin_client.list_quotas()
-        self.assertEqual('200', resp['status'])
+        _, body = self.admin_client.reset_quotas(tenant_id)
+        _, non_default_quotas = self.admin_client.list_quotas()
         for q in non_default_quotas['quotas']:
             self.assertNotEqual(tenant_id, q['tenant_id'])
 

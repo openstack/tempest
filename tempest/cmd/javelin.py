@@ -19,23 +19,26 @@ resources in a declarative way.
 
 """
 
+import argparse
+import datetime
 import logging
 import os
 import sys
 import unittest
-import yaml
 
-import argparse
+import yaml
 
 import tempest.auth
 from tempest import config
 from tempest import exceptions
+from tempest.openstack.common import timeutils
 from tempest.services.compute.json import flavors_client
 from tempest.services.compute.json import servers_client
 from tempest.services.identity.json import identity_client
 from tempest.services.image.v2.json import image_client
 from tempest.services.object_storage import container_client
 from tempest.services.object_storage import object_client
+from tempest.services.telemetry.json import telemetry_client
 from tempest.services.volume.json import volumes_client
 
 OPTS = {}
@@ -43,6 +46,8 @@ USERS = {}
 RES = {}
 
 LOG = None
+
+JAVELIN_START = datetime.datetime.utcnow()
 
 
 class OSClient(object):
@@ -62,6 +67,7 @@ class OSClient(object):
         self.containers = container_client.ContainerClient(_auth)
         self.images = image_client.ImageClientV2JSON(_auth)
         self.flavors = flavors_client.FlavorsClientJSON(_auth)
+        self.telemetry = telemetry_client.TelemetryClientJSON(_auth)
         self.volumes = volumes_client.VolumesClientJSON(_auth)
 
 
@@ -196,6 +202,7 @@ class JavelinCheck(unittest.TestCase):
         # TODO(sdague): Volumes not yet working, bring it back once the
         # code is self testing.
         # self.check_volumes()
+        self.check_telemetry()
 
     def check_users(self):
         """Check that the users we expect to exist, do.
@@ -249,8 +256,28 @@ class JavelinCheck(unittest.TestCase):
                 if return_code is 0:
                     break
             self.assertNotEqual(count, 59,
-                               "Server %s is not pingable at %s" % (
-                               server['name'], addr))
+                                "Server %s is not pingable at %s" % (
+                                    server['name'], addr))
+
+    def check_telemetry(self):
+        """Check that ceilometer provides a sane sample.
+
+        Confirm that there are more than one sample and that they have the
+        expected metadata.
+
+        If in check mode confirm that the oldest sample available is from
+        before the upgrade.
+        """
+        LOG.info("checking telemetry")
+        for server in self.res['servers']:
+            client = client_for_user(server['owner'])
+            response, body = client.telemetry.list_samples(
+                'instance',
+                query=('metadata.display_name', 'eq', server['name'])
+            )
+            self.assertEqual(response.status, 200)
+            self.assertTrue(len(body) >= 1, 'expecting at least one sample')
+            self._confirm_telemetry_sample(server, body[-1])
 
     def check_volumes(self):
         """Check that the volumes are still there and attached."""
@@ -269,6 +296,26 @@ class JavelinCheck(unittest.TestCase):
             attachment = self.client.get_attachment_from_volume(volume)
             self.assertEqual(volume['id'], attachment['volume_id'])
             self.assertEqual(server_id, attachment['server_id'])
+
+    def _confirm_telemetry_sample(self, server, sample):
+        """Check this sample matches the expected resource metadata."""
+        # Confirm display_name
+        self.assertEqual(server['name'],
+                         sample['resource_metadata']['display_name'])
+        # Confirm instance_type of flavor
+        flavor = sample['resource_metadata'].get(
+            'flavor.name',
+            sample['resource_metadata'].get('instance_type')
+        )
+        self.assertEqual(server['flavor'], flavor)
+        # Confirm the oldest sample was created before upgrade.
+        if OPTS.mode == 'check':
+            oldest_timestamp = timeutils.normalize_time(
+                timeutils.parse_isotime(sample['timestamp']))
+            self.assertTrue(
+                oldest_timestamp < JAVELIN_START,
+                'timestamp should come before start of second javelin run'
+            )
 
 
 #######################
@@ -401,7 +448,7 @@ def create_servers(servers):
         image_id = _get_image_by_name(client, server['image'])['id']
         flavor_id = _get_flavor_by_name(client, server['flavor'])['id']
         resp, body = client.servers.create_server(server['name'], image_id,
-                                                 flavor_id)
+                                                  flavor_id)
         server_id = body['id']
         client.servers.wait_for_server_status(server_id, 'ACTIVE')
 
@@ -420,7 +467,7 @@ def destroy_servers(servers):
 
         client.servers.delete_server(response['id'])
         client.servers.wait_for_server_termination(response['id'],
-                ignore_error=True)
+                                                   ignore_error=True)
 
 
 #######################

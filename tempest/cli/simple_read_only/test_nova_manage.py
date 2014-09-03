@@ -79,10 +79,6 @@ class SimpleReadOnlyNovaManageTest(cli.ClientTestBase):
     def test_flavor_list(self):
         self.assertNotEqual("", self.nova_manage('flavor list'))
 
-    def test_db_archive_deleted_rows(self):
-        # make sure command doesn't error out
-        self.nova_manage('db archive_deleted_rows 50')
-
     def test_db_sync(self):
         # make sure command doesn't error out
         self.nova_manage('db sync')

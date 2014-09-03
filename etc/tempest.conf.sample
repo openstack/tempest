@@ -105,6 +105,17 @@
 #syslog_log_facility=LOG_USER
 
 
+[auth]
+
+#
+# Options defined in tempest.config
+#
+
+# Path to the yaml file that contains the list of credentials
+# to use for running tests (string value)
+#test_accounts_file=etc/accounts.yaml
+
+
 [baremetal]
 
 #
@@ -386,6 +397,9 @@
 # If false, skip all nova v3 tests. (boolean value)
 #api_v3=false
 
+# If false skip all v2 api tests with xml (boolean value)
+#xml_api_v2=true
+
 # If false, skip disk config tests (boolean value)
 #disk_config=true
 
@@ -404,6 +418,10 @@
 # Does the test environment support changing the admin
 # password? (boolean value)
 #change_password=false
+
+# Does the test environment support obtaining instance serial
+# console output? (boolean value)
+#console_output=true
 
 # Does the test environment support resizing? (boolean value)
 #resize=false
@@ -455,6 +473,10 @@
 # Does the test environment support dynamic network interface
 # attachment? (boolean value)
 #interface_attach=true
+
+# Does the test environment support creating snapshot images
+# of running instances? (boolean value)
+#snapshot=true
 
 
 [dashboard]
@@ -911,8 +933,15 @@
 # Directory containing image files (string value)
 #img_dir=/opt/stack/new/devstack/files/images/cirros-0.3.1-x86_64-uec
 
-# QCOW2 image file name (string value)
-#qcow2_img_file=cirros-0.3.1-x86_64-disk.img
+# Image file name (string value)
+# Deprecated group/name - [DEFAULT]/qcow2_img_file
+#img_file=cirros-0.3.1-x86_64-disk.img
+
+# Image disk format (string value)
+#img_disk_format=qcow2
+
+# Image container format (string value)
+#img_container_format=bare
 
 # AMI image file name (string value)
 #ami_img_file=cirros-0.3.1-x86_64-blank.img
@@ -981,9 +1010,9 @@
 # value)
 #trove=false
 
-# Whether or not Marconi is expected to be available (boolean
+# Whether or not Zaqar is expected to be available (boolean
 # value)
-#marconi=false
+#zaqar=false
 
 
 [stress]

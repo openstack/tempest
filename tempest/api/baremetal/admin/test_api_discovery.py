@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.baremetal import base
+from tempest.api.baremetal.admin import base
 from tempest import test
 
 
@@ -19,10 +19,8 @@ class TestApiDiscovery(base.BaseBaremetalTest):
 
     @test.attr(type='smoke')
     def test_api_versions(self):
-        resp, descr = self.client.get_api_description()
-        self.assertEqual('200', resp['status'])
+        _, descr = self.client.get_api_description()
         expected_versions = ('v1',)
-
         versions = [version['id'] for version in descr['versions']]
 
         for v in expected_versions:
@@ -30,16 +28,13 @@ class TestApiDiscovery(base.BaseBaremetalTest):
 
     @test.attr(type='smoke')
     def test_default_version(self):
-        resp, descr = self.client.get_api_description()
-        self.assertEqual('200', resp['status'])
+        _, descr = self.client.get_api_description()
         default_version = descr['default_version']
-
         self.assertEqual(default_version['id'], 'v1')
 
     @test.attr(type='smoke')
     def test_version_1_resources(self):
-        resp, descr = self.client.get_version_description(version='v1')
-        self.assertEqual('200', resp['status'])
+        _, descr = self.client.get_version_description(version='v1')
         expected_resources = ('nodes', 'chassis',
                               'ports', 'links', 'media_types')
 

@@ -13,6 +13,9 @@
 #    under the License.
 
 import re
+from unittest import util
+
+from testtools import helpers
 
 
 class ExistsAllResponseHeaders(object):
@@ -169,6 +172,57 @@ class InvalidFormat(object):
 
     def describe(self):
         return "InvalidFormat (%s, %s)" % (self.key, self.value)
+
+    def get_details(self):
+        return {}
+
+
+class MatchesDictExceptForKeys(object):
+    """Matches two dictionaries. Verifies all items are equals except for those
+    identified by a list of keys.
+    """
+
+    def __init__(self, expected, excluded_keys=None):
+        self.expected = expected
+        self.excluded_keys = excluded_keys if excluded_keys is not None else []
+
+    def match(self, actual):
+        filtered_expected = helpers.dict_subtract(self.expected,
+                                                  self.excluded_keys)
+        filtered_actual = helpers.dict_subtract(actual,
+                                                self.excluded_keys)
+        if filtered_actual != filtered_expected:
+            return DictMismatch(filtered_expected, filtered_actual)
+
+
+class DictMismatch(object):
+    """Mismatch between two dicts describes deltas"""
+
+    def __init__(self, expected, actual):
+        self.expected = expected
+        self.actual = actual
+        self.intersect = set(self.expected) & set(self.actual)
+        self.symmetric_diff = set(self.expected) ^ set(self.actual)
+
+    def describe(self):
+        msg = ""
+        if self.symmetric_diff:
+            only_expected = helpers.dict_subtract(self.expected, self.actual)
+            only_actual = helpers.dict_subtract(self.actual, self.expected)
+            if only_expected:
+                msg += "Only in expected:\n  %s\n" % \
+                       util.safe_repr(only_expected)
+            if only_actual:
+                msg += "Only in actual:\n  %s\n" % \
+                       util.safe_repr(only_actual)
+        diff_set = set(o for o in self.intersect if
+                       self.expected[o] != self.actual[o])
+        if diff_set:
+            msg += "Differences:\n"
+        for o in diff_set:
+            msg += "  %s: expected %s, actual %s\n" % (
+                o, self.expected[o], self.actual[o])
+        return msg
 
     def get_details(self):
         return {}

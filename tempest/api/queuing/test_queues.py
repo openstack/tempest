@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+
 from six import moves
 from testtools import matchers
 

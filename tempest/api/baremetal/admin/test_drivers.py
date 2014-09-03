@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.baremetal import base
+from tempest.api.baremetal.admin import base
 from tempest import config
 from tempest import test
 
@@ -29,13 +29,11 @@ class TestDrivers(base.BaseBaremetalTest):
 
     @test.attr(type="smoke")
     def test_list_drivers(self):
-        resp, drivers = self.client.list_drivers()
-        self.assertEqual('200', resp['status'])
+        _, drivers = self.client.list_drivers()
         self.assertIn(self.driver_name,
                       [d['name'] for d in drivers['drivers']])
 
     @test.attr(type="smoke")
     def test_show_driver(self):
-        resp, driver = self.client.show_driver(self.driver_name)
-        self.assertEqual('200', resp['status'])
+        _, driver = self.client.show_driver(self.driver_name)
         self.assertEqual(self.driver_name, driver['name'])

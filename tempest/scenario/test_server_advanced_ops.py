@@ -25,7 +25,7 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-class TestServerAdvancedOps(manager.OfficialClientTest):
+class TestServerAdvancedOps(manager.ScenarioTest):
 
     """
     This test case stresses some advanced server instance operations:
@@ -49,19 +49,19 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     def test_resize_server_confirm(self):
         # We create an instance for use in this test
         instance = self.create_server()
-        instance_id = instance.id
+        instance_id = instance['id']
         resize_flavor = CONF.compute.flavor_ref_alt
         LOG.debug("Resizing instance %s from flavor %s to flavor %s",
-                  instance.id, instance.flavor, resize_flavor)
-        instance.resize(resize_flavor)
-        self.status_timeout(self.compute_client.servers, instance_id,
-                            'VERIFY_RESIZE')
+                  instance['id'], instance['flavor']['id'], resize_flavor)
+        self.servers_client.resize(instance_id, resize_flavor)
+        self.servers_client.wait_for_server_status(instance_id,
+                                                   'VERIFY_RESIZE')
 
         LOG.debug("Confirming resize of instance %s", instance_id)
-        instance.confirm_resize()
+        self.servers_client.confirm_resize(instance_id)
 
-        self.status_timeout(
-            self.compute_client.servers, instance_id, 'ACTIVE')
+        self.servers_client.wait_for_server_status(instance_id,
+                                                   'ACTIVE')
 
     @testtools.skipUnless(CONF.compute_feature_enabled.suspend,
                           'Suspend is not available.')
@@ -69,24 +69,27 @@ class TestServerAdvancedOps(manager.OfficialClientTest):
     def test_server_sequence_suspend_resume(self):
         # We create an instance for use in this test
         instance = self.create_server()
-        instance_id = instance.id
+        instance_id = instance['id']
         LOG.debug("Suspending instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.suspend()
-        self.status_timeout(self.compute_client.servers, instance_id,
-                            'SUSPENDED')
+                  instance_id, instance['status'])
+        self.servers_client.suspend_server(instance_id)
+        self.servers_client.wait_for_server_status(instance_id,
+                                                   'SUSPENDED')
+        _, fetched_instance = self.servers_client.get_server(instance_id)
         LOG.debug("Resuming instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.resume()
-        self.status_timeout(self.compute_client.servers, instance_id,
-                            'ACTIVE')
+                  instance_id, fetched_instance['status'])
+        self.servers_client.resume_server(instance_id)
+        self.servers_client.wait_for_server_status(instance_id,
+                                                   'ACTIVE')
+        _, fetched_instance = self.servers_client.get_server(instance_id)
         LOG.debug("Suspending instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.suspend()
-        self.status_timeout(self.compute_client.servers, instance_id,
-                            'SUSPENDED')
+                  instance_id, fetched_instance['status'])
+        self.servers_client.suspend_server(instance_id)
+        self.servers_client.wait_for_server_status(instance_id,
+                                                   'SUSPENDED')
+        _, fetched_instance = self.servers_client.get_server(instance_id)
         LOG.debug("Resuming instance %s. Current status: %s",
-                  instance_id, instance.status)
-        instance.resume()
-        self.status_timeout(self.compute_client.servers, instance_id,
-                            'ACTIVE')
+                  instance_id, fetched_instance['status'])
+        self.servers_client.resume_server(instance_id)
+        self.servers_client.wait_for_server_status(instance_id,
+                                                   'ACTIVE')

@@ -223,5 +223,8 @@ class CommandFailed(Exception):
 
     def __str__(self):
         return ("Command '%s' returned non-zero exit status %d.\n"
-        "stdout:\n%s\n"
-        "stderr:\n%s" % (self.cmd, self.returncode, self.stdout, self.stderr))
+                "stdout:\n%s\n"
+                "stderr:\n%s" % (self.cmd,
+                                 self.returncode,
+                                 self.stdout,
+                                 self.stderr))

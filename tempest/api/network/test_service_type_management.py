@@ -26,8 +26,7 @@ class ServiceTypeManagementTestJSON(base.BaseNetworkTest):
 
     @test.attr(type='smoke')
     def test_service_provider_list(self):
-        resp, body = self.client.list_service_providers()
-        self.assertEqual(resp['status'], '200')
+        _, body = self.client.list_service_providers()
         self.assertIsInstance(body['service_providers'], list)
 
 

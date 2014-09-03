@@ -13,11 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from testtools import matchers
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
 from tempest import test
-from testtools import matchers
+
 
 CONF = config.CONF
 

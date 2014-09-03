@@ -37,6 +37,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     def setUpClass(cls):
         cls.set_network_resources()
         super(BaseComputeTest, cls).setUpClass()
+        if getattr(cls, '_interface', None) == 'xml' and cls._api_version == 2:
+            if not CONF.compute_feature_enabled.xml_api_v2:
+                raise cls.skipException('XML API is not enabled')
 
         # TODO(andreaf) WE should care also for the alt_manager here
         # but only once client lazy load in the manager is done
@@ -268,10 +271,10 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         return resp, body
 
     @classmethod
-    def create_test_server_group(cls, name="", policy=[]):
+    def create_test_server_group(cls, name="", policy=None):
         if not name:
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
-        if not policy:
+        if policy is None:
             policy = ['affinity']
         resp, body = cls.servers_client.create_server_group(name, policy)
         cls.server_groups.append(body['id'])

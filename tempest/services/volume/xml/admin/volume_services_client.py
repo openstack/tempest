@@ -39,4 +39,5 @@ class VolumesServicesClientXML(rest_client.RestClient):
         resp, body = self.get(url)
         node = etree.fromstring(body)
         body = [xml_utils.xml_to_json(x) for x in node.getchildren()]
+        self.expected_success(200, resp.status)
         return resp, body

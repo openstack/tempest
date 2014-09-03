@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
-
 from tempest import config
 import tempest.test as test
 from tempest.tests import base
@@ -30,9 +28,9 @@ class TestNegativeAutoTest(base.TestCase):
                        "http-method": "GET",
                        "url": "flavors/detail",
                        "json-schema": {"type": "object",
-                                      "properties":
-                                      {"minRam": {"type": "integer"},
-                                       "minDisk": {"type": "integer"}}
+                                       "properties":
+                                       {"minRam": {"type": "integer"},
+                                        "minDisk": {"type": "integer"}}
                                        },
                        "resources": ["flavor", "volume", "image"]
                        }
@@ -56,11 +54,9 @@ class TestNegativeAutoTest(base.TestCase):
         for entry in entries:
             self.assertIsNotNone(entry[1]['resource'])
 
-    @mock.patch('tempest.test.NegativeAutoTest.load_schema')
-    def test_generate_scenario(self, open_mock):
-        open_mock.return_value = self.fake_input_desc
+    def test_generate_scenario(self):
         scenarios = test.NegativeAutoTest.\
-            generate_scenario(None)
+            generate_scenario(self.fake_input_desc)
 
         self.assertIsInstance(scenarios, list)
         for scenario in scenarios:

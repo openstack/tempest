@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import httplib2
 import json
 
+import httplib2
 from oslotest import mockpatch
 
 from tempest.common import rest_client

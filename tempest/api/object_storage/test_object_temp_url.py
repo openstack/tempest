@@ -185,3 +185,20 @@ class ObjectTempUrlTest(base.BaseObjectTest):
         resp, body = self.object_client.head(url)
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self.assertHeaders(resp, 'Object', 'HEAD')
+
+    @test.attr(type='gate')
+    @test.requires_ext(extension='tempurl', service='object')
+    def test_get_object_using_temp_url_with_inline_query_parameter(self):
+        expires = self._get_expiry_date()
+
+        # get a temp URL for the created object
+        url = self._get_temp_url(self.container_name, self.object_name, "GET",
+                                 expires, self.key)
+        url = url + '&inline'
+
+        # trying to get object using temp url within expiry time
+        resp, body = self.object_client.get(url)
+        self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
+        self.assertHeaders(resp, 'Object', 'GET')
+        self.assertEqual(body, self.content)
+        self.assertEqual(resp['content-disposition'], 'inline')

@@ -33,7 +33,7 @@ class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
             raise cls.skipException(msg)
 
         super(ServerRescueNegativeV3Test, cls).setUpClass()
-        cls.device = 'vdf'
+        cls.device = CONF.compute.volume_device_name
 
         # Create a volume and wait for it to become ready for attach
         resp, cls.volume = cls.volumes_client.create_volume(
@@ -56,7 +56,8 @@ class ServerRescueNegativeV3Test(base.BaseV3ComputeTest):
 
     @classmethod
     def tearDownClass(cls):
-        cls.delete_volume(cls.volume['id'])
+        if hasattr(cls, 'volume'):
+            cls.delete_volume(cls.volume['id'])
         super(ServerRescueNegativeV3Test, cls).tearDownClass()
 
     def _detach(self, server_id, volume_id):

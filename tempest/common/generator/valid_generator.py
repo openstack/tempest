@@ -24,7 +24,7 @@ class ValidTestGenerator(base.BasicGeneratorSet):
     @base.generator_type("string")
     @base.simple_generator
     def generate_valid_string(self, schema):
-        size = schema.get("minLength", 0)
+        size = schema.get("minLength", 1)
         # TODO(dkr mko): handle format and pattern
         return "x" * size
 

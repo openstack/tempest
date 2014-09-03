@@ -29,6 +29,18 @@ def register_opt_group(conf, opt_group, options):
         conf.register_opt(opt, group=opt_group.name)
 
 
+auth_group = cfg.OptGroup(name='auth',
+                          title="Options for authentication and credentials")
+
+
+AuthGroup = [
+    cfg.StrOpt('test_accounts_file',
+               default='etc/accounts.yaml',
+               help="Path to the yaml file that contains the list of "
+                    "credentials to use for running tests"),
+]
+
+
 identity_group = cfg.OptGroup(name='identity',
                               title="Keystone Configuration Options")
 
@@ -40,7 +52,6 @@ IdentityGroup = [
                 default=False,
                 help="Set to True if using self-signed SSL certificates."),
     cfg.StrOpt('uri',
-               default=None,
                help="Full URI of the OpenStack Identity API (Keystone), v2"),
     cfg.StrOpt('uri_v3',
                help='Full URI of the OpenStack Identity API (Keystone), v3'),
@@ -60,52 +71,40 @@ IdentityGroup = [
                         'publicURL', 'adminURL', 'internalURL'],
                help="The endpoint type to use for the identity service."),
     cfg.StrOpt('username',
-               default=None,
                help="Username to use for Nova API requests."),
     cfg.StrOpt('tenant_name',
-               default=None,
                help="Tenant name to use for Nova API requests."),
     cfg.StrOpt('admin_role',
                default='admin',
                help="Role required to administrate keystone."),
     cfg.StrOpt('password',
-               default=None,
                help="API key to use when authenticating.",
                secret=True),
     cfg.StrOpt('domain_name',
-               default=None,
                help="Domain name for authentication (Keystone V3)."
                     "The same domain applies to user and project"),
     cfg.StrOpt('alt_username',
-               default=None,
                help="Username of alternate user to use for Nova API "
                     "requests."),
     cfg.StrOpt('alt_tenant_name',
-               default=None,
                help="Alternate user's Tenant name to use for Nova API "
                     "requests."),
     cfg.StrOpt('alt_password',
-               default=None,
                help="API key to use when authenticating as alternate user.",
                secret=True),
     cfg.StrOpt('alt_domain_name',
-               default=None,
                help="Alternate domain name for authentication (Keystone V3)."
                     "The same domain applies to user and project"),
     cfg.StrOpt('admin_username',
-               default=None,
                help="Administrative Username to use for "
                     "Keystone API requests."),
     cfg.StrOpt('admin_tenant_name',
-               default=None,
                help="Administrative Tenant name to use for Keystone API "
                     "requests."),
     cfg.StrOpt('admin_password',
-               default=None,
                help="API key to use when authenticating as admin.",
                secret=True),
     cfg.StrOpt('admin_domain_name',
-               default=None,
                help="Admin domain name for authentication (Keystone V3)."
                     "The same domain applies to user and project"),
 ]
@@ -234,7 +233,6 @@ ComputeGroup = [
                default='computev3',
                help="Catalog type of the Compute v3 service."),
     cfg.StrOpt('path_to_private_key',
-               default=None,
                help="Path to a private key file for SSH access to remote "
                     "hosts"),
     cfg.StrOpt('volume_device_name',
@@ -261,6 +259,9 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('api_v3',
                 default=False,
                 help="If false, skip all nova v3 tests."),
+    cfg.BoolOpt('xml_api_v2',
+                default=True,
+                help="If false skip all v2 api tests with xml"),
     cfg.BoolOpt('disk_config',
                 default=True,
                 help="If false, skip disk config tests"),
@@ -280,6 +281,10 @@ ComputeFeaturesGroup = [
                 default=False,
                 help="Does the test environment support changing the admin "
                      "password?"),
+    cfg.BoolOpt('console_output',
+                default=True,
+                help="Does the test environment support obtaining instance "
+                     "serial console output?"),
     cfg.BoolOpt('resize',
                 default=False,
                 help="Does the test environment support resizing?"),
@@ -328,7 +333,11 @@ ComputeFeaturesGroup = [
     cfg.BoolOpt('interface_attach',
                 default=True,
                 help='Does the test environment support dynamic network '
-                     'interface attachment?')
+                     'interface attachment?'),
+    cfg.BoolOpt('snapshot',
+                default=True,
+                help='Does the test environment support creating snapshot '
+                     'images of running instances?')
 ]
 
 
@@ -337,18 +346,14 @@ compute_admin_group = cfg.OptGroup(name='compute-admin',
 
 ComputeAdminGroup = [
     cfg.StrOpt('username',
-               default=None,
                help="Administrative Username to use for Nova API requests."),
     cfg.StrOpt('tenant_name',
-               default=None,
                help="Administrative Tenant name to use for Nova API "
                     "requests."),
     cfg.StrOpt('password',
-               default=None,
                help="API key to use when authenticating as admin.",
                secret=True),
     cfg.StrOpt('domain_name',
-               default=None,
                help="Domain name for authentication as admin (Keystone V3)."
                     "The same domain applies to user and project"),
 ]
@@ -669,11 +674,9 @@ OrchestrationGroup = [
                help="Instance type for tests. Needs to be big enough for a "
                     "full OS plus the test workload"),
     cfg.StrOpt('image_ref',
-               default=None,
                help="Name of heat-cfntools enabled image to use when "
                     "launching test instances."),
     cfg.StrOpt('keypair_name',
-               default=None,
                help="Name of existing keypair to launch servers with."),
     cfg.IntOpt('max_template_size',
                default=524288,
@@ -742,11 +745,9 @@ BotoGroup = [
                default="http://localhost:8080",
                help="S3 URL"),
     cfg.StrOpt('aws_secret',
-               default=None,
                help="AWS Secret Key",
                secret=True),
     cfg.StrOpt('aws_access',
-               default=None,
                help="AWS Access Key"),
     cfg.StrOpt('aws_zone',
                default="nova",
@@ -785,26 +786,20 @@ stress_group = cfg.OptGroup(name='stress', title='Stress Test Options')
 
 StressGroup = [
     cfg.StrOpt('nova_logdir',
-               default=None,
                help='Directory containing log files on the compute nodes'),
     cfg.IntOpt('max_instances',
                default=16,
                help='Maximum number of instances to create during test.'),
     cfg.StrOpt('controller',
-               default=None,
                help='Controller host.'),
     # new stress options
     cfg.StrOpt('target_controller',
-               default=None,
                help='Controller host.'),
     cfg.StrOpt('target_ssh_user',
-               default=None,
                help='ssh user.'),
     cfg.StrOpt('target_private_key_path',
-               default=None,
                help='Path to private key.'),
     cfg.StrOpt('target_logfiles',
-               default=None,
                help='regexp for list of log files.'),
     cfg.IntOpt('log_check_interval',
                default=60,
@@ -832,9 +827,15 @@ ScenarioGroup = [
                default='/opt/stack/new/devstack/files/images/'
                'cirros-0.3.1-x86_64-uec',
                help='Directory containing image files'),
-    cfg.StrOpt('qcow2_img_file',
+    cfg.StrOpt('img_file', deprecated_name='qcow2_img_file',
                default='cirros-0.3.1-x86_64-disk.img',
-               help='QCOW2 image file name'),
+               help='Image file name'),
+    cfg.StrOpt('img_disk_format',
+               default='qcow2',
+               help='Image disk format'),
+    cfg.StrOpt('img_container_format',
+               default='bare',
+               help='Image container format'),
     cfg.StrOpt('ami_img_file',
                default='cirros-0.3.1-x86_64-blank.img',
                help='AMI image file name'),
@@ -892,9 +893,9 @@ ServiceAvailableGroup = [
     cfg.BoolOpt('trove',
                 default=False,
                 help="Whether or not Trove is expected to be available"),
-    cfg.BoolOpt('marconi',
+    cfg.BoolOpt('zaqar',
                 default=False,
-                help="Whether or not Marconi is expected to be available"),
+                help="Whether or not Zaqar is expected to be available"),
 ]
 
 debug_group = cfg.OptGroup(name="debug",
@@ -1012,6 +1013,7 @@ NegativeGroup = [
 
 
 def register_opts():
+    register_opt_group(cfg.CONF, auth_group, AuthGroup)
     register_opt_group(cfg.CONF, compute_group, ComputeGroup)
     register_opt_group(cfg.CONF, compute_features_group,
                        ComputeFeaturesGroup)
@@ -1059,7 +1061,12 @@ class TempestConfigPrivate(object):
 
     DEFAULT_CONFIG_FILE = "tempest.conf"
 
+    def __getattr__(self, attr):
+        # Handles config options from the default group
+        return getattr(cfg.CONF, attr)
+
     def _set_attrs(self):
+        self.auth = cfg.CONF.auth
         self.compute = cfg.CONF.compute
         self.compute_feature_enabled = cfg.CONF['compute-feature-enabled']
         self.identity = cfg.CONF.identity

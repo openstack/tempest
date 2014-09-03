@@ -135,7 +135,7 @@ class AggregatesAdminV3Test(base.BaseV3ComputeAdminTest):
         self.assertEqual(200, resp.status)
         self.assertIn((aggregate_id, new_aggregate_name, new_az_name),
                       map(lambda x:
-                         (x['id'], x['name'], x['availability_zone']),
+                          (x['id'], x['name'], x['availability_zone']),
                           aggregates))
 
     @test.attr(type='gate')

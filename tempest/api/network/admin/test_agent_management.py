@@ -32,8 +32,7 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type='smoke')
     def test_list_agent(self):
-        resp, body = self.admin_client.list_agents()
-        self.assertEqual('200', resp['status'])
+        _, body = self.admin_client.list_agents()
         agents = body['agents']
         # Hearthbeats must be excluded from comparison
         self.agent.pop('heartbeat_timestamp', None)
@@ -45,15 +44,13 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
 
     @test.attr(type=['smoke'])
     def test_list_agents_non_admin(self):
-        resp, body = self.client.list_agents()
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.list_agents()
         self.assertEqual(len(body["agents"]), 0)
 
     @test.attr(type='smoke')
     def test_show_agent(self):
-        resp, body = self.admin_client.show_agent(self.agent['id'])
+        _, body = self.admin_client.show_agent(self.agent['id'])
         agent = body['agent']
-        self.assertEqual('200', resp['status'])
         self.assertEqual(agent['id'], self.agent['id'])
 
     @test.attr(type='smoke')
@@ -62,10 +59,9 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         # Try to update the 'admin_state_up' to the original
         # one to avoid the negative effect.
         agent_status = {'admin_state_up': origin_status}
-        resp, body = self.admin_client.update_agent(agent_id=self.agent['id'],
-                                                    agent_info=agent_status)
+        _, body = self.admin_client.update_agent(agent_id=self.agent['id'],
+                                                 agent_info=agent_status)
         updated_status = body['agent']['admin_state_up']
-        self.assertEqual('200', resp['status'])
         self.assertEqual(origin_status, updated_status)
 
     @test.attr(type='smoke')
@@ -73,10 +69,8 @@ class AgentManagementTestJSON(base.BaseAdminNetworkTest):
         self.useFixture(fixtures.LockFixture('agent_description'))
         description = 'description for update agent.'
         agent_description = {'description': description}
-        resp, body = self.admin_client.update_agent(
-            agent_id=self.agent['id'],
-            agent_info=agent_description)
-        self.assertEqual('200', resp['status'])
+        _, body = self.admin_client.update_agent(agent_id=self.agent['id'],
+                                                 agent_info=agent_description)
         self.addCleanup(self._restore_agent)
         updated_description = body['agent']['description']
         self.assertEqual(updated_description, description)

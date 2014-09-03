@@ -1,15 +1,28 @@
-import random
+# Copyright 2014 OpenStack Foundation
+# All Rights Reserved.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
 import netaddr
+import random
+
 from tempest.api.network import base
+from tempest.common.utils import data_utils
 from tempest import config
-from tempest import test
-from tempest.openstack.common import log as logging
-from tempest.common.utils.data_utils import get_ipv6_addr_by_EUI64, \
-    rand_mac_address
 from tempest import exceptions
+from tempest import test
 
 CONF = config.CONF
-LOG = logging.getLogger(__name__)
 
 
 class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
@@ -20,21 +33,39 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
     @test.safe_setup
     def setUpClass(cls):
         super(NetworksTestDHCPv6JSON, cls).setUpClass()
+        msg = None
+        if not CONF.network_feature_enabled.ipv6:
+            msg = "IPv6 is not enabled"
+        elif not CONF.network_feature_enabled.ipv6_subnet_attributes:
+            msg = "DHCPv6 attributes are not enabled."
+        if msg:
+            raise cls.skipException(msg)
         cls.network = cls.create_network()
 
-    def _clean_network(self, **kwargs):
-        if "ports" in kwargs:
-            for port in kwargs["ports"]:
+    def _clean_network(self):
+        resp, body = self.client.list_ports()
+        ports = body['ports']
+        for port in ports:
+            if self.ports:
+                self.ports.pop()
+            if port['device_owner'] == 'network:router_interface':
+                self.client.remove_router_interface_with_port_id(
+                    port['device_id'], port['id']
+                )
+            else:
                 self.client.delete_port(port['id'])
-        if "router_interfaces" in kwargs:
-            for interface in kwargs["router_interfaces"]:
-                self.client.remove_router_interface_with_subnet_id(*interface)
-        if "subnets" in kwargs:
-            for subnet in kwargs["subnets"]:
-                self.client.delete_subnet(subnet['id'])
-        if "routers" in kwargs:
-            for router in kwargs["routers"]:
-                self.client.delete_router(router['id'])
+        resp, body = self.client.list_subnets()
+        subnets = body['subnets']
+        for subnet in subnets:
+            if self.subnets:
+                self.subnets.pop()
+            self.client.delete_subnet(subnet['id'])
+        resp, body = self.client.list_routers()
+        routers = body['routers']
+        for router in routers:
+            if self.routers:
+                self.routers.pop()
+            self.client.delete_router(router['id'])
 
     @test.attr(type='smoke')
     def test_dhcpv6_stateless_eui64(self):
@@ -49,13 +80,12 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
             subnet = self.create_subnet(self.network, **kwargs)
-            self.subnets.pop()
-            port_mac = rand_mac_address()
+            port_mac = data_utils.rand_mac_address()
             port = self.create_port(self.network, mac_address=port_mac)
-            self.ports.pop()
             real_ip = next(iter(port['fixed_ips']))['ip_address']
-            eui_ip = get_ipv6_addr_by_EUI64(subnet['cidr'], port_mac).format()
-            self._clean_network(ports=[port], subnets=[subnet])
+            eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
+                                                       port_mac).format()
+            self._clean_network()
             self.assertEqual(eui_ip, real_ip,
                              ('Real port IP is %s, but shall be %s when '
                               'ipv6_ra_mode=%s and ipv6_address_mode=%s') % (
@@ -75,22 +105,16 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                       'ipv6_address_mode': add_mode}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
             subnet = self.create_subnet(self.network, **kwargs)
-            self.subnets.pop()
             router = self.create_router(router_name="router1",
                                         admin_state_up=True)
             self.create_router_interface(router['id'],
                                          subnet['id'])
-            self.routers.pop()
-            port_mac = rand_mac_address()
+            port_mac = data_utils.rand_mac_address()
             port = self.create_port(self.network, mac_address=port_mac)
-            self.ports.pop()
             real_ip = next(iter(port['fixed_ips']))['ip_address']
-            eui_ip = get_ipv6_addr_by_EUI64(subnet['cidr'], port_mac).format()
-            self._clean_network(ports=[port],
-                                subnets=[subnet],
-                                router_interfaces=[(router['id'],
-                                                    subnet['id'])],
-                                routers=[router])
+            eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
+                                                       port_mac).format()
+            self._clean_network()
             self.assertEqual(eui_ip, real_ip,
                              ('Real port IP is %s, but shall be %s when '
                               'ipv6_ra_mode=%s and ipv6_address_mode=%s') % (
@@ -113,13 +137,12 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                       'ipv6_address_mode': add_mode}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
             subnet = self.create_subnet(self.network, **kwargs)
-            self.subnets.pop()
-            port_mac = rand_mac_address()
+            port_mac = data_utils.rand_mac_address()
             port = self.create_port(self.network, mac_address=port_mac)
-            self.ports.pop()
             real_ip = next(iter(port['fixed_ips']))['ip_address']
-            eui_ip = get_ipv6_addr_by_EUI64(subnet['cidr'], port_mac).format()
-            self._clean_network(ports=[port], subnets=[subnet])
+            eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
+                                                       port_mac).format()
+            self._clean_network()
             self.assertEqual(eui_ip, real_ip,
                              ('Real port IP %s equal to EUI-64 %s when '
                               'ipv6_ra_mode=%s and ipv6_address_mode=%s') % (
@@ -151,13 +174,12 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
         port shall receive IP from fixed IPs list of subnet.
         """
         subnet = self.create_subnet(self.network)
-        self.subnets.pop()
-        port_mac = rand_mac_address()
+        port_mac = data_utils.rand_mac_address()
         port = self.create_port(self.network, mac_address=port_mac)
-        self.ports.pop()
         real_ip = next(iter(port['fixed_ips']))['ip_address']
-        eui_ip = get_ipv6_addr_by_EUI64(subnet['cidr'], port_mac).format()
-        self._clean_network(ports=[port], subnets=[subnet])
+        eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
+                                                   port_mac).format()
+        self._clean_network()
         self.assertNotEqual(eui_ip, real_ip,
                             ('Real port IP %s equal to EUI-64 %s when '
                              'ipv6_ra_mode=Off and ipv6_address_mode=Off') % (
@@ -176,21 +198,20 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
             kwargs = {'ipv6_ra_mode': ra_mode,
                       'ipv6_address_mode': add_mode}
             subnet1 = self.create_subnet(self.network, **kwargs)
-            self.subnets.pop()
             subnet2 = self.create_subnet(self.network, **kwargs)
-            self.subnets.pop()
-            port_mac = rand_mac_address()
+            port_mac = data_utils.rand_mac_address()
             port = self.create_port(self.network, mac_address=port_mac)
-            self.ports.pop()
             real_ips = [i['ip_address'] for i in port['fixed_ips']]
             eui_ips = [
-                get_ipv6_addr_by_EUI64(i['cidr'], port_mac).format()
+                data_utils.get_ipv6_addr_by_EUI64(i['cidr'],
+                                                  port_mac).format()
                 for i in (subnet1, subnet2)
             ]
-            self._clean_network(ports=[port], subnets=[subnet1, subnet2])
+            self._clean_network()
             self.assertSequenceEqual(sorted(real_ips), sorted(eui_ips),
-                                     ('Real port IPs %s and %s are not equal to'
-                                      ' SLAAC IPs %s %s') % tuple(real_ips + eui_ips))
+                                     ('Real port IPs %s,%s are not equal to'
+                                      ' SLAAC IPs: %s,%s') % tuple(real_ips +
+                                                                   eui_ips))
 
     @test.attr(type='smoke')
     def test_dhcpv6_two_subnets(self):
@@ -209,30 +230,29 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                 kwargs_dhcp = {'ipv6_address_mode': 'dhcpv6-stateful'}
                 if order == "slaac_first":
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
-                    subnet_dhcp = self.create_subnet(self.network, **kwargs_dhcp)
+                    subnet_dhcp = self.create_subnet(
+                        self.network, **kwargs_dhcp)
                 else:
-                    subnet_dhcp = self.create_subnet(self.network, **kwargs_dhcp)
+                    subnet_dhcp = self.create_subnet(
+                        self.network, **kwargs_dhcp)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
-                port_mac = rand_mac_address()
+                port_mac = data_utils.rand_mac_address()
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
-                                             for sub in subnet_dhcp, subnet_slaac]
+                                             for sub in subnet_dhcp,
+                                             subnet_slaac]
                 dhcp_ip = subnet_dhcp["allocation_pools"][0]["start"]
-                eui_ip = get_ipv6_addr_by_EUI64(
+                eui_ip = data_utils.get_ipv6_addr_by_EUI64(
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
-                self.subnets.pop()
-                self.subnets.pop()
-                self.ports.pop()
-                self._clean_network(ports=[port],
-                                    subnets=[subnet_slaac, subnet_dhcp])
+                self._clean_network()
                 self.assertSequenceEqual((real_eui_ip, real_dhcp_ip),
                                          (eui_ip, dhcp_ip),
-                                         ('Real port IPs %s and %s are not equal'
-                                          ' to planned IPs %s %s') % (
+                                         ('Real port IPs %s,%s are not equal'
+                                          ' to planned IPs %s,%s') % (
                                              real_dhcp_ip,
                                              real_eui_ip,
                                              eui_ip,
@@ -245,10 +265,13 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
         the network.
         """
         kwargs = {'ipv6_ra_mode': 'slaac',
-                  'ipv6_address_mode': 'slaac'}
+                  'ipv6_address_mode': 'slaac',
+                  'cidr': netaddr.IPNetwork('2014::/64'),
+                  'mask_bits': 64}
         subnet = self.create_subnet(self.network, **kwargs)
-        port_mac = rand_mac_address()
-        eui_ip = get_ipv6_addr_by_EUI64(subnet['cidr'], port_mac).format()
+        port_mac = data_utils.rand_mac_address()
+        eui_ip = data_utils.get_ipv6_addr_by_EUI64(subnet['cidr'],
+                                                   port_mac).format()
         port = self.create_port(self.network,
                                 fixed_ips=[
                                     {'subnet_id': subnet['id'],
@@ -276,12 +299,10 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                       'ipv6_address_mode': add_mode}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
             subnet = self.create_subnet(self.network, **kwargs)
-            self.subnets.pop()
             port = self.create_port(self.network,)
-            self.ports.pop()
             port_ip = next(iter(port['fixed_ips']))['ip_address']
             first_alloc = subnet["allocation_pools"][0]["start"]
-            self._clean_network(ports=[port], subnets=[subnet])
+            self._clean_network()
             self.assertEqual(port_ip, first_alloc,
                              ("Port IP %s is not as first IP from "
                               "subnets allocation pool: %s") % (
@@ -308,18 +329,15 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                       'ipv6_address_mode': add_mode}
             kwargs = {k: v for k, v in kwargs.iteritems() if v}
             subnet = self.create_subnet(self.network, **kwargs)
-            self.subnets.pop()
             ip_range = netaddr.IPRange(subnet["allocation_pools"][0]["start"],
-                               subnet["allocation_pools"][0]["end"])
+                                       subnet["allocation_pools"][0]["end"])
             ip = netaddr.IPAddress(random.randrange(ip_range.first,
                                                     ip_range.last)).format()
             port = self.create_port(self.network,
-                                fixed_ips=[
-                                    {'subnet_id': subnet['id'],
-                                     'ip_address': ip}])
-            self.ports.pop()
+                                    fixed_ips=[{'subnet_id': subnet['id'],
+                                                'ip_address': ip}])
             port_ip = next(iter(port['fixed_ips']))['ip_address']
-            self._clean_network(ports=[port], subnets=[subnet])
+            self._clean_network()
             self.assertEqual(port_ip, ip,
                              ("Port IP %s is not as fixed IP from "
                               "port create request: %s") % (
@@ -334,9 +352,9 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                   'ipv6_address_mode': 'dhcpv6-stateful'}
         subnet = self.create_subnet(self.network, **kwargs)
         ip_range = netaddr.IPRange(subnet["allocation_pools"][0]["start"],
-                           subnet["allocation_pools"][0]["end"])
+                                   subnet["allocation_pools"][0]["end"])
         ip = netaddr.IPAddress(random.randrange(
-            ip_range.last+1, ip_range.last+10)).format()
+            ip_range.last + 1, ip_range.last + 10)).format()
         self.assertRaisesRegexp(exceptions.BadRequest,
                                 "not a valid IP for the defined subnet",
                                 self.create_port,
@@ -353,7 +371,7 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                   'ipv6_address_mode': 'dhcpv6-stateful'}
         subnet = self.create_subnet(self.network, **kwargs)
         ip_range = netaddr.IPRange(subnet["allocation_pools"][0]["start"],
-                           subnet["allocation_pools"][0]["end"])
+                                   subnet["allocation_pools"][0]["end"])
         ip = netaddr.IPAddress(random.randrange(
             ip_range.first, ip_range.last)).format()
         self.create_port(self.network,
@@ -366,6 +384,10 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                                 self.network,
                                 fixed_ips=[{'subnet_id': subnet['id'],
                                             'ip_address': ip}])
+
+    def tearDown(self):
+        self._clean_network()
+        super(NetworksTestDHCPv6JSON, self).tearDown()
 
 
 class NetworksTestDHCPv6XML(NetworksTestDHCPv6JSON):

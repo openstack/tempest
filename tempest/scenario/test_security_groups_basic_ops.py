@@ -213,9 +213,15 @@ class TestSecurityGroupsBasicOps(manager.NetworkScenarioTest):
         myport = (tenant.router.id, tenant.subnet.id)
         router_ports = [(i['device_id'], i['fixed_ips'][0]['subnet_id']) for i
                         in self.network_client.list_ports()['ports']
-                        if i['device_owner'] == 'network:router_interface']
+                        if self._is_router_port(i)]
 
         self.assertIn(myport, router_ports)
+
+    def _is_router_port(self, port):
+        """Return True if port is a router interface."""
+        # NOTE(armando-migliaccio): match device owner for both centralized
+        # and distributed routers; 'device_owner' is "" by default.
+        return port['device_owner'].startswith('network:router_interface')
 
     def _create_server(self, name, tenant, security_groups=None):
         """

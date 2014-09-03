@@ -18,16 +18,17 @@ import copy
 import datetime
 import exceptions
 import re
-import six
 import urlparse
 
+import six
+
 from tempest import config
+from tempest.openstack.common import log as logging
 from tempest.services.identity.json import identity_client as json_id
 from tempest.services.identity.v3.json import identity_client as json_v3id
 from tempest.services.identity.v3.xml import identity_client as xml_v3id
 from tempest.services.identity.xml import identity_client as xml_id
 
-from tempest.openstack.common import log as logging
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)

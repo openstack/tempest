@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 load_tests = test_utils.load_tests_input_scenario_utils
 
 
-class TestServerBasicOps(manager.OfficialClientTest):
+class TestServerBasicOps(manager.ScenarioTest):
 
     """
     This smoke test case follows this basic set of operations:
@@ -69,9 +69,9 @@ class TestServerBasicOps(manager.OfficialClientTest):
 
     def boot_instance(self):
         # Create server with image and flavor from input scenario
-        security_groups = [self.security_group.name]
+        security_groups = [self.security_group]
         create_kwargs = {
-            'key_name': self.keypair.id,
+            'key_name': self.keypair['name'],
             'security_groups': security_groups
         }
         self.instance = self.create_server(image=self.image_ref,
@@ -81,16 +81,19 @@ class TestServerBasicOps(manager.OfficialClientTest):
     def verify_ssh(self):
         if self.run_ssh:
             # Obtain a floating IP
-            floating_ip = self.compute_client.floating_ips.create()
-            self.addCleanup(self.delete_wrapper, floating_ip)
+            _, floating_ip = self.floating_ips_client.create_floating_ip()
+            self.addCleanup(self.delete_wrapper,
+                            self.floating_ips_client.delete_floating_ip,
+                            floating_ip['id'])
             # Attach a floating IP
-            self.instance.add_floating_ip(floating_ip)
+            self.floating_ips_client.associate_floating_ip_to_server(
+                floating_ip['ip'], self.instance['id'])
             # Check ssh
             try:
                 self.get_remote_client(
-                    server_or_ip=floating_ip.ip,
+                    server_or_ip=floating_ip['ip'],
                     username=self.image_utils.ssh_user(self.image_ref),
-                    private_key=self.keypair.private_key)
+                    private_key=self.keypair['private_key'])
             except Exception:
                 LOG.exception('ssh to server failed')
                 self._log_console_output()
@@ -99,7 +102,7 @@ class TestServerBasicOps(manager.OfficialClientTest):
     @test.services('compute', 'network')
     def test_server_basicops(self):
         self.add_keypair()
-        self.security_group = self._create_security_group_nova()
+        self.security_group = self._create_security_group()
         self.boot_instance()
         self.verify_ssh()
-        self.instance.delete()
+        self.servers_client.delete_server(self.instance['id'])

@@ -111,6 +111,7 @@ class NetworkClientBase(object):
                 uri += '?' + urllib.urlencode(filters, doseq=1)
             resp, body = self.get(uri)
             result = {plural_name: self.deserialize_list(body)}
+            self.rest_client.expected_success(200, resp.status)
             return resp, result
 
         return _list
@@ -119,7 +120,9 @@ class NetworkClientBase(object):
         def _delete(resource_id):
             plural = self.pluralize(resource_name)
             uri = '%s/%s' % (self.get_uri(plural), resource_id)
-            return self.delete(uri)
+            resp, body = self.delete(uri)
+            self.rest_client.expected_success(204, resp.status)
+            return resp, body
 
         return _delete
 
@@ -134,6 +137,7 @@ class NetworkClientBase(object):
                 uri += '?' + urllib.urlencode(fields, doseq=1)
             resp, body = self.get(uri)
             body = self.deserialize_single(body)
+            self.rest_client.expected_success(200, resp.status)
             return resp, body
 
         return _show
@@ -145,6 +149,7 @@ class NetworkClientBase(object):
             post_data = self.serialize({resource_name: kwargs})
             resp, body = self.post(uri, post_data)
             body = self.deserialize_single(body)
+            self.rest_client.expected_success(201, resp.status)
             return resp, body
 
         return _create
@@ -156,6 +161,7 @@ class NetworkClientBase(object):
             post_data = self.serialize({resource_name: kwargs})
             resp, body = self.put(uri, post_data)
             body = self.deserialize_single(body)
+            self.rest_client.expected_success(200, resp.status)
             return resp, body
 
         return _update
@@ -174,15 +180,14 @@ class NetworkClientBase(object):
         raise AttributeError(name)
 
     # Common methods that are hard to automate
-    def create_bulk_network(self, count, names):
-        network_list = list()
-        for i in range(count):
-            network_list.append({'name': names[i]})
+    def create_bulk_network(self, names):
+        network_list = [{'name': name} for name in names]
         post_data = {'networks': network_list}
         body = self.serialize_list(post_data, "networks", "network")
         uri = self.get_uri("networks")
         resp, body = self.post(uri, body)
         body = {'networks': self.deserialize_list(body)}
+        self.rest_client.expected_success(201, resp.status)
         return resp, body
 
     def create_bulk_subnet(self, subnet_list):
@@ -191,6 +196,7 @@ class NetworkClientBase(object):
         uri = self.get_uri('subnets')
         resp, body = self.post(uri, body)
         body = {'subnets': self.deserialize_list(body)}
+        self.rest_client.expected_success(201, resp.status)
         return resp, body
 
     def create_bulk_port(self, port_list):
@@ -199,6 +205,7 @@ class NetworkClientBase(object):
         uri = self.get_uri('ports')
         resp, body = self.post(uri, body)
         body = {'ports': self.deserialize_list(body)}
+        self.rest_client.expected_success(201, resp.status)
         return resp, body
 
     def wait_for_resource_deletion(self, resource_type, id):

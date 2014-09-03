@@ -16,12 +16,12 @@
 
 import collections
 import json
-from lxml import etree
 import re
 import string
 import time
 
 import jsonschema
+from lxml import etree
 
 from tempest.common import http
 from tempest.common.utils import misc as misc_utils
@@ -209,8 +209,9 @@ class RestClient(object):
             pattern = """Unexpected http success status code {0},
                          The expected status code is {1}"""
             if ((not isinstance(expected_code, list) and
-                (read_code != expected_code)) or (isinstance(expected_code,
-                list) and (read_code not in expected_code))):
+                 (read_code != expected_code)) or
+                (isinstance(expected_code, list) and
+                 (read_code not in expected_code))):
                 details = pattern.format(read_code, expected_code)
                 raise exceptions.InvalidHttpSuccessCode(details)
 
@@ -247,8 +248,10 @@ class RestClient(object):
                 return resp[i]
         return ""
 
-    def _log_request_start(self, method, req_url, req_headers={},
+    def _log_request_start(self, method, req_url, req_headers=None,
                            req_body=None):
+        if req_headers is None:
+            req_headers = {}
         caller_name = misc_utils.find_test_caller()
         trace_regex = CONF.debug.trace_requests
         if trace_regex and re.search(trace_regex, caller_name):
@@ -256,8 +259,10 @@ class RestClient(object):
                            (caller_name, method, req_url))
 
     def _log_request(self, method, req_url, resp,
-                     secs="", req_headers={},
+                     secs="", req_headers=None,
                      req_body=None, resp_body=None):
+        if req_headers is None:
+            req_headers = {}
         # if we have the request id, put it in the right part of the log
         extra = dict(request_id=self._get_request_id(resp))
         # NOTE(sdague): while we still have 6 callers to this function

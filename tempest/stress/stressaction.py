@@ -12,12 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
 import signal
 import sys
+
+import six
 
 from tempest.openstack.common import log as logging
 
 
+@six.add_metaclass(abc.ABCMeta)
 class StressAction(object):
 
     def __init__(self, manager, max_runs=None, stop_on_error=False):
@@ -83,6 +87,7 @@ class StressAction(object):
                     self.tearDown()
                     sys.exit(1)
 
+    @abc.abstractmethod
     def run(self):
         """This method is where the stress test code runs."""
-        raise NotImplemented()
+        return

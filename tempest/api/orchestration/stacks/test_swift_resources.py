@@ -61,15 +61,16 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
             self.assertEqual(resource_name, resource['logical_resource_id'])
             self.assertEqual('CREATE_COMPLETE', resource['resource_status'])
 
+    @test.services('object_storage')
     def test_created_containers(self):
         params = {'format': 'json'}
-        resp, container_list = \
+        _, container_list = \
             self.account_client.list_account_containers(params=params)
-        self.assertEqual('200', resp['status'])
         self.assertEqual(2, len(container_list))
         for cont in container_list:
             self.assertTrue(cont['name'].startswith(self.stack_name))
 
+    @test.services('object_storage')
     def test_acl(self):
         acl_headers = ('x-container-meta-web-index', 'x-container-read')
 
@@ -86,6 +87,7 @@ class SwiftResourcesTestJSON(base.BaseOrchestrationTest):
         for h in acl_headers:
             self.assertIn(h, headers)
 
+    @test.services('object_storage')
     def test_metadata(self):
         swift_basic_template = self.load_template('swift_basic')
         metadatas = swift_basic_template['resources']['SwiftContainerWebsite'][

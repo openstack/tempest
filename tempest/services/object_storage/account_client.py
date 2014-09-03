@@ -15,12 +15,12 @@
 
 import json
 import urllib
+from xml.etree import ElementTree as etree
 
 from tempest.common import http
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
-from xml.etree import ElementTree as etree
 
 CONF = config.CONF
 
@@ -32,11 +32,15 @@ class AccountClient(rest_client.RestClient):
 
     def create_account(self, data=None,
                        params=None,
-                       metadata={},
-                       remove_metadata={},
+                       metadata=None,
+                       remove_metadata=None,
                        metadata_prefix='X-Account-Meta-',
                        remove_metadata_prefix='X-Remove-Account-Meta-'):
         """Create an account."""
+        if metadata is None:
+            metadata = {}
+        if remove_metadata is None:
+            remove_metadata = {}
         url = ''
         if params:
             url += '?%s' % urllib.urlencode(params)

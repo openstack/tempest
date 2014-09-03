@@ -17,9 +17,10 @@ import cStringIO as StringIO
 import hashlib
 import random
 import re
-import six
 import time
 import zlib
+
+import six
 
 from tempest.api.object_storage import base
 from tempest.common import custom_matchers

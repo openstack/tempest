@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.api.baremetal import base
+from tempest.api.baremetal.admin import base
 from tempest.common.utils import data_utils
 from tempest import exceptions as exc
 from tempest import test
@@ -22,11 +22,8 @@ class TestPortsNegative(base.BaseBaremetalTest):
     def setUp(self):
         super(TestPortsNegative, self).setUp()
 
-        resp, self.chassis = self.create_chassis()
-        self.assertEqual('201', resp['status'])
-
-        resp, self.node = self.create_node(self.chassis['uuid'])
-        self.assertEqual('201', resp['status'])
+        _, self.chassis = self.create_chassis()
+        _, self.node = self.create_node(self.chassis['uuid'])
 
     @test.attr(type=['negative', 'smoke'])
     def test_create_port_malformed_mac(self):
@@ -137,13 +134,11 @@ class TestPortsNegative(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         extra = {'key': 'value'}
 
-        resp, port = self.create_port(node_id=node_id, address=address,
-                                      extra=extra)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address,
+                                   extra=extra)
         port_id = port['uuid']
 
-        resp, body = self.client.delete_port(port_id)
-        self.assertEqual('204', resp['status'])
+        _, body = self.client.delete_port(port_id)
 
         patch = [{'path': '/extra/key',
                   'op': 'replace',
@@ -169,8 +164,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
@@ -182,8 +176,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
@@ -196,8 +189,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
@@ -209,8 +201,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         patch = [{'path': '/node_uuid',
@@ -225,11 +216,9 @@ class TestPortsNegative(base.BaseBaremetalTest):
         address1 = data_utils.rand_mac_address()
         address2 = data_utils.rand_mac_address()
 
-        resp, port1 = self.create_port(node_id=node_id, address=address1)
-        self.assertEqual('201', resp['status'])
+        _, port1 = self.create_port(node_id=node_id, address=address1)
 
-        resp, port2 = self.create_port(node_id=node_id, address=address2)
-        self.assertEqual('201', resp['status'])
+        _, port2 = self.create_port(node_id=node_id, address=address2)
         port_id = port2['uuid']
 
         patch = [{'path': '/address',
@@ -243,8 +232,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         patch = [{'path': '/node_uuid',
@@ -258,8 +246,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         patch = [{'path': '/address',
@@ -275,9 +262,8 @@ class TestPortsNegative(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         extra = {'key': 'value'}
 
-        resp, port = self.create_port(node_id=node_id, address=address,
-                                      extra=extra)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address,
+                                   extra=extra)
         port_id = port['uuid']
 
         patch = [{'path': '/extra/key',
@@ -291,8 +277,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         patch = [{'path': '/extra',
@@ -307,8 +292,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         patch = [{'path': '/nonexistent', ' op': 'replace', 'value': 'value'}]
@@ -321,8 +305,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
@@ -333,8 +316,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
@@ -345,8 +327,7 @@ class TestPortsNegative(base.BaseBaremetalTest):
         node_id = self.node['uuid']
         address = data_utils.rand_mac_address()
 
-        resp, port = self.create_port(node_id=node_id, address=address)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address)
         port_id = port['uuid']
 
         self.assertRaises(exc.BadRequest, self.client.update_port, port_id,
@@ -366,9 +347,8 @@ class TestPortsNegative(base.BaseBaremetalTest):
         address = data_utils.rand_mac_address()
         extra = {'key1': 'value1', 'key2': 'value2'}
 
-        resp, port = self.create_port(node_id=node_id, address=address,
-                                      extra=extra)
-        self.assertEqual('201', resp['status'])
+        _, port = self.create_port(node_id=node_id, address=address,
+                                   extra=extra)
         port_id = port['uuid']
 
         new_address = data_utils.rand_mac_address()
@@ -393,7 +373,6 @@ class TestPortsNegative(base.BaseBaremetalTest):
                           patch)
 
         # patch should not be applied
-        resp, body = self.client.show_port(port_id)
-        self.assertEqual(200, resp.status)
+        _, body = self.client.show_port(port_id)
         self.assertEqual(address, body['address'])
         self.assertEqual(extra, body['extra'])

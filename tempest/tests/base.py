@@ -13,7 +13,6 @@
 #    under the License.
 
 import mock
-
 from oslotest import base
 from oslotest import moxstubout
 

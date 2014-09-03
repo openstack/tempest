@@ -54,16 +54,14 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
         # Create port with allowed address pair attribute
         allowed_address_pairs = [{'ip_address': self.ip_address,
                                   'mac_address': self.mac_address}]
-        resp, body = self.client.create_port(
+        _, body = self.client.create_port(
             network_id=self.network['id'],
             allowed_address_pairs=allowed_address_pairs)
-        self.assertEqual('201', resp['status'])
         port_id = body['port']['id']
         self.addCleanup(self.client.delete_port, port_id)
 
         # Confirm port was created with allowed address pair attribute
-        resp, body = self.client.list_ports()
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.list_ports()
         ports = body['ports']
         port = [p for p in ports if p['id'] == port_id]
         msg = 'Created port not found in list of ports returned by Neutron'
@@ -73,21 +71,18 @@ class AllowedAddressPairTestJSON(base.BaseNetworkTest):
     @test.attr(type='smoke')
     def test_update_port_with_address_pair(self):
         # Create a port without allowed address pair
-        resp, body = self.client.create_port(network_id=self.network['id'])
-        self.assertEqual('201', resp['status'])
+        _, body = self.client.create_port(network_id=self.network['id'])
         port_id = body['port']['id']
         self.addCleanup(self.client.delete_port, port_id)
 
         # Confirm  port is created
-        resp, body = self.client.show_port(port_id)
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.show_port(port_id)
 
         # Update allowed address pair attribute of port
         allowed_address_pairs = [{'ip_address': self.ip_address,
                                   'mac_address': self.mac_address}]
-        resp, body = self.client.update_port(port_id,
-                          allowed_address_pairs=allowed_address_pairs)
-        self.assertEqual('200', resp['status'])
+        _, body = self.client.update_port(
+            port_id, allowed_address_pairs=allowed_address_pairs)
         newport = body['port']
         self._confirm_allowed_address_pair(newport, self.ip_address)
 

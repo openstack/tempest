@@ -55,9 +55,7 @@ addresses_v3['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][
         'mac_addr': {'type': 'string'}
     })
 addresses_v3['patternProperties']['^[a-zA-Z0-9-_.]+$']['items'][
-    'required'].extend(
-        ['type', 'mac_addr']
-    )
+    'required'].extend(['type', 'mac_addr'])
 
 update_server = copy.deepcopy(servers.base_update_get_server)
 update_server['response_body']['properties']['server']['properties'].update({

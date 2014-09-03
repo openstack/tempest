@@ -16,6 +16,8 @@
 import StringIO
 import time
 
+import testtools
+
 from tempest.api.compute import base
 from tempest.common.utils import data_utils
 from tempest import config
@@ -62,6 +64,9 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         cls.image2_id = cls.image2['id']
         cls.image3 = _create_image()
         cls.image3_id = cls.image3['id']
+
+        if not CONF.compute_feature_enabled.snapshot:
+            return
 
         # Create instances and snapshots via nova
         try:
@@ -114,6 +119,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images if i['id'] == self.image2_id]))
         self.assertFalse(any([i for i in images if i['id'] == self.image3_id]))
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     @test.attr(type='gate')
     def test_list_images_filter_by_server_id(self):
         # The images should contain images filtered by server id
@@ -129,6 +136,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertFalse(any([i for i in images
                               if i['id'] == self.snapshot3_id]))
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     @test.attr(type='gate')
     def test_list_images_filter_by_server_ref(self):
         # The list of servers should be filtered by server ref
@@ -146,6 +155,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.snapshot3_id]))
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     @test.attr(type='gate')
     def test_list_images_filter_by_type(self):
         # The list of servers should be filtered by image type
@@ -211,6 +222,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
         resp, images = self.client.list_images_with_detail(params)
         self.assertEqual(1, len(images))
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_server_ref(self):
         # Detailed list of servers should be filtered by server ref
@@ -228,6 +241,8 @@ class ListImageFiltersTestJSON(base.BaseV2ComputeTest):
             self.assertTrue(any([i for i in images
                                  if i['id'] == self.snapshot3_id]))
 
+    @testtools.skipUnless(CONF.compute_feature_enabled.snapshot,
+                          'Snapshotting is not available.')
     @test.attr(type='gate')
     def test_list_images_with_detail_filter_by_type(self):
         # The detailed list of servers should be filtered by image type
