@@ -131,3 +131,31 @@ def wait_for_image_status(client, image_id, status):
             if caller:
                 message = '(%s) %s' % (caller, message)
             raise exceptions.TimeoutException(message)
+
+
+def wait_for_bm_node_status(client, node_id, attr, status):
+    """Waits for a baremetal node attribute to reach given status.
+
+    The client should have a show_node(node_uuid) method to get the node.
+    """
+    _, node = client.show_node(node_id)
+    start = int(time.time())
+
+    while node[attr] != status:
+        time.sleep(client.build_interval)
+        _, node = client.show_node(node_id)
+        if node[attr] == status:
+            return
+
+        if int(time.time()) - start >= client.build_timeout:
+            message = ('Node %(node_id)s failed to reach %(attr)s=%(status)s '
+                       'within the required time (%(timeout)s s).' %
+                       {'node_id': node_id,
+                        'attr': attr,
+                        'status': status,
+                        'timeout': client.build_timeout})
+            message += ' Current state of %s: %s.' % (attr, node[attr])
+            caller = misc_utils.find_test_caller()
+            if caller:
+                message = '(%s) %s' % (caller, message)
+            raise exceptions.TimeoutException(message)
