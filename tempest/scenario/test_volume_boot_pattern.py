@@ -56,7 +56,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
             'device_name': 'vda',
             'volume_id': vol_id,
             'delete_on_termination': '0'}]
-        self.security_group = self._create_security_group_nova()
+        self.security_group = self._create_security_group()
         security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'block_device_mapping': bd_map,
@@ -140,7 +140,7 @@ class TestVolumeBootPattern(manager.ScenarioTest):
     @test.services('compute', 'volume', 'image')
     def test_volume_boot_pattern(self):
         keypair = self.create_keypair()
-        self.security_group = self._create_security_group_nova()
+        self.security_group = self._create_security_group()
 
         # create an instance from volume
         volume_origin = self._create_volume_from_image()
@@ -187,7 +187,7 @@ class TestVolumeBootPatternV2(TestVolumeBootPattern):
         bdms = [{'uuid': vol_id, 'source_type': 'volume',
                  'destination_type': 'volume', 'boot_index': 0,
                  'delete_on_termination': False}]
-        self.security_group = self._create_security_group_nova()
+        self.security_group = self._create_security_group()
         security_groups = [{'name': self.security_group['name']}]
         create_kwargs = {
             'block_device_mapping_v2': bdms,

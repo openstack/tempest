@@ -102,7 +102,7 @@ class TestServerBasicOps(manager.ScenarioTest):
     @test.services('compute', 'network')
     def test_server_basicops(self):
         self.add_keypair()
-        self.security_group = self._create_security_group_nova()
+        self.security_group = self._create_security_group()
         self.boot_instance()
         self.verify_ssh()
         self.servers_client.delete_server(self.instance['id'])
