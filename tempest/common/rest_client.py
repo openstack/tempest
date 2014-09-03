@@ -248,8 +248,10 @@ class RestClient(object):
                 return resp[i]
         return ""
 
-    def _log_request_start(self, method, req_url, req_headers={},
+    def _log_request_start(self, method, req_url, req_headers=None,
                            req_body=None):
+        if req_headers is None:
+            req_headers = {}
         caller_name = misc_utils.find_test_caller()
         trace_regex = CONF.debug.trace_requests
         if trace_regex and re.search(trace_regex, caller_name):
@@ -257,8 +259,10 @@ class RestClient(object):
                            (caller_name, method, req_url))
 
     def _log_request(self, method, req_url, resp,
-                     secs="", req_headers={},
+                     secs="", req_headers=None,
                      req_body=None, resp_body=None):
+        if req_headers is None:
+            req_headers = {}
         # if we have the request id, put it in the right part of the log
         extra = dict(request_id=self._get_request_id(resp))
         # NOTE(sdague): while we still have 6 callers to this function

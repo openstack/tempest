@@ -45,9 +45,11 @@ class OrchestrationClient(rest_client.RestClient):
         body = json.loads(body)
         return resp, body['stacks']
 
-    def create_stack(self, name, disable_rollback=True, parameters={},
+    def create_stack(self, name, disable_rollback=True, parameters=None,
                      timeout_mins=60, template=None, template_url=None,
                      environment=None, files=None):
+        if parameters is None:
+            parameters = {}
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
@@ -63,8 +65,10 @@ class OrchestrationClient(rest_client.RestClient):
         return resp, body
 
     def update_stack(self, stack_identifier, name, disable_rollback=True,
-                     parameters={}, timeout_mins=60, template=None,
+                     parameters=None, timeout_mins=60, template=None,
                      template_url=None, environment=None, files=None):
+        if parameters is None:
+            parameters = {}
         headers, body = self._prepare_update_create(
             name,
             disable_rollback,
@@ -80,9 +84,11 @@ class OrchestrationClient(rest_client.RestClient):
         return resp, body
 
     def _prepare_update_create(self, name, disable_rollback=True,
-                               parameters={}, timeout_mins=60,
+                               parameters=None, timeout_mins=60,
                                template=None, template_url=None,
                                environment=None, files=None):
+        if parameters is None:
+            parameters = {}
         post_body = {
             "stack_name": name,
             "disable_rollback": disable_rollback,
@@ -264,16 +270,20 @@ class OrchestrationClient(rest_client.RestClient):
         body = json.loads(body)
         return resp, body
 
-    def validate_template(self, template, parameters={}):
+    def validate_template(self, template, parameters=None):
         """Returns the validation result for a template with parameters."""
+        if parameters is None:
+            parameters = {}
         post_body = {
             'template': template,
             'parameters': parameters,
         }
         return self._validate_template(post_body)
 
-    def validate_template_url(self, template_url, parameters={}):
+    def validate_template_url(self, template_url, parameters=None):
         """Returns the validation result for a template with parameters."""
+        if parameters is None:
+            parameters = {}
         post_body = {
             'template_url': template_url,
             'parameters': parameters,

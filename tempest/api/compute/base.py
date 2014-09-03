@@ -271,10 +271,10 @@ class BaseComputeTest(tempest.test.BaseTestCase):
         return resp, body
 
     @classmethod
-    def create_test_server_group(cls, name="", policy=[]):
+    def create_test_server_group(cls, name="", policy=None):
         if not name:
             name = data_utils.rand_name(cls.__name__ + "-Server-Group")
-        if not policy:
+        if policy is None:
             policy = ['affinity']
         resp, body = cls.servers_client.create_server_group(name, policy)
         cls.server_groups.append(body['id'])

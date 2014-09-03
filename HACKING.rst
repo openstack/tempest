@@ -12,6 +12,7 @@ Tempest Specific Commandments
 - [T104] Scenario tests require a services decorator
 - [T105] Unit tests cannot use setUpClass
 - [T106] vim configuration should not be kept in source files.
+- [N322] Method's default argument shouldn't be mutable
 
 Test Data/Configuration
 -----------------------

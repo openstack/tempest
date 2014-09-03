@@ -136,8 +136,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             pass
 
     def addCleanup_with_wait(self, waiter_callable, thing_id, thing_id_param,
-                             cleanup_callable, cleanup_args=[],
-                             cleanup_kwargs={}, ignore_error=True):
+                             cleanup_callable, cleanup_args=None,
+                             cleanup_kwargs=None, ignore_error=True):
         """Adds wait for ansyc resource deletion at the end of cleanups
 
         @param waiter_callable: callable to wait for the resource to delete
@@ -147,6 +147,10 @@ class ScenarioTest(tempest.test.BaseTestCase):
             the following *cleanup_args, **cleanup_kwargs.
             usually a delete method.
         """
+        if cleanup_args is None:
+            cleanup_args = []
+        if cleanup_kwargs is None:
+            cleanup_kwargs = {}
         self.addCleanup(cleanup_callable, *cleanup_args, **cleanup_kwargs)
         wait_dict = {
             'waiter_callable': waiter_callable,
@@ -181,7 +185,7 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
     def create_server(self, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,
-                      create_kwargs={}):
+                      create_kwargs=None):
         """Creates VM instance.
 
         @param image: image from which to create the instance
@@ -196,6 +200,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
             image = CONF.compute.image_ref
         if flavor is None:
             flavor = CONF.compute.flavor_ref
+        if create_kwargs is None:
+            create_kwargs = {}
 
         fixed_network_name = CONF.compute.fixed_network_name
         if 'nics' not in create_kwargs and fixed_network_name:
@@ -338,7 +344,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
 
         return linux_client
 
-    def _image_create(self, name, fmt, path, properties={}):
+    def _image_create(self, name, fmt, path, properties=None):
+        if properties is None:
+            properties = {}
         name = data_utils.rand_name('%s-' % name)
         image_file = open(path, 'rb')
         self.addCleanup(image_file.close)
@@ -531,8 +539,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
     def addCleanup_with_wait(self, things, thing_id,
                              error_status='ERROR',
                              exc_type=nova_exceptions.NotFound,
-                             cleanup_callable=None, cleanup_args=[],
-                             cleanup_kwargs={}):
+                             cleanup_callable=None, cleanup_args=None,
+                             cleanup_kwargs=None):
         """Adds wait for ansyc resource deletion at the end of cleanups
 
         @param things: type of the resource to delete
@@ -544,6 +552,10 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             usually a delete method. if not used, will try to use:
             things.delete(thing_id)
         """
+        if cleanup_args is None:
+            cleanup_args = []
+        if cleanup_kwargs is None:
+            cleanup_kwargs = {}
         if cleanup_callable is None:
             LOG.debug("no delete method passed. using {rclass}.delete({id}) as"
                       " default".format(rclass=things, id=thing_id))
@@ -725,7 +737,7 @@ class OfficialClientTest(tempest.test.BaseTestCase):
 
     def create_server(self, client=None, name=None, image=None, flavor=None,
                       wait_on_boot=True, wait_on_delete=True,
-                      create_kwargs={}):
+                      create_kwargs=None):
         """Creates VM instance.
 
         @param client: compute client to create the instance
@@ -743,6 +755,8 @@ class OfficialClientTest(tempest.test.BaseTestCase):
             image = CONF.compute.image_ref
         if flavor is None:
             flavor = CONF.compute.flavor_ref
+        if create_kwargs is None:
+            create_kwargs = {}
 
         fixed_network_name = CONF.compute.fixed_network_name
         if 'nics' not in create_kwargs and fixed_network_name:
@@ -872,7 +886,9 @@ class OfficialClientTest(tempest.test.BaseTestCase):
         self.status_timeout(
             self.volume_client.volumes, volume_id, status)
 
-    def _image_create(self, name, fmt, path, properties={}):
+    def _image_create(self, name, fmt, path, properties=None):
+        if properties is None:
+            properties = {}
         name = data_utils.rand_name('%s-' % name)
         image_file = open(path, 'rb')
         self.addCleanup(image_file.close)
@@ -1866,12 +1882,17 @@ class SwiftScenarioTest(ScenarioTest):
         self._list_and_check_container_objects(container_name,
                                                not_present_obj=[filename])
 
-    def _list_and_check_container_objects(self, container_name, present_obj=[],
-                                          not_present_obj=[]):
+    def _list_and_check_container_objects(self, container_name,
+                                          present_obj=None,
+                                          not_present_obj=None):
         """
         List objects for a given container and assert which are present and
         which are not.
         """
+        if present_obj is None:
+            present_obj = []
+        if not_present_obj is None:
+            not_present_obj = []
         _, object_list = self.container_client.list_container_contents(
             container_name)
         if present_obj:
