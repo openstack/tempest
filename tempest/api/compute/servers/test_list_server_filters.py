@@ -234,6 +234,30 @@ class ListServerFiltersTestJSON(base.BaseV2ComputeTest):
         self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
 
     @test.attr(type='gate')
+    def test_list_servers_filtered_by_name_regex(self):
+        # list of regex that should match s1, s2 and s3
+        regexes = ['^.*\-instance\-[0-9]+$', '^.*\-instance\-.*$']
+        for regex in regexes:
+            params = {'name': regex}
+            resp, body = self.client.list_servers(params)
+            servers = body['servers']
+
+            self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+            self.assertIn(self.s2_name, map(lambda x: x['name'], servers))
+            self.assertIn(self.s3_name, map(lambda x: x['name'], servers))
+
+        # Let's take random part of name and try to search it
+        part_name = self.s1_name[-10:]
+
+        params = {'name': part_name}
+        resp, body = self.client.list_servers(params)
+        servers = body['servers']
+
+        self.assertIn(self.s1_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s2_name, map(lambda x: x['name'], servers))
+        self.assertNotIn(self.s3_name, map(lambda x: x['name'], servers))
+
+    @test.attr(type='gate')
     def test_list_servers_filtered_by_ip(self):
         # Filter servers by ip
         # Here should be listed 1 server
