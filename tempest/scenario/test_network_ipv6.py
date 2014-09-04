@@ -35,8 +35,8 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
     def test_large_prefix(self):
         import netaddr
 
-        net = self ._create_network(tenant_id=self.tenant_id,
-                                    namestart='net-125-126')
+        net = self._create_network(tenant_id=self.tenant_id,
+                                   namestart='net-125-126')
         for bits in [125, 126]:
             sub = self._create_subnet(network=net,
                                       namestart='subnet-{0}'.format(bits),
@@ -46,6 +46,43 @@ class TestNetworkIPv6(manager.NetworkScenarioTest):
             n_addresses = end.value - start.value + 1
             self.assertEqual(expected=pow(2, 128 - bits)-3,
                              observed=n_addresses)
+
+    @test.services('compute', 'network')
+    def test_46(self):
+        net = self._create_network(tenant_id=self.tenant_id,
+                                   namestart='net-46')
+
+        def define_access(srv):
+            for nic in srv.addresses[net.name]:
+                if nic['version'] == 6:
+                    srv.accessIPv6 = nic['addr']
+                else:
+                    srv.accessIPv4 = nic['addr']
+
+        self._create_subnet(network=net, namestart='sub-4', ip_version=4)
+        self._create_subnet(network=net, namestart='sub-6')
+
+        key_pair = self.create_keypair()
+        sec_group = self._create_security_group_nova()
+        kwargs = {'key_name': key_pair.id,
+                  'security_groups': [sec_group.name]}
+
+        i1 = self.create_server(create_kwargs=kwargs)
+        define_access(i1)
+        i2 = self.create_server(create_kwargs=kwargs)
+        define_access(i2)
+
+        ssh1 = self.get_remote_client(server_or_ip=i1.accessIPv4,
+                                      private_key=key_pair.private_key)
+        ssh2 = self.get_remote_client(server_or_ip=i2.accessIPv4,
+                                      private_key=key_pair.private_key)
+
+        r = ssh1.exec_command('ip addr show dev eth0')
+        self.assertIn(i1.accessIPv4, r)
+        self.assertIn(i1.accessIPv6, r)
+        r = ssh2.exec_command('ip addr show dev eth0')
+        self.assertIn(i2.accessIPv4, r)
+        self.assertIn(i2.accessIPv6, r)
 
 
 class TestRadvdIPv6(manager.NetworkScenarioTest):
