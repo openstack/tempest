@@ -1713,7 +1713,8 @@ class NetworkScenarioTest(OfficialClientTest):
             cidr_in_use = self._list_subnets(tenant_id=tenant_id, cidr=cidr)
             return len(cidr_in_use) != 0
 
-        if self._ip_version == 6:
+        ip_version = kwargs.get('ip_version', self._ip_version)
+        if ip_version == 6:
             tenant_cidr = netaddr.IPNetwork(CONF.network.tenant_network_v6_cidr)
             network_prefix = CONF.network.tenant_network_v6_mask_bits
         else:
@@ -1732,7 +1733,7 @@ class NetworkScenarioTest(OfficialClientTest):
             body = dict(
                 subnet=dict(
                     name=data_utils.rand_name(namestart),
-                    ip_version=self._ip_version,
+                    ip_version=ip_version,
                     network_id=network.id,
                     tenant_id=network.tenant_id,
                     cidr=str_cidr,
