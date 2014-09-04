@@ -237,17 +237,76 @@ class NetworksTestDHCPv6JSON(base.BaseNetworkTest):
                         self.network, **kwargs_dhcp)
                     subnet_slaac = self.create_subnet(self.network, **kwargs)
                 port_mac = data_utils.rand_mac_address()
+                dhcp_ip = subnet_dhcp["allocation_pools"][0]["start"]
+                eui_ip = data_utils.get_ipv6_addr_by_EUI64(
+                    subnet_slaac['cidr'],
+                    port_mac
+                ).format()
+                # TODO: remove this check when 1330826 is fixed
+                _, body = self.client.list_ports()
+                for dport in body['ports']:
+                    if dport['device_owner'] == 'network:dhcp' and dport['fixed_ips']:
+                        dhcp_ip = (netaddr.IPAddress(dhcp_ip) + 1).format()
+                        break
+                # End of check
                 port = self.create_port(self.network, mac_address=port_mac)
                 real_ips = dict([(k['subnet_id'], k['ip_address'])
                                  for k in port['fixed_ips']])
                 real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
                                              for sub in subnet_dhcp,
                                              subnet_slaac]
+
+                self._clean_network()
+                self.assertSequenceEqual((real_eui_ip, real_dhcp_ip),
+                                         (eui_ip, dhcp_ip),
+                                         ('Real port IPs %s,%s are not equal'
+                                          ' to planned IPs %s,%s') % (
+                                             real_dhcp_ip,
+                                             real_eui_ip,
+                                             eui_ip,
+                                             dhcp_ip))
+
+    @test.attr(type='smoke')
+    def test_dhcpv6_64_subnets(self):
+        """When one subnet configured with dnsmasq SLAAC or DHCP stateless
+        and other is with DHCP of IPv4, port shall receive EUI-64 IP
+        addresses from first subnet and IPv4 DHCP address from second one.
+        Order of subnet creating should be unimportant.
+        """
+        for order in ("slaac_first", "dhcp_first"):
+            for ra_mode, add_mode in (
+                    ('slaac', 'slaac'),
+                    ('dhcpv6-stateless', 'dhcpv6-stateless'),
+            ):
+                kwargs = {'ipv6_ra_mode': ra_mode,
+                          'ipv6_address_mode': add_mode}
+                if order == "slaac_first":
+                    subnet_slaac = self.create_subnet(self.network, **kwargs)
+                    subnet_dhcp = self.create_subnet(
+                        self.network, ip_version=4)
+                else:
+                    subnet_dhcp = self.create_subnet(
+                        self.network, ip_version=4)
+                    subnet_slaac = self.create_subnet(self.network, **kwargs)
+                port_mac = data_utils.rand_mac_address()
                 dhcp_ip = subnet_dhcp["allocation_pools"][0]["start"]
                 eui_ip = data_utils.get_ipv6_addr_by_EUI64(
                     subnet_slaac['cidr'],
                     port_mac
                 ).format()
+                # TODO: remove this check when 1330826 is fixed
+                _, body = self.client.list_ports()
+                for dport in body['ports']:
+                    if dport['device_owner'] == 'network:dhcp' and dport['fixed_ips']:
+                        dhcp_ip = (netaddr.IPAddress(dhcp_ip) + 1).format()
+                        break
+                # End of check
+                port = self.create_port(self.network, mac_address=port_mac)
+                real_ips = dict([(k['subnet_id'], k['ip_address'])
+                                 for k in port['fixed_ips']])
+                real_dhcp_ip, real_eui_ip = [real_ips[sub['id']]
+                                             for sub in subnet_dhcp,
+                                             subnet_slaac]
                 self._clean_network()
                 self.assertSequenceEqual((real_eui_ip, real_dhcp_ip),
                                          (eui_ip, dhcp_ip),
