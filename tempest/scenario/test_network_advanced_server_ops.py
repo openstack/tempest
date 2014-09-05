@@ -50,16 +50,13 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             cls.enabled = False
             raise cls.skipException(msg)
 
-    def setUp(self):
-        super(TestNetworkAdvancedServerOps, self).setUp()
+    def _setup_network_and_servers(self):
         key_name = data_utils.rand_name('keypair-smoke-')
         self.keypair = self.create_keypair(name=key_name)
         security_group =\
             self._create_security_group_neutron(tenant_id=self.tenant_id)
-        network = self._create_network(self.tenant_id)
-        router = self._get_router(self.tenant_id)
-        subnet = self._create_subnet(network)
-        subnet.add_to_router(router.id)
+        network, subnet, router = self.create_networks(self.tenant_id)
+
         public_network_id = CONF.network.public_network_id
         create_kwargs = {
             'nics': [
@@ -68,7 +65,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             'key_name': self.keypair.name,
             'security_groups': [security_group.name],
         }
-        server_name = data_utils.rand_name('server-smoke-%d-')
+        server_name = data_utils.rand_name('server-smoke')
         self.server = self.create_server(name=server_name,
                                          create_kwargs=create_kwargs)
         self.floating_ip = self._create_floating_ip(self.server,
@@ -92,6 +89,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     @test.services('compute', 'network')
     def test_server_connectivity_stop_start(self):
+        self._setup_network_and_servers()
         self.server.stop()
         self.status_timeout(self.compute_client.servers, self.server.id,
                             'SHUTOFF')
@@ -101,11 +99,13 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
 
     @test.services('compute', 'network')
     def test_server_connectivity_reboot(self):
+        self._setup_network_and_servers()
         self.server.reboot()
         self._wait_server_status_and_check_network_connectivity()
 
     @test.services('compute', 'network')
     def test_server_connectivity_rebuild(self):
+        self._setup_network_and_servers()
         image_ref_alt = CONF.compute.image_ref_alt
         self.server.rebuild(image_ref_alt)
         self._wait_server_status_and_check_network_connectivity()
@@ -114,6 +114,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                           'Pause is not available.')
     @test.services('compute', 'network')
     def test_server_connectivity_pause_unpause(self):
+        self._setup_network_and_servers()
         self.server.pause()
         self.status_timeout(self.compute_client.servers, self.server.id,
                             'PAUSED')
@@ -125,6 +126,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                           'Suspend is not available.')
     @test.services('compute', 'network')
     def test_server_connectivity_suspend_resume(self):
+        self._setup_network_and_servers()
         self.server.suspend()
         self.status_timeout(self.compute_client.servers, self.server.id,
                             'SUSPENDED')
@@ -140,6 +142,7 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
         if resize_flavor == CONF.compute.flavor_ref:
             msg = "Skipping test - flavor_ref and flavor_ref_alt are identical"
             raise self.skipException(msg)
+        self._setup_network_and_servers()
         resize_flavor = CONF.compute.flavor_ref_alt
         self.server.resize(resize_flavor)
         self.status_timeout(self.compute_client.servers, self.server.id,
