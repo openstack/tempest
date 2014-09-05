@@ -23,6 +23,16 @@ from tempest import test
 class VolumeTypesNegativeTest(base.BaseVolumeV1AdminTest):
     _interface = 'json'
 
+    @classmethod
+    @test.safe_setup
+    def setUpClass(cls):
+        super(VolumeTypesNegativeTest, cls).setUpClass()
+        if cls._api_version == 1:
+           cls.client=cls.os_adm.volume_types_client
+        if cls._api_version == 2:
+           cls.client=cls.os_adm.volume_types_v2_client
+
+
     @test.attr(type='gate')
     def test_create_with_nonexistent_volume_type(self):
         # Should not be able to create volume with nonexistent volume_type.
@@ -38,6 +48,12 @@ class VolumeTypesNegativeTest(base.BaseVolumeV1AdminTest):
                           self.client.create_volume_type, '')
 
     @test.attr(type='gate')
+    def test_create_with_exist_type_name(self):
+        # Should not be able to create volume type with an exist type name.
+        self.assertRaises(exceptions.Conflict,
+                          self.client.create_volume_type, 'backup')
+
+    @test.attr(type='gate')
     def test_get_nonexistent_type_id(self):
         # Should not be able to get volume type with nonexistent type id.
         self.assertRaises(exceptions.NotFound, self.client.get_volume_type,
@@ -49,6 +65,18 @@ class VolumeTypesNegativeTest(base.BaseVolumeV1AdminTest):
         self.assertRaises(exceptions.NotFound, self.client.delete_volume_type,
                           str(uuid.uuid4()))
 
+    @test.attr(type='gate')
+    def test_list_type_nonexistent_parm(self):
+        params = {'nonexist': '^&*'}
+        resp, fetched_type = self.client.list_volume_types(params)
+        resp, ex_type = self.client.list_volume_types()
+        self.assertEqual(200, resp.status)
+        resp, ex_type = self.client.list_volume_types()
+        self.assertEqual(len(ex_type), len(fetched_type))
+
+
+class VolumeTypesV2NegativeTest(VolumeTypesNegativeTest):
+    _api_version= 2
 
 class VolumesTypesNegativeTestXML(VolumeTypesNegativeTest):
     _interface = 'xml'

@@ -44,6 +44,22 @@ class FloatingIPDetailsNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.NotFound,
                           self.client.get_floating_ip_details, non_exist_id)
 
+    @test.attr(type=['negative', 'gate'])
+    @test.services('network')
+    def test_list_floating_ip_with_invalid_pool(self):
+        param={'pool' : '11'}
+        resp, floating_ip = self.client.list_floating_ips(param)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(0, len(floating_ip))
+
+    @test.attr(type=['negative', 'gate'])
+    @test.services('network')
+    def test_list_floating_ip_pools_with_invalid_pool_name(self):
+        param={'nonexist' : 'null'}
+        resp, ip_pools = self.client.list_floating_ip_pools(param)
+        self.assertEqual(200, resp.status)
+        resp, ex_pools = self.client.list_floating_ip_pools()
+        self.assertEqual(len(ex_pools), len(ip_pools))
 
 class FloatingIPDetailsNegativeTestXML(FloatingIPDetailsNegativeTestJSON):
     _interface = 'xml'

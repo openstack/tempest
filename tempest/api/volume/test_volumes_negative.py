@@ -259,6 +259,8 @@ class VolumesV2NegativeTest(base.BaseVolumeTest):
         _, fetched_volume = self.client.list_volumes_with_detail(params)
         self.assertEqual(0, len(fetched_volume))
 
+class VolumesV2NegativeTest(VolumesNegativeTest):
+    _api_version= 2
 
 class VolumesV2NegativeTestXML(VolumesV2NegativeTest):
     _interface = 'xml'

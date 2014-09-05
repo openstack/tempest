@@ -94,6 +94,13 @@ class KeyPairsNegativeTestJSON(base.BaseV2ComputeTest):
         self.assertRaises(exceptions.BadRequest, self._create_keypair,
                           k_name)
 
+    @test.attr(type=['negative', 'gate'])
+    def test_get_keypair_invalid_name(self):
+        # Keypairs with name being an invalid name should not be got
+        k_name = 'key_/.\@:'
+        self.assertRaises(exceptions.NotFound, self.client.get_keypair,
+                          k_name)
+
 
 class KeyPairsNegativeTestXML(KeyPairsNegativeTestJSON):
     _interface = 'xml'
