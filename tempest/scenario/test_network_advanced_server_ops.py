@@ -70,6 +70,9 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
                                          create_kwargs=create_kwargs)
         self.floating_ip = self._create_floating_ip(self.server,
                                                     public_network_id)
+        # Verify that we can indeed connect to the server before we mess with
+        # it's state
+        self._wait_server_status_and_check_network_connectivity()
 
     def _check_network_connectivity(self, should_connect=True):
         username = CONF.compute.image_ssh_user
