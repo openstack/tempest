@@ -47,6 +47,7 @@ class ImagesOneServerV3Test(base.BaseV3ComputeTest):
         super(ImagesOneServerV3Test, self).tearDown()
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ImagesOneServerV3Test, cls).setUpClass()
         cls.client = cls.images_client
@@ -54,12 +55,8 @@ class ImagesOneServerV3Test(base.BaseV3ComputeTest):
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        try:
-            resp, server = cls.create_test_server(wait_until='ACTIVE')
-            cls.server_id = server['id']
-        except Exception:
-            cls.tearDownClass()
-            raise
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
 
     def _get_default_flavor_disk_size(self, flavor_id):
         resp, flavor = self.flavors_client.get_flavor_details(flavor_id)

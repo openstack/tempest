@@ -55,6 +55,7 @@ class ImagesOneServerNegativeV3Test(base.BaseV3ComputeTest):
         self.__class__.server_id = self.rebuild_server(self.server_id)
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(ImagesOneServerNegativeV3Test, cls).setUpClass()
         cls.client = cls.images_client
@@ -62,12 +63,8 @@ class ImagesOneServerNegativeV3Test(base.BaseV3ComputeTest):
             skip_msg = ("%s skipped as glance is not available" % cls.__name__)
             raise cls.skipException(skip_msg)
 
-        try:
-            resp, server = cls.create_test_server(wait_until='ACTIVE')
-            cls.server_id = server['id']
-        except Exception:
-            cls.tearDownClass()
-            raise
+        resp, server = cls.create_test_server(wait_until='ACTIVE')
+        cls.server_id = server['id']
 
         cls.image_ids = []
 

@@ -249,10 +249,10 @@ class PortsIpV6TestJSON(PortsTestJSON):
     _tenant_network_mask_bits = CONF.network.tenant_network_v6_mask_bits
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(PortsIpV6TestJSON, cls).setUpClass()
         if not CONF.network_feature_enabled.ipv6:
-            cls.tearDownClass()
             skip_msg = "IPv6 Tests are disabled."
             raise cls.skipException(skip_msg)
 

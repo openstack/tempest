@@ -35,6 +35,7 @@ class MeteringJSON(base.BaseAdminNetworkTest):
     """
 
     @classmethod
+    @test.safe_setup
     def setUpClass(cls):
         super(MeteringJSON, cls).setUpClass()
         if not test.is_extension_enabled('metering', 'network'):
@@ -42,17 +43,12 @@ class MeteringJSON(base.BaseAdminNetworkTest):
             raise cls.skipException(msg)
         description = "metering label created by tempest"
         name = data_utils.rand_name("metering-label")
-        try:
-            cls.metering_label = cls.create_metering_label(name, description)
-            remote_ip_prefix = "10.0.0.0/24"
-            direction = "ingress"
-            cls.metering_label_rule = cls.create_metering_label_rule(
-                remote_ip_prefix, direction,
-                metering_label_id=cls.metering_label['id'])
-        except Exception:
-            LOG.exception('setUpClass failed')
-            cls.tearDownClass()
-            raise
+        cls.metering_label = cls.create_metering_label(name, description)
+        remote_ip_prefix = "10.0.0.0/24"
+        direction = "ingress"
+        cls.metering_label_rule = cls.create_metering_label_rule(
+            remote_ip_prefix, direction,
+            metering_label_id=cls.metering_label['id'])
 
     def _delete_metering_label(self, metering_label_id):
         # Deletes a label and verifies if it is deleted or not
