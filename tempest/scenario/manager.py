@@ -398,6 +398,9 @@ class ScenarioTest(tempest.test.BaseTestCase):
         LOG.debug("image:%s" % self.image)
 
     def _log_console_output(self, servers=None):
+        if not CONF.compute_feature_enabled.console_output:
+            LOG.debug('Console output not supported, cannot log')
+            return
         if not servers:
             _, servers = self.servers_client.list_servers()
             servers = servers['servers']
