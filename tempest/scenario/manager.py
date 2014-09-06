@@ -94,6 +94,13 @@ class ScenarioTest(tempest.test.BaseTestCase):
         cls.network_client = cls.manager.network_client
 
     @classmethod
+    def tearDownClass(cls):
+        # Isolated creds also manages network resources, which should
+        # be cleaned up at the end of the test case
+        cls.isolated_creds.clear_isolated_creds()
+        super(ScenarioTest, cls).tearDownClass()
+
+    @classmethod
     def _get_credentials(cls, get_creds, ctype):
         if CONF.compute.allow_tenant_isolation:
             creds = get_creds()
