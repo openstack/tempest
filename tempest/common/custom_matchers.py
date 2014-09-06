@@ -219,9 +219,9 @@ class DictMismatch(object):
                        self.expected[o] != self.actual[o])
         if diff_set:
             msg += "Differences:\n"
-        for o in diff_set:
-            msg += "  %s: expected %s, actual %s\n" % (
-                o, self.expected[o], self.actual[o])
+            for o in diff_set:
+                msg += "  %s: expected %s, actual %s\n" % (
+                    o, self.expected[o], self.actual[o])
         return msg
 
     def get_details(self):
