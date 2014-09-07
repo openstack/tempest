@@ -185,3 +185,15 @@ class TestAccount(base.TestCase):
                                  hash_list[2])
         remove_mock.mock.assert_called_once_with(hash_path)
         rmdir_mock.mock.assert_not_called()
+
+    def test_is_multi_user(self):
+        test_accounts_class = accounts.Accounts('test_name')
+        self.assertTrue(test_accounts_class.is_multi_user())
+
+    def test_is_not_multi_user(self):
+        self.test_accounts = [self.test_accounts[0]]
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        test_accounts_class = accounts.Accounts('test_name')
+        self.assertFalse(test_accounts_class.is_multi_user())
