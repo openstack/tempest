@@ -13,7 +13,6 @@
 #    under the License.
 
 import re
-from unittest import util
 
 from testtools import helpers
 
@@ -204,17 +203,28 @@ class DictMismatch(object):
         self.intersect = set(self.expected) & set(self.actual)
         self.symmetric_diff = set(self.expected) ^ set(self.actual)
 
+    def _format_dict(self, dict_to_format):
+        # Ensure the error string dict is printed in a set order
+        # NOTE(mtreinish): needed to ensure a deterministic error msg for
+        # testing. Otherwise the error message will be dependent on the
+        # dict ordering.
+        dict_string = "{"
+        for key in sorted(dict_to_format):
+            dict_string += "'%s': %s, " % (key, dict_to_format[key])
+        dict_string = dict_string[:-2] + '}'
+        return dict_string
+
     def describe(self):
         msg = ""
         if self.symmetric_diff:
             only_expected = helpers.dict_subtract(self.expected, self.actual)
             only_actual = helpers.dict_subtract(self.actual, self.expected)
             if only_expected:
-                msg += "Only in expected:\n  %s\n" % \
-                       util.safe_repr(only_expected)
+                msg += "Only in expected:\n  %s\n" % self._format_dict(
+                    only_expected)
             if only_actual:
-                msg += "Only in actual:\n  %s\n" % \
-                       util.safe_repr(only_actual)
+                msg += "Only in actual:\n  %s\n" % self._format_dict(
+                    only_actual)
         diff_set = set(o for o in self.intersect if
                        self.expected[o] != self.actual[o])
         if diff_set:
