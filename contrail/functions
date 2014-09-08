@@ -95,6 +95,7 @@ function create_public_network() {
     local subnet=$2
     create_network $vn_name $subnet 
     ${with_venv} neutron net-update $vn_name --router:external True
+    sshpass -p $API_SERVER_HOST_PASSWORD ssh -o $SSHOPT ${API_SERVER_HOST_USER}@${API_SERVER_IP} "python /opt/contrail/utils/add_route_target.py --routing_instance_name $PUBLIC_NETWORK_RI_FQ_NAME --route_target_number $PUBLIC_NETWORK_RT --router_asn $ROUTER_ASN --api_server_ip $API_SERVER_IP --api_server_port 8082 --admin_user $OS_USERNAME --admin_password $OS_PASSWORD --admin_tenant_name $OS_TENANT_NAME" || echo "Unable to set route target on the public vn!!"
 }
 
 
