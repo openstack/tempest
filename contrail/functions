@@ -47,13 +47,13 @@ function get_image_id() {
     images=`${with_venv} nova image-list`
     #if grep -q $image_name $images; then
     if [[ "$images" == *${image_name}* ]];then
-        image_id=`${with_venv} nova image-list | grep cirros  | awk {'print $2'}`
+        image_id=`${with_venv} nova image-list | grep " $image_name "  | awk {'print $2'}`
     else
         image_filename=$(basename $image_path)
         rm -f $image_filename
         `wget $image_path`
         export OS_IMAGE_URL=http://${keystone_host}:9292/ && ${with_venv} glance image-create --name $image_name --disk-format qcow2 --container-format bare --is-public True --file $image_filename
-        image_id=`${with_venv} nova image-list | grep cirros  | awk {'print $2'}`
+        image_id=`${with_venv} nova image-list | grep " $image_name "  | awk {'print $2'}`
     fi
     echo $image_id
 }
