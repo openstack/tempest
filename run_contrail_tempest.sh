@@ -91,10 +91,6 @@ if [ $no_site_packages -eq 1 ]; then
   installvenvopts="--no-site-packages"
 fi
 
-if [ $populate_config -eq 1 ]; then
-  ./contrail/contrail-tempest-init.sh
-fi
-
 function testr_init {
   if [ ! -d .testrepository ]; then
       ${wrapper} testr init
@@ -148,6 +144,10 @@ then
       fi
     fi
   fi
+fi
+
+if [ $populate_config -eq 1 ]; then
+  ./contrail/contrail-tempest-init.sh
 fi
 
 run_tests
