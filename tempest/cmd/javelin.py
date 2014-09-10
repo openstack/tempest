@@ -362,7 +362,7 @@ def destroy_objects(objects):
     for obj in objects:
         client = client_for_user(obj['owner'])
         r, body = client.objects.delete_object(obj['container'], obj['name'])
-        if not (200 >= int(r['status']) < 299):
+        if not (200 <= int(r['status']) < 299):
             raise ValueError("unable to destroy object: [%s] %s" % (r, body))
 
 
@@ -564,7 +564,6 @@ def destroy_resources():
     destroy_servers(RES['servers'])
     destroy_images(RES['images'])
     destroy_objects(RES['objects'])
-    destroy_servers(RES['servers'])
     destroy_volumes(RES['volumes'])
     destroy_users(RES['users'])
     destroy_tenants(RES['tenants'])
