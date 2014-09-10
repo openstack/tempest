@@ -264,14 +264,18 @@ class ScenarioTest(tempest.test.BaseTestCase):
         _, volume = self.volumes_client.create_volume(
             size=size, display_name=name, snapshot_id=snapshot_id,
             imageRef=imageRef, volume_type=volume_type)
+
         if wait_on_delete:
             self.addCleanup(self.volumes_client.wait_for_resource_deletion,
                             volume['id'])
-        self.addCleanup_with_wait(
-            waiter_callable=self.volumes_client.wait_for_resource_deletion,
-            thing_id=volume['id'], thing_id_param='id',
-            cleanup_callable=self.delete_wrapper,
-            cleanup_args=[self.volumes_client.delete_volume, volume['id']])
+            self.addCleanup(self.delete_wrapper,
+                            self.volumes_client.delete_volume, volume['id'])
+        else:
+            self.addCleanup_with_wait(
+                waiter_callable=self.volumes_client.wait_for_resource_deletion,
+                thing_id=volume['id'], thing_id_param='id',
+                cleanup_callable=self.delete_wrapper,
+                cleanup_args=[self.volumes_client.delete_volume, volume['id']])
 
         self.assertEqual(name, volume['display_name'])
         self.volumes_client.wait_for_volume_status(volume['id'], 'available')
