@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from boto import exception
-
 from tempest.common.utils import data_utils
 from tempest.common.utils.linux import remote_client
 from tempest import config
@@ -82,6 +80,13 @@ class InstanceRunTest(boto_test.BotoTestCase):
                 raise exceptions.EC2RegisterImageException(
                     image_id=image["image_id"])
 
+    def _terminate_reservation(self, reservation, rcuk):
+        for instance in reservation.instances:
+            instance.terminate()
+        for instance in reservation.instances:
+            self.assertInstanceStateWait(instance, '_GONE')
+        self.cancelResourceCleanUp(rcuk)
+
     def test_run_idempotent_instances(self):
         # EC2 run instances idempotently
 
@@ -95,11 +100,6 @@ class InstanceRunTest(boto_test.BotoTestCase):
             rcuk = self.addResourceCleanUp(self.destroy_reservation,
                                            reservation)
             return (reservation, rcuk)
-
-        def _terminate_reservation(reservation, rcuk):
-            for instance in reservation.instances:
-                instance.terminate()
-            self.cancelResourceCleanUp(rcuk)
 
         reservation_1, rcuk_1 = _run_instance('token_1')
         reservation_2, rcuk_2 = _run_instance('token_2')
@@ -116,8 +116,8 @@ class InstanceRunTest(boto_test.BotoTestCase):
         # handled by rcuk1
         self.cancelResourceCleanUp(rcuk_1a)
 
-        _terminate_reservation(reservation_1, rcuk_1)
-        _terminate_reservation(reservation_2, rcuk_2)
+        self._terminate_reservation(reservation_1, rcuk_1)
+        self._terminate_reservation(reservation_2, rcuk_2)
 
     def test_run_stop_terminate_instance(self):
         # EC2 run, stop and terminate instance
@@ -139,9 +139,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
             if instance.state != "stopped":
                 self.assertInstanceStateWait(instance, "stopped")
 
-        for instance in reservation.instances:
-            instance.terminate()
-        self.cancelResourceCleanUp(rcuk)
+        self._terminate_reservation(reservation, rcuk)
 
     def test_run_stop_terminate_instance_with_tags(self):
         # EC2 run, stop and terminate instance with tags
@@ -188,9 +186,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
             if instance.state != "stopped":
                 self.assertInstanceStateWait(instance, "stopped")
 
-        for instance in reservation.instances:
-            instance.terminate()
-        self.cancelResourceCleanUp(rcuk)
+        self._terminate_reservation(reservation, rcuk)
 
     def test_run_terminate_instance(self):
         # EC2 run, terminate immediately
@@ -202,18 +198,7 @@ class InstanceRunTest(boto_test.BotoTestCase):
 
         for instance in reservation.instances:
             instance.terminate()
-        try:
-            instance.update(validate=True)
-        except ValueError:
-            pass
-        except exception.EC2ResponseError as exc:
-            if self.ec2_error_code.\
-                client.InvalidInstanceID.NotFound.match(exc) is None:
-                pass
-            else:
-                raise
-        else:
-            self.assertNotEqual(instance.state, "running")
+        self.assertInstanceStateWait(instance, '_GONE')
 
     def test_compute_with_volumes(self):
         # EC2 1. integration test (not strict)
