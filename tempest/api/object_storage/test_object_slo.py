@@ -59,23 +59,23 @@ class ObjectSloTest(base.BaseObjectTest):
         object_name_base_1 = object_name + '_01'
         object_name_base_2 = object_name + '_02'
         data_size = MIN_SEGMENT_SIZE
-        self.data = data_utils.arbitrary_string(data_size)
+        self.content = data_utils.arbitrary_string(data_size)
         self._create_object(self.container_name,
                             object_name_base_1,
-                            self.data)
+                            self.content)
         self._create_object(self.container_name,
                             object_name_base_2,
-                            self.data)
+                            self.content)
 
         path_object_1 = '/%s/%s' % (self.container_name,
                                     object_name_base_1)
         path_object_2 = '/%s/%s' % (self.container_name,
                                     object_name_base_2)
         data_manifest = [{'path': path_object_1,
-                          'etag': hashlib.md5(self.data).hexdigest(),
+                          'etag': hashlib.md5(self.content).hexdigest(),
                           'size_bytes': data_size},
                          {'path': path_object_2,
-                          'etag': hashlib.md5(self.data).hexdigest(),
+                          'etag': hashlib.md5(self.content).hexdigest(),
                           'size_bytes': data_size}]
 
         return json.dumps(data_manifest)
@@ -147,7 +147,7 @@ class ObjectSloTest(base.BaseObjectTest):
         self.assertIn(int(resp['status']), test.HTTP_SUCCESS)
         self._assertHeadersSLO(resp, 'GET')
 
-        sum_data = self.data + self.data
+        sum_data = self.content + self.content
         self.assertEqual(body, sum_data)
 
     @test.attr(type='gate')
