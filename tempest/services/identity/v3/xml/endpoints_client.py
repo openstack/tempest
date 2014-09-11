@@ -65,6 +65,7 @@ class EndPointClientXML(rest_client.RestClient):
     def list_endpoints(self):
         """Get the list of endpoints."""
         resp, body = self.get("endpoints")
+        self.expected_success(200, resp.status)
         body = self._parse_array(etree.fromstring(body))
         return resp, body
 
@@ -90,6 +91,7 @@ class EndPointClientXML(rest_client.RestClient):
                                          enabled=enabled)
         resp, body = self.post('endpoints',
                                str(common.Document(create_endpoint)))
+        self.expected_success(201, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
@@ -120,10 +122,12 @@ class EndPointClientXML(rest_client.RestClient):
             endpoint.add_attr("enabled", str(enabled).lower())
 
         resp, body = self.patch('endpoints/%s' % str(endpoint_id), str(doc))
+        self.expected_success(200, resp.status)
         body = self._parse_body(etree.fromstring(body))
         return resp, body
 
     def delete_endpoint(self, endpoint_id):
         """Delete endpoint."""
         resp_header, resp_body = self.delete('endpoints/%s' % endpoint_id)
+        self.expected_success(204, resp_header.status)
         return resp_header, resp_body

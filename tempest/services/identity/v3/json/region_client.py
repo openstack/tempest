@@ -43,6 +43,7 @@ class RegionClientJSON(rest_client.RestClient):
                 'regions/%s' % kwargs.get('unique_region_id'), req_body)
         else:
             resp, body = self.post('regions', req_body)
+        self.expected_success(201, resp.status)
         body = json.loads(body)
         return resp, body['region']
 
@@ -55,6 +56,7 @@ class RegionClientJSON(rest_client.RestClient):
             post_body['parent_region_id'] = kwargs.get('parent_region_id')
         post_body = json.dumps({'region': post_body})
         resp, body = self.patch('regions/%s' % region_id, post_body)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['region']
 
@@ -62,6 +64,7 @@ class RegionClientJSON(rest_client.RestClient):
         """Get region."""
         url = 'regions/%s' % region_id
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['region']
 
@@ -71,10 +74,12 @@ class RegionClientJSON(rest_client.RestClient):
         if params:
             url += '?%s' % urllib.urlencode(params)
         resp, body = self.get(url)
+        self.expected_success(200, resp.status)
         body = json.loads(body)
         return resp, body['regions']
 
     def delete_region(self, region_id):
         """Delete region."""
         resp, body = self.delete('regions/%s' % region_id)
+        self.expected_success(204, resp.status)
         return resp, body
