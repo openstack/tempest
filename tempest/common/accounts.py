@@ -127,3 +127,44 @@ class Accounts(cred_provider.CredentialProvider):
         msg = ('If admin credentials are available tenant_isolation should be'
                ' used instead')
         raise NotImplementedError(msg)
+
+
+class NotLockingAccounts(Accounts):
+    """Credentials provider which always returns the first and second
+    configured accounts as primary and alt users.
+    This credential provider can be used in case of serial test execution
+    to preserve the current behaviour of the serial tempest run.
+    """
+
+    def get_creds(self, id):
+        try:
+            # No need to sort the dict as within the same python process
+            # the HASH seed won't change, so subsequent calls to keys()
+            # will return the same result
+            _hash = self.hash_dict.keys()[id]
+        except IndexError:
+            msg = 'Insufficient number of users provided'
+            raise exceptions.InvalidConfiguration(msg)
+        return self.hash_dict[_hash]
+
+    def get_primary_creds(self):
+        if self.isolated_creds.get('primary'):
+            return self.isolated_creds.get('primary')
+        creds = self.get_creds(0)
+        primary_credential = auth.get_credentials(**creds)
+        self.isolated_creds['primary'] = primary_credential
+        return primary_credential
+
+    def get_alt_creds(self):
+        if self.isolated_creds.get('alt'):
+            return self.isolated_creds.get('alt')
+        creds = self.get_creds(1)
+        alt_credential = auth.get_credentials(**creds)
+        self.isolated_creds['alt'] = alt_credential
+        return alt_credential
+
+    def clear_isolated_creds(self):
+        self.isolated_creds = {}
+
+    def get_admin_creds(self):
+        return auth.get_default_credentials("identity_admin", fill_in=False)

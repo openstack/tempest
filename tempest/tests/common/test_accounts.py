@@ -197,3 +197,36 @@ class TestAccount(base.TestCase):
             return_value=self.test_accounts))
         test_accounts_class = accounts.Accounts('test_name')
         self.assertFalse(test_accounts_class.is_multi_user())
+
+
+class TestNotLockingAccount(base.TestCase):
+
+    def setUp(self):
+        super(TestNotLockingAccount, self).setUp()
+        self.useFixture(fake_config.ConfigFixture())
+        self.stubs.Set(config, 'TempestConfigPrivate', fake_config.FakePrivate)
+        self.temp_dir = tempfile.mkdtemp()
+        cfg.CONF.set_default('lock_path', self.temp_dir)
+        self.addCleanup(os.rmdir, self.temp_dir)
+        self.test_accounts = [
+            {'username': 'test_user1', 'tenant_name': 'test_tenant1',
+             'password': 'p'},
+            {'username': 'test_user2', 'tenant_name': 'test_tenant2',
+             'password': 'p'},
+            {'username': 'test_user3', 'tenant_name': 'test_tenant3',
+             'password': 'p'},
+        ]
+        self.useFixture(mockpatch.Patch(
+            'tempest.common.accounts.read_accounts_yaml',
+            return_value=self.test_accounts))
+        cfg.CONF.set_default('test_accounts_file', '', group='auth')
+
+    def test_get_creds(self):
+        test_accounts_class = accounts.NotLockingAccounts('test_name')
+        for i in xrange(len(self.test_accounts)):
+            creds = test_accounts_class.get_creds(i)
+            msg = "Empty credentials returned for ID %s" % str(i)
+            self.assertIsNotNone(creds, msg)
+        self.assertRaises(exceptions.InvalidConfiguration,
+                          test_accounts_class.get_creds,
+                          id=len(self.test_accounts))
