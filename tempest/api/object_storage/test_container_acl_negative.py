@@ -29,11 +29,6 @@ class ObjectACLsNegativeTest(base.BaseObjectTest):
         test_os = clients.Manager(cls.data.test_credentials)
         cls.test_auth_data = test_os.auth_provider.auth_data
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.data.teardown_all()
-        super(ObjectACLsNegativeTest, cls).tearDownClass()
-
     def setUp(self):
         super(ObjectACLsNegativeTest, self).setUp()
         self.container_name = data_utils.rand_name(name='TestContainer')
