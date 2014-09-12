@@ -69,6 +69,7 @@ class TestDashboardBasicOps(manager.ScenarioTest):
         response = self.opener.open(CONF.dashboard.dashboard_url)
         self.assertIn('Overview', response.read())
 
+    @test.skip_because(bug="1345955")
     @test.services('dashboard')
     def test_basic_scenario(self):
         self.check_login_page()
