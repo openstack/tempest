@@ -57,10 +57,10 @@ class ServiceClientJSON(rest_client.RestClient):
     def create_service(self, serv_type, name=None, description=None,
                        enabled=True):
         body_dict = {
-            "name": name,
+            'name': name,
             'type': serv_type,
             'enabled': enabled,
-            "description": description,
+            'description': description,
         }
         body = json.dumps({'service': body_dict})
         resp, body = self.post("services", body)
@@ -73,3 +73,9 @@ class ServiceClientJSON(rest_client.RestClient):
         resp, body = self.delete(url)
         self.expected_success(204, resp.status)
         return resp, body
+
+    def list_services(self):
+        resp, body = self.get('services')
+        self.expected_success(200, resp.status)
+        body = json.loads(body)
+        return resp, body['services']
