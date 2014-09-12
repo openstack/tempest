@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
 import time
 import urlparse
 
@@ -68,6 +69,9 @@ class ContainerSyncTest(base.BaseObjectTest):
 
     @test.attr(type='slow')
     @test.skip_because(bug='1317133')
+    @testtools.skipIf(
+        not CONF.object_storage_feature_enabled.container_sync,
+        'Old-style container sync function is disabled')
     def test_container_synchronization(self):
         # container to container synchronization
         # to allow/accept sync requests to/from other accounts

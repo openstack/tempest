@@ -843,6 +843,15 @@
 # expected to be enabled (list value)
 #discoverable_apis=all
 
+# Execute (old style) container-sync tests (boolean value)
+#container_sync=true
+
+# Execute object-versioning tests (boolean value)
+#object_versioning=true
+
+# Execute discoverability tests (boolean value)
+#discoverability=true
+
 
 [orchestration]
 
