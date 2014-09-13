@@ -67,10 +67,10 @@ class ObjectTempUrlNegativeTest(base.BaseObjectTest):
 
         # create object
         self.object_name = data_utils.rand_name(name='ObjectTemp')
-        self.data = data_utils.arbitrary_string(size=len(self.object_name),
-                                                base_text=self.object_name)
+        self.content = data_utils.arbitrary_string(size=len(self.object_name),
+                                                   base_text=self.object_name)
         self.object_client.create_object(self.container_name,
-                                         self.object_name, self.data)
+                                         self.object_name, self.content)
 
     def _get_expiry_date(self, expiration_time=1000):
         return int(time.time() + expiration_time)
