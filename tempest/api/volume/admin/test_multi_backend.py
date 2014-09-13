@@ -67,13 +67,13 @@ class VolumeMultiBackendTest(base.BaseVolumeV1AdminTest):
 
         _, self.volume = self.volume_client.create_volume(
             size=1, display_name=vol_name, volume_type=type_name)
-        self.volume_client.wait_for_volume_status(
-            self.volume['id'], 'available')
         if with_prefix:
             self.volume_id_list_with_prefix.append(self.volume['id'])
         else:
             self.volume_id_list_without_prefix.append(
                 self.volume['id'])
+        self.volume_client.wait_for_volume_status(
+            self.volume['id'], 'available')
 
     @classmethod
     def tearDownClass(cls):
