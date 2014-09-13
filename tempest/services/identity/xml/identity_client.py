@@ -157,6 +157,7 @@ class TokenClientXML(identity_client.TokenClientJSON):
         auth = xml.Element('auth', **auth_kwargs)
         auth.append(passwordCreds)
         resp, body = self.post(self.auth_url, body=str(xml.Document(auth)))
+        self.expected_success(200, resp.status)
         return resp, body['access']
 
     def auth_token(self, token_id, tenant=None):
@@ -167,4 +168,5 @@ class TokenClientXML(identity_client.TokenClientJSON):
         auth = xml.Element('auth', **auth_kwargs)
         auth.append(tokenCreds)
         resp, body = self.post(self.auth_url, body=str(xml.Document(auth)))
+        self.expected_success(200, resp.status)
         return resp, body['access']

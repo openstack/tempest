@@ -141,11 +141,10 @@ class RolesV3TestJSON(base.BaseIdentityV3AdminTest):
         self.client.add_group_user(self.group_body['id'], self.user_body['id'])
         self.addCleanup(self.client.delete_group_user,
                         self.group_body['id'], self.user_body['id'])
-        resp, body = self.token.auth(self.user_body['id'], self.u_password,
-                                     self.project['name'],
-                                     domain=self.domain['name'])
+        _, body = self.token.auth(self.user_body['id'], self.u_password,
+                                  self.project['name'],
+                                  domain=self.domain['name'])
         roles = body['token']['roles']
-        self.assertEqual(resp['status'], '201')
         self.assertEqual(len(roles), 1)
         self.assertEqual(roles[0]['id'], self.role['id'])
         # Revoke role to group on project
