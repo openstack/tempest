@@ -35,6 +35,6 @@ class FlavorDetailsNegativeTestJSON(base.BaseV2ComputeTest,
     _schema = flavors.flavors_details
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorDetailsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorDetailsNegativeTestJSON, cls).resource_setup()
         cls.set_resource("flavor", cls.flavor_ref)

@@ -24,8 +24,8 @@ class AZAdminV3Test(base.BaseComputeAdminTest):
     _api_version = 3
 
     @classmethod
-    def setUpClass(cls):
-        super(AZAdminV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(AZAdminV3Test, cls).resource_setup()
         cls.client = cls.availability_zone_admin_client
 
     @test.attr(type='gate')

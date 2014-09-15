@@ -26,9 +26,8 @@ class ServerGroupTestJSON(base.BaseV2ComputeTest):
     It also adds the tests for list and get details of server-groups
     """
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ServerGroupTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServerGroupTestJSON, cls).resource_setup()
         if not test.is_extension_enabled('os-server-groups', 'compute'):
             msg = "os-server-groups extension is not enabled."
             raise cls.skipException(msg)

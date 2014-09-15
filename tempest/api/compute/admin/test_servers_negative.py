@@ -32,8 +32,8 @@ class ServersAdminNegativeTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(ServersAdminNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServersAdminNegativeTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.servers_client
         cls.non_adm_client = cls.servers_client
         cls.flavors_client = cls.os_adm.flavors_client

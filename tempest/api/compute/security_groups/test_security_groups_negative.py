@@ -27,8 +27,8 @@ CONF = config.CONF
 class SecurityGroupsNegativeTestJSON(base.BaseSecurityGroupsTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupsNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(SecurityGroupsNegativeTestJSON, cls).resource_setup()
         cls.client = cls.security_groups_client
         cls.neutron_available = CONF.service_available.neutron
 

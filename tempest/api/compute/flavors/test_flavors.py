@@ -24,8 +24,8 @@ class FlavorsV3Test(base.BaseComputeTest):
     _min_ram = 'min_ram'
 
     @classmethod
-    def setUpClass(cls):
-        super(FlavorsV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(FlavorsV3Test, cls).resource_setup()
         cls.client = cls.flavors_client
 
     @test.attr(type='smoke')

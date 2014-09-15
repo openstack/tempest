@@ -22,8 +22,8 @@ from tempest import test
 class ServerMetadataNegativeTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ServerMetadataNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServerMetadataNegativeTestJSON, cls).resource_setup()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
         cls.tenant_id = cls.client.tenant_id

@@ -26,8 +26,8 @@ CONF = config.CONF
 class SecurityGroupsTestAdminJSON(base.BaseV2ComputeAdminTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(SecurityGroupsTestAdminJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(SecurityGroupsTestAdminJSON, cls).resource_setup()
         cls.adm_client = cls.os_adm.security_groups_client
         cls.client = cls.security_groups_client
 

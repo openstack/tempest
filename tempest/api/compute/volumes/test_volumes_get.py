@@ -27,8 +27,8 @@ CONF = config.CONF
 class VolumesGetTestJSON(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumesGetTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesGetTestJSON, cls).resource_setup()
         cls.client = cls.volumes_extensions_client
         if not CONF.service_available.cinder:
             skip_msg = ("%s skipped as Cinder is not available" % cls.__name__)

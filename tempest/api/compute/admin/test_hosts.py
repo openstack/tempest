@@ -24,8 +24,8 @@ class HostsAdminTestJSON(base.BaseV2ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(HostsAdminTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(HostsAdminTestJSON, cls).resource_setup()
         cls.client = cls.os_adm.hosts_client
 
     @test.attr(type='gate')

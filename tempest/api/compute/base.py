@@ -34,9 +34,9 @@ class BaseComputeTest(tempest.test.BaseTestCase):
     force_tenant_isolation = False
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources()
-        super(BaseComputeTest, cls).setUpClass()
+        super(BaseComputeTest, cls).resource_setup()
         if getattr(cls, '_interface', None) == 'xml' and cls._api_version == 2:
             if not CONF.compute_feature_enabled.xml_api_v2:
                 raise cls.skipException('XML API is not enabled')
@@ -211,13 +211,12 @@ class BaseComputeTest(tempest.test.BaseTestCase):
                               server_group_id)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.clear_images()
         cls.clear_servers()
         cls.clear_security_groups()
-        cls.clear_isolated_creds()
         cls.clear_server_groups()
-        super(BaseComputeTest, cls).tearDownClass()
+        super(BaseComputeTest, cls).resource_cleanup()
 
     @classmethod
     def create_test_server(cls, **kwargs):
@@ -382,8 +381,8 @@ class BaseComputeAdminTest(BaseComputeTest):
     _interface = "json"
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseComputeAdminTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaseComputeAdminTest, cls).resource_setup()
         if (CONF.compute.allow_tenant_isolation or
             cls.force_tenant_isolation is True):
             creds = cls.isolated_creds.get_admin_creds()

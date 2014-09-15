@@ -19,7 +19,7 @@ from tempest.api.compute import base
 class BaseSecurityGroupsTest(base.BaseV2ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # A network and a subnet will be created for these tests
         cls.set_network_resources(network=True, subnet=True)
-        super(BaseSecurityGroupsTest, cls).setUpClass()
+        super(BaseSecurityGroupsTest, cls).resource_setup()

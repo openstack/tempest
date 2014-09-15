@@ -29,8 +29,8 @@ class NetworksTest(base.BaseComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(NetworksTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NetworksTest, cls).resource_setup()
         cls.client = cls.os_adm.networks_client
 
     def test_get_network(self):
