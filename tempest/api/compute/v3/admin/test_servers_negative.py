@@ -32,8 +32,8 @@ class ServersAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(ServersAdminNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServersAdminNegativeV3Test, cls).resource_setup()
         cls.client = cls.servers_admin_client
         cls.non_adm_client = cls.servers_client
         cls.flavors_client = cls.flavors_admin_client

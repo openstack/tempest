@@ -21,8 +21,8 @@ from tempest import test
 class ServersV3Test(base.BaseV3ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ServersV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServersV3Test, cls).resource_setup()
         cls.client = cls.servers_client
 
     def tearDown(self):

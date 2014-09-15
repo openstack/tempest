@@ -24,8 +24,8 @@ class HypervisorAdminV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(HypervisorAdminV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(HypervisorAdminV3Test, cls).resource_setup()
         cls.client = cls.hypervisor_admin_client
 
     def _list_hypervisors(self):

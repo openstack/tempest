@@ -26,8 +26,8 @@ class QuotasV3Test(base.BaseV3ComputeTest):
         super(QuotasV3Test, self).setUp()
 
     @classmethod
-    def setUpClass(cls):
-        super(QuotasV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(QuotasV3Test, cls).resource_setup()
         cls.client = cls.quotas_client
         cls.tenant_id = cls.client.tenant_id
         cls.user_id = cls.client.user_id

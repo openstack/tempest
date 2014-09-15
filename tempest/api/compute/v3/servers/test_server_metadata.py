@@ -20,8 +20,8 @@ from tempest import test
 class ServerMetadataV3Test(base.BaseV3ComputeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(ServerMetadataV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServerMetadataV3Test, cls).resource_setup()
         cls.client = cls.servers_client
         cls.quotas = cls.quotas_client
         resp, server = cls.create_test_server(meta={}, wait_until='ACTIVE')

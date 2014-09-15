@@ -23,8 +23,8 @@ class QuotasAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     force_tenant_isolation = True
 
     @classmethod
-    def setUpClass(cls):
-        super(QuotasAdminNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(QuotasAdminNegativeV3Test, cls).resource_setup()
         cls.client = cls.quotas_client
         cls.adm_client = cls.quotas_admin_client
 

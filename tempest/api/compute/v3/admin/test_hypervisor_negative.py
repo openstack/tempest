@@ -28,8 +28,8 @@ class HypervisorAdminNegativeV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(HypervisorAdminNegativeV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(HypervisorAdminNegativeV3Test, cls).resource_setup()
         cls.client = cls.hypervisor_admin_client
         cls.non_adm_client = cls.hypervisor_client
 

@@ -25,8 +25,8 @@ class ServicesAdminV3Test(base.BaseV3ComputeAdminTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(ServicesAdminV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(ServicesAdminV3Test, cls).resource_setup()
         cls.client = cls.services_admin_client
 
     @test.attr(type='gate')

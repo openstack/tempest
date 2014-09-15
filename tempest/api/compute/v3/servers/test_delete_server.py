@@ -26,8 +26,8 @@ class DeleteServersV3Test(base.BaseV3ComputeTest):
     # for preventing "Quota exceeded for instances".
 
     @classmethod
-    def setUpClass(cls):
-        super(DeleteServersV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(DeleteServersV3Test, cls).resource_setup()
         cls.client = cls.servers_client
 
     @test.attr(type='gate')
@@ -128,8 +128,8 @@ class DeleteServersAdminV3Test(base.BaseV3ComputeAdminTest):
     # for preventing "Quota exceeded for instances".
 
     @classmethod
-    def setUpClass(cls):
-        super(DeleteServersAdminV3Test, cls).setUpClass()
+    def resource_setup(cls):
+        super(DeleteServersAdminV3Test, cls).resource_setup()
         cls.non_admin_client = cls.servers_client
         cls.admin_client = cls.servers_admin_client
 
