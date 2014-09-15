@@ -26,8 +26,8 @@ CONF = config.CONF
 class VolumesV2TransfersTest(base.BaseVolumeTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(VolumesV2TransfersTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesV2TransfersTest, cls).resource_setup()
 
         # Add another tenant to test volume-transfer
         if CONF.compute.allow_tenant_isolation:

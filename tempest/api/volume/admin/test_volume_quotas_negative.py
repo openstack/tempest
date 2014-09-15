@@ -23,9 +23,8 @@ class VolumeQuotasNegativeTestJSON(base.BaseVolumeV1AdminTest):
     force_tenant_isolation = True
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumeQuotasNegativeTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumeQuotasNegativeTestJSON, cls).resource_setup()
         demo_user = cls.isolated_creds.get_primary_creds()
         cls.demo_tenant_id = demo_user.tenant_id
         cls.shared_quota_set = {'gigabytes': 3, 'volumes': 1, 'snapshots': 1}

@@ -23,9 +23,8 @@ CONF = config.CONF
 class VolumesV2ExtendTest(base.BaseVolumeTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumesV2ExtendTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesV2ExtendTest, cls).resource_setup()
         cls.client = cls.volumes_client
 
     @test.attr(type='gate')

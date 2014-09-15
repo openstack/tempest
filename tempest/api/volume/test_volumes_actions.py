@@ -24,9 +24,8 @@ CONF = config.CONF
 class VolumesV2ActionsTest(base.BaseVolumeTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(VolumesV2ActionsTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(VolumesV2ActionsTest, cls).resource_setup()
         cls.client = cls.volumes_client
         cls.image_client = cls.os.image_client
 
@@ -45,12 +44,12 @@ class VolumesV2ActionsTest(base.BaseVolumeTest):
         self.image_client.wait_for_resource_deletion(image_id)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         # Delete the test instance
         cls.servers_client.delete_server(cls.server['id'])
         cls.servers_client.wait_for_server_termination(cls.server['id'])
 
-        super(VolumesV2ActionsTest, cls).tearDownClass()
+        super(VolumesV2ActionsTest, cls).resource_cleanup()
 
     @test.stresstest(class_setup_per='process')
     @test.attr(type='smoke')
