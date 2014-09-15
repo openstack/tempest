@@ -30,9 +30,8 @@ LOG = logging.getLogger(__name__)
 class NeutronResourcesTestJSON(base.BaseOrchestrationTest):
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(NeutronResourcesTestJSON, cls).setUpClass()
+    def resource_setup(cls):
+        super(NeutronResourcesTestJSON, cls).resource_setup()
         if not CONF.orchestration.image_ref:
             raise cls.skipException("No image available to test")
         os = clients.Manager()
