@@ -51,17 +51,17 @@ class Manager(object):
         self.client_attr_names = []
 
     @classmethod
-    def get_auth_provider_class(cls, auth_version):
-        if auth_version == 'v2':
-            return auth.KeystoneV2AuthProvider
-        else:
+    def get_auth_provider_class(cls, credentials):
+        if isinstance(credentials, auth.KeystoneV3Credentials):
             return auth.KeystoneV3AuthProvider
+        else:
+            return auth.KeystoneV2AuthProvider
 
     def get_auth_provider(self, credentials):
         if credentials is None:
             raise exceptions.InvalidCredentials(
                 'Credentials must be specified')
-        auth_provider_class = self.get_auth_provider_class(self.auth_version)
+        auth_provider_class = self.get_auth_provider_class(credentials)
         return auth_provider_class(
             client_type=getattr(self, 'client_type', None),
             interface=getattr(self, 'interface', None),
