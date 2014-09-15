@@ -34,9 +34,9 @@ class TestDashboardBasicOps(manager.ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources()
-        super(TestDashboardBasicOps, cls).setUpClass()
+        super(TestDashboardBasicOps, cls).resource_setup()
 
         if not CONF.service_available.horizon:
             raise cls.skipException("Horizon support is required")

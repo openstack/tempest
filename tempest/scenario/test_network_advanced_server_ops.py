@@ -50,10 +50,10 @@ class TestNetworkAdvancedServerOps(manager.NetworkScenarioTest):
             raise cls.skipException(msg)
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         # Create no network resources for these tests.
         cls.set_network_resources()
-        super(TestNetworkAdvancedServerOps, cls).setUpClass()
+        super(TestNetworkAdvancedServerOps, cls).resource_setup()
 
     def _setup_network_and_servers(self):
         self.keypair = self.create_keypair()

@@ -58,8 +58,8 @@ class ScenarioTest(tempest.test.BaseTestCase):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(ScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ScenarioTest, cls).resource_setup()
         # Using tempest client for isolated credentials as well
         cls.isolated_creds = isolated_creds.IsolatedCreds(
             cls.__name__, network_resources=cls.network_resources)
@@ -483,8 +483,8 @@ class NetworkScenarioTest(ScenarioTest):
             raise cls.skipException('Neutron not available')
 
     @classmethod
-    def setUpClass(cls):
-        super(NetworkScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(NetworkScenarioTest, cls).resource_setup()
         cls.tenant_id = cls.manager.identity_client.tenant_id
         cls.check_preconditions()
 
@@ -1011,8 +1011,8 @@ class BaremetalProvisionStates(object):
 
 class BaremetalScenarioTest(ScenarioTest):
     @classmethod
-    def setUpClass(cls):
-        super(BaremetalScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(BaremetalScenarioTest, cls).resource_setup()
 
         if (not CONF.service_available.ironic or
            not CONF.baremetal.driver_enabled):
@@ -1143,8 +1143,8 @@ class EncryptionScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(EncryptionScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(EncryptionScenarioTest, cls).resource_setup()
         cls.admin_volume_types_client = cls.admin_manager.volume_types_client
 
     def _wait_for_volume_status(self, status):
@@ -1190,8 +1190,8 @@ class OrchestrationScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
-        super(OrchestrationScenarioTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(OrchestrationScenarioTest, cls).resource_setup()
         if not CONF.service_available.heat:
             raise cls.skipException("Heat support is required")
 
@@ -1235,9 +1235,9 @@ class SwiftScenarioTest(ScenarioTest):
     """
 
     @classmethod
-    def setUpClass(cls):
+    def resource_setup(cls):
         cls.set_network_resources()
-        super(SwiftScenarioTest, cls).setUpClass()
+        super(SwiftScenarioTest, cls).resource_setup()
         if not CONF.service_available.swift:
             skip_msg = ("%s skipped as swift is not available" %
                         cls.__name__)
