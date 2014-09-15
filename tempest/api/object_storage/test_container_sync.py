@@ -35,9 +35,8 @@ class ContainerSyncTest(base.BaseObjectTest):
     clients = {}
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(ContainerSyncTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ContainerSyncTest, cls).resource_setup()
         cls.containers = []
         cls.objects = []
 
@@ -62,10 +61,10 @@ class ContainerSyncTest(base.BaseObjectTest):
             cls.containers.append(cont_name)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         for client in cls.clients.values():
             cls.delete_containers(cls.containers, client[0], client[1])
-        super(ContainerSyncTest, cls).tearDownClass()
+        super(ContainerSyncTest, cls).resource_cleanup()
 
     @test.attr(type='slow')
     @test.skip_because(bug='1317133')

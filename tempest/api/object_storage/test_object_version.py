@@ -25,14 +25,14 @@ CONF = config.CONF
 
 class ContainerTest(base.BaseObjectTest):
     @classmethod
-    def setUpClass(cls):
-        super(ContainerTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(ContainerTest, cls).resource_setup()
         cls.containers = []
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_containers(cls.containers)
-        super(ContainerTest, cls).tearDownClass()
+        super(ContainerTest, cls).resource_cleanup()
 
     def assertContainer(self, container, count, byte, versioned):
         resp, _ = self.container_client.list_container_metadata(container)

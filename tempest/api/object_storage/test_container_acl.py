@@ -21,8 +21,8 @@ from tempest import test
 
 class ObjectTestACLs(base.BaseObjectTest):
     @classmethod
-    def setUpClass(cls):
-        super(ObjectTestACLs, cls).setUpClass()
+    def resource_setup(cls):
+        super(ObjectTestACLs, cls).resource_setup()
         cls.data.setup_test_user()
         test_os = clients.Manager(cls.data.test_credentials)
         cls.test_auth_data = test_os.auth_provider.auth_data

@@ -23,8 +23,8 @@ from tempest import test
 class HealthcheckTest(base.BaseObjectTest):
 
     @classmethod
-    def setUpClass(cls):
-        super(HealthcheckTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(HealthcheckTest, cls).resource_setup()
 
     def setUp(self):
         super(HealthcheckTest, self).setUp()

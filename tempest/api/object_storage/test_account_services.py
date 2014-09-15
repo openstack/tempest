@@ -32,9 +32,8 @@ class AccountTest(base.BaseObjectTest):
     containers = []
 
     @classmethod
-    @test.safe_setup
-    def setUpClass(cls):
-        super(AccountTest, cls).setUpClass()
+    def resource_setup(cls):
+        super(AccountTest, cls).resource_setup()
         for i in moves.xrange(ord('a'), ord('f') + 1):
             name = data_utils.rand_name(name='%s-' % chr(i))
             cls.container_client.create_container(name)
@@ -42,9 +41,9 @@ class AccountTest(base.BaseObjectTest):
         cls.containers_count = len(cls.containers)
 
     @classmethod
-    def tearDownClass(cls):
+    def resource_cleanup(cls):
         cls.delete_containers(cls.containers)
-        super(AccountTest, cls).tearDownClass()
+        super(AccountTest, cls).resource_cleanup()
 
     @test.attr(type='smoke')
     def test_list_containers(self):
