@@ -36,11 +36,13 @@ volumes:
   - name: assegai
     server: peltast
     owner: javelin
-    size: 1
+    gb: 1
+    device: /dev/vdb
   - name: pifpouf
     server: hoplite
     owner: javelin
-    size: 2
+    gb: 2
+    device: /dev/vdb
 servers:
   - name: peltast
     owner: javelin
