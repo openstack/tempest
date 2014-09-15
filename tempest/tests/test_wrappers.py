@@ -69,7 +69,7 @@ class TestWrappers(base.TestCase):
 
         self.assertEqual(
             p.returncode, expected,
-            "Stdout: %s; Stderr: %s" % (p.stdout, p.stderr))
+            "Stdout: %s; Stderr: %s" % (p.stdout.read(), p.stderr.read()))
 
     def test_pretty_tox(self):
         # Git init is required for the pbr testr command. pbr requires a git
